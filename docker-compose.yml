@@ -1,0 +1,160 @@
+version: "2"
+
+services:
+  chat-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/chat-api.Dockerfile
+    volumes:
+      - ./chat-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/chat-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5000
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    networks:
+      default:
+      internal:
+        aliases:
+          - chat-api
+
+  cryptocurrency-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/cryptocurrency-api.Dockerfile
+    volumes:
+      - ./cryptocurrency-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/cryptocurrency-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5001
+    working_dir: /app
+    ports:
+      - "5001:5001"
+    networks:
+      default:
+      internal:
+        aliases:
+          - cryptocurrency-api
+
+  fiat-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/fiat-api.Dockerfile
+    volumes:
+      - ./fiat-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/fiat-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5002
+    working_dir: /app
+    ports:
+      - "5002:5002"
+    networks:
+      default:
+      internal:
+        aliases:
+          - fiat-api
+
+  offer-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/offer-api.Dockerfile
+    volumes:
+      - ./offer-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/offer-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5003
+    working_dir: /app
+    ports:
+      - "5003:5003"
+    networks:
+      default:
+      internal:
+        aliases:
+          - offer-api
+
+  trade-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/trade-api.Dockerfile
+    volumes:
+      - ./trade-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/trade-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5004
+    working_dir: /app
+    ports:
+      - "5004:5004"
+    networks:
+      default:
+      internal:
+        aliases:
+          - trade-api
+
+  user-api:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/user-api.Dockerfile
+    volumes:
+      - ./user-api:/app
+      - /app/node_modules
+    env_file:
+      - ./files/user-api.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=5005
+    working_dir: /app
+    ports:
+      - "5005:5005"
+    networks:
+      default:
+      internal:
+        aliases:
+          - user-api
+
+  catalog:
+    image: node:lts
+    build:
+      context: .
+      dockerfile: ./Dockerfiles/catalog.Dockerfile
+    volumes:
+      - ./catalog:/app
+      - /app/node_modules
+    env_file:
+      - ./files/catalog.env
+    environment:
+      - HOST=host.docker.internal
+      - PORT=3000
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    networks:
+      default:
+      internal:
+        aliases:
+          - catalog
+networks:
+  default:
+  internal:
+    driver: bridge
