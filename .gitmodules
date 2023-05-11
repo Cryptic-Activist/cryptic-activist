@@ -16,3 +16,12 @@
 [submodule "api-user-cryptic-activist"]
 	path = api-user-cryptic-activist
 	url = git@github.com:Cryptic-Activist/api-user-cryptic-activist.git
+[submodule "cryptic-activist-catalog"]
+	path = cryptic-activist-catalog
+	url = git@github.com:Cryptic-Activist/cryptic-activist-catalog.git
+[submodule "base-ca"]
+	path = base-ca
+	url = git@github.com:Cryptic-Activist/base-ca.git
+[submodule "cryptic-utils"]
+	path = cryptic-utils
+	url = git@github.com:Cryptic-Activist/cryptic-utils.git
