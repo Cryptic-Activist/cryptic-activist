@@ -4,8 +4,8 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y nodejs \
     npm      
 
-COPY files/chat-api.env /app/.env
-COPY chat-api/. /app/.
+COPY files/api-chat-cryptic-activist.env /app/.env
+COPY api-chat-cryptic-activist/. /app/.
 
 WORKDIR /app
 
