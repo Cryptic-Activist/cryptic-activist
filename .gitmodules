@@ -1,0 +1,3 @@
+[submodule "chat-api"]
+  path = chat-api
+  url = git@github.com:Cryptic-Activist/api-chat-cryptic-activist.git
