@@ -5,12 +5,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/chat-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-chat-cryptic-activist.Dockerfile
     volumes:
-      - ./chat-api:/app
+      - ./api-chat-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/chat-api.env
+      - ./files/api-chat-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5000
@@ -27,12 +27,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/cryptocurrency-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-cryptocurrency-cryptic-activist.Dockerfile
     volumes:
-      - ./cryptocurrency-api:/app
+      - ./api-cryptocurrency-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/cryptocurrency-api.env
+      - ./files/api-cryptocurrency-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5001
@@ -49,12 +49,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/fiat-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-fiat-cryptic-activist.Dockerfile
     volumes:
-      - ./fiat-api:/app
+      - ./api-fiat-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/fiat-api.env
+      - ./files/api-fiat-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5002
@@ -71,12 +71,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/offer-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-offer-cryptic-activist.Dockerfile
     volumes:
-      - ./offer-api:/app
+      - ./api-offer-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/offer-api.env
+      - ./files/api-offer-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5003
@@ -93,12 +93,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/trade-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-trade-cryptic-activist.Dockerfile
     volumes:
-      - ./trade-api:/app
+      - ./api-trade-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/trade-api.env
+      - ./files/api-trade-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5004
@@ -115,12 +115,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/user-api.Dockerfile
+      dockerfile: ./Dockerfiles/api-user-cryptic-activist.Dockerfile
     volumes:
-      - ./user-api:/app
+      - ./api-user-cryptic-activist:/app
       - /app/node_modules
     env_file:
-      - ./files/user-api.env
+      - ./files/api-user-cryptic-activist.env
     environment:
       - HOST=host.docker.internal
       - PORT=5005
@@ -137,12 +137,12 @@ services:
     image: node:lts
     build:
       context: .
-      dockerfile: ./Dockerfiles/catalog.Dockerfile
+      dockerfile: ./Dockerfiles/cryptic-activist-catalog.Dockerfile
     volumes:
-      - ./catalog:/app
+      - ./cryptic-activist-catalog:/app
       - /app/node_modules
     env_file:
-      - ./files/catalog.env
+      - ./files/cryptic-activist-catalog.env
     environment:
       - HOST=host.docker.internal
       - PORT=3000
