@@ -1,160 +1,21 @@
-version: "2"
+version: "3"
 
 services:
-  chat-api:
-    image: node:lts
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/api-chat-cryptic-activist.Dockerfile
-    volumes:
-      - ./api-chat-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-chat-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5000
-    working_dir: /app
-    ports:
-      - "5000:5000"
-    networks:
-      default:
-      internal:
-        aliases:
-          - chat-api
-
-  cryptocurrency-api:
-    image: node:lts
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/api-cryptocurrency-cryptic-activist.Dockerfile
-    volumes:
-      - ./api-cryptocurrency-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-cryptocurrency-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5001
-    working_dir: /app
-    ports:
-      - "5001:5001"
-    networks:
-      default:
-      internal:
-        aliases:
-          - cryptocurrency-api
-
-  fiat-api:
-    image: node:lts
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/api-fiat-cryptic-activist.Dockerfile
-    volumes:
-      - ./api-fiat-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-fiat-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5002
-    working_dir: /app
-    ports:
-      - "5002:5002"
-    networks:
-      default:
-      internal:
-        aliases:
-          - fiat-api
-
-  offer-api:
-    image: node:lts
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/api-offer-cryptic-activist.Dockerfile
-    volumes:
-      - ./api-offer-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-offer-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5003
-    working_dir: /app
-    ports:
-      - "5003:5003"
-    networks:
-      default:
-      internal:
-        aliases:
-          - offer-api
-
-  trade-api:
-    image: node:lts
-    build:
-      context: .
-      dockerfile: ./Dockerfiles/api-trade-cryptic-activist.Dockerfile
-    volumes:
-      - ./api-trade-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-trade-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5004
-    working_dir: /app
-    ports:
-      - "5004:5004"
-    networks:
-      default:
-      internal:
-        aliases:
-          - trade-api
-
   user-api:
-    image: node:lts
     build:
-      context: .
-      dockerfile: ./Dockerfiles/api-user-cryptic-activist.Dockerfile
+      context: ./api-user-cryptic-activist/
+      dockerfile: Dockerfile
     volumes:
       - ./api-user-cryptic-activist:/app
-      - /app/node_modules
-    env_file:
-      - ./files/api-user-cryptic-activist.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=5005
-    working_dir: /app
-    ports:
-      - "5005:5005"
-    networks:
-      default:
-      internal:
-        aliases:
-          - user-api
+      - /api-user-cryptic-activist/node_modules
 
   catalog:
-    image: node:lts
     build:
-      context: .
-      dockerfile: ./Dockerfiles/cryptic-activist-catalog.Dockerfile
+      context: ./cryptic-activist-catalog/
+      dockerfile: Dockerfile
     volumes:
       - ./cryptic-activist-catalog:/app
-      - /app/node_modules
-    env_file:
-      - ./files/cryptic-activist-catalog.env
-    environment:
-      - HOST=host.docker.internal
-      - PORT=3000
-    working_dir: /app
-    ports:
-      - "3000:3000"
-    networks:
-      default:
-      internal:
-        aliases:
-          - catalog
-networks:
-  default:
-  internal:
-    driver: bridge
+      - /cryptic-activist-catalog/node_modules
+
+    depends_on:
+      - user-api
