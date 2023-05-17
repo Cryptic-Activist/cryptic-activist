@@ -3,19 +3,9 @@ version: "3"
 services:
   user-api:
     build:
-      context: ./api-user-cryptic-activist/
+      context: api-user-cryptic-activist/
       dockerfile: Dockerfile
-    volumes:
-      - ./api-user-cryptic-activist:/app
-      - /api-user-cryptic-activist/node_modules
-
-  catalog:
-    build:
-      context: ./cryptic-activist-catalog/
-      dockerfile: Dockerfile
-    volumes:
-      - ./cryptic-activist-catalog:/app
-      - /cryptic-activist-catalog/node_modules
-
-    depends_on:
-      - user-api
+    ports:
+      - "5005:5005"
+    env_file:
+      - api-user-cryptic-activist/development.env
