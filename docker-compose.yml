@@ -1,6 +1,70 @@
 version: "3"
 
 services:
+  database:
+    image: postgres:latest
+    env_file:
+      - .env
+    volumes:
+      - postgres-db:/data/postgres
+    ports:
+      - "5432:5432"
+
+  chat-api:
+    build:
+      context: api-chat-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - api-chat-cryptic-activist/development.env
+    depends_on:
+      - database
+
+  cryptocurrency-api:
+    build:
+      context: api-cryptocurrency-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    env_file:
+      - api-cryptocurrency-cryptic-activist/development.env
+    depends_on:
+      - database
+
+  fiat-api:
+    build:
+      context: api-fiat-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    env_file:
+      - api-fiat-cryptic-activist/development.env
+    depends_on:
+      - database
+
+  offer-api:
+    build:
+      context: api-offer-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5003"
+    env_file:
+      - api-offer-cryptic-activist/development.env
+    depends_on:
+      - database
+
+  trade-api:
+    build:
+      context: api-trade-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5004"
+    env_file:
+      - api-trade-cryptic-activist/development.env
+    depends_on:
+      - database
+
   user-api:
     build:
       context: api-user-cryptic-activist/
@@ -9,3 +73,18 @@ services:
       - "5005:5005"
     env_file:
       - api-user-cryptic-activist/development.env
+    depends_on:
+      - database
+
+  catalog:
+    build:
+      context: cryptic-activist-catalog/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - cryptic-activist-catalog/development.env
+
+volumes:
+  postgres-db:
+    driver: local
