@@ -1,0 +1,277 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id         String    @id @default(uuid())
+  firstName  String    @db.VarChar(50)
+  lastName   String    @db.VarChar(50)
+  username   String    @unique @db.VarChar(120)
+  password   String
+  isVerified Boolean?  @default(false) @db.Boolean
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+
+  @@map("admins")
+}
+
+model User {
+  id              String          @id @default(uuid())
+  profileColor    String          @db.VarChar(10)
+  firstName       String          @db.VarChar(50)
+  lastName        String          @db.VarChar(50)
+  username        String          @unique @db.VarChar(120)
+  password        String
+  privateKeys     String[]        @unique
+  isVerified      Boolean?        @default(false) @db.Boolean
+  isDeleted       Boolean?        @default(false) @db.Boolean
+  whenDelete      DateTime?       @db.Date
+  createdAt       DateTime?       @default(now()) @db.Date
+  updatedAt       DateTime?       @updatedAt @db.Date
+  userLanguage    UserLanguage[]
+  systemMessages  SystemMessage[]
+  trusters        Trust[]         @relation("trusters")
+  trusted         Trust[]         @relation("trusted")
+  blockers        Block[]         @relation("blockers")
+  blocked         Block[]         @relation("blocked")
+  offers          Offer[]         @relation("offer")
+  feedbacksVendor Feedback[]      @relation("feedbackVendor")
+  feedbackTrader  Feedback[]      @relation("feedbackTrader")
+  tradeVendor     Trade[]         @relation("vendorTrade")
+  tradeTrader     Trade[]         @relation("traderTrade")
+
+  @@map("users")
+}
+
+model Language {
+  id           String         @id @default(uuid())
+  name         String         @unique @db.VarChar(50)
+  isDeleted    Boolean?       @default(false) @db.Boolean
+  whenDelete   DateTime?      @db.Date
+  createdAt    DateTime?      @default(now()) @db.Date
+  updatedAt    DateTime?      @updatedAt @db.Date
+  UserLanguage UserLanguage[]
+
+  @@map("languages")
+}
+
+model UserLanguage {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @default(uuid())
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String   @default(uuid())
+
+  @@id([userId, languageId])
+  @@map("user_languages")
+}
+
+model Chat {
+  id         String    @id @default(uuid())
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+  trade      Trade     @relation(fields: [tradeId], references: [id])
+  tradeId    String    @unique
+
+  @@map("chats")
+}
+
+model SystemMessage {
+  id         String    @id @default(uuid())
+  message    String    @db.VarChar(256)
+  whenSeen   DateTime?
+  url        String
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+  User       User      @relation(fields: [userId], references: [id])
+  userId     String
+
+  @@map("system_messages")
+}
+
+model PaymentMethodCategory {
+  id             String          @id @default(uuid())
+  name           String          @db.VarChar(60)
+  isDeleted      Boolean?        @default(false) @db.Boolean
+  whenDelete     DateTime?       @db.Date
+  createdAt      DateTime?       @default(now()) @db.Date
+  updatedAt      DateTime?       @updatedAt @db.Date
+  paymentMethods PaymentMethod[]
+
+  @@map("payment_method_categories")
+}
+
+model PaymentMethod {
+  id                      String                @id @default(uuid())
+  name                    String                @db.VarChar(60)
+  isDeleted               Boolean?              @default(false) @db.Boolean
+  whenDelete              DateTime?             @db.Date
+  createdAt               DateTime?             @default(now()) @db.Date
+  updatedAt               DateTime?             @updatedAt @db.Date
+  paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id])
+  paymentMethodCategoryId String                @default(uuid())
+  offers                  Offer[]               @relation("offer")
+
+  @@map("payment_methods")
+}
+
+model PaymentReceipt {
+  id         String    @id @default(uuid())
+  name       String    @db.VarChar(60)
+  key        String
+  url        String
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+
+  @@map("payment_receipts")
+}
+
+model Trust {
+  id         String    @id @default(uuid())
+  truster    User      @relation("trusters", fields: [trusterId], references: [id])
+  trusterId  String    @default(uuid())
+  trusted    User      @relation("trusted", fields: [trustedId], references: [id])
+  trustedId  String    @default(uuid())
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+
+  @@map("trusts")
+}
+
+model Block {
+  id         String    @id @default(uuid())
+  blocker    User      @relation("blockers", fields: [blockerId], references: [id])
+  blockerId  String
+  blockedId  String
+  blocked    User      @relation("blocked", fields: [blockedId], references: [id])
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+
+  @@map("blocks")
+}
+
+model Cryptocurrency {
+  id          String    @id @default(uuid())
+  coingeckoId String    @unique @db.VarChar(200)
+  symbol      String    @db.VarChar(200)
+  name        String    @db.VarChar(200)
+  isDeleted   Boolean?  @default(false) @db.Boolean
+  whenDelete  DateTime? @db.Date
+  createdAt   DateTime? @default(now()) @db.Date
+  updatedAt   DateTime? @updatedAt @db.Date
+  offers      Offer[]   @relation("offer")
+  trades      Trade[]   @relation("trade")
+
+  @@map("cryptocurrencies")
+}
+
+model Fiat {
+  id         String    @id @default(uuid())
+  name       String    @db.VarChar(30)
+  symbol     String    @db.VarChar(10)
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+  offers     Offer[]   @relation("offer")
+  trades     Trade[]   @relation("trade")
+
+  @@map("fiats")
+}
+
+model Feedback {
+  id         String    @id @default(uuid())
+  vendor     User      @relation("feedbackVendor", fields: [vendorId], references: [id])
+  vendorId   String    @default(uuid())
+  trader     User      @relation("feedbackTrader", fields: [traderId], references: [id])
+  traderId   String    @default(uuid())
+  offer      Offer     @relation("feedbackOffer", fields: [offerId], references: [id])
+  offerId    String    @default(uuid())
+  message    String    @db.VarChar(256)
+  type       String    @db.VarChar(10)
+  isDeleted  Boolean?  @default(false) @db.Boolean
+  whenDelete DateTime? @db.Date
+  createdAt  DateTime? @default(now()) @db.Date
+  updatedAt  DateTime? @updatedAt @db.Date
+
+  @@map("feedbacks")
+}
+
+model Offer {
+  id                            String    @id @default(uuid())
+  paymentMethodType             String
+  tradePricingType              String
+  tradePricingListAt            Float
+  tradePricingTradeLimitsMin    Float
+  tradePricingTradeLimitsMax    Float
+  tradePricingTimeLimit         Float
+  tradeInstructionsTags         String[]
+  tradeInstructionsLabel        String
+  tradeInstructionsTerms        String
+  tradeInstructionsInstructions String
+  isDeleted                     Boolean?  @default(false) @db.Boolean
+  whenDelete                    DateTime? @db.Date
+  createdAt                     DateTime? @default(now()) @db.Date
+  updatedAt                     DateTime? @updatedAt @db.Date
+
+  vendor           User           @relation("offer", fields: [vendorId], references: [id])
+  vendorId         String         @default(uuid())
+  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id])
+  cryptocurrencyId String         @default(uuid())
+  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id])
+  paymentMethodId  String         @default(uuid())
+  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id])
+  fiatId           String         @default(uuid())
+  feedbacks        Feedback[]     @relation("feedbackOffer")
+  trades           Trade[]        @relation("tradeOffer")
+
+  @@map("offers")
+}
+
+model Trade {
+  id               String         @id @default(uuid())
+  paymentReceiptId String         @default(uuid())
+  vendor           User           @relation("vendorTrade", fields: [vendorId], references: [id])
+  vendorId         String         @default(uuid())
+  trader           User           @relation("traderTrade", fields: [traderId], references: [id])
+  traderId         String         @default(uuid())
+  offer            Offer          @relation("tradeOffer", fields: [offerId], references: [id])
+  offerId          String         @default(uuid())
+  cryptocurrency   Cryptocurrency @relation("trade", fields: [cryptocurrencyId], references: [id])
+  cryptocurrencyId String         @default(uuid())
+  fiat             Fiat           @relation("trade", fields: [fiatId], references: [id])
+  fiatId           String         @default(uuid())
+  chat             Chat?
+
+  cryptocurrencyAmount Float
+  fiatAmount           Float
+  startedAt            DateTime  @default(now())
+  endedAt              DateTime?
+  state                String
+  paid                 Boolean?  @default(false) @db.Boolean
+  isDeleted            Boolean?  @default(false) @db.Boolean
+  whenDelete           DateTime? @db.Date
+  createdAt            DateTime? @default(now()) @db.Date
+  updatedAt            DateTime? @updatedAt @db.Date
+
+  @@map("trades")
+}

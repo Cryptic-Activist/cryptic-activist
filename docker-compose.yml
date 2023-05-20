@@ -1,14 +1,68 @@
 version: "3"
 
+networks:
+  postgresql-network:
+    driver: bridge
+    # driver_opts:
+    #   com.docker.network.bridge.enable_icc: "true"
+
+volumes:
+  postgres-db:
+    driver: local
+
 services:
-  database:
+  db:
     image: postgres:latest
+    container_name: postgresql
+    restart: always
+    networks:
+      - postgresql-network
     env_file:
       - .env
     volumes:
       - postgres-db:/data/postgres
     ports:
       - "5432:5432"
+    expose:
+      - "5432"
+    mem_limit: 512m
+
+  # prisma:
+  #   container_name: prisma
+  #   build:
+  #     context: Dockerfiles/
+  #     dockerfile: prisma.Dockerfile
+  #   restart: always
+  #   ports:
+  #     - "5555:5555"
+  #   networks:
+  #     - postgresql-network
+  #   command: >
+  #     bash -c '
+  #       npx prisma db push --schema prisma/schema.prisma
+  #       npx prisma generate --schema prisma/schema.prisma
+  #       npm start
+  #     '
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - .env
+
+  user-api:
+    build:
+      context: api-user-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005"
+    env_file:
+      - api-user-cryptic-activist/development.env
+    networks:
+      - postgresql-network
+    depends_on:
+      - db
+    # volumes:
+    #   - /api-user-cryptic-activist:/app
+    #   - /app/node_modules
 
   chat-api:
     build:
@@ -19,7 +73,7 @@ services:
     env_file:
       - api-chat-cryptic-activist/development.env
     depends_on:
-      - database
+      - db
 
   cryptocurrency-api:
     build:
@@ -30,7 +84,7 @@ services:
     env_file:
       - api-cryptocurrency-cryptic-activist/development.env
     depends_on:
-      - database
+      - db
 
   fiat-api:
     build:
@@ -41,7 +95,7 @@ services:
     env_file:
       - api-fiat-cryptic-activist/development.env
     depends_on:
-      - database
+      - db
 
   offer-api:
     build:
@@ -52,7 +106,7 @@ services:
     env_file:
       - api-offer-cryptic-activist/development.env
     depends_on:
-      - database
+      - db
 
   trade-api:
     build:
@@ -63,18 +117,7 @@ services:
     env_file:
       - api-trade-cryptic-activist/development.env
     depends_on:
-      - database
-
-  user-api:
-    build:
-      context: api-user-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5005:5005"
-    env_file:
-      - api-user-cryptic-activist/development.env
-    depends_on:
-      - database
+      - db
 
   catalog:
     build:
@@ -84,7 +127,3 @@ services:
       - "3000:3000"
     env_file:
       - cryptic-activist-catalog/development.env
-
-volumes:
-  postgres-db:
-    driver: local
