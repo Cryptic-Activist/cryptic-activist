@@ -3,66 +3,47 @@ version: "3"
 networks:
   postgresql-network:
     driver: bridge
-    # driver_opts:
-    #   com.docker.network.bridge.enable_icc: "true"
 
 volumes:
   postgres-db:
     driver: local
 
 services:
-  db:
+  postgres:
     image: postgres:latest
     container_name: postgresql
     restart: always
-    networks:
-      - postgresql-network
     env_file:
       - .env
     volumes:
-      - postgres-db:/data/postgres
+      - ${POSTGRES_VOLUME}:/data/postgres
     ports:
-      - "5432:5432"
-    expose:
-      - "5432"
-    mem_limit: 512m
+      - "${DB_PORT}:5432"
+    networks:
+      - postgresql-network
 
-  # prisma:
-  #   container_name: prisma
-  #   build:
-  #     context: Dockerfiles/
-  #     dockerfile: prisma.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "5555:5555"
-  #   networks:
-  #     - postgresql-network
-  #   command: >
-  #     bash -c '
-  #       npx prisma db push --schema prisma/schema.prisma
-  #       npx prisma generate --schema prisma/schema.prisma
-  #       npm start
-  #     '
-  #   depends_on:
-  #     - db
-  #   env_file:
-  #     - .env
-
-  user-api:
-    build:
-      context: api-user-cryptic-activist/
-      dockerfile: Dockerfile
+  prisma:
+    image: prismagraphql/prisma:1.8
+    restart: always
     ports:
-      - "5005:5005"
-    env_file:
-      - api-user-cryptic-activist/development.env
+      - "4466:4466"
     networks:
       - postgresql-network
     depends_on:
-      - db
-    # volumes:
-    #   - /api-user-cryptic-activist:/app
-    #   - /app/node_modules
+      - postgres
+    environment:
+      PRISMA_CONFIG: |
+        managementApiSecret: someSecret
+        port: 4466
+        databases:
+          default:
+            connector: postgres
+            host: ${DB_HOST}
+            port: ${DB_PORT}
+            user: ${POSTGRES_USER}
+            password: ${POSTGRES_PASSWORD}
+            migration: true
+            connectionLimit: 2
 
   chat-api:
     build:
@@ -71,9 +52,13 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - api-chat-cryptic-activist/development.env
+      - files/api-chat-cryptic-activist.env
+    networks:
+      - postgresql-network
     depends_on:
-      - db
+      - postgres
+      - user-api
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   cryptocurrency-api:
     build:
@@ -82,9 +67,13 @@ services:
     ports:
       - "5001:5001"
     env_file:
-      - api-cryptocurrency-cryptic-activist/development.env
+      - files/api-cryptocurrency-cryptic-activist.env
+    networks:
+      - postgresql-network
     depends_on:
-      - db
+      - postgres
+      - user-api
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   fiat-api:
     build:
@@ -93,9 +82,13 @@ services:
     ports:
       - "5002:5002"
     env_file:
-      - api-fiat-cryptic-activist/development.env
+      - files/api-fiat-cryptic-activist.env
+    networks:
+      - postgresql-network
     depends_on:
-      - db
+      - postgres
+      - user-api
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   offer-api:
     build:
@@ -104,9 +97,13 @@ services:
     ports:
       - "5003:5003"
     env_file:
-      - api-offer-cryptic-activist/development.env
+      - files/api-offer-cryptic-activist.env
+    networks:
+      - postgresql-network
     depends_on:
-      - db
+      - postgres
+      - user-api
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   trade-api:
     build:
@@ -115,9 +112,32 @@ services:
     ports:
       - "5004:5004"
     env_file:
-      - api-trade-cryptic-activist/development.env
+      - files/api-trade-cryptic-activist.env
+    networks:
+      - postgresql-network
     depends_on:
-      - db
+      - postgres
+      - user-api
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
+
+  user-api:
+    build:
+      context: api-user-cryptic-activist/
+      dockerfile: Dockerfile
+    ports:
+      - "5005:5005"
+    env_file:
+      - files/api-user-cryptic-activist.env
+    networks:
+      - postgresql-network
+    depends_on:
+      - prisma
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "npx prisma generate && npx prisma migrate dev && npm run dev",
+      ]
 
   catalog:
     build:
@@ -126,4 +146,13 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - cryptic-activist-catalog/development.env
+      - files/cryptic-activist-catalog.env
+    networks:
+      - postgresql-network
+    depends_on:
+      - user-api
+      - chat-api
+      - cryptocurrency-api
+      - fiat-api
+      - offer-api
+      - trade-api
