@@ -25,6 +25,3 @@
 [submodule "cryptic-utils"]
 	path = cryptic-utils
 	url = git@github.com:Cryptic-Activist/cryptic-utils.git
-[submodule "cryptic-activist-catalog"]
-	path = crytic-activist-catalog
-	url = git@github.com:Cryptic-Activist/cryptic-activist-catalog.git
