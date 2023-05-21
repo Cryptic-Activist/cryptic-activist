@@ -2,7 +2,7 @@
 
 A cryptocurrency exchange that allows multi currency crypto trading.
 
-## Installation
+## Manual Installation
 
 1. Install Docker
 
@@ -20,7 +20,25 @@ git submodule update --recursive --init
 
 ## Run project
 
-1. Run containerized project
+Run containerized project thorugh init script
+
+### Run project for the first time
+
+1. Give execution permission to init.sh file
+
+```
+sudo chmod +x init.sh
+```
+
+2. Run init script
+
+```
+./init.sh
+```
+
+### Run project with Docker
+
+1. Run docker-compose file
 
 ```
 docker compose up -d
