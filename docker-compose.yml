@@ -188,3 +188,25 @@ services:
       - fiat-api
       - offer-api
       - trade-api
+
+  admin-catalog:
+    build:
+      context: admin-cryptic-activist-catalog/
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - files/admin-cryptic-activist-catalog.env
+    networks:
+      - postgresql-network
+    volumes:
+      - ./admin-cryptic-activist-catalog:/app
+      - /app/node_modules
+    depends_on:
+      - user-api
+      - chat-api
+      - cryptocurrency-api
+      - fiat-api
+      - offer-api
+      - trade-api
+      - catalog
