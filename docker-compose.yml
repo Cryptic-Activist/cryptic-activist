@@ -22,6 +22,17 @@ services:
     networks:
       - postgresql-network
 
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgAdmin4
+    restart: always
+    env_file:
+      - pgAdmin.env
+    ports:
+      - "5050:80"
+    networks:
+      - postgresql-network
+
   prisma:
     image: prismagraphql/prisma:1.8
     restart: always

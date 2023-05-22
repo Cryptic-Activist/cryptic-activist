@@ -10,8 +10,8 @@
 	path = api-fiat-cryptic-activist
 	url = git@github.com:Cryptic-Activist/api-fiat-cryptic-activist.git
   branch = main
-[submodule "api-offer-cryptic-activist"]
-	path = api-offer-cryptic-activist
+[submodule "api-trade-cryptic-activist"]
+	path = api-trade-cryptic-activist
 	url = git@github.com:Cryptic-Activist/api-trade-cryptic-activist.git
   branch = main
 [submodule "api-user-cryptic-activist"]
@@ -22,6 +22,6 @@
 	path = cryptic-activist-catalog
 	url = git@github.com:Cryptic-Activist/cryptic-activist-catalog.git
   branch = main
-[submodule "api-trade-cryptic-activist"]
-	path = api-trade-cryptic-activist
-	url = git@github.com:Cryptic-Activist/api-trade-cryptic-activist.git
+[submodule "api-offer-cryptic-activist"]
+	path = api-offer-cryptic-activist
+	url = git@github.com:Cryptic-Activist/api-offer-cryptic-activist.git
