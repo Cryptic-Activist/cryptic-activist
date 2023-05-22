@@ -22,3 +22,6 @@
 	path = cryptic-activist-catalog
 	url = git@github.com:Cryptic-Activist/cryptic-activist-catalog.git
   branch = main
+[submodule "api-trade-cryptic-activist"]
+	path = api-trade-cryptic-activist
+	url = git@github.com:Cryptic-Activist/api-trade-cryptic-activist.git

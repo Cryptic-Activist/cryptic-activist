@@ -12,6 +12,8 @@ cd api-offer-cryptic-activist && git checkout main && cd ..
 
 cd api-user-cryptic-activist && git checkout main && cd ..
 
+cd api-user-cryptic-activist && git checkout main && cd ..
+
 cd cryptic-activist-catalog && git checkout main && cd ..
 
 docker compose up -d
