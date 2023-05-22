@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 networks:
   postgresql-network:
@@ -55,6 +55,9 @@ services:
       - files/api-chat-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-chat-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - user-api
@@ -70,6 +73,9 @@ services:
       - files/api-cryptocurrency-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-cryptocurrency-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - user-api
@@ -85,6 +91,9 @@ services:
       - files/api-fiat-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-fiat-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - user-api
@@ -100,6 +109,9 @@ services:
       - files/api-offer-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-offer-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - user-api
@@ -115,6 +127,9 @@ services:
       - files/api-trade-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-trade-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - user-api
@@ -130,6 +145,9 @@ services:
       - files/api-user-cryptic-activist.env
     networks:
       - postgresql-network
+    volumes:
+      - ./api-user-cryptic-activist:/app
+      - /app/node_modules
     depends_on:
       - prisma
     entrypoint:
@@ -149,6 +167,9 @@ services:
       - files/cryptic-activist-catalog.env
     networks:
       - postgresql-network
+    volumes:
+      - ./cryptic-activist-catalog:/app
+      - /app/node_modules
     depends_on:
       - user-api
       - chat-api
