@@ -18,4 +18,4 @@ cd cryptic-activist-catalog && git checkout main && cd ..
 
 docker compose up -d
 
-docker compose exec -it postgres psql -U postgres -d db-ca < docker-entrypoint-initdb.d/dump.sql
+docker container exec postgresql psql -U postgres -d db-ca < dump.sql
