@@ -43,3 +43,14 @@ sudo chmod +x init.sh
 ```
 docker compose up -d
 ```
+
+### Import database data
+
+After the whole project is up and running without any errors do the following:
+
+1. Get into the running container
+
+2. Import the database dump.
+   ```
+   psql -U postgres -d db-ca < docker-entrypoint-initdb.d/dump.sql
+   ```

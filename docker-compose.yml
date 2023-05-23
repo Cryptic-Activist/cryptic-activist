@@ -17,6 +17,7 @@ services:
       - .env
     volumes:
       - ${POSTGRES_VOLUME}:/data/postgres
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     ports:
       - "${DB_PORT}:5432"
     networks:
