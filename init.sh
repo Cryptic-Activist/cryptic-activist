@@ -10,7 +10,7 @@ cd api-fiat-cryptic-activist && git checkout main && cd ..
 
 cd api-offer-cryptic-activist && git checkout main && cd ..
 
-cd api-user-cryptic-activist && git checkout main && cd ..
+cd api-trade-cryptic-activist && git checkout main && cd ..
 
 cd api-user-cryptic-activist && git checkout main && cd ..
 
