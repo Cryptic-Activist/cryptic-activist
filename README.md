@@ -48,7 +48,7 @@ docker compose up -d
 
 After the whole project is up and running without any errors do the following:
 
-1. Get into the running container
+1. Get into the running postgres database container
 
 2. Import the database dump.
    ```
