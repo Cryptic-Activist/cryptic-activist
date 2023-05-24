@@ -52,5 +52,5 @@ After the whole project is up and running without any errors do the following:
 
 2. Import the database dump.
    ```
-   psql -U postgres -d db-ca < docker-entrypoint-initdb.d/dump.sql
+   psql -U postgres -d db-ca < dump.sql
    ```
