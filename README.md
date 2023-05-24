@@ -56,3 +56,21 @@ After the whole project is up and running without any errors do the following:
    ```
 
 ### How to connect to Postgres database via pgAdmin
+
+1. Go to http://localhost:5050
+
+2. Log in with the following credentials:
+
+   ```
+   email: admin@admin.com
+   password: admin
+   ```
+
+3. Connect to the `db-ca` database with the following database connection info:
+
+   ```
+   Host name/address: postgres
+   Maintenance database: db-ca
+   Username: postgres
+   Password: postgres
+   ```
