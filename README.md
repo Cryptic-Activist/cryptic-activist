@@ -54,3 +54,5 @@ After the whole project is up and running without any errors do the following:
    ```
    psql -U postgres -d db-ca < dump.sql
    ```
+
+### How to connect to Postgres database via pgAdmin
