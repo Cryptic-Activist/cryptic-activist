@@ -3,8 +3,6 @@ version: "3.8"
 networks:
   postgresql-network:
     driver: bridge
-  apis-network:
-    driver: bridge
 
 volumes:
   postgres-db:
@@ -69,7 +67,6 @@ services:
       - files/api-chat-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-chat-cryptic-activist:/app
       - /app/node_modules
@@ -88,7 +85,6 @@ services:
       - files/api-cryptocurrency-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-cryptocurrency-cryptic-activist:/app
       - /app/node_modules
@@ -107,7 +103,6 @@ services:
       - files/api-fiat-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-fiat-cryptic-activist:/app
       - /app/node_modules
@@ -126,7 +121,6 @@ services:
       - files/api-offer-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-offer-cryptic-activist:/app
       - /app/node_modules
@@ -145,7 +139,6 @@ services:
       - files/api-trade-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-trade-cryptic-activist:/app
       - /app/node_modules
@@ -164,18 +157,12 @@ services:
       - files/api-user-cryptic-activist.env
     networks:
       - postgresql-network
-      - apis-network
     volumes:
       - ./api-user-cryptic-activist:/app
       - /app/node_modules
     depends_on:
       - prisma
-    entrypoint:
-      [
-        "sh",
-        "-c",
-        "npx prisma generate && npx prisma migrate dev && npm run dev",
-      ]
+    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   catalog:
     build:
