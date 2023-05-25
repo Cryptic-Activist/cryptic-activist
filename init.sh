@@ -2,19 +2,19 @@
 
 git submodule update --recursive --init
 
-cd api-chat-cryptic-activist && git checkout main && cd ..
+cd api-chat-cryptic-activist && git checkout main && yarn && cd ..
 
-cd api-cryptocurrency-cryptic-activist && git checkout main && cd ..
+cd api-cryptocurrency-cryptic-activist && git checkout main && yarn && cd ..
 
-cd api-fiat-cryptic-activist && git checkout main && cd ..
+cd api-fiat-cryptic-activist && git checkout main && yarn && cd ..
 
-cd api-offer-cryptic-activist && git checkout main && cd ..
+cd api-offer-cryptic-activist && git checkout main && yarn && cd ..
 
-cd api-trade-cryptic-activist && git checkout main && cd ..
+cd api-trade-cryptic-activist && git checkout main && yarn && cd ..
 
-cd api-user-cryptic-activist && git checkout main && cd ..
+cd api-user-cryptic-activist && git checkout main && yarn && cd ..
 
-cd cryptic-activist-catalog && git checkout main && cd ..
+cd cryptic-activist-catalog && git checkout main && yarn && cd ..
 
 docker compose up -d
 
