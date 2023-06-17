@@ -193,6 +193,27 @@ services:
       - offer-api
       - trade-api
 
+  new-catalog:
+    build:
+      context: new-cryptic-activist-catalog/
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    env_file:
+      - files/new-cryptic-activist-catalog.env
+    networks:
+      - postgresql-network
+    volumes:
+      - ./new-cryptic-activist-catalog:/app
+      - /app/node_modules
+    depends_on:
+      - user-api
+      - chat-api
+      - cryptocurrency-api
+      - fiat-api
+      - offer-api
+      - trade-api
+
   admin-catalog:
     build:
       context: admin-cryptic-activist-catalog/

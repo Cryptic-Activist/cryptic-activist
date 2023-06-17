@@ -22,3 +22,6 @@
 [submodule "admin-cryptic-activist-catalog"]
 	path = admin-cryptic-activist-catalog
 	url = git@github.com:Cryptic-Activist/admin-cryptic-activist-catalog.git
+[submodule "new-cryptic-activist-catalog"]
+	path = new-cryptic-activist-catalog
+	url = git@github.com:Cryptic-Activist/new-cryptic-activist-catalog.git
