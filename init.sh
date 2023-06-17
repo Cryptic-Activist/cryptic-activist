@@ -16,7 +16,7 @@ cd api-user-cryptic-activist && git checkout main && yarn && cd ..
 
 cd cryptic-activist-catalog && git checkout main && yarn && cd ..
 
-cd adimn-cryptic-activist-catalog && git checkout main && yarn && cd ..
+cd admin-cryptic-activist-catalog && git checkout main && yarn && cd ..
 
 cd new-cryptic-activist-catalog && git checkout main && yarn && cd ..
 
