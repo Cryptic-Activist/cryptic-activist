@@ -1,29 +1,26 @@
 networks:
-  postgresql-network:
-    driver: bridge
-  apis-network:
+  app-network:
     driver: bridge
 
 volumes:
-  postgres-db:
+  postgres-data:
     driver: local
 
 services:
-  postgresql:
+  postgres:
     image: postgres:latest
-    container_name: postgresql
     restart: always
-    profiles:
-      - database
+    # profiles:
+    #   - database
     env_file:
       - .env
     volumes:
-      - ${POSTGRES_VOLUME}:/data/postgres
+      - postgres-data:/var/lib/postgresql/data
       - ./dump.sql:/dump.sql
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     networks:
-      - postgresql-network
+      - app-network
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -34,30 +31,7 @@ services:
     ports:
       - "5050:80"
     networks:
-      - postgresql-network
-
-  prisma:
-    image: prismagraphql/prisma:1.8
-    restart: always
-    ports:
-      - "4466:4466"
-    networks:
-      - postgresql-network
-    # depends_on:
-      # - postgres
-    environment:
-      PRISMA_CONFIG: |
-        managementApiSecret: someSecret
-        port: 4466
-        databases:
-          default:
-            connector: postgres
-            host: ${DB_HOST}
-            port: ${DB_PORT}
-            user: ${POSTGRES_USER}
-            password: ${POSTGRES_PASSWORD}
-            migration: true
-            connectionLimit: 2
+      - app-network
 
   chat-api:
     build:
@@ -65,18 +39,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    env_file:
-      - files/api-chat-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-chat-cryptic-activist:/app
       - /app/node_modules
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
+    env_file:
+      - files/api-chat-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      # - postgres
-      - user-api
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
+      - postgres
+      - cryptocurrency-api
 
   cryptocurrency-api:
     build:
@@ -84,18 +65,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5001:5001"
-    env_file:
-      - files/api-cryptocurrency-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-cryptocurrency-cryptic-activist:/app
       - /app/node_modules
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
+    env_file:
+      - files/api-cryptocurrency-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      # - postgres
-      - user-api
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
+      - postgres
+      - fiat-api
 
   fiat-api:
     build:
@@ -103,18 +91,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5002:5002"
-    env_file:
-      - files/api-fiat-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-fiat-cryptic-activist:/app
       - /app/node_modules
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
+    env_file:
+      - files/api-fiat-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      # - postgres
-      - user-api
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
+      - postgres
+      - offer-api
 
   offer-api:
     build:
@@ -122,18 +117,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5003:5003"
-    env_file:
-      - files/api-offer-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-offer-cryptic-activist:/app
       - /app/node_modules
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
+    env_file:
+      - files/api-offer-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      # - postgres
-      - user-api
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
+      - postgres
+      - trade-api
 
   trade-api:
     build:
@@ -141,18 +143,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5004:5004"
-    env_file:
-      - files/api-trade-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-trade-cryptic-activist:/app
       - /app/node_modules
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
+    env_file:
+      - files/api-trade-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      # - postgres
+      - postgres
       - user-api
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
 
   user-api:
     build:
@@ -160,78 +169,64 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5005:5005"
-    env_file:
-      - files/api-user-cryptic-activist.env
-    networks:
-      - postgresql-network
-      - apis-network
     volumes:
       - ./api-user-cryptic-activist:/app
       - /app/node_modules
-    depends_on:
-      - prisma
-    entrypoint: ["sh", "-c", "npx prisma generate && npm run dev"]
-
-  catalog:
-    build:
-      context: cryptic-activist-catalog/
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+      - ./base-ca:/app/libraries/base-ca
+      - ./cryptic-utils:/app/libraries/cryptic-utils
     env_file:
-      - files/cryptic-activist-catalog.env
+      - files/api-user-cryptic-activist.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
     networks:
-      - postgresql-network
-    volumes:
-      - ./cryptic-activist-catalog:/app
-      - /app/node_modules
+      - app-network
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    deploy:
+      resources:
+        limits:
+          memory: 6GB
     depends_on:
-      - user-api
-      - chat-api
-      - cryptocurrency-api
-      - fiat-api
-      - offer-api
-      - trade-api
+      - postgres
 
-  new-catalog:
-    build:
-      context: new-cryptic-activist-catalog/
-      dockerfile: Dockerfile
-    ports:
-      - "3002:3002"
-    env_file:
-      - files/new-cryptic-activist-catalog.env
-    networks:
-      - postgresql-network
-    volumes:
-      - ./new-cryptic-activist-catalog:/app
-      - /app/node_modules
-    depends_on:
-      - user-api
-      - chat-api
-      - cryptocurrency-api
-      - fiat-api
-      - offer-api
-      - trade-api
+  # new-catalog:
+  #   build:
+  #     context: new-cryptic-activist-catalog/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3002:3002"
+  #   env_file:
+  #     - files/new-cryptic-activist-catalog.env
+  #   volumes:
+  #     - ./new-cryptic-activist-catalog:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - user-api
+    #   - chat-api
+    #   - cryptocurrency-api
+    #   - fiat-api
+    #   - offer-api
+    #   - trade-api
 
-  admin-catalog:
-    build:
-      context: admin-cryptic-activist-catalog/
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-    env_file:
-      - files/admin-cryptic-activist-catalog.env
-    networks:
-      - postgresql-network
-    volumes:
-      - ./admin-cryptic-activist-catalog:/app
-      - /app/node_modules
-    depends_on:
-      - user-api
-      - chat-api
-      - cryptocurrency-api
-      - fiat-api
-      - offer-api
-      - trade-api
-      - catalog
+  # admin-catalog:
+  #   build:
+  #     context: admin-cryptic-activist-catalog/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3001:3001"
+  #   env_file:
+  #     - files/admin-cryptic-activist-catalog.env
+  #   networks:
+  #     - app-network
+  #   volumes:
+  #     - ./admin-cryptic-activist-catalog:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - user-api
+  #     - chat-api
+  #     - cryptocurrency-api
+  #     - fiat-api
+  #     - offer-api
+  #     - trade-api
+  #     - catalog
