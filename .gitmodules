@@ -25,3 +25,9 @@
 [submodule "new-cryptic-activist-catalog"]
 	path = new-cryptic-activist-catalog
 	url = git@github.com:Cryptic-Activist/new-cryptic-activist-catalog.git
+[submodule "cryptic-utils"]
+	path = cryptic-utils
+	url = git@github.com:Cryptic-Activist/cryptic-utils.git
+[submodule "base-ca"]
+	path = base-ca
+	url = git@github.com:Cryptic-Activist/base-ca.git
