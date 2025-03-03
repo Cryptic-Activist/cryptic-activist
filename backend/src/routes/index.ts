@@ -1,21 +1,15 @@
 import { Application } from 'express';
-
-import ping from './ping';
-
-import users from './users';
-import usersAuth from './users/auth';
-import usersAuthorization from './users/authorization';
-
 import admins from './admins';
 import adminsAuth from './admins/auth';
 import adminsAuthorization from './admins/authorization';
-
-import language from './languages';
-
 import blocks from './blocks';
-import trusts from './trusts';
-
+import language from './languages';
+import ping from './ping';
 import tests from './tests';
+import trusts from './trusts';
+import users from './users';
+import usersAuth from './users/auth';
+import usersAuthorization from './users/authorization';
 
 export default (app: Application): void => {
   app.use('/ping', ping);
