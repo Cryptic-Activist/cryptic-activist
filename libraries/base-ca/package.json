@@ -1,0 +1,58 @@
+{
+  "name": "base-ca",
+  "description": "Cryptic Activist database tooling package",
+  "version": "1.0.11",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "base-ca",
+    "database",
+    "database tooling"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cryptic-Activist/base-ca"
+  },
+  "homepage": "https://github.com/Cryptic-Activist/base-ca/#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsup",
+    "generate": "npx prisma generate",
+    "migrate": "npx prisma migrate dev",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.69",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "nodemon": "^2.0.22",
+    "sequelize-cli": "^6.6.2",
+    "sequelize-typescript": "^2.1.6",
+    "ts-node": "^10.9.2",
+    "tsc": "^2.0.4",
+    "tsx": "^3.14.0",
+    "typescript": "^4.9.5",
+    "vitest": "^0.23.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.16.2",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "prisma": "^4.16.2",
+    "sequelize": "^6.37.5",
+    "tsup": "^6.7.0"
+  }
+}

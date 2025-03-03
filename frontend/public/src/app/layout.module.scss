@@ -1,0 +1,11 @@
+@use "../styles/globals.module.scss";
+
+.main {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100vh - globals.$navbigation-bar-height - globals.$footer-height);
+}
+
+.body {
+  overflow-x: hidden;
+}

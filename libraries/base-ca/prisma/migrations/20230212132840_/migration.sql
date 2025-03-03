@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "trades" ALTER COLUMN "state" SET NOT NULL,
+ALTER COLUMN "state" SET DATA TYPE TEXT;

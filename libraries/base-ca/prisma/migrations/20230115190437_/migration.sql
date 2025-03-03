@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "cryptocurrecies" ALTER COLUMN "coingeckoId" SET DATA TYPE VARCHAR(50),
+ALTER COLUMN "symbol" SET DATA TYPE VARCHAR(50);

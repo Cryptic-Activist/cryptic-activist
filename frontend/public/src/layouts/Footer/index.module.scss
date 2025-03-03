@@ -1,0 +1,34 @@
+@use '../../styles/globals.module.scss';
+
+.footer {
+  position: relative;
+  width: 100%;
+  height: 23rem;
+  background-color: globals.$primary;
+  border-top: 1px solid globals.$secondary;
+  box-shadow: 0px -4px 8px -2px globals.$box-shadow-default-color;
+}
+
+.container {
+  width: 80%;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  padding: 4rem 0 1rem 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brandLinksContainer {
+  display: flex;
+  display: flex;
+  justify-content: space-between;
+}
+
+.statement {
+  width: 100%;
+  align-self: flex-end;
+  text-align: center;
+}
