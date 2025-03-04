@@ -1,27 +1,13 @@
-import {
-  login,
-  loginDecodeToken,
-  register,
-} from '../../controllers/admin/auth';
-import {
-  validateLogin,
-  validatePrivateKeysRequest,
-  validateRegister,
-} from '../../middlewares/validators/request/users/auth';
+import { login, loginDecodeToken, register } from '@/controllers/admin/auth';
 
 import { Router } from 'express';
-import { authenticateUser } from '../../middlewares/authorization';
 
 const router = Router();
 
-router.post('/login', validateLogin, login);
+router.post('/login', login);
 
-router.get(
-  '/login/decode/token/:accessToken',
-  authenticateUser,
-  loginDecodeToken,
-);
+router.get('/login/decode/token/:accessToken', loginDecodeToken);
 
-router.post('/register', validateRegister, register);
+router.post('/register', register);
 
 export default router;

@@ -3,16 +3,16 @@ import {
   createTradeController,
   getTradeController,
   index,
-} from '../../controllers/trade';
+} from '@/controllers/offers';
 import {
   validateCancelTrade,
   validateCreateTrade,
   validateGetTrade,
   validateSetPaidTrade,
-} from '../../../utils/validators/request/trader';
+} from '@/utils/validators/request/trader';
 
 import { Router } from 'express';
-import { authenticateUser } from '../../middlewares/authorization';
+import { authenticateUser } from '@/middlewares/authorization';
 
 const router = Router();
 

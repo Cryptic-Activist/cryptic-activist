@@ -1,11 +1,11 @@
-import { Router } from 'express';
-
 import {
-	createFiatController,
-	createFiatsJSON,
-	index,
-} from '../../controllers/fiats';
-import { authenticateUser } from '../../middlewares/authorization';
+  createFiatController,
+  createFiatsJSON,
+  index,
+} from '@/controllers/fiats';
+
+import { Router } from 'express';
+import { authenticateUser } from '@/middlewares/authorization';
 
 const router = Router();
 

@@ -1,5 +1,5 @@
+import { CreateTrade, GetTrade } from '@/middlewares/validators/trades';
 import { NextFunction, Request, Response } from 'express';
-import { CreateTrade, GetTrade } from '../../../middlewares/validators/trades';
 
 export function validateCreateTrade(
   req: Request,
@@ -12,7 +12,7 @@ export function validateCreateTrade(
   if (validated.success) {
     next();
   } else {
-    return res.status(400).send({
+    res.status(400).send({
       status_code: 400,
       results: {},
       // @ts-ignore
@@ -32,7 +32,7 @@ export function validateGetTrade(
   if (validated.success) {
     next();
   } else {
-    return res.status(400).send({
+    res.status(400).send({
       status_code: 400,
       results: {},
       // @ts-ignore
@@ -63,7 +63,7 @@ export function validateCancelTrade(
   }
 
   if (errors.length > 0) {
-    return res.status(400).send({
+    res.status(400).send({
       status_code: 400,
       results: {},
       errors,
@@ -95,7 +95,7 @@ export function validateSetPaidTrade(
   }
 
   if (errors.length > 0) {
-    return res.status(400).send({
+    res.status(400).send({
       status_code: 400,
       results: {},
       errors,

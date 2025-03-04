@@ -1,10 +1,7 @@
-import { createOffer, getOffer } from 'base-ca';
 import { Request, Response } from 'express';
+import { createOffer, getOffer } from 'base-ca';
 
-export async function createOfferController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function createOfferController(req: Request, res: Response) {
   try {
     const { body } = req;
     const { cryptocurrency, fiat, ...rest } = body;
@@ -17,23 +14,20 @@ export async function createOfferController(
 
     const newOffer = await createOffer(create);
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: newOffer,
       errors: [],
     });
   } catch (err: any) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       errors: [err.message],
     });
   }
 }
 
-export async function getOfferController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getOfferController(req: Request, res: Response) {
   try {
     const { query } = req;
     const { id, associations } = query;
@@ -80,7 +74,7 @@ export async function getOfferController(
     //   );
 
     //   if (!offer) {
-    //     return res.status(204).send({
+    //     res.status(204).send({
     //       status_code: 204,
     //       results: {},
     //       errors: [],
@@ -91,14 +85,14 @@ export async function getOfferController(
 
     //   console.log('safeOffer:', safeOffer);
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: offer,
       errors: [],
     });
   } catch (err: any) {
     console.log(err);
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],

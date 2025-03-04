@@ -1,12 +1,10 @@
-import { Application } from 'express';
+import { Router } from 'express';
 import chat from './chat';
 import systemMessages from './systemMessages';
 
-export default (app: Application) => {
-  return {
-    init: () => {
-      app.use('/systemMessages', systemMessages);
-      app.use('/chat', chat);
-    },
-  };
-};
+const router = Router();
+
+router.use('/systemMessages', systemMessages);
+router.use('/chat', chat);
+
+export default router;

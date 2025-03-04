@@ -1,12 +1,10 @@
-import { Application } from 'express';
+import { Router } from 'express';
 import fiat from './fiat';
 import fiats from './fiats';
 
-export default (app: Application) => {
-  return {
-    init: () => {
-      app.use('/fiat', fiat);
-      app.use('/fiats', fiats);
-    },
-  };
-};
+const router = Router();
+
+router.use('/fiat', fiat);
+router.use('/fiats', fiats);
+
+export default router;

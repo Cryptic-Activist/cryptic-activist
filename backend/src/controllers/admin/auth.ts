@@ -1,6 +1,6 @@
+import { Request, Response } from 'express';
 // import jwt from 'jsonwebtoken';
 import { createAdmin, getAdmin } from 'base-ca';
-import bcrypt from 'bcryptjs';
 import {
   decodeToken,
   generateRefreshToken,
@@ -8,11 +8,12 @@ import {
   generateUniqueUsername,
   sanitize,
 } from 'cryptic-utils';
-import { Request, Response } from 'express';
 
-import { JWT_SECRET } from '../../constants/env';
-import { assignSafeAdminData } from '../../utils/responses/users';
-import { validateAdminUsername } from '../../utils/validators';
+import { JWT_SECRET } from '@/constants/env';
+import { assignSafeAdminData } from '@/utils/responses/users';
+import bcrypt from 'bcryptjs';
+
+// import { validateAdminUsername } from '@/utils/validators';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -27,21 +28,21 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).send({
+      res.status(400).send({
         errors,
       });
     }
 
     bcrypt.compare(password, admin!.password, (compareError, isMatch) => {
       if (compareError) {
-        return res.status(500).send({
+        res.status(500).send({
           errors: [compareError.message],
         });
       }
 
       if (isMatch) {
         if (!admin!.isVerified) {
-          return res.status(401).send({
+          res.status(401).send({
             errors: ['Account is not verified'],
           });
         }
@@ -56,56 +57,53 @@ export const login = async (req: Request, res: Response) => {
           JWT_SECRET,
         );
 
-        return res.status(200).send({
+        res.status(200).send({
           accessToken,
           refreshToken,
         });
       }
 
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Invalid credentials'],
       });
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 };
 
-export async function loginDecodeToken(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function loginDecodeToken(req: Request, res: Response) {
   const { accessToken } = req.params;
 
   try {
     const decoded = decodeToken(accessToken, JWT_SECRET);
 
     if (!decoded) {
-      return res.status(401).send({});
+      res.status(401).send({});
     }
 
     const admin = await getAdmin({ id: decoded.id });
 
     if (!admin) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['User not found'],
       });
     }
-
+    // @ts-ignore
     const safeAdmin = await assignSafeAdminData(admin);
 
-    return res.status(200).send({ ...safeAdmin });
+    res.status(200).send({ ...safeAdmin });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function register(req: Request, res: Response): Promise<Response> {
+export async function register(req: Request, res: Response) {
   const { names, username, password } = req.body;
 
   try {
@@ -113,14 +111,14 @@ export async function register(req: Request, res: Response): Promise<Response> {
 
     const cleanBody = sanitize({ ...names, username }, []);
 
-    const usernameValidation = await validateAdminUsername(cleanBody.username);
+    // const usernameValidation = await validateAdminUsername(cleanBody.username);
 
-    if (!usernameValidation.valid) {
-      cleanBody.username = generateUniqueUsername(cleanBody.username);
-    }
+    // if (!usernameValidation.valid) {
+    //   cleanBody.username = generateUniqueUsername(cleanBody.username);
+    // }
 
     if (errors.length > 0) {
-      return res.status(400).send({
+      res.status(400).send({
         errors,
       });
     }
@@ -137,12 +135,12 @@ export async function register(req: Request, res: Response): Promise<Response> {
     });
 
     if (!admin) {
-      return res.status(400).send({});
+      res.status(400).send({});
     }
 
-    return res.status(201).send({});
+    res.status(201).send({});
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

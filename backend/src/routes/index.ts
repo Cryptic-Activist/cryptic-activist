@@ -7,10 +7,10 @@ import trades from './trades';
 import users from './users';
 
 export default (app: Application): void => {
-  users(app).init();
-  trades(app).init();
-  offers(app).init();
-  fiats(app).init();
-  cryptocurrencies(app).init();
-  chats(app).init();
+  app.use('/chats', chats);
+  app.use('/cryptocurrencies', cryptocurrencies);
+  app.use('/fiats', fiats);
+  app.use('/offers', offers);
+  app.use('/trades', trades);
+  app.use('/users', users);
 };

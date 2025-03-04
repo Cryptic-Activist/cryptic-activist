@@ -1,12 +1,10 @@
-import { Application } from 'express';
+import { Router } from 'express';
 import cryptocurrencies from './cryptocurrencies';
 import cryptocurrency from './cryptocurrency';
 
-export default (app: Application) => {
-  return {
-    init: () => {
-      app.use('/cryptocurrency', cryptocurrency);
-      app.use('/cryptocurrencies', cryptocurrencies);
-    },
-  };
-};
+const router = Router();
+
+router.use('/cryptocurrency', cryptocurrency);
+router.use('/cryptocurrencies', cryptocurrencies);
+
+export default router;

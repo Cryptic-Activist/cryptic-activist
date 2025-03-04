@@ -1,36 +1,12 @@
-import { createPaymentMethod, getPaymentMethods } from 'base-ca';
-import { sanitize } from 'cryptic-utils';
 import { Request, Response } from 'express';
+import { createPaymentMethod, getPaymentMethods } from 'base-ca';
 
-export async function index(req: Request, res: Response): Promise<Response> {
-  try {
-    const { associations } = req.query;
-
-    const paymentMethods = await getPaymentMethods({
-      offers: false,
-      paymentMethodCategory: false,
-      _count: false,
-    });
-
-    return res.status(200).send({
-      status_code: 200,
-      results: paymentMethods,
-      errors: [],
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send({
-      status_code: 500,
-      results: {},
-      errors: [err.message],
-    });
-  }
-}
+import { sanitize } from 'cryptic-utils';
 
 export async function createPaymentMethodController(
   req: Request,
   res: Response,
-): Promise<Response> {
+) {
   try {
     const { name, paymentMethodCategory } = req.body;
     const { id } = paymentMethodCategory;
@@ -40,13 +16,13 @@ export async function createPaymentMethodController(
       paymentMethodCategoryId: id,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: newPaymentMethod,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],
@@ -57,7 +33,7 @@ export async function createPaymentMethodController(
 export async function getPaymentMethodsByCategoryController(
   req: Request,
   res: Response,
-): Promise<Response> {
+) {
   try {
     const { categoryId } = req.params;
 
@@ -74,13 +50,13 @@ export async function getPaymentMethodsByCategoryController(
       },
     );
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: paymentMethods,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],

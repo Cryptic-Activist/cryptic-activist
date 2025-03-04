@@ -46,13 +46,13 @@ export const createSystemMessageController = async (
 
     console.log(createdSystemMessage);
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: createdSystemMessage,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       errors: [err.message],
     });

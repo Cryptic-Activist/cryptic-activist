@@ -1,14 +1,14 @@
-import { getAdmin, getAdmins } from 'base-ca';
+import { Request, Response } from 'express';
 import {
   convertWhere,
   generateRandomNames,
   sanitize,
   slugifyStringLowerCase,
 } from 'cryptic-utils';
-import { Request, Response } from 'express';
+import { getAdmin, getAdmins } from 'base-ca';
 
-import { mapAdmins } from '../../utils/map/admins';
-import { assignSafeAdminData } from '../../utils/responses/users';
+import { assignSafeAdminData } from '@/utils/responses/users';
+import { mapAdmins } from '@/utils/map/admins';
 
 const validateCredentials = async (username: string) => {
   const user = await getAdmin({ username });
@@ -20,10 +20,7 @@ const validateCredentials = async (username: string) => {
   return false;
 };
 
-export async function getRandomCredentials(
-  _req: Request,
-  res: Response,
-): Promise<Response> {
+export const getRandomCredentials = async (_req: Request, res: Response) => {
   try {
     let names: string[];
     let username: string;
@@ -33,37 +30,34 @@ export async function getRandomCredentials(
       username = slugifyStringLowerCase(`${names[0]} ${names[1]}`);
     } while (!(await validateCredentials(username)));
 
-    return res.status(200).send({
+    res.status(200).send({
       names,
       username,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
-}
+};
 
-export async function getAllAdmins(_req: Request, res: Response) {
+export const getAllAdmins = async (_req: Request, res: Response) => {
   try {
     const admins = await getAdmins();
 
     const mapped = mapAdmins(admins);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...mapped,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
-}
+};
 
-export async function getAdminController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export const getAdminController = (req: Request, res: Response) => {
   try {
     // const { associations } = req.query;
     const { associations } = req.query;
@@ -84,25 +78,22 @@ export async function getAdminController(
     const user = await getAdmin({ ...where }, cleanReqQuery.associations);
 
     if (!user) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Admin not found'],
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       ...user,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
-}
+};
 
-export async function getAdminVerify(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export const getAdminVerify = async (req: Request, res: Response) => {
   try {
     const { id, username } = req.query;
 
@@ -121,21 +112,21 @@ export async function getAdminVerify(
     const user = await getAdmin(cleanQuery);
 
     if (!user) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Admin not found'],
       });
     }
 
-    return res.status(200).send({
-      names: { firstName: user.firstName, lastName: user.lastName },
-      username: user.username,
+    res.status(200).send({
+      names: { firstName: user?.firstName, lastName: user?.lastName },
+      username: user?.username,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
-}
+};
 
 export const getAdminById = async (req: Request, res: Response) => {
   try {
@@ -145,7 +136,7 @@ export const getAdminById = async (req: Request, res: Response) => {
     const user = await getAdmin({ id: userId });
 
     if (!user) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['Admin not found'],
       });
     }
@@ -153,11 +144,11 @@ export const getAdminById = async (req: Request, res: Response) => {
     // @ts-ignore
     const safeAdmin = await assignSafeAdminData(user);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...safeAdmin,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
@@ -171,7 +162,7 @@ export const getAdminByAdminname = async (req: Request, res: Response) => {
     const user = await getAdmin({ username });
 
     if (!user) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['Admin not found'],
       });
     }
@@ -179,11 +170,11 @@ export const getAdminByAdminname = async (req: Request, res: Response) => {
     // @ts-ignore
     const safeAdmin = await assignSafeAdminData(user);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...safeAdmin,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

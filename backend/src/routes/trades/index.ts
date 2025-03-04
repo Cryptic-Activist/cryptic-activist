@@ -1,12 +1,10 @@
-import { Application } from 'express';
+import { Router } from 'express';
 import trade from './trade';
 import trades from './trades';
 
-export default (app: Application) => {
-  return {
-    init: () => {
-      app.use('/trade', trade);
-      app.use('/trades', trades);
-    },
-  };
-};
+const router = Router();
+
+router.use('/trade', trade);
+router.use('/trades', trades);
+
+export default router;

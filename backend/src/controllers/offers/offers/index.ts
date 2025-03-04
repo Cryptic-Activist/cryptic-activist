@@ -1,8 +1,8 @@
-import { getOffers, getOffersPagination } from 'base-ca';
-import { converterToType, convertWhere, sanitize } from 'cryptic-utils';
 import { Request, Response } from 'express';
+import { convertWhere, converterToType, sanitize } from 'cryptic-utils';
+import { getOffers, getOffersPagination } from 'base-ca';
 
-export async function index(req: Request, res: Response): Promise<Response> {
+export async function index(req: Request, res: Response) {
   try {
     const {
       id,
@@ -51,13 +51,13 @@ export async function index(req: Request, res: Response): Promise<Response> {
       updated_at,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: offers,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],
@@ -105,18 +105,18 @@ export const indexPagination = async (req: Request, res: Response) => {
     );
 
     if (!offers) {
-      return res.status(204).send({
+      res.status(204).send({
         status_code: 204,
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: offers,
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       errors: err,
     });
@@ -160,18 +160,18 @@ export const getOffersController = async (req: Request, res: Response) => {
     );
 
     if (!offers) {
-      return res.status(204).send({
+      res.status(204).send({
         status_code: 204,
         results: offers,
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: offers,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       errors: err,
     });
@@ -196,12 +196,12 @@ export const getOffersByUser = async (req: Request, res: Response) => {
 
     console.log(offers);
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: offers,
     });
   } catch (error) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       errors: [error.message],
     });

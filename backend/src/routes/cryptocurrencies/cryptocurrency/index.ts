@@ -1,27 +1,21 @@
-import { Router } from 'express';
-
 import {
   createCryptocurrencyCoinGecko,
   getCryptocurrencyController,
   getPrice,
-} from '@/controllers/cryptocurrency';
+} from '@/controllers/cryptocurrencies';
+
+import { Router } from 'express';
 import { authenticateUser } from '@/middlewares/authorization';
-import {
-  validateCreateCryptocurrencyCoinGecko,
-  validateGetCryptocurrency,
-  validateGetPrice,
-} from '@/middlewares/validators/request/cryptocurrency';
 
 const router = Router();
 
-router.get('', validateGetCryptocurrency, getCryptocurrencyController);
+router.get('', getCryptocurrencyController);
 
-router.get('/price', validateGetPrice, getPrice);
+router.get('/price', getPrice);
 
 router.post(
   '/coin-gecko/create',
   authenticateUser,
-  validateCreateCryptocurrencyCoinGecko,
   createCryptocurrencyCoinGecko,
 );
 

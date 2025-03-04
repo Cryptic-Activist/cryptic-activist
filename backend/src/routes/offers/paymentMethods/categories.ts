@@ -1,9 +1,9 @@
-import { Router } from 'express';
-
 import {
   createPaymentMethodCategoryController,
   index,
-} from '../../controllers/paymentMethods/categories';
+} from '@/controllers/offers';
+
+import { Router } from 'express';
 
 // import { authenticateUser } from '../../middlewares/authorization';
 

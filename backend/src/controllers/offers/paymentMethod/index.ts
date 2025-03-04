@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { getPaymentMethod, safePaymentMethodValuesAssigner } from 'base-ca';
 import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
+import { getPaymentMethod, safePaymentMethodValuesAssigner } from 'base-ca';
 
 export const getPaymentMethodController = async (
   req: Request,
   res: Response,
-): Promise<Response> => {
+) => {
   try {
     const { associations } = req.query;
 
@@ -22,13 +22,13 @@ export const getPaymentMethodController = async (
 
     const safePaymentMethod = safePaymentMethodValuesAssigner(paymentMethod);
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: safePaymentMethod,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],

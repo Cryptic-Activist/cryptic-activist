@@ -1,10 +1,10 @@
-import { Router } from 'express';
-
 import {
   createCryptocurrenciesCoinGecko,
   index,
   indexCoinGecko,
 } from '@/controllers/cryptocurrencies';
+
+import { Router } from 'express';
 
 const router = Router();
 

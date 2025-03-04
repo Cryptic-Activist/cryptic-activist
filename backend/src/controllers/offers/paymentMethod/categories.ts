@@ -1,32 +1,15 @@
 import { Request, Response } from 'express';
 import {
-  getPaymentMethodCategories,
   createPaymentMethodCategory,
+  getPaymentMethodCategories,
 } from 'base-ca';
+
 import { sanitize } from 'cryptic-utils';
-
-export async function index(req: Request, res: Response): Promise<Response> {
-  try {
-    const paymentMethodCategories = await getPaymentMethodCategories(null);
-
-    return res.status(200).send({
-      status_code: 200,
-      results: paymentMethodCategories,
-      errors: [],
-    });
-  } catch (err) {
-    return res.status(500).send({
-      status_code: 500,
-      results: {},
-      errors: [err.message],
-    });
-  }
-}
 
 export async function createPaymentMethodCategoryController(
   req: Request,
   res: Response,
-): Promise<Response> {
+) {
   try {
     const { name } = req.body;
 
@@ -36,13 +19,13 @@ export async function createPaymentMethodCategoryController(
       name: cleanName,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: newPaymentMethodCategory,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],
@@ -50,10 +33,7 @@ export async function createPaymentMethodCategoryController(
   }
 }
 
-export async function getPaymentMethodCategory(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getPaymentMethodCategory(req: Request, res: Response) {
   try {
     // const { id } = req.params;
 
@@ -62,13 +42,13 @@ export async function getPaymentMethodCategory(
     //   ['payment_method_category'],
     // );
 
-    return res.status(200).send({
+    res.status(200).send({
       status_code: 200,
       results: {},
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],

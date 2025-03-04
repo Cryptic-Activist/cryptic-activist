@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
+
 import { createFeedback } from 'base-ca';
 import { sanitize } from 'cryptic-utils';
 
-export async function createFeedbackController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function createFeedbackController(req: Request, res: Response) {
   const { vendor_id, user_id, offer_id, message, type } = req.body;
 
   const cleanReqBody = sanitize(
@@ -29,13 +27,13 @@ export async function createFeedbackController(
       type: cleanReqBody.type,
     });
 
-    return res.status(201).send({
+    res.status(201).send({
       status_code: 201,
       results: feedback,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       status_code: 500,
       results: {},
       errors: [err.message],

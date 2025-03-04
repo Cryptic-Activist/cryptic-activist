@@ -1,25 +1,20 @@
-import { Router } from 'express';
-
 import {
   getOffersByUser,
   getOffersController,
   index,
   indexPagination,
-} from '../../controllers/offers';
+} from '@/controllers/offers';
 
-import {
-  validateGetOffer,
-  validateInputIndexPagination,
-} from '../../middlewares/validators/request/offers';
+import { Router } from 'express';
 
 const router = Router();
 
 router.get('/list', index);
 
-router.get('', validateGetOffer, getOffersController);
+router.get('', getOffersController);
 
 router.get('/user/:userId', getOffersByUser);
 
-router.get('/pagination', validateInputIndexPagination, indexPagination);
+router.get('/pagination', indexPagination);
 
 export default router;

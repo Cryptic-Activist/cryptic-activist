@@ -1,31 +1,14 @@
-import { Router } from 'express';
-
 import {
   createPaymentMethodController,
   getPaymentMethodsByCategoryController,
-  index,
-} from '../../controllers/paymentMethods';
+} from '@/controllers/offers/paymentMethods';
 
-import {
-  validateInputCreatePaymentMethod,
-  validateInputGetPaymentMethodsByCategory,
-} from '../../middlewares/validators/request/paymentMethods';
+import { Router } from 'express';
 
 const router = Router();
 
-router.get('', index);
+router.post('/create', createPaymentMethodController);
 
-router.post(
-  '/create',
-  validateInputCreatePaymentMethod,
-  createPaymentMethodController,
-);
-
-router.get(
-  '/:categoryId/all',
-  // authenticateUser,
-  validateInputGetPaymentMethodsByCategory,
-  getPaymentMethodsByCategoryController,
-);
+router.get('/:categoryId/all', getPaymentMethodsByCategoryController);
 
 export default router;

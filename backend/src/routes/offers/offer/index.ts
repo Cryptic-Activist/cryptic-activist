@@ -1,24 +1,14 @@
-import { Router } from 'express';
-
 import {
   createOfferController,
   getOfferController,
-} from '../../controllers/offer';
+} from '@/controllers/offers';
 
-import {
-  validateGetOffer,
-  validateInputCreateOffer,
-} from '../../middlewares/validators/request/offers';
+import { Router } from 'express';
 
 const router = Router();
 
-router.get('', validateGetOffer, getOfferController);
+router.get('', getOfferController);
 
-router.post(
-  '/create',
-  // authenticateUser,
-  validateInputCreateOffer,
-  createOfferController,
-);
+router.post('/create', createOfferController);
 
 export default router;
