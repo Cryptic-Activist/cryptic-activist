@@ -1,12 +1,13 @@
+import { Request, Response } from 'express';
+import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
+
 import { createSystemMessage } from 'base-ca';
 import { getSystemMessages } from 'cryptic-base';
-import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
-import { Request, Response } from 'express';
 
 export async function getSystemMessagesController(
   req: Request,
   res: Response,
-): Promise<Response> {
+): Promise<void> {
   try {
     const { associations } = req.query;
 
@@ -22,14 +23,12 @@ export async function getSystemMessagesController(
       where,
     );
 
-    return res.status(200).send({
-      status_code: 200,
+    res.status(200).send({
       results: systemMessages,
       errors: [],
     });
   } catch (err) {
-    return res.status(500).send({
-      status_code: 500,
+    res.status(500).send({
       results: {},
       errors: [err.message],
     });
