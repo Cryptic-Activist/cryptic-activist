@@ -1,13 +1,11 @@
+import { Request, Response } from 'express';
+
 import { countBlocks } from 'base-ca';
 import { sanitize } from 'cryptic-utils';
-import { Request, Response } from 'express';
 
 // import { sanitizeInputCountBlocks } from '@utils/sanitizer/block';
 
-export async function countBlocked(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function countBlocked(req: Request, res: Response) {
   try {
     const { userId } = req.query;
 
@@ -17,20 +15,17 @@ export async function countBlocked(
       blockedId: cleanQuery.userId,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       count,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function countBlocker(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function countBlocker(req: Request, res: Response) {
   try {
     const { userId } = req.query;
 
@@ -41,11 +36,11 @@ export async function countBlocker(
       blockerId: cleanQuery.userId,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       count,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

@@ -3,7 +3,7 @@ import {
   createTradeController,
   getTradeController,
   index,
-} from '@/controllers/offers';
+} from '@/controllers/trades';
 import {
   validateCancelTrade,
   validateCreateTrade,
@@ -29,11 +29,6 @@ router.put('/cancel', authenticateUser, validateCancelTrade, cancelTrade);
 
 router.put('/paid', authenticateUser, validateSetPaidTrade);
 
-router.get(
-  '/get/:id',
-  // authenticateUser,
-  validateGetTrade,
-  getTradeController,
-);
+router.get('/get/:id', authenticateUser, getTradeController);
 
 export default router;

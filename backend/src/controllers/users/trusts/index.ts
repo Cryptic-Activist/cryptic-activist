@@ -1,11 +1,9 @@
-import { countTrusts as crypticBaseCountTrusts } from 'base-ca';
-import { sanitize } from 'cryptic-utils';
 import { Request, Response } from 'express';
 
-export async function countTrusts(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+import { countTrusts as crypticBaseCountTrusts } from 'base-ca';
+import { sanitize } from 'cryptic-utils';
+
+export async function countTrusts(req: Request, res: Response) {
   try {
     const { userId } = req.query;
 
@@ -15,11 +13,11 @@ export async function countTrusts(
       trustedId: cleanQuery.userId,
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       count,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

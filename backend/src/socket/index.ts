@@ -1,23 +1,24 @@
-import { Socket } from 'socket.io';
+import {} from // createOnlineUser,
+// deleteOnlineUser,
+// getOnlineUser,
+// setup,
+// createSystemMessage,
+'base-ca';
+
 import {
-  createOnlineUser,
-  deleteOnlineUser,
-  getOnlineUser,
-  setup,
-  createSystemMessage,
-} from 'cryptic-base';
-import {
-  JOIN,
-  ADMIN_MESSAGE,
-  MESSAGE,
-  ROOM_DATA,
-  GO_ONLINE,
-  DISCONNECT,
-  SEND_SYSTEM_MESSAGE,
   ADMIN_BOT_NAMES,
   ADMIN_JOIN_MESSAGE,
+  ADMIN_MESSAGE,
+  DISCONNECT,
   END,
+  GO_ONLINE,
+  JOIN,
+  MESSAGE,
+  ROOM_DATA,
+  SEND_SYSTEM_MESSAGE,
 } from 'cryptic-utils';
+
+import { Socket } from 'socket.io';
 
 // import {
 //   addTrader,
@@ -27,14 +28,14 @@ import {
 // } from '@utils/helpers/users';
 
 export default function socketEvents(io) {
-  setup(true);
+  // setup(true);
 
   io.on('connection', (socket: Socket) => {
     socket.on(GO_ONLINE, async ({ user }) => {
-      const userObj = await getOnlineUser({ user_id: user.id });
-      if (!userObj) {
-        await createOnlineUser({ socket_id: socket.id, user_id: user.id });
-      }
+      // const userObj = await getOnlineUser({ user_id: user.id });
+      // if (!userObj) {
+      //   await createOnlineUser({ socket_id: socket.id, user_id: user.id });
+      // }
     });
 
     socket.on(JOIN, ({ room, trader, vendor }) => {
@@ -59,20 +60,20 @@ export default function socketEvents(io) {
     // socket.on(SEND_CHAT_MESSAGE, ({ user, message }) => {});
 
     socket.on(END, async ({ user }) => {
-      await deleteOnlineUser({ user_id: user.id });
+      // await deleteOnlineUser({ user_id: user.id });
     });
 
     // socket.on(ALERT_NEW_TRADE_STARTED, async () => {});
 
     socket.on(SEND_SYSTEM_MESSAGE, async ({ user_id, trade_id, message }) => {
-      await createSystemMessage({ user_id, trade_id, message });
+      // await createSystemMessage({ user_id, trade_id, message });
     });
 
     socket.on(DISCONNECT, async () => {
-      const userObj = await getOnlineUser({ socket_id: socket.id });
-      if (userObj) {
-        await deleteOnlineUser({ socket_id: socket.id });
-      }
+      // const userObj = await getOnlineUser({ socket_id: socket.id });
+      // if (userObj) {
+      //   await deleteOnlineUser({ socket_id: socket.id });
+      // }
     });
   });
 }

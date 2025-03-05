@@ -1,7 +1,7 @@
-import { countBlocked, countBlocker } from '../../controllers/users/blocks';
+import { countBlocked, countBlocker } from '@/controllers/users/blocks';
 
 import { Router } from 'express';
-import { validateCountBlocks } from '../../middleware/validators/request/blocks';
+import { validateCountBlocks } from './middleware';
 
 const router = Router();
 

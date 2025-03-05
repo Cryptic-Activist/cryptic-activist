@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import {
   associateUserToLanguage,
   createLanguage,
@@ -5,7 +6,6 @@ import {
   getUser,
   updateUser,
 } from 'base-ca';
-import bcrypt from 'bcryptjs';
 import {
   decodeToken,
   generatePrivateKeysBip39,
@@ -14,12 +14,12 @@ import {
   generateUniqueUsername,
   sanitize,
 } from 'cryptic-utils';
-import { Request, Response } from 'express';
 
-import { JWT_SECRET } from '../../constants/env';
-import { assignSafeUserData } from '../../utils/responses/users';
-import { validateUsername } from '../../utils/validators';
+import { JWT_SECRET } from '@/constants/env';
+import { assignSafeUserData } from '@/utils/responses/users';
+import bcrypt from 'bcryptjs';
 import { getRandomHighContrastColor } from '@/utils/color';
+import { validateUsername } from '@/utils/validators/';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -35,21 +35,21 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).send({
+      res.status(400).send({
         errors,
       });
     }
 
     bcrypt.compare(password, user!.password, (compareError, isMatch) => {
       if (compareError) {
-        return res.status(400).send({
+        res.status(400).send({
           errors: [compareError.message],
         });
       }
 
       if (isMatch) {
         if (!user!.isVerified) {
-          return res.status(401).send({
+          res.status(401).send({
             errors: ['Account is not verified'],
           });
         }
@@ -64,34 +64,31 @@ export const login = async (req: Request, res: Response) => {
           JWT_SECRET,
         );
 
-        return res.status(200).send({
+        res.status(200).send({
           accessToken,
           refreshToken,
         });
       }
 
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Invalid credentials'],
       });
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 };
 
-export async function loginDecodeToken(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function loginDecodeToken(req: Request, res: Response) {
   const { accessToken } = req.params;
 
   try {
     const decoded = decodeToken(accessToken, JWT_SECRET);
 
     if (!decoded) {
-      return res.status(401).send({
+      res.status(401).send({
         errors: ['Unable to decode the token'],
       });
     }
@@ -102,7 +99,7 @@ export async function loginDecodeToken(
     );
 
     if (!user) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['User not found'],
       });
     }
@@ -110,17 +107,17 @@ export async function loginDecodeToken(
     // @ts-ignore
     const safeUser = await assignSafeUserData(user);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...safeUser,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function register(req: Request, res: Response): Promise<Response> {
+export async function register(req: Request, res: Response) {
   const { names, username, password } = req.body;
 
   try {
@@ -135,7 +132,7 @@ export async function register(req: Request, res: Response): Promise<Response> {
     }
 
     if (errors.length > 0) {
-      return res.status(400).send({
+      res.status(400).send({
         errors,
       });
     }
@@ -161,52 +158,49 @@ export async function register(req: Request, res: Response): Promise<Response> {
 
     await associateUserToLanguage({ userId: user.id, languageId: language.id });
 
-    return res.status(201).send({
+    res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function verifyPrivateKeys(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function verifyPrivateKeys(req: Request, res: Response) {
   const { username, privateKeys } = req.body;
 
   try {
     const user = await getUser({ username }, {});
 
     if (!user) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['User not found'],
       });
     }
 
-    if (user.isVerified) {
-      return res.status(401).send({
+    if (user?.isVerified) {
+      res.status(401).send({
         errors: ['You have already verified your account'],
       });
     }
 
-    user.privateKeys.forEach(async (privateKey, index) => {
+    user?.privateKeys.forEach(async (privateKey, index) => {
       if (!(await bcrypt.compare(privateKeys[index], privateKey))) {
-        return res.status(400).send({
+        res.status(400).send({
           errors: ['Private keys combination does not exist.'],
         });
       }
     });
 
-    await updateUser({ id: user.id }, { isVerified: true });
+    await updateUser({ id: user?.id }, { isVerified: true });
 
-    return res.status(200).send({});
+    res.status(200).send({});
   } catch (err) {
     console.log(err);
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

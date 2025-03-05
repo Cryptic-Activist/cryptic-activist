@@ -25,7 +25,7 @@ export function validateGetTrade(
   req: Request,
   res: Response,
   next: NextFunction,
-): NextFunction | Response {
+) {
   const { params } = req;
   const validated = GetTrade.safeParse(params);
 
@@ -45,7 +45,7 @@ export function validateCancelTrade(
   req: Request,
   res: Response,
   next: NextFunction,
-): NextFunction | Response {
+) {
   const { id } = req.body;
 
   const errors: string[] = [];
@@ -77,7 +77,7 @@ export function validateSetPaidTrade(
   req: Request,
   res: Response,
   next: NextFunction,
-): NextFunction | Response {
+) {
   const { id } = req.body;
 
   const errors: string[] = [];

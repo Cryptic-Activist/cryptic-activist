@@ -1,14 +1,14 @@
-import { getTrades, getUser, getUsers, getUsersByMultiple } from 'base-ca';
+import { Request, Response } from 'express';
 import {
   convertWhere,
   generateRandomNames,
   sanitize,
   slugifyStringLowerCase,
 } from 'cryptic-utils';
-import { Request, Response } from 'express';
+import { getTrades, getUser, getUsers, getUsersByMultiple } from 'base-ca';
 
-import { mapUsers } from '../../utils/map/users';
-import { assignSafeUserData } from '../../utils/responses/users';
+import { assignSafeUserData } from '@/utils/responses/users';
+import { mapUsers } from '@/utils/map/users';
 
 const validateCredentials = async (username: string) => {
   const user = await getUser({ username }, {});
@@ -20,10 +20,7 @@ const validateCredentials = async (username: string) => {
   return false;
 };
 
-export async function getRandomCredentials(
-  _req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getRandomCredentials(_req: Request, res: Response) {
   try {
     let names: string[];
     let username: string;
@@ -33,13 +30,13 @@ export async function getRandomCredentials(
       username = slugifyStringLowerCase(`${names[0]} ${names[1]}`);
     } while (!(await validateCredentials(username)));
 
-    return res.status(200).send({
+    res.status(200).send({
       names,
       username,
     });
   } catch (error) {
     console.log({ error });
-    return res.status(500).send({
+    res.status(500).send({
       error,
     });
   }
@@ -51,20 +48,17 @@ export async function getAllUsers(_req: Request, res: Response) {
 
     const mapped = mapUsers(users);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...mapped,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function getUserController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getUserController(req: Request, res: Response) {
   try {
     // const { associations } = req.query;
     const { associations } = req.query;
@@ -77,25 +71,22 @@ export async function getUserController(
     const user = await getUser({ ...where }, cleanReqQuery.associations);
 
     if (!user) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['User not found'],
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       ...user,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function getUsersController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getUsersController(req: Request, res: Response) {
   try {
     const { query } = req;
     const { user } = query;
@@ -106,25 +97,22 @@ export async function getUsersController(
     );
 
     if (!users) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Users not found'],
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       ...users,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function getMultipleUsersController(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getMultipleUsersController(req: Request, res: Response) {
   try {
     const { query } = req;
     const { user } = query;
@@ -156,25 +144,22 @@ export async function getMultipleUsersController(
     );
 
     if (!users) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['Users not found'],
       });
     }
 
-    return res.status(200).send({
+    res.status(200).send({
       ...users,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
 }
 
-export async function getUserVerify(
-  req: Request,
-  res: Response,
-): Promise<Response> {
+export async function getUserVerify(req: Request, res: Response) {
   try {
     const { id, username } = req.query;
 
@@ -193,17 +178,17 @@ export async function getUserVerify(
     const user = await getUser(cleanQuery, {});
 
     if (!user) {
-      return res.status(400).send({
+      res.status(400).send({
         errors: ['User not found'],
       });
     }
 
-    return res.status(200).send({
-      names: { first_name: user.firstName, last_name: user.lastName },
-      username: user.username,
+    res.status(200).send({
+      names: { first_name: user?.firstName, last_name: user?.lastName },
+      username: user?.username,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
@@ -217,7 +202,7 @@ export const getUserById = async (req: Request, res: Response) => {
     const user = await getUser({ id: userId }, { userLanguage: true });
 
     if (!user) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['User not found'],
       });
     }
@@ -225,11 +210,11 @@ export const getUserById = async (req: Request, res: Response) => {
     // @ts-ignore
     const safeUser = await assignSafeUserData(user);
 
-    return res.status(200).send({
+    res.status(200).send({
       ...safeUser,
     });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }
@@ -246,7 +231,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     );
 
     if (!user) {
-      return res.status(404).send({
+      res.status(404).send({
         errors: ['User not found'],
       });
     }
@@ -260,15 +245,15 @@ export const getUserByUsername = async (req: Request, res: Response) => {
         trader: false,
         vendor: false,
       },
-      { vendorId: user.id },
+      { vendorId: user?.id },
     );
 
     // @ts-ignore
     const safeUser = await assignSafeUserData(user);
 
-    return res.status(200).send({ ...safeUser, tradesCount: trades.length });
+    res.status(200).send({ ...safeUser, tradesCount: trades.length });
   } catch (err) {
-    return res.status(500).send({
+    res.status(500).send({
       errors: [err.message],
     });
   }

@@ -9,8 +9,7 @@ export const MAIN_DOMAIN = process.env.MAIN_DOMAIN as string;
 export const USER_API = process.env.USER_API as string;
 export const OFFER_API = process.env.OFFER_API as string;
 export const CHAT_API = process.env.CHAT_API as string;
-export const CRYPTOCURRENCY_API = process.env
-  .CRYPTOCURRENCY_API as string;
+export const CRYPTOCURRENCY_API = process.env.CRYPTOCURRENCY_API as string;
 export const FIAT_API = process.env.FIAT_API as string;
 export const TRADE_API = process.env.TRADE_API as string;
 export const NEW_CRYPTIC_ACTIVIST_CATALOG = process.env
@@ -21,3 +20,4 @@ export const CRYPTIC_ACTIVIST_CATALOG = process.env
   .CRYPTIC_ACTIVIST_CATALOG as string;
 export const ADMIN_CRYPTIC_ACTIVIST_CATALOG = process.env
   .ADMIN_CRYPTIC_ACTIVIST_CATALOG as string;
+export const BACKEND_API = process.env.BACKEND_API as string;

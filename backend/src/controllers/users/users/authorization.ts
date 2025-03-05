@@ -1,7 +1,7 @@
-import { authorizeUser } from 'cryptic-utils';
 import { Request, Response } from 'express';
 
-import { JWT_SECRET } from '../../constants/env';
+import { JWT_SECRET } from '@/constants/env';
+import { authorizeUser } from 'cryptic-utils';
 
 export const authorize = async (req: Request, res: Response) => {
   try {

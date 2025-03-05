@@ -2,15 +2,15 @@ import {
   associateLanguage,
   indexByUser,
   removeLanguageFromUser,
-} from '../../controllers/users/languages';
+} from '@/controllers/users/languages';
 import {
   validateAssociateLanguageToUser,
   validateIndexLanguagesByUser,
   validateRemoveLanguageToUser,
-} from '../../middleware/validators/request/users';
+} from './middleware';
 
 import { Router } from 'express';
-import { authenticateUser } from '../../middleware/authorization';
+import { authenticateUser } from '@/middlewares/authorization';
 
 const router = Router();
 

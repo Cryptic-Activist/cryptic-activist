@@ -3,15 +3,15 @@ import {
   loginDecodeToken,
   register,
   verifyPrivateKeys,
-} from '../../controllers/users1/auth';
+} from '@/controllers/users/auth';
 import {
   validateLogin,
   validatePrivateKeysRequest,
   validateRegister,
-} from '../../middlewares/validators/request/users/auth';
+} from './middleware';
 
 import { Router } from 'express';
-import { authenticateUser } from '../../middlewares/authorization';
+import { authenticateUser } from '@/middlewares/authorization';
 
 const router = Router();
 

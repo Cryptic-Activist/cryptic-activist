@@ -1,5 +1,3 @@
-import { Router } from 'express';
-
 import {
   getAllUsers,
   getMultipleUsersController,
@@ -9,11 +7,13 @@ import {
   getUserController,
   getUserVerify,
   getUsersController,
-} from '../../controllers/users1';
+} from '@/controllers/users';
 import {
   validateGetMultipleUserRequest,
   validateGetUserRequest,
-} from '../../middleware/validators/request/users';
+} from './middleware';
+
+import { Router } from 'express';
 
 const router = Router();
 

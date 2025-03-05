@@ -1,13 +1,8 @@
 import { Request, Response } from 'express';
 import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
+import { createSystemMessage, getSystemMessages } from 'base-ca';
 
-import { createSystemMessage } from 'base-ca';
-import { getSystemMessages } from 'cryptic-base';
-
-export async function getSystemMessagesController(
-  req: Request,
-  res: Response,
-): Promise<void> {
+export async function getSystemMessagesController(req: Request, res: Response) {
   try {
     const { associations } = req.query;
 
@@ -18,7 +13,6 @@ export async function getSystemMessagesController(
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
     const systemMessages = await getSystemMessages(
-      null,
       cleanReqQuery.associations,
       where,
     );
@@ -38,7 +32,7 @@ export async function getSystemMessagesController(
 export const createSystemMessageController = async (
   req: Request,
   res: Response,
-): Promise<Response> => {
+) => {
   try {
     const { body } = req;
 

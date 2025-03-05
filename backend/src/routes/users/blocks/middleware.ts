@@ -1,18 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { CountTrusts } from './zod';
+import { CountBlocks } from './zod';
 
-export const validateCountTrusts = (
+export const validateCountBlocks = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   const { query } = req;
 
-  const validated = CountTrusts.safeParse(query);
+  const validated = CountBlocks.safeParse(query);
 
   if (!validated.success) {
-    return res.status(400).send({
+    res.status(400).send({
       errors: validated.error,
     });
   }
