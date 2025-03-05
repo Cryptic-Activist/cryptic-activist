@@ -1,8 +1,3 @@
-import { map } from 'nanostores';
-
-import { USER_API } from '@/constants';
-import { fetchPost } from '@/services/axios';
-
 import type {
   SetPrivateKeysParam,
   SetUsernameParam,
@@ -10,6 +5,10 @@ import type {
   VerifyAccountSetter,
   VerifyAccountState,
 } from './types';
+
+import { BACKEND } from '@/constants';
+import { fetchPost } from '@/services/axios';
+import { map } from 'nanostores';
 
 export const $verifyAccount = map<VerifyAccountState>();
 
@@ -51,7 +50,7 @@ export const submitVerifyPrivateKeys = async (
   params: SubmitVerifyPrivateKeysParams
 ) => {
   const response = await fetchPost(
-    USER_API + '/users/auth/private-keys/verify',
+    BACKEND + '/users/auth/private-keys/verify',
     { ...params }
   );
 

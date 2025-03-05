@@ -1,9 +1,10 @@
-import { USER_API } from '@/constants';
 import { fetchGet, fetchPost } from '@/services/axios';
+
+import { BACKEND } from '@/constants';
 import { UserRegistrationParams } from './types';
 
 export const getRandomCredentials = async () => {
-  const response = await fetchGet(USER_API + '/users/random/credentials');
+  const response = await fetchGet(BACKEND + '/users/random/credentials');
 
   if (response.status !== 200) {
     return;
@@ -15,7 +16,7 @@ export const getRandomCredentials = async () => {
 export const onSubmitUserRegistration = async (
   params: UserRegistrationParams
 ) => {
-  const response = await fetchPost(USER_API + '/users/auth/register', {
+  const response = await fetchPost(BACKEND + '/users/auth/register', {
     ...params,
   });
 

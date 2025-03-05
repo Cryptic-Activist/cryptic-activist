@@ -1,9 +1,10 @@
-import { CRYPTOCURRENCY_API } from '@/constants';
 import { AxiosResponse, fetchGet } from '@/services/axios';
+
+import { BACKEND } from '@/constants';
 
 export const fetchCryptocurrencies = async () => {
   try {
-    const response = await fetchGet(CRYPTOCURRENCY_API + '/cryptocurrencies');
+    const response = await fetchGet(BACKEND + '/cryptocurrencies');
 
     if (response.status !== 200) {
       return null;

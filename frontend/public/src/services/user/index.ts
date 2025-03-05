@@ -1,24 +1,25 @@
 import {
+  GetUserInfoReturn,
+  GetUserTokenResponse,
+  LoginUserParams,
+} from './types';
+import { fetchGet, fetchPost } from '../axios';
+import {
   getBearerToken,
   getLocalStorage,
   removeLocalStorage,
   setCookie,
   setLocalStorage,
 } from '@/utils';
-import {
-  GetUserInfoReturn,
-  GetUserTokenResponse,
-  LoginUserParams,
-} from './types';
-import { fetchGet, fetchPost } from '../axios';
-import { USER_API } from '@/constants';
 import { resetUserInfo, setUserInfo } from '@/store';
+
+import { BACKEND } from '@/constants';
 
 const getUserToken = async ({
   password,
   username,
 }: LoginUserParams): Promise<GetUserTokenResponse | null> => {
-  const response = await fetchPost(USER_API + '/users/auth/login', {
+  const response = await fetchPost(BACKEND + '/users/auth/login', {
     password,
     username,
   });
@@ -32,7 +33,7 @@ const getUserInfoFromToken = async (
   token: string
 ): Promise<GetUserInfoReturn | null> => {
   const response = await fetchGet(
-    `${USER_API}/users/auth/login/decode/token/${token}`,
+    `${BACKEND}/users/auth/login/decode/token/${token}`,
     {
       Authorization: getBearerToken(token),
     }
