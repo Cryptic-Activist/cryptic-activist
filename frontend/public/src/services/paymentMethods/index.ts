@@ -3,7 +3,7 @@ import { AxiosResponse, fetchGet } from '@/services/axios';
 import { BACKEND } from '@/constants';
 
 export const fetchPaymentMethods = async (): Promise<AxiosResponse | null> => {
-  const response = await fetchGet(`${BACKEND}/payment-methods`);
+  const response = await fetchGet(`${BACKEND}/offers/payment-methods`);
 
   if (response.status !== 200) {
     return null;
@@ -16,7 +16,7 @@ export const fetchPaymentMethodsByCategory = async (
   categoryId: string
 ): Promise<AxiosResponse | null> => {
   const response = await fetchGet(
-    `${BACKEND}/payment-methods/${categoryId}/all`
+    `${BACKEND}/offers/payment-methods/${categoryId}/all`
   );
 
   if (response.status !== 200) {

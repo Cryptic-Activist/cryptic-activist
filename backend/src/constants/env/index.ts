@@ -20,4 +20,4 @@ export const CRYPTIC_ACTIVIST_CATALOG = process.env
   .CRYPTIC_ACTIVIST_CATALOG as string;
 export const ADMIN_CRYPTIC_ACTIVIST_CATALOG = process.env
   .ADMIN_CRYPTIC_ACTIVIST_CATALOG as string;
-export const BACKEND_API = process.env.BACKEND_API as string;
+export const BACKEND = process.env.BACKEND as string;

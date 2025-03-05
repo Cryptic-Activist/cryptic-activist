@@ -8,10 +8,10 @@ import paymentMethods from './paymentMethods';
 
 const router = Router();
 
+router.use('', offers);
+router.use('/offer', offer);
 router.use('/feedback', feedback);
 router.use('/feedbacks', feedbacks);
-router.use('/offer', offer);
-router.use('/offers', offers);
 router.use('/payment-method', paymentMethod);
 router.use('/payment-methods', paymentMethods);
 

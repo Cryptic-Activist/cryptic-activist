@@ -5,6 +5,6 @@ import systemMessages from './systemMessages';
 const router = Router();
 
 router.use('/systemMessages', systemMessages);
-router.use('/chat', chat);
+router.use('', chat);
 
 export default router;

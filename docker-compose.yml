@@ -19,8 +19,6 @@ services:
       - "5432:5432"
     networks:
       - app-network
-    profiles:
-      - db
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -32,8 +30,6 @@ services:
       - "5050:80"
     networks:
       - app-network
-    profiles:
-      - db
 
   backend:
     build:
@@ -44,8 +40,8 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
+      - ./libraries/base-ca:/app/libraries/base-ca
+      - ./libraries/cryptic-utils:/app/libraries/cryptic-utils
     env_file:
       - envs/backend.env
     environment:
@@ -61,34 +57,34 @@ services:
       - postgres
 
 
-  frontend-public:
-    build:
-      context: frontend/public/
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    env_file:
-      - envs/frontend-public.env
-    volumes:
-      - ./frontend-public:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    depends_on:
-      - backend
+  # frontend-public:
+  #   build:
+  #     context: frontend/public/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - envs/frontend-public.env
+  #   volumes:
+  #     - ./frontend-public:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - backend
 
-  frontend-admin:
-    build:
-      context: frontend/admin/
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-    env_file:
-      - envs/frontend-admin.env
-    networks:
-      - app-network
-    volumes:
-      - ./frontend-admin:/app
-      - /app/node_modules
-    depends_on:
-      - backend
+  # frontend-admin:
+  #   build:
+  #     context: frontend/admin/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3001:3001"
+  #   env_file:
+  #     - envs/frontend-admin.env
+  #   networks:
+  #     - app-network
+  #   volumes:
+  #     - ./frontend-admin:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - backend

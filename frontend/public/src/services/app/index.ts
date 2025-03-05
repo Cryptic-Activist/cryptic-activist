@@ -8,7 +8,9 @@ export const fetchCurrentPrice = async (
   fiatSymbol: string
 ): Promise<AxiosResponse | null> => {
   const query = getQueries({ id, fiatSymbol });
-  const response = await fetchGet(BACKEND + '/cryptocurrency/price' + query);
+  const response = await fetchGet(
+    BACKEND + '/cryptocurrencies/cryptocurrency/price' + query
+  );
 
   if (response.status !== 200) return null;
 

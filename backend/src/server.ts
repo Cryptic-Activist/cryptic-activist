@@ -1,14 +1,10 @@
-import chalk from 'chalk';
-import { checkEnvironmentVariable, success } from 'cryptic-utils';
-
-import app from './app';
 import { APP_NAME, NODE_ENV, PORT } from './constants/env';
 
-// import requiredEnv from 'envs.json';
+import app from './app';
+import chalk from 'chalk';
+import { success } from 'cryptic-utils';
 
-// checkEnvironmentVariable(requiredEnv);
-
-const port = PORT || 5005;
+const port = PORT || 5000;
 
 app.listen(port, () => {
   success(`${APP_NAME} is listening on port: ${chalk.green(port)}`);

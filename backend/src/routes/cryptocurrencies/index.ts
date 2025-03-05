@@ -4,7 +4,7 @@ import cryptocurrency from './cryptocurrency';
 
 const router = Router();
 
+router.use('', cryptocurrencies);
 router.use('/cryptocurrency', cryptocurrency);
-router.use('/cryptocurrencies', cryptocurrencies);
 
 export default router;

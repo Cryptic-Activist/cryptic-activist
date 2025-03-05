@@ -5,6 +5,6 @@ import fiats from './fiats';
 const router = Router();
 
 router.use('/fiat', fiat);
-router.use('/fiats', fiats);
+router.use('', fiats);
 
 export default router;

@@ -1,25 +1,5 @@
-import {
-  ADMIN_CRYPTIC_ACTIVIST_CATALOG,
-  CHAT_API,
-  CRYPTIC_ACTIVIST_CATALOG,
-  CRYPTOCURRENCY_API,
-  FIAT_API,
-  NEW_CRYPTIC_ACTIVIST_CATALOG,
-  OFFER_API,
-  TRADE_API,
-  USER_API,
-} from '../../../constants/env';
+import { BACKEND } from '@/constants/env';
 
 export default {
-  origin: [
-    CHAT_API,
-    CRYPTOCURRENCY_API,
-    FIAT_API,
-    OFFER_API,
-    TRADE_API,
-    USER_API,
-    CRYPTIC_ACTIVIST_CATALOG,
-    ADMIN_CRYPTIC_ACTIVIST_CATALOG,
-    NEW_CRYPTIC_ACTIVIST_CATALOG,
-  ] as string[],
+  origin: [BACKEND] as string[],
 };

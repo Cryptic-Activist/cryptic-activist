@@ -7,8 +7,8 @@ import users from './users';
 
 const router = Router();
 
+router.use('', users);
 router.use('/blocks', blocks);
-router.use('/users', users);
 router.use('/auth', auth);
 router.use('/language', language);
 router.use('/blocks', blocks);
