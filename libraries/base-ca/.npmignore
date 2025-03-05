@@ -1,0 +1,11 @@
+/src
+/node_modules
+
+.env
+.local.env
+.development.env
+.dev.env
+.staging.env
+.stage.env
+.production.env
+.prod.env

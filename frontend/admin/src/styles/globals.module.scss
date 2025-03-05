@@ -1,0 +1,28 @@
+$primary: #ffcd2b;
+$secondary: #000;
+$white: #fff;
+$input-border-color: #c0c0c0;
+$grey-background: #e2e2e2;
+$grey: #a2a2a2;
+$grey-select-input: #e8e8e8;
+$status-online: #1bbb2b;
+$status-offline: #ff3a3a;
+$status-away: #fed141;
+$feedback-positive: #1bbb2b;
+$feedback-negative: #ff3a3a;
+
+$navbigation-bar-height: calc(4rem + 1px);
+$footer-height: calc(23rem + 1px);
+$main-content-height: calc(100vh - $navbigation-bar-height - $footer-height);
+
+$box-shadow-default-color: rgba(0, 0, 0, 0.3);
+$hover-button-background-color: rgba(0, 0, 0, 0.07);
+$semi-transparent-background: rgba(0, 0, 0, 0.2);
+
+$font-size-s: 0.8rem;
+$font-size-m: 1rem;
+$font-size-l: 1.2rem;
+$font-size-xl: 1.4rem;
+
+$border-radius-100: 2rem;
+$border-radius-4: 0.4rem;

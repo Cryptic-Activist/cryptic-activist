@@ -1,0 +1,7 @@
+@use '../../../styles/globals.module.scss';
+
+.menu {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

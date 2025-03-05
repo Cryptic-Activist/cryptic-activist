@@ -10,8 +10,6 @@ services:
   postgres:
     image: postgres:latest
     restart: always
-    # profiles:
-    #   - database
     env_file:
       - .env
     volumes:
@@ -33,149 +31,19 @@ services:
     networks:
       - app-network
 
-  chat-api:
+  backend:
     build:
-      context: api-chat-cryptic-activist/
+      context: backend/
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
     volumes:
-      - ./api-chat-cryptic-activist:/app
+      - ./backend:/app
       - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
+      - ./libraries/base-ca:/app/libraries/base-ca
+      - ./libraries/cryptic-utils:/app/libraries/cryptic-utils
     env_file:
-      - files/api-chat-cryptic-activist.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 6GB
-    depends_on:
-      - postgres
-      - cryptocurrency-api
-
-  cryptocurrency-api:
-    build:
-      context: api-cryptocurrency-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5001:5001"
-    volumes:
-      - ./api-cryptocurrency-cryptic-activist:/app
-      - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
-    env_file:
-      - files/api-cryptocurrency-cryptic-activist.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 6GB
-    depends_on:
-      - postgres
-      - fiat-api
-
-  fiat-api:
-    build:
-      context: api-fiat-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5002:5002"
-    volumes:
-      - ./api-fiat-cryptic-activist:/app
-      - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
-    env_file:
-      - files/api-fiat-cryptic-activist.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 6GB
-    depends_on:
-      - postgres
-      - offer-api
-
-  offer-api:
-    build:
-      context: api-offer-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5003:5003"
-    volumes:
-      - ./api-offer-cryptic-activist:/app
-      - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
-    env_file:
-      - files/api-offer-cryptic-activist.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 6GB
-    depends_on:
-      - postgres
-      - trade-api
-
-  trade-api:
-    build:
-      context: api-trade-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5004:5004"
-    volumes:
-      - ./api-trade-cryptic-activist:/app
-      - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
-    env_file:
-      - files/api-trade-cryptic-activist.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 6GB
-    depends_on:
-      - postgres
-      - user-api
-
-  user-api:
-    build:
-      context: api-user-cryptic-activist/
-      dockerfile: Dockerfile
-    ports:
-      - "5005:5005"
-    volumes:
-      - ./api-user-cryptic-activist:/app
-      - /app/node_modules
-      - ./base-ca:/app/libraries/base-ca
-      - ./cryptic-utils:/app/libraries/cryptic-utils
-    env_file:
-      - files/api-user-cryptic-activist.env
+      - envs/backend.env
     environment:
       - NODE_OPTIONS=--max-old-space-size=4096
     networks:
@@ -188,44 +56,35 @@ services:
     depends_on:
       - postgres
 
-  new-catalog:
+
+  frontend-public:
     build:
-      context: new-cryptic-activist-catalog/
+      context: frontend/public/
       dockerfile: Dockerfile
     ports:
-      - "3002:3002"
+      - "3000:3000"
     env_file:
-      - files/new-cryptic-activist-catalog.env
+      - envs/frontend-public.env
     volumes:
-      - ./new-cryptic-activist-catalog:/app
+      - ./frontend/public:/app
       - /app/node_modules
     networks:
       - app-network
     depends_on:
-      - user-api
-      - chat-api
-      - cryptocurrency-api
-      - fiat-api
-      - offer-api
-      - trade-api
+      - backend
 
-  admin-catalog:
+  frontend-admin:
     build:
-      context: admin-cryptic-activist-catalog/
+      context: frontend/admin/
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
     env_file:
-      - files/admin-cryptic-activist-catalog.env
+      - envs/frontend-admin.env
+    volumes:
+      - ./frontend/admin:/app
+      - /app/node_modules
     networks:
       - app-network
-    volumes:
-      - ./admin-cryptic-activist-catalog:/app
-      - /app/node_modules
     depends_on:
-      - user-api
-      - chat-api
-      - cryptocurrency-api
-      - fiat-api
-      - offer-api
-      - trade-api
+      - backend
