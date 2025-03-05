@@ -1,0 +1,3 @@
+const walletAddress = "";
+
+export { walletAddress };

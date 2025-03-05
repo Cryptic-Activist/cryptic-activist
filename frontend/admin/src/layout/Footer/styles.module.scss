@@ -1,0 +1,16 @@
+@use "../../styles/theme.module.scss";
+
+.footer {
+  background-color: theme.$primary;
+  padding: 0.8rem 0;
+  border-top: 1px solid #000;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px, rgba(0, 0, 0, 0.15) 0px 0px 2px;
+  position: relative;
+  z-index: 9;
+}
+
+.statement {
+  color: theme.$text-light-default;
+  font-size: 1rem;
+  text-align: center;
+}

@@ -1,0 +1,42 @@
+@use "../../styles/theme.module.scss";
+
+.aside {
+  height: 100%;
+  width: 15rem;
+  background-color: theme.$sidebar-background;
+  border-right: 1px solid #000;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px, rgba(0, 0, 0, 0.15) 0px 0px 2px;
+}
+
+.asideList {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  height: 100%;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.asideListItem {
+  list-style: none;
+  a {
+    text-decoration: none;
+    color: theme.$text-light-default;
+    padding: 1rem;
+    display: inherit;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    &:hover {
+      background-color: rgba($color: theme.$sidebar-background-hover, $alpha: 1);
+    }
+  }
+}
+
+.asideListItemIsCurrentPage {
+  background-color: rgba($color: theme.$sidebar-background-hover, $alpha: 1);
+}

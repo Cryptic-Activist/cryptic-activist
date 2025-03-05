@@ -1,0 +1,150 @@
+@use "../../../styles/globals.module.scss";
+
+.container {
+  display: grid;
+  grid-template-columns: 2rem 25rem;
+  position: absolute;
+  top: 0;
+  right: -27rem;
+  width: 27rem;
+  height: 100vh;
+  z-index: 9;
+  transition: right ease-in-out 0.5s;
+  animation: opening 0.5s ease-out;
+}
+
+.closeButton {
+  background-color: globals.$secondary;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1rem;
+  svg {
+    color: globals.$primary;
+  }
+}
+
+.opened {
+  right: 0;
+}
+
+.closed {
+  right: -27rem;
+}
+
+@keyframes opening {
+  0% {
+    right: -27rem;
+  }
+  100% {
+    right: 0;
+  }
+}
+
+.content {
+  width: 25rem;
+  background-color: globals.$primary;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: fit-content;
+}
+
+.accountInfo {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  height: fit-content;
+  width: 15rem;
+  overflow-x: hidden;
+  background-color: transparent;
+  padding: 0.5em;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.5em;
+  transition: background-color 0.2s ease-in-out;
+  &:hover {
+    background-color: darken($color: globals.$primary, $amount: 10);
+  }
+}
+
+.profileColorProvider {
+  display: flex;
+  position: relative;
+}
+
+.profileColor {
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  min-height: 3rem;
+  display: flex;
+  border-radius: 2rem;
+}
+
+.provider {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: #000;
+  z-index: 10;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 1rem;
+}
+
+.address {
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  width: 11rem;
+  overflow: hidden;
+  text-align: start;
+}
+
+.disconnect {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  border-radius: 2rem;
+  padding: 0.3em;
+  background-color: globals.$secondary;
+  cursor: pointer;
+  svg {
+    color: globals.$primary;
+  }
+}
+
+.section {
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+  gap: 0.5rem;
+}
+
+.valueContainer {
+  display: flex;
+  gap: 1px;
+  flex-direction: column;
+  background-color: darken($color: globals.$primary, $amount: 10);
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5em;
+  .label {
+    font-size: 0.9rem;
+  }
+  .valueNumber {
+    font-size: 2.5rem;
+  }
+  .valueString {
+    font-size: 1.5rem;
+  }
+}

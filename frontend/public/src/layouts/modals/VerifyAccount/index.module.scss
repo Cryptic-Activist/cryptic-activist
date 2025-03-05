@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.verifyAccountUsernameForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.verifyAccountPrivateKeysForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.verifyAccountList {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+  li {
+    list-style: none;
+  }
+}

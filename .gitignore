@@ -1,4 +1,8 @@
 node_modules
 yarn-error.log
 yarn.lock
-package*.json
+
+frontend-public
+frontend-admin
+base-ca
+cryptic-utils

@@ -1,0 +1,14 @@
+/node_modules
+
+/dist
+
+.env
+.env.development
+
+/uploads/identicons/*.png
+/uploads/identicons/*.jpg
+/uploads/identicons/*.jpeg
+/uploads/identicons/*.gif
+
+/libraries
+

@@ -1,0 +1,15 @@
+@use "../../../styles/theme.module.scss";
+
+.button {
+  background-color: #000;
+  color: theme.$primary;
+  font-size: 1rem;
+  border-radius: 0.4rem;
+  border: none;
+  padding: 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+  &:focus {
+    outline: none;
+  }
+}

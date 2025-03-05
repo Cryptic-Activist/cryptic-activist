@@ -1,0 +1,75 @@
+@use '../../styles/globals.module.scss';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-shadow: 0 2px 4px 0px globals.$box-shadow-default-color;
+  border-radius: 2em 2em 1em 1em;
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid globals.$border-color-dark;
+  border-bottom: none;
+  border-radius: 2em 2em 0 0;
+  overflow: hidden;
+}
+
+.searchInput {
+  border: none;
+  padding: 1em;
+  width: 100%;
+  font-size: 1rem;
+  &:focus {
+    outline: none;
+  }
+}
+
+.searchButton {
+  border: none;
+  background-color: transparent;
+  padding: 1em;
+  cursor: pointer;
+}
+
+.listContainer {
+  display: grid;
+  grid-template-columns: 20% 80%;
+  border: 1px solid globals.$border-color-dark;
+  border-radius: 0 0 1em 1em;
+  overflow: hidden;
+  height: 30rem;
+}
+
+.categoriesList,
+.paymentMethodsList {
+  li {
+    list-style: none;
+    width: 100%;
+    button {
+      background-color: transparent;
+      border: none;
+      font-size: 1rem;
+      padding: 1em 1.2em;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      &:hover {
+        background-color: globals.$primary;
+      }
+    }
+  }
+}
+
+.categoriesList {
+  border-right: 1px solid globals.$border-color-dark;
+}
+
+.paymentMethodsList {
+}
+
+.selected {
+  background-color: globals.$primary;
+}

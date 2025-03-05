@@ -1,0 +1,23 @@
+.main {
+  display: flex;
+  height: calc(100vh - 6.17rem);
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  overflow-y: scroll;
+  padding: 0 1rem;
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #000;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #333;
+  }
+}

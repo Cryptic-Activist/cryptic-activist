@@ -1,0 +1,11 @@
+@use "../../../styles/theme.module.scss";
+
+.link {
+  width: 100%;
+  text-align: center;
+  color: theme.$text-default;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}

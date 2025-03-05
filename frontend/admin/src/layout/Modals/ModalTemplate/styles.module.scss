@@ -1,0 +1,82 @@
+@use "../../../styles/theme.module.scss";
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.background {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+
+.container {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: theme.$primary;
+  padding: 20px;
+  border-radius: 6px;
+  position: fixed;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 4px, rgba(0, 0, 0, 0.15) 0px 0px 2px;
+  z-index: 9999;
+  width: 350px;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  @media (max-height: 840px) {
+    max-width: 75%;
+  }
+}
+
+.heading {
+  color: theme.$text-default;
+  font-size: 17px;
+  font-weight: 900;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  width: 250px;
+  height: 180px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  svg {
+    font-size: 20px;
+    color: theme.$text-default;
+    animation: spin 0.5s linear infinite;
+  }
+}
+
+.message {
+  font-size: 1rem;
+  color: theme.$text-default;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.splitDiv {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 4px;
+}

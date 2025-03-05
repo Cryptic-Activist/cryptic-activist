@@ -1,0 +1,7 @@
+@use '../../styles/globals.module.scss';
+
+.statement {
+  font-size: 0.95rem;
+  color: globals.$grey;
+  font-weight: 600;
+}
