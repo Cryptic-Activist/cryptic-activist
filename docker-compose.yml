@@ -19,6 +19,8 @@ services:
       - "5432:5432"
     networks:
       - app-network
+    profiles:
+      - db
 
   pgadmin4:
     image: dpage/pgadmin4
@@ -30,6 +32,8 @@ services:
       - "5050:80"
     networks:
       - app-network
+    profiles:
+      - db
 
   backend:
     build:
