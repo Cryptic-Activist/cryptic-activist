@@ -15,17 +15,17 @@ export const authorize = async (req: Request, res: Response) => {
       });
     }
 
-    const authorizationArr = authorization.split(' ');
+    const authorizationArr = authorization?.split(' ');
 
     console.log({ authorizationArr });
 
-    if (authorizationArr.length !== 2 && authorizationArr[0]) {
+    if (authorizationArr!.length !== 2 && authorizationArr![0]) {
       res.status(401).send({
         errors: ['Authorization token is invalid'],
       });
     }
 
-    const decoded = decodeToken(authorizationArr[1], JWT_SECRET);
+    const decoded = decodeToken(authorizationArr![1], JWT_SECRET);
 
     const admin = await getAdmin({ id: decoded.id });
 

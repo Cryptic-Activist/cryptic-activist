@@ -6,7 +6,7 @@ import {
 } from 'base-ca';
 
 import { fetchGet } from '@/services/axios';
-import { filterLongShort } from '@/utils/filters/cryptocurrencies';
+import { filterLongShort } from '@/utils/filters';
 
 export const index = async (_req: Request, res: Response) => {
   try {

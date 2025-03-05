@@ -1,4 +1,4 @@
-import { fetchGet } from '../../../../api-cryptocurrency-cryptic-activist/src/services/axios';
+import { fetchGet } from '../axios';
 
 export const getCoinPrice = async (ids: string, fiatSymbol: string) => {
   const response = await fetchGet(

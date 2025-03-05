@@ -46,7 +46,7 @@ export async function cancelTrade(req: Request, res: Response) {
     const trade = await updateTrade(
       // @ts-ignore
       { id: cleanReqBody.id },
-      { state: 'canceled', ended_at: new Date() },
+      { state: 'canceled', endedAt: new Date() },
     );
 
     res.status(200).send({
@@ -74,7 +74,7 @@ export async function setPaidTrade(req: Request, res: Response) {
     const trade = await updateTrade(
       // @ts-ignore
       { id: cleanReqBody.id },
-      { state: 'canceled', ended_at: new Date() },
+      { state: 'canceled', endedAt: new Date() },
     );
 
     res.status(200).send({

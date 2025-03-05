@@ -20,9 +20,9 @@ export async function createFeedbackController(req: Request, res: Response) {
   try {
     // @ts-ignore
     const feedback = await createFeedback({
-      vendor_id: cleanReqBody.vendor_id,
-      user_id: cleanReqBody.user_id,
-      offer_id: cleanReqBody.offer_id,
+      vendorId: cleanReqBody.vendor_id,
+      userId: cleanReqBody.user_id,
+      offerId: cleanReqBody.offer_id,
       message: cleanReqBody.message,
       type: cleanReqBody.type,
     });

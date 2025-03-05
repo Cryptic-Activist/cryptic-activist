@@ -12,10 +12,6 @@ router.get('', index);
 
 router.get('/coin-gecko', indexCoinGecko);
 
-router.post(
-  '/coin-gecko/create',
-  // authenticateUser,
-  createCryptocurrenciesCoinGecko,
-);
+router.post('/coin-gecko/create', createCryptocurrenciesCoinGecko);
 
 export default router;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { createFiat, getFiat, getFiats } from 'base-ca';
 
-import fiatsJson from '../../../fiats.json';
+import fiatsJson from '../../../../fiats.json';
 
 export const index = async (_req: Request, res: Response) => {
   try {

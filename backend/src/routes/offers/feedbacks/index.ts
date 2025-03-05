@@ -6,7 +6,6 @@ import {
 } from '@/controllers/offers';
 
 import { Router } from 'express';
-import { validateInputCountFeedbacks } from '@/middlewares/validators/request/feedbacks';
 
 const router = Router();
 

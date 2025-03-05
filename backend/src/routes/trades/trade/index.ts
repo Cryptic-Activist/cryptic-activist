@@ -7,9 +7,8 @@ import {
 import {
   validateCancelTrade,
   validateCreateTrade,
-  validateGetTrade,
   validateSetPaidTrade,
-} from '@/utils/validators/request/trader';
+} from './middleware';
 
 import { Router } from 'express';
 import { authenticateUser } from '@/middlewares/authorization';

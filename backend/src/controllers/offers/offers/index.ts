@@ -152,11 +152,11 @@ export const getOffersController = async (req: Request, res: Response) => {
     const where = convertWhere({ ...cleanReqQuery }, ['limit', 'associations']);
 
     const offers = await getOffers(
-      cleanReqQuery.limit,
       cleanReqQuery.associations,
       {
         ...where,
       },
+      cleanReqQuery.limit,
     );
 
     if (!offers) {
@@ -190,6 +190,8 @@ export const getOffersByUser = async (req: Request, res: Response) => {
         fiat: true,
         paymentMethod: true,
         vendor: true,
+        feedbacks: true,
+        trades: true,
       },
       { vendorId, paymentMethodType: type as string },
     );
