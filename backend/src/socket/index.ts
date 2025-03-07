@@ -41,8 +41,6 @@ export default function socketEvents(io) {
     socket.on(JOIN, ({ room, trader, vendor }) => {
       socket.join(room);
 
-      // console.log(room, trader, vendor);
-
       socket.emit(ADMIN_MESSAGE, {
         user: ADMIN_BOT_NAMES,
         message: ADMIN_JOIN_MESSAGE(trader, vendor),

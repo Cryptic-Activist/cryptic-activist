@@ -1,12 +1,11 @@
-import { map } from 'nanostores';
-
-import { OFFER_API } from '@/constants/envs';
-import { fetchGet, fetchPost } from '@/services/axios';
-
 import type {
 	CreatePaymentMethodCategoryParams,
 	PaymentMethodCategoryState
 } from './types';
+import { fetchGet, fetchPost } from '@/services/axios';
+
+import { BACKEND } from '@/constants/envs';
+import { map } from 'nanostores';
 
 export const paymentMethodCategories = map<PaymentMethodCategoryState>({
 	data: [],
@@ -19,7 +18,7 @@ const fetchCreatePaymentMethodCategory = async (
 	data: CreatePaymentMethodCategoryParams
 ) => {
 	const response = await fetchPost(
-		`${OFFER_API}/payment-method/categories/create`,
+		`${BACKEND}/offers/payment-method/categories/create`,
 		data
 	);
 
@@ -30,9 +29,10 @@ const fetchCreatePaymentMethodCategory = async (
 	return response.data.results;
 };
 
-const fetchListPaymentMethodCategory = async () => {
-	console.log(`${OFFER_API}/payment-method/categories`);
-	const response = await fetchGet(`${OFFER_API}/payment-method/categories`);
+const fetchListPaymentMethodCategories = async () => {
+	const response = await fetchGet(
+		`${BACKEND}/offers/payment-method/categories`
+	);
 
 	if (response.status !== 200) {
 		return null;
@@ -69,9 +69,9 @@ export const createPaymentMethodCategory = async (
 	setter([], false, true, []);
 };
 
-export const listPaymentMethodCategory = async () => {
+export const listPaymentMethodCategories = async () => {
 	setter([], true, false, []);
-	const list = await fetchListPaymentMethodCategory();
+	const list = await fetchListPaymentMethodCategories();
 
 	if (!list) {
 		setter([], false, true, []);

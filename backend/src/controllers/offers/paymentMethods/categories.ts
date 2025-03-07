@@ -41,7 +41,6 @@ import { sanitize } from 'cryptic-utils';
 //       errors: [],
 //     });
 //   } catch (err) {
-//     console.log(err);
 //     return res.status(500).send({
 //       status_code: 500,
 //       results: {},

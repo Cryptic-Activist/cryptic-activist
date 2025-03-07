@@ -1,15 +1,15 @@
 'use client';
-import { useStore } from '@nanostores/react';
-import { useEffect } from 'react';
+
+import { $user, setValue, toggleModal } from '@/store';
+import { decodeAccessToken, login, logout } from '@/services/user';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { decodeAccessToken, login, logout } from '@/services/user';
-import { $user, setValue, toggleModal } from '@/store';
-
-import useApp from '../useApp';
-import { useForm } from 'react-hook-form';
-import { loginResolver } from './zod';
 import { OnSubmit } from './types';
+import { loginResolver } from './zod';
+import useApp from '../useApp';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useStore } from '@nanostores/react';
 
 const useUser = () => {
   const user = useStore($user);
@@ -21,6 +21,7 @@ const useUser = () => {
   const query = useQuery({
     queryKey: ['login'],
     queryFn: decodeAccessToken,
+    refetchOnMount: false,
   });
   const {
     register: loginFormRegister,

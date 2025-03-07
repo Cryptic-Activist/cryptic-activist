@@ -1,15 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	env: {
-		MAIN_API: process.env.MAIN_API,
-		MAIN_DOMAIN: process.env.MAIN_DOMAIN,
-		USER_API: process.env.USER_API,
-		OFFER_API: process.env.OFFER_API,
-		CHAT_API: process.env.CHAT_API,
-		CRYPTOCURRENCY_API: process.env.CRYPTOCURRENCY_API,
-		FIAT_API: process.env.FIAT_API,
-		TRADE_API: process.env.TRADE_API,
-		WEB3_ETHEREUM_HTTP_PROVIDER: process.env.WEB3_ETHEREUM_HTTP_PROVIDER
+		APP_NAME: process.env.APP_NAME,
+		BACKEND: process.env.BACKEND
 	}
 };
 

@@ -115,7 +115,6 @@ export const indexPagination = async (req: Request, res: Response) => {
       results: offers,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       errors: err,
@@ -124,7 +123,6 @@ export const indexPagination = async (req: Request, res: Response) => {
 };
 
 export const getOffersController = async (req: Request, res: Response) => {
-  console.log(req.query);
   const { trade_instructions_tags, associations } = req.query;
 
   try {
@@ -195,8 +193,6 @@ export const getOffersByUser = async (req: Request, res: Response) => {
       },
       { vendorId, paymentMethodType: type as string },
     );
-
-    console.log(offers);
 
     res.status(200).send({
       status_code: 200,

@@ -22,7 +22,6 @@ export async function getPaymentMethods(req: Request, res: Response) {
       errors: [],
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},

@@ -39,8 +39,6 @@ export async function getOfferController(req: Request, res: Response) {
       associationObj[association] = true;
     });
 
-    console.log({ id });
-
     const offer = await getOffer({ id: id?.toString() }, associationObj);
 
     //   const cleanReqQuery = sanitize(
@@ -83,15 +81,12 @@ export async function getOfferController(req: Request, res: Response) {
 
     //   const safeOffer = safeOfferValuesAssigner(offer);
 
-    //   console.log('safeOffer:', safeOffer);
-
     res.status(200).send({
       status_code: 200,
       results: offer,
       errors: [],
     });
   } catch (err: any) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},

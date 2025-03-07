@@ -17,8 +17,6 @@ export const authorize = async (req: Request, res: Response) => {
 
     const authorizationArr = authorization?.split(' ');
 
-    console.log({ authorizationArr });
-
     if (authorizationArr!.length !== 2 && authorizationArr![0]) {
       res.status(401).send({
         errors: ['Authorization token is invalid'],

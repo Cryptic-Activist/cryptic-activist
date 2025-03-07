@@ -1,9 +1,8 @@
-import { map } from 'nanostores';
-
-import { OFFER_API } from '@/constants/envs';
+import type { CreatePaymentMethodParams, PaymentMethodState } from './types';
 import { fetchGet, fetchPost } from '@/services/axios';
 
-import type { CreatePaymentMethodParams, PaymentMethodState } from './types';
+import { BACKEND } from '@/constants/envs';
+import { map } from 'nanostores';
 
 export const paymentMethods = map<PaymentMethodState>({
 	data: [],
@@ -13,7 +12,10 @@ export const paymentMethods = map<PaymentMethodState>({
 });
 
 const fetchCreatePaymentMethod = async (data: CreatePaymentMethodParams) => {
-	const response = await fetchPost(`${OFFER_API}/payment-methods/create`, data);
+	const response = await fetchPost(
+		`${BACKEND}/offers/payment-methods/create`,
+		data
+	);
 
 	if (response.status !== 200) {
 		return null;
@@ -23,7 +25,7 @@ const fetchCreatePaymentMethod = async (data: CreatePaymentMethodParams) => {
 };
 
 const fetchListPaymentMethod = async () => {
-	const response = await fetchGet(`${OFFER_API}/payment-methods`);
+	const response = await fetchGet(`${BACKEND}/offers/payment-methods`);
 
 	if (response.status !== 200) {
 		return null;
