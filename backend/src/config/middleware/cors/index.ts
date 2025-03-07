@@ -1,5 +1,5 @@
-import { BACKEND } from '@/constants/env';
+import { FRONTEND_ADMIN, FRONTEND_PUBLIC } from '@/constants/env';
 
 export default {
-  origin: [BACKEND] as string[],
+  origin: [FRONTEND_PUBLIC, FRONTEND_ADMIN] as string[],
 };

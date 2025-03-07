@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+
 import { validate } from 'cryptic-utils';
 
 export function validateInputCreatePaymentMethod(
@@ -9,8 +10,6 @@ export function validateInputCreatePaymentMethod(
   const { name, paymentMethodCategory } = req.body;
   const { id } = paymentMethodCategory;
 
-  console.log(req.body);
-
   next();
 }
 
@@ -18,7 +17,7 @@ export function validateInputGetPaymentMethodsByCategory(
   req: Request,
   res: Response,
   next: NextFunction,
-): NextFunction | Response {
+) {
   const { categoryId } = req.params;
 
   const errors: string[] = validate({ categoryId }, { categoryId: 'string' });

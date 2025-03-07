@@ -23,7 +23,6 @@ import { validateUsername } from '@/utils/validators/';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
-  console.log({ username, password });
 
   try {
     const errors: string[] = [];
@@ -38,6 +37,7 @@ export const login = async (req: Request, res: Response) => {
       res.status(400).send({
         errors,
       });
+      return;
     }
 
     bcrypt.compare(password, user!.password, (compareError, isMatch) => {
@@ -45,6 +45,7 @@ export const login = async (req: Request, res: Response) => {
         res.status(400).send({
           errors: [compareError.message],
         });
+        return;
       }
 
       if (isMatch) {
@@ -52,6 +53,7 @@ export const login = async (req: Request, res: Response) => {
           res.status(401).send({
             errors: ['Account is not verified'],
           });
+          return;
         }
 
         const accessToken: string = generateToken(
@@ -68,16 +70,19 @@ export const login = async (req: Request, res: Response) => {
           accessToken,
           refreshToken,
         });
+        return;
       }
 
       res.status(400).send({
         errors: ['Invalid credentials'],
       });
+      return;
     });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
     });
+    return;
   }
 };
 
@@ -91,6 +96,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(401).send({
         errors: ['Unable to decode the token'],
       });
+      return;
     }
 
     const user = await getUser(
@@ -102,6 +108,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(404).send({
         errors: ['User not found'],
       });
+      return;
     }
 
     // @ts-ignore
@@ -110,10 +117,12 @@ export async function loginDecodeToken(req: Request, res: Response) {
     res.status(200).send({
       ...safeUser,
     });
+    return;
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
     });
+    return;
   }
 }
 
@@ -161,11 +170,12 @@ export async function register(req: Request, res: Response) {
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,
     });
+    return;
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
+    return;
   }
 }
 
@@ -179,12 +189,14 @@ export async function verifyPrivateKeys(req: Request, res: Response) {
       res.status(400).send({
         errors: ['User not found'],
       });
+      return;
     }
 
     if (user?.isVerified) {
       res.status(401).send({
         errors: ['You have already verified your account'],
       });
+      return;
     }
 
     user?.privateKeys.forEach(async (privateKey, index) => {
@@ -192,16 +204,18 @@ export async function verifyPrivateKeys(req: Request, res: Response) {
         res.status(400).send({
           errors: ['Private keys combination does not exist.'],
         });
+        return;
       }
     });
 
     await updateUser({ id: user?.id }, { isVerified: true });
 
     res.status(200).send({});
+    return;
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
+    return;
   }
 }

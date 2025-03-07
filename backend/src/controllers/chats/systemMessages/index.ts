@@ -38,8 +38,6 @@ export const createSystemMessageController = async (
 
     const createdSystemMessage = await createSystemMessage(body);
 
-    console.log(createdSystemMessage);
-
     res.status(200).send({
       status_code: 200,
       results: createdSystemMessage,

@@ -96,7 +96,6 @@ export async function loginDecodeToken(req: Request, res: Response) {
 
     res.status(200).send({ ...safeAdmin });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });

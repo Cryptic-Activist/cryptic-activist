@@ -5,7 +5,6 @@ import { sanitizeInputGetTrade } from '@/utils/sanitizer/trade';
 
 export async function index(req: Request, res: Response) {
   try {
-    console.log(req);
   } catch (err) {
     res.status(500).send({
       status_code: 500,
@@ -27,7 +26,6 @@ export async function createTradeController(req: Request, res: Response) {
       errors: [],
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},
@@ -55,7 +53,6 @@ export async function cancelTrade(req: Request, res: Response) {
       errors: [],
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},
@@ -83,7 +80,6 @@ export async function setPaidTrade(req: Request, res: Response) {
       errors: [],
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},
@@ -125,7 +121,6 @@ export async function getTradeController(req: Request, res: Response) {
       errors: [],
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},

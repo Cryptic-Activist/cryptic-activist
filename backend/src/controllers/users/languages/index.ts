@@ -16,7 +16,6 @@ export async function indexByUser(req: Request, res: Response) {
       ...user,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
@@ -39,7 +38,6 @@ export const associateLanguage = async (req: Request, res: Response) => {
       ...language,
     });
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
@@ -60,7 +58,6 @@ export async function removeLanguageFromUser(req: Request, res: Response) {
 
     res.status(200).send({});
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
