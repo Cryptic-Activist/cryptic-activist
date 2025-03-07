@@ -1,43 +1,44 @@
-"use client";
-import { useEffect } from "react";
-import { useStore } from "@nanostores/react";
+'use client';
 
 import {
-  paymentMethodCategories,
-  createPaymentMethodCategory,
-  listPaymentMethodCategory,
-} from "@/stores";
+	CreatePaymentMethodCategoryParams,
+	UsePaymentMethodCategoriesParams
+} from './types';
 import {
-  CreatePaymentMethodCategoryParams,
-  UsePaymentMethodCategoriesParams,
-} from "./types";
+	createPaymentMethodCategory,
+	listPaymentMethodCategories,
+	paymentMethodCategories
+} from '@/stores';
+
+import { useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 
 const UsePaymentMethodCategories = (
-  fetchData?: UsePaymentMethodCategoriesParams
+	fetchData?: UsePaymentMethodCategoriesParams
 ) => {
-  const $paymentMethodCategories = useStore(paymentMethodCategories);
+	const $paymentMethodCategories = useStore(paymentMethodCategories);
 
-  const handleCreatePaymentMethodCategory = async (
-    data: CreatePaymentMethodCategoryParams
-  ) => {
-    await createPaymentMethodCategory(data);
-  };
+	const handleCreatePaymentMethodCategory = async (
+		data: CreatePaymentMethodCategoryParams
+	) => {
+		await createPaymentMethodCategory(data);
+	};
 
-  const handleListPaymentMethodCategory = async () => {
-    await listPaymentMethodCategory();
-  };
+	const handleListPaymentMethodCategories = async () => {
+		await listPaymentMethodCategories();
+	};
 
-  useEffect(() => {
-    if (fetchData) {
-      handleListPaymentMethodCategory();
-    }
-  }, [fetchData]);
+	useEffect(() => {
+		if (fetchData) {
+			handleListPaymentMethodCategories();
+		}
+	}, [fetchData]);
 
-  return {
-    handleCreatePaymentMethodCategory,
-    handleListPaymentMethodCategory,
-    paymentMethodCategories: $paymentMethodCategories,
-  };
+	return {
+		handleCreatePaymentMethodCategory,
+		handleListPaymentMethodCategories,
+		paymentMethodCategories: $paymentMethodCategories
+	};
 };
 
 export default UsePaymentMethodCategories;

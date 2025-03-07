@@ -1,13 +1,12 @@
-import { map } from 'nanostores';
-
-import { CRYPTOCURRENCY_API } from '@/constants/envs';
-import { fetchGet, fetchPost } from '@/services/axios';
-import { getBearerToken, getLocalStorage } from '@/utils/browser/storage';
-
 import type {
 	CreateCryptocurrencyParams,
 	CryptocurrenciesState
 } from './types';
+import { fetchGet, fetchPost } from '@/services/axios';
+import { getBearerToken, getLocalStorage } from '@/utils/browser/storage';
+
+import { BACKEND } from '@/constants/envs';
+import { map } from 'nanostores';
 
 export const cryptocurrencies = map<CryptocurrenciesState>({
 	data: [],
@@ -18,7 +17,7 @@ export const cryptocurrencies = map<CryptocurrenciesState>({
 
 const fetchCreateCryptocurrency = async (data: CreateCryptocurrencyParams) => {
 	const response = await fetchPost(
-		`${CRYPTOCURRENCY_API}/cryptocurrencies/coin-gecko/create`,
+		`${BACKEND}/cryptocurrencies/coin-gecko/create`,
 		data
 	);
 
@@ -30,7 +29,7 @@ const fetchCreateCryptocurrency = async (data: CreateCryptocurrencyParams) => {
 };
 
 const fetchListCryptocurrencies = async () => {
-	const response = await fetchGet(`${CRYPTOCURRENCY_API}/cryptocurrencies`);
+	const response = await fetchGet(`${BACKEND}/cryptocurrencies`);
 
 	if (response.status !== 200) {
 		return null;
@@ -47,7 +46,7 @@ const fetchCreateAllCryptocurrencies = async () => {
 	}
 
 	const response = await fetchPost(
-		`${CRYPTOCURRENCY_API}/cryptocurrencies/coin-gecko/create`,
+		`${BACKEND}/cryptocurrencies/coin-gecko/create`,
 		undefined,
 		{
 			Authorization: getBearerToken(accessToken)

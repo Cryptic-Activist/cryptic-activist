@@ -8,3 +8,4 @@ export const FIAT_API = process.env.FIAT_API as string;
 export const TRADE_API = process.env.TRADE_API as string;
 export const WEB3_ETHEREUM_HTTP_PROVIDER = process.env
 	.WEB3_ETHEREUM_HTTP_PROVIDER as string;
+export const BACKEND = process.env.BACKEND as string;

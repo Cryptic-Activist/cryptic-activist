@@ -1,8 +1,6 @@
 'use client';
 
-import { useNavigationBar } from '@/hooks';
 import {
-  Blockchain,
   Cryptocurrencies,
   Fiats,
   Login,
@@ -10,7 +8,10 @@ import {
   PrivateKeys,
   Register,
   VerifyAccount,
+  Wallet,
 } from '@/layouts/modals';
+
+import { useNavigationBar } from '@/hooks';
 
 const AllModals = () => {
   const { navigationBar } = useNavigationBar();
@@ -24,7 +25,7 @@ const AllModals = () => {
       {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : <></>}
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : <></>}
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : <></>}
-      {navigationBar.modals.blockchain ? <Blockchain /> : <></>}
+      {navigationBar.modals.blockchain ? <Wallet /> : <></>}
     </>
   );
 };

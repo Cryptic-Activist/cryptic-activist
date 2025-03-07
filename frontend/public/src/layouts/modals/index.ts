@@ -8,4 +8,4 @@ export { default as Register } from './Register';
 export { default as Template } from './Template';
 export { default as VerifyAccount } from './VerifyAccount';
 export { default as PrivateKeys } from './PrivateKeys';
-export { default as Blockchain } from './Blockchain';
+export { default as Wallet } from './Wallet';

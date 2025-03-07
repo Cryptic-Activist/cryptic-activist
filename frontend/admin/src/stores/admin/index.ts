@@ -1,4 +1,4 @@
-import { USER_API } from '@/constants/envs';
+import { BACKEND } from '@/constants/envs';
 import { fetchGet, fetchPost } from '@/services/axios';
 import {
 	getLocalStorage,
@@ -38,7 +38,7 @@ const setter = (
 const getToken = async (
 	adminData: LoginAdminParams
 ): Promise<GetTokensReturn | null> => {
-	const response = await fetchPost(`${USER_API}/admins/auth/login`, adminData);
+	const response = await fetchPost(`${BACKEND}/admins/auth/login`, adminData);
 
 	if (response.status !== 200) {
 		return null;
@@ -51,7 +51,7 @@ const getAdminInfoFromToken = async (
 	token: string
 ): Promise<GetAdminInfoReturn | null> => {
 	const response = await fetchGet(
-		`${USER_API}/admins/auth/login/decode/token/${token}`,
+		`${BACKEND}/admins/auth/login/decode/token/${token}`,
 		{ Authorization: `Bearer ${token}` }
 	);
 
@@ -110,7 +110,7 @@ export const decodeAccessToken = async () => {
 const registerAdmin = async (
 	admin: RegisterAdminParams
 ): Promise<GetAdminInfoReturn | null> => {
-	const response = await fetchPost(`${USER_API}/admins/auth/register`, admin);
+	const response = await fetchPost(`${BACKEND}/admins/auth/register`, admin);
 
 	if (response.status !== 201) {
 		return null;

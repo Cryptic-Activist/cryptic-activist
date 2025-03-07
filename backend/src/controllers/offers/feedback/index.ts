@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 
-import { createFeedback } from 'base-ca';
+import { createFeedback as createFeedbackBaseCa } from 'base-ca';
 import { sanitize } from 'cryptic-utils';
 
-export async function createFeedbackController(req: Request, res: Response) {
+export const createFeedback = async (req: Request, res: Response) => {
   const { vendor_id, user_id, offer_id, message, type } = req.body;
 
   const cleanReqBody = sanitize(
@@ -19,7 +19,7 @@ export async function createFeedbackController(req: Request, res: Response) {
 
   try {
     // @ts-ignore
-    const feedback = await createFeedback({
+    const feedback = await createFeedbackBaseCa({
       vendorId: cleanReqBody.vendor_id,
       userId: cleanReqBody.user_id,
       offerId: cleanReqBody.offer_id,
@@ -39,4 +39,4 @@ export async function createFeedbackController(req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};

@@ -56,7 +56,6 @@ export async function indexFeedbacks(req: Request, res: Response) {
 }
 
 export async function indexFeedbacksPagination(req: Request, res: Response) {
-  console.log(req.query);
   try {
     const { limit, skip } = req.query;
     const { vendor_id, user_id, offer_id, message, type } = req.body;
