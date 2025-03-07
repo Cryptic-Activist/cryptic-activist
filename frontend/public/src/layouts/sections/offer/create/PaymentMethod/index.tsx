@@ -10,25 +10,27 @@ import React, { FC } from 'react';
 import { CreateOfferPaymentMethodProps } from './types';
 import Head from 'next/head';
 import type { Item } from '@/components/Radio/types';
-import styles from './index.module.scss';
 import stylesCore from '../index.module.scss';
 
 const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
   setCreateOfferValues,
+  toStep,
   createOffer,
+  step,
+  onClickEvents,
 }) => {
   const selectOfferType = (value: Item) => {
-    setCreateOfferValues({ data: { offerType: value.value } });
+    setCreateOfferValues({ offerType: value.value });
   };
 
   const selectPaymentMethod = (id: string) => {
-    setCreateOfferValues({ data: { paymentMethodId: id } });
+    setCreateOfferValues({ paymentMethodId: id });
   };
 
   const goToNextStep = () => {
-    setCreateOfferValues({
-      data: { section: { paymentMethod: false, tradePricing: true } },
-    });
+    if (createOffer.isPaymentMethodCompleted) {
+      toStep(1);
+    }
   };
 
   return (
@@ -41,7 +43,8 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
           <h1 className={stylesCore.heading}>Create an Offer</h1>
           <ProgressBar
             steps={['Payment Method', 'Trade Pricing', 'Trade Instructions']}
-            currentStep={0}
+            currentStep={step}
+            onClickEvents={onClickEvents}
           />
           <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>Choose Fiat</h2>
@@ -51,7 +54,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             <h2 className={stylesCore.groupHeading}>Choose Cryptocurrency</h2>
             <Selector type="cryptocurrency" hasLabel={false} />
           </section>
-          {createOffer.data?.cryptocurrency && (
+          {createOffer?.cryptocurrency && (
             <section className={stylesCore.horizontalGroup}>
               <h2 className={stylesCore.groupHeading}>
                 What would like to do?
@@ -62,6 +65,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
                   { label: 'Sell', value: 'sell' },
                 ]}
                 onChange={selectOfferType}
+                value={createOffer.offerType}
               />
             </section>
           )}
@@ -69,7 +73,10 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             <h2 className={stylesCore.groupHeading}>
               Step 1: Select a payment method
             </h2>
-            <SelectPaymentMethod handlePaymentMethod={selectPaymentMethod} />
+            <SelectPaymentMethod
+              handlePaymentMethod={selectPaymentMethod}
+              paymentMethodId={createOffer.paymentMethodId}
+            />
           </section>
         </main>
         <aside className={stylesCore.aside}>
@@ -86,10 +93,8 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             fullWidth
             padding="1em"
             type="button"
-            theme={
-              createOffer.data?.isPaymentMethodCompleted ? 'primary' : 'ghost'
-            }
-            isDisabled={!createOffer.data?.isPaymentMethodCompleted}
+            theme={createOffer?.isPaymentMethodCompleted ? 'primary' : 'ghost'}
+            isDisabled={!createOffer?.isPaymentMethodCompleted}
             onClick={goToNextStep}
           >
             Go the next step: Trade pricing

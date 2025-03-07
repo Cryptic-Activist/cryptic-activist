@@ -1,4 +1,4 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .list {
   display: flex;
@@ -27,6 +27,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: globals.$white;
+  cursor: pointer;
+}
+
+.completed {
+  cursor: pointer;
 }
 
 .currentStep {

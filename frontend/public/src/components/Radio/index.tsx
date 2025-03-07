@@ -1,7 +1,7 @@
 'use client';
 
 import { Item, RadioProps } from './types';
-import React, { FC, FormEvent, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import styles from './index.module.scss';
 
@@ -9,6 +9,7 @@ const Radio: FC<RadioProps> = ({
   items,
   onChange,
   orientation = 'vertical',
+  value,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
 
@@ -16,6 +17,13 @@ const Radio: FC<RadioProps> = ({
     onChange(item);
     setSelectedIndex(index);
   };
+
+  useEffect(() => {
+    const index = items.findIndex((item) => item.value.includes(value));
+    if (index > -1) {
+      setSelectedIndex(index);
+    }
+  }, [value, items]);
 
   return (
     <ul className={`${styles.list} ${styles[orientation]}`}>

@@ -1,11 +1,9 @@
 'use client';
 
 import { FC } from 'react';
-
-import { toCapitalize } from '@/utils';
-
-import styles from './index.module.scss';
 import type { InputProps } from './types';
+import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
 
 const Input: FC<InputProps> = ({
   register,
@@ -32,9 +30,11 @@ const Input: FC<InputProps> = ({
     )}
     <input
       className={styles.input}
-      {...register(name, {
-        required: required,
-        disabled: disabled,
+      {...(register && {
+        ...register(name, {
+          required: required,
+          disabled: disabled,
+        }),
       })}
       type={type}
       id={id}
