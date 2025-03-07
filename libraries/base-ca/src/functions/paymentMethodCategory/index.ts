@@ -1,8 +1,8 @@
-import { PaymentMethodCategory, prisma } from '../../services/prisma';
 import {
   CreatePaymentMethodCategoryParams,
   WherePaymentMethodCategoryParams,
 } from './types';
+import { PaymentMethodCategory, prisma } from '../../services/prisma';
 
 export const createPaymentMethodCategory = async (
   params: CreatePaymentMethodCategoryParams

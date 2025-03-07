@@ -1,9 +1,8 @@
-import { map } from 'nanostores';
-
-import { FIAT_API } from '@/constants/envs';
+import type { CreateFiatParams, FiatsState } from './types';
 import { fetchGet, fetchPost } from '@/services/axios';
 
-import type { CreateFiatParams, FiatsState } from './types';
+import { BACKEND } from '@/constants/envs';
+import { map } from 'nanostores';
 
 export const fiats = map<FiatsState>({
 	data: [],
@@ -13,7 +12,7 @@ export const fiats = map<FiatsState>({
 });
 
 const fetchCreateFiat = async (data: CreateFiatParams) => {
-	const response = await fetchPost(`${FIAT_API}/fiats/create`, data);
+	const response = await fetchPost(`${BACKEND}/fiats/create`, data);
 
 	if (response.status !== 200) {
 		return null;
@@ -23,7 +22,7 @@ const fetchCreateFiat = async (data: CreateFiatParams) => {
 };
 
 const fetchListFiats = async () => {
-	const response = await fetchGet(`${FIAT_API}/fiats`);
+	const response = await fetchGet(`${BACKEND}/fiats`);
 
 	if (response.status !== 200) {
 		return null;
@@ -33,7 +32,7 @@ const fetchListFiats = async () => {
 };
 
 const fetchCreateAllFiats = async () => {
-	const response = await fetchPost(`${FIAT_API}/fiats/json/create`);
+	const response = await fetchPost(`${BACKEND}/fiats/json/create`);
 
 	if (response.status !== 200) {
 		return null;

@@ -16,15 +16,18 @@ export const getPrice = async (req: Request, res: Response) => {
       res.status(200).send({
         ...price,
       });
+      return;
     }
 
     res.status(400).send({
       errors: ['Cryptocurrency not found.'],
     });
+    return;
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
     });
+    return;
   }
 };
 

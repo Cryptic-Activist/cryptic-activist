@@ -1,9 +1,8 @@
-import { map } from 'nanostores';
-
-import { USER_API } from '@/constants/envs';
+import type { CreateUserParams, UsersState } from './types';
 import { fetchGet, fetchPost } from '@/services/axios';
 
-import type { CreateUserParams, UsersState } from './types';
+import { BACKEND } from '@/constants/envs';
+import { map } from 'nanostores';
 
 export const users = map<UsersState>({
 	data: [],
@@ -13,7 +12,7 @@ export const users = map<UsersState>({
 });
 
 const fetchCreateUser = async (data: CreateUserParams) => {
-	const response = await fetchPost(`${USER_API}/users/auth/register`, data);
+	const response = await fetchPost(`${BACKEND}/users/auth/register`, data);
 
 	if (response.status !== 200) {
 		return null;
@@ -23,7 +22,7 @@ const fetchCreateUser = async (data: CreateUserParams) => {
 };
 
 const fetchListUsers = async () => {
-	const response = await fetchGet(`${USER_API}/users/all`);
+	const response = await fetchGet(`${BACKEND}/users/all`);
 
 	if (response.status !== 200) {
 		return null;
