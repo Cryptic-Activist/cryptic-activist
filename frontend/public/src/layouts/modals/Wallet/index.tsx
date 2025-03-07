@@ -1,17 +1,16 @@
 import React, { FC } from 'react';
-import Image from 'next/image';
-import { useConnect } from 'wagmi';
 
 import { Button } from '@/components';
-import useBlockchain from '@/hooks/useBlockchain';
-import { Template } from '@/layouts/modals';
-import { toCapitalize } from '@/utils';
-
-import styles from './index.module.scss';
-import { WalletName } from '@/hooks/useBlockchain/types';
+import Image from 'next/image';
 import { ProviderProps } from './types';
-import { useQuery } from '@tanstack/react-query';
+import { Template } from '@/layouts/modals';
+import { WalletName } from '@/hooks/useBlockchain/types';
 import { checkInstalledWallet } from '@/services/blockchain';
+import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
+import useBlockchain from '@/hooks/useBlockchain';
+import { useConnect } from 'wagmi';
+import { useQuery } from '@tanstack/react-query';
 
 const Provider: FC<ProviderProps> = ({ connector, onConnectWallet }) => {
   const { data: isWalletAvailable } = useQuery({
@@ -41,11 +40,11 @@ const Provider: FC<ProviderProps> = ({ connector, onConnectWallet }) => {
   );
 };
 
-const Blockchain = () => {
+const Wallet = () => {
   const { connectors, connect, onConnectWallet } = useBlockchain();
 
   return (
-    <Template heading="Select Blockchain" width="24rem">
+    <Template heading="Select Wallet" width="24rem">
       <ul className={styles.walletList}>
         {connectors.map((connector) => (
           <Provider
@@ -59,4 +58,4 @@ const Blockchain = () => {
   );
 };
 
-export default Blockchain;
+export default Wallet;

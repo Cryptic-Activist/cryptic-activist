@@ -13,18 +13,21 @@ export const authenticateUser = async (
   try {
     const validated = AuthenticationUser.safeParse(req.headers);
 
-    if (!validated.error) {
+    if (validated.error) {
       res.status(401).send({
         errors: validated.error,
       });
+      return;
     }
 
-    const decoded = decodeToken(validated.data?.authorization, JWT_SECRET);
+    const token = validated.data.authorization.split('Bearer ')[1];
+    const decoded = decodeToken(token, JWT_SECRET);
 
     if (!decoded) {
       res.status(401).send({
         errors: decoded,
       });
+      return;
     }
 
     const user = await getUser({ id: decoded.userId }, {});
@@ -33,6 +36,7 @@ export const authenticateUser = async (
       res.status(401).send({
         errors: ['Invalid token or user was not found.'],
       });
+      return;
     }
 
     next();
@@ -40,5 +44,6 @@ export const authenticateUser = async (
     res.status(500).send({
       errors,
     });
+    return;
   }
 };
