@@ -6,15 +6,10 @@ type OfferType = 'sell' | 'buy';
 type TradePricingType = 'market' | 'fixed';
 
 export type CreateOffer = {
-  section?: {
-    paymentMethod?: boolean;
-    tradePricing?: boolean;
-    tradeInstructions?: boolean;
-  };
-  cryptocurrency?: Cryptocurrency | null;
-  fiat?: Fiat | null;
+  cryptocurrency?: Cryptocurrency;
+  fiat?: Fiat;
   offerType?: OfferType;
-  paymentMethodId?: string | null;
+  paymentMethodId?: string;
   isPaymentMethodCompleted?: boolean;
   tradePricingType?: TradePricingType;
   listAt?: number;
@@ -31,18 +26,8 @@ export type CreateOffer = {
   isSubmitted?: boolean;
 };
 
-export type CreateOfferState = {
-  data?: CreateOffer;
-  loading: boolean;
-  fetched: boolean;
-  errors: string[];
-};
+export type CreateOfferState = CreateOffer;
 
-export type CreateOfferSetter = {
-  data?: CreateOffer;
-  loading?: boolean;
-  fetched?: boolean;
-  errors?: string[];
-};
+export type CreateOfferSetter = CreateOffer;
 
 export type SetCreateOfferValues = (params: CreateOfferSetter) => void;

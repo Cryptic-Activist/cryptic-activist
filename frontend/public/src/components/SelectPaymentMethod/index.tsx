@@ -12,6 +12,7 @@ import { usePaymentMethods } from '@/hooks';
 
 const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
   handlePaymentMethod,
+  paymentMethodId,
 }) => {
   const {
     paymentMethodCategories,
@@ -22,7 +23,7 @@ const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<
     null | number
   >(null);
-  const [selectedPaymentMethodIndex, setSelectPaymentMethodIndex] = useState<
+  const [selectedPaymentMethodIndex, setSelectedPaymentMethodIndex] = useState<
     null | number
   >(null);
   const [localPaymentMethodCategories, setLocalPaymentMethodCategories] =
@@ -37,7 +38,7 @@ const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
   };
 
   const selectPaymentMethod = (id: string, index: number) => {
-    setSelectPaymentMethodIndex(index);
+    setSelectedPaymentMethodIndex(index);
     handlePaymentMethod(id);
   };
 
@@ -50,7 +51,7 @@ const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
         value
       ) as PaymentMethod[];
       setLocalPaymentMethods(filtered);
-      setSelectPaymentMethodIndex(null);
+      setSelectedPaymentMethodIndex(null);
     }
   };
 
@@ -58,6 +59,17 @@ const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
     setLocalPaymentMethods(paymentMethods.data);
     setLocalPaymentMethodCategories(paymentMethodCategories.data);
   }, [paymentMethods.data, paymentMethodCategories.data]);
+
+  useEffect(() => {
+    if (paymentMethodId && paymentMethods.data) {
+      const index = paymentMethods.data?.findIndex(
+        (paymentMethod) => paymentMethod.id === paymentMethodId
+      );
+      if (index > 0) {
+        setSelectedPaymentMethodIndex(index);
+      }
+    }
+  }, [paymentMethodId, paymentMethods.data]);
 
   return (
     <div className={styles.container}>

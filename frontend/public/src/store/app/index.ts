@@ -1,7 +1,3 @@
-import { map } from 'nanostores';
-
-import { fetchCurrentPrice } from '@/services/app';
-
 import {
   AppState,
   AppStateSetter,
@@ -10,19 +6,17 @@ import {
   ToastType,
   Value,
 } from './types';
+
+import { fetchCurrentPrice } from '@/services/app';
 import { generateUUID } from '@/utils';
+import { map } from 'nanostores';
 
 export const $app = map<AppState>({
-  defaults: {
-    cryptocurrency: null,
-    fiat: null,
-    paymentMethod: null,
-  },
   dimensions: [0, 0],
   isMobile: false,
   type: 'buy',
   toasts: [],
-  currentPrice: null,
+  defaults: {},
 });
 
 const setter = ({
@@ -37,9 +31,9 @@ const setter = ({
 
   $app.set({
     defaults: {
-      fiat: defaults?.fiat ?? app.defaults.fiat,
-      cryptocurrency: defaults?.cryptocurrency ?? app.defaults.cryptocurrency,
-      paymentMethod: defaults?.paymentMethod ?? app.defaults.paymentMethod,
+      fiat: defaults?.fiat ?? app.defaults?.fiat,
+      cryptocurrency: defaults?.cryptocurrency ?? app.defaults?.cryptocurrency,
+      paymentMethod: defaults?.paymentMethod ?? app.defaults?.paymentMethod,
     },
     dimensions: dimensions ?? app.dimensions,
     isMobile: isMobile ?? app.isMobile,

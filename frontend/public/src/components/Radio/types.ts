@@ -7,5 +7,6 @@ export type Item = {
 export type RadioProps = {
   items: Item[];
   onChange: (value: Item) => void;
+  value?: string | number;
   orientation?: 'vertical' | 'horizontal';
 };

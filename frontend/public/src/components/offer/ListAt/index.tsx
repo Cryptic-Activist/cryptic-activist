@@ -1,32 +1,33 @@
 import React, { FC } from 'react';
-import { useApp, useCreateOffer } from '@/hooks';
 
+import { InputNumber } from '@/components';
 import { ListAtProps } from './types';
-import { MinusPlusInput } from '@/components';
 import styles from './index.module.scss';
+import { useApp } from '@/hooks';
 
-const ListAt: FC<ListAtProps> = ({ onChange }) => {
+const ListAt: FC<ListAtProps> = ({ onChange, createOffer }) => {
   const {
     app: { currentPrice, defaults },
   } = useApp();
-  const { createOffer } = useCreateOffer();
 
   return (
     <>
       <div className={styles.container}>
         <div className={styles.pricingTypeRow}>
-          {createOffer.data?.tradePricingType === 'fixed' && (
-            <MinusPlusInput
+          {createOffer?.tradePricingType === 'fixed' && (
+            <InputNumber
+              id="offerFixPrice"
               value={currentPrice ?? 0}
               step={100}
               onChange={onChange}
-              symbol={createOffer.data?.fiat?.symbol}
+              symbol={createOffer?.fiat?.symbol}
               min={0}
             />
           )}
-          {createOffer.data?.tradePricingType === 'market' && (
-            <MinusPlusInput
-              value={createOffer.data?.listAt ?? 0}
+          {createOffer?.tradePricingType === 'market' && (
+            <InputNumber
+              id="offerMarketPrice"
+              value={createOffer?.listAt ?? 0}
               step={0.1}
               onChange={onChange}
               symbol="%"
@@ -36,10 +37,10 @@ const ListAt: FC<ListAtProps> = ({ onChange }) => {
           <span className={styles.onEachStatement}>on each sale</span>
         </div>
         <p className={styles.statement}>
-          {`Current ${createOffer.data?.cryptocurrency?.name} market price: `}
+          {`Current ${createOffer?.cryptocurrency?.name} market price: `}
           <strong>
             {currentPrice
-              ? `${currentPrice} ${defaults.fiat?.symbol}`
+              ? `${currentPrice} ${defaults?.fiat?.symbol}`
               : 'Unavailable'}
           </strong>
         </p>

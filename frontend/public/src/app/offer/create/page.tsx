@@ -6,26 +6,36 @@ import React from 'react';
 import { useCreateOffer } from '@/hooks';
 
 const Page = () => {
-  const { createOffer, setCreateOfferValues } = useCreateOffer();
+  const { createOffer, step, onClickEvents, setCreateOfferValues, toStep } =
+    useCreateOffer();
 
   return (
     <>
-      {createOffer.data?.section?.paymentMethod && (
+      {step === 0 && (
         <PaymentMethod
           setCreateOfferValues={setCreateOfferValues}
+          toStep={toStep}
           createOffer={createOffer}
+          step={step}
+          onClickEvents={onClickEvents}
         />
       )}
-      {createOffer.data?.section?.tradePricing && (
+      {step == 1 && (
         <TradePricing
           setCreateOfferValues={setCreateOfferValues}
+          toStep={toStep}
           createOffer={createOffer}
+          step={step}
+          onClickEvents={onClickEvents}
         />
       )}
-      {createOffer.data?.section?.tradeInstructions && (
+      {step == 2 && (
         <TradeInstructions
           setCreateOfferValues={setCreateOfferValues}
+          toStep={toStep}
           createOffer={createOffer}
+          step={step}
+          onClickEvents={onClickEvents}
         />
       )}
     </>
