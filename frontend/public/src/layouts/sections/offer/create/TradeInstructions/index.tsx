@@ -18,6 +18,10 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
     }
   };
 
+  const inputTags = (value: string[]) => {
+    setCreateOfferValues({ tags: value });
+  };
+
   return (
     <>
       <Head>
@@ -35,7 +39,12 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
             <h2 className={stylesCore.groupHeading}>
               Step 3: Trade Instructions
             </h2>
-            <Tags />
+            <Tags
+              createOffer={createOffer}
+              onChange={inputTags}
+              id="tags"
+              width="50%"
+            />
           </section>
         </main>
         <aside className={stylesCore.aside}>
