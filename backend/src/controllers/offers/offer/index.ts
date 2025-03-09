@@ -6,6 +6,8 @@ export async function createOfferController(req: Request, res: Response) {
     const { body } = req;
     const { cryptocurrency, fiat, ...rest } = body;
 
+    console.log({ body });
+
     const create = {
       cryptocurrencyId: cryptocurrency.id,
       fiatId: fiat.id,

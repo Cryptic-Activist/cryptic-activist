@@ -1,11 +1,15 @@
 import {
   ZodCryptocurrency,
   ZodFiat,
+  ZodInstructions,
+  ZodLabel,
   ZodLimitMax,
   ZodLimitMin,
   ZodListAt,
   ZodOfferType,
   ZodPaymentMethodId,
+  ZodTags,
+  ZodTerms,
   ZodTimeLimit,
   ZodTradePricingType,
 } from '@/layouts/sections/offer/create/zod';
@@ -53,3 +57,14 @@ export const CreateOfferTradePricing = z
   });
 
 export const createOfferTradePricing = zodResolver(CreateOfferTradePricing);
+
+export const CreateOfferTradeInstructions = z.object({
+  tags: ZodTags,
+  label: ZodLabel,
+  terms: ZodTerms,
+  instructions: ZodInstructions,
+});
+
+export const createOfferTradeInstructions = zodResolver(
+  CreateOfferTradeInstructions
+);

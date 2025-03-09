@@ -1,4 +1,4 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .container {
   box-shadow: inset 0px 0px 10px 0px globals.$box-shadow-default-color;
@@ -10,4 +10,5 @@
   align-items: center;
   justify-content: center;
   font-size: 5rem;
+  color: globals.$white;
 }

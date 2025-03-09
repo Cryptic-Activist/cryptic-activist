@@ -1,6 +1,10 @@
 'use client';
 
-import { CreateOfferPaymentMethod, CreateOfferTradePricing } from './zod';
+import {
+  CreateOfferPaymentMethod,
+  CreateOfferTradeInstructions,
+  CreateOfferTradePricing,
+} from './zod';
 import { useEffect, useState } from 'react';
 
 import { $createOffer } from '@/store';
@@ -59,6 +63,22 @@ const useCreateOffer = () => {
     createOffer?.limitMin,
     createOffer?.limitMax,
     createOffer?.timeLimit,
+  ]);
+
+  useEffect(() => {
+    const validated = CreateOfferTradeInstructions.safeParse({
+      tags: createOffer?.tags,
+      label: createOffer?.label,
+      terms: createOffer?.terms,
+      instructions: createOffer?.instructions,
+    });
+
+    setCreateOfferValues({ isTradeInstructionsCompleted: validated.success });
+  }, [
+    createOffer?.tags,
+    createOffer?.label,
+    createOffer?.terms,
+    createOffer?.instructions,
   ]);
 
   const toStep = (step: number) => {
