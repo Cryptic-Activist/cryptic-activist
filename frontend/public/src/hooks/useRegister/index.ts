@@ -1,20 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { $register, setRegisterPrivateKeys } from '@/store';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-
+import { OnSubmit, OnSubmitPayload } from './types';
 import {
   getRandomCredentials,
   onSubmitUserRegistration,
 } from '@/services/register';
 import { resetNavigationBar, toggleModal } from '@/store/navigationBar';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { registerResolver } from './zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { $register, setRegisterPrivateKeys } from '@/store';
-import { useStore } from '@nanostores/react';
 import { useCountDown } from '..';
-import { OnSubmit, OnSubmitPayload } from './types';
+import { useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 
 const useRegister = () => {
   const register = useStore($register);
@@ -40,8 +39,6 @@ const useRegister = () => {
   } = useForm({ resolver: registerResolver });
 
   const onSubmit: OnSubmit = async (data) => {
-    setValue('successMessage', undefined);
-
     const { confirmPassword, names, password, username } = data;
     mutation.mutate({
       confirmPassword,
@@ -88,7 +85,6 @@ const useRegister = () => {
       username: getValues('username'),
       password: getValues('password'),
       confirmPassword: getValues('confirmPassword'),
-      successMessage: getValues('successMessage'),
     },
     timeLeftInSeconds,
   };

@@ -22,21 +22,23 @@
   font-weight: 600;
 }
 
-.input {
+.textarea {
   background-color: white;
   color: globals.$secondary;
   padding: 1rem;
-  border: 1px solid globals.$input-border-color;
+  border: 1px solid globals.$border-color-dark;
   border-radius: 0.4rem;
   box-shadow: 0 0px 6px -2px rgb(0, 0, 0, 0.3);
   font-size: 1rem;
   transition: border-color 0.2s ease-in-out;
   width: 100%;
   box-sizing: border-box;
+  resize: vertical;
+  min-height: 10rem;
+  letter-spacing: -1px;
 
   &:focus {
     outline: none;
-    border-color: globals.$secondary;
   }
 }
 
@@ -47,4 +49,9 @@
 .errorMessage {
   color: globals.$secondary;
   font-size: 0.9rem;
+}
+
+.info {
+  font-size: 1rem;
+  color: globals.$text-description-color;
 }

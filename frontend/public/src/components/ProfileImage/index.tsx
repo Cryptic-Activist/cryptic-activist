@@ -1,11 +1,9 @@
 'use client';
 
 import { FC } from 'react';
-
-import { getInitials } from '@/utils';
-
-import styles from './index.module.scss';
 import type { ProfileImageProps } from './types';
+import { getInitials } from '@/utils';
+import styles from './index.module.scss';
 
 const ProfileImage: FC<ProfileImageProps> = ({ size, user }) => {
   const s =
@@ -41,7 +39,7 @@ const ProfileImage: FC<ProfileImageProps> = ({ size, user }) => {
           height: s.height,
           width: s.width,
           fontSize: s.fontSize,
-          color: user?.profileColor,
+          backgroundColor: user?.profileColor,
         }),
       }}
     >

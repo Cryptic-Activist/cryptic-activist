@@ -3,14 +3,15 @@
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { convertStringToArrayOfStrings, toCapitalize } from '@/utils';
 
+import { Input } from '@/components/forms';
 import { TagsProps } from './types';
 import styles from './index.module.scss';
 
-const Tags: FC<TagsProps> = ({ createOffer, onChange, id, label, width }) => {
+const Tags: FC<TagsProps> = ({ createOffer, onChange }) => {
   const [tags, setTags] = useState('');
 
-  const handleTags = (e: ChangeEvent<HTMLInputElement>) => {
-    setTags(e.currentTarget.value);
+  const handleTags = (value: string) => {
+    setTags(value);
   };
 
   useEffect(() => {
@@ -22,26 +23,22 @@ const Tags: FC<TagsProps> = ({ createOffer, onChange, id, label, width }) => {
     }
   }, [tags]);
 
-  console.log({ createOfferTags: createOffer.tags });
-
   return (
     <div className={styles.inputContainer}>
-      {label && (
-        <div className={styles.labelLinkContainer}>
-          <label htmlFor={id} className={styles.label}>
-            {toCapitalize(label)}
-          </label>
-        </div>
-      )}
-      <input
-        className={styles.input}
-        id={id}
-        style={{ width }}
+      <Input
+        type="text"
+        name="tags"
+        id="tags"
+        label="Offer Tags"
+        placeholder="Cash, Bank transfer, Bitcoin..."
+        width="50%"
         onChange={handleTags}
-        value={tags}
       />
+      <p className={styles.statement}>
+        Select a maximum of 5 tags that best describe your offer terms.
+      </p>
       {createOffer.tags && createOffer.tags.length > 0 && (
-        <ul className={styles.tagsList} style={{ width }}>
+        <ul className={styles.tagsList}>
           {createOffer.tags.map((tag, index) => (
             <li key={index} className={styles.tagItem}>
               {tag}

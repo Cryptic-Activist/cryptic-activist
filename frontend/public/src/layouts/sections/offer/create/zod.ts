@@ -18,3 +18,7 @@ export const ZodListAt = z.number().min(1);
 export const ZodLimitMax = z.number().min(1);
 export const ZodLimitMin = z.number().min(1);
 export const ZodTimeLimit = z.number().min(1);
+export const ZodTags = z.array(z.string());
+export const ZodLabel = z.string().min(1);
+export const ZodTerms = z.string().min(1);
+export const ZodInstructions = z.string().min(1);

@@ -17,6 +17,7 @@ const TradeTime: FC<TradeTimeProps> = ({
         step={100}
         onChange={inputTradeTimeLimit}
         min={0}
+        width="6rem"
       />
       <p className={styles.description}>
         This indicates the amount of time your trade partner has to make their
