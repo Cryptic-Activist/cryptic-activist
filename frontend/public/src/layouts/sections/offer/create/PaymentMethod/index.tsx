@@ -39,7 +39,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
         <title>Payment Method | Create Offer - Cryptic Activist</title>
       </Head>
       <div className={stylesCore.container}>
-        <main className={stylesCore.main}>
+        <div className={stylesCore.main}>
           <h1 className={stylesCore.heading}>Create an Offer</h1>
           <ProgressBar
             steps={['Payment Method', 'Trade Pricing', 'Trade Instructions']}
@@ -78,7 +78,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
               paymentMethodId={createOffer.paymentMethodId}
             />
           </section>
-        </main>
+        </div>
         <aside className={stylesCore.aside}>
           <h3 className={stylesCore.asideHeading}>About the Payment Method</h3>
           <section className={stylesCore.horizontalGroup}>

@@ -33,8 +33,6 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
     setCreateOfferValues({ pricingType: pricingType.value });
   };
 
-  console.log({ createOfferListAt: createOffer.listAt });
-
   const inputLimit = (value: number) => {
     setCreateOfferValues({ listAt: value });
   };
@@ -63,7 +61,7 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
         <title>Trade Instructions | Create Offer - Cryptic Activist</title>
       </Head>
       <div className={stylesCore.container}>
-        <main className={stylesCore.main}>
+        <div className={stylesCore.main}>
           <h1 className={stylesCore.heading}>Create an Offer</h1>
           <ProgressBar
             steps={['Payment Method', 'Trade Pricing', 'Trade Instructions']}
@@ -101,7 +99,7 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
               inputTradeTimeLimit={inputTradeTimeLimit}
             />
           </section>
-        </main>
+        </div>
         <aside className={stylesCore.aside}>
           <h3 className={stylesCore.asideHeading}>About the Trade Pricing</h3>
           <section className={stylesCore.horizontalGroup}>
