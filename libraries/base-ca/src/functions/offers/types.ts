@@ -1,14 +1,11 @@
 import { DateType } from '@/functions/types';
-import { GetUserReturnType } from '@/functions/users/types';
-import { Prisma } from '@prisma/client';
-
 import { GetCryptocurrencyReturnType } from '../cryptocurrencies/types';
 import { GetFiatReturnType } from '../fiats/types';
 import { GetLanguageReturnType } from '../languages/types';
+import { GetUserReturnType } from '@/functions/users/types';
+import { Prisma } from '@prisma/client';
 
-export type CreateTradeInstructionsTagsPrismaType =
-  Prisma.StringNullableListFilter;
-export type UpdateTradeInstructionsTagsPrismaType =
+export type UpdateTagsPrismaType =
   Prisma.StringFieldUpdateOperationsInput;
 export type GetTradeInstructionsTagsPrismaType =
   Prisma.StringNullableListFilter;
@@ -18,16 +15,16 @@ export type CreateOfferParams = {
   cryptocurrencyId: string;
   paymentMethodId: string;
   fiatId: string;
-  paymentMethodType: string;
-  tradePricingType: string;
-  tradePricingListAt: number;
-  tradePricingTradeLimitsMin: number;
-  tradePricingTradeLimitsMax: number;
-  tradePricingTimeLimit: number;
-  tradeInstructionsTags: string[];
-  tradeInstructionsLabel: string;
-  tradeInstructionsTerms: string;
-  tradeInstructionsInstructions: string;
+  offerType: string;
+  pricingType: string;
+  listAt: number;
+  limitMin: number;
+  limitMax: number;
+  timeLimit: number;
+  tags: string[];
+  label: string;
+  terms: string;
+  instructions: string;
 };
 
 export type OfferDynamicType = {
@@ -36,16 +33,16 @@ export type OfferDynamicType = {
   cryptocurrencyId?: string;
   paymentMethodId?: string;
   fiatId?: string;
-  paymentMethodType?: string;
-  tradePricingType?: string;
-  tradePricingListAt?: number;
-  tradePricingTradeLimitsMin?: number;
-  tradePricingTradeLimitsMax?: number;
-  tradePricingTimeLimit?: number;
-  tradeInstructionsTags?: string[];
-  tradeInstructionsLabel?: string;
-  tradeInstructionsTerms?: string;
-  tradeInstructionsInstructions?: string;
+  offerType?: string;
+  pricingType?: string;
+  listAt?: number;
+  limitMin?: number;
+  limitMax?: number;
+  timeLimit?: number;
+  tags?: string[];
+  label?: string;
+  terms?: string;
+  instructions?: string;
   isDeleted?: boolean;
   whenDeleted?: DateType;
   createdAt?: DateType;
@@ -67,30 +64,4 @@ export type OfferAssociationsArrayType = {
   fiat: boolean;
   feedbacks: boolean;
   trades: boolean;
-};
-
-export type GetOfferReturnType = {
-  id: string;
-  vendorId: string;
-  cryptocurrencyId: string;
-  paymentMethodId: string;
-  fiatId: string;
-  paymentMethodType: string;
-  tradePricingType: string;
-  tradePricingListAt: number;
-  tradePricingTradeLimitsMin: number;
-  tradePricingTradeLimitsMax: number;
-  tradePricingTimeLimit: number;
-  tradeInstructionsTags: string[];
-  tradeInstructionsLabel: string;
-  tradeInstructionsTerms: string;
-  tradeInstructionsInstructions: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-  cryptocurrency?: GetCryptocurrencyReturnType;
-  fiat?: GetFiatReturnType;
-  vendor?: GetUserReturnType;
-  paymentMethod?: GetLanguageReturnType;
 };

@@ -22,8 +22,10 @@ const Input: FC<InputProps> = ({
   ...rest
 }) => {
   const handleChange = (event: ChangeEvent<any>) => {
-    const value = event.currentTarget.value;
-    onChange(value);
+    if (onChange) {
+      const value = event.currentTarget.value;
+      onChange(value);
+    }
   };
 
   return (
@@ -50,7 +52,7 @@ const Input: FC<InputProps> = ({
           width,
           ...(focus && { borderColor: '#000' }),
         }}
-        onChange={handleChange}
+        {...(onChange && { onChange: handleChange })}
         {...rest}
       />
       {errorMessage && (

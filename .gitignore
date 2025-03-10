@@ -4,5 +4,5 @@ yarn.lock
 
 frontend-public
 frontend-admin
-base-ca
-cryptic-utils
+!/libraries/base-ca
+!/libraries/cryptic-utils

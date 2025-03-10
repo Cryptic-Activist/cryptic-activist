@@ -217,21 +217,21 @@ model Feedback {
 }
 
 model Offer {
-  id                            String    @id @default(uuid())
-  paymentMethodType             String
-  tradePricingType              String
-  tradePricingListAt            Float
-  tradePricingTradeLimitsMin    Float
-  tradePricingTradeLimitsMax    Float
-  tradePricingTimeLimit         Float
-  tradeInstructionsTags         String[]
-  tradeInstructionsLabel        String
-  tradeInstructionsTerms        String
-  tradeInstructionsInstructions String
-  isDeleted                     Boolean?  @default(false) @db.Boolean
-  whenDelete                    DateTime? @db.Date
-  createdAt                     DateTime? @default(now()) @db.Date
-  updatedAt                     DateTime? @updatedAt @db.Date
+  id           String    @id @default(uuid())
+  offerType    String
+  pricingType  String
+  listAt       Float
+  limitMin     Float
+  limitMax     Float
+  timeLimit    Float
+  tags         String[]
+  label        String
+  terms        String
+  instructions String
+  isDeleted    Boolean?  @default(false) @db.Boolean
+  whenDelete   DateTime? @db.Date
+  createdAt    DateTime? @default(now()) @db.Date
+  updatedAt    DateTime? @updatedAt @db.Date
 
   vendor           User           @relation("offer", fields: [vendorId], references: [id])
   vendorId         String         @default(uuid())

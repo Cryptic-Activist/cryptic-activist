@@ -2,7 +2,7 @@ import {
   CreateOfferParams,
   GetOfferWhereType,
   UpdateOfferToUpdateType,
-  UpdateTradeInstructionsTagsPrismaType,
+  UpdateTagsPrismaType,
 } from '../../../functions/offers/types';
 
 export const createParamsRemapping = (params?: CreateOfferParams) => {
@@ -10,13 +10,13 @@ export const createParamsRemapping = (params?: CreateOfferParams) => {
     return;
   }
 
-  const { tradeInstructionsTags, ...rest } = params;
+  const { tags, ...rest } = params;
 
   return {
-    ...(tradeInstructionsTags && {
-      tradeInstructionsTags: {
+    ...(tags && {
+      tags: {
         // @ts-check
-        hasEvery: [...(tradeInstructionsTags as string[])],
+        hasEvery: [...(tags as string[])],
       },
     }),
     ...rest,
@@ -26,11 +26,10 @@ export const createParamsRemapping = (params?: CreateOfferParams) => {
 export const updateParamsRemapping = (
   params: UpdateOfferToUpdateType
 ) => {
-  const { tradeInstructionsTags, ...rest } = params;
+  const { tags, ...rest } = params;
 
   return {
-    tradeInstructionsTags:
-      tradeInstructionsTags as UpdateTradeInstructionsTagsPrismaType,
+    tags: tags as UpdateTagsPrismaType,
     ...rest,
   };
 };
@@ -40,13 +39,13 @@ export const getParamsRemapping = (params?: GetOfferWhereType) => {
     return;
   }
 
-  const { tradeInstructionsTags, ...rest } = params;
+  const { tags, ...rest } = params;
 
   return {
-    ...(tradeInstructionsTags && {
-      tradeInstructionsTags: {
+    ...(tags && {
+      tags: {
         // @ts-check
-        hasEvery: [...(tradeInstructionsTags as string[])],
+        hasEvery: [...(tags as string[])],
       },
     }),
     ...rest,

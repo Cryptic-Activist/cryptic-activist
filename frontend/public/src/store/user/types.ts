@@ -4,6 +4,7 @@ type Language = {
 };
 
 export type User = {
+  id: string;
   names: {
     firstName: string;
     lastName: string;
@@ -18,6 +19,7 @@ export type User = {
 export type UserState = User;
 
 export type UserSetter = {
+  id?: string;
   names?: {
     firstName?: string;
     lastName?: string;

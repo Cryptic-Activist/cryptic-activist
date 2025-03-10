@@ -29,7 +29,7 @@ const PricingType: FC<PricingTypeProps> = ({ onChange, createOffer }) => {
           },
         ]}
         onChange={handleOnChange}
-        value={createOffer.tradePricingType}
+        value={createOffer.pricingType}
       />
     </div>
   );

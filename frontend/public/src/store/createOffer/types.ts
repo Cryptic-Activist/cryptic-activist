@@ -8,10 +8,11 @@ type TradePricingType = 'market' | 'fixed';
 export type CreateOffer = {
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
+  vendorId?: string;
   offerType?: OfferType;
   paymentMethodId?: string;
   isPaymentMethodCompleted?: boolean;
-  tradePricingType?: TradePricingType;
+  pricingType?: TradePricingType;
   listAt?: number;
   limitMin?: number;
   limitMax?: number;
