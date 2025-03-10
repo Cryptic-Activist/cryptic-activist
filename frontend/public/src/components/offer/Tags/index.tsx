@@ -1,14 +1,20 @@
 'use client';
 
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
-import { convertStringToArrayOfStrings, toCapitalize } from '@/utils';
+import {
+  convertArrayOfStringsToString,
+  convertStringToArrayOfStrings,
+  toCapitalize,
+} from '@/utils';
 
 import { Input } from '@/components/forms';
 import { TagsProps } from './types';
 import styles from './index.module.scss';
 
 const Tags: FC<TagsProps> = ({ createOffer, onChange }) => {
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState(
+    convertArrayOfStringsToString(createOffer.tags ?? [])
+  );
 
   const handleTags = (value: string) => {
     setTags(value);
@@ -33,6 +39,7 @@ const Tags: FC<TagsProps> = ({ createOffer, onChange }) => {
         placeholder="Cash, Bank transfer, Bitcoin..."
         width="50%"
         onChange={handleTags}
+        value={tags}
       />
       <p className={styles.statement}>
         Select a maximum of 5 tags that best describe your offer terms.

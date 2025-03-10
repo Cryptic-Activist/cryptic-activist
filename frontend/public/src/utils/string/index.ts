@@ -27,4 +27,9 @@ export const convertStringToArrayOfStrings = (string: string): string[] => {
   return trimmedStringArr;
 };
 
+export const convertArrayOfStringsToString = (array: string[]): string => {
+  const converted = array.join(', ');
+  return converted;
+};
+
 export const getBearerToken = (token: string) => `Bearer ${token}`;
