@@ -16,7 +16,7 @@ const TradeLimit: FC<TradeLimitProps> = ({
         <InputNumber
           id="minTradeAmount"
           label="Minimum Trade Amount"
-          value={0}
+          value={createOffer.limitMin ?? 10}
           step={100}
           onChange={inputMinTradeAmount}
           min={0}
@@ -25,7 +25,7 @@ const TradeLimit: FC<TradeLimitProps> = ({
         <InputNumber
           id="maxTradeAmount"
           label="Maximum Trade Amount"
-          value={0}
+          value={createOffer.limitMax ?? 100}
           step={100}
           onChange={inputMaxTradeAmount}
           min={0}

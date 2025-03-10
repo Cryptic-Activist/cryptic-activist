@@ -13,7 +13,7 @@ const TradeTime: FC<TradeTimeProps> = ({
       <InputNumber
         id="tradeTimeLimit"
         label="Trade Time Limit"
-        value={0}
+        value={createOffer.timeLimit ?? 15}
         step={100}
         onChange={inputTradeTimeLimit}
         min={0}

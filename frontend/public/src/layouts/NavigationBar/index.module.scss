@@ -1,4 +1,4 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .navbar {
   width: 100%;
@@ -9,7 +9,7 @@
 }
 
 .container {
-  width: 80%;
+  width: 1400px;
   height: 100%;
   margin: 0 auto;
   display: flex;
@@ -25,4 +25,10 @@
 .menu {
   display: flex;
   gap: 1rem;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: 90%;
+  }
 }

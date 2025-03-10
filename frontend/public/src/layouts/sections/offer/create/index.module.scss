@@ -1,7 +1,7 @@
-@use '../../../../styles/globals.module.scss';
+@use "../../../../styles/globals.module.scss";
 
 .container {
-  width: 90%;
+  width: 1400px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 70% 30%;
@@ -52,4 +52,16 @@
 
 .asideStatement {
   font-size: 1rem;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.5rem;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: 90%;
+  }
 }
