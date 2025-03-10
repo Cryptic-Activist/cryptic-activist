@@ -43,8 +43,6 @@ const InputNumber: FC<InputNumberProps> = ({
     }
   }, [localValue]);
 
-  console.log({ localValue });
-
   return (
     <div className={styles.wrapper}>
       {label && (

@@ -9,4 +9,5 @@ export type CreateOfferTradePricingProps = {
   createOffer: CreateOfferState;
   step: number;
   onClickEvents: { [key: number]: () => void };
+  saveCreateOfferLocally: () => void;
 };

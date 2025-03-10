@@ -15,6 +15,7 @@ import stylesCore from '../index.module.scss';
 const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
   setCreateOfferValues,
   toStep,
+  saveCreateOfferLocally,
   createOffer,
   step,
   onClickEvents,
@@ -29,6 +30,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
 
   const goToNextStep = () => {
     if (createOffer.isPaymentMethodCompleted) {
+      saveCreateOfferLocally();
       toStep(1);
     }
   };

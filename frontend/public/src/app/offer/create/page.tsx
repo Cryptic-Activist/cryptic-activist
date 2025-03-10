@@ -6,8 +6,14 @@ import React from 'react';
 import { useCreateOffer } from '@/hooks';
 
 const Page = () => {
-  const { createOffer, step, onClickEvents, setCreateOfferValues, toStep } =
-    useCreateOffer();
+  const {
+    createOffer,
+    step,
+    onClickEvents,
+    setCreateOfferValues,
+    toStep,
+    saveCreateOfferLocally,
+  } = useCreateOffer();
 
   return (
     <>
@@ -18,6 +24,7 @@ const Page = () => {
           createOffer={createOffer}
           step={step}
           onClickEvents={onClickEvents}
+          saveCreateOfferLocally={saveCreateOfferLocally}
         />
       )}
       {step == 1 && (
@@ -27,6 +34,7 @@ const Page = () => {
           createOffer={createOffer}
           step={step}
           onClickEvents={onClickEvents}
+          saveCreateOfferLocally={saveCreateOfferLocally}
         />
       )}
       {step == 2 && (
@@ -36,6 +44,7 @@ const Page = () => {
           createOffer={createOffer}
           step={step}
           onClickEvents={onClickEvents}
+          saveCreateOfferLocally={saveCreateOfferLocally}
         />
       )}
     </>

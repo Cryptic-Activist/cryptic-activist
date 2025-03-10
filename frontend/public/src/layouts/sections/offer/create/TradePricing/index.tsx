@@ -18,6 +18,7 @@ import { useApp } from '@/hooks';
 const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
   setCreateOfferValues,
   toStep,
+  saveCreateOfferLocally,
   createOffer,
   step,
   onClickEvents,
@@ -51,8 +52,14 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
 
   const goToNextStep = () => {
     if (createOffer.isTradePricingCompleted) {
+      saveCreateOfferLocally();
       toStep(2);
     }
+  };
+
+  const backToPaymentMethod = () => {
+    saveCreateOfferLocally();
+    toStep(0);
   };
 
   return (
@@ -111,7 +118,7 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
             </p>
           </section>
           <div className={stylesCore.buttons}>
-            <Button padding="1em" type="button" onClick={() => toStep(0)}>
+            <Button padding="1em" type="button" onClick={backToPaymentMethod}>
               <FaChevronLeft size={18} />
             </Button>
             <Button
