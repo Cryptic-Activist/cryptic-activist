@@ -37,3 +37,12 @@ const setter = (data: CreateOfferSetter) => {
 export const setCreateOfferValues = (params: CreateOfferSetter) => {
   setter({ ...params });
 };
+
+export const resetCreateOfferValues = () => {
+  let reseted: { [key: string]: any } = {};
+  Object.keys($createOffer.get()).forEach((key) => {
+    reseted[key] = undefined;
+  });
+  console.log({ resetedValues: reseted });
+  setter({ ...reseted });
+};

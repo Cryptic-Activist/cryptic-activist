@@ -5,6 +5,7 @@ import {
   CreateOfferTradeInstructions,
   CreateOfferTradePricing,
 } from './zod';
+import { getLocalStorage, setLocalStorage } from '@/utils';
 import { useEffect, useState } from 'react';
 
 import { $createOffer } from '@/store';
@@ -33,6 +34,19 @@ const useCreateOffer = () => {
       setCreateOfferValues({ vendorId: user.id });
       return true;
     },
+    refetchOnMount: false,
+  });
+  const {} = useQuery({
+    queryFn: () => {
+      const savedCreateOfferString = getLocalStorage('createOffer');
+      if (!savedCreateOfferString) {
+        return false;
+      }
+      const savedCreateOffer = JSON.parse(savedCreateOfferString);
+      setCreateOfferValues(savedCreateOffer);
+      return true;
+    },
+    queryKey: ['savedCreateOffer'],
     refetchOnMount: false,
   });
 
@@ -97,12 +111,17 @@ const useCreateOffer = () => {
     setStep(step);
   };
 
+  const saveCreateOfferLocally = () => {
+    setLocalStorage('createOffer', JSON.stringify(createOffer));
+  };
+
   return {
     createOffer,
     step,
     onClickEvents,
     setCreateOfferValues,
     toStep,
+    saveCreateOfferLocally,
   };
 };
 

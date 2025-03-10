@@ -7,21 +7,34 @@ import { CreateOfferTradeInstructionsProps } from './types';
 import { FaChevronLeft } from 'react-icons/fa6';
 import Head from 'next/head';
 import { TextArea } from '@/components/forms';
+import { removeLocalStorage } from '@/utils';
+import { resetCreateOfferValues } from '@/store';
 import stylesCore from '../index.module.scss';
 import { submitOfferCreate } from '@/services/offers';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
   setCreateOfferValues,
   toStep,
+  saveCreateOfferLocally,
   createOffer,
   step,
   onClickEvents,
 }) => {
+  const router = useRouter();
+
   const createOfferMutation = useMutation({
     mutationKey: ['createOffer'],
     mutationFn: submitOfferCreate,
+    retry: 3,
+    onSuccess: () => {
+      resetCreateOfferValues();
+      removeLocalStorage('createOffer');
+      router.replace('/account');
+    },
   });
+
   const submitOffer = () => {
     if (createOffer.isTradeInstructionsCompleted) {
       createOfferMutation.mutate(createOffer);
@@ -42,6 +55,11 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
 
   const inputInstructions = (value: string) => {
     setCreateOfferValues({ instructions: value });
+  };
+
+  const backToTradePricing = () => {
+    saveCreateOfferLocally();
+    toStep(1);
   };
 
   return (
@@ -105,7 +123,7 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
             </p>
           </section>
           <div className={stylesCore.buttons}>
-            <Button padding="1em" type="button" onClick={() => toStep(1)}>
+            <Button padding="1em" type="button" onClick={backToTradePricing}>
               <FaChevronLeft size={18} />
             </Button>
             <Button
