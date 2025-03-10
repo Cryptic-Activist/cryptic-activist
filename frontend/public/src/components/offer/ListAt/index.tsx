@@ -27,7 +27,7 @@ const ListAt: FC<ListAtProps> = ({ onChange, createOffer }) => {
           {createOffer?.pricingType === 'market' && (
             <InputNumber
               id="offerMarketPrice"
-              value={createOffer?.listAt ?? 0}
+              value={createOffer?.listAt ?? 2.35}
               step={0.1}
               onChange={onChange}
               symbol="%"

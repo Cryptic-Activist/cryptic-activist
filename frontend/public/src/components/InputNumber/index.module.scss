@@ -36,9 +36,8 @@
   background-color: white;
   color: globals.$secondary;
   padding: 1rem;
-  border: 1px solid globals.$input-border-color;
+  border: none;
   border-radius: 0.4rem;
-  box-shadow: 0 0px 6px -2px rgb(0, 0, 0, 0.3);
   font-size: 1rem;
   transition: border-color 0.2s ease-in-out;
   width: 100%;

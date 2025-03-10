@@ -9,6 +9,7 @@ import {
 import React, { FC } from 'react';
 
 import { CreateOfferTradePricingProps } from './types';
+import { FaChevronLeft } from 'react-icons/fa6';
 import Head from 'next/head';
 import type { PricingItem } from '@/components/PricingType/types';
 import stylesCore from '../index.module.scss';
@@ -25,9 +26,14 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
     app: { currentPrice },
   } = useApp();
 
-  const selectRateType = (item: PricingItem) => {
-    setCreateOfferValues({ pricingType: item.value });
+  const selectRateType = (pricingType: PricingItem) => {
+    if (pricingType.value === 'market') {
+      setCreateOfferValues({ listAt: 2.35 });
+    }
+    setCreateOfferValues({ pricingType: pricingType.value });
   };
+
+  console.log({ createOfferListAt: createOffer.listAt });
 
   const inputLimit = (value: number) => {
     setCreateOfferValues({ listAt: value });
@@ -106,16 +112,21 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
               Make your selection on payment method and move onto the next step.
             </p>
           </section>
-          <Button
-            fullWidth
-            padding="1em"
-            type="button"
-            theme={createOffer?.isTradePricingCompleted ? 'primary' : 'ghost'}
-            isDisabled={!createOffer?.isTradePricingCompleted}
-            onClick={goToNextStep}
-          >
-            Go the next step: Trade Instructions
-          </Button>
+          <div className={stylesCore.buttons}>
+            <Button padding="1em" type="button" onClick={() => toStep(0)}>
+              <FaChevronLeft size={18} />
+            </Button>
+            <Button
+              fullWidth
+              padding="1em"
+              type="button"
+              theme={createOffer?.isTradePricingCompleted ? 'primary' : 'ghost'}
+              isDisabled={!createOffer?.isTradePricingCompleted}
+              onClick={goToNextStep}
+            >
+              Go the next step: Trade Instructions
+            </Button>
+          </div>
         </aside>
       </div>
     </>

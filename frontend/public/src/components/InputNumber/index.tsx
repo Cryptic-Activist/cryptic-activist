@@ -18,7 +18,7 @@ const InputNumber: FC<InputNumberProps> = ({
   id,
   width,
 }) => {
-  const [localValue, setLocalValue] = useState('');
+  const [localValue, setLocalValue] = useState(value.toString());
 
   const errorStyle = errorMessage ? styles.error : '';
 
@@ -42,6 +42,8 @@ const InputNumber: FC<InputNumberProps> = ({
       onChange(finalValue);
     }
   }, [localValue]);
+
+  console.log({ localValue });
 
   return (
     <div className={styles.wrapper}>

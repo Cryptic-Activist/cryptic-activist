@@ -4,6 +4,7 @@ import { Button, Label, ProgressBar, Tags } from '@/components';
 import React, { FC } from 'react';
 
 import { CreateOfferTradeInstructionsProps } from './types';
+import { FaChevronLeft } from 'react-icons/fa6';
 import Head from 'next/head';
 import { TextArea } from '@/components/forms';
 import stylesCore from '../index.module.scss';
@@ -103,18 +104,23 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
               Make your selection on payment method and move onto the next step.
             </p>
           </section>
-          <Button
-            fullWidth
-            padding="1em"
-            type="button"
-            theme={
-              createOffer?.isTradeInstructionsCompleted ? 'primary' : 'ghost'
-            }
-            isDisabled={!createOffer?.isTradeInstructionsCompleted}
-            onClick={submitOffer}
-          >
-            Finish offer creation
-          </Button>
+          <div className={stylesCore.buttons}>
+            <Button padding="1em" type="button" onClick={() => toStep(1)}>
+              <FaChevronLeft size={18} />
+            </Button>
+            <Button
+              fullWidth
+              padding="1em"
+              type="button"
+              theme={
+                createOffer?.isTradeInstructionsCompleted ? 'primary' : 'ghost'
+              }
+              isDisabled={!createOffer?.isTradeInstructionsCompleted}
+              onClick={submitOffer}
+            >
+              Finish offer creation
+            </Button>
+          </div>
         </aside>
       </div>
     </>
