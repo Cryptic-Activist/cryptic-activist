@@ -1,9 +1,3 @@
-import { Offer, prisma } from '../../services/prisma';
-import {
-  createParamsRemapping,
-  getParamsRemapping,
-  updateParamsRemapping,
-} from '../../utils/remap/offers';
 import {
   CreateOfferParams,
   DeleteOfferWhereType,
@@ -12,12 +6,19 @@ import {
   UpdateOfferToUpdateType,
   UpdateOfferWhereType,
 } from './types';
+import { Offer, prisma } from '@/services/prisma';
+import {
+  createParamsRemapping,
+  getParamsRemapping,
+  updateParamsRemapping,
+} from '../../utils/remap/offers';
 
 export const createOffer = async (
   params: CreateOfferParams
 ): Promise<Offer> => {
   try {
     const newParams = createParamsRemapping(params);
+
     const offer = await prisma.offer.findFirst({
       where: newParams,
     });

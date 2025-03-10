@@ -17,14 +17,13 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
   step,
   onClickEvents,
 }) => {
-  const mutation = useMutation({
+  const createOfferMutation = useMutation({
     mutationKey: ['createOffer'],
     mutationFn: submitOfferCreate,
   });
-  const goToNextStep = () => {
+  const submitOffer = () => {
     if (createOffer.isTradeInstructionsCompleted) {
-      console.log();
-      mutation.mutate(createOffer);
+      createOfferMutation.mutate(createOffer);
     }
   };
 
@@ -112,7 +111,7 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
               createOffer?.isTradeInstructionsCompleted ? 'primary' : 'ghost'
             }
             isDisabled={!createOffer?.isTradeInstructionsCompleted}
-            onClick={goToNextStep}
+            onClick={submitOffer}
           >
             Finish offer creation
           </Button>

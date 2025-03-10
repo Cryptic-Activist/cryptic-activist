@@ -10,19 +10,31 @@ import { useEffect, useState } from 'react';
 import { $createOffer } from '@/store';
 import { setCreateOfferValues } from '@/store';
 import useApp from '../useApp';
+import { useQuery } from '@tanstack/react-query';
 import { useStore } from '@nanostores/react';
+import useUser from '../useUser';
 
 const useCreateOffer = () => {
   const createOffer = useStore($createOffer);
   const {
     app: { defaults },
   } = useApp();
+  const { user } = useUser();
   const [step, setStep] = useState(0);
   const onClickEvents = {
     0: () => toStep(0),
     1: () => toStep(1),
     2: () => toStep(2),
   };
+  const {} = useQuery({
+    queryKey: ['vendor', user.id],
+    enabled: !!user.id,
+    queryFn: () => {
+      setCreateOfferValues({ vendorId: user.id });
+      return true;
+    },
+    refetchOnMount: false,
+  });
 
   useEffect(() => {
     setCreateOfferValues({
@@ -49,7 +61,7 @@ const useCreateOffer = () => {
 
   useEffect(() => {
     const validated = CreateOfferTradePricing.safeParse({
-      tradePricingType: createOffer?.tradePricingType,
+      pricingType: createOffer?.pricingType,
       listAt: createOffer?.listAt,
       limitMax: createOffer?.limitMax,
       limitMin: createOffer?.limitMin,
@@ -58,7 +70,7 @@ const useCreateOffer = () => {
 
     setCreateOfferValues({ isTradePricingCompleted: validated.success });
   }, [
-    createOffer?.tradePricingType,
+    createOffer?.pricingType,
     createOffer?.listAt,
     createOffer?.limitMin,
     createOffer?.limitMax,

@@ -26,7 +26,7 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
   } = useApp();
 
   const selectRateType = (item: PricingItem) => {
-    setCreateOfferValues({ tradePricingType: item.value });
+    setCreateOfferValues({ pricingType: item.value });
   };
 
   const inputLimit = (value: number) => {
@@ -68,13 +68,13 @@ const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
             <h2 className={stylesCore.groupHeading}>Step 2: Trade Pricing</h2>
             <PricingType onChange={selectRateType} createOffer={createOffer} />
           </section>
-          {(createOffer?.tradePricingType === 'fixed' ||
-            createOffer?.tradePricingType === 'market') && (
+          {(createOffer?.pricingType === 'fixed' ||
+            createOffer?.pricingType === 'market') && (
             <section className={stylesCore.horizontalGroup}>
               <h2 className={stylesCore.groupHeading}>
-                {createOffer?.tradePricingType === 'fixed' &&
+                {createOffer?.pricingType === 'fixed' &&
                   'Percent above market rate your offer will list at'}
-                {createOffer?.tradePricingType === 'market' &&
+                {createOffer?.pricingType === 'market' &&
                   'Price your offer will list at'}
               </h2>
               <ListAt onChange={inputLimit} createOffer={createOffer} />

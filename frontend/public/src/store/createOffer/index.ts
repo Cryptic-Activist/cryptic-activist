@@ -10,11 +10,12 @@ const setter = (data: CreateOfferSetter) => {
   $createOffer.set({
     cryptocurrency: data?.cryptocurrency ?? createOffer?.cryptocurrency,
     fiat: data?.fiat ?? createOffer?.fiat,
+    vendorId: data?.vendorId ?? createOffer.vendorId,
     offerType: data?.offerType ?? createOffer?.offerType,
     paymentMethodId: data?.paymentMethodId ?? createOffer?.paymentMethodId,
     isPaymentMethodCompleted:
       data?.isPaymentMethodCompleted ?? createOffer?.isPaymentMethodCompleted,
-    tradePricingType: data?.tradePricingType ?? createOffer?.tradePricingType,
+    pricingType: data?.pricingType ?? createOffer?.pricingType,
     listAt: data?.listAt ?? createOffer?.listAt,
     limitMin: data?.limitMin ?? createOffer?.limitMin,
     limitMax: data?.limitMax ?? createOffer?.limitMax,

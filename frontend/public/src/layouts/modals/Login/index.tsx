@@ -9,7 +9,8 @@ import styles from './index.module.scss';
 import { useUser } from '@/hooks';
 
 const Login = () => {
-  const { errors, loginFormRegister, onSubmit, handleSubmit } = useUser();
+  const { errors, formValues, loginFormRegister, onSubmit, handleSubmit } =
+    useUser();
   const links = [
     {
       label: "Don't have an account yet?",

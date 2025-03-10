@@ -25,7 +25,6 @@ export const createPaymentMethodCategoryController = async (
     });
     return;
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       status_code: 500,
       results: {},

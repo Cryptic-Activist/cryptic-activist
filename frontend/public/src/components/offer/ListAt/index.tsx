@@ -14,7 +14,7 @@ const ListAt: FC<ListAtProps> = ({ onChange, createOffer }) => {
     <>
       <div className={styles.container}>
         <div className={styles.pricingTypeRow}>
-          {createOffer?.tradePricingType === 'fixed' && (
+          {createOffer?.pricingType === 'fixed' && (
             <InputNumber
               id="offerFixPrice"
               value={currentPrice ?? 0}
@@ -24,7 +24,7 @@ const ListAt: FC<ListAtProps> = ({ onChange, createOffer }) => {
               min={0}
             />
           )}
-          {createOffer?.tradePricingType === 'market' && (
+          {createOffer?.pricingType === 'market' && (
             <InputNumber
               id="offerMarketPrice"
               value={createOffer?.listAt ?? 0}

@@ -1,10 +1,11 @@
-import { map } from 'nanostores';
-
 import type { UserSetter, UserState } from './types';
+
+import { map } from 'nanostores';
 
 export const $user = map<UserState>();
 
 const setter = ({
+  id,
   createdAt,
   languages,
   names,
@@ -15,6 +16,7 @@ const setter = ({
   const user = $user.get();
 
   $user.set({
+    id: id ?? user.id,
     names: {
       firstName: names?.firstName ?? user.names.firstName,
       lastName: names?.lastName ?? user.names.lastName,
@@ -29,6 +31,7 @@ const setter = ({
 
 export const setUserInfo = (userInfo: UserSetter) => {
   setter({
+    id: userInfo.id,
     createdAt: userInfo.createdAt,
     names: {
       firstName: userInfo.names?.firstName,

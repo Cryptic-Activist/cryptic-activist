@@ -1,20 +1,11 @@
 import { Request, Response } from 'express';
 import { createOffer, getOffer } from 'base-ca';
 
-export async function createOfferController(req: Request, res: Response) {
+export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
-    const { cryptocurrency, fiat, ...rest } = body;
 
-    console.log({ body });
-
-    const create = {
-      cryptocurrencyId: cryptocurrency.id,
-      fiatId: fiat.id,
-      ...rest,
-    };
-
-    const newOffer = await createOffer(create);
+    const newOffer = await createOffer(body);
 
     res.status(200).send({
       status_code: 200,
@@ -27,9 +18,9 @@ export async function createOfferController(req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};
 
-export async function getOfferController(req: Request, res: Response) {
+export const getOfferController = async (req: Request, res: Response) => {
   try {
     const { query } = req;
     const { id, associations } = query;
@@ -95,4 +86,4 @@ export async function getOfferController(req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};

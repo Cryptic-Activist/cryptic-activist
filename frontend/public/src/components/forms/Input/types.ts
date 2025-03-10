@@ -10,7 +10,7 @@ export type InputProps = {
   disabled?: boolean;
   id?: string;
   value?: string;
-  onChange?: any;
+  onChange?: (value: any) => void;
   register?: any;
   type?: InputType;
   placeholder?: string;
