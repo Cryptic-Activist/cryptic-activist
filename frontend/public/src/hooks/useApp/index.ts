@@ -1,31 +1,44 @@
 'use client';
 
-import {
-  $app,
-  addToast,
-  removeToast,
-  setCurrentPrice as setCurrentPriceStore,
-  setValue,
-} from '@/store';
-
-import { useStore } from '@nanostores/react';
+import { useAppStore } from '@/zustand';
 
 const useApp = () => {
-  const app = useStore($app);
+  const {
+    defaults,
+    dimensions,
+    isMobile,
+    toasts,
+    type,
+    currentPrice,
+    setCurrentPrice: setCurrentPriceStore,
+    addToast,
+    removeToast,
+    setValue,
+  } = useAppStore();
 
   const setCurrentPrice = async () => {
-    if (
-      app.defaults?.cryptocurrency?.coingeckoId &&
-      app.defaults?.fiat?.symbol
-    ) {
+    if (defaults?.cryptocurrency?.coingeckoId && defaults?.fiat?.symbol) {
       setCurrentPriceStore(
-        app.defaults?.cryptocurrency?.coingeckoId,
-        app.defaults?.fiat?.symbol
+        defaults?.cryptocurrency?.coingeckoId,
+        defaults?.fiat?.symbol
       );
     }
   };
 
-  return { app, setValue, setCurrentPrice, addToast, removeToast };
+  return {
+    app: {
+      dimensions,
+      isMobile,
+      type,
+      toasts,
+      defaults,
+      currentPrice,
+    },
+    setValue,
+    setCurrentPrice,
+    addToast,
+    removeToast,
+  };
 };
 
 export default useApp;

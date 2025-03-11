@@ -1,4 +1,3 @@
-export * from './app';
 export * from './cryptocurrencies';
 export * from './cryptocurrency';
 export * from './fiat';

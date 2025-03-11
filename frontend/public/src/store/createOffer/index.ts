@@ -43,6 +43,5 @@ export const resetCreateOfferValues = () => {
   Object.keys($createOffer.get()).forEach((key) => {
     reseted[key] = undefined;
   });
-  console.log({ resetedValues: reseted });
   setter({ ...reseted });
 };
