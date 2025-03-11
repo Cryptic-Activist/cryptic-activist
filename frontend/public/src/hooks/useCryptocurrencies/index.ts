@@ -1,19 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-
 import {
   $cryptocurrencies,
   getCryptocurrencies as getCryptocurrenciesStore,
-  setValue,
 } from '@/store';
+
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
+import { CryptocurrencyCoinGeckoId } from './types';
 import { toLowerCase } from '@/utils';
+import { useAppStore } from '@/zustand';
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 
-import { CryptocurrencyCoinGeckoId } from './types';
-
 const useCryptocurrency = () => {
+  const { setValue } = useAppStore();
   const cryptocurrencies = useStore($cryptocurrencies);
   const [cryptocurrenciesList, setCryptocurrenciesList] = useState(
     cryptocurrencies.data

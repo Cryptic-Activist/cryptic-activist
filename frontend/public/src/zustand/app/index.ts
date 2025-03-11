@@ -13,13 +13,34 @@ const useAppStore = create<AppStore>()(
       type: 'buy',
       toasts: [],
       defaults: {},
-      setValue: (value) => {
-        set((state) => {
-          console.log({ value });
-          return {
-            ...state,
-          };
-        });
+      setValue: ({
+        currentPrice,
+        defaults,
+        dimensions,
+        isMobile,
+        toasts,
+        type,
+      }) => {
+        set(
+          (state) => {
+            return {
+              defaults: {
+                fiat: defaults?.fiat ?? state.defaults?.fiat,
+                cryptocurrency:
+                  defaults?.cryptocurrency ?? state.defaults?.cryptocurrency,
+                paymentMethod:
+                  defaults?.paymentMethod ?? state.defaults?.paymentMethod,
+              },
+              dimensions: dimensions ?? state.dimensions,
+              isMobile: isMobile ?? state.isMobile,
+              type: type ?? state.type,
+              toasts: toasts ?? state.toasts,
+              currentPrice: currentPrice ?? state.currentPrice,
+            };
+          },
+          false,
+          'app/setValue'
+        );
       },
       setCurrentPrice: async (id, fiatSymbol) => {
         const currentPrice = await fetchCurrentPrice(id, fiatSymbol);
@@ -31,14 +52,18 @@ const useAppStore = create<AppStore>()(
         const crypto = Object.values(currentPrice.data)[0] as object;
         const price: number = Object.values(crypto)[0];
 
-        set(() => ({
-          currentPrice: price,
-        }));
+        set(
+          () => ({
+            currentPrice: price,
+          }),
+          false,
+          'app/setCurrentPrice'
+        );
       },
       removeToast: (id) => {
         const toasts = useAppStore.getState().toasts;
         const filteredToasts = toasts.filter((toast) => toast.id !== id);
-        set({ toasts: filteredToasts });
+        set({ toasts: filteredToasts }, false, 'app/removeToast');
       },
       addToast: (type, content, timeout) => {
         const toasts = useAppStore.getState().toasts;
@@ -47,7 +72,7 @@ const useAppStore = create<AppStore>()(
 
         toasts.push({ type, content, timeout, id: uuid });
 
-        set({ toasts });
+        set({ toasts }, false, 'app/addToast');
 
         setTimeout(() => {
           removeToast(uuid);

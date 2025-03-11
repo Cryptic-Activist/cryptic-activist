@@ -1,14 +1,16 @@
 'use client';
 
-import { $fiats, getFiats, setValue } from '@/store';
+import { $fiats, getFiats } from '@/store';
 
 import { Fiat } from '@/store/fiat/types';
 import { FiatSymbol } from './types';
 import { toLowerCase } from '@/utils';
+import { useAppStore } from '@/zustand';
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 
 const useFiats = () => {
+  const { setValue } = useAppStore();
   const fiats = useStore($fiats);
   const [fiatsList, setFiatsList] = useState(fiats.data);
 
