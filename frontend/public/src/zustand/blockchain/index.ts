@@ -19,13 +19,13 @@ export const useBlockchainStore: StateCreator<
       set(
         ({ blockchain, ...rest }) => ({
           blockchain: {
+            ...blockchain,
             account: params.account ?? blockchain.account,
             balance: params.balance ?? blockchain.balance,
             chain: params.chain ?? blockchain.chain,
             connector: params.connector ?? blockchain.connector,
             provider: params.provider ?? blockchain.provider,
             wallet: params.wallet ?? blockchain.wallet,
-            ...blockchain,
           },
           ...rest,
         }),

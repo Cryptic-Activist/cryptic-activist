@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 
+import { BRAVE_WALLET } from '@/constants';
 import { Button } from '@/components';
 import Image from 'next/image';
 import { ProviderProps } from './types';
@@ -47,11 +48,14 @@ const Wallet = () => {
     <Template heading="Select Wallet" width="24rem">
       <ul className={styles.walletList}>
         {connectors.map((connector) => (
-          <Provider
-            key={connector.uid}
-            connector={connector}
-            onConnectWallet={onConnectWallet}
-          />
+          <Fragment key={connector.uid}>
+            {connector.name !== BRAVE_WALLET && (
+              <Provider
+                connector={connector}
+                onConnectWallet={onConnectWallet}
+              />
+            )}
+          </Fragment>
         ))}
       </ul>
     </Template>
