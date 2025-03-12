@@ -19,10 +19,8 @@ const InitialSettings = () => {
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
   const { setValue, setCurrentPrice, app } = useApp();
-  const { user } = useUser();
-  const { app: appStore, blockchain, cryptocurrency } = useRootStore();
-
-  console.log({ app: appStore, blockchain, cryptocurrency });
+  const {} = useUser();
+  const {} = useRootStore();
 
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);

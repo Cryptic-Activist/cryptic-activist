@@ -1,12 +1,17 @@
 'use client';
 
-import { Connector, useAccountEffect, useBalance, useConnect } from 'wagmi';
+import {
+  Connector,
+  useAccount,
+  useAccountEffect,
+  useBalance,
+  useConnect,
+} from 'wagmi';
 import { resetNavigationBar, toggleModal } from '@/store';
-import { useBlockchainStore, useRootStore } from '@/zustand';
+import { useEffect, useState } from 'react';
 
 import { BRAVE_WALLET } from '@/constants';
-import { Balance } from '@/zustand/blockchain/types';
-import { useEffect } from 'react';
+import { useRootStore } from '@/zustand';
 import { useUser } from '@/hooks';
 
 const useBlockchain = () => {
@@ -24,7 +29,9 @@ const useBlockchain = () => {
   } = useRootStore();
   const { connect, connectors } = useConnect();
   const balance = useBalance({ address: account?.address as `0x${string}` });
+  const { isConnected } = useAccount();
   const { isLoggedIn } = useUser();
+  const isWalletConnected = isLoggedIn() && isConnected;
 
   const resetWalletNavigation = () => {
     resetNavigationBar();
@@ -43,14 +50,8 @@ const useBlockchain = () => {
     await connector?.disconnect();
   };
 
-  const isWalletConnected =
-    isLoggedIn() &&
-    provider &&
-    account?.address &&
-    account?.address?.length > 0;
-
   useAccountEffect({
-    async onConnect({ address, chain, connector, isReconnected }) {
+    async onConnect({ address, chain, connector }) {
       const provider = await connector.getProvider();
 
       setBlockchainValue(
@@ -62,7 +63,7 @@ const useBlockchain = () => {
           provider,
           balance: balance.data,
         },
-        'blockchain/setBlockchainValue'
+        'blockchain/setWalletDetails'
       );
     },
     onDisconnect() {
@@ -70,17 +71,11 @@ const useBlockchain = () => {
     },
   });
 
-  const onReconnectWallet = () => {
-    // const walletCookie = getCookie();
-  };
-
   useEffect(() => {
     if (balance.isSuccess) {
-      setBlockchainValue({ balance: balance.data });
+      setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
   }, [balance.isSuccess]);
-
-  useEffect(() => {}, []);
 
   return {
     blockchain: {

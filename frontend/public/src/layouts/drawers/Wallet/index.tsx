@@ -1,12 +1,37 @@
 'use client';
 
-import React, { FC, MouseEvent, useEffect, useState } from 'react';
-
-import styles from './index.module.scss';
+import { BRAVE_WALLET, METAMASK } from '@/constants';
+import { Brave, MetaMask } from '@/assets';
 import { FaChevronRight, FaPowerOff } from 'react-icons/fa';
+import { ProviderImageProps, ValueContainerProps } from './types';
+import React, { FC, useEffect, useState } from 'react';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
-import { ValueContainerProps } from './types';
+
 import { copyToClipboard } from '@/utils';
+import styles from './index.module.scss';
+
+const ProviderImage: FC<ProviderImageProps> = ({ provider }) => {
+  const getProviderImage = () => {
+    switch (provider) {
+      case BRAVE_WALLET: {
+        return Brave.src;
+      }
+      case METAMASK: {
+        return MetaMask.src;
+      }
+      default: {
+        return '';
+      }
+    }
+  };
+
+  return (
+    <span
+      className={styles.provider}
+      style={{ backgroundImage: `url(${getProviderImage()})` }}
+    />
+  );
+};
 
 const ValueContainer: FC<ValueContainerProps> = ({ label, value }) => {
   const valueType = typeof value;
@@ -34,6 +59,8 @@ const Wallet = () => {
   const { toggleDrawer, navigationBar } = useNavigationBar();
   const { blockchain, onDisconnectWallet } = useBlockchain();
   const { user } = useUser();
+
+  console.log({ blockchain });
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
@@ -74,7 +101,7 @@ const Wallet = () => {
                   backgroundColor: user.profileColor,
                 }}
               />
-              <span className={styles.provider} />
+              <ProviderImage provider={blockchain.wallet} />
             </div>
 
             <p className={styles.address}>
