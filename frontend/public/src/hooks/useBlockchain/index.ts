@@ -1,29 +1,29 @@
 'use client';
 
-import {
-  $blockchain,
-  resetBlockchain,
-  resetNavigationBar,
-  setAccount,
-  setBalance,
-  setChain,
-  setConnector,
-  setProvider,
-  setWallet,
-  toggleModal,
-} from '@/store';
-import { useStore } from '@nanostores/react';
-import { Connector, useConnect, useAccountEffect, useBalance } from 'wagmi';
+import { Connector, useAccountEffect, useBalance, useConnect } from 'wagmi';
+import { resetNavigationBar, toggleModal } from '@/store';
+import { useBlockchainStore, useRootStore } from '@/zustand';
 
-import { useUser } from '@/hooks';
-import { useEffect } from 'react';
-import { getCookie } from '@/utils';
 import { BRAVE_WALLET } from '@/constants';
+import { Balance } from '@/zustand/blockchain/types';
+import { useEffect } from 'react';
+import { useUser } from '@/hooks';
 
 const useBlockchain = () => {
-  const blockchain = useStore($blockchain);
+  const {
+    blockchain: {
+      setBlockchainValue,
+      resetBlockchain,
+      account,
+      connector,
+      provider,
+      chain,
+      balance: balanceBlockchainStore,
+      wallet,
+    },
+  } = useRootStore();
   const { connect, connectors } = useConnect();
-  const balance = useBalance({ address: blockchain.account?.address });
+  const balance = useBalance({ address: account?.address as `0x${string}` });
   const { isLoggedIn } = useUser();
 
   const resetWalletNavigation = () => {
@@ -37,27 +37,30 @@ const useBlockchain = () => {
   };
 
   const onDisconnectWallet = async () => {
-    if (blockchain.connector?.name === BRAVE_WALLET) {
+    if (connector?.name === BRAVE_WALLET) {
       resetWalletNavigation();
     }
-    await blockchain.connector?.disconnect();
+    await connector?.disconnect();
   };
 
   const isWalletConnected =
     isLoggedIn() &&
-    blockchain.provider &&
-    blockchain.account?.address &&
-    blockchain.account?.address?.length > 0;
+    provider &&
+    account?.address &&
+    account?.address?.length > 0;
 
   useAccountEffect({
     async onConnect({ address, chain, connector, isReconnected }) {
       const provider = await connector.getProvider();
 
-      setAccount({ address });
-      setChain(chain);
-      setConnector(connector);
-      setWallet(connector.name);
-      setProvider(provider);
+      setBlockchainValue({
+        account: { address: address },
+        chain,
+        connector,
+        wallet: connector.name,
+        provider,
+        balance: balance.data,
+      });
     },
     onDisconnect() {
       resetWalletNavigation();
@@ -70,20 +73,27 @@ const useBlockchain = () => {
 
   useEffect(() => {
     if (balance.isSuccess) {
-      setBalance(balance.data);
+      setBlockchainValue({ balance: balance.data });
     }
   }, [balance.isSuccess]);
 
   useEffect(() => {}, []);
 
   return {
-    blockchain,
+    blockchain: {
+      account,
+      chain,
+      connector,
+      provider,
+      wallet,
+      balance: balanceBlockchainStore,
+    },
     connectors,
     isWalletConnected,
     connect,
-    setProvider,
     onConnectWallet,
     onDisconnectWallet,
+    setValue: setBlockchainValue,
   };
 };
 

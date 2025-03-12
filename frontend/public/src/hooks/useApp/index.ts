@@ -1,20 +1,22 @@
 'use client';
 
-import { useAppStore } from '@/zustand';
+import { useRootStore } from '@/zustand';
 
 const useApp = () => {
   const {
-    defaults,
-    dimensions,
-    isMobile,
-    toasts,
-    type,
-    currentPrice,
-    setCurrentPrice: setCurrentPriceStore,
-    addToast,
-    removeToast,
-    setValue,
-  } = useAppStore();
+    app: {
+      defaults,
+      dimensions,
+      isMobile,
+      toasts,
+      type,
+      currentPrice,
+      setCurrentPrice: setCurrentPriceStore,
+      addToast,
+      removeToast,
+      setAppValue,
+    },
+  } = useRootStore();
 
   const setCurrentPrice = async () => {
     if (defaults?.cryptocurrency?.coingeckoId && defaults?.fiat?.symbol) {
@@ -34,7 +36,7 @@ const useApp = () => {
       defaults,
       currentPrice,
     },
-    setValue,
+    setValue: setAppValue,
     setCurrentPrice,
     addToast,
     removeToast,

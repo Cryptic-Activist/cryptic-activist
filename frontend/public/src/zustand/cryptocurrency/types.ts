@@ -5,11 +5,24 @@ export type Cryptocurrency = {
   coingeckoId: string;
 };
 
-export type CryptocurrenciesStore = {
-  data?: Cryptocurrency[];
-  getCryptocurrencies: () => Promise<void>;
+export type CryptocurrencySetter = {
+  id?: string;
+  name?: string;
+  symbol?: string;
+  coingeckoId?: string;
 };
 
-export type CryptocurrencyState = Cryptocurrency | object;
+export type Value = CryptocurrencySetter;
 
-export type CryptocurrencySetter = Cryptocurrency;
+export type CryptocurrencyStore = {
+  cryptocurrency: {
+    id?: string;
+    name?: string;
+    symbol?: string;
+    coingeckoId?: string;
+    setCryptocurrencyValue: (value: Value) => void;
+    getCryptocurrency: () => Promise<void>;
+  };
+};
+
+export type CryptocurrencyState = Cryptocurrency;

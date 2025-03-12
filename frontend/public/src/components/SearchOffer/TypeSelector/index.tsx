@@ -1,10 +1,10 @@
 'use client';
 
-import { useApp } from '@/hooks';
 import { useEffect, useState } from 'react';
 
-import styles from './index.module.scss';
 import { Selected } from './types';
+import styles from './index.module.scss';
+import { useApp } from '@/hooks';
 
 const TypeSelector = () => {
   const { setValue } = useApp();
