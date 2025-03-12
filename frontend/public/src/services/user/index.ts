@@ -7,6 +7,7 @@ import { fetchGet, fetchPost } from '../axios';
 import {
   getBearerToken,
   getLocalStorage,
+  removeCookie,
   removeLocalStorage,
   setCookie,
   setLocalStorage,
@@ -109,5 +110,7 @@ export const login = async (userData: LoginUserParams) => {
 export const logout = () => {
   removeLocalStorage('accessToken');
   removeLocalStorage('refreshToken');
+  removeCookie('accessToken');
+  removeCookie('refreshToken');
   resetUserInfo();
 };

@@ -17,14 +17,16 @@ export const getCurrentPath = () => {
 };
 
 export const getCookie = (name: string) => {
-  const cookies = document.cookie.split('; ');
-  for (let cookie of cookies) {
-    const [key, value] = cookie.split('=');
-    if (key === name) {
-      return decodeURIComponent(value);
+  if (typeof document !== 'undefined') {
+    const cookies = document.cookie.split('; ');
+    for (let cookie of cookies) {
+      const [key, value] = cookie.split('=');
+      if (key === name) {
+        return decodeURIComponent(value);
+      }
     }
+    return null;
   }
-  return null;
 };
 
 export const setCookie = ({
