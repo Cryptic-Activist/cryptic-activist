@@ -8,12 +8,12 @@ import {
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { CryptocurrencyCoinGeckoId } from './types';
 import { toLowerCase } from '@/utils';
-import { useAppStore } from '@/zustand';
+import { useApp } from '@/hooks';
 import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 
 const useCryptocurrency = () => {
-  const { setValue } = useAppStore();
+  const { setValue } = useApp();
   const cryptocurrencies = useStore($cryptocurrencies);
   const [cryptocurrenciesList, setCryptocurrenciesList] = useState(
     cryptocurrencies.data

@@ -26,16 +26,18 @@ type Defaults = {
 export type CurrentPrice = number;
 
 export type AppStore = {
-  isMobile: boolean;
-  dimensions: Dimensions;
-  toasts: Toast[];
-  type: Type;
-  defaults: Defaults;
-  currentPrice?: CurrentPrice;
-  setValue: (value: Value) => void;
-  setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
-  removeToast: (id: string) => void;
-  addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
+  app: {
+    isMobile: boolean;
+    dimensions: Dimensions;
+    toasts: Toast[];
+    type: Type;
+    defaults: Defaults;
+    currentPrice?: CurrentPrice;
+    setAppValue: (value: Value) => void;
+    setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
+    removeToast: (id: string) => void;
+    addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
+  };
 };
 
 export type AppStoreSetter = {

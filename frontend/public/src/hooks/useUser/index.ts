@@ -1,6 +1,6 @@
 'use client';
 
-import { $user, setValue, toggleModal } from '@/store';
+import { $user, toggleModal } from '@/store';
 import { decodeAccessToken, login, logout } from '@/services/user';
 import { useMutation, useQuery } from '@tanstack/react-query';
 

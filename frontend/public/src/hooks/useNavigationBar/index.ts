@@ -7,7 +7,7 @@ import {
   toggleModal,
   toggleTooltip,
 } from '@/store';
-import { Drawer, Modal } from '@/store/navigationBar/types';
+
 import { useStore } from '@nanostores/react';
 
 const useNavigationBar = () => {

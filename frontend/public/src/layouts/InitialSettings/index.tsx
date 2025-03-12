@@ -11,6 +11,7 @@ import {
 } from '@/hooks';
 
 import { useEffect } from 'react';
+import { useRootStore } from '@/zustand';
 
 const InitialSettings = () => {
   const { getFiats, getFiat, fiats } = useFiats();
@@ -19,6 +20,7 @@ const InitialSettings = () => {
   const { getPaymentMethods } = usePaymentMethods();
   const { setValue, setCurrentPrice, app } = useApp();
   const { user } = useUser();
+  const {} = useRootStore();
 
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);
@@ -39,6 +41,8 @@ const InitialSettings = () => {
 
   const setDefaultFiat = (symbol: FiatSymbol) => {
     const fiat = getFiat(symbol);
+
+    // console.log({ fiatSetValue: setValue });
 
     if (fiat) {
       setValue({
