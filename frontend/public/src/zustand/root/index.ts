@@ -1,4 +1,10 @@
-import { useAppStore, useBlockchainStore, useCryptocurrencyStore } from '../';
+import {
+  useAppStore,
+  useBlockchainStore,
+  useCryptocurrencyStore,
+  useFiatStore,
+  usePaymentMethodStore,
+} from '../';
 
 import { IS_DEVELOPMENT } from '@/constants';
 import { RootStore } from './types';
@@ -11,6 +17,8 @@ export const useRootStore = create<RootStore>()(
       ...useAppStore(set, get, store),
       ...useBlockchainStore(set, get, store),
       ...useCryptocurrencyStore(set, get, store),
+      ...useFiatStore(set, get, store),
+      ...usePaymentMethodStore(set, get, store),
     }),
     {
       name: 'RootStore',

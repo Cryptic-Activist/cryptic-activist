@@ -13,37 +13,28 @@ export const useCryptocurrencyStore: StateCreator<
     id: undefined,
     name: undefined,
     symbol: undefined,
-    setCryptocurrencyValue: (params) => {
-      const {
-        cryptocurrency: {
-          coingeckoId,
-          id,
-          name,
-          symbol,
-          ...restCryptocurrency
-        },
-        ...rest
-      } = get();
+    setCryptocurrencyValue: (
+      params,
+      actionName = 'cryptocurrency/setValue'
+    ) => {
       set(
-        {
+        ({ cryptocurrency, ...rest }) => ({
           cryptocurrency: {
-            coingeckoId: params.coingeckoId ?? coingeckoId,
-            id: params.id ?? id,
-            name: params.name ?? name,
-            symbol: params.symbol ?? symbol,
-            ...restCryptocurrency,
+            coingeckoId: params.coingeckoId ?? cryptocurrency.coingeckoId,
+            id: params.id ?? cryptocurrency.id,
+            name: params.name ?? cryptocurrency.name,
+            symbol: params.symbol ?? cryptocurrency.symbol,
+            ...cryptocurrency,
           },
           ...rest,
-        },
+        }),
         false,
-        'blockchain/setValue'
+        actionName
       );
     },
-    getCryptocurrency: async () => {
-      // const cryptocurrencies = await fetchCryptocurrencies();
-      // if (!cryptocurrencies) {
-      //   set({ cryptocurrency:  });
-      // }
+    setCryptocurrency: (cryptocurrency) => {
+      const setValue = get().cryptocurrency.setCryptocurrencyValue;
+      setValue(cryptocurrency, 'cryptocurrency/setCryptocurrency');
     },
   },
 });

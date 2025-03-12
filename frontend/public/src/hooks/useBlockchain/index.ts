@@ -53,14 +53,17 @@ const useBlockchain = () => {
     async onConnect({ address, chain, connector, isReconnected }) {
       const provider = await connector.getProvider();
 
-      setBlockchainValue({
-        account: { address: address },
-        chain,
-        connector,
-        wallet: connector.name,
-        provider,
-        balance: balance.data,
-      });
+      setBlockchainValue(
+        {
+          account: { address: address },
+          chain,
+          connector,
+          wallet: connector.name,
+          provider,
+          balance: balance.data,
+        },
+        'blockchain/setBlockchainValue'
+      );
     },
     onDisconnect() {
       resetWalletNavigation();

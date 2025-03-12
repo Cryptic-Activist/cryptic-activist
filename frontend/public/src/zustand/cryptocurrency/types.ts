@@ -20,8 +20,11 @@ export type CryptocurrencyStore = {
     name?: string;
     symbol?: string;
     coingeckoId?: string;
-    setCryptocurrencyValue: (value: Value) => void;
-    getCryptocurrency: () => Promise<void>;
+    setCryptocurrencyValue: (
+      value: Value,
+      action?: `cryptocurrency/${string}`
+    ) => void;
+    setCryptocurrency: (cryptocurrency: Cryptocurrency) => void;
   };
 };
 

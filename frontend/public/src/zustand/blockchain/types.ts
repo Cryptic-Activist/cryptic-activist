@@ -33,7 +33,10 @@ export type BlockchainStore = {
     provider?: any;
     account?: Account;
     balance?: Balance;
-    setBlockchainValue: (value: Value) => void;
+    setBlockchainValue: (
+      value: Value,
+      actionName?: `blockchain/${string}`
+    ) => void;
     resetBlockchain: () => void;
   };
 };

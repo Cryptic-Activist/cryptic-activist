@@ -24,11 +24,14 @@ const usePaymentMethods = (fetch?: boolean) => {
   );
 
   const setPaymentMethod = (paymentMethod: PaymentMethod) => {
-    setValue({
-      defaults: {
-        paymentMethod: { id: paymentMethod.id, name: paymentMethod.name },
+    setValue(
+      {
+        defaults: {
+          paymentMethod: { id: paymentMethod.id, name: paymentMethod.name },
+        },
       },
-    });
+      'app/setDefaultPaymentMethod'
+    );
   };
 
   // const getPaymentMethod = (symbol: FiatSymbol) => {

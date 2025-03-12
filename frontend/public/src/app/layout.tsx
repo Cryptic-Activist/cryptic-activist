@@ -1,4 +1,4 @@
-import { Roboto } from 'next/font/google';
+import './index.css';
 
 import {
   AllModals,
@@ -8,10 +8,10 @@ import {
   Toast,
 } from '@/layouts';
 
-import './index.css';
-import styles from './layout.module.scss';
-import { QueryProvider } from '@/components';
 import AllDrawers from '@/layouts/drawers/AllDrawers';
+import { QueryProvider } from '@/components';
+import { Roboto } from 'next/font/google';
+import styles from './layout.module.scss';
 
 const roboto = Roboto({ weight: '400', subsets: ['latin'], preload: true });
 

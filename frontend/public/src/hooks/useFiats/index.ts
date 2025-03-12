@@ -31,11 +31,14 @@ const useFiats = () => {
   };
 
   const setFiat = (fiat: Fiat) => {
-    setValue({
-      defaults: {
-        fiat: { id: fiat.id, name: fiat.name, symbol: fiat.symbol },
+    setValue(
+      {
+        defaults: {
+          fiat: { id: fiat.id, name: fiat.name, symbol: fiat.symbol },
+        },
       },
-    });
+      'app/setDefaultFiat'
+    );
   };
 
   const filterFiats = (term: string) => {
