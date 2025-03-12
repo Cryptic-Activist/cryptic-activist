@@ -86,7 +86,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export async function loginDecodeToken(req: Request, res: Response) {
+export const loginDecodeToken = async (req: Request, res: Response) => {
   const { accessToken } = req.params;
 
   try {
@@ -124,9 +124,9 @@ export async function loginDecodeToken(req: Request, res: Response) {
     });
     return;
   }
-}
+};
 
-export async function register(req: Request, res: Response) {
+export const register = async (req: Request, res: Response) => {
   const { names, username, password } = req.body;
 
   try {
@@ -177,9 +177,9 @@ export async function register(req: Request, res: Response) {
     });
     return;
   }
-}
+};
 
-export async function verifyPrivateKeys(req: Request, res: Response) {
+export const verifyPrivateKeys = async (req: Request, res: Response) => {
   const { username, privateKeys } = req.body;
 
   try {
@@ -218,4 +218,16 @@ export async function verifyPrivateKeys(req: Request, res: Response) {
     });
     return;
   }
-}
+};
+
+export const authenticate = async (_req: Request, res: Response) => {
+  try {
+    res.status(200).send({ ok: true });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};

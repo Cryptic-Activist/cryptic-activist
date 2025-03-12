@@ -1,4 +1,5 @@
 import {
+  authenticate,
   login,
   loginDecodeToken,
   register,
@@ -30,5 +31,7 @@ router.post(
   validatePrivateKeysRequest,
   verifyPrivateKeys,
 );
+
+router.get('/authenticate', authenticateUser, authenticate);
 
 export default router;
