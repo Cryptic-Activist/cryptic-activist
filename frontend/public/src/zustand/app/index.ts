@@ -16,40 +16,28 @@ export const useAppStore: StateCreator<
     type: 'buy',
     toasts: [],
     defaults: {},
-    setAppValue: (params) => {
-      const {
-        app: {
-          defaults,
-          dimensions,
-          isMobile,
-          toasts,
-          type,
-          currentPrice,
-          ...restApp
-        },
-        ...rest
-      } = get();
+    setAppValue: (params, actionName = 'app/setValue') => {
       set(
-        {
+        ({ app, ...rest }) => ({
           app: {
-            dimensions: params.dimensions ?? dimensions,
-            isMobile: params.isMobile ?? isMobile,
-            toasts: params.toasts ?? toasts,
-            type: params.type ?? type,
-            currentPrice: params.currentPrice ?? currentPrice,
+            ...app,
+            dimensions: params.dimensions ?? app.dimensions,
+            isMobile: params.isMobile ?? app.isMobile,
+            toasts: params.toasts ?? app.toasts,
+            type: params.type ?? app.type,
+            currentPrice: params.currentPrice ?? app.currentPrice,
             defaults: {
               cryptocurrency:
-                params.defaults?.cryptocurrency ?? defaults.cryptocurrency,
-              fiat: params.defaults?.fiat ?? defaults.fiat,
+                params.defaults?.cryptocurrency ?? app.defaults.cryptocurrency,
+              fiat: params.defaults?.fiat ?? app.defaults.fiat,
               paymentMethod:
-                params.defaults?.paymentMethod ?? defaults.paymentMethod,
+                params.defaults?.paymentMethod ?? app.defaults.paymentMethod,
             },
-            ...restApp,
           },
           ...rest,
-        },
+        }),
         false,
-        'app/setValue'
+        actionName
       );
     },
     setCurrentPrice: async (id, fiatSymbol) => {
@@ -63,15 +51,11 @@ export const useAppStore: StateCreator<
       const price: number = Object.values(crypto)[0];
 
       const {
-        app: { currentPrice: _currentPrice, ...restApp },
+        app: { currentPrice: _currentPrice, setAppValue, ...restApp },
         ...rest
       } = get();
 
-      set(
-        { app: { currentPrice: price, ...restApp }, ...rest },
-        false,
-        'app/setCurrentPrice'
-      );
+      setAppValue({ currentPrice: price }, 'app/setCurrentPrice');
     },
     removeToast: (id) => {
       const {

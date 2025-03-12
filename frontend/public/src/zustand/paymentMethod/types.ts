@@ -3,6 +3,21 @@ export type PaymentMethod = {
   name: string;
 };
 
-export type PaymentMethodState = PaymentMethod | object;
+export type PaymentMethodSetter = {
+  id?: string;
+  name?: string;
+};
 
-export type PaymentMethodSetter = PaymentMethod;
+export type Value = PaymentMethodSetter;
+
+export type PaymentMethodStore = {
+  paymentMethod: {
+    id?: string;
+    name?: string;
+    setPaymentMethodValue: (
+      value: Value,
+      action?: `paymentMethod/${string}`
+    ) => void;
+    setPaymentMethod: (paymentMethod: PaymentMethod) => void;
+  };
+};

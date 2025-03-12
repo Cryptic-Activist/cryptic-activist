@@ -42,16 +42,19 @@ const useCryptocurrency = () => {
   };
 
   const setCryptocurrency = (cryptocurrency: Cryptocurrency) => {
-    setValue({
-      defaults: {
-        cryptocurrency: {
-          id: cryptocurrency.id,
-          name: cryptocurrency.name,
-          symbol: cryptocurrency.symbol,
-          coingeckoId: cryptocurrency.coingeckoId,
+    setValue(
+      {
+        defaults: {
+          cryptocurrency: {
+            id: cryptocurrency.id,
+            name: cryptocurrency.name,
+            symbol: cryptocurrency.symbol,
+            coingeckoId: cryptocurrency.coingeckoId,
+          },
         },
       },
-    });
+      'app/setDefaultCryptocurrency'
+    );
   };
 
   const filterCryptocurrencies = (term: string) => {

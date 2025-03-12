@@ -33,7 +33,7 @@ export type AppStore = {
     type: Type;
     defaults: Defaults;
     currentPrice?: CurrentPrice;
-    setAppValue: (value: Value) => void;
+    setAppValue: (value: Value, actionName?: `app/${string}`) => void;
     setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
     removeToast: (id: string) => void;
     addToast: (type: ToastType, content: ToastContent, timeout: number) => void;

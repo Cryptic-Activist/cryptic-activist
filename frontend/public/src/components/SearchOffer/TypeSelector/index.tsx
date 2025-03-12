@@ -15,7 +15,7 @@ const TypeSelector = () => {
   };
 
   useEffect(() => {
-    setValue({ type: selected });
+    setValue({ type: selected }, 'app/setType');
   }, [selected]);
 
   return (

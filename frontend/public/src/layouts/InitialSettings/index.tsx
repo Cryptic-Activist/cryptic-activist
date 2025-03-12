@@ -20,40 +20,46 @@ const InitialSettings = () => {
   const { getPaymentMethods } = usePaymentMethods();
   const { setValue, setCurrentPrice, app } = useApp();
   const { user } = useUser();
-  const {} = useRootStore();
+  const { app: appStore, blockchain, cryptocurrency } = useRootStore();
+
+  console.log({ app: appStore, blockchain, cryptocurrency });
 
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);
 
     if (cryptocurrency) {
-      setValue({
-        defaults: {
-          cryptocurrency: {
-            coingeckoId: cryptocurrency.coingeckoId,
-            id: cryptocurrency.id,
-            name: cryptocurrency.name,
-            symbol: cryptocurrency.symbol,
+      setValue(
+        {
+          defaults: {
+            cryptocurrency: {
+              coingeckoId: cryptocurrency.coingeckoId,
+              id: cryptocurrency.id,
+              name: cryptocurrency.name,
+              symbol: cryptocurrency.symbol,
+            },
           },
         },
-      });
+        'app/setDefaultCryptocurrency'
+      );
     }
   };
 
   const setDefaultFiat = (symbol: FiatSymbol) => {
     const fiat = getFiat(symbol);
 
-    // console.log({ fiatSetValue: setValue });
-
     if (fiat) {
-      setValue({
-        defaults: {
-          fiat: {
-            id: fiat.id,
-            name: fiat.name,
-            symbol: fiat.symbol,
+      setValue(
+        {
+          defaults: {
+            fiat: {
+              id: fiat.id,
+              name: fiat.name,
+              symbol: fiat.symbol,
+            },
           },
         },
-      });
+        'app/setDefaultFiat'
+      );
     }
   };
 
