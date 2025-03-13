@@ -5,6 +5,7 @@ import {
   useFiatStore,
   useNavigationBarStore,
   usePaymentMethodStore,
+  useRegisterStore,
   useUserStore,
 } from '../';
 
@@ -25,6 +26,7 @@ export const useRootStore = create<RootStore>()(
       ...usePaymentMethodStore(set, get, store),
       ...useNavigationBarStore(set, get, store),
       ...useUserStore(set, get, store),
+      ...useRegisterStore(set, get, store),
     }),
     {
       name: 'RootStore',

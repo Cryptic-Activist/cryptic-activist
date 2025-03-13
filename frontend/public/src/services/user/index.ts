@@ -40,9 +40,7 @@ export const getUserFromToken = async (
 
 export const decodeAccessToken = async () => {
   try {
-    console.log('before access token...');
     const accessToken = getCookie('accessToken');
-    console.log({ accessToken });
 
     if (!accessToken) return null;
 

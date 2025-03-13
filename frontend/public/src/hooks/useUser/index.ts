@@ -58,7 +58,6 @@ const useUser = () => {
 
   const isLoggedIn = () => {
     const isLogged = user.id !== undefined;
-    console.log({ isLogged, user });
     return isLogged;
   };
 
