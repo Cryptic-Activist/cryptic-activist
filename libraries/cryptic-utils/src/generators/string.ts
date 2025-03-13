@@ -1,15 +1,33 @@
-import crypto from 'crypto';
-import slugify from 'slugify';
 import {
+  Config,
   adjectives,
   animals,
-  Config,
+  colors,
+  countries,
+  languages,
+  names,
+  starWars,
   uniqueNamesGenerator,
 } from 'unique-names-generator';
 
+import crypto from 'crypto';
+import { getRandomNumber } from './numbers';
+import slugify from 'slugify';
+
+const getDictionaries = () => {
+  const randOne = getRandomNumber(0, 1);
+  const randTwo = getRandomNumber(0, 4);
+  const firstDicts = [adjectives, colors];
+  const secondDicts = [animals, countries, languages, names, starWars];
+  console.log({ randOne, randTwo });
+
+  return [firstDicts[randOne], secondDicts[randTwo]];
+};
+
 export function generateRandomNames(): string[] {
+  const dictionaries = getDictionaries();
   const customConfig: Config = {
-    dictionaries: [adjectives, animals],
+    dictionaries,
     separator: ' ',
     length: 2,
   };

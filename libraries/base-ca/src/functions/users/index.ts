@@ -1,17 +1,16 @@
 import 'dotenv/config';
 
-import { PrismaClient, User } from '@prisma/client';
-
-import {
-  getParamsRemapping,
-  getUsersParamsRemapping,
-} from '../../utils/remap/user';
 import {
   CreateUserParams,
   UserAssociationsArrayType,
   WhereUserFullTextParams,
   WhereUserParams,
 } from './types';
+import { PrismaClient, User } from '@prisma/client';
+import {
+  getParamsRemapping,
+  getUsersParamsRemapping,
+} from '../../utils/remap/user';
 
 const prisma = new PrismaClient();
 
@@ -44,7 +43,6 @@ export const getUser = async (
   where: WhereUserParams,
   associations: UserAssociationsArrayType
 ): Promise<User | null> => {
-  console.log({ DATABASE_URL: process.env.DATABASE_URL });
   const remapped = getParamsRemapping(where);
   const user = await prisma.user.findFirst({
     where: remapped,

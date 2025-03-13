@@ -73,11 +73,11 @@ export const useNavigationBarStore: StateCreator<
           const modals = state.navigationBar.modals;
           modals[modal] = !modals[modal];
           return {
-            navigationBar: { ...state.navigationBar, modal },
+            navigationBar: { ...state.navigationBar, modals },
           };
         },
         false,
-        'navigationBar/toggleDrawer'
+        'navigationBar/toggleModal'
       );
     },
     toggleTooltip: (tooltip) => {
@@ -90,7 +90,7 @@ export const useNavigationBarStore: StateCreator<
           };
         },
         false,
-        'navigationBar/toggleDrawer'
+        'navigationBar/toggleTooltip'
       );
     },
     resetNavigationBar: () => {

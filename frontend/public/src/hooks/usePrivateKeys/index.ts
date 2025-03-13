@@ -17,6 +17,7 @@ const usePrivateKeys = () => {
 
   const onAccountVerification = () => {
     resetNavigationBar();
+    register.resetPrivateKeys();
     toggleModal('verifyAccount');
   };
 

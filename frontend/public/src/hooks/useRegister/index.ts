@@ -1,6 +1,5 @@
 'use client';
 
-import { $register, setRegisterPrivateKeys } from '@/store';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { OnSubmit, OnSubmitPayload } from './types';
 import {
@@ -16,9 +15,9 @@ import { useRootStore } from '@/zustand';
 import { useStore } from '@nanostores/react';
 
 const useRegister = () => {
-  const register = useStore($register);
   const {
     navigationBar: { resetNavigationBar, toggleModal },
+    register,
   } = useRootStore();
   const { startCountDown, timeLeftInSeconds } = useCountDown();
   const mutation = useMutation({
@@ -41,6 +40,8 @@ const useRegister = () => {
     getValues,
   } = useForm({ resolver: registerResolver });
 
+  console.log({ register });
+
   const onSubmit: OnSubmit = async (data) => {
     const { confirmPassword, names, password, username } = data;
     mutation.mutate({
@@ -61,7 +62,7 @@ const useRegister = () => {
 
   useEffect(() => {
     if (mutation.data) {
-      setRegisterPrivateKeys(mutation.data.privateKeys);
+      register.setPrivateKeys(mutation.data.privateKeys);
       const countdownMs = 5000;
       startCountDown(countdownMs);
       setTimeout(() => {
