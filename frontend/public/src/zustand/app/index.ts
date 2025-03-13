@@ -51,8 +51,7 @@ export const useAppStore: StateCreator<
       const price: number = Object.values(crypto)[0];
 
       const {
-        app: { currentPrice: _currentPrice, setAppValue, ...restApp },
-        ...rest
+        app: { currentPrice: _currentPrice, setAppValue },
       } = get();
 
       setAppValue({ currentPrice: price }, 'app/setCurrentPrice');

@@ -4,8 +4,7 @@ import { CryptocurrencyStore } from '../cryptocurrency/types';
 import { FiatStore } from '../fiat/types';
 import { PaymentMethodStore } from '../paymentMethod/types';
 
-export type RootStore = AppStore &
-  BlockchainStore &
-  CryptocurrencyStore &
-  FiatStore &
-  PaymentMethodStore;
+export type RootStore = AppStore & BlockchainStore;
+// CryptocurrencyStore &
+// FiatStore &
+// PaymentMethodStore;
