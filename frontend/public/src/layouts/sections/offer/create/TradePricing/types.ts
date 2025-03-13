@@ -1,12 +1,12 @@
 import {
-  CreateOfferState,
-  SetCreateOfferValues,
-} from '@/store/createOffer/types';
+  CreateOfferSetter,
+  SetCreateOfferValue,
+} from '@/zustand/createOffer/types';
 
 export type CreateOfferTradePricingProps = {
-  setCreateOfferValues: SetCreateOfferValues;
+  setCreateOfferValue: SetCreateOfferValue;
   toStep: (step: number) => void;
-  createOffer: CreateOfferState;
+  createOffer: CreateOfferSetter;
   step: number;
   onClickEvents: { [key: number]: () => void };
   saveCreateOfferLocally: () => void;

@@ -13,41 +13,39 @@ import { FaChevronLeft } from 'react-icons/fa6';
 import Head from 'next/head';
 import type { PricingItem } from '@/components/PricingType/types';
 import stylesCore from '../index.module.scss';
-import { useApp } from '@/hooks';
 
 const CreateOfferTradePricing: FC<CreateOfferTradePricingProps> = ({
-  setCreateOfferValues,
+  setCreateOfferValue,
   toStep,
   saveCreateOfferLocally,
   createOffer,
   step,
   onClickEvents,
 }) => {
-  const {
-    app: { currentPrice },
-  } = useApp();
-
   const selectRateType = (pricingType: PricingItem) => {
     if (pricingType.value === 'market') {
-      setCreateOfferValues({ listAt: 2.35 });
+      setCreateOfferValue({ listAt: 2.35 }, 'createOffer/setListAt');
     }
-    setCreateOfferValues({ pricingType: pricingType.value });
+    setCreateOfferValue(
+      { pricingType: pricingType.value },
+      'createOffer/setPricingType'
+    );
   };
 
   const inputLimit = (value: number) => {
-    setCreateOfferValues({ listAt: value });
+    setCreateOfferValue({ listAt: value }, 'createOffer/ListAt');
   };
 
   const inputMinTradeAmount = (value: number) => {
-    setCreateOfferValues({ limitMin: value });
+    setCreateOfferValue({ limitMin: value }, 'createOffer/setLimitMin');
   };
 
   const inputMaxTradeAmount = (value: number) => {
-    setCreateOfferValues({ limitMax: value });
+    setCreateOfferValue({ limitMax: value }, 'createOffer/setLimitMax');
   };
 
   const inputTradeTimeLimit = (value: number) => {
-    setCreateOfferValues({ timeLimit: value });
+    setCreateOfferValue({ timeLimit: value }, 'createOffer/setTimeLimit');
   };
 
   const goToNextStep = () => {

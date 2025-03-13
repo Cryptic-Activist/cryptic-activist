@@ -13,6 +13,7 @@ export const createOfferController = async (req: Request, res: Response) => {
       errors: [],
     });
   } catch (err: any) {
+    console.log({ err });
     res.status(500).send({
       status_code: 500,
       errors: [err.message],

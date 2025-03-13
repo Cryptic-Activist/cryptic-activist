@@ -13,7 +13,7 @@ import type { Item } from '@/components/Radio/types';
 import stylesCore from '../index.module.scss';
 
 const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
-  setCreateOfferValues,
+  setCreateOfferValue,
   toStep,
   saveCreateOfferLocally,
   createOffer,
@@ -21,11 +21,14 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
   onClickEvents,
 }) => {
   const selectOfferType = (value: Item) => {
-    setCreateOfferValues({ offerType: value.value });
+    setCreateOfferValue({ offerType: value.value }, 'createOffer/setOfferType');
   };
 
   const selectPaymentMethod = (id: string) => {
-    setCreateOfferValues({ paymentMethodId: id });
+    setCreateOfferValue(
+      { paymentMethodId: id },
+      'createOffer/setPaymentMethodId'
+    );
   };
 
   const goToNextStep = () => {

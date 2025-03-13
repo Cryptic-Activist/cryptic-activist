@@ -5,6 +5,4 @@ export * from './fiats';
 export * from './paymentMethod';
 export * from './paymentMethodCategories';
 export * from './paymentMethods';
-export * from './register';
 export * from './verifyAccount';
-export * from './createOffer';

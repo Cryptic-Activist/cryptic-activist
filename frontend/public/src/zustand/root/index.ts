@@ -1,6 +1,7 @@
 import {
   useAppStore,
   useBlockchainStore,
+  useCreateOfferStore,
   useCryptocurrencyStore,
   useFiatStore,
   useNavigationBarStore,
@@ -27,6 +28,7 @@ export const useRootStore = create<RootStore>()(
       ...useNavigationBarStore(set, get, store),
       ...useUserStore(set, get, store),
       ...useRegisterStore(set, get, store),
+      ...useCreateOfferStore(set, get, store),
     }),
     {
       name: 'RootStore',

@@ -10,16 +10,17 @@ const Page = () => {
     createOffer,
     step,
     onClickEvents,
-    setCreateOfferValues,
+    setCreateOfferValue,
     toStep,
     saveCreateOfferLocally,
+    resetCreateOffer,
   } = useCreateOffer();
 
   return (
     <>
       {step === 0 && (
         <PaymentMethod
-          setCreateOfferValues={setCreateOfferValues}
+          setCreateOfferValue={setCreateOfferValue}
           toStep={toStep}
           createOffer={createOffer}
           step={step}
@@ -29,7 +30,7 @@ const Page = () => {
       )}
       {step == 1 && (
         <TradePricing
-          setCreateOfferValues={setCreateOfferValues}
+          setCreateOfferValue={setCreateOfferValue}
           toStep={toStep}
           createOffer={createOffer}
           step={step}
@@ -39,12 +40,13 @@ const Page = () => {
       )}
       {step == 2 && (
         <TradeInstructions
-          setCreateOfferValues={setCreateOfferValues}
+          setCreateOfferValue={setCreateOfferValue}
           toStep={toStep}
           createOffer={createOffer}
           step={step}
           onClickEvents={onClickEvents}
           saveCreateOfferLocally={saveCreateOfferLocally}
+          resetCreateOffer={resetCreateOffer}
         />
       )}
     </>
