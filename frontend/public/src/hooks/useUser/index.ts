@@ -22,7 +22,11 @@ const useUser = () => {
   });
   const query = useQuery({
     queryKey: ['login'],
-    queryFn: decodeAccessToken,
+    queryFn: async () => {
+      const decoded = await decodeAccessToken();
+      user.setUser({ ...decoded });
+      return user;
+    },
     refetchOnMount: false,
   });
   const {
@@ -35,7 +39,7 @@ const useUser = () => {
 
   const onSubmit: OnSubmit = (data) => {
     const { password, username } = data;
-    mutation.mutate(password, username);
+    mutation.mutate({ password, username });
   };
 
   useEffect(() => {
@@ -53,8 +57,9 @@ const useUser = () => {
   }, [mutation.isSuccess]);
 
   const isLoggedIn = () => {
-    console.log({ userIsLoggedIn: Object.entries(user).length > 0 });
-    return Object.entries(user).length > 0;
+    const isLogged = user.id !== undefined;
+    console.log({ isLogged, user });
+    return isLogged;
   };
 
   return {

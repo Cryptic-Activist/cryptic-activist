@@ -14,8 +14,11 @@ export type GetUserTokenResponse = {
 };
 
 export type GetUserInfoReturn = {
-  firstName: string;
-  lastName: string;
+  id: string;
+  names: {
+    firstName: string;
+    lastName: string;
+  };
   username: string;
   profileColor: string;
   createdAt: string;

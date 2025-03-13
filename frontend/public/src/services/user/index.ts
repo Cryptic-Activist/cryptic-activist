@@ -1,6 +1,11 @@
 import { GetUserInfoReturn, GetUserTokenResponse, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import { getBearerToken, getLocalStorage, removeLocalStorage } from '@/utils';
+import {
+  getBearerToken,
+  getCookie,
+  getLocalStorage,
+  removeLocalStorage,
+} from '@/utils';
 
 import { BACKEND } from '@/constants';
 
@@ -36,7 +41,7 @@ export const getUserFromToken = async (
 export const decodeAccessToken = async () => {
   try {
     console.log('before access token...');
-    const accessToken = getLocalStorage('accessToken');
+    const accessToken = getCookie('accessToken');
     console.log({ accessToken });
 
     if (!accessToken) return null;
@@ -46,7 +51,7 @@ export const decodeAccessToken = async () => {
     if (!userInfo) {
       removeLocalStorage('accessToken');
       removeLocalStorage('refreshToken');
-      throw Error('Unable to decode token');
+      return null;
     }
 
     return userInfo;
@@ -54,6 +59,6 @@ export const decodeAccessToken = async () => {
     removeLocalStorage('accessToken');
     removeLocalStorage('refreshToken');
 
-    throw Error('Unable to decode token');
+    return null;
   }
 };
