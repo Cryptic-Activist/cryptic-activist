@@ -2,6 +2,7 @@ import { Connector } from 'wagmi';
 
 export type SetChainParam = any;
 export type SetProviderParam = any;
+export type Wallet = string;
 
 export type Account = {
   address: string;

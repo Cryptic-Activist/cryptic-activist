@@ -7,16 +7,19 @@ import {
   getRandomCredentials,
   onSubmitUserRegistration,
 } from '@/services/register';
-import { resetNavigationBar, toggleModal } from '@/store/navigationBar';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { registerResolver } from './zod';
 import { useCountDown } from '..';
 import { useEffect } from 'react';
+import { useRootStore } from '@/zustand';
 import { useStore } from '@nanostores/react';
 
 const useRegister = () => {
   const register = useStore($register);
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
   const { startCountDown, timeLeftInSeconds } = useCountDown();
   const mutation = useMutation({
     mutationKey: ['register'],

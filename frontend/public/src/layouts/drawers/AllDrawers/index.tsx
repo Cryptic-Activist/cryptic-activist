@@ -1,7 +1,8 @@
 'use client';
 
 import { useBlockchain, useNavigationBar } from '@/hooks';
-import { Wallet } from '@/layouts/drawers';
+
+import { WalletDrawer } from '@/layouts/drawers';
 
 const AllDrawers = () => {
   const { navigationBar } = useNavigationBar();
@@ -10,7 +11,7 @@ const AllDrawers = () => {
   return (
     <>
       {navigationBar.drawers.wallet && blockchain.account?.address ? (
-        <Wallet />
+        <WalletDrawer />
       ) : (
         <></>
       )}

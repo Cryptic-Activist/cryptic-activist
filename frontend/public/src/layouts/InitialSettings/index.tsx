@@ -18,9 +18,16 @@ const InitialSettings = () => {
   const { getCryptocurrencies, getCryptocurrency, cryptocurrencies } =
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice, app } = useApp();
+  const { setValue, setCurrentPrice } = useApp();
   const {} = useUser();
-  const {} = useRootStore();
+  const { app } = useRootStore();
+
+  useEffect(() => {
+    // navigationBar.setNavigationBarValue(
+    //   { drawers: { user: true } },
+    //   'navigationBar/Test'
+    // );
+  }, []);
 
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);

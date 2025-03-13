@@ -8,7 +8,7 @@ import {
   PrivateKeys,
   Register,
   VerifyAccount,
-  Wallet,
+  WalletModal,
 } from '@/layouts/modals';
 
 import { useNavigationBar } from '@/hooks';
@@ -25,7 +25,7 @@ const AllModals = () => {
       {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : <></>}
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : <></>}
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : <></>}
-      {navigationBar.modals.blockchain ? <Wallet /> : <></>}
+      {navigationBar.modals.blockchain ? <WalletModal /> : <></>}
     </>
   );
 };

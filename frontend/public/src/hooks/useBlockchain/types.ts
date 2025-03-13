@@ -1,4 +1,4 @@
-import { Wallet } from '@/store/blockchain/types';
+import { Wallet } from '@/zustand/blockchain/types';
 
 export type WalletName = Wallet;
 
