@@ -48,17 +48,20 @@ export const useUserStore: StateCreator<
       setValue(user, 'user/setUser');
     },
     resetUser: () => {
-      const setValue = get().user.setUserValue;
-      setValue(
-        {
-          id: undefined,
-          names: undefined,
-          languages: undefined,
-          profileColor: undefined,
-          username: undefined,
-          createdAt: undefined,
-          updatedAt: undefined,
-        },
+      set(
+        ({ user }) => ({
+          user: {
+            ...user,
+            id: undefined,
+            languages: undefined,
+            names: undefined,
+            profileColor: undefined,
+            username: undefined,
+            createdAt: undefined,
+            updatedAt: undefined,
+          },
+        }),
+        false,
         'user/resetUser'
       );
     },
@@ -78,13 +81,12 @@ export const useUserStore: StateCreator<
 
         const setValue = get().user.setUserValue;
 
-        // console.log({ decodedUser: user });
-
         setValue(
           {
+            id: user.id,
             names: {
-              firstName: user.firstName,
-              lastName: user.lastName,
+              firstName: user.names.firstName,
+              lastName: user.names.lastName,
             },
             languages: user.languages,
             profileColor: user.profileColor,
@@ -131,13 +133,12 @@ export const useUserStore: StateCreator<
 
         const setValue = get().user.setUserValue;
 
-        // console.log({ loginUser: user });
-
         setValue(
           {
+            id: user.id,
             names: {
-              firstName: user.firstName,
-              lastName: user.lastName,
+              firstName: user.names.firstName,
+              lastName: user.names.lastName,
             },
             languages: user.languages,
             profileColor: user.profileColor,
