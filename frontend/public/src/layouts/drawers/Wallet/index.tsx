@@ -60,8 +60,6 @@ const Wallet = () => {
   const { blockchain, onDisconnectWallet } = useBlockchain();
   const { user } = useUser();
 
-  console.log({ blockchain });
-
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
   const closeWallet = () => {

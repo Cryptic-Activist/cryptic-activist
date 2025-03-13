@@ -8,7 +8,7 @@ import styles from './index.module.scss';
 import { useUser } from '@/hooks';
 import withAuth from '@/hoc/withAuth';
 
-const Account = withAuth(() => {
+const Account = () => {
   const { user } = useUser();
 
   return (
@@ -21,6 +21,6 @@ const Account = withAuth(() => {
       </div>
     </div>
   );
-});
+};
 
 export default Account;

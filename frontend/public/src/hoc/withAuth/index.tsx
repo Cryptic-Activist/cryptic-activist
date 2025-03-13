@@ -30,10 +30,7 @@ export default function withAuth<T extends Record<string, any>>(
   return function ProtectedComponent(originalProps: T) {
     const tokenCookie = getCookie('accessToken');
 
-    console.log({ tokenCookie });
-
     if (tokenCookie === null) {
-      console.log('te');
       redirect('/');
     }
 

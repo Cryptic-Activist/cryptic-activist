@@ -3,7 +3,7 @@ type Language = {
   name: string;
 };
 
-export type LoginUserParams = {
+export type LoginParams = {
   username: string;
   password: string;
 };

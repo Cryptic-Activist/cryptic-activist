@@ -22,11 +22,21 @@ type Modals = {
   blockchain: boolean;
 };
 
-export type NavigationBarState = {
-  drawers: Drawers;
-  tooltips: Tooltips;
-  modals: Modals;
-  status: NavigationBarStatus;
+export type NavigationBarStore = {
+  navigationBar: {
+    drawers: Drawers;
+    tooltips: Tooltips;
+    modals: Modals;
+    status: NavigationBarStatus;
+    setNavigationBarValue: (
+      value: Value,
+      actionName: `navigationBar/${string}`
+    ) => void;
+    toggleDrawer: (drawer: Drawer) => void;
+    toggleModal: (modal: Modal) => void;
+    toggleTooltip: (tooltip: Tooltip) => void;
+    resetNavigationBar: () => void;
+  };
 };
 
 export type NavigationBarStateSetter = {
@@ -35,6 +45,8 @@ export type NavigationBarStateSetter = {
   modals?: Modals;
   status?: NavigationBarStatus;
 };
+
+export type Value = NavigationBarStateSetter;
 
 export type Drawer = 'user' | 'wallet';
 

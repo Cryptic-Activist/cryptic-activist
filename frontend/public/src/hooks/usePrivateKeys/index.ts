@@ -1,10 +1,12 @@
-import { resetNavigationBar, toggleModal } from '@/store';
-
 import { copyToClipboard } from '@/utils';
 import { useRegister } from '@/hooks';
+import { useRootStore } from '@/zustand';
 
 const usePrivateKeys = () => {
   const { register } = useRegister();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
 
   const handleCopyPrivateKeysToClipboard = () => {
     if (register.privateKeys) {

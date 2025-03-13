@@ -63,7 +63,7 @@ const Menu = () => {
       <Tooltip position="bottom" spacing={55}>
         {isLoggedIn() ? (
           <Button theme="transparent" onClick={handleToggleUserDrawer}>
-            {user.names?.firstName}
+            <>{user.names?.firstName}</>
           </Button>
         ) : (
           <Button theme="transparent" onClick={handleToggleLogin}>

@@ -6,13 +6,16 @@ import { useFiats, useHorizontalScroll } from '@/hooks';
 import { Fiat } from '@/store/fiat/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
-import { toggleModal } from '@/store';
 import { useRef } from 'react';
+import { useRootStore } from '@/zustand';
 
 const Fiats = () => {
   const ref = useRef<HTMLUListElement | null>(null);
   const _scroll = useHorizontalScroll(ref);
   const { fiatsList, setFiat, filterFiats } = useFiats();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
 
   const selectFiat = (fiat: Fiat) => {
     setFiat(fiat);

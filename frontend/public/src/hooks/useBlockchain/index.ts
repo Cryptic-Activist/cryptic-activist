@@ -7,10 +7,9 @@ import {
   useBalance,
   useConnect,
 } from 'wagmi';
-import { resetNavigationBar, toggleModal } from '@/store';
-import { useEffect, useState } from 'react';
 
 import { BRAVE_WALLET } from '@/constants';
+import { useEffect } from 'react';
 import { useRootStore } from '@/zustand';
 import { useUser } from '@/hooks';
 
@@ -26,6 +25,7 @@ const useBlockchain = () => {
       balance: balanceBlockchainStore,
       wallet,
     },
+    navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();
   const { connect, connectors } = useConnect();
   const balance = useBalance({ address: account?.address as `0x${string}` });

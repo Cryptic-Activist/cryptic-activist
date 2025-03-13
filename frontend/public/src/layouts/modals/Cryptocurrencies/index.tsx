@@ -1,20 +1,22 @@
 'use client';
 
-import { useRef } from 'react';
-
-import { useCryptocurrencies, useHorizontalScroll } from '@/hooks';
-import { ListTemplate } from '@/layouts/modals';
-import { toggleModal } from '@/store';
-import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { toCapitalize, toUpperCase } from '@/utils';
+import { useCryptocurrencies, useHorizontalScroll } from '@/hooks';
 
+import { Cryptocurrency } from '@/store/cryptocurrency/types';
+import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
+import { useRef } from 'react';
+import { useRootStore } from '@/zustand';
 
 const Cryptocurrencies = () => {
   const ref = useRef<HTMLUListElement | null>(null);
   const _scroll = useHorizontalScroll(ref);
   const { cryptocurrenciesList, setCryptocurrency, filterCryptocurrencies } =
     useCryptocurrencies();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
 
   const selectCryptocurrency = (cryptocurrency: Cryptocurrency) => {
     setCryptocurrency(cryptocurrency);

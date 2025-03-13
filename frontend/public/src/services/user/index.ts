@@ -1,25 +1,13 @@
-import {
-  GetUserInfoReturn,
-  GetUserTokenResponse,
-  LoginUserParams,
-} from './types';
+import { GetUserInfoReturn, GetUserTokenResponse, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import {
-  getBearerToken,
-  getLocalStorage,
-  removeCookie,
-  removeLocalStorage,
-  setCookie,
-  setLocalStorage,
-} from '@/utils';
-import { resetUserInfo, setUserInfo } from '@/store';
+import { getBearerToken, getLocalStorage, removeLocalStorage } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
-const getUserToken = async ({
+export const getUserToken = async ({
   password,
   username,
-}: LoginUserParams): Promise<GetUserTokenResponse | null> => {
+}: LoginParams): Promise<GetUserTokenResponse | null> => {
   const response = await fetchPost(BACKEND + '/users/auth/login', {
     password,
     username,
@@ -30,7 +18,7 @@ const getUserToken = async ({
   return response.data;
 };
 
-const getUserInfoFromToken = async (
+export const getUserFromToken = async (
   token: string
 ): Promise<GetUserInfoReturn | null> => {
   const response = await fetchGet(
@@ -47,11 +35,13 @@ const getUserInfoFromToken = async (
 
 export const decodeAccessToken = async () => {
   try {
+    console.log('before access token...');
     const accessToken = getLocalStorage('accessToken');
+    console.log({ accessToken });
 
     if (!accessToken) return null;
 
-    const userInfo = await getUserInfoFromToken(accessToken);
+    const userInfo = await getUserFromToken(accessToken);
 
     if (!userInfo) {
       removeLocalStorage('accessToken');
@@ -59,7 +49,6 @@ export const decodeAccessToken = async () => {
       throw Error('Unable to decode token');
     }
 
-    setUserInfo(userInfo);
     return userInfo;
   } catch (err) {
     removeLocalStorage('accessToken');
@@ -67,50 +56,4 @@ export const decodeAccessToken = async () => {
 
     throw Error('Unable to decode token');
   }
-};
-
-export const login = async (userData: LoginUserParams) => {
-  try {
-    const tokens = await getUserToken(userData);
-
-    if (!tokens) {
-      throw Error('Unable to login');
-    }
-    setCookie({
-      name: 'accessToken',
-      value: tokens.accessToken,
-      expiresInHours: 1,
-    });
-    setCookie({
-      name: 'refreshToken',
-      value: tokens.refreshToken,
-      expiresInHours: 2,
-    });
-    setLocalStorage('accessToken', tokens.accessToken);
-    setLocalStorage('refreshToken', tokens.refreshToken);
-
-    const userInfo = await getUserInfoFromToken(tokens.accessToken);
-
-    if (!userInfo) {
-      removeLocalStorage('accessToken');
-      removeLocalStorage('refreshToken');
-      throw Error('Unable to login');
-    }
-
-    setUserInfo(userInfo);
-    return true;
-  } catch (err) {
-    removeLocalStorage('accessToken');
-    removeLocalStorage('refreshToken');
-
-    throw Error('Unable to login');
-  }
-};
-
-export const logout = () => {
-  removeLocalStorage('accessToken');
-  removeLocalStorage('refreshToken');
-  removeCookie('accessToken');
-  removeCookie('refreshToken');
-  resetUserInfo();
 };

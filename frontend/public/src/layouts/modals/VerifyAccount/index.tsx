@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { Input, Links } from '@/components/forms';
 
 import { Button } from '@/components';
-import { Input, Links } from '@/components/forms';
-import { useVerifyAccount } from '@/hooks';
 import { Template } from '@/layouts/modals';
-import { resetNavigationBar, toggleModal } from '@/store/navigationBar';
-
 import styles from './index.module.scss';
+import { useRootStore } from '@/zustand';
+import { useState } from 'react';
+import { useVerifyAccount } from '@/hooks';
 
 const VerifyAccount = () => {
   const {
@@ -23,6 +22,9 @@ const VerifyAccount = () => {
     usernameErrors,
     privateKeysErrors,
   } = useVerifyAccount();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
 
   const [privateKeysArray, setPrivateKeysArray] = useState<string[]>(
     Array(12).fill('')
@@ -92,10 +94,10 @@ const VerifyAccount = () => {
                       required
                       // value={}
                       width="9rem"
-                      errorMessage={
-                        privateKeysErrors[`privateKey${privateKeyNumber}`]
-                          ?.message
-                      }
+                      // errorMessage={
+                      //   privateKeysErrors[`privateKey${privateKeyNumber}`]
+                      //     ?.message
+                      // }
                     />
                   </li>
                 );

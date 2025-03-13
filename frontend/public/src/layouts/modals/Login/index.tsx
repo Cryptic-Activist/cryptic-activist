@@ -1,16 +1,19 @@
 'use client';
 
 import { Input, Links } from '@/components/forms';
-import { resetNavigationBar, toggleModal } from '@/store/navigationBar';
 
 import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
+import { useRootStore } from '@/zustand';
 import { useUser } from '@/hooks';
 
 const Login = () => {
   const { errors, formValues, loginFormRegister, onSubmit, handleSubmit } =
     useUser();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
   const links = [
     {
       label: "Don't have an account yet?",

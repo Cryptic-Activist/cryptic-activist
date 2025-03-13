@@ -1,24 +1,20 @@
 'use client';
 
-import {
-  $navigationBar,
-  resetNavigationBar,
-  toggleDrawer,
-  toggleModal,
-  toggleTooltip,
-} from '@/store';
-
-import { useStore } from '@nanostores/react';
+import { useRootStore } from '@/zustand';
 
 const useNavigationBar = () => {
-  const navigationBar = useStore($navigationBar);
+  const { navigationBar } = useRootStore();
+  const { drawers, modals, status, tooltips, ...navigationBarRest } =
+    navigationBar;
 
   return {
-    navigationBar,
-    toggleDrawer,
-    toggleModal,
-    toggleTooltip,
-    resetNavigationBar,
+    navigationBar: {
+      drawers,
+      modals,
+      tooltips,
+      status,
+    },
+    ...navigationBarRest,
   };
 };
 

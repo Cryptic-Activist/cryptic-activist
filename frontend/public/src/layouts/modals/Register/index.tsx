@@ -1,12 +1,12 @@
 'use client';
 
-import { Button } from '@/components';
 import { Input, Links } from '@/components/forms';
-import { useRegister } from '@/hooks';
-import { Template } from '@/layouts/modals';
-import { resetNavigationBar, toggleModal } from '@/store/navigationBar';
 
+import { Button } from '@/components';
+import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
+import { useRegister } from '@/hooks';
+import { useRootStore } from '@/zustand';
 
 const Register = () => {
   const {
@@ -19,6 +19,9 @@ const Register = () => {
     query,
     timeLeftInSeconds,
   } = useRegister();
+  const {
+    navigationBar: { resetNavigationBar, toggleModal },
+  } = useRootStore();
 
   const links = [
     {
@@ -38,11 +41,7 @@ const Register = () => {
   ];
 
   return (
-    <Template
-      width="20rem"
-      heading="Register"
-      successMessage={formValues.successMessage}
-    >
+    <Template width="20rem" heading="Register">
       <div className={styles.container}>
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <Input

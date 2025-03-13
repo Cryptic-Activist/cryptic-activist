@@ -1,21 +1,23 @@
 'use client';
 
-import { $user, toggleModal } from '@/store';
-import { decodeAccessToken, login, logout } from '@/services/user';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { OnSubmit } from './types';
+import { decodeAccessToken } from '@/services/user';
 import { loginResolver } from './zod';
 import useApp from '../useApp';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useStore } from '@nanostores/react';
+import { useRootStore } from '@/zustand';
 
 const useUser = () => {
-  const user = useStore($user);
   const { addToast } = useApp();
+  const {
+    navigationBar: { toggleModal },
+    user,
+  } = useRootStore();
   const mutation = useMutation({
-    mutationFn: login,
+    mutationFn: user.login,
     mutationKey: ['login'],
   });
   const query = useQuery({
@@ -33,7 +35,7 @@ const useUser = () => {
 
   const onSubmit: OnSubmit = (data) => {
     const { password, username } = data;
-    mutation.mutate({ password, username });
+    mutation.mutate(password, username);
   };
 
   useEffect(() => {
@@ -51,17 +53,29 @@ const useUser = () => {
   }, [mutation.isSuccess]);
 
   const isLoggedIn = () => {
+    console.log({ userIsLoggedIn: Object.entries(user).length > 0 });
     return Object.entries(user).length > 0;
   };
 
   return {
-    logout,
+    logout: user.logout,
     isLoggedIn,
     handleSubmit,
     onSubmit,
     loginFormRegister,
     errors,
-    user,
+    user: {
+      id: user.id,
+      names: {
+        firstName: user.names?.firstName,
+        lastName: user.names?.lastName,
+      },
+      username: user.username,
+      profileColor: user.profileColor,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      languages: user.languages,
+    },
     mutation,
     query,
     formValues: {

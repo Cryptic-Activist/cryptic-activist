@@ -18,7 +18,7 @@ export const useAppStore: StateCreator<
     defaults: {},
     setAppValue: (params, actionName = 'app/setValue') => {
       set(
-        ({ app, ...rest }) => ({
+        ({ app }) => ({
           app: {
             ...app,
             dimensions: params.dimensions ?? app.dimensions,
@@ -34,7 +34,6 @@ export const useAppStore: StateCreator<
                 params.defaults?.paymentMethod ?? app.defaults.paymentMethod,
             },
           },
-          ...rest,
         }),
         false,
         actionName
