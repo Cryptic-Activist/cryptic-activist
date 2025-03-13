@@ -17,17 +17,28 @@ export const useBlockchainStore: StateCreator<
     wallet: undefined,
     setBlockchainValue: (params, actionName = 'blockchain/setValue') => {
       set(
-        ({ blockchain, ...rest }) => ({
+        ({
           blockchain: {
-            ...blockchain,
-            account: params.account ?? blockchain.account,
-            balance: params.balance ?? blockchain.balance,
-            chain: params.chain ?? blockchain.chain,
-            connector: params.connector ?? blockchain.connector,
-            provider: params.provider ?? blockchain.provider,
-            wallet: params.wallet ?? blockchain.wallet,
+            account,
+            balance,
+            chain,
+            connector,
+            provider,
+            wallet,
+            ...blockchainRest
           },
+          ...rest
+        }) => ({
           ...rest,
+          blockchain: {
+            account: 'account' in params ? params.account : account,
+            balance: 'balance' in params ? params.balance : balance,
+            chain: 'chain' in params ? params.chain : chain,
+            connector: 'connector' in params ? params.connector : connector,
+            provider: 'provider' in params ? params.provider : provider,
+            wallet: 'wallet' in params ? params.wallet : wallet,
+            ...blockchainRest,
+          },
         }),
         false,
         actionName
@@ -35,14 +46,17 @@ export const useBlockchainStore: StateCreator<
     },
     resetBlockchain: () => {
       const setValue = get().blockchain.setBlockchainValue;
-      setValue({
-        account: undefined,
-        balance: undefined,
-        chain: undefined,
-        connector: undefined,
-        provider: undefined,
-        wallet: undefined,
-      });
+      setValue(
+        {
+          account: undefined,
+          balance: undefined,
+          chain: undefined,
+          connector: undefined,
+          provider: undefined,
+          wallet: undefined,
+        },
+        'blockchain/resetBlockchain'
+      );
     },
   },
 });
