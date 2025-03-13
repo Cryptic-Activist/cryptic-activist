@@ -72,7 +72,7 @@
   border-radius: 0.5em;
   transition: background-color 0.2s ease-in-out;
   &:hover {
-    background-color: darken($color: globals.$primary, $amount: 10);
+    background-color: globals.$primary-darken-10;
   }
 }
 

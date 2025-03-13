@@ -40,8 +40,6 @@ const useRegister = () => {
     getValues,
   } = useForm({ resolver: registerResolver });
 
-  console.log({ register });
-
   const onSubmit: OnSubmit = async (data) => {
     const { confirmPassword, names, password, username } = data;
     mutation.mutate({

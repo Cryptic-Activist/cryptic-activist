@@ -27,7 +27,6 @@ export const useRegisterStore: StateCreator<
       setValue({ privateKeys }, 'register/setRegister');
     },
     resetPrivateKeys: () => {
-      console.log('reseting register');
       set(
         ({ register }) => ({
           register: {

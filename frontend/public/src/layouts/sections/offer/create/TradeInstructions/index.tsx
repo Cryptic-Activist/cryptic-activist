@@ -1,21 +1,21 @@
 'use client';
 
 import { Button, Label, ProgressBar, Tags } from '@/components';
-import React, { FC } from 'react';
 
 import { CreateOfferTradeInstructionsProps } from './types';
+import { FC } from 'react';
 import { FaChevronLeft } from 'react-icons/fa6';
 import Head from 'next/head';
 import { TextArea } from '@/components/forms';
 import { removeLocalStorage } from '@/utils';
-import { resetCreateOfferValues } from '@/store';
 import stylesCore from '../index.module.scss';
 import { submitOfferCreate } from '@/services/offers';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
-  setCreateOfferValues,
+  setCreateOfferValue,
+  resetCreateOffer,
   toStep,
   saveCreateOfferLocally,
   createOffer,
@@ -24,12 +24,16 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
 }) => {
   const router = useRouter();
 
+  // console.log({
+  //   isTradeInstructionsCompleted: createOffer,
+  // });
+
   const createOfferMutation = useMutation({
     mutationKey: ['createOffer'],
     mutationFn: submitOfferCreate,
     retry: 3,
     onSuccess: () => {
-      resetCreateOfferValues();
+      resetCreateOffer();
       removeLocalStorage('createOffer');
       router.replace('/account');
     },
@@ -42,19 +46,19 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
   };
 
   const inputTags = (value: string[]) => {
-    setCreateOfferValues({ tags: value });
+    setCreateOfferValue({ tags: value }, 'createOffer/setTags');
   };
 
   const inputLabel = (value: string) => {
-    setCreateOfferValues({ label: value });
+    setCreateOfferValue({ label: value }, 'createOffer/setLabel');
   };
 
   const inputTerms = (value: string) => {
-    setCreateOfferValues({ terms: value });
+    setCreateOfferValue({ terms: value }, 'createOffer/setTerms');
   };
 
   const inputInstructions = (value: string) => {
-    setCreateOfferValues({ instructions: value });
+    setCreateOfferValue({ instructions: value }, 'createOffer/Instructions');
   };
 
   const backToTradePricing = () => {

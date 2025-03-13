@@ -9,13 +9,11 @@ import { getLocalStorage, setLocalStorage } from '@/utils';
 import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 
-import { $createOffer } from '@/store';
-import { setCreateOfferValues } from '@/store';
 import { useQuery } from '@tanstack/react-query';
-import { useStore } from '@nanostores/react';
+import { useRootStore } from '@/zustand';
 
 const useCreateOffer = () => {
-  const createOffer = useStore($createOffer);
+  const { createOffer } = useRootStore();
   const {
     app: { defaults },
   } = useApp();
@@ -26,14 +24,18 @@ const useCreateOffer = () => {
     1: () => toStep(1),
     2: () => toStep(2),
   };
+
   const {} = useQuery({
     queryKey: ['vendor', user.id],
     enabled: !!user.id,
     queryFn: () => {
-      setCreateOfferValues({ vendorId: user.id });
+      createOffer.setCreateOfferValue(
+        { vendorId: user.id },
+        'createOffer/setVendor'
+      );
       return true;
     },
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
   const {} = useQuery({
     queryFn: () => {
@@ -42,7 +44,10 @@ const useCreateOffer = () => {
         return false;
       }
       const savedCreateOffer = JSON.parse(savedCreateOfferString);
-      setCreateOfferValues(savedCreateOffer);
+      createOffer.setCreateOfferValue(
+        { ...savedCreateOffer },
+        'createOffer/setCreateOfferFromLocalStorage'
+      );
       return true;
     },
     queryKey: ['savedCreateOffer'],
@@ -50,10 +55,13 @@ const useCreateOffer = () => {
   });
 
   useEffect(() => {
-    setCreateOfferValues({
-      fiat: defaults?.fiat,
-      cryptocurrency: defaults?.cryptocurrency,
-    });
+    createOffer.setCreateOfferValue(
+      {
+        fiat: defaults?.fiat,
+        cryptocurrency: defaults?.cryptocurrency,
+      },
+      'createOffer/setFiatCryptocurrency'
+    );
   }, [defaults?.cryptocurrency, defaults?.fiat]);
 
   useEffect(() => {
@@ -64,7 +72,10 @@ const useCreateOffer = () => {
       paymentMethodId: createOffer?.paymentMethodId,
     });
 
-    setCreateOfferValues({ isPaymentMethodCompleted: validated.success });
+    createOffer.setCreateOfferValue(
+      { isPaymentMethodCompleted: validated.success },
+      'createOffer/setIsPaymentMethodCompleted'
+    );
   }, [
     createOffer?.fiat,
     createOffer?.cryptocurrency,
@@ -81,7 +92,10 @@ const useCreateOffer = () => {
       timeLimit: createOffer?.timeLimit,
     });
 
-    setCreateOfferValues({ isTradePricingCompleted: validated.success });
+    createOffer.setCreateOfferValue(
+      { isTradePricingCompleted: validated.success },
+      'createOffer/setIsTradePricingCompleted'
+    );
   }, [
     createOffer?.pricingType,
     createOffer?.listAt,
@@ -98,7 +112,14 @@ const useCreateOffer = () => {
       instructions: createOffer?.instructions,
     });
 
-    setCreateOfferValues({ isTradeInstructionsCompleted: validated.success });
+    console.log({ validated });
+
+    createOffer.setCreateOfferValue(
+      {
+        isTradeInstructionsCompleted: validated.success,
+      },
+      'createOffer/setTradeInstructionsCompleted'
+    );
   }, [
     createOffer?.tags,
     createOffer?.label,
@@ -115,10 +136,29 @@ const useCreateOffer = () => {
   };
 
   return {
-    createOffer,
+    createOffer: {
+      cryptocurrency: createOffer.cryptocurrency,
+      fiat: createOffer.fiat,
+      vendorId: createOffer.vendorId,
+      offerType: createOffer.offerType,
+      paymentMethodId: createOffer.paymentMethodId,
+      isPaymentMethodCompleted: createOffer.isPaymentMethodCompleted,
+      pricingType: createOffer.pricingType,
+      listAt: createOffer.listAt,
+      limitMin: createOffer.limitMin,
+      limitMax: createOffer.limitMax,
+      timeLimit: createOffer.timeLimit,
+      isTradePricingCompleted: createOffer.isTradePricingCompleted,
+      tags: createOffer.tags,
+      label: createOffer.label,
+      terms: createOffer.terms,
+      instructions: createOffer.instructions,
+      isTradeInstructionsCompleted: createOffer.isTradeInstructionsCompleted,
+    },
     step,
     onClickEvents,
-    setCreateOfferValues,
+    setCreateOfferValue: createOffer.setCreateOfferValue,
+    resetCreateOffer: createOffer.resetCreateOffer,
     toStep,
     saveCreateOfferLocally,
   };
