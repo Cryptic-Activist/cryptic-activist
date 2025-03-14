@@ -1,4 +1,4 @@
-import { CreateOfferState } from '@/store/createOffer/types';
+import { CreateOfferStore } from '@/zustand/createOffer/types';
 
 export type PricingItem = {
   label: 'Market' | 'Fixed';
@@ -7,5 +7,5 @@ export type PricingItem = {
 
 export type PricingTypeProps = {
   onChange: (item: PricingItem) => void;
-  createOffer: CreateOfferState;
+  createOffer: CreateOfferStore;
 };

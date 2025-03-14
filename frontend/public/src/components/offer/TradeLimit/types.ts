@@ -1,7 +1,7 @@
-import { CreateOfferState } from '@/store/createOffer/types';
+import { CreateOfferStore } from '@/zustand/createOffer/types';
 
 export type TradeLimitProps = {
-  createOffer: CreateOfferState;
+  createOffer: CreateOfferStore;
   inputMinTradeAmount: (value: number) => void;
   inputMaxTradeAmount: (value: number) => void;
 };

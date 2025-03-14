@@ -3,7 +3,7 @@
 import { toCapitalize, toUpperCase } from '@/utils';
 import { useFiats, useHorizontalScroll } from '@/hooks';
 
-import { Fiat } from '@/store/fiat/types';
+import { Fiat } from '@/zustand/fiat/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRef } from 'react';

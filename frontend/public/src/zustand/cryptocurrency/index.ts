@@ -18,15 +18,14 @@ export const useCryptocurrencyStore: StateCreator<
       actionName = 'cryptocurrency/setValue'
     ) => {
       set(
-        ({ cryptocurrency, ...rest }) => ({
+        ({ cryptocurrency }) => ({
           cryptocurrency: {
+            ...cryptocurrency,
             coingeckoId: params.coingeckoId ?? cryptocurrency.coingeckoId,
             id: params.id ?? cryptocurrency.id,
             name: params.name ?? cryptocurrency.name,
             symbol: params.symbol ?? cryptocurrency.symbol,
-            ...cryptocurrency,
           },
-          ...rest,
         }),
         false,
         actionName

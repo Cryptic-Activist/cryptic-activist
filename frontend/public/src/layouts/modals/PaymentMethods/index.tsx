@@ -1,17 +1,16 @@
 'use client';
 
-import { useRef } from 'react';
-
 import {
   useHorizontalScroll,
   useNavigationBar,
   usePaymentMethods,
 } from '@/hooks';
-import { ListTemplate } from '@/layouts/modals';
-import { PaymentMethod } from '@/store/paymentMethod/types';
-import { toCapitalize } from '@/utils';
 
+import { ListTemplate } from '@/layouts/modals';
+import { PaymentMethod } from '@/zustand/paymentMethod/types';
 import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
+import { useRef } from 'react';
 
 const PaymentMethods = () => {
   const ref = useRef<HTMLUListElement | null>(null);

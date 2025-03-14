@@ -14,13 +14,12 @@ export const usePaymentMethodStore: StateCreator<
 
     setPaymentMethodValue: (params, actionName = 'paymentMethod/setValue') => {
       set(
-        ({ paymentMethod, ...rest }) => ({
+        ({ paymentMethod }) => ({
           paymentMethod: {
+            ...paymentMethod,
             id: params.id ?? paymentMethod.id,
             name: params.name ?? paymentMethod.name,
-            ...paymentMethod,
           },
-          ...rest,
         }),
         false,
         actionName

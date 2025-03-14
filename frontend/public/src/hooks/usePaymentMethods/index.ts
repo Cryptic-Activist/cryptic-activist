@@ -1,24 +1,17 @@
 'use client';
 
-import {
-  $paymentMethodCategories,
-  $paymentMethods,
-  getPaymentMethodCategories,
-  getPaymentMethods,
-  getPaymentMethodsByCategory,
-} from '@/store';
 import { useEffect, useState } from 'react';
 
-import { PaymentMethod } from '@/store/paymentMethod/types';
+import { PaymentMethod } from '@/zustand/paymentMethod/types';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
-import { useStore } from '@nanostores/react';
+import { useRootStore } from '@/zustand';
 
 const usePaymentMethods = (fetch?: boolean) => {
   const { setValue } = useApp();
 
-  const paymentMethods = useStore($paymentMethods);
-  const paymentMethodCategories = useStore($paymentMethodCategories);
+  const { paymentMethods, paymentMethodCategories } = useRootStore();
+
   const [paymentMethodsList, setPaymentMethodsList] = useState(
     paymentMethods.data
   );
@@ -66,7 +59,7 @@ const usePaymentMethods = (fetch?: boolean) => {
 
   useEffect(() => {
     if (fetch) {
-      getPaymentMethodCategories();
+      paymentMethodCategories.getPaymentMethodCategories();
     }
   }, [fetch]);
 
@@ -74,10 +67,11 @@ const usePaymentMethods = (fetch?: boolean) => {
     paymentMethods,
     paymentMethodCategories,
     paymentMethodsList,
-    getPaymentMethods,
+    getPaymentMethods: paymentMethods.getPaymentMethods,
     // getPaymentMethod,
-    getPaymentMethodCategories,
-    getPaymentMethodsByCategory,
+    getPaymentMethodCategories:
+      paymentMethodCategories.getPaymentMethodCategories,
+    getPaymentMethodsByCategory: paymentMethods.getPaymentMethodsByCategory,
     setPaymentMethod,
     filterPaymentMethods,
   };

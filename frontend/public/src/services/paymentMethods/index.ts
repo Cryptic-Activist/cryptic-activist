@@ -1,20 +1,17 @@
-import { AxiosResponse, fetchGet } from '@/services/axios';
-
 import { BACKEND } from '@/constants';
+import { fetchGet } from '@/services/axios';
 
-export const fetchPaymentMethods = async (): Promise<AxiosResponse | null> => {
+export const fetchPaymentMethods = async () => {
   const response = await fetchGet(`${BACKEND}/offers/payment-methods`);
 
   if (response.status !== 200) {
     return null;
   }
 
-  return response;
+  return response.data;
 };
 
-export const fetchPaymentMethodsByCategory = async (
-  categoryId: string
-): Promise<AxiosResponse | null> => {
+export const fetchPaymentMethodsByCategory = async (categoryId: string) => {
   const response = await fetchGet(
     `${BACKEND}/offers/payment-methods/${categoryId}/all`
   );
@@ -23,5 +20,5 @@ export const fetchPaymentMethodsByCategory = async (
     return null;
   }
 
-  return response;
+  return response.data;
 };

@@ -1,13 +1,16 @@
-import { AxiosResponse, fetchGet } from '@/services/axios';
-
 import { BACKEND } from '@/constants';
+import { fetchGet } from '@/services/axios';
 
-export const fetchFiats = async (): Promise<AxiosResponse | null> => {
-  const response = await fetchGet(`${BACKEND}/fiats`);
+export const fetchFiats = async () => {
+  try {
+    const response = await fetchGet(`${BACKEND}/fiats`);
 
-  if (response.status !== 200) {
+    if (response.status !== 200) {
+      return null;
+    }
+
+    return response.data;
+  } catch (error) {
     return null;
   }
-
-  return response;
 };

@@ -1,6 +1,6 @@
-import { CreateOfferState } from '@/store/createOffer/types';
+import { CreateOfferStore } from '@/zustand/createOffer/types';
 
 export type TradeTimeProps = {
-  createOffer: CreateOfferState;
+  createOffer: CreateOfferStore;
   inputTradeTimeLimit: (value: number) => void;
 };

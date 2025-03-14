@@ -14,14 +14,13 @@ export const useFiatStore: StateCreator<
     symbol: undefined,
     setFiatValue: (params, actionName = 'fiat/setValue') => {
       set(
-        ({ fiat, ...rest }) => ({
+        ({ fiat }) => ({
           fiat: {
+            ...fiat,
             id: params.id ?? fiat.id,
             name: params.name ?? fiat.name,
             symbol: params.symbol ?? fiat.symbol,
-            ...fiat,
           },
-          ...rest,
         }),
         false,
         actionName

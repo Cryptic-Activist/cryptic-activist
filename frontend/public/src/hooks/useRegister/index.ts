@@ -12,7 +12,6 @@ import { registerResolver } from './zod';
 import { useCountDown } from '..';
 import { useEffect } from 'react';
 import { useRootStore } from '@/zustand';
-import { useStore } from '@nanostores/react';
 
 const useRegister = () => {
   const {

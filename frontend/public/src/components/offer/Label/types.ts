@@ -1,6 +1,6 @@
-import { CreateOfferState } from '@/store/createOffer/types';
+import { CreateOfferStore } from '@/zustand/createOffer/types';
 
 export type LabelProps = {
   onChange: (value: string) => void;
-  createOffer: CreateOfferState;
+  createOffer: CreateOfferStore;
 };

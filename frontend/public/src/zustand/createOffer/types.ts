@@ -1,5 +1,5 @@
-import { Cryptocurrency } from '@/store/cryptocurrency/types';
-import { Fiat } from '@/store/fiat/types';
+import { Cryptocurrency } from '@/zustand/cryptocurrency/types';
+import { Fiat } from '@/zustand/fiat/types';
 
 type OfferType = 'sell' | 'buy';
 
