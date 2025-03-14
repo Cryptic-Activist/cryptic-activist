@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import {
+  createAcceptedCryptocurrency,
   createCryptocurrency,
   createManyCryptocurrencies,
+  getAcceptedCryptocurrencies,
   getCryptocurrencies,
 } from 'base-ca';
+import { getCoin, getCoins } from '@/services/coinGecko';
 
 import { fetchGet } from '@/services/axios';
 import { filterLongShort } from '@/utils/filters';
+import { getQueries } from '@/utils/axios';
 
 export const index = async (_req: Request, res: Response) => {
   try {
@@ -55,20 +59,53 @@ export const createCryptocurrenciesCoinGecko = async (
   res: Response,
 ) => {
   try {
-    const response = await fetchGet(
-      'https://api.coingecko.com/api/v3/coins/list',
-    );
+    const acceptedCryptocurrencies = await getAcceptedCryptocurrencies();
+    const ids = acceptedCryptocurrencies
+      .map((accepted) => {
+        return accepted.coingeckoId;
+      })
+      .join(',');
+    const coins = await getCoins({
+      vs_currency: 'usd',
+      ids,
+    });
+    const mapped = filterLongShort(coins).map(({ id, name, symbol }) => ({
+      coingeckoId: id,
+      name,
+      symbol,
+    }));
 
-    const mappped = filterLongShort(response.data).map(
-      ({ id, name, symbol }) => ({ coingeckoId: id, name, symbol }),
-    );
-
-    const created = await createManyCryptocurrencies(mappped);
+    const created = await createManyCryptocurrencies(mapped);
 
     res.status(200).send({
       ...created,
     });
   } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const createAcceptedCryptocurrencyCoinGecko = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { coingeckoId } = req.body;
+
+    const coin = await getCoin(coingeckoId);
+
+    const createdAcceptedCryptocurrency = await createAcceptedCryptocurrency({
+      coingeckoId: coin.id,
+      name: coin.name,
+      symbol: coin.symbol,
+    });
+
+    res.status(200).send(createdAcceptedCryptocurrency);
+  } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

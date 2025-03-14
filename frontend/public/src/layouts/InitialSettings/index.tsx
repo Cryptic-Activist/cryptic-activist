@@ -22,13 +22,6 @@ const InitialSettings = () => {
   const {} = useUser();
   const { app } = useRootStore();
 
-  useEffect(() => {
-    // navigationBar.setNavigationBarValue(
-    //   { drawers: { user: true } },
-    //   'navigationBar/Test'
-    // );
-  }, []);
-
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);
 

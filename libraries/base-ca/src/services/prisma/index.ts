@@ -1,4 +1,5 @@
 import {
+  AcceptedCryptocurrency,
   Admin,
   Block,
   Chat,
@@ -40,4 +41,5 @@ export {
   UserLanguage,
   SystemMessage,
   Admin,
+  AcceptedCryptocurrency,
 };

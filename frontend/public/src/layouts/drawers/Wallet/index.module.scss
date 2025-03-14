@@ -137,7 +137,7 @@
   display: flex;
   gap: 1px;
   flex-direction: column;
-  background-color: darken($color: globals.$primary, $amount: 10);
+  background-color: globals.$primary-darken-10;
   width: 100%;
   padding: 1rem;
   border-radius: 0.5em;

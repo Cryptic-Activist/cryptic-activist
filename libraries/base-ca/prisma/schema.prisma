@@ -275,3 +275,12 @@ model Trade {
 
   @@map("trades")
 }
+
+model AcceptedCryptocurrency {
+  id          String @id @default(uuid())
+  coingeckoId String @unique @db.VarChar(200)
+  symbol      String @db.VarChar(200)
+  name        String @db.VarChar(200)
+
+  @@map("accepted_cryptocurrencies")
+}

@@ -30,7 +30,10 @@ export const useCryptocurrenciesStore: StateCreator<
       const cryptocurrencies = await fetchCryptocurrencies();
       const setValue = get().cryptocurrencies.setCryptocurrenciesValue;
 
-      setValue(cryptocurrencies, 'cryptocurrencies/setCryptocurrencies');
+      setValue(
+        { data: cryptocurrencies },
+        'cryptocurrencies/setCryptocurrencies'
+      );
     },
   },
 });

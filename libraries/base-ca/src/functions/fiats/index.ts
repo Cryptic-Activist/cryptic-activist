@@ -1,5 +1,10 @@
+import {
+  CreateFiatParams,
+  GetFiatsParams,
+  OrderByFiatParams,
+  WhereFiatParams,
+} from './types';
 import { Fiat, prisma } from '../../services/prisma';
-import { CreateFiatParams, WhereFiatParams } from './types';
 
 export const createFiat = async (
   params: CreateFiatParams
@@ -52,13 +57,15 @@ export const getFiat = async (
   return fiat;
 };
 
-export const getFiats = async (
-  where?: WhereFiatParams,
-  limit?: number
-): Promise<Fiat[]> => {
+export const getFiats = async ({
+  limit,
+  orderBy,
+  where,
+}: GetFiatsParams): Promise<Fiat[]> => {
   const fiats = await prisma.fiat.findMany({
     where,
     take: limit,
+    orderBy: orderBy,
   });
 
   return fiats;
