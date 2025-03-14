@@ -1,6 +1,6 @@
-import { Cryptocurrency } from '@/zustand/cryptocurrency/types';
-import { Fiat } from '@/zustand/fiat/types';
-import { PaymentMethod } from '@/zustand/paymentMethod/types';
+import { Cryptocurrency } from '@/store/cryptocurrency/types';
+import { Fiat } from '@/store/fiat/types';
+import { PaymentMethod } from '@/store/paymentMethod/types';
 import { ReactElement } from 'react';
 
 type Dimensions = [number, number];

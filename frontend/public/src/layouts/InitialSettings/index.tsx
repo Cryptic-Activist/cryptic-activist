@@ -11,7 +11,7 @@ import {
 } from '@/hooks';
 
 import { useEffect } from 'react';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const InitialSettings = () => {
   const { getFiats, getFiat, fiats } = useFiats();

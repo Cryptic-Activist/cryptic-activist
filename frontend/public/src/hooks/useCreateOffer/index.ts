@@ -10,7 +10,7 @@ import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const useCreateOffer = () => {
   const { createOffer } = useRootStore();

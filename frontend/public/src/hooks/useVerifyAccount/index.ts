@@ -8,7 +8,7 @@ import {
 
 import { Step } from './types';
 import { useForm } from 'react-hook-form';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const useVerifyAccount = () => {
   const { verifyAccount } = useRootStore();

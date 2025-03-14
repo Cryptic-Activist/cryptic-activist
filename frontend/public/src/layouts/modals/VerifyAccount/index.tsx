@@ -5,7 +5,7 @@ import { Input, Links } from '@/components/forms';
 import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 import { useState } from 'react';
 import { useVerifyAccount } from '@/hooks';
 

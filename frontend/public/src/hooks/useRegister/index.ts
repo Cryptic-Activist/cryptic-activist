@@ -11,7 +11,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { registerResolver } from './zod';
 import { useCountDown } from '..';
 import { useEffect } from 'react';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const useRegister = () => {
   const {

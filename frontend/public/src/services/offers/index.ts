@@ -1,7 +1,7 @@
 import { AxiosResponse, fetchGet, fetchPost } from '@/services/axios';
 
 import { BACKEND } from '@/constants';
-import { CreateOffer } from '@/zustand/createOffer/types';
+import { CreateOffer } from '@/store/createOffer/types';
 
 export const fetchOffers = async (): Promise<AxiosResponse | null> => {
   const response = await fetchGet(`${BACKEND}/offers`);

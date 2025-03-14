@@ -1,3 +1,3 @@
-import { Type } from '@/zustand/app/types';
+import { Type } from '@/store/app/types';
 
 export type Selected = Type;

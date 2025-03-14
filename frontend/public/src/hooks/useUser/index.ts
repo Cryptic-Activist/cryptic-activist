@@ -8,7 +8,7 @@ import { loginResolver } from './zod';
 import useApp from '../useApp';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const useUser = () => {
   const { addToast } = useApp();

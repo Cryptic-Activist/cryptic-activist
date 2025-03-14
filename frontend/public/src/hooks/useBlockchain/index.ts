@@ -10,7 +10,7 @@ import {
 
 import { BRAVE_WALLET } from '@/constants';
 import { useEffect } from 'react';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
 
 const useBlockchain = () => {

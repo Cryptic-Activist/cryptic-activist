@@ -4,7 +4,7 @@ import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 import Link from 'next/link';
 import type { MenuListProps } from './types';
 import styles from './index.module.scss';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   const { logout } = useUser();

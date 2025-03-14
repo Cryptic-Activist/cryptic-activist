@@ -1,10 +1,10 @@
 'use client';
 
-import { Fiat } from '@/zustand/fiat/types';
+import { Fiat } from '@/store/fiat/types';
 import { FiatSymbol } from './types';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 import { useState } from 'react';
 
 const useFiats = () => {

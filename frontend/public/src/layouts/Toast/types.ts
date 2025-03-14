@@ -1,4 +1,4 @@
-import { Toast } from '@/zustand/app/types';
+import { Toast } from '@/store/app/types';
 
 export type ToastComponent = {
   toast: Toast;

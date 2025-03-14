@@ -1,7 +1,7 @@
 import {
   CreateOfferSetter,
   SetCreateOfferValue,
-} from '@/zustand/createOffer/types';
+} from '@/store/createOffer/types';
 
 export type CreateOfferTradePricingProps = {
   setCreateOfferValue: SetCreateOfferValue;

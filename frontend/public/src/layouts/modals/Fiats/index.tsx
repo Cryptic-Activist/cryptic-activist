@@ -3,11 +3,11 @@
 import { toCapitalize, toUpperCase } from '@/utils';
 import { useFiats, useHorizontalScroll } from '@/hooks';
 
-import { Fiat } from '@/zustand/fiat/types';
+import { Fiat } from '@/store/fiat/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRef } from 'react';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const Fiats = () => {
   const ref = useRef<HTMLUListElement | null>(null);
