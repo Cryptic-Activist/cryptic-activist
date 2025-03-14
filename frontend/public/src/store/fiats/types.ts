@@ -2,6 +2,7 @@ export type Fiat = {
   id: string;
   name: string;
   symbol: string;
+  country: string;
 };
 
 export type FiatsStore = {
@@ -17,6 +18,7 @@ export type FiatsSetter = {
     id: string;
     name: string;
     symbol: string;
+    country: string;
   }[];
 };
 

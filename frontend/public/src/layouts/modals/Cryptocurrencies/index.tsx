@@ -1,17 +1,14 @@
 'use client';
 
 import { toCapitalize, toUpperCase } from '@/utils';
-import { useCryptocurrencies, useHorizontalScroll } from '@/hooks';
 
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
-import { useRef } from 'react';
+import { useCryptocurrencies } from '@/hooks';
 import { useRootStore } from '@/store';
 
 const Cryptocurrencies = () => {
-  const ref = useRef<HTMLUListElement | null>(null);
-  const _scroll = useHorizontalScroll(ref);
   const { cryptocurrenciesList, setCryptocurrency, filterCryptocurrencies } =
     useCryptocurrencies();
   const {
@@ -25,12 +22,12 @@ const Cryptocurrencies = () => {
 
   return (
     <ListTemplate
-      width="70vw"
+      width="40vw"
       height="70vh"
       heading="Cryptocurrencies"
       onFilter={filterCryptocurrencies}
     >
-      <ul className={styles.list} ref={ref}>
+      <ul className={styles.list}>
         {cryptocurrenciesList?.map((cryptocurrency, index) => (
           <li key={index}>
             <button

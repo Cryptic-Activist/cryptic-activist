@@ -163,6 +163,7 @@ CREATE TABLE "fiats" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(30) NOT NULL,
     "symbol" VARCHAR(10) NOT NULL,
+    "country" VARCHAR(100) NOT NULL,
     "isDeleted" BOOLEAN DEFAULT false,
     "whenDelete" DATE,
     "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
@@ -235,6 +236,16 @@ CREATE TABLE "trades" (
     CONSTRAINT "trades_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "accepted_cryptocurrencies" (
+    "id" TEXT NOT NULL,
+    "coingeckoId" VARCHAR(200) NOT NULL,
+    "symbol" VARCHAR(200) NOT NULL,
+    "name" VARCHAR(200) NOT NULL,
+
+    CONSTRAINT "accepted_cryptocurrencies_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "admins_username_key" ON "admins"("username");
 
@@ -252,6 +263,9 @@ CREATE UNIQUE INDEX "chats_tradeId_key" ON "chats"("tradeId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "cryptocurrencies_coingeckoId_key" ON "cryptocurrencies"("coingeckoId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cryptocurrencies"("coingeckoId");
 
 -- AddForeignKey
 ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

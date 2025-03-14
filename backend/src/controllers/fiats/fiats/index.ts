@@ -22,11 +22,12 @@ export const index = async (_req: Request, res: Response) => {
 
 export const createFiatController = async (req: Request, res: Response) => {
   try {
-    const { name, symbol } = req.body;
+    const { name, symbol, country } = req.body;
 
     const newFiat = await createFiat({
       name,
       symbol,
+      country,
     });
 
     res.status(200).send(newFiat);
@@ -44,6 +45,7 @@ export const createFiatsJSON = async (_req: Request, res: Response) => {
       await createFiat({
         name: fiat.name,
         symbol: fiat.symbol,
+        country: fiat.country,
       });
     });
 
