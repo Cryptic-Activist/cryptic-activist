@@ -1,17 +1,15 @@
 'use client';
 
 import { toCapitalize, toUpperCase } from '@/utils';
-import { useFiats, useHorizontalScroll } from '@/hooks';
 
 import { Fiat } from '@/store/fiat/types';
+import Flag from './Flag';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
-import { useRef } from 'react';
+import { useFiats } from '@/hooks';
 import { useRootStore } from '@/store';
 
 const Fiats = () => {
-  const ref = useRef<HTMLUListElement | null>(null);
-  const _scroll = useHorizontalScroll(ref);
   const { fiatsList, setFiat, filterFiats } = useFiats();
   const {
     navigationBar: { resetNavigationBar, toggleModal },
@@ -24,17 +22,18 @@ const Fiats = () => {
 
   return (
     <ListTemplate
-      width="70vw"
+      width="40vw"
       height="70vh"
       heading="Fiats"
       onFilter={filterFiats}
     >
-      <ul className={styles.list} ref={ref}>
+      <ul className={styles.list}>
         {fiatsList?.map((fiat, index) => (
           <li key={index}>
-            <button onClick={() => selectFiat(fiat)}>{`${toUpperCase(
-              fiat.symbol
-            )} - ${toCapitalize(fiat.name)}`}</button>
+            <button onClick={() => selectFiat(fiat)}>
+              <Flag country={fiat.country} />
+              {toCapitalize(fiat.name)}
+            </button>
           </li>
         ))}
       </ul>

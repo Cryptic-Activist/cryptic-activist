@@ -188,6 +188,7 @@ model Fiat {
   id         String    @id @default(uuid())
   name       String    @db.VarChar(30)
   symbol     String    @db.VarChar(10)
+  country    String    @db.VarChar(100)
   isDeleted  Boolean?  @default(false) @db.Boolean
   whenDelete DateTime? @db.Date
   createdAt  DateTime? @default(now()) @db.Date
