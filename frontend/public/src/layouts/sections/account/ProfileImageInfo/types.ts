@@ -1,4 +1,4 @@
-import { User } from '@/store/user/types';
+import { User } from '@/zustand/user/types';
 
 export type ProfileSection = {
   user?: User;

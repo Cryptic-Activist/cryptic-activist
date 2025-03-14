@@ -1,29 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-
-import {
-  $verifyAccount,
-  setPrivateKeys,
-  setPrivateKeysArray,
-  setUsername,
-  submitVerifyPrivateKeys,
-} from '@/store';
-import { useStore } from '@nanostores/react';
-
-import { Step } from './types';
 import {
   verifyAccountPrivateKeysResolver,
   verifyAccountUsernameResolver,
 } from './zod';
 
+import { Step } from './types';
+import { useForm } from 'react-hook-form';
+import { useRootStore } from '@/zustand';
+
 const useVerifyAccount = () => {
+  const { verifyAccount } = useRootStore();
   const [step, setStep] = useState<Step>('username');
-
-  const { privateKeys, privateKeysArray, username, isSubmitted } =
-    useStore($verifyAccount);
-
   const {
     register: usernameRegister,
     handleSubmit: handleSubmitUsername,
@@ -37,36 +26,38 @@ const useVerifyAccount = () => {
   } = useForm({ resolver: verifyAccountPrivateKeysResolver });
 
   useEffect(() => {
-    setPrivateKeysArray();
+    verifyAccount.setPrivateKeysArray();
   }, []);
 
   const onSubmitFindUser = (data: any) => {
-    setUsername({ username: data['username'] });
+    verifyAccount.setUsername({ username: data['username'] });
     setStep('verification');
   };
 
   const onSubmitVerifyPrivateKeys = async (data: any) => {
-    const mappedPrivateKeys = Object.values(data).map(
-      (privateKey) => privateKey
-    ) as string[];
-    setPrivateKeys({ privateKeys: mappedPrivateKeys });
+    if (verifyAccount.username) {
+      const mappedPrivateKeys = Object.values(data).map(
+        (privateKey) => privateKey
+      ) as string[];
+      verifyAccount.setPrivateKeys({ privateKeys: mappedPrivateKeys });
 
-    const isSubmitted = await submitVerifyPrivateKeys({
-      username,
-      privateKeys: mappedPrivateKeys,
-    });
+      const isSubmitted = await verifyAccount.verifyPrivateKeys({
+        username: verifyAccount.username,
+        privateKeys: mappedPrivateKeys,
+      });
 
-    if (isSubmitted) {
-      setStep('success');
-      setPrivateKeys({ privateKeys: [] });
+      if (isSubmitted) {
+        setStep('success');
+        verifyAccount.setPrivateKeys({ privateKeys: [] });
+      }
     }
   };
 
   return {
-    privateKeys,
-    privateKeysArray,
-    username,
-    isSubmitted,
+    privateKeys: verifyAccount.privateKeys,
+    privateKeysArray: verifyAccount.privateKeysArray,
+    username: verifyAccount.username,
+    isSubmitted: verifyAccount.isSubmitted,
     step,
     usernameErrors,
     privateKeysErrors,
@@ -74,7 +65,7 @@ const useVerifyAccount = () => {
     privateKeysRegister,
     handleSubmitUsername,
     handleSubmitPrivateKeys,
-    setUsername,
+    setUsername: verifyAccount.setUsername,
     onSubmitFindUser,
     onSubmitVerifyPrivateKeys,
   };

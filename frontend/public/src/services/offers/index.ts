@@ -1,7 +1,7 @@
 import { AxiosResponse, fetchGet, fetchPost } from '@/services/axios';
 
 import { BACKEND } from '@/constants';
-import { CreateOffer } from '@/store/createOffer/types';
+import { CreateOffer } from '@/zustand/createOffer/types';
 
 export const fetchOffers = async (): Promise<AxiosResponse | null> => {
   const response = await fetchGet(`${BACKEND}/offers`);
@@ -15,20 +15,20 @@ export const fetchOffers = async (): Promise<AxiosResponse | null> => {
 
 export const submitOfferCreate = async (data: CreateOffer) => {
   const payload = {
-    vendorId: data.vendorId,
-    cryptocurrencyId: data.cryptocurrency?.id,
-    fiatId: data.fiat?.id,
-    offerType: data.offerType,
-    paymentMethodId: data.paymentMethodId,
-    pricingType: data.pricingType,
-    listAt: data.listAt,
-    limitMin: data.limitMin,
-    limitMax: data.limitMax,
-    timeLimit: data.timeLimit,
-    tags: data.tags,
-    label: data.label,
-    terms: data.terms,
-    instructions: data.instructions,
+    vendorId: data.createOffer.vendorId,
+    cryptocurrencyId: data.createOffer.cryptocurrency?.id,
+    fiatId: data.createOffer.fiat?.id,
+    offerType: data.createOffer.offerType,
+    paymentMethodId: data.createOffer.paymentMethodId,
+    pricingType: data.createOffer.pricingType,
+    listAt: data.createOffer.listAt,
+    limitMin: data.createOffer.limitMin,
+    limitMax: data.createOffer.limitMax,
+    timeLimit: data.createOffer.timeLimit,
+    tags: data.createOffer.tags,
+    label: data.createOffer.label,
+    terms: data.createOffer.terms,
+    instructions: data.createOffer.instructions,
   };
   const response = await fetchPost(BACKEND + '/offers/offer/create', payload);
 

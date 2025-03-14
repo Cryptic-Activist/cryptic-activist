@@ -1,4 +1,4 @@
-import { User } from '@/store/user/types';
+import { User } from '@/zustand/user/types';
 
 export type ProfileInfoProps = {
   user?: User;

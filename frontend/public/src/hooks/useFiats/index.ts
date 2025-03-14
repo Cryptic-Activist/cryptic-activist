@@ -1,17 +1,15 @@
 'use client';
 
-import { $fiats, getFiats } from '@/store';
-
-import { Fiat } from '@/store/fiat/types';
+import { Fiat } from '@/zustand/fiat/types';
 import { FiatSymbol } from './types';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
+import { useRootStore } from '@/zustand';
 import { useState } from 'react';
-import { useStore } from '@nanostores/react';
 
 const useFiats = () => {
   const { setValue } = useApp();
-  const fiats = useStore($fiats);
+  const { fiats } = useRootStore();
   const [fiatsList, setFiatsList] = useState(fiats.data);
 
   const getFiat = (symbol: FiatSymbol) => {
@@ -58,7 +56,14 @@ const useFiats = () => {
     setFiatsList(filtered);
   };
 
-  return { fiats, fiatsList, getFiats, getFiat, setFiat, filterFiats };
+  return {
+    fiats,
+    fiatsList,
+    getFiats: fiats.getFiats,
+    getFiat,
+    setFiat,
+    filterFiats,
+  };
 };
 
 export default useFiats;

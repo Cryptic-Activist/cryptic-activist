@@ -3,7 +3,7 @@
 import { toCapitalize, toUpperCase } from '@/utils';
 import { useCryptocurrencies, useHorizontalScroll } from '@/hooks';
 
-import { Cryptocurrency } from '@/store/cryptocurrency/types';
+import { Cryptocurrency } from '@/zustand/cryptocurrency/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRef } from 'react';
