@@ -27,7 +27,7 @@ export const useFiatsStore: StateCreator<
       const fiats = await fetchFiats();
       const setValue = get().fiats.setFiatsValue;
 
-      setValue(fiats, 'fiats/setFiats');
+      setValue({ data: fiats }, 'fiats/setFiats');
     },
   },
 });

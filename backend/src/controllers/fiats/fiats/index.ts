@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
-import { createFiat, getFiat, getFiats } from 'base-ca';
+import { createFiat, getFiats } from 'base-ca';
 
 import fiatsJson from '../../../../fiats.json';
 
 export const index = async (_req: Request, res: Response) => {
   try {
-    const fiats = await getFiats();
-
-    res.status(200).send({
-      status_code: 200,
-      results: fiats,
+    const fiats = await getFiats({
+      orderBy: {
+        name: 'asc',
+      },
     });
+
+    res.status(200).send(fiats);
   } catch (err) {
     res.status(500).send({
       status_code: 500,
@@ -28,10 +29,7 @@ export const createFiatController = async (req: Request, res: Response) => {
       symbol,
     });
 
-    res.status(200).send({
-      status_code: 200,
-      results: newFiat,
-    });
+    res.status(200).send(newFiat);
   } catch (err) {
     res.status(500).send({
       status_code: 500,
@@ -49,9 +47,7 @@ export const createFiatsJSON = async (_req: Request, res: Response) => {
       });
     });
 
-    res.status(200).send({
-      status_code: 200,
-    });
+    res.status(200).send({ ok: true });
   } catch (err) {
     res.status(500).send({
       status_code: 500,

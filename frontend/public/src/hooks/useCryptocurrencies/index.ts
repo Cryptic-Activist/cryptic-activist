@@ -14,10 +14,6 @@ const useCryptocurrency = () => {
     cryptocurrencies.data
   );
 
-  const getCryptocurrencies = () => {
-    cryptocurrencies.getCryptocurrencies();
-  };
-
   const getCryptocurrency = (coingeckoId: CryptocurrencyCoinGeckoId) => {
     if (!cryptocurrencies.data) {
       return null;
@@ -74,7 +70,7 @@ const useCryptocurrency = () => {
   return {
     cryptocurrencies,
     cryptocurrenciesList,
-    getCryptocurrencies,
+    getCryptocurrencies: cryptocurrencies.getCryptocurrencies,
     getCryptocurrency,
     setCryptocurrency,
     filterCryptocurrencies,

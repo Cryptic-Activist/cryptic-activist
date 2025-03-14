@@ -17,6 +17,8 @@ const useFiats = () => {
       return null;
     }
 
+    console.log({ fiats });
+
     const fiat = fiats.data.filter((f) => f.symbol === symbol);
 
     const hasFound = fiat.length > 0;
