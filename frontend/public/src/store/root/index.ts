@@ -13,14 +13,12 @@ import {
   useRegisterStore,
   useUserStore,
   useVerifyAccountStore,
-} from '../';
+} from '..';
 
 import { IS_DEVELOPMENT } from '@/constants';
 import { RootStore } from './types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-// import { immer } from 'zustand/middleware/immer';
 
 export const useRootStore = create<RootStore>()(
   devtools(

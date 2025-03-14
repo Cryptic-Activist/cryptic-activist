@@ -3,8 +3,8 @@
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 
 import { FaSearch } from 'react-icons/fa';
-import { PaymentMethod } from '@/zustand/paymentMethod/types';
-import { PaymentMethodCategory } from '@/zustand/paymentMethodCategories/types';
+import { PaymentMethod } from '@/store/paymentMethod/types';
+import { PaymentMethodCategory } from '@/store/paymentMethodCategories/types';
 import { SelectPaymentMethodProps } from './types';
 import { searchArrayOfObjects } from '@/utils';
 import styles from './index.module.scss';

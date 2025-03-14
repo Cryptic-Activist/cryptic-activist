@@ -1,4 +1,4 @@
-import { CreateOfferStore } from '@/zustand/createOffer/types';
+import { CreateOfferStore } from '@/store/createOffer/types';
 
 export type TradeTimeProps = {
   createOffer: CreateOfferStore;

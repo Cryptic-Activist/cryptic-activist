@@ -1,10 +1,10 @@
 'use client';
 
-import { Cryptocurrency } from '@/zustand/cryptocurrency/types';
+import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { CryptocurrencyCoinGeckoId } from './types';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 import { useState } from 'react';
 
 const useCryptocurrency = () => {

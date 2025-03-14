@@ -1,6 +1,6 @@
 import { copyToClipboard } from '@/utils';
 import { useRegister } from '@/hooks';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const usePrivateKeys = () => {
   const { register } = useRegister();

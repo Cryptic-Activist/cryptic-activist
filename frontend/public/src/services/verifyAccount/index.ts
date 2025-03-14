@@ -1,5 +1,5 @@
 import { BACKEND } from '@/constants';
-import { SubmitVerifyPrivateKeysParams } from '@/zustand/verifyAccount/types';
+import { SubmitVerifyPrivateKeysParams } from '@/store/verifyAccount/types';
 import { fetchPost } from '../axios';
 
 export const submitPrivateKeysVerification = async (

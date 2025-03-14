@@ -1,6 +1,6 @@
 'use client';
 
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const useNavigationBar = () => {
   const { navigationBar } = useRootStore();

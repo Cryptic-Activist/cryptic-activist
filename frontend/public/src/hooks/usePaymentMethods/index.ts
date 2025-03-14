@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-import { PaymentMethod } from '@/zustand/paymentMethod/types';
+import { PaymentMethod } from '@/store/paymentMethod/types';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const usePaymentMethods = (fetch?: boolean) => {
   const { setValue } = useApp();

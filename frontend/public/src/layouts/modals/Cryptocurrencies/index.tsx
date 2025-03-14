@@ -3,11 +3,11 @@
 import { toCapitalize, toUpperCase } from '@/utils';
 import { useCryptocurrencies, useHorizontalScroll } from '@/hooks';
 
-import { Cryptocurrency } from '@/zustand/cryptocurrency/types';
+import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRef } from 'react';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const Cryptocurrencies = () => {
   const ref = useRef<HTMLUListElement | null>(null);

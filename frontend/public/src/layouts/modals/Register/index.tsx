@@ -6,7 +6,7 @@ import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRegister } from '@/hooks';
-import { useRootStore } from '@/zustand';
+import { useRootStore } from '@/store';
 
 const Register = () => {
   const {
