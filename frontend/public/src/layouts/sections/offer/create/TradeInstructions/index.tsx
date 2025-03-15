@@ -24,10 +24,6 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
 }) => {
   const router = useRouter();
 
-  // console.log({
-  //   isTradeInstructionsCompleted: createOffer,
-  // });
-
   const createOfferMutation = useMutation({
     mutationKey: ['createOffer'],
     mutationFn: submitOfferCreate,

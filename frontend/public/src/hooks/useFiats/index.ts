@@ -17,8 +17,6 @@ const useFiats = () => {
       return null;
     }
 
-    console.log({ fiats });
-
     const fiat = fiats.data.filter((f) => f.symbol === symbol);
 
     const hasFound = fiat.length > 0;
@@ -34,7 +32,12 @@ const useFiats = () => {
     setValue(
       {
         defaults: {
-          fiat: { id: fiat.id, name: fiat.name, symbol: fiat.symbol },
+          fiat: {
+            id: fiat.id,
+            name: fiat.name,
+            symbol: fiat.symbol,
+            country: fiat.country,
+          },
         },
       },
       'app/setDefaultFiat'
