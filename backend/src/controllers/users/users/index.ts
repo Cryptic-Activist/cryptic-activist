@@ -35,7 +35,6 @@ export async function getRandomCredentials(_req: Request, res: Response) {
       username,
     });
   } catch (error) {
-    console.log({ error });
     res.status(500).send({
       error,
     });

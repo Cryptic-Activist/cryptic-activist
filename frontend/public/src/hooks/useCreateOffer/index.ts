@@ -112,8 +112,6 @@ const useCreateOffer = () => {
       instructions: createOffer?.instructions,
     });
 
-    console.log({ validated });
-
     createOffer.setCreateOfferValue(
       {
         isTradeInstructionsCompleted: validated.success,
