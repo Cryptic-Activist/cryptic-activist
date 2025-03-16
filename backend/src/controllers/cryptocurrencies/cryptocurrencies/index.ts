@@ -37,6 +37,7 @@ export async function indexCoinGecko(_req: Request, res: Response) {
         coingeckoId: cryptocurrency.id,
         name: cryptocurrency.name,
         symbol: cryptocurrency.symbol,
+        image: cryptocurrency.name,
       });
 
       return createdCryptocurrency;
@@ -69,11 +70,14 @@ export const createCryptocurrenciesCoinGecko = async (
       vs_currency: 'usd',
       ids,
     });
-    const mapped = filterLongShort(coins).map(({ id, name, symbol }) => ({
-      coingeckoId: id,
-      name,
-      symbol,
-    }));
+    const mapped = filterLongShort(coins).map(
+      ({ id, name, symbol, image }) => ({
+        coingeckoId: id,
+        name,
+        symbol,
+        image,
+      }),
+    );
 
     const created = await createManyCryptocurrencies(mapped);
 

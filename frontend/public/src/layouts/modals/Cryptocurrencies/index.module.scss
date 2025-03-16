@@ -21,6 +21,9 @@
     button {
       cursor: pointer;
       font-size: globals.$font-size-l;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       background-color: transparent;
       border: none;
       border-radius: 0.2em;

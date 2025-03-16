@@ -7,11 +7,7 @@ export const createOfferController = async (req: Request, res: Response) => {
 
     const newOffer = await createOffer(body);
 
-    res.status(200).send({
-      status_code: 200,
-      results: newOffer,
-      errors: [],
-    });
+    res.status(200).send(newOffer);
   } catch (err: any) {
     res.status(500).send({
       status_code: 500,

@@ -34,7 +34,7 @@ export const usePaymentMethodsStore: StateCreator<
       const paymentMethods = await fetchPaymentMethods();
       const setValue = get().paymentMethods.setPaymentMethodsValue;
 
-      setValue(paymentMethods, 'paymentMethods/setPaymentMethods');
+      setValue({ data: paymentMethods }, 'paymentMethods/setPaymentMethods');
     },
     getPaymentMethodsByCategory: async (categoryId) => {
       const paymentMethods = await fetchPaymentMethodsByCategory(categoryId);

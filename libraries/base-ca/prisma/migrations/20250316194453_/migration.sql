@@ -150,6 +150,7 @@ CREATE TABLE "cryptocurrencies" (
     "coingeckoId" VARCHAR(200) NOT NULL,
     "symbol" VARCHAR(200) NOT NULL,
     "name" VARCHAR(200) NOT NULL,
+    "image" TEXT NOT NULL,
     "isDeleted" BOOLEAN DEFAULT false,
     "whenDelete" DATE,
     "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,

@@ -32,7 +32,7 @@ export const usePaymentMethodCategoriesStore: StateCreator<
         get().paymentMethodCategories.setPaymentMethodCategoriesValue;
 
       setValue(
-        paymentMethodCategories,
+        { data: paymentMethodCategories },
         'paymentMethodCategories/setPaymentMethodCategories'
       );
     },

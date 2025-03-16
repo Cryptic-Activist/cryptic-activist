@@ -3,6 +3,7 @@ export type Cryptocurrency = {
   name: string;
   symbol: string;
   coingeckoId: string;
+  image: string;
 };
 
 export type CryptocurrencySetter = {
@@ -10,6 +11,7 @@ export type CryptocurrencySetter = {
   name?: string;
   symbol?: string;
   coingeckoId?: string;
+  image?: string;
 };
 
 export type Value = CryptocurrencySetter;
@@ -20,6 +22,7 @@ export type CryptocurrencyStore = {
     name?: string;
     symbol?: string;
     coingeckoId?: string;
+    image?: string;
     setCryptocurrencyValue: (
       value: Value,
       action?: `cryptocurrency/${string}`

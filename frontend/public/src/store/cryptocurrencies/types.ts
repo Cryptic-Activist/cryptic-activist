@@ -3,6 +3,7 @@ export type Cryptocurrency = {
   name: string;
   symbol: string;
   coingeckoId: string;
+  image: string;
 };
 
 export type CryptocurrenciesStore = {
@@ -22,6 +23,7 @@ export type CryptocurrenciesSetter = {
     name: string;
     symbol: string;
     coingeckoId: string;
+    image: string;
   }[];
 };
 

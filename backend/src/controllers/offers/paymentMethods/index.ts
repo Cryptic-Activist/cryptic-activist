@@ -16,11 +16,7 @@ export async function getPaymentMethods(req: Request, res: Response) {
       _count: false,
     });
 
-    res.status(200).send({
-      status_code: 200,
-      results: paymentMethods,
-      errors: [],
-    });
+    res.status(200).send(paymentMethods);
   } catch (err) {
     res.status(500).send({
       status_code: 500,
@@ -44,9 +40,7 @@ export async function createPaymentMethodController(
     });
 
     res.status(200).send({
-      status_code: 200,
-      results: newPaymentMethod,
-      errors: [],
+      ...newPaymentMethod,
     });
   } catch (err) {
     res.status(500).send({
@@ -77,11 +71,7 @@ export async function getPaymentMethodsByCategoryController(
       },
     );
 
-    res.status(200).send({
-      status_code: 200,
-      results: paymentMethods,
-      errors: [],
-    });
+    res.status(200).send(paymentMethods);
   } catch (err) {
     res.status(500).send({
       status_code: 500,
