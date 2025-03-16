@@ -25,6 +25,7 @@ export const useCryptocurrencyStore: StateCreator<
             id: params.id ?? cryptocurrency.id,
             name: params.name ?? cryptocurrency.name,
             symbol: params.symbol ?? cryptocurrency.symbol,
+            image: params.image ?? cryptocurrency.image,
           },
         }),
         false,

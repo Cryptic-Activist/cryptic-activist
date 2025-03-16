@@ -4,6 +4,7 @@ export type CreateCryptocurrencyParams = {
   coingeckoId: string;
   symbol: string;
   name: string;
+  image: string;
 };
 
 export type WhereCryptocurrencyParams = {
@@ -11,6 +12,7 @@ export type WhereCryptocurrencyParams = {
   coingeckoId?: string;
   symbol?: string;
   name?: string;
+  image?: string;
   isDeleted?: boolean;
   whenDeleted?: DateType;
   createdAt?: DateType;
@@ -22,6 +24,7 @@ export type GetCryptocurrencyReturnType = {
   coingeckoId: string;
   symbol: string;
   name: string;
+  image: string;
   isDeleted: boolean;
   whenDeleted: DateType;
   createdAt: DateType;

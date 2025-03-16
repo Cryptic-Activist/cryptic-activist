@@ -41,6 +41,7 @@ const useCryptocurrency = () => {
             name: cryptocurrency.name,
             symbol: cryptocurrency.symbol,
             coingeckoId: cryptocurrency.coingeckoId,
+            image: cryptocurrency.image,
           },
         },
       },

@@ -23,9 +23,7 @@ export const getPaymentMethodController = async (
     const safePaymentMethod = safePaymentMethodValuesAssigner(paymentMethod);
 
     res.status(200).send({
-      status_code: 200,
-      results: safePaymentMethod,
-      errors: [],
+      ...safePaymentMethod,
     });
   } catch (err) {
     res.status(500).send({

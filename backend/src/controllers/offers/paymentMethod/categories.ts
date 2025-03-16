@@ -43,11 +43,7 @@ export const getPaymentMethodCategories = async (
 
     const paymentMethodCategories = await getPaymentMethodCategoriesBaseCa({});
 
-    res.status(200).send({
-      status_code: 200,
-      results: paymentMethodCategories,
-      errors: [],
-    });
+    res.status(200).send(paymentMethodCategories);
   } catch (err) {
     res.status(500).send({
       status_code: 500,

@@ -1,20 +1,13 @@
 'use client';
 
-import {
-  useHorizontalScroll,
-  useNavigationBar,
-  usePaymentMethods,
-} from '@/hooks';
+import { useNavigationBar, usePaymentMethods } from '@/hooks';
 
 import { ListTemplate } from '@/layouts/modals';
 import { PaymentMethod } from '@/store/paymentMethod/types';
 import styles from './index.module.scss';
 import { toCapitalize } from '@/utils';
-import { useRef } from 'react';
 
 const PaymentMethods = () => {
-  const ref = useRef<HTMLUListElement | null>(null);
-  const _scroll = useHorizontalScroll(ref);
   const { paymentMethodsList, setPaymentMethod, filterPaymentMethods } =
     usePaymentMethods();
   const { toggleModal } = useNavigationBar();
@@ -31,7 +24,7 @@ const PaymentMethods = () => {
       heading="Payment Methods"
       onFilter={filterPaymentMethods}
     >
-      <ul className={styles.list} ref={ref}>
+      <ul className={styles.list}>
         {paymentMethodsList?.map((paymentMethod, index) => (
           <li key={index}>
             <button onClick={() => selectPaymentMethod(paymentMethod)}>

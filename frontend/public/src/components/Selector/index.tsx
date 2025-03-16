@@ -1,31 +1,55 @@
 'use client';
 
-import { BuildLabel, SelectorProps } from './types';
-import { FC, useEffect, useState } from 'react';
+import { BuildCryptocurrencyLabel, BuildLabel, SelectorProps } from './types';
+import {
+  FC,
+  JSXElementConstructor,
+  ReactElement,
+  useEffect,
+  useState,
+} from 'react';
 import { toCapitalize, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar } from '@/hooks';
 
+import Image from 'next/image';
 import styles from './index.module.scss';
 
 const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
-  const [label, setLabel] = useState('No data');
+  const [label, setLabel] = useState<
+    string | ReactElement<unknown, string | JSXElementConstructor<any>>
+  >('No data');
 
   const { app } = useApp();
   const { toggleModal } = useNavigationBar();
   const { defaults } = app;
 
-  const buildLabel: BuildLabel = (symbol, name) => {
+  const buildFiatLabel: BuildLabel = (symbol, name) => {
     return `${toUpperCase(symbol)} - ${toCapitalize(name)}`;
+  };
+
+  const buildCryptocurrencyLabel: BuildCryptocurrencyLabel = (image, name) => {
+    return (
+      <div className={styles.labelContent}>
+        <Image
+          src={image}
+          alt={`${name} icon`}
+          width={24}
+          height={24}
+          style={{ alignItems: 'center', justifyContent: 'center' }}
+        />
+        <span>{name}</span>
+      </div>
+    );
   };
 
   const getButtonLabel = () => {
     const localLabel =
       type === 'cryptocurrency'
-        ? buildLabel(
-            defaults.cryptocurrency?.symbol!,
+        ? buildCryptocurrencyLabel(
+            defaults.cryptocurrency?.image!,
             defaults.cryptocurrency?.name!
           )
-        : buildLabel(defaults.fiat?.symbol!, defaults.fiat?.name!);
+        : buildFiatLabel(defaults.fiat?.symbol!, defaults.fiat?.name!);
 
     setLabel(localLabel);
   };

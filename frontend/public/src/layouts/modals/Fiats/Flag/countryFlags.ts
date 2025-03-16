@@ -31,8 +31,6 @@ import {
   UnitedStates,
 } from '@/assets';
 
-console.log({ UkraineFlag: Ukraine.src });
-
 const countryFlags: { [key: string]: string } = {
   'united states': UnitedStates.src,
   'european union': Europe.src,

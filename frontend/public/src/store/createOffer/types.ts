@@ -62,3 +62,5 @@ export type CreateOfferSetter = {
 export type CreateOfferStore = CreateOffer;
 
 export type Value = CreateOfferSetter;
+
+export type CreateOfferProp = CreateOfferSetter;
