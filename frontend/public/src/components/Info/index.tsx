@@ -15,7 +15,7 @@ const Info: FC<InfoProps> = ({ message }) => {
   };
 
   return (
-    <Tooltip position="bottom" spacing={32}>
+    <Tooltip position="left" spacing={165}>
       <div
         className={styles.icon}
         onMouseEnter={toggleMessage}
