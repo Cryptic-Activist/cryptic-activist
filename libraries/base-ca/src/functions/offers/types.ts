@@ -46,13 +46,7 @@ export type OfferDynamicType = {
   updatedAt?: DateType;
 };
 
-export type UpdateOfferWhereType = OfferDynamicType;
-
 export type UpdateOfferToUpdateType = OfferDynamicType;
-
-export type DeleteOfferWhereType = OfferDynamicType;
-
-export type GetOfferWhereType = OfferDynamicType;
 
 export type OfferAssociationsArrayType = {
   vendor?: boolean;
@@ -86,17 +80,31 @@ export type GetOffersSelect = {
   updatedAt?: boolean;
 };
 
+export type UpdateOfferParams = {
+  toUpdate: UpdateOfferToUpdateType;
+  where: Prisma.OfferWhereUniqueInput;
+};
+
+export type DeleteOfferParams = {
+  where: Prisma.OfferWhereUniqueInput;
+};
+
+export type GetOfferParams = {
+  where: Prisma.OfferWhereInput;
+  associations: OfferAssociationsArrayType;
+};
+
 export type GetOffersParams = {
   associations?: OfferAssociationsArrayType;
-  where?: GetOfferWhereType;
+  where?: Prisma.OfferWhereInput;
   limit?: number;
-  select?: GetOffersSelect;
+  select?: Prisma.OfferSelect;
 };
 
 export type GetOffersPaginationParams = {
   limit: number;
   offset: number;
   associations?: OfferAssociationsArrayType;
-  where?: GetOfferWhereType;
-  select?: GetOffersSelect;
+  where?: Prisma.OfferWhereInput;
+  select?: Prisma.OfferSelect;
 };

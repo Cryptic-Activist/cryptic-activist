@@ -4,7 +4,17 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin: 0.2rem 0;
+  padding: 0.2rem 0;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
 }
 
 .item {

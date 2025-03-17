@@ -79,17 +79,33 @@ export const getOffersPaginationController = async (
     paymentMethodId,
     limit,
     offset,
+    excludedVendorId,
   } = req.query as unknown as GetOffersPaginationRequest;
+
+  console.log({
+    where: {
+      cryptocurrencyId,
+      fiatId,
+      offerType,
+      paymentMethodId,
+      vendorId: {
+        notIn: excludedVendorId,
+      },
+    },
+  });
 
   try {
     const offers = await getOffersPagination({
-      limit,
-      offset: offset,
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10),
       where: {
         cryptocurrencyId,
         fiatId,
         offerType,
         paymentMethodId,
+        vendorId: {
+          notIn: excludedVendorId,
+        },
       },
       select: {
         _count: {

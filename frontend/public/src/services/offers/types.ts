@@ -3,4 +3,7 @@ export type FetchOffersParams = {
   cryptocurrencyId?: string;
   paymentMethodId?: string;
   fiatId?: string;
+  excludedVendorId?: string;
+  limit: number;
+  offset: number;
 };

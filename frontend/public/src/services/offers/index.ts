@@ -14,6 +14,15 @@ export const fetchOffers = async (params: FetchOffersParams) => {
   return response.data;
 };
 
+export const fetchOffersPagination = async (params: FetchOffersParams) => {
+  const queries = getQueries(params);
+  const response = await fetchGet(`${BACKEND}/offers/pagination` + queries);
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
 export const submitOfferCreate = async (data: CreateOfferSetter) => {
   const payload = {
     vendorId: data.vendorId,

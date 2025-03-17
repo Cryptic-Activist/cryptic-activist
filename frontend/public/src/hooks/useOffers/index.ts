@@ -1,21 +1,21 @@
 'use client';
 
+import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { fetchOffers } from '@/services/offers';
-import { toLowerCase } from '@/utils';
-import { useApp } from '@/hooks';
+import { fetchOffersPagination } from '@/services/offers';
 import { useRootStore } from '@/store';
 
 const useOffers = () => {
   const { offers } = useRootStore();
   const [offersList, setOffersList] = useState(offers.data);
   const { app } = useApp();
+  const { user } = useUser();
 
   const mutationOffers = useMutation({
     mutationKey: ['offers'],
-    mutationFn: fetchOffers,
+    mutationFn: fetchOffersPagination,
     onSuccess: (data) => {
       offers.setOffers(data);
       setOffersList(data);
@@ -62,6 +62,9 @@ const useOffers = () => {
         fiatId: app.defaults.fiat?.id,
         // paymentMethodId: app.defaults.paymentMethod?.id,
         offerType: app.type,
+        excludedVendorId: user.id,
+        limit: 20,
+        offset: 0,
       });
     }
   }, [
@@ -69,6 +72,7 @@ const useOffers = () => {
     app.defaults.fiat?.id,
     app.defaults.paymentMethod?.id,
     app.type,
+    user.id,
   ]);
 
   return {

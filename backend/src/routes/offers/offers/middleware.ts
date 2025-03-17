@@ -28,10 +28,12 @@ export const validateGetOffersPagination = (
 
   const validated = GetOffersPagination.safeParse(query);
 
-  if (!validated.success) {
+  if (validated.error) {
+    console.log({ errior: validated.error });
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();
