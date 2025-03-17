@@ -6,10 +6,11 @@ export type GetOffersRequest = {
 };
 
 export type GetOffersPaginationRequest = {
-  limit: number;
-  offset: number;
+  limit: string;
+  offset: string;
   offerType?: string;
   cryptocurrencyId?: string;
   paymentMethodId?: string;
   fiatId?: string;
+  excludedVendorId?: string[];
 };
