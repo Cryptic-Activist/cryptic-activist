@@ -80,24 +80,17 @@ export const getOffersPaginationController = async (
     limit,
     offset,
     excludedVendorId,
+    cursor,
   } = req.query as unknown as GetOffersPaginationRequest;
 
-  console.log({
-    where: {
-      cryptocurrencyId,
-      fiatId,
-      offerType,
-      paymentMethodId,
-      vendorId: {
-        notIn: excludedVendorId,
-      },
-    },
-  });
+  const take = parseInt(limit, 10) || 20;
+  const cursorObj = cursor ? { id: cursor } : undefined;
 
   try {
     const offers = await getOffersPagination({
-      limit: parseInt(limit, 10),
+      limit: take + 1,
       offset: parseInt(offset, 10),
+      cursor: cursorObj,
       where: {
         cryptocurrencyId,
         fiatId,
@@ -145,11 +138,14 @@ export const getOffersPaginationController = async (
       },
     });
 
-    if (!offers) {
-      res.status(204).send([]);
+    let nextCursor: string | null = null;
+
+    if (offers.length > take) {
+      const nextItem = offers.pop();
+      nextCursor = nextItem?.id || null;
     }
 
-    res.status(200).send(offers);
+    res.status(200).send({ offers, nextCursor });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

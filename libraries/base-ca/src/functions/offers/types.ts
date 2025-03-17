@@ -107,4 +107,5 @@ export type GetOffersPaginationParams = {
   associations?: OfferAssociationsArrayType;
   where?: Prisma.OfferWhereInput;
   select?: Prisma.OfferSelect;
+  cursor?: Prisma.OfferWhereUniqueInput;
 };
