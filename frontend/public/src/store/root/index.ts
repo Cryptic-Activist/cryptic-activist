@@ -7,6 +7,7 @@ import {
   useFiatStore,
   useFiatsStore,
   useNavigationBarStore,
+  useOffersStore,
   usePaymentMethodCategoriesStore,
   usePaymentMethodStore,
   usePaymentMethodsStore,
@@ -37,6 +38,7 @@ export const useRootStore = create<RootStore>()(
       ...useRegisterStore(set, get, store),
       ...useCreateOfferStore(set, get, store),
       ...useVerifyAccountStore(set, get, store),
+      ...useOffersStore(set, get, store),
     }),
     {
       name: 'RootStore',

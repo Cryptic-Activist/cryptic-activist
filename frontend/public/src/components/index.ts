@@ -15,5 +15,6 @@ export { default as SelectPaymentMethod } from './SelectPaymentMethod';
 export { default as InputNumber } from './InputNumber';
 export { default as QueryProvider } from './QueryProvider';
 export { default as ConnectedWallet } from './ConnectedWallet';
+export { default as Info } from './Info';
 export * from './lists';
 export * from './offer';

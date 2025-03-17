@@ -1,8 +1,5 @@
 import { DateType } from '@/functions/types';
-import { GetCryptocurrencyReturnType } from '../cryptocurrencies/types';
-import { GetFiatReturnType } from '../fiats/types';
-import { GetLanguageReturnType } from '../languages/types';
-import { GetUserReturnType } from '@/functions/users/types';
+import { DefaultArgs } from '@prisma/client/runtime';
 import { Prisma } from '@prisma/client';
 
 export type UpdateTagsPrismaType =
@@ -58,10 +55,48 @@ export type DeleteOfferWhereType = OfferDynamicType;
 export type GetOfferWhereType = OfferDynamicType;
 
 export type OfferAssociationsArrayType = {
-  vendor: boolean;
-  cryptocurrency: boolean;
-  paymentMethod: boolean;
-  fiat: boolean;
-  feedbacks: boolean;
-  trades: boolean;
+  vendor?: boolean;
+  cryptocurrency?: boolean;
+  paymentMethod?: boolean;
+  fiat?: boolean;
+  feedbacks?: boolean;
+  trades?: boolean;
+};
+
+export type GetOffersSelect = {
+  _count?: boolean | Prisma.OfferCountOutputTypeArgs<DefaultArgs>;
+  id?: boolean;
+  vendor?: boolean | Prisma.UserArgs<DefaultArgs>;
+  cryptocurrency?: boolean | Prisma.CryptocurrencyArgs<DefaultArgs>;
+  paymentMethod?: boolean | Prisma.PaymentMethodArgs<DefaultArgs>;
+  fiat?: boolean | Prisma.FiatArgs<DefaultArgs>;
+  offerType?: boolean;
+  pricingType?: boolean;
+  listAt?: boolean;
+  limitMin?: boolean;
+  limitMax?: boolean;
+  timeLimit?: boolean;
+  tags?: boolean;
+  label?: boolean;
+  terms?: boolean;
+  trades?: boolean | Prisma.Offer$tradesArgs<DefaultArgs>;
+  feedbacks?: boolean | Prisma.Offer$feedbacksArgs<DefaultArgs>;
+  instructions?: boolean;
+  createdAt?: boolean;
+  updatedAt?: boolean;
+};
+
+export type GetOffersParams = {
+  associations?: OfferAssociationsArrayType;
+  where?: GetOfferWhereType;
+  limit?: number;
+  select?: GetOffersSelect;
+};
+
+export type GetOffersPaginationParams = {
+  limit: number;
+  offset: number;
+  associations?: OfferAssociationsArrayType;
+  where?: GetOfferWhereType;
+  select?: GetOffersSelect;
 };

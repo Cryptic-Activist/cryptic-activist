@@ -108,7 +108,7 @@ export const useUserStore: StateCreator<
         const tokens = await getUserToken(params);
 
         if (!tokens) {
-          return;
+          throw Error('Unable to login');
         }
         setCookie({
           name: 'accessToken',
@@ -128,7 +128,7 @@ export const useUserStore: StateCreator<
         if (!user) {
           removeLocalStorage('accessToken');
           removeLocalStorage('refreshToken');
-          return;
+          throw Error('Unable to login');
         }
 
         const setValue = get().user.setUserValue;
@@ -151,6 +151,7 @@ export const useUserStore: StateCreator<
       } catch (err) {
         removeLocalStorage('accessToken');
         removeLocalStorage('refreshToken');
+        throw Error('Unable to login');
       }
     },
     logout: () => {
