@@ -2,6 +2,8 @@ import {
   CreateOfferParams,
   DeleteOfferWhereType,
   GetOfferWhereType,
+  GetOffersPaginationParams,
+  GetOffersParams,
   OfferAssociationsArrayType,
   UpdateOfferToUpdateType,
   UpdateOfferWhereType,
@@ -69,33 +71,37 @@ export const getOffer = async (
   return offer;
 };
 
-export const getOffers = async (
-  associations: OfferAssociationsArrayType,
-  where?: GetOfferWhereType,
-  limit?: number
-): Promise<Offer[]> => {
+export const getOffers = async ({
+  associations,
+  limit,
+  where,
+  select,
+}: GetOffersParams): Promise<Offer[]> => {
   const newWhere = getParamsRemapping(where);
   const offers = await prisma.offer.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(associations && { include: associations }),
+    ...(select && { select }),
     where: newWhere,
-    include: associations,
   });
 
   return offers;
 };
 
-export const getOffersPagination = async (
-  associations: OfferAssociationsArrayType,
-  limit: number,
-  offset: number,
-  where?: GetOfferWhereType
-): Promise<Offer[]> => {
+export const getOffersPagination = async ({
+  associations,
+  limit,
+  select,
+  where,
+  offset,
+}: GetOffersPaginationParams): Promise<Offer[]> => {
   const newWhere = getParamsRemapping(where);
   const offers = await prisma.offer.findMany({
     take: limit,
     skip: offset,
+    ...(associations && { include: associations }),
+    ...(select && { select }),
     where: newWhere,
-    include: associations,
   });
 
   return offers;

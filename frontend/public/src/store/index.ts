@@ -13,3 +13,4 @@ export * from './fiats';
 export * from './paymentMethodCategories';
 export * from './paymentMethods';
 export * from './verifyAccount';
+export * from './offers';

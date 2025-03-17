@@ -1,16 +1,17 @@
-import { AxiosResponse, fetchGet, fetchPost } from '@/services/axios';
-import { CreateOffer, CreateOfferSetter } from '@/store/createOffer/types';
+import { fetchGet, fetchPost } from '@/services/axios';
 
 import { BACKEND } from '@/constants';
+import { CreateOfferSetter } from '@/store/createOffer/types';
+import { FetchOffersParams } from './types';
+import { getQueries } from '@/utils';
 
-export const fetchOffers = async (): Promise<AxiosResponse | null> => {
-  const response = await fetchGet(`${BACKEND}/offers`);
+export const fetchOffers = async (params: FetchOffersParams) => {
+  const queries = getQueries(params);
+  const response = await fetchGet(`${BACKEND}/offers` + queries);
 
-  if (response.status !== 200) {
-    return null;
-  }
+  if (response.status !== 200) return null;
 
-  return response;
+  return response.data;
 };
 
 export const submitOfferCreate = async (data: CreateOfferSetter) => {

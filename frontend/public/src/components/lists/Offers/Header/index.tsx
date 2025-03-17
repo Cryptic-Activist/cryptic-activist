@@ -6,7 +6,9 @@ const Header = () => {
       <button className={styles.columnButton}>Buy from</button>
       <button className={styles.columnButton}>Pay with</button>
       <button className={styles.columnButton}>Avg. trade speed</button>
-      <button className={styles.columnButton}>Rate</button>
+      <button className={`${styles.columnButton} ${styles.rightHeader}`}>
+        Rate
+      </button>
     </div>
   );
 };

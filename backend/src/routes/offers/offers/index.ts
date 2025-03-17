@@ -1,20 +1,19 @@
 import {
-  getOffersByUser,
   getOffersController,
-  index,
-  indexPagination,
+  getOffersPaginationController,
 } from '@/controllers/offers';
+import { validateGetOffers, validateGetOffersPagination } from './middleware';
 
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/list', index);
+router.get('', validateGetOffers, getOffersController);
 
-router.get('', getOffersController);
-
-router.get('/user/:userId', getOffersByUser);
-
-router.get('/pagination', indexPagination);
+router.get(
+  '/pagination',
+  validateGetOffersPagination,
+  getOffersPaginationController,
+);
 
 export default router;

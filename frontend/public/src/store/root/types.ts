@@ -6,6 +6,7 @@ import type { CryptocurrencyStore } from '../cryptocurrency/types';
 import type { FiatStore } from '../fiat/types';
 import type { FiatsStore } from '../fiats/types';
 import type { NavigationBarStore } from '../navigationBar/types';
+import type { OffersStore } from '../offers/types';
 import type { PaymentMethodCategoriesStore } from '../paymentMethodCategories/types';
 import type { PaymentMethodStore } from '../paymentMethod/types';
 import type { PaymentMethodsStore } from '../paymentMethods/types';
@@ -26,4 +27,5 @@ export type RootStore = AppStore &
   FiatsStore &
   PaymentMethodsStore &
   PaymentMethodCategoriesStore &
-  VerifyAccountStore;
+  VerifyAccountStore &
+  OffersStore;

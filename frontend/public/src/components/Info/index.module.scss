@@ -1,0 +1,23 @@
+@use "../../styles/globals.module.scss";
+
+.icon {
+  color: globals.$grey;
+  border: 2px solid globals.$grey;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem;
+  svg {
+    transform: translateX(1px);
+  }
+}
+
+.message {
+  color: globals.$black;
+  padding: 0.5rem;
+  border-radius: 0.4em;
+  background-color: globals.$grey-background;
+  border: 1px solid globals.$grey;
+  min-width: 10rem;
+}

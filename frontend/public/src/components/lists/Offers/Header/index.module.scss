@@ -1,4 +1,4 @@
-@use '../../../../styles/globals.module.scss';
+@use "../../../../styles/globals.module.scss";
 
 .header {
   width: 100%;
@@ -6,8 +6,9 @@
   border-radius: 0.4rem;
   border-bottom: 1px solid globals.$secondary;
   box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
 }
 
 .columnButton {
@@ -15,4 +16,10 @@
   border: none;
   font-size: globals.$font-size-m;
   font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rightHeader {
+  text-align: end;
 }
