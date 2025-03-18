@@ -24,6 +24,10 @@ type Defaults = {
 };
 
 export type CurrentPrice = number;
+export type IsCheckIsMobileParams = {
+  width: number;
+  height: number;
+};
 
 export type AppStore = {
   app: {
@@ -37,6 +41,7 @@ export type AppStore = {
     setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
     removeToast: (id: string) => void;
     addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
+    checkIsMobile: (params: IsCheckIsMobileParams) => void;
   };
 };
 

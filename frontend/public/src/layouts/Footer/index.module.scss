@@ -16,13 +16,11 @@
   display: flex;
   padding: 4rem 0 1rem 0;
   box-sizing: border-box;
-  display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
 .brandLinksContainer {
-  display: flex;
   display: flex;
   justify-content: space-between;
 }
@@ -36,5 +34,18 @@
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+  }
+}
+
+@media (max-width: 1030px) {
+  .footer {
+    height: 40rem;
+  }
+  .brandLinksContainer {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 4rem;
   }
 }

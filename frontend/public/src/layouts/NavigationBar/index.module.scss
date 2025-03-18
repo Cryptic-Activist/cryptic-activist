@@ -27,8 +27,22 @@
   gap: 1rem;
 }
 
+.drawerToggler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+}
+
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .searchMenu {
+    display: none;
   }
 }

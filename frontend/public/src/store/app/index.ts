@@ -89,5 +89,11 @@ export const useAppStore: StateCreator<
         removeToast(uuid);
       }, timeout);
     },
+    checkIsMobile: ({ width }) => {
+      const { app } = get();
+      const isMobile = width < 768;
+
+      set({ app: { ...app, isMobile } }, false, 'app/checkIsMobile');
+    },
   },
 });

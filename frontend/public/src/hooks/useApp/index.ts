@@ -15,6 +15,7 @@ const useApp = () => {
       addToast,
       removeToast,
       setAppValue,
+      checkIsMobile,
     },
   } = useRootStore();
 
@@ -40,6 +41,7 @@ const useApp = () => {
     setCurrentPrice,
     addToast,
     removeToast,
+    checkIsMobile,
   };
 };
 
