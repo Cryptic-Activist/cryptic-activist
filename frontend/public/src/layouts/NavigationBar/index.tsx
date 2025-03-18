@@ -18,7 +18,10 @@ const NavigationBar = () => {
         <Brand />
         {app.isMobile ? (
           <>
-            <button className={styles.drawerToggler}>
+            <button
+              className={styles.drawerToggler}
+              onClick={handleToggleDrawer}
+            >
               <FaBars size={24} />
             </button>
           </>

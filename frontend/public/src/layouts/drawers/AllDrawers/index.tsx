@@ -1,8 +1,7 @@
 'use client';
 
+import { UserDrawer, WalletDrawer } from '@/layouts/drawers';
 import { useBlockchain, useNavigationBar } from '@/hooks';
-
-import { WalletDrawer } from '@/layouts/drawers';
 
 const AllDrawers = () => {
   const { navigationBar } = useNavigationBar();
@@ -15,6 +14,7 @@ const AllDrawers = () => {
       ) : (
         <></>
       )}
+      {navigationBar.drawers.user ? <UserDrawer /> : <></>}
     </>
   );
 };

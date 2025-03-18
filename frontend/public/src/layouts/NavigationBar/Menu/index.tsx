@@ -9,17 +9,16 @@ import {
   useUser,
 } from '@/hooks';
 
-import { FaWallet } from 'react-icons/fa6';
 import { MenuList } from '@/layouts/tooltips';
 import styles from './index.module.scss';
 
 const Menu = () => {
   const {
     navigationBar: {
-      drawers: { user: userDrawer },
+      tooltips: { user: userTooltip },
     },
-    toggleDrawer,
     toggleModal,
+    toggleTooltip,
   } = useNavigationBar();
   const {
     user,
@@ -29,8 +28,8 @@ const Menu = () => {
   } = useUser();
   const { blockchain, isWalletConnected } = useBlockchain();
 
-  const handleToggleUserDrawer = () => {
-    toggleDrawer('user');
+  const handleToggleUserTooltip = () => {
+    toggleTooltip('user');
   };
 
   const handleToggleLogin = () => {
@@ -41,7 +40,7 @@ const Menu = () => {
     toggleModal('blockchain');
   };
 
-  const ref = useOutsideClick(handleToggleUserDrawer);
+  const ref = useOutsideClick(handleToggleUserTooltip);
 
   return (
     <div className={styles.menu}>
@@ -62,7 +61,7 @@ const Menu = () => {
       {isWalletConnected && <ConnectedWallet />}
       <Tooltip position="bottom" spacing={55}>
         {isLoggedIn() ? (
-          <Button theme="transparent" onClick={handleToggleUserDrawer}>
+          <Button theme="transparent" onClick={handleToggleUserTooltip}>
             <>{user.names?.firstName}</>
           </Button>
         ) : (
@@ -71,7 +70,7 @@ const Menu = () => {
             {userQuery.isSuccess ? 'Login' : ''}
           </Button>
         )}
-        {userDrawer ? (
+        {userTooltip ? (
           <>
             {/* @ts-ignore */}
             <MenuList ref={ref} items={menuUserList} />
