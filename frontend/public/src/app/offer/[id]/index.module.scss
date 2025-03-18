@@ -1,13 +1,28 @@
+@use "../../../styles/globals.module.scss";
+
 .container {
   width: 1400px;
+  min-height: calc(globals.$main-content-height);
   margin: 0 auto;
-  display: flex;
-  gap: 2rem;
+  display: grid;
+  grid-template-areas:
+    "howMuch offer"
+    "vendor offer";
+  gap: 1rem;
   padding: 1rem 0;
 }
 
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .container {
+    grid-template-areas:
+      "vendor"
+      "offer"
+      "howMuch";
   }
 }

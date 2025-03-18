@@ -10,6 +10,7 @@ import {
   useUser,
 } from '@/hooks';
 
+import { set } from 'react-hook-form';
 import { useEffect } from 'react';
 import { useRootStore } from '@/store';
 
@@ -18,9 +19,8 @@ const InitialSettings = () => {
   const { getCryptocurrencies, getCryptocurrency, cryptocurrencies } =
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice } = useApp();
+  const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
   const {} = useUser();
-  const { app } = useRootStore();
 
   const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
     const cryptocurrency = getCryptocurrency(coinGeckoId);
@@ -62,6 +62,21 @@ const InitialSettings = () => {
       );
     }
   };
+
+  const handleResize = () => {
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+
+    checkIsMobile({ width: currentWidth, height: currentHeight });
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     getCryptocurrencies();

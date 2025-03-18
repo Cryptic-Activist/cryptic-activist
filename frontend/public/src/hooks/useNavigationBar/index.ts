@@ -7,6 +7,10 @@ const useNavigationBar = () => {
   const { drawers, modals, status, tooltips, ...navigationBarRest } =
     navigationBar;
 
+  const handleToggleDrawer = () => {
+    navigationBar.toggleDrawer('user');
+  };
+
   return {
     navigationBar: {
       drawers,
@@ -15,6 +19,7 @@ const useNavigationBar = () => {
       status,
     },
     ...navigationBarRest,
+    handleToggleDrawer,
   };
 };
 
