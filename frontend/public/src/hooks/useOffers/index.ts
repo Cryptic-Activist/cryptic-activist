@@ -86,7 +86,6 @@ const useOffers = () => {
       limit: 5,
       cursor: offers.cursor,
     });
-    console.log({ newOffers });
     if (newOffers.offers.length > 0) {
       const newOffersList = [...offers.data, ...newOffers.offers];
       offers.setOffers({
