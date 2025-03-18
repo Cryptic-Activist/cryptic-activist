@@ -1,9 +1,11 @@
 'use client';
 
 import { PaymentMethod, TradeInstructions, TradePricing } from '@/layouts';
+import React, { useEffect } from 'react';
+import { useCreateOffer, useDynamicTitle } from '@/hooks';
 
-import React from 'react';
-import { useCreateOffer } from '@/hooks';
+import Head from 'next/head';
+import { Metadata } from 'next';
 
 const Page = () => {
   const {
@@ -15,6 +17,7 @@ const Page = () => {
     saveCreateOfferLocally,
     resetCreateOffer,
   } = useCreateOffer();
+  const {} = useDynamicTitle('Create an Offer | Cryptic Activist');
 
   return (
     <>

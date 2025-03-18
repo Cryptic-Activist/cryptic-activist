@@ -1,15 +1,16 @@
 'use client';
 
 import { ProfileNameUsername, Status } from '@/components';
+import { useDynamicTitle, useUser } from '@/hooks';
 
 import FeedbackCount from '@/components/FeedbackCount';
 import { ProfileImageInfo } from '@/layouts';
 import styles from './index.module.scss';
-import { useUser } from '@/hooks';
 import withAuth from '@/hoc/withAuth';
 
 const Account = () => {
   const { user } = useUser();
+  const {} = useDynamicTitle('Account | Cryptic Activist');
 
   return (
     <div className={styles.container}>

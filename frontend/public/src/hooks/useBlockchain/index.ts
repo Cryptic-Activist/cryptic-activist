@@ -9,6 +9,7 @@ import {
 } from 'wagmi';
 
 import { BRAVE_WALLET } from '@/constants';
+import { getCurrentConnector } from '@/services/blockchain';
 import { useEffect } from 'react';
 import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
@@ -19,8 +20,6 @@ const useBlockchain = () => {
       setBlockchainValue,
       resetBlockchain,
       account,
-      connector,
-      provider,
       chain,
       balance: balanceBlockchainStore,
       wallet,
@@ -44,6 +43,7 @@ const useBlockchain = () => {
   };
 
   const onDisconnectWallet = async () => {
+    const connector = getCurrentConnector();
     if (connector?.name === BRAVE_WALLET) {
       resetWalletNavigation();
     }
@@ -52,15 +52,11 @@ const useBlockchain = () => {
 
   useAccountEffect({
     async onConnect({ address, chain, connector }) {
-      const provider = await connector.getProvider();
-
       setBlockchainValue(
         {
           account: { address: address },
           chain,
-          connector,
           wallet: connector.name,
-          provider,
           balance: balance.data,
         },
         'blockchain/setWalletDetails'
@@ -81,8 +77,6 @@ const useBlockchain = () => {
     blockchain: {
       account,
       chain,
-      connector,
-      provider,
       wallet,
       balance: balanceBlockchainStore,
     },

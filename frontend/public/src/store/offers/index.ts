@@ -41,12 +41,16 @@ export const useOffersStore: StateCreator<
       });
     },
     setHasMore: (hasMore: boolean) => {
-      set(({ offers }) => ({
-        offers: {
-          ...offers,
-          hasMore,
-        },
-      }));
+      set(
+        ({ offers }) => ({
+          offers: {
+            ...offers,
+            hasMore,
+          },
+        }),
+        false,
+        'offers/setHasMore'
+      );
 
       // setValue({ data: offers }, 'offers/setOffers', nextCursor);
     },

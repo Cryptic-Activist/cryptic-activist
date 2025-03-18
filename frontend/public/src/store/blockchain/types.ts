@@ -1,5 +1,3 @@
-import { Connector } from 'wagmi';
-
 export type SetChainParam = any;
 export type SetProviderParam = any;
 export type Wallet = string;
@@ -16,10 +14,8 @@ export type Balance = {
 };
 
 export type BlockchainSetter = {
-  connector?: Connector;
   chain?: any;
   wallet?: string;
-  provider?: any;
   account?: Account;
   balance?: Balance;
 };
@@ -28,10 +24,8 @@ export type Value = BlockchainSetter;
 
 export type BlockchainStore = {
   blockchain: {
-    connector?: Connector;
     chain?: any;
     wallet?: string;
-    provider?: any;
     account?: Account;
     balance?: Balance;
     setBlockchainValue: (

@@ -1,9 +1,8 @@
 'use client';
 
+import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
+
 import React from 'react';
-
-import { useApp, useBlockchain, useNavigationBar, useUser } from '@/hooks';
-
 import styles from './index.module.scss';
 
 const ConnectedWallet = () => {

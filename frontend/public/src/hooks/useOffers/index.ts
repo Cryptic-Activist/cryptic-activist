@@ -4,6 +4,7 @@ import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { Console } from 'console';
 import { FetchOffersParams } from '@/services/offers/types';
 import { fetchOffersPagination } from '@/services/offers';
 import { useRootStore } from '@/store';
@@ -19,7 +20,6 @@ const useOffers = () => {
     mutationKey: ['offers'],
     mutationFn: fetchOffersPagination,
     onSuccess: (data) => {
-      console.log({ data });
       offers.setOffers({ offers: data.offers, cursor: data.nextCursor });
       setOffersList(data);
     },
@@ -73,9 +73,7 @@ const useOffers = () => {
     } else {
       offers.setOffers({ offers: [], cursor: null });
     }
-    if (newOffers.nextCursor !== null) {
-      offers.setHasMore(false);
-    }
+    offers.setHasMore(newOffers.nextCursor !== null);
   };
 
   const loadMore = async () => {
@@ -88,6 +86,7 @@ const useOffers = () => {
       limit: 5,
       cursor: offers.cursor,
     });
+    console.log({ newOffers });
     if (newOffers.offers.length > 0) {
       const newOffersList = [...offers.data, ...newOffers.offers];
       offers.setOffers({
@@ -97,9 +96,7 @@ const useOffers = () => {
     } else {
       offers.setOffers({ offers: [], cursor: null });
     }
-    if (newOffers.nextCursor !== null) {
-      offers.setHasMore(false);
-    }
+    offers.setHasMore(newOffers.nextCursor !== null);
   };
 
   useEffect(() => {
