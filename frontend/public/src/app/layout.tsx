@@ -16,7 +16,7 @@ import styles from './layout.module.scss';
 const roboto = Roboto({ weight: '400', subsets: ['latin'], preload: true });
 
 export const metadata = {
-  title: 'Cryptic Actvist Catalog',
+  title: 'Cryptic Activist Catalog',
   description: 'P2P trade dApp',
 };
 

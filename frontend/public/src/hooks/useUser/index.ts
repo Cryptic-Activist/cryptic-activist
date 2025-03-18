@@ -68,18 +68,7 @@ const useUser = () => {
     onSubmit,
     loginFormRegister,
     errors,
-    user: {
-      id: user.id,
-      names: {
-        firstName: user.names?.firstName,
-        lastName: user.names?.lastName,
-      },
-      username: user.username,
-      profileColor: user.profileColor,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      languages: user.languages,
-    },
+    user,
     mutation,
     query,
     formValues: {

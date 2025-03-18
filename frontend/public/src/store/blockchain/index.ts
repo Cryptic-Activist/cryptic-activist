@@ -12,8 +12,6 @@ export const useBlockchainStore: StateCreator<
     account: undefined,
     balance: undefined,
     chain: undefined,
-    connector: undefined,
-    provider: undefined,
     wallet: undefined,
     setBlockchainValue: (params, actionName = 'blockchain/setValue') => {
       set(
@@ -23,8 +21,6 @@ export const useBlockchainStore: StateCreator<
             account: params.account ?? blockchain.account,
             balance: params.balance ?? blockchain.balance,
             chain: params.chain ?? blockchain.chain,
-            connector: params.connector ?? blockchain.connector,
-            provider: params.provider ?? blockchain.provider,
             wallet: params.wallet ?? blockchain.wallet,
           },
         }),
@@ -39,8 +35,6 @@ export const useBlockchainStore: StateCreator<
           account: undefined,
           balance: undefined,
           chain: undefined,
-          connector: undefined,
-          provider: undefined,
           wallet: undefined,
         },
         'blockchain/resetBlockchain'
