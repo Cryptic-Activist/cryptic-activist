@@ -11,7 +11,7 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   const { toggleDrawer } = useNavigationBar();
   const { onDisconnectWallet } = useBlockchain();
   const {
-    navigationBar: { resetNavigationBar, toggleModal },
+    navigationBar: { resetNavigationBar },
   } = useRootStore();
 
   const handleLogout = () => {
