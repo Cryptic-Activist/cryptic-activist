@@ -4,6 +4,8 @@ import { Type } from '@/store/app/types';
 export type ListProps = {
   currentPrice?: number;
   type: Type;
+  height?: string;
+  id: string;
 };
 
 export type ItemProps = {

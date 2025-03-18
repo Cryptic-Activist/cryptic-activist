@@ -12,7 +12,7 @@ import { useRootStore } from '@/store';
 const Fiats = () => {
   const { fiatsList, setFiat, filterFiats } = useFiats();
   const {
-    navigationBar: { resetNavigationBar, toggleModal },
+    navigationBar: { toggleModal },
   } = useRootStore();
 
   const selectFiat = (fiat: Fiat) => {
@@ -31,7 +31,7 @@ const Fiats = () => {
         {fiatsList?.map((fiat, index) => (
           <li key={index}>
             <button onClick={() => selectFiat(fiat)}>
-              <Flag country={fiat.country} />
+              <Flag country={fiat.country} flag={fiat.flag} />
               {toCapitalize(fiat.name)}
             </button>
           </li>

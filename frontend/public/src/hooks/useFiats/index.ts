@@ -1,16 +1,18 @@
 'use client';
 
+import { FiatList, FiatSymbol } from './types';
+import { useEffect, useState } from 'react';
+
 import { Fiat } from '@/store/fiat/types';
-import { FiatSymbol } from './types';
+import countryFlags from './countryFlags';
 import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
 import { useRootStore } from '@/store';
-import { useState } from 'react';
 
 const useFiats = () => {
   const { setValue } = useApp();
   const { fiats } = useRootStore();
-  const [fiatsList, setFiatsList] = useState(fiats.data);
+  const [fiatsList, setFiatsList] = useState<FiatList>([]);
 
   const getFiat = (symbol: FiatSymbol) => {
     if (!fiats.data) {
@@ -44,6 +46,18 @@ const useFiats = () => {
     );
   };
 
+  const filter = (list: FiatList) => {
+    const newList = list.map((item) => ({
+      flag: countryFlags[item.country],
+      country: item.country,
+      name: item.name,
+      id: item.id,
+      symbol: item.symbol,
+    }));
+
+    return newList;
+  };
+
   const filterFiats = (term: string) => {
     if (!fiats.data) return;
     const filtered = fiats.data.filter((fiat) => {
@@ -58,8 +72,16 @@ const useFiats = () => {
       );
     });
 
-    setFiatsList(filtered);
+    const newList = filter(filtered as FiatList);
+    setFiatsList(newList);
   };
+
+  useEffect(() => {
+    if (fiats.data) {
+      const list = filter(fiats.data as FiatList);
+      setFiatsList(list);
+    }
+  }, [fiats.data]);
 
   return {
     fiats,

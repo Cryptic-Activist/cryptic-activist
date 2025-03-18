@@ -5,5 +5,5 @@ export type FetchOffersParams = {
   fiatId?: string;
   excludedVendorId?: string;
   limit: number;
-  offset: number;
+  cursor: string | null;
 };

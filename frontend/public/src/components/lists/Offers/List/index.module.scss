@@ -1,5 +1,14 @@
 @use "../../../../styles/globals.module.scss";
 
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -14,6 +23,16 @@
   }
   &::-webkit-scrollbar-thumb {
     background: globals.$secondary;
+  }
+}
+
+.spinner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    animation: spin 1s linear infinite;
   }
 }
 
@@ -154,4 +173,16 @@
 
 .limits {
   font-size: 1rem;
+}
+
+.endOfList {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.pullDownToRefresh,
+.releaseToRefresh {
+  text-align: center;
+  font-weight: 500;
 }

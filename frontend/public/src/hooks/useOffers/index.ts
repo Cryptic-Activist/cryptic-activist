@@ -4,20 +4,23 @@ import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { FetchOffersParams } from '@/services/offers/types';
 import { fetchOffersPagination } from '@/services/offers';
 import { useRootStore } from '@/store';
 
 const useOffers = () => {
   const { offers } = useRootStore();
-  const [offersList, setOffersList] = useState(offers.data);
   const { app } = useApp();
   const { user } = useUser();
+
+  const [offersList, setOffersList] = useState(offers.data);
 
   const mutationOffers = useMutation({
     mutationKey: ['offers'],
     mutationFn: fetchOffersPagination,
     onSuccess: (data) => {
-      offers.setOffers(data);
+      console.log({ data });
+      offers.setOffers({ offers: data.offers, cursor: data.nextCursor });
       setOffersList(data);
     },
   });
@@ -50,6 +53,55 @@ const useOffers = () => {
     // setOffersList(filtered);
   };
 
+  const initialFetch = async () => {
+    const newOffers = await fetchOffersPagination({
+      cryptocurrencyId: app.defaults.cryptocurrency?.id,
+      fiatId: app.defaults.fiat?.id,
+      // paymentMethodId: app.defaults.paymentMethod?.id,
+      offerType: app.type,
+      excludedVendorId: user.id,
+      limit: 5,
+      cursor: null,
+    });
+    if (newOffers.offers.length > 0) {
+      const newOffersList = [...newOffers.offers];
+
+      offers.setOffers({
+        offers: newOffersList,
+        cursor: newOffersList[newOffersList.length - 1].id,
+      });
+    } else {
+      offers.setOffers({ offers: [], cursor: null });
+    }
+    if (newOffers.nextCursor !== null) {
+      offers.setHasMore(false);
+    }
+  };
+
+  const loadMore = async () => {
+    const newOffers = await fetchOffersPagination({
+      cryptocurrencyId: app.defaults.cryptocurrency?.id,
+      fiatId: app.defaults.fiat?.id,
+      // paymentMethodId: app.defaults.paymentMethod?.id,
+      offerType: app.type,
+      excludedVendorId: user.id,
+      limit: 5,
+      cursor: offers.cursor,
+    });
+    if (newOffers.offers.length > 0) {
+      const newOffersList = [...offers.data, ...newOffers.offers];
+      offers.setOffers({
+        offers: newOffersList,
+        cursor: newOffersList[newOffersList.length - 1].id,
+      });
+    } else {
+      offers.setOffers({ offers: [], cursor: null });
+    }
+    if (newOffers.nextCursor !== null) {
+      offers.setHasMore(false);
+    }
+  };
+
   useEffect(() => {
     if (
       app.defaults.cryptocurrency?.id &&
@@ -57,15 +109,7 @@ const useOffers = () => {
       // app.defaults.paymentMethod?.id &&
       app.type
     ) {
-      mutationOffers.mutate({
-        cryptocurrencyId: app.defaults.cryptocurrency?.id,
-        fiatId: app.defaults.fiat?.id,
-        // paymentMethodId: app.defaults.paymentMethod?.id,
-        offerType: app.type,
-        excludedVendorId: user.id,
-        limit: 20,
-        offset: 0,
-      });
+      initialFetch();
     }
   }, [
     app.defaults.cryptocurrency?.id,
@@ -81,6 +125,8 @@ const useOffers = () => {
     setOffers: offers.setOffers,
     getOffer,
     filterOffers,
+    loadMore,
+    initialFetch,
   };
 };
 

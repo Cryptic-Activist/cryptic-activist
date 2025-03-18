@@ -90,13 +90,16 @@ export const getOffersPagination = async ({
   where,
   offset,
   cursor,
+  orderBy,
 }: GetOffersPaginationParams): Promise<Offer[]> => {
+  console.log({ cursor });
   const offers = await prisma.offer.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
     ...(associations && { include: associations }),
     ...(select && { select }),
     ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
   });
 

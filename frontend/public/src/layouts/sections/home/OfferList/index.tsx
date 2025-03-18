@@ -1,4 +1,5 @@
 import { Offers as OffersList, SearchOffer } from '@/components';
+
 import styles from './index.module.scss';
 
 const OfferListSection = () => {
@@ -6,7 +7,7 @@ const OfferListSection = () => {
     <section className={styles.offerListSection}>
       <div className={styles.container}>
         <SearchOffer />
-        <OffersList />
+        <OffersList height="31.95rem" />
       </div>
     </section>
   );
