@@ -10,27 +10,20 @@ export const GetOffers = z.object({
 export const GetOffersPagination = z
   .object({
     limit: z.string(),
-    offset: z.string(),
+    cursor: z.string().optional(),
     offerType: z.string().min(2).optional(),
     cryptocurrencyId: z.string().min(2).optional(),
     paymentMethodId: z.string().min(2).optional(),
     fiatId: z.string().min(2).optional(),
     excludedVendorId: z.string().min(2).optional(),
   })
-  .superRefine(({ limit, offset }, ctx) => {
+  .superRefine(({ limit }, ctx) => {
     const regex = /^\d+$/;
     if (!regex.test(limit)) {
       ctx.addIssue({
         code: 'custom',
         path: ['limit'],
         message: 'limit must be number',
-      });
-    }
-    if (!regex.test(offset)) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['offset'],
-        message: 'offset must be number',
       });
     }
   });

@@ -78,7 +78,6 @@ export const getOffersPaginationController = async (
     offerType,
     paymentMethodId,
     limit,
-    offset,
     excludedVendorId,
     cursor,
   } = req.query as unknown as GetOffersPaginationRequest;
@@ -89,8 +88,8 @@ export const getOffersPaginationController = async (
   try {
     const offers = await getOffersPagination({
       limit: take + 1,
-      offset: parseInt(offset, 10),
       cursor: cursorObj,
+      orderBy: { id: 'desc' },
       where: {
         cryptocurrencyId,
         fiatId,
@@ -101,6 +100,7 @@ export const getOffersPaginationController = async (
         },
       },
       select: {
+        id: true,
         _count: {
           select: { trades: true, feedbacks: true },
         },

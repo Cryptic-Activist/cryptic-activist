@@ -103,9 +103,10 @@ export type GetOffersParams = {
 
 export type GetOffersPaginationParams = {
   limit: number;
-  offset: number;
+  offset?: number;
+  cursor?: Prisma.OfferWhereUniqueInput & { id: string };
   associations?: OfferAssociationsArrayType;
   where?: Prisma.OfferWhereInput;
   select?: Prisma.OfferSelect;
-  cursor?: Prisma.OfferWhereUniqueInput;
+  orderBy?: Prisma.OfferOrderByWithAggregationInput;
 };

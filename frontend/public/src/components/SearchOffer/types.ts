@@ -1,1 +1,3 @@
-export type SearchOfferProps = {};
+export type SearchOfferProps = {
+  theme?: 'flat';
+};

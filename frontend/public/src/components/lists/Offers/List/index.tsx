@@ -5,12 +5,15 @@ import {
   FaArrowRightArrowLeft,
   FaArrowUp,
   FaCircle,
+  FaEllipsis,
   FaHeart,
+  FaSpinner,
 } from 'react-icons/fa6';
 import type { ItemProps, ListProps, RatesProps } from './types';
 import { getInitials, toCapitalize } from '@/utils';
 
 import { FC } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import Link from 'next/link';
 import styles from './index.module.scss';
 import { useOffers } from '@/hooks';
@@ -108,20 +111,64 @@ const Item: FC<ItemProps> = ({ offer, currentPrice, type }) => {
   );
 };
 
-const List: FC<ListProps> = ({ currentPrice, type }) => {
-  const { offers } = useOffers();
+const List: FC<ListProps> = ({ currentPrice, type, height, id }) => {
+  const { offers, loadMore, initialFetch } = useOffers();
 
   return (
-    <ul className={styles.list}>
-      {offers.data?.map((offer, index) => (
-        <Item
-          key={index}
-          offer={offer}
-          currentPrice={currentPrice}
-          type={type}
-        />
-      ))}
-    </ul>
+    <div
+      className={styles.list}
+      id={id}
+      style={{
+        ...(height && { height }),
+      }}
+    >
+      {offers.data && (
+        <InfiniteScroll
+          className={styles.list}
+          dataLength={offers.data?.length}
+          hasMore={offers.hasMore}
+          next={loadMore}
+          loader={
+            <div
+              className={styles.spinner}
+              style={{
+                ...(height && { height: `calc(${height} - 1rem)` }),
+              }}
+            >
+              <FaSpinner size={20} />
+            </div>
+          }
+          endMessage={
+            <div className={styles.endOfList}>
+              <FaEllipsis size={20} />
+            </div>
+          }
+          scrollableTarget={id}
+          refreshFunction={initialFetch}
+          pullDownToRefresh
+          pullDownToRefreshThreshold={80}
+          pullDownToRefreshContent={
+            <h3 className={styles.pullDownToRefresh}>
+              &#8595; Pull down to refresh
+            </h3>
+          }
+          releaseToRefreshContent={
+            <h3 className={styles.releaseToRefresh}>
+              &#8593; Release to refresh
+            </h3>
+          }
+        >
+          {offers.data?.map((offer, index) => (
+            <Item
+              key={index}
+              offer={offer}
+              currentPrice={currentPrice}
+              type={type}
+            />
+          ))}
+        </InfiniteScroll>
+      )}
+    </div>
   );
 };
 

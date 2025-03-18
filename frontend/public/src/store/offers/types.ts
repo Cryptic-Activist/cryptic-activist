@@ -35,11 +35,24 @@ export type Offer = {
   instructions: string;
 };
 
+type Cursor = string;
+
 export type OffersStore = {
   offers: {
-    data?: Offer[];
-    setOffersValue: (value: Value, action?: `offers/${string}`) => void;
-    setOffers: (offers: Offer[]) => Promise<void>;
+    data: Offer[];
+    cursor: string | null;
+    hasMore: boolean;
+    setOffersValue: (params: {
+      value: Value;
+      actionName?: `offers/${string}`;
+      cursor?: Cursor | null;
+      hasMore?: boolean;
+    }) => void;
+    setOffers: (params: {
+      offers: Offer[];
+      cursor: Cursor | null;
+    }) => Promise<void>;
+    setHasMore: (hasMore: boolean) => void;
   };
 };
 
