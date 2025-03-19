@@ -34,6 +34,7 @@ model User {
   password        String
   privateKeys     String[]        @unique
   isVerified      Boolean?        @default(false) @db.Boolean
+  isPremium       Boolean?        @default(false) @db.Boolean
   isDeleted       Boolean?        @default(false) @db.Boolean
   whenDelete      DateTime?       @db.Date
   createdAt       DateTime?       @default(now()) @db.Date
@@ -49,6 +50,8 @@ model User {
   feedbackTrader  Feedback[]      @relation("feedbackTrader")
   tradeVendor     Trade[]         @relation("vendorTrade")
   tradeTrader     Trade[]         @relation("traderTrade")
+  tier            Tier?           @relation(fields: [tierId], references: [id])
+  tierId          String?
 
   @@map("users")
 }
@@ -66,9 +69,9 @@ model Language {
 }
 
 model UserLanguage {
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId     String   @default(uuid())
-  language   Language @relation(fields: [languageId], references: [id])
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   languageId String   @default(uuid())
 
   @@id([userId, languageId])
@@ -81,7 +84,7 @@ model Chat {
   whenDelete DateTime? @db.Date
   createdAt  DateTime? @default(now()) @db.Date
   updatedAt  DateTime? @updatedAt @db.Date
-  trade      Trade     @relation(fields: [tradeId], references: [id])
+  trade      Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tradeId    String    @unique
 
   @@map("chats")
@@ -96,7 +99,7 @@ model SystemMessage {
   whenDelete DateTime? @db.Date
   createdAt  DateTime? @default(now()) @db.Date
   updatedAt  DateTime? @updatedAt @db.Date
-  User       User      @relation(fields: [userId], references: [id])
+  User       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId     String
 
   @@map("system_messages")
@@ -121,7 +124,7 @@ model PaymentMethod {
   whenDelete              DateTime?             @db.Date
   createdAt               DateTime?             @default(now()) @db.Date
   updatedAt               DateTime?             @updatedAt @db.Date
-  paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id])
+  paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   paymentMethodCategoryId String                @default(uuid())
   offers                  Offer[]               @relation("offer")
 
@@ -143,9 +146,9 @@ model PaymentReceipt {
 
 model Trust {
   id         String    @id @default(uuid())
-  truster    User      @relation("trusters", fields: [trusterId], references: [id])
+  truster    User      @relation("trusters", fields: [trusterId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who trusts
   trusterId  String    @default(uuid())
-  trusted    User      @relation("trusted", fields: [trustedId], references: [id])
+  trusted    User      @relation("trusted", fields: [trustedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is trusted
   trustedId  String    @default(uuid())
   isDeleted  Boolean?  @default(false) @db.Boolean
   whenDelete DateTime? @db.Date
@@ -157,10 +160,10 @@ model Trust {
 
 model Block {
   id         String    @id @default(uuid())
-  blocker    User      @relation("blockers", fields: [blockerId], references: [id])
+  blocker    User      @relation("blockers", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who blocks 
   blockerId  String
   blockedId  String
-  blocked    User      @relation("blocked", fields: [blockedId], references: [id])
+  blocked    User      @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is blocked
   isDeleted  Boolean?  @default(false) @db.Boolean
   whenDelete DateTime? @db.Date
   createdAt  DateTime? @default(now()) @db.Date
@@ -202,11 +205,11 @@ model Fiat {
 
 model Feedback {
   id         String    @id @default(uuid())
-  vendor     User      @relation("feedbackVendor", fields: [vendorId], references: [id])
+  vendor     User      @relation("feedbackVendor", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   vendorId   String    @default(uuid())
-  trader     User      @relation("feedbackTrader", fields: [traderId], references: [id])
+  trader     User      @relation("feedbackTrader", fields: [traderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   traderId   String    @default(uuid())
-  offer      Offer     @relation("feedbackOffer", fields: [offerId], references: [id])
+  offer      Offer     @relation("feedbackOffer", fields: [offerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   offerId    String    @default(uuid())
   message    String    @db.VarChar(256)
   type       String    @db.VarChar(10)
@@ -235,13 +238,13 @@ model Offer {
   createdAt    DateTime? @default(now()) @db.Date
   updatedAt    DateTime? @updatedAt @db.Date
 
-  vendor           User           @relation("offer", fields: [vendorId], references: [id])
+  vendor           User           @relation("offer", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   vendorId         String         @default(uuid())
-  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id])
+  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cryptocurrencyId String         @default(uuid())
-  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id])
+  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   paymentMethodId  String         @default(uuid())
-  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id])
+  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fiatId           String         @default(uuid())
   feedbacks        Feedback[]     @relation("feedbackOffer")
   trades           Trade[]        @relation("tradeOffer")
@@ -252,15 +255,15 @@ model Offer {
 model Trade {
   id               String         @id @default(uuid())
   paymentReceiptId String         @default(uuid())
-  vendor           User           @relation("vendorTrade", fields: [vendorId], references: [id])
+  vendor           User           @relation("vendorTrade", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   vendorId         String         @default(uuid())
-  trader           User           @relation("traderTrade", fields: [traderId], references: [id])
+  trader           User           @relation("traderTrade", fields: [traderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   traderId         String         @default(uuid())
-  offer            Offer          @relation("tradeOffer", fields: [offerId], references: [id])
+  offer            Offer          @relation("tradeOffer", fields: [offerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   offerId          String         @default(uuid())
-  cryptocurrency   Cryptocurrency @relation("trade", fields: [cryptocurrencyId], references: [id])
+  cryptocurrency   Cryptocurrency @relation("trade", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cryptocurrencyId String         @default(uuid())
-  fiat             Fiat           @relation("trade", fields: [fiatId], references: [id])
+  fiat             Fiat           @relation("trade", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fiatId           String         @default(uuid())
   chat             Chat?
 
@@ -285,4 +288,17 @@ model AcceptedCryptocurrency {
   name        String @db.VarChar(200)
 
   @@map("accepted_cryptocurrencies")
+}
+
+model Tier {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+  level       Int    @unique
+  tradingFee  Float
+  discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
+  minVolume   Float // Minimum trading volume to qualify for this tier
+  users       User[]
+
+  @@map("tiers")
 }

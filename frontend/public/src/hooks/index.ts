@@ -12,4 +12,5 @@ export { default as useBlockchain } from './useBlockchain';
 export { default as useCountDown } from './useCountDown';
 export { default as useCreateOffer } from './useCreateOffer';
 export { default as useOffers } from './useOffers';
+export { default as useOffer } from './useOffer';
 export { default as useDynamicTitle } from './useDynamicTitle';

@@ -2,7 +2,7 @@ import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 
 import { ReactElement } from 'react';
 
-type InputType = 'text' | 'email' | 'password' | 'hidden';
+type InputType = 'text' | 'email' | 'password' | 'hidden' | 'number';
 
 export type InputProps = {
   name?: string;
