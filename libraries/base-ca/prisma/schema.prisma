@@ -26,32 +26,37 @@ model Admin {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  profileColor    String          @db.VarChar(10)
-  firstName       String          @db.VarChar(50)
-  lastName        String          @db.VarChar(50)
-  username        String          @unique @db.VarChar(120)
-  password        String
-  privateKeys     String[]        @unique
-  isVerified      Boolean?        @default(false) @db.Boolean
-  isPremium       Boolean?        @default(false) @db.Boolean
-  isDeleted       Boolean?        @default(false) @db.Boolean
-  whenDelete      DateTime?       @db.Date
-  createdAt       DateTime?       @default(now()) @db.Date
-  updatedAt       DateTime?       @updatedAt @db.Date
-  userLanguage    UserLanguage[]
-  systemMessages  SystemMessage[]
-  trusters        Trust[]         @relation("trusters")
-  trusted         Trust[]         @relation("trusted")
-  blockers        Block[]         @relation("blockers")
-  blocked         Block[]         @relation("blocked")
-  offers          Offer[]         @relation("offer")
-  feedbacksVendor Feedback[]      @relation("feedbackVendor")
-  feedbackTrader  Feedback[]      @relation("feedbackTrader")
-  tradeVendor     Trade[]         @relation("vendorTrade")
-  tradeTrader     Trade[]         @relation("traderTrade")
-  tier            Tier?           @relation(fields: [tierId], references: [id])
-  tierId          String?
+  id                       String                     @id @default(uuid())
+  profileColor             String                     @db.VarChar(10)
+  firstName                String                     @db.VarChar(50)
+  lastName                 String                     @db.VarChar(50)
+  username                 String                     @unique @db.VarChar(120)
+  password                 String
+  privateKeys              String[]                   @unique
+  isVerified               Boolean?                   @default(false) @db.Boolean
+  isDeleted                Boolean?                   @default(false) @db.Boolean
+  whenDelete               DateTime?                  @db.Date
+  createdAt                DateTime?                  @default(now()) @db.Date
+  updatedAt                DateTime?                  @updatedAt @db.Date
+  userLanguage             UserLanguage[]
+  systemMessages           SystemMessage[]
+  trusters                 Trust[]                    @relation("trusters")
+  trusted                  Trust[]                    @relation("trusted")
+  blockers                 Block[]                    @relation("blockers")
+  blocked                  Block[]                    @relation("blocked")
+  offers                   Offer[]                    @relation("offer")
+  feedbacksVendor          Feedback[]                 @relation("feedbackVendor")
+  feedbackTrader           Feedback[]                 @relation("feedbackTrader")
+  tradeVendor              Trade[]                    @relation("vendorTrade")
+  tradeTrader              Trade[]                    @relation("traderTrade")
+  tier                     Tier?                      @relation(fields: [tierId], references: [id])
+  tierId                   String?
+  premiumPurchase          PremiumPurchase?
+  kyc                      KYC?
+  kycId                    String?
+  TransactionPaymentMethod TransactionPaymentMethod[]
+  Transaction              Transaction[]
+  Transaction              Transaction[]
 
   @@map("users")
 }
@@ -301,4 +306,67 @@ model Tier {
   users       User[]
 
   @@map("tiers")
+}
+
+model PremiumPurchase {
+  id             String   @id @default(cuid())
+  depositAddress String   @unique
+  userId         String   @unique
+  expectedAmount Float
+  status         String // e.g., "pending", "completed", "failed"
+  transactionId  String?
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@map("premium_purchases")
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model KYC {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  documentType    String // e.g., "passport", "driver_license"
+  documentUrl     String // URL of the uploaded document
+  selfieUrl       String // URL of the selfie for verification
+  proofOfAddress  String // URL of address proof (if required)
+  status          KYCStatus @default(PENDING)
+  rejectionReason String? // Optional reason for rejection
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("kyc")
+}
+
+model TransactionPaymentMethod {
+  id                         String        @id // ID from the payment gateway (e.g., Stripe payment method ID)
+  transactionPaymentMethodId String
+  userId                     Int
+  user                       User          @relation(fields: [userId], references: [id])
+  type                       String // e.g., 'credit_card'
+  transactions               Transaction[] @relation("TransactionPaymentMethod")
+
+  @@map("transaction_payment_method")
+}
+
+model Transaction {
+  id                         String                   @id @default(cuid())
+  userId                     Int
+  user                       User                     @relation("TransactionUser", fields: [userId], references: [id])
+  transactionPaymentMethodId String
+  transactionPaymentMethod   TransactionPaymentMethod @relation("TransactionPaymentMethod", fields: [transactionPaymentMethodId], references: [id])
+  amount                     Float
+  currency                   String
+  status                     String // e.g., 'pending', 'completed', 'failed'
+  gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)
+  createdAt                  DateTime                 @default(now())
+  User                       User                     @relation(fields: [userId], references: [id])
+
+  @@map("transactions")
 }
