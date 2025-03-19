@@ -12,6 +12,7 @@ export const useOffersStore: StateCreator<
     data: [],
     cursor: null,
     hasMore: true,
+    hasError: false,
     setOffersValue: ({
       value,
       actionName = 'offers/setValue',
@@ -51,8 +52,18 @@ export const useOffersStore: StateCreator<
         false,
         'offers/setHasMore'
       );
-
-      // setValue({ data: offers }, 'offers/setOffers', nextCursor);
+    },
+    setHasError: (hasError: boolean) => {
+      set(
+        ({ offers }) => ({
+          offers: {
+            ...offers,
+            hasError,
+          },
+        }),
+        false,
+        'offers/setHasMore'
+      );
     },
   },
 });
