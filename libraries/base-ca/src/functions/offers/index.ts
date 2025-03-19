@@ -56,10 +56,12 @@ export const deleteOffer = async ({
 export const getOffer = async ({
   associations,
   where,
-}: GetOfferParams): Promise<Offer | null> => {
+  select,
+}: GetOfferParams) => {
   const offer = await prisma.offer.findFirst({
+    ...(associations && { include: associations }),
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   if (!offer) return null;

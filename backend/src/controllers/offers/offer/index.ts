@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { createOffer, getOffer } from 'base-ca';
 
+import { convertAssociationStringToObject } from '@/utils/map';
+
 export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
@@ -18,67 +20,68 @@ export const createOfferController = async (req: Request, res: Response) => {
 
 export const getOfferController = async (req: Request, res: Response) => {
   try {
-    const { query } = req;
-    const { id, associations } = query;
+    const { query, params } = req;
+    const { associations } = query;
+    const { id } = params;
 
-    const associationsArr = associations?.toString().split(',');
-    const associationObj: any = {};
+    const associationsObject = convertAssociationStringToObject(
+      associations as string,
+    );
 
-    associationsArr?.forEach((association) => {
-      associationObj[association] = true;
+    const offer = await getOffer({
+      where: {
+        id: id as string,
+      },
+      select: {
+        id: true,
+        offerType: true,
+        pricingType: true,
+        listAt: true,
+        limitMin: true,
+        limitMax: true,
+        timeLimit: true,
+        tags: true,
+        label: true,
+        terms: true,
+        instructions: true,
+        createdAt: true,
+        updatedAt: true,
+        vendor: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            createdAt: true,
+          },
+        },
+        cryptocurrency: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+            image: true,
+          },
+        },
+        fiat: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+          },
+        },
+        paymentMethod: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
-
-    const offer = await getOffer({ id: id?.toString() }, associationObj);
-
-    //   const cleanReqQuery = sanitize(
-    //     {
-    //       ...req.query,
-    //     },
-    //     [],
-    //   );
-
-    //   if (trade_instructions_tags) {
-    //     // @ts-ignore
-    //     const tags = sanitize(trade_instructions_tags.split(','), []);
-    //     cleanReqQuery.trade_instructions_tags = tags;
-    //   }
-
-    //   if (associations) {
-    //     // @ts-ignore
-    //     const associationsArr = sanitize(associations.split(','), []);
-    //     cleanReqQuery.associations = associationsArr;
-    //   } else {
-    //     cleanReqQuery.associations = [];
-    //   }
-
-    //   const where = convertWhere({ ...cleanReqQuery }, ['limit', 'associations']);
-
-    //   const offer = await getOffer(
-    //     {
-    //       ...where,
-    //     },
-    //     cleanReqQuery.associations,
-    //   );
-
-    //   if (!offer) {
-    //     res.status(204).send({
-    //       status_code: 204,
-    //       results: {},
-    //       errors: [],
-    //     });
-    //   }
-
-    //   const safeOffer = safeOfferValuesAssigner(offer);
-
-    res.status(200).send({
-      status_code: 200,
-      results: offer,
-      errors: [],
-    });
+    res.status(200).send(offer);
   } catch (err: any) {
+    console.log({ err });
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

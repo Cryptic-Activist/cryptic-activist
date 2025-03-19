@@ -8,7 +8,7 @@ import { validateCreateOffer } from './middleware';
 
 const router = Router();
 
-router.get('', getOfferController);
+router.get('/:id', getOfferController);
 
 router.post('/create', validateCreateOffer, createOfferController);
 

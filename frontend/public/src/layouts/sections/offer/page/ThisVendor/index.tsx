@@ -4,7 +4,7 @@ import coreStyles from '../index.module.scss';
 const ThisVendor = () => {
   return (
     <div className={`${coreStyles.container} ${coreStyles.vnedor}`}>
-      ThisVendor
+      <h2 className={coreStyles.heading}>About this vendor</h2>
     </div>
   );
 };

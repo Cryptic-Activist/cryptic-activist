@@ -90,8 +90,9 @@ export type DeleteOfferParams = {
 };
 
 export type GetOfferParams = {
-  where: Prisma.OfferWhereInput;
-  associations: OfferAssociationsArrayType;
+  associations?: OfferAssociationsArrayType;
+  where?: Prisma.OfferWhereInput;
+  select?: Prisma.OfferSelect;
 };
 
 export type GetOffersParams = {
