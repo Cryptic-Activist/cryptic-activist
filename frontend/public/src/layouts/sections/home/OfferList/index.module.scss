@@ -22,3 +22,12 @@
     width: 90%;
   }
 }
+
+@media (max-width: 900px) {
+  .offerListSection {
+    height: auto;
+  }
+  .container {
+    flex-direction: column;
+  }
+}

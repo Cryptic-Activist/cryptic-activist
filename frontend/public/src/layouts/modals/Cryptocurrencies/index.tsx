@@ -23,7 +23,7 @@ const Cryptocurrencies = () => {
 
   return (
     <ListTemplate
-      width="35vw"
+      width="30rem"
       height="70vh"
       heading="Cryptocurrencies"
       onFilter={filterCryptocurrencies}

@@ -44,6 +44,7 @@
   padding: 0.8rem;
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 1rem;
 }
 
 .vendor {
@@ -185,4 +186,28 @@
 .releaseToRefresh {
   text-align: center;
   font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .item {
+    grid-template-columns: none;
+    grid-template-areas:
+      "vendor avgTradeSpeed"
+      "labelTermsTags rates";
+  }
+  .vendor {
+    grid-area: vendor;
+  }
+  .labelTermsTags {
+    grid-area: labelTermsTags;
+  }
+  .avgTradeSpeed {
+    grid-area: avgTradeSpeed;
+    .speed {
+      text-align: end;
+    }
+  }
+  .rates {
+    grid-area: rates;
+  }
 }

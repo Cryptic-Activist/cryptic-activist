@@ -22,7 +22,7 @@ const Fiats = () => {
 
   return (
     <ListTemplate
-      width="40vw"
+      width="30rem"
       height="70vh"
       heading="Fiats"
       onFilter={filterFiats}
