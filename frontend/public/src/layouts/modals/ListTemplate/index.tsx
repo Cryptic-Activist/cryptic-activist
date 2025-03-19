@@ -1,12 +1,11 @@
 'use client';
 
 import { ChangeEvent, FC } from 'react';
+
 import { FaSearch } from 'react-icons/fa';
-
-import { useNavigationBar } from '@/hooks';
-
-import styles from './index.module.scss';
 import type { ListTemplateProps } from './types';
+import styles from './index.module.scss';
+import { useNavigationBar } from '@/hooks';
 
 const ListTemplate: FC<ListTemplateProps> = ({
   children,
@@ -32,12 +31,7 @@ const ListTemplate: FC<ListTemplateProps> = ({
       <div className={styles.container} style={{ width, height }}>
         {heading && <h1 className={styles.heading}>{heading}</h1>}
         <div className={styles.search}>
-          <input
-            type="text"
-            placeholder="Search"
-            onChange={handleSearch}
-            autoFocus
-          />
+          <input type="text" placeholder="Search" onChange={handleSearch} />
           <button>
             <FaSearch />
           </button>

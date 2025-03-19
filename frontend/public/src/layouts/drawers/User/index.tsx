@@ -11,8 +11,15 @@ const User: FC = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [isUserOpened, setIsUserOpened] = useState(false);
 
-  const { toggleDrawer, toggleModal, resetNavigationBar } = useNavigationBar();
-  const { onDisconnectWallet } = useBlockchain();
+  const {
+    toggleDrawer,
+    toggleModal,
+    resetNavigationBar,
+    navigationBar: {
+      drawers: { wallet },
+    },
+  } = useNavigationBar();
+  const { onDisconnectWallet, isWalletConnected } = useBlockchain();
   const { user, logout, isLoggedIn } = useUser();
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
@@ -38,6 +45,22 @@ const User: FC = () => {
   const handleToggleLogin = () => {
     resetNavigationBar();
     toggleModal('login');
+  };
+
+  const handleToggleBlockchain = () => {
+    toggleDrawer('user');
+    toggleModal('blockchain');
+  };
+
+  const openWallet = () => {
+    if (!wallet) {
+      toggleDrawer('user');
+      toggleDrawer('wallet');
+    }
+  };
+
+  const navigate = () => {
+    toggleDrawer('user');
   };
 
   return (
@@ -72,13 +95,19 @@ const User: FC = () => {
                 </button>
                 <ul className={`${styles.userContentList} ${userStyle}`}>
                   <li className={styles.subMenuItem}>
-                    <Link href="/account">Account</Link>
+                    <Link href="/account" onClick={navigate}>
+                      Account
+                    </Link>
                   </li>
                   <li className={styles.subMenuItem}>
-                    <Link href="/account/messages">Messages</Link>
+                    <Link href="/account/messages" onClick={navigate}>
+                      Messages
+                    </Link>
                   </li>
                   <li className={styles.subMenuItem}>
-                    <Link href="/account/settings">Account Settings</Link>
+                    <Link href="/account/settings" onClick={navigate}>
+                      Account Settings
+                    </Link>
                   </li>
                   <li className={styles.subMenuButton}>
                     <button onClick={handleLogout}>Logout</button>
@@ -87,13 +116,30 @@ const User: FC = () => {
               </div>
             </>
           )}
-          <Link href="/" className={styles.link}>
+          {isWalletConnected && (
+            <button
+              className={`${styles.menuButton} ${styles.userButton}`}
+              onClick={openWallet}
+            >
+              Wallet
+            </button>
+          )}
+          {isLoggedIn() && !isWalletConnected && (
+            <button
+              className={`${styles.menuButton} ${styles.userButton}`}
+              onClick={handleToggleBlockchain}
+            >
+              Connect Wallet
+            </button>
+          )}
+
+          <Link href="/" className={styles.link} onClick={navigate}>
             Home
           </Link>
-          <Link href="/vendors" className={styles.link}>
+          <Link href="/vendors" className={styles.link} onClick={navigate}>
             Vendors
           </Link>
-          <Link href="/help" className={styles.link}>
+          <Link href="/help" className={styles.link} onClick={navigate}>
             Help
           </Link>
         </div>

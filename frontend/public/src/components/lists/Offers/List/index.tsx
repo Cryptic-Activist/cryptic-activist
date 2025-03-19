@@ -101,7 +101,7 @@ const Item: FC<ItemProps> = ({ offer, currentPrice, type }) => {
         </ul>
       </div>
       <div className={styles.avgTradeSpeed}>
-        <p>Under a minute</p>
+        <p className={styles.speed}>Under a minute</p>
       </div>
       <div className={styles.rates}>
         <Rates offer={offer} currentPrice={currentPrice} />

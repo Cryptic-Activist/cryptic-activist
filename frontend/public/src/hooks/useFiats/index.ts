@@ -68,7 +68,7 @@ const useFiats = () => {
       return (
         lowerFiatName.includes(lowerTerm) ||
         lowerFiatSymbol.includes(lowerTerm) ||
-        `${lowerFiatSymbol} - ${lowerFiatName}`.includes(lowerTerm)
+        `${lowerFiatSymbol} ${lowerFiatName}`.includes(lowerTerm)
       );
     });
 

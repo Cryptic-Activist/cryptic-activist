@@ -20,6 +20,28 @@
   cursor: pointer;
 }
 
-.rightHeader {
+.rate {
   text-align: end;
+}
+
+@media (max-width: 900px) {
+  .header {
+    grid-template-columns: none;
+    grid-template-areas:
+      "buyFrom avgTradeSpeed"
+      "payWith rate";
+  }
+  .buyFrom {
+    grid-area: buyFrom;
+  }
+  .payWith {
+    grid-area: payWith;
+  }
+  .avgTradeSpeed {
+    text-align: end;
+    grid-area: avgTradeSpeed;
+  }
+  .rate {
+    grid-area: rate;
+  }
 }

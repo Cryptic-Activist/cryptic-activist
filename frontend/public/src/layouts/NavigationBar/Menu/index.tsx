@@ -20,13 +20,8 @@ const Menu = () => {
     toggleModal,
     toggleTooltip,
   } = useNavigationBar();
-  const {
-    user,
-    mutation: userMutation,
-    query: userQuery,
-    isLoggedIn,
-  } = useUser();
-  const { blockchain, isWalletConnected } = useBlockchain();
+  const { user, query: userQuery, isLoggedIn } = useUser();
+  const { isWalletConnected } = useBlockchain();
 
   const handleToggleUserTooltip = () => {
     toggleTooltip('user');
