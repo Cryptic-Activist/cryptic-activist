@@ -42,6 +42,7 @@ export type OffersStore = {
     data: Offer[];
     cursor: string | null;
     hasMore: boolean;
+    hasError: boolean;
     setOffersValue: (params: {
       value: Value;
       actionName?: `offers/${string}`;
@@ -53,6 +54,7 @@ export type OffersStore = {
       cursor: Cursor | null;
     }) => Promise<void>;
     setHasMore: (hasMore: boolean) => void;
+    setHasError: (hasError: boolean) => void;
   };
 };
 

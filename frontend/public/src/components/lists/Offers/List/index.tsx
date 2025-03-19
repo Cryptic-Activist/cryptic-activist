@@ -126,13 +126,13 @@ const List: FC<ListProps> = ({ currentPrice, type, height, id }) => {
         <InfiniteScroll
           className={styles.list}
           dataLength={offers.data?.length}
-          hasMore={offers.hasMore}
+          hasMore={offers.hasMore && !offers.hasError}
           next={loadMore}
           loader={
             <div
               className={styles.spinner}
               style={{
-                ...(height && { height: `calc(${height} - 1rem)` }),
+                ...(height && { height: `calc(${height} - 10rem)` }),
               }}
             >
               <FaSpinner size={20} />

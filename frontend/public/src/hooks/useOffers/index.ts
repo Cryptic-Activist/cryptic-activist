@@ -4,8 +4,6 @@ import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { Console } from 'console';
-import { FetchOffersParams } from '@/services/offers/types';
 import { fetchOffersPagination } from '@/services/offers';
 import { useRootStore } from '@/store';
 
@@ -14,46 +12,8 @@ const useOffers = () => {
   const { app } = useApp();
   const { user } = useUser();
 
-  const [offersList, setOffersList] = useState(offers.data);
-
-  const mutationOffers = useMutation({
-    mutationKey: ['offers'],
-    mutationFn: fetchOffersPagination,
-    onSuccess: (data) => {
-      offers.setOffers({ offers: data.offers, cursor: data.nextCursor });
-      setOffersList(data);
-    },
-  });
-
-  const getOffer = (id: string) => {
-    if (!offers.data) return null;
-
-    const offer = offers.data.filter((f) => f.id === id);
-    const hasFound = offer.length > 0;
-
-    if (!hasFound) return null;
-
-    return offer[0];
-  };
-
-  const filterOffers = (term: string) => {
-    if (!offers.data) return;
-    // const filtered = offers.data.filter((offer) => {
-    //   const lowerOfferName = toLowerCase(offer.label);
-    //   const lowerOfferSymbol = toLowerCase(offer.symbol);
-    //   const lowerTerm = toLowerCase(term);
-
-    //   return (
-    //     lowerOfferName.includes(lowerTerm) ||
-    //     lowerOfferSymbol.includes(lowerTerm) ||
-    //     `${lowerOfferSymbol} - ${lowerOfferName}`.includes(lowerTerm)
-    //   );
-    // });
-
-    // setOffersList(filtered);
-  };
-
   const initialFetch = async () => {
+    offers.setHasError(false);
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
@@ -98,6 +58,33 @@ const useOffers = () => {
     offers.setHasMore(newOffers.nextCursor !== null);
   };
 
+  const mutationInitialFetch = useMutation({
+    mutationKey: ['initialFetch', 'offers'],
+    mutationFn: initialFetch,
+    retry: 3,
+    onError: (error) => {
+      offers.setHasError(true);
+      console.log('Error fetching offers', error);
+    },
+  });
+
+  const mutationLoadMore = useMutation({
+    mutationKey: ['loadMore', 'offers'],
+    mutationFn: loadMore,
+    retry: 3,
+  });
+
+  const getOffer = (id: string) => {
+    if (!offers.data) return null;
+
+    const offer = offers.data.filter((f) => f.id === id);
+    const hasFound = offer.length > 0;
+
+    if (!hasFound) return null;
+
+    return offer[0];
+  };
+
   useEffect(() => {
     if (
       app.defaults.cryptocurrency?.id &&
@@ -105,7 +92,7 @@ const useOffers = () => {
       // app.defaults.paymentMethod?.id &&
       app.type
     ) {
-      initialFetch();
+      mutationInitialFetch.mutate();
     }
   }, [
     app.defaults.cryptocurrency?.id,
@@ -117,12 +104,10 @@ const useOffers = () => {
 
   return {
     offers,
-    offersList,
     setOffers: offers.setOffers,
     getOffer,
-    filterOffers,
-    loadMore,
-    initialFetch,
+    loadMore: mutationLoadMore.mutate,
+    initialFetch: mutationInitialFetch.mutate,
   };
 };
 
