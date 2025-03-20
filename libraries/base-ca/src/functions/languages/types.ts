@@ -1,31 +1,38 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateLanguageParams = {
-  name: string;
+export type CreateLanguage = Prisma.LanguageCreateInput;
+
+export type CreateManyLanguages = Prisma.LanguageCreateManyInput;
+
+export type WhereLanguage = Prisma.LanguageWhereUniqueInput;
+
+export type UpdateLanguageParams = {
+  toUpdate: Prisma.LanguageUpdateInput;
+  where: Prisma.LanguageWhereUniqueInput;
 };
 
-export type LanguageDynamicType = {
-  id?: string;
-  name?: string;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteLanguageParams = {
+  where: Prisma.LanguageWhereUniqueInput;
 };
 
-export type UpdateLanguageWhereType = LanguageDynamicType;
+export type GetLanguageParams = {
+  where?: Prisma.LanguageWhereInput;
+  select?: Prisma.LanguageSelect;
+};
 
-export type UpdateLanguageToUpdateType = LanguageDynamicType;
+export type GetLanguagesParams = {
+  where?: Prisma.LanguageWhereInput;
+  limit?: number;
+  select?: Prisma.LanguageSelect;
+};
 
-export type DeleteLanguageWhereType = LanguageDynamicType;
-
-export type GetLanguageWhereType = LanguageDynamicType;
-
-export type GetLanguageReturnType = {
-  id: string;
-  name: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
+export type GetLanguagesPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.LanguageWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.LanguageWhereInput;
+  select?: Prisma.LanguageSelect;
+  orderBy?: Prisma.LanguageOrderByWithAggregationInput;
 };

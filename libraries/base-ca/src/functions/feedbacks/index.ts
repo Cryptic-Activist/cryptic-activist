@@ -1,12 +1,25 @@
-import { Feedback, prisma } from '../../services/prisma';
-import { CreateFeedbackParams, WhereFeedbackParams } from './types';
+import {
+  BatchPayload,
+  Feedback,
+  prisma,
+} from '../../services/prisma';
+import {
+  CreateFeedback,
+  CreateManyFeedbacks,
+  DeleteFeedbackParams,
+  GetFeedbackParams,
+  GetFeedbacksPaginationParams,
+  GetFeedbacksParams,
+  UpdateFeedbackParams,
+  WhereFeedback,
+} from './types';
 
 export const createFeedback = async (
-  params: CreateFeedbackParams
+  params: CreateFeedback
 ): Promise<Feedback> => {
   try {
     const feedback = await prisma.feedback.findFirst({
-      where: params,
+      where: params as WhereFeedback,
     });
 
     if (feedback) {
@@ -23,10 +36,24 @@ export const createFeedback = async (
   }
 };
 
-export const updateFeedback = async (
-  toUpdate: WhereFeedbackParams,
-  where: WhereFeedbackParams
-): Promise<Feedback> => {
+export const createManyFeedbacks = async (
+  params: CreateManyFeedbacks[]
+): Promise<BatchPayload> => {
+  try {
+    const newFeedbacks = await prisma.feedback.createMany({
+      data: params,
+    });
+
+    return newFeedbacks;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateFeedback = async ({
+  toUpdate,
+  where,
+}: UpdateFeedbackParams): Promise<Feedback> => {
   const updated = await prisma.feedback.update({
     where,
     data: toUpdate,
@@ -35,45 +62,59 @@ export const updateFeedback = async (
   return updated;
 };
 
-export const deleteFeedback = async (
-  where: WhereFeedbackParams
-): Promise<Feedback> => {
-  const deleted = await prisma.feedback.delete({ where });
+export const deleteFeedback = async ({
+  where,
+}: DeleteFeedbackParams): Promise<Feedback> => {
+  const deleted = await prisma.feedback.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getFeedback = async (
-  where: WhereFeedbackParams
-): Promise<Feedback | null> => {
+export const getFeedback = async ({
+  where,
+  select,
+}: GetFeedbackParams): Promise<Feedback | null> => {
   const feedback = await prisma.feedback.findFirst({
+    ...(select && { select }),
     where,
   });
 
-  if (!feedback) return null;
+  if (!feedback) {
+    return null;
+  }
 
   return feedback;
 };
 
-export const getFeedbacks = async (
-  where?: WhereFeedbackParams,
-  limit?: number
-): Promise<Feedback[]> => {
-  const feedback = await prisma.feedback.findMany({
+export const getFeedbacks = async ({
+  limit,
+  where,
+  select,
+}: GetFeedbacksParams): Promise<Feedback[]> => {
+  const feedbacks = await prisma.feedback.findMany({
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    take: limit,
   });
 
-  return feedback;
+  return feedbacks;
 };
 
-export const getFeedbacksPagination = async (
-  limit: number,
-  offset: number,
-  where?: WhereFeedbackParams
-): Promise<Feedback[]> => {
+export const getFeedbacksPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetFeedbacksPaginationParams): Promise<Feedback[]> => {
   const feedbacks = await prisma.feedback.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
   });
 

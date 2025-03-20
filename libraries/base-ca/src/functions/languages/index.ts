@@ -1,18 +1,25 @@
-import { Language, prisma } from '../../services/prisma';
 import {
-  CreateLanguageParams,
-  DeleteLanguageWhereType,
-  GetLanguageWhereType,
-  UpdateLanguageToUpdateType,
-  UpdateLanguageWhereType,
+  BatchPayload,
+  Language,
+  prisma,
+} from '../../services/prisma';
+import {
+  CreateLanguage,
+  CreateManyLanguages,
+  DeleteLanguageParams,
+  GetLanguageParams,
+  GetLanguagesPaginationParams,
+  GetLanguagesParams,
+  UpdateLanguageParams,
+  WhereLanguage,
 } from './types';
 
 export const createLanguage = async (
-  params: CreateLanguageParams
+  params: CreateLanguage
 ): Promise<Language> => {
   try {
     const language = await prisma.language.findFirst({
-      where: params,
+      where: params as WhereLanguage,
     });
 
     if (language) {
@@ -29,10 +36,24 @@ export const createLanguage = async (
   }
 };
 
-export const updateLanguage = async (
-  where: UpdateLanguageWhereType,
-  toUpdate: UpdateLanguageToUpdateType
-): Promise<Language> => {
+export const createManyLanguages = async (
+  params: CreateManyLanguages[]
+): Promise<BatchPayload> => {
+  try {
+    const newLanguages = await prisma.language.createMany({
+      data: params,
+    });
+
+    return newLanguages;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateLanguage = async ({
+  toUpdate,
+  where,
+}: UpdateLanguageParams): Promise<Language> => {
   const updated = await prisma.language.update({
     where,
     data: toUpdate,
@@ -41,17 +62,21 @@ export const updateLanguage = async (
   return updated;
 };
 
-export const deleteLanguage = async (
-  where: DeleteLanguageWhereType
-): Promise<Language> => {
-  const deleted = await prisma.language.delete({ where });
+export const deleteLanguage = async ({
+  where,
+}: DeleteLanguageParams): Promise<Language> => {
+  const deleted = await prisma.language.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getLanguage = async (
-  where: GetLanguageWhereType
-): Promise<Language | null> => {
+export const getLanguage = async ({
+  where,
+  select,
+}: GetLanguageParams): Promise<Language | null> => {
   const language = await prisma.language.findFirst({
+    ...(select && { select }),
     where,
   });
 
@@ -62,13 +87,35 @@ export const getLanguage = async (
   return language;
 };
 
-export const getLanguages = async (
-  where?: GetLanguageWhereType,
-  limit?: number
-): Promise<Language[]> => {
+export const getLanguages = async ({
+  limit,
+  where,
+  select,
+}: GetLanguagesParams): Promise<Language[]> => {
   const languages = await prisma.language.findMany({
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
+  });
+
+  return languages;
+};
+
+export const getLanguagesPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetLanguagesPaginationParams): Promise<Language[]> => {
+  const languages = await prisma.language.findMany({
     take: limit,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
+    where,
   });
 
   return languages;

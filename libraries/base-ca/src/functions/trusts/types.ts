@@ -1,39 +1,38 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateTrustParamsType = {
-  trusterId: string;
-  trustedId: string;
+export type CreateTrust = Prisma.TrustCreateInput;
+
+export type CreateManyTrusts = Prisma.TrustCreateManyInput;
+
+export type WhereTrust = Prisma.TrustWhereUniqueInput;
+
+export type UpdateTrustParams = {
+  toUpdate: Prisma.TrustUpdateInput;
+  where: Prisma.TrustWhereUniqueInput;
 };
 
-export type TrustDynamicType = {
-  id?: string;
-  trusterId?: string;
-  trustedId?: string;
-  isDeleted?: boolean;
-  whenDeleted?: null | DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteTrustParams = {
+  where: Prisma.TrustWhereUniqueInput;
 };
 
-export type UpdateTrustWhereType = TrustDynamicType;
-
-export type UpdateTrustToUpdateType = TrustDynamicType;
-
-export type DeleteTrustWhereType = TrustDynamicType;
-
-export type GetTrustWhereType = TrustDynamicType;
-
-export type TrustAssociationsArrayType = {
-  truster: boolean;
-  trusted: boolean;
+export type GetTrustParams = {
+  where?: Prisma.TrustWhereInput;
+  select?: Prisma.TrustSelect;
 };
 
-export type GetTrustReturnType = {
-  id: string;
-  trusterId: string;
-  trustedId: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
+export type GetTrustsParams = {
+  where?: Prisma.TrustWhereInput;
+  limit?: number;
+  select?: Prisma.TrustSelect;
+};
+
+export type GetTrustsPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.TrustWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.TrustWhereInput;
+  select?: Prisma.TrustSelect;
+  orderBy?: Prisma.TrustOrderByWithAggregationInput;
 };

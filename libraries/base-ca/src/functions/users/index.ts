@@ -1,102 +1,117 @@
-import 'dotenv/config';
-
+import { BatchPayload, User, prisma } from '../../services/prisma';
 import {
-  CreateUserParams,
-  UserAssociationsArrayType,
-  WhereUserFullTextParams,
-  WhereUserParams,
+  CreateManyUsers,
+  CreateUser,
+  DeleteUserParams,
+  GetUserParams,
+  GetUsersPaginationParams,
+  GetUsersParams,
+  UpdateUserParams,
+  UserWhereInput,
 } from './types';
-import { PrismaClient, User } from '@prisma/client';
-import {
-  getParamsRemapping,
-  getUsersParamsRemapping,
-} from '../../utils/remap/user';
-
-const prisma = new PrismaClient();
 
 export const createUser = async (
-  params: CreateUserParams
+  params: CreateUser
 ): Promise<User> => {
-  const created = await prisma.user.create({
-    data: params,
-  });
-  return created;
+  try {
+    const user = await prisma.user.findFirst({
+      where: params as UserWhereInput,
+    });
+
+    if (user) {
+      return user;
+    }
+
+    const newUser = await prisma.user.create({
+      data: params,
+    });
+
+    return newUser;
+  } catch (error: any) {
+    throw Error(error);
+  }
 };
 
-export const updateUser = async (
-  where: WhereUserParams,
-  toUpdate: WhereUserParams
-): Promise<User> => {
+export const createManyUsers = async (
+  params: CreateManyUsers[]
+): Promise<BatchPayload> => {
+  try {
+    const newUsers = await prisma.user.createMany({
+      data: params,
+    });
+
+    return newUsers;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateUser = async ({
+  toUpdate,
+  where,
+}: UpdateUserParams): Promise<User> => {
   const updated = await prisma.user.update({
     where,
     data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteUser = async (where: User): Promise<User> => {
-  const deleted = await prisma.user.delete({ where });
+export const deleteUser = async ({
+  where,
+}: DeleteUserParams): Promise<User> => {
+  const deleted = await prisma.user.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getUser = async (
-  where: WhereUserParams,
-  associations: UserAssociationsArrayType
-): Promise<User | null> => {
-  const remapped = getParamsRemapping(where);
+export const getUser = async ({
+  where,
+  select,
+}: GetUserParams): Promise<User | null> => {
   const user = await prisma.user.findFirst({
-    where: remapped,
-    ...(Object.entries(associations).length && {
-      include: associations,
-    }),
+    ...(select && { select }),
+    where,
   });
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   return user;
 };
 
-export const getUsers = async (
-  associations: UserAssociationsArrayType,
-  where?: WhereUserParams,
-  limit?: number
-): Promise<User[]> => {
-  const remapped = getUsersParamsRemapping(where);
+export const getUsers = async ({
+  limit,
+  where,
+  select,
+}: GetUsersParams): Promise<User[]> => {
   const users = await prisma.user.findMany({
-    take: limit,
-    where: remapped,
-    include: associations,
-  });
-
-  return users;
-};
-
-export const getUsersPagination = async (
-  associations: UserAssociationsArrayType,
-  limit: number,
-  offset: number,
-  where?: WhereUserParams
-): Promise<User[]> => {
-  const remapped = getUsersParamsRemapping(where);
-  const users = await prisma.user.findMany({
-    take: limit,
-    skip: offset,
-    where: remapped,
-    include: associations,
-  });
-
-  return users;
-};
-
-export const getUsersByMultiple = async (
-  associations: UserAssociationsArrayType,
-  where?: WhereUserFullTextParams,
-  limit?: number
-) => {
-  const users = await prisma.user.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    include: associations,
+  });
+
+  return users;
+};
+
+export const getUsersPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetUsersPaginationParams): Promise<User[]> => {
+  const users = await prisma.user.findMany({
+    take: limit,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
+    where,
   });
 
   return users;

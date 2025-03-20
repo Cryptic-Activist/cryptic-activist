@@ -1,31 +1,38 @@
-import { GetTradeReturnType } from '@/functions/trades/types';
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateChatParamsType = {
-  tradeId: string;
+export type CreateChat = Prisma.ChatCreateInput;
+
+export type CreateManyChats = Prisma.ChatCreateManyInput;
+
+export type WhereChat = Prisma.ChatWhereUniqueInput;
+
+export type UpdateChatParams = {
+  toUpdate: Prisma.ChatUpdateInput;
+  where: Prisma.ChatWhereUniqueInput;
 };
 
-export type ChatDynamicType = {
-  id?: string;
-  isDeleted?: boolean;
-  whenDeleted?: null | DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteChatParams = {
+  where: Prisma.ChatWhereUniqueInput;
 };
 
-export type UpdateChatWhereType = ChatDynamicType;
+export type GetChatParams = {
+  where?: Prisma.ChatWhereInput;
+  select?: Prisma.ChatSelect;
+};
 
-export type UpdateChatToUpdateType = ChatDynamicType;
+export type GetChatsParams = {
+  where?: Prisma.ChatWhereInput;
+  limit?: number;
+  select?: Prisma.ChatSelect;
+};
 
-export type DeleteChatWhereType = ChatDynamicType;
-
-export type GetChatWhereType = ChatDynamicType;
-
-export type GetChatReturnType = {
-  id: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-  trade?: GetTradeReturnType;
+export type GetChatsPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.ChatWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.ChatWhereInput;
+  select?: Prisma.ChatSelect;
+  orderBy?: Prisma.ChatOrderByWithAggregationInput;
 };

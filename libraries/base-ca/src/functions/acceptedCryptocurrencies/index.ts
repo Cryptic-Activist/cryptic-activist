@@ -4,12 +4,17 @@ import {
   prisma,
 } from '../../services/prisma';
 import {
-  CreateAcceptedCryptocurrencyParams,
-  WhereAcceptedCryptocurrencyParams,
+  CreateAcceptedCryptocurrency,
+  DeleteAcceptedCryptocurrencyParams,
+  GetAcceptedCryptocurrenciesPaginationParams,
+  GetAcceptedCryptocurrenciesParams,
+  GetAcceptedCryptocurrencyParams,
+  UpdateAcceptedCryptocurrencyParams,
+  WhereAcceptedCryptocurrency,
 } from './types';
 
 export const createAcceptedCryptocurrency = async (
-  params: CreateAcceptedCryptocurrencyParams
+  params: CreateAcceptedCryptocurrency
 ): Promise<AcceptedCryptocurrency> => {
   try {
     const acceptedCryptocurrency =
@@ -33,7 +38,7 @@ export const createAcceptedCryptocurrency = async (
 };
 
 export const createManyAcceptedCryptocurrencies = async (
-  params: CreateAcceptedCryptocurrencyParams[]
+  params: CreateAcceptedCryptocurrency[]
 ): Promise<BatchPayload> => {
   try {
     const newAcceptedCryptocurrencies =
@@ -47,10 +52,10 @@ export const createManyAcceptedCryptocurrencies = async (
   }
 };
 
-export const updateAcceptedCryptocurrency = async (
-  toUpdate: WhereAcceptedCryptocurrencyParams,
-  where: WhereAcceptedCryptocurrencyParams
-): Promise<AcceptedCryptocurrency> => {
+export const updateAcceptedCryptocurrency = async ({
+  toUpdate,
+  where,
+}: UpdateAcceptedCryptocurrencyParams): Promise<AcceptedCryptocurrency> => {
   const updated = await prisma.acceptedCryptocurrency.update({
     where,
     data: toUpdate,
@@ -59,20 +64,22 @@ export const updateAcceptedCryptocurrency = async (
   return updated;
 };
 
-export const deleteAcceptedCryptocurrency = async (
-  where: WhereAcceptedCryptocurrencyParams
-): Promise<AcceptedCryptocurrency> => {
+export const deleteAcceptedCryptocurrency = async ({
+  where,
+}: DeleteAcceptedCryptocurrencyParams): Promise<AcceptedCryptocurrency> => {
   const deleted = await prisma.acceptedCryptocurrency.delete({
     where,
   });
   return deleted;
 };
 
-export const getAcceptedCryptocurrency = async (
-  where: WhereAcceptedCryptocurrencyParams
-): Promise<AcceptedCryptocurrency | null> => {
+export const getAcceptedCryptocurrency = async ({
+  where,
+  select,
+}: GetAcceptedCryptocurrencyParams): Promise<AcceptedCryptocurrency | null> => {
   const acceptedCryptocurrency =
     await prisma.acceptedCryptocurrency.findFirst({
+      ...(select && { select }),
       where,
     });
 
@@ -83,30 +90,42 @@ export const getAcceptedCryptocurrency = async (
   return acceptedCryptocurrency;
 };
 
-export const getAcceptedCryptocurrencies = async (
-  where?: WhereAcceptedCryptocurrencyParams,
-  limit?: number
-): Promise<AcceptedCryptocurrency[]> => {
-  const cryptocurrencies =
+export const getAcceptedCryptocurrencies = async ({
+  limit,
+  where,
+  select,
+}: GetAcceptedCryptocurrenciesParams): Promise<
+  AcceptedCryptocurrency[]
+> => {
+  const acceptedCryptocurrencies =
     await prisma.acceptedCryptocurrency.findMany({
+      ...(limit && { take: limit }),
+      ...(select && { select }),
       where,
-      take: limit,
     });
 
-  return cryptocurrencies;
+  return acceptedCryptocurrencies;
 };
 
-export const getAcceptedCryptocurrenciesPagination = async (
-  limit: number,
-  offset: number,
-  where?: WhereAcceptedCryptocurrencyParams
-): Promise<AcceptedCryptocurrency[]> => {
-  const cryptocurrencies =
+export const getAcceptedCryptocurrenciesPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetAcceptedCryptocurrenciesPaginationParams): Promise<
+  AcceptedCryptocurrency[]
+> => {
+  const acceptedCryptocurrencies =
     await prisma.acceptedCryptocurrency.findMany({
       take: limit,
-      skip: offset,
+      ...(offset && { skip: offset }),
+      ...(select && { select }),
+      ...(cursor && { cursor }),
+      ...(orderBy && { orderBy }),
       where,
     });
 
-  return cryptocurrencies;
+  return acceptedCryptocurrencies;
 };

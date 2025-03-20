@@ -1,33 +1,33 @@
-import { UserLanguage, prisma } from '../../services/prisma';
 import {
-  AssociateUserToLanguageParams,
-  DisassociateUserToLanguageParams,
+  BatchPayload,
+  UserLanguage,
+  prisma,
+} from '../../services/prisma';
+import {
+  CreateManyUserLanguages,
+  CreateUserLanguage,
+  DeleteUserLanguageParams,
+  GetUserLanguageParams,
+  GetUserLanguagesPaginationParams,
+  GetUserLanguagesParams,
+  UpdateUserLanguageParams,
+  UserLanguageWhereInput,
 } from './types';
 
-export const associateUserToLanguage = async (
-  params: AssociateUserToLanguageParams
-): Promise<any> => {
+export const createUserLanguage = async (
+  params: CreateUserLanguage
+): Promise<UserLanguage> => {
   try {
-    const { languageId, userId } = params;
-
-    const language = await prisma.language.findFirst({
-      where: { id: languageId },
+    const userLanguage = await prisma.userLanguage.findFirst({
+      where: params as UserLanguageWhereInput,
     });
 
-    if (!language) {
-      return null;
-    }
-
-    const user = await prisma.user.findFirst({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return null;
+    if (userLanguage) {
+      return userLanguage;
     }
 
     const newUserLanguage = await prisma.userLanguage.create({
-      data: { languageId: languageId, userId: userId },
+      data: params,
     });
 
     return newUserLanguage;
@@ -36,17 +36,87 @@ export const associateUserToLanguage = async (
   }
 };
 
-export const disassociateUserToLanguage = async (
-  params: DisassociateUserToLanguageParams
-): Promise<UserLanguage> => {
+export const createManyUserLanguages = async (
+  params: CreateManyUserLanguages[]
+): Promise<BatchPayload> => {
   try {
-    const { languageId, userId } = params;
-
-    const deleted = await prisma.userLanguage.delete({
-      where: { userId_languageId: { languageId, userId } },
+    const newUserLanguages = await prisma.userLanguage.createMany({
+      data: params,
     });
-    return deleted;
+
+    return newUserLanguages;
   } catch (error: any) {
     throw Error(error);
   }
+};
+
+export const updateUserLanguage = async ({
+  toUpdate,
+  where,
+}: UpdateUserLanguageParams): Promise<UserLanguage> => {
+  const updated = await prisma.userLanguage.update({
+    where,
+    data: toUpdate,
+  });
+
+  return updated;
+};
+
+export const deleteUserLanguage = async ({
+  where,
+}: DeleteUserLanguageParams): Promise<UserLanguage> => {
+  const deleted = await prisma.userLanguage.delete({
+    where,
+  });
+  return deleted;
+};
+
+export const getUserLanguage = async ({
+  where,
+  select,
+}: GetUserLanguageParams): Promise<UserLanguage | null> => {
+  const userLanguage = await prisma.userLanguage.findFirst({
+    ...(select && { select }),
+    where,
+  });
+
+  if (!userLanguage) {
+    return null;
+  }
+
+  return userLanguage;
+};
+
+export const getUserLanguages = async ({
+  limit,
+  where,
+  select,
+}: GetUserLanguagesParams): Promise<UserLanguage[]> => {
+  const userLanguages = await prisma.userLanguage.findMany({
+    ...(limit && { take: limit }),
+    ...(select && { select }),
+    where,
+  });
+
+  return userLanguages;
+};
+
+export const getUserLanguagesPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetUserLanguagesPaginationParams): Promise<UserLanguage[]> => {
+  const userLanguages = await prisma.userLanguage.findMany({
+    take: limit,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
+    where,
+  });
+
+  return userLanguages;
 };

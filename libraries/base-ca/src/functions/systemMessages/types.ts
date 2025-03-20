@@ -1,46 +1,39 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-import { GetLanguageReturnType } from '../languages/types';
+export type CreateSystemMessage = Prisma.SystemMessageCreateInput;
 
-export type CreateSystemMessageParams = {
-  message: string;
-  url: string;
-  userId: string;
+export type CreateManySystemMessages =
+  Prisma.SystemMessageCreateManyInput;
+
+export type WhereSystemMessage = Prisma.SystemMessageWhereUniqueInput;
+
+export type UpdateSystemMessageParams = {
+  toUpdate: Prisma.SystemMessageUpdateInput;
+  where: Prisma.SystemMessageWhereUniqueInput;
 };
 
-export type WhereSystemMessageParams = {
-  id?: string;
-  profileColor?: string;
-  firstName?: string;
-  lastName?: string;
-  username?: string;
-  password?: string;
-  privateKeys?: string;
-  isVerified?: boolean;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteSystemMessageParams = {
+  where: Prisma.SystemMessageWhereUniqueInput;
 };
 
-export type SystemMessageDynamicType = WhereSystemMessageParams;
-
-export type SystemMessageAssociationsType = {
-  User?: boolean;
+export type GetSystemMessageParams = {
+  where?: Prisma.SystemMessageWhereInput;
+  select?: Prisma.SystemMessageSelect;
 };
 
-export type GetSystemMessageReturnType = {
-  id: string;
-  profileColor: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-  privateKeys: string[];
-  isVerified: boolean;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-  languages?: GetLanguageReturnType[];
+export type GetSystemMessagesParams = {
+  where?: Prisma.SystemMessageWhereInput;
+  limit?: number;
+  select?: Prisma.SystemMessageSelect;
+};
+
+export type GetSystemMessagesPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.SystemMessageWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.SystemMessageWhereInput;
+  select?: Prisma.SystemMessageSelect;
+  orderBy?: Prisma.SystemMessageOrderByWithAggregationInput;
 };

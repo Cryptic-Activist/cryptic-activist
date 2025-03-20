@@ -1,48 +1,38 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-type OrderBy = 'asc' | 'desc';
+export type CreateFiat = Prisma.FiatCreateInput;
 
-export type CreateFiatParams = {
-  name: string;
-  symbol: string;
-  country: string;
+export type CreateManyFiats = Prisma.FiatCreateManyInput;
+
+export type WhereFiat = Prisma.FiatWhereUniqueInput;
+
+export type UpdateFiatParams = {
+  toUpdate: Prisma.FiatUpdateInput;
+  where: Prisma.FiatWhereUniqueInput;
 };
 
-export type WhereFiatParams = {
-  id?: string;
-  name?: string;
-  symbol?: string;
-  country?: string;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteFiatParams = {
+  where: Prisma.FiatWhereUniqueInput;
 };
 
-export type GetFiatReturnType = {
-  id: string;
-  name?: string;
-  symbol?: string;
-  country?: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-};
-
-export type OrderByFiatParams = {
-  id?: OrderBy;
-  name?: OrderBy;
-  symbol?: OrderBy;
-  country?: OrderBy;
-  isDeleted?: OrderBy;
-  whenDeleted?: OrderBy;
-  createdAt?: OrderBy;
-  updatedAt?: OrderBy;
+export type GetFiatParams = {
+  where?: Prisma.FiatWhereInput;
+  select?: Prisma.FiatSelect;
 };
 
 export type GetFiatsParams = {
-  where?: WhereFiatParams;
+  where?: Prisma.FiatWhereInput;
   limit?: number;
-  orderBy?: OrderByFiatParams;
+  select?: Prisma.FiatSelect;
+};
+
+export type GetFiatsPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.FiatWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.FiatWhereInput;
+  select?: Prisma.FiatSelect;
+  orderBy?: Prisma.FiatOrderByWithAggregationInput;
 };

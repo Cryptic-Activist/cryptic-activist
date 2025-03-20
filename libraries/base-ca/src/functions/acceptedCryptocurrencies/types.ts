@@ -1,21 +1,38 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateAcceptedCryptocurrencyParams = {
-  coingeckoId: string;
-  symbol: string;
-  name: string;
+export type CreateAcceptedCryptocurrency =
+  Prisma.AcceptedCryptocurrencyCreateInput;
+
+export type WhereAcceptedCryptocurrency =
+  Prisma.AcceptedCryptocurrencyWhereUniqueInput;
+
+export type UpdateAcceptedCryptocurrencyParams = {
+  toUpdate: Prisma.AcceptedCryptocurrencyUpdateInput;
+  where: Prisma.AcceptedCryptocurrencyWhereUniqueInput;
 };
 
-export type WhereAcceptedCryptocurrencyParams = {
-  id?: string;
-  coingeckoId?: string;
-  symbol?: string;
-  name?: string;
+export type DeleteAcceptedCryptocurrencyParams = {
+  where: Prisma.AcceptedCryptocurrencyWhereUniqueInput;
 };
 
-export type GetAcceptedCryptocurrencyReturnType = {
-  id: string;
-  coingeckoId: string;
-  symbol: string;
-  name: string;
+export type GetAcceptedCryptocurrencyParams = {
+  where?: Prisma.AcceptedCryptocurrencyWhereInput;
+  select?: Prisma.AcceptedCryptocurrencySelect;
+};
+
+export type GetAcceptedCryptocurrenciesParams = {
+  where?: Prisma.AcceptedCryptocurrencyWhereInput;
+  limit?: number;
+  select?: Prisma.AcceptedCryptocurrencySelect;
+};
+
+export type GetAcceptedCryptocurrenciesPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.AcceptedCryptocurrencyWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.AcceptedCryptocurrencyWhereInput;
+  select?: Prisma.AcceptedCryptocurrencySelect;
+  orderBy?: Prisma.AcceptedCryptocurrencyOrderByWithAggregationInput;
 };

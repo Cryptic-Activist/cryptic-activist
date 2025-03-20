@@ -1,36 +1,38 @@
-import { DateType } from '../types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateAdminParams = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
+export type CreateAdmin = Prisma.AdminCreateInput;
+
+export type CreateManyAdmins = Prisma.AdminCreateManyInput;
+
+export type WhereAdmin = Prisma.AdminWhereUniqueInput;
+
+export type UpdateAdminParams = {
+  toUpdate: Prisma.AdminUpdateInput;
+  where: Prisma.AdminWhereUniqueInput;
 };
 
-export type WhereAdminParams = {
-  id?: string;
-  firstName?: string;
-  lastName?: string;
-  username?: string;
-  password?: string;
-  isVerified?: boolean;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteAdminParams = {
+  where: Prisma.AdminWhereUniqueInput;
 };
 
-export type AdminDynamicType = WhereAdminParams;
+export type GetAdminParams = {
+  where?: Prisma.AdminWhereInput;
+  select?: Prisma.AdminSelect;
+};
 
-export type GetAdminReturnType = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-  isVerified: boolean;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
+export type GetAdminsParams = {
+  where?: Prisma.AdminWhereInput;
+  limit?: number;
+  select?: Prisma.AdminSelect;
+};
+
+export type GetAdminsPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.AdminWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.AdminWhereInput;
+  select?: Prisma.AdminSelect;
+  orderBy?: Prisma.AdminOrderByWithAggregationInput;
 };

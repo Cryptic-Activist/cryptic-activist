@@ -1,93 +1,38 @@
-import { DateType } from '@/functions/types';
-import { GetUserReturnType } from '@/functions/users/types';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/services/prisma';
 
-import { GetCryptocurrencyReturnType } from '../cryptocurrencies/types';
-import { GetFiatReturnType } from '../fiats/types';
-import { GetLanguageReturnType } from '../languages/types';
+export type CreateTrade = Prisma.TradeCreateInput;
 
-export type CreateStatePrismaType = Prisma.StringNullableListFilter;
-export type UpdateTradeInstructionsTagsPrismaType =
-  Prisma.StringFieldUpdateOperationsInput;
-export type GetTradeInstructionsTagsPrismaType =
-  Prisma.StringNullableListFilter;
+export type CreateManyTrades = Prisma.TradeCreateManyInput;
 
-export type CreateTradeParams = {
-  paymentReceiptId: string;
-  vendorId: string;
-  traderId: string;
-  offerId: string;
-  cryptocurrencyId: string;
-  fiatId: string;
-  chatId?: string;
-  cryptocurrencyAmount: number;
-  fiatAmount: number;
-  startedAt: Date;
-  endedAt?: Date;
+export type WhereTrade = Prisma.TradeWhereUniqueInput;
+
+export type UpdateTradeParams = {
+  toUpdate: Prisma.TradeUpdateInput;
+  where: Prisma.TradeWhereUniqueInput;
 };
 
-export type WhereTradeParams = {
-  id?: string;
-  paymentReceiptId?: string;
-  vendorId?: string;
-  traderId?: string;
-  offerId?: string;
-  cryptocurrencyId?: string;
-  fiatId?: string;
-  chatId?: string;
-  cryptocurrencyAmount?: number;
-  fiatAmount?: number;
-  startedAt?: Date;
-  endedAt?: Date;
-  state?: 'ongoing' | 'canceled' | 'done' | 'error';
-  paid?: false;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteTradeParams = {
+  where: Prisma.TradeWhereUniqueInput;
 };
 
-export type TradeDynamicType = WhereTradeParams;
-
-export type UpdateTradeWhereType = TradeDynamicType;
-
-export type UpdateTradeToUpdateType = TradeDynamicType;
-
-export type DeleteTradeWhereType = TradeDynamicType;
-
-export type GetTradeWhereType = TradeDynamicType;
-
-export type TradeAssociationsArrayType = {
-  vendor: boolean;
-  trader: boolean;
-  offer: boolean;
-  cryptocurrency: boolean;
-  fiat: boolean;
-  chat: boolean;
+export type GetTradeParams = {
+  where?: Prisma.TradeWhereInput;
+  select?: Prisma.TradeSelect;
 };
 
-export type GetTradeReturnType = {
-  id: string;
-  vendorId: string;
-  cryptocurrencyId: string;
-  paymentMethodId: string;
-  fiatId: string;
-  paymentMethodType: 'buy' | 'sell';
-  tradePricingType: 'market' | 'fixed';
-  tradePricingListAt: number;
-  tradePricingTradeLimitsMin: number;
-  tradePricingTradeLimitsMax: number;
-  tradePricingTimeLimit: number;
-  tradeInstructionsTags: string[];
-  tradeInstructionsLabel: string;
-  tradeInstructionsTerms: string;
-  tradeInstructionsInstructions: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-  cryptocurrency?: GetCryptocurrencyReturnType;
-  fiat?: GetFiatReturnType;
-  vendor?: GetUserReturnType;
-  paymentMethod?: GetLanguageReturnType;
+export type GetTradesParams = {
+  where?: Prisma.TradeWhereInput;
+  limit?: number;
+  select?: Prisma.TradeSelect;
+};
+
+export type GetTradesPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.TradeWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.TradeWhereInput;
+  select?: Prisma.TradeSelect;
+  orderBy?: Prisma.TradeOrderByWithAggregationInput;
 };

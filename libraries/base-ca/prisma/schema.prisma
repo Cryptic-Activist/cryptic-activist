@@ -10,19 +10,356 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AcceptedCryptocurrency {
+  id          String @id @default(uuid())
+  coingeckoId String @unique @db.VarChar(200)
+  symbol      String @db.VarChar(200)
+  name        String @db.VarChar(200)
+
+  @@map("accepted_cryptocurrencies")
+}
+
 model Admin {
+  id           String    @id @default(uuid())
+  firstName    String    @db.VarChar(50)
+  lastName     String    @db.VarChar(50)
+  username     String    @unique @db.VarChar(120)
+  password     String
+  isVerified   Boolean?  @default(false) @db.Boolean
+  deletedAt    DateTime? @db.Date
+  createdAt    DateTime? @default(now()) @db.Date
+  updatedAt    DateTime? @updatedAt @db.Date
+  kyc          KYC[]
+  createdUsers User[]    @relation("UserCreatedBy") // All users created by this admin
+  updatedUsers User[]    @relation("UserLastUpdatedBy") // All users updated by this admin
+
+  @@map("admins")
+}
+
+model Block {
+  id        String    @id @default(uuid())
+  blocker   User      @relation("blockers", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who blocks 
+  blockerId String
+  blocked   User      @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is blocked
+  blockedId String
+  reason    String?   @db.VarChar(255)
+  deletedAt DateTime? @db.Date
+  createdAt DateTime? @default(now()) @db.Date
+  updatedAt DateTime? @updatedAt @db.Date
+
+  @@unique([blockerId, blockedId]) // Prevent duplicate block records
+  @@map("blocks")
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  deletedAt DateTime? @db.Date
+  createdAt DateTime? @default(now()) @db.Date
+  updatedAt DateTime? @updatedAt @db.Date
+  trade     Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  tradeId   String    @unique
+
+  @@map("chats")
+}
+
+model Cryptocurrency {
+  id          String    @id @default(uuid())
+  coingeckoId String    @unique @db.VarChar(200)
+  symbol      String    @db.VarChar(200)
+  name        String    @db.VarChar(200)
+  image       String
+  deletedAt   DateTime? @db.Date
+  createdAt   DateTime? @default(now()) @db.Date
+  updatedAt   DateTime? @updatedAt @db.Date
+  offers      Offer[]   @relation("offer")
+  trades      Trade[]   @relation("trade")
+
+  @@map("cryptocurrencies")
+}
+
+enum FeedbackType {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+model Feedback {
+  id        String       @id @default(uuid())
+  vendor    User         @relation("feedbackVendor", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  vendorId  String
+  trader    User         @relation("feedbackTrader", fields: [traderId], references: [id], onUpdate: Cascade)
+  traderId  String
+  offer     Offer        @relation("feedbackOffer", fields: [offerId], references: [id], onUpdate: Cascade)
+  offerId   String
+  message   String       @db.VarChar(256)
+  type      FeedbackType
+  deletedAt DateTime?    @db.Date
+  createdAt DateTime?    @default(now()) @db.Date
+  updatedAt DateTime?    @updatedAt @db.Date
+
+  @@map("feedbacks")
+}
+
+model Fiat {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(30)
+  symbol    String    @db.VarChar(10)
+  country   String    @db.VarChar(100)
+  deletedAt DateTime? @db.Date
+  createdAt DateTime? @default(now()) @db.Date
+  updatedAt DateTime? @updatedAt @db.Date
+  offers    Offer[]   @relation("offer")
+  trades    Trade[]   @relation("trade")
+
+  @@map("fiats")
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model KYC {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  documentType    String // e.g., "passport", "driver_license"
+  documentUrl     String // URL of the uploaded document
+  selfieUrl       String // URL of the selfie for verification
+  proofOfAddress  String // URL of address proof (if required)
+  status          KYCStatus @default(PENDING)
+  rejectionReason String? // Optional reason for rejection
+  reviewedBy      String? // Admin who reviewed the KYC
+  reviewer        Admin?    @relation(fields: [reviewedBy], references: [id])
+  reviewedAt      DateTime? @db.Date
+  deletedAt       DateTime? @db.Date
+  createdAt       DateTime? @default(now()) @db.Date
+  updatedAt       DateTime? @updatedAt @db.Date
+
+  @@map("kyc")
+}
+
+model Language {
+  id           String         @id @default(uuid())
+  name         String         @unique @db.VarChar(50)
+  deletedAt    DateTime?      @db.Date
+  createdAt    DateTime?      @default(now()) @db.Date
+  updatedAt    DateTime?      @updatedAt @db.Date
+  UserLanguage UserLanguage[]
+
+  @@map("languages")
+}
+
+model Offer {
+  id               String         @id @default(uuid())
+  offerType        String
+  pricingType      String
+  listAt           Float
+  limitMin         Float
+  limitMax         Float
+  timeLimit        Float
+  tags             String[]
+  label            String
+  terms            String
+  instructions     String
+  deletedAt        DateTime?      @db.Date
+  createdAt        DateTime?      @default(now()) @db.Date
+  updatedAt        DateTime?      @updatedAt @db.Date
+  vendor           User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
+  vendorId         String
+  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cryptocurrencyId String
+  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethodId  String
+  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fiatId           String
+  feedbacks        Feedback[]     @relation("feedbackOffer")
+  trades           Trade[]        @relation("tradeOffer")
+
+  @@map("offers")
+}
+
+model PaymentMethod {
+  id                      String                @id @default(uuid())
+  name                    String                @db.VarChar(60)
+  deletedAt               DateTime?             @db.Date
+  createdAt               DateTime?             @default(now()) @db.Date
+  updatedAt               DateTime?             @updatedAt @db.Date
+  paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id], onUpdate: Cascade)
+  paymentMethodCategoryId String
+  offers                  Offer[]               @relation("offer")
+
+  @@map("payment_methods")
+}
+
+model PaymentMethodCategory {
+  id             String          @id @default(uuid())
+  name           String          @db.VarChar(60)
+  deletedAt      DateTime?       @db.Date
+  createdAt      DateTime?       @default(now()) @db.Date
+  updatedAt      DateTime?       @updatedAt @db.Date
+  paymentMethods PaymentMethod[]
+
+  @@map("payment_method_categories")
+}
+
+model PaymentReceipt {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(60)
+  key       String
+  url       String
+  deletedAt DateTime? @db.Date
+  createdAt DateTime? @default(now()) @db.Date
+  updatedAt DateTime? @updatedAt @db.Date
+  trade     Trade[]
+
+  @@map("payment_receipts")
+}
+
+model PremiumPurchase {
+  id             String    @id @default(cuid())
+  depositAddress String    @unique
+  userId         String    @unique
+  user           User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  expectedAmount Float
+  status         String // e.g., "pending", "completed", "failed"
+  transactionId  String?
+  deletedAt      DateTime? @db.Date
+  createdAt      DateTime? @default(now()) @db.Date
+  updatedAt      DateTime? @updatedAt @db.Date
+
+  @@map("premium_purchases")
+}
+
+model SystemMessage {
+  id        String    @id @default(uuid())
+  message   String    @db.VarChar(256)
+  whenSeen  DateTime?
+  url       String
+  deletedAt DateTime? @db.Date
+  createdAt DateTime? @default(now()) @db.Date
+  updatedAt DateTime? @updatedAt @db.Date
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
+
+  @@map("system_messages")
+}
+
+model Tier {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String
+  level       Int    @unique
+  tradingFee  Float
+  discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
+  minVolume   Float // Minimum trading volume to qualify for this tier
+  users       User[]
+
+  @@map("tiers")
+}
+
+enum TradeStatus {
+  PENDING // Trade is created but not yet confirmed  
+  IN_PROGRESS // Trade is actively being processed  
+  COMPLETED // Trade has been successfully completed  
+  CANCELLED // Trade was cancelled by one of the parties  
+  DISPUTED // Trade is under review due to a dispute  
+  EXPIRED // Trade expired due to inactivity  
+}
+
+model Trade {
+  id                   String         @id @default(uuid())
+  paymentReceipt       PaymentReceipt @relation(fields: [paymentReceiptId], references: [id])
+  paymentReceiptId     String
+  vendor               User           @relation("vendorTrade", fields: [vendorId], references: [id])
+  vendorId             String
+  trader               User           @relation("traderTrade", fields: [traderId], references: [id])
+  traderId             String
+  offer                Offer          @relation("tradeOffer", fields: [offerId], references: [id])
+  offerId              String
+  cryptocurrency       Cryptocurrency @relation("trade", fields: [cryptocurrencyId], references: [id])
+  cryptocurrencyId     String
+  fiat                 Fiat           @relation("trade", fields: [fiatId], references: [id])
+  fiatId               String
+  chat                 Chat?
+  cryptocurrencyAmount Float
+  fiatAmount           Float
+  startedAt            DateTime       @default(now())
+  endedAt              DateTime?
+  expiredAt            DateTime? // Time when the trade should be considered expired
+  status               TradeStatus
+  paid                 Boolean?       @default(false) @db.Boolean
+  escrowReleaseDate    DateTime?      @db.Date
+  deletedAt            DateTime?      @db.Date
+  createdAt            DateTime?      @default(now()) @db.Date
+  updatedAt            DateTime?      @updatedAt @db.Date
+
+  @@map("trades")
+}
+
+enum TransactionPaymentMethodType {
+  CREDIT_CARD
+}
+
+model TransactionPaymentMethod {
+  id                         String                       @id @default(cuid()) // ID from the payment gateway (e.g., Stripe payment method ID)
+  transactionPaymentMethodId String
+  userId                     String
+  user                       User                         @relation(fields: [userId], references: [id])
+  type                       TransactionPaymentMethodType
+  transactions               Transaction[]
+
+  @@map("transaction_payment_method")
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model Transaction {
+  id                         String                   @id @default(cuid())
+  userId                     String
+  user                       User                     @relation(fields: [userId], references: [id])
+  transactionPaymentMethodId String
+  transactionPaymentMethod   TransactionPaymentMethod @relation(fields: [transactionPaymentMethodId], references: [id])
+  amount                     Float
+  currency                   String
+  status                     TransactionStatus // e.g., 'pending', 'completed', 'failed'
+  gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)
+  deletedAt                  DateTime?                @db.Date
+  createdAt                  DateTime?                @default(now()) @db.Date
+  updatedAt                  DateTime?                @updatedAt @db.Date
+
+  @@unique([gatewayTransactionId]) // Prevent duplicate transactions
+  @@map("transactions")
+}
+
+model Trust {
   id         String    @id @default(uuid())
-  firstName  String    @db.VarChar(50)
-  lastName   String    @db.VarChar(50)
-  username   String    @unique @db.VarChar(120)
-  password   String
-  isVerified Boolean?  @default(false) @db.Boolean
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
+  truster    User      @relation("trusters", fields: [trusterId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who trusts
+  trusterId  String
+  trusted    User      @relation("trusted", fields: [trustedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is trusted
+  trustedId  String
+  trustLabel Int?
+  deletedAt  DateTime? @db.Date
   createdAt  DateTime? @default(now()) @db.Date
   updatedAt  DateTime? @updatedAt @db.Date
 
-  @@map("admins")
+  @@unique([trusterId, trustedId]) // Prevent duplicate trust records
+  @@map("trusts")
+}
+
+model UserLanguage {
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId     String
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  languageId String
+
+  @@id([userId, languageId])
+  @@map("user_languages")
 }
 
 model User {
@@ -34,8 +371,12 @@ model User {
   password                 String
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean
-  isDeleted                Boolean?                   @default(false) @db.Boolean
-  whenDelete               DateTime?                  @db.Date
+  lastLoginAt              DateTime?                  @db.Date
+  createdById              String? // Admin who created the account (Foreign key)
+  lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
+  createdBy                Admin?                     @relation("UserCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
+  lastUpdatedBy            Admin?                     @relation("UserLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
+  deletedAt                DateTime?                  @db.Date
   createdAt                DateTime?                  @default(now()) @db.Date
   updatedAt                DateTime?                  @updatedAt @db.Date
   userLanguage             UserLanguage[]
@@ -54,319 +395,9 @@ model User {
   premiumPurchase          PremiumPurchase?
   kyc                      KYC?
   kycId                    String?
-  TransactionPaymentMethod TransactionPaymentMethod[]
-  Transaction              Transaction[]
-  Transaction              Transaction[]
+  transactionPaymentMethod TransactionPaymentMethod[]
+  transactions             Transaction[]
 
+  @@index([username])
   @@map("users")
-}
-
-model Language {
-  id           String         @id @default(uuid())
-  name         String         @unique @db.VarChar(50)
-  isDeleted    Boolean?       @default(false) @db.Boolean
-  whenDelete   DateTime?      @db.Date
-  createdAt    DateTime?      @default(now()) @db.Date
-  updatedAt    DateTime?      @updatedAt @db.Date
-  UserLanguage UserLanguage[]
-
-  @@map("languages")
-}
-
-model UserLanguage {
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId     String   @default(uuid())
-  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  languageId String   @default(uuid())
-
-  @@id([userId, languageId])
-  @@map("user_languages")
-}
-
-model Chat {
-  id         String    @id @default(uuid())
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-  trade      Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  tradeId    String    @unique
-
-  @@map("chats")
-}
-
-model SystemMessage {
-  id         String    @id @default(uuid())
-  message    String    @db.VarChar(256)
-  whenSeen   DateTime?
-  url        String
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-  User       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId     String
-
-  @@map("system_messages")
-}
-
-model PaymentMethodCategory {
-  id             String          @id @default(uuid())
-  name           String          @db.VarChar(60)
-  isDeleted      Boolean?        @default(false) @db.Boolean
-  whenDelete     DateTime?       @db.Date
-  createdAt      DateTime?       @default(now()) @db.Date
-  updatedAt      DateTime?       @updatedAt @db.Date
-  paymentMethods PaymentMethod[]
-
-  @@map("payment_method_categories")
-}
-
-model PaymentMethod {
-  id                      String                @id @default(uuid())
-  name                    String                @db.VarChar(60)
-  isDeleted               Boolean?              @default(false) @db.Boolean
-  whenDelete              DateTime?             @db.Date
-  createdAt               DateTime?             @default(now()) @db.Date
-  updatedAt               DateTime?             @updatedAt @db.Date
-  paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  paymentMethodCategoryId String                @default(uuid())
-  offers                  Offer[]               @relation("offer")
-
-  @@map("payment_methods")
-}
-
-model PaymentReceipt {
-  id         String    @id @default(uuid())
-  name       String    @db.VarChar(60)
-  key        String
-  url        String
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-
-  @@map("payment_receipts")
-}
-
-model Trust {
-  id         String    @id @default(uuid())
-  truster    User      @relation("trusters", fields: [trusterId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who trusts
-  trusterId  String    @default(uuid())
-  trusted    User      @relation("trusted", fields: [trustedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is trusted
-  trustedId  String    @default(uuid())
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-
-  @@map("trusts")
-}
-
-model Block {
-  id         String    @id @default(uuid())
-  blocker    User      @relation("blockers", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who blocks 
-  blockerId  String
-  blockedId  String
-  blocked    User      @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is blocked
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-
-  @@map("blocks")
-}
-
-model Cryptocurrency {
-  id          String    @id @default(uuid())
-  coingeckoId String    @unique @db.VarChar(200)
-  symbol      String    @db.VarChar(200)
-  name        String    @db.VarChar(200)
-  image       String
-  isDeleted   Boolean?  @default(false) @db.Boolean
-  whenDelete  DateTime? @db.Date
-  createdAt   DateTime? @default(now()) @db.Date
-  updatedAt   DateTime? @updatedAt @db.Date
-  offers      Offer[]   @relation("offer")
-  trades      Trade[]   @relation("trade")
-
-  @@map("cryptocurrencies")
-}
-
-model Fiat {
-  id         String    @id @default(uuid())
-  name       String    @db.VarChar(30)
-  symbol     String    @db.VarChar(10)
-  country    String    @db.VarChar(100)
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-  offers     Offer[]   @relation("offer")
-  trades     Trade[]   @relation("trade")
-
-  @@map("fiats")
-}
-
-model Feedback {
-  id         String    @id @default(uuid())
-  vendor     User      @relation("feedbackVendor", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  vendorId   String    @default(uuid())
-  trader     User      @relation("feedbackTrader", fields: [traderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  traderId   String    @default(uuid())
-  offer      Offer     @relation("feedbackOffer", fields: [offerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  offerId    String    @default(uuid())
-  message    String    @db.VarChar(256)
-  type       String    @db.VarChar(10)
-  isDeleted  Boolean?  @default(false) @db.Boolean
-  whenDelete DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
-
-  @@map("feedbacks")
-}
-
-model Offer {
-  id           String    @id @default(uuid())
-  offerType    String
-  pricingType  String
-  listAt       Float
-  limitMin     Float
-  limitMax     Float
-  timeLimit    Float
-  tags         String[]
-  label        String
-  terms        String
-  instructions String
-  isDeleted    Boolean?  @default(false) @db.Boolean
-  whenDelete   DateTime? @db.Date
-  createdAt    DateTime? @default(now()) @db.Date
-  updatedAt    DateTime? @updatedAt @db.Date
-
-  vendor           User           @relation("offer", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  vendorId         String         @default(uuid())
-  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cryptocurrencyId String         @default(uuid())
-  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  paymentMethodId  String         @default(uuid())
-  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fiatId           String         @default(uuid())
-  feedbacks        Feedback[]     @relation("feedbackOffer")
-  trades           Trade[]        @relation("tradeOffer")
-
-  @@map("offers")
-}
-
-model Trade {
-  id               String         @id @default(uuid())
-  paymentReceiptId String         @default(uuid())
-  vendor           User           @relation("vendorTrade", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  vendorId         String         @default(uuid())
-  trader           User           @relation("traderTrade", fields: [traderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  traderId         String         @default(uuid())
-  offer            Offer          @relation("tradeOffer", fields: [offerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  offerId          String         @default(uuid())
-  cryptocurrency   Cryptocurrency @relation("trade", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cryptocurrencyId String         @default(uuid())
-  fiat             Fiat           @relation("trade", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fiatId           String         @default(uuid())
-  chat             Chat?
-
-  cryptocurrencyAmount Float
-  fiatAmount           Float
-  startedAt            DateTime  @default(now())
-  endedAt              DateTime?
-  state                String
-  paid                 Boolean?  @default(false) @db.Boolean
-  isDeleted            Boolean?  @default(false) @db.Boolean
-  whenDelete           DateTime? @db.Date
-  createdAt            DateTime? @default(now()) @db.Date
-  updatedAt            DateTime? @updatedAt @db.Date
-
-  @@map("trades")
-}
-
-model AcceptedCryptocurrency {
-  id          String @id @default(uuid())
-  coingeckoId String @unique @db.VarChar(200)
-  symbol      String @db.VarChar(200)
-  name        String @db.VarChar(200)
-
-  @@map("accepted_cryptocurrencies")
-}
-
-model Tier {
-  id          String @id @default(uuid())
-  name        String @unique
-  description String
-  level       Int    @unique
-  tradingFee  Float
-  discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
-  minVolume   Float // Minimum trading volume to qualify for this tier
-  users       User[]
-
-  @@map("tiers")
-}
-
-model PremiumPurchase {
-  id             String   @id @default(cuid())
-  depositAddress String   @unique
-  userId         String   @unique
-  expectedAmount Float
-  status         String // e.g., "pending", "completed", "failed"
-  transactionId  String?
-  createdAt      DateTime @default(now())
-  user           User     @relation(fields: [userId], references: [id])
-
-  @@map("premium_purchases")
-}
-
-enum KYCStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-}
-
-model KYC {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  documentType    String // e.g., "passport", "driver_license"
-  documentUrl     String // URL of the uploaded document
-  selfieUrl       String // URL of the selfie for verification
-  proofOfAddress  String // URL of address proof (if required)
-  status          KYCStatus @default(PENDING)
-  rejectionReason String? // Optional reason for rejection
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("kyc")
-}
-
-model TransactionPaymentMethod {
-  id                         String        @id // ID from the payment gateway (e.g., Stripe payment method ID)
-  transactionPaymentMethodId String
-  userId                     Int
-  user                       User          @relation(fields: [userId], references: [id])
-  type                       String // e.g., 'credit_card'
-  transactions               Transaction[] @relation("TransactionPaymentMethod")
-
-  @@map("transaction_payment_method")
-}
-
-model Transaction {
-  id                         String                   @id @default(cuid())
-  userId                     Int
-  user                       User                     @relation("TransactionUser", fields: [userId], references: [id])
-  transactionPaymentMethodId String
-  transactionPaymentMethod   TransactionPaymentMethod @relation("TransactionPaymentMethod", fields: [transactionPaymentMethodId], references: [id])
-  amount                     Float
-  currency                   String
-  status                     String // e.g., 'pending', 'completed', 'failed'
-  gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)
-  createdAt                  DateTime                 @default(now())
-  User                       User                     @relation(fields: [userId], references: [id])
-
-  @@map("transactions")
 }

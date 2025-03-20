@@ -1,46 +1,38 @@
-import { DateType } from '@/functions/types';
-import { GetUserReturnType } from '@/functions/users/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateFeedbackParams = {
-  vendorId: string;
-  userId: string;
-  offerId: string;
-  message: string;
-  type: string;
+export type CreateFeedback = Prisma.FeedbackCreateInput;
+
+export type CreateManyFeedbacks = Prisma.FeedbackCreateManyInput;
+
+export type WhereFeedback = Prisma.FeedbackWhereUniqueInput;
+
+export type UpdateFeedbackParams = {
+  toUpdate: Prisma.FeedbackUpdateInput;
+  where: Prisma.FeedbackWhereUniqueInput;
 };
 
-export type WhereFeedbackParams = {
-  id?: string;
-  vendorId?: string;
-  userId?: string;
-  offerId?: string;
-  message?: string;
-  type?: string;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteFeedbackParams = {
+  where: Prisma.FeedbackWhereUniqueInput;
 };
 
-export type FeedbackAssociationsArrayType =
-  | []
-  | ['user']
-  | ['offer']
-  | ['user', 'offer'];
+export type GetFeedbackParams = {
+  where?: Prisma.FeedbackWhereInput;
+  select?: Prisma.FeedbackSelect;
+};
 
-export type GetFeedbackReturnType = {
-  id: string;
-  profileColor: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  password: string;
-  privateKeys: string[];
-  isVerified: boolean;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
-  vendor?: GetUserReturnType;
-  user?: GetUserReturnType;
+export type GetFeedbacksParams = {
+  where?: Prisma.FeedbackWhereInput;
+  limit?: number;
+  select?: Prisma.FeedbackSelect;
+};
+
+export type GetFeedbacksPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.FeedbackWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.FeedbackWhereInput;
+  select?: Prisma.FeedbackSelect;
+  orderBy?: Prisma.FeedbackOrderByWithAggregationInput;
 };

@@ -1,24 +1,30 @@
+import { BatchPayload, Fiat, prisma } from '../../services/prisma';
 import {
-  CreateFiatParams,
+  CreateFiat,
+  CreateManyFiats,
+  DeleteFiatParams,
+  GetFiatParams,
+  GetFiatsPaginationParams,
   GetFiatsParams,
-  OrderByFiatParams,
-  WhereFiatParams,
+  UpdateFiatParams,
+  WhereFiat,
 } from './types';
-import { Fiat, prisma } from '../../services/prisma';
 
 export const createFiat = async (
-  params: CreateFiatParams
+  params: CreateFiat
 ): Promise<Fiat> => {
   try {
     const fiat = await prisma.fiat.findFirst({
-      where: params,
+      where: params as WhereFiat,
     });
 
     if (fiat) {
       return fiat;
     }
 
-    const newFiat = await prisma.fiat.create({ data: params });
+    const newFiat = await prisma.fiat.create({
+      data: params,
+    });
 
     return newFiat;
   } catch (error: any) {
@@ -26,10 +32,24 @@ export const createFiat = async (
   }
 };
 
-export const updateFiat = async (
-  toUpdate: WhereFiatParams,
-  where: WhereFiatParams
-): Promise<Fiat> => {
+export const createManyFiats = async (
+  params: CreateManyFiats[]
+): Promise<BatchPayload> => {
+  try {
+    const newFiats = await prisma.fiat.createMany({
+      data: params,
+    });
+
+    return newFiats;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateFiat = async ({
+  toUpdate,
+  where,
+}: UpdateFiatParams): Promise<Fiat> => {
   const updated = await prisma.fiat.update({
     where,
     data: toUpdate,
@@ -38,15 +58,21 @@ export const updateFiat = async (
   return updated;
 };
 
-export const deleteFiat = async (where: WhereFiatParams) => {
-  const deleted = await prisma.fiat.delete({ where });
+export const deleteFiat = async ({
+  where,
+}: DeleteFiatParams): Promise<Fiat> => {
+  const deleted = await prisma.fiat.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getFiat = async (
-  where: WhereFiatParams
-): Promise<Fiat | null> => {
+export const getFiat = async ({
+  where,
+  select,
+}: GetFiatParams): Promise<Fiat | null> => {
   const fiat = await prisma.fiat.findFirst({
+    ...(select && { select }),
     where,
   });
 
@@ -59,26 +85,32 @@ export const getFiat = async (
 
 export const getFiats = async ({
   limit,
-  orderBy,
   where,
+  select,
 }: GetFiatsParams): Promise<Fiat[]> => {
   const fiats = await prisma.fiat.findMany({
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    take: limit,
-    orderBy: orderBy,
   });
 
   return fiats;
 };
 
-export const getFiatsPagination = async (
-  limit: number,
-  offset: number,
-  where?: WhereFiatParams
-): Promise<Fiat[]> => {
+export const getFiatsPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetFiatsPaginationParams): Promise<Fiat[]> => {
   const fiats = await prisma.fiat.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
   });
 
