@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateLanguage = Prisma.LanguageCreateInput;
+export type CreateLanguage = Prisma.LanguageUpsertArgs;
 
 export type CreateManyLanguages = Prisma.LanguageCreateManyInput;
 

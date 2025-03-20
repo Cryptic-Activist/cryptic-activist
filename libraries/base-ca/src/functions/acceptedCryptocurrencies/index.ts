@@ -5,31 +5,20 @@ import {
 } from '../../services/prisma';
 import {
   CreateAcceptedCryptocurrency,
+  CreateManyAcceptedCryptocurrency,
   DeleteAcceptedCryptocurrencyParams,
   GetAcceptedCryptocurrenciesPaginationParams,
   GetAcceptedCryptocurrenciesParams,
   GetAcceptedCryptocurrencyParams,
   UpdateAcceptedCryptocurrencyParams,
-  WhereAcceptedCryptocurrency,
 } from './types';
 
 export const createAcceptedCryptocurrency = async (
   params: CreateAcceptedCryptocurrency
 ): Promise<AcceptedCryptocurrency> => {
   try {
-    const acceptedCryptocurrency =
-      await prisma.acceptedCryptocurrency.findFirst({
-        where: params,
-      });
-
-    if (acceptedCryptocurrency) {
-      return acceptedCryptocurrency;
-    }
-
     const newAcceptedCryptocurrency =
-      await prisma.acceptedCryptocurrency.create({
-        data: params,
-      });
+      await prisma.acceptedCryptocurrency.upsert(params);
 
     return newAcceptedCryptocurrency;
   } catch (error: any) {
@@ -38,7 +27,7 @@ export const createAcceptedCryptocurrency = async (
 };
 
 export const createManyAcceptedCryptocurrencies = async (
-  params: CreateAcceptedCryptocurrency[]
+  params: CreateManyAcceptedCryptocurrency
 ): Promise<BatchPayload> => {
   try {
     const newAcceptedCryptocurrencies =

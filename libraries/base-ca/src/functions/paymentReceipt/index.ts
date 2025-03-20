@@ -11,24 +11,15 @@ import {
   GetPaymentReceiptsPaginationParams,
   GetPaymentReceiptsParams,
   UpdatePaymentReceiptParams,
-  WherePaymentReceipt,
 } from './types';
 
 export const createPaymentReceipt = async (
   params: CreatePaymentReceipt
 ): Promise<PaymentReceipt> => {
   try {
-    const paymentReceipt = await prisma.paymentReceipt.findFirst({
-      where: params as WherePaymentReceipt,
-    });
-
-    if (paymentReceipt) {
-      return paymentReceipt;
-    }
-
-    const newPaymentReceipt = await prisma.paymentReceipt.create({
-      data: params,
-    });
+    const newPaymentReceipt = await prisma.paymentReceipt.upsert(
+      params
+    );
 
     return newPaymentReceipt;
   } catch (error: any) {

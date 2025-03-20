@@ -7,24 +7,13 @@ import {
   GetAdminsPaginationParams,
   GetAdminsParams,
   UpdateAdminParams,
-  WhereAdmin,
 } from './types';
 
 export const createAdmin = async (
   params: CreateAdmin
 ): Promise<Admin> => {
   try {
-    const admin = await prisma.admin.findFirst({
-      where: params as WhereAdmin,
-    });
-
-    if (admin) {
-      return admin;
-    }
-
-    const newAdmin = await prisma.admin.create({
-      data: params,
-    });
+    const newAdmin = await prisma.admin.upsert(params);
 
     return newAdmin;
   } catch (error: any) {

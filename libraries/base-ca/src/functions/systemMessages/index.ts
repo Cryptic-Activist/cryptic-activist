@@ -11,24 +11,15 @@ import {
   GetSystemMessagesPaginationParams,
   GetSystemMessagesParams,
   UpdateSystemMessageParams,
-  WhereSystemMessage,
 } from './types';
 
 export const createSystemMessage = async (
   params: CreateSystemMessage
 ): Promise<SystemMessage> => {
   try {
-    const systemMessage = await prisma.systemMessage.findFirst({
-      where: params as WhereSystemMessage,
-    });
-
-    if (systemMessage) {
-      return systemMessage;
-    }
-
-    const newSystemMessage = await prisma.systemMessage.create({
-      data: params,
-    });
+    const newSystemMessage = await prisma.systemMessage.upsert(
+      params
+    );
 
     return newSystemMessage;
   } catch (error: any) {

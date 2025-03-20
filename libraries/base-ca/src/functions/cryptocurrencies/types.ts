@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateCryptocurrency = Prisma.CryptocurrencyCreateInput;
+export type CreateCryptocurrency = Prisma.CryptocurrencyUpsertArgs;
 
 export type CreateManyCryptocurrencies =
   Prisma.CryptocurrencyCreateManyInput;

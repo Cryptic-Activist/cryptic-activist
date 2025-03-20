@@ -7,24 +7,13 @@ import {
   GetTradesPaginationParams,
   GetTradesParams,
   UpdateTradeParams,
-  WhereTrade,
 } from './types';
 
 export const createTrade = async (
   params: CreateTrade
 ): Promise<Trade> => {
   try {
-    const trade = await prisma.trade.findFirst({
-      where: params as WhereTrade,
-    });
-
-    if (trade) {
-      return trade;
-    }
-
-    const newTrade = await prisma.trade.create({
-      data: params,
-    });
+    const newTrade = await prisma.trade.upsert(params);
 
     return newTrade;
   } catch (error: any) {

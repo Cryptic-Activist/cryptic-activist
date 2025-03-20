@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateKYC = Prisma.KYCCreateInput;
+export type CreateKYC = Prisma.KYCUpsertArgs;
 
 export type CreateManyKYCs = Prisma.KYCCreateManyInput;
 

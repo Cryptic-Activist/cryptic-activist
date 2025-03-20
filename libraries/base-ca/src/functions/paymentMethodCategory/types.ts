@@ -1,7 +1,7 @@
 import { Prisma } from '@/services/prisma';
 
 export type CreatePaymentMethodCategory =
-  Prisma.PaymentMethodCategoryCreateInput;
+  Prisma.PaymentMethodCategoryUpsertArgs;
 
 export type CreateManyPaymentMethodCategories =
   Prisma.PaymentMethodCategoryCreateManyInput;

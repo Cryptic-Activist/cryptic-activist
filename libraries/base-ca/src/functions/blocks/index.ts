@@ -7,24 +7,13 @@ import {
   GetBlocksPaginationParams,
   GetBlocksParams,
   UpdateBlockParams,
-  WhereBlock,
 } from './types';
 
 export const createBlock = async (
   params: CreateBlock
 ): Promise<Block> => {
   try {
-    const block = await prisma.block.findFirst({
-      where: params as WhereBlock,
-    });
-
-    if (block) {
-      return block;
-    }
-
-    const newBlock = await prisma.block.create({
-      data: params,
-    });
+    const newBlock = await prisma.block.upsert(params);
 
     return newBlock;
   } catch (error: any) {

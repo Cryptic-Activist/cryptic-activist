@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateChat = Prisma.ChatCreateInput;
+export type CreateChat = Prisma.ChatUpsertArgs;
 
 export type CreateManyChats = Prisma.ChatCreateManyInput;
 

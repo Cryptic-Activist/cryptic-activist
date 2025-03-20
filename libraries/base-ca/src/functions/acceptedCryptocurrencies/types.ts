@@ -1,7 +1,10 @@
 import { Prisma } from '@/services/prisma';
 
 export type CreateAcceptedCryptocurrency =
-  Prisma.AcceptedCryptocurrencyCreateInput;
+  Prisma.AcceptedCryptocurrencyUpsertArgs;
+
+export type CreateManyAcceptedCryptocurrency =
+  Prisma.Enumerable<Prisma.AcceptedCryptocurrencyCreateManyInput>;
 
 export type WhereAcceptedCryptocurrency =
   Prisma.AcceptedCryptocurrencyWhereUniqueInput;

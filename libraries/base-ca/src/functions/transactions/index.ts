@@ -11,24 +11,13 @@ import {
   GetTransactionsPaginationParams,
   GetTransactionsParams,
   UpdateTransactionParams,
-  WhereTransaction,
 } from './types';
 
 export const createTransaction = async (
   params: CreateTransaction
 ): Promise<Transaction> => {
   try {
-    const transaction = await prisma.transaction.findFirst({
-      where: params as WhereTransaction,
-    });
-
-    if (transaction) {
-      return transaction;
-    }
-
-    const newTransaction = await prisma.transaction.create({
-      data: params,
-    });
+    const newTransaction = await prisma.transaction.upsert(params);
 
     return newTransaction;
   } catch (error: any) {

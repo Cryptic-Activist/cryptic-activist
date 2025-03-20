@@ -11,24 +11,15 @@ import {
   GetPaymentMethodsPaginationParams,
   GetPaymentMethodsParams,
   UpdatePaymentMethodParams,
-  WherePaymentMethod,
 } from './types';
 
 export const createPaymentMethod = async (
   params: CreatePaymentMethod
 ): Promise<PaymentMethod> => {
   try {
-    const paymentMethod = await prisma.paymentMethod.findFirst({
-      where: params as WherePaymentMethod,
-    });
-
-    if (paymentMethod) {
-      return paymentMethod;
-    }
-
-    const newPaymentMethod = await prisma.paymentMethod.create({
-      data: params,
-    });
+    const newPaymentMethod = await prisma.paymentMethod.upsert(
+      params
+    );
 
     return newPaymentMethod;
   } catch (error: any) {

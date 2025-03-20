@@ -7,31 +7,13 @@ import {
   GetUsersPaginationParams,
   GetUsersParams,
   UpdateUserParams,
-  UserWhereInput,
 } from './types';
-
-import { getUsersParamsRemapping } from '@/utils/remap/user';
 
 export const createUser = async (
   params: CreateUser
 ): Promise<User> => {
   try {
-    const remapped = getUsersParamsRemapping(
-      params as UserWhereInput
-    );
-    console.log({ remapped });
-    const user = await prisma.user.findFirst({
-      where: remapped as UserWhereInput,
-    });
-
-    if (user) {
-      return user;
-    }
-
-    const newUser = await prisma.user.create({
-      data: params,
-    });
-
+    const newUser = await prisma.user.upsert(params);
     return newUser;
   } catch (error: any) {
     throw Error(error);

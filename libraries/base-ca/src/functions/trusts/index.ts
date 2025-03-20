@@ -14,17 +14,7 @@ export const createTrust = async (
   params: CreateTrust
 ): Promise<Trust> => {
   try {
-    const trust = await prisma.trust.findFirst({
-      where: params as WhereTrust,
-    });
-
-    if (trust) {
-      return trust;
-    }
-
-    const newTrust = await prisma.trust.create({
-      data: params,
-    });
+    const newTrust = await prisma.trust.upsert(params);
 
     return newTrust;
   } catch (error: any) {

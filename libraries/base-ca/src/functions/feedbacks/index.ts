@@ -11,24 +11,13 @@ import {
   GetFeedbacksPaginationParams,
   GetFeedbacksParams,
   UpdateFeedbackParams,
-  WhereFeedback,
 } from './types';
 
 export const createFeedback = async (
   params: CreateFeedback
 ): Promise<Feedback> => {
   try {
-    const feedback = await prisma.feedback.findFirst({
-      where: params as WhereFeedback,
-    });
-
-    if (feedback) {
-      return feedback;
-    }
-
-    const newFeedback = await prisma.feedback.create({
-      data: params,
-    });
+    const newFeedback = await prisma.feedback.upsert(params);
 
     return newFeedback;
   } catch (error: any) {

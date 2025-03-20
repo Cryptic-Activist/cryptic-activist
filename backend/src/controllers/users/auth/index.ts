@@ -3,6 +3,7 @@ import {
   associateUserToLanguage,
   countUsers,
   createLanguage,
+  createTier,
   createUser,
   getUser,
   getUsers,
@@ -108,6 +109,12 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
     const user = await getUser({
       where: { id: decoded.userId as string },
       select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        tier: true,
+        profileColor: true,
         userLanguage: true,
       },
     });
@@ -127,6 +134,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
     });
     return;
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -158,20 +166,30 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const generatedSalt = await bcrypt.genSalt(10);
-
     const hash = await bcrypt.hash(password, generatedSalt);
-
     const privateKeysArrObj = await generatePrivateKeysBip39();
-
     const profileColor = getRandomHighContrastColor();
+    const tier = await createTier({
+      name: 'Bronze',
+      description: 'Bronze tier description',
+      discount: 0.01,
+      level: 0,
+      minVolume: 100,
+      tradingFee: 0.05,
+    });
 
     const user = await createUser({
-      firstName: cleanBody.firstName,
-      lastName: cleanBody.lastName,
-      username: cleanBody.username,
-      password: hash,
-      privateKeys: privateKeysArrObj.encryptedPrivateKeys,
-      profileColor,
+      where: { id: '' },
+      update: {},
+      create: {
+        firstName: cleanBody.firstName,
+        lastName: cleanBody.lastName,
+        username: cleanBody.username,
+        password: hash,
+        privateKeys: privateKeysArrObj.encryptedPrivateKeys,
+        profileColor,
+        tierId: tier.id,
+      },
     });
 
     const language = await createLanguage({ name: 'English' });

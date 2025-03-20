@@ -7,22 +7,11 @@ import {
   GetKYCsPaginationParams,
   GetKYCsParams,
   UpdateKYCParams,
-  WhereKYC,
 } from './types';
 
 export const createKYC = async (params: CreateKYC): Promise<KYC> => {
   try {
-    const kYC = await prisma.kYC.findFirst({
-      where: params as WhereKYC,
-    });
-
-    if (kYC) {
-      return kYC;
-    }
-
-    const newKYC = await prisma.kYC.create({
-      data: params,
-    });
+    const newKYC = await prisma.kYC.upsert(params);
 
     return newKYC;
   } catch (error: any) {

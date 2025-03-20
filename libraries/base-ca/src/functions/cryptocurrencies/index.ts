@@ -11,24 +11,15 @@ import {
   GetCryptocurrenciesParams,
   GetCryptocurrencyParams,
   UpdateCryptocurrencyParams,
-  WhereCryptocurrency,
 } from './types';
 
 export const createCryptocurrency = async (
   params: CreateCryptocurrency
 ): Promise<Cryptocurrency> => {
   try {
-    const cryptocurrency = await prisma.cryptocurrency.findFirst({
-      where: params as WhereCryptocurrency,
-    });
-
-    if (cryptocurrency) {
-      return cryptocurrency;
-    }
-
-    const newCryptocurrency = await prisma.cryptocurrency.create({
-      data: params,
-    });
+    const newCryptocurrency = await prisma.cryptocurrency.upsert(
+      params
+    );
 
     return newCryptocurrency;
   } catch (error: any) {

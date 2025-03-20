@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateTier = Prisma.TierCreateInput;
+export type CreateTier = Prisma.TierUpsertArgs;
 
 export type CreateManyTiers = Prisma.TierCreateManyInput;
 

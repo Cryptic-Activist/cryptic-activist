@@ -11,24 +11,13 @@ import {
   GetLanguagesPaginationParams,
   GetLanguagesParams,
   UpdateLanguageParams,
-  WhereLanguage,
 } from './types';
 
 export const createLanguage = async (
   params: CreateLanguage
 ): Promise<Language> => {
   try {
-    const language = await prisma.language.findFirst({
-      where: params as WhereLanguage,
-    });
-
-    if (language) {
-      return language;
-    }
-
-    const newLanguage = await prisma.language.create({
-      data: params,
-    });
+    const newLanguage = await prisma.language.upsert(params);
 
     return newLanguage;
   } catch (error: any) {

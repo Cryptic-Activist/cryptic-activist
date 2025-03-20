@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateFiat = Prisma.FiatCreateInput;
+export type CreateFiat = Prisma.FiatUpsertArgs;
 
 export type CreateManyFiats = Prisma.FiatCreateManyInput;
 

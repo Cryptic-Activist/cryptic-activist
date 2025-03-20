@@ -7,24 +7,13 @@ import {
   GetTiersPaginationParams,
   GetTiersParams,
   UpdateTierParams,
-  WhereTier,
 } from './types';
 
 export const createTier = async (
   params: CreateTier
 ): Promise<Tier> => {
   try {
-    const tier = await prisma.tier.findFirst({
-      where: params as WhereTier,
-    });
-
-    if (tier) {
-      return tier;
-    }
-
-    const newTier = await prisma.tier.create({
-      data: params,
-    });
+    const newTier = await prisma.tier.upsert(params);
 
     return newTier;
   } catch (error: any) {

@@ -7,24 +7,13 @@ import {
   GetChatsPaginationParams,
   GetChatsParams,
   UpdateChatParams,
-  WhereChat,
 } from './types';
 
 export const createChat = async (
   params: CreateChat
 ): Promise<Chat> => {
   try {
-    const chat = await prisma.chat.findFirst({
-      where: params as WhereChat,
-    });
-
-    if (chat) {
-      return chat;
-    }
-
-    const newChat = await prisma.chat.create({
-      data: params,
-    });
+    const newChat = await prisma.chat.upsert(params);
 
     return newChat;
   } catch (error: any) {
