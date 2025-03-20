@@ -12,6 +12,7 @@ import { toCapitalize, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar } from '@/hooks';
 
 import Image from 'next/image';
+import countryFlags from '@/hooks/useFiats/countryFlags';
 import styles from './index.module.scss';
 
 const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
@@ -23,11 +24,7 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
   const { toggleModal } = useNavigationBar();
   const { defaults } = app;
 
-  const buildFiatLabel: BuildLabel = (symbol, name) => {
-    return `${toUpperCase(symbol)} - ${toCapitalize(name)}`;
-  };
-
-  const buildCryptocurrencyLabel: BuildCryptocurrencyLabel = (image, name) => {
+  const buildLabel: BuildCryptocurrencyLabel = (image, name) => {
     return (
       <div className={styles.labelContent}>
         <Image
@@ -43,13 +40,23 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
   };
 
   const getButtonLabel = () => {
-    const localLabel =
-      type === 'cryptocurrency'
-        ? buildCryptocurrencyLabel(
-            defaults.cryptocurrency?.image!,
-            defaults.cryptocurrency?.name!
-          )
-        : buildFiatLabel(defaults.fiat?.symbol!, defaults.fiat?.name!);
+    let localLabel;
+
+    switch (type) {
+      case 'cryptocurrency': {
+        localLabel = buildLabel(
+          defaults.cryptocurrency?.image!,
+          defaults.cryptocurrency?.name!
+        );
+        break;
+      }
+      case 'fiat': {
+        localLabel = buildLabel(
+          countryFlags[defaults.fiat?.country!],
+          defaults.fiat?.name!
+        );
+      }
+    }
 
     setLabel(localLabel);
   };

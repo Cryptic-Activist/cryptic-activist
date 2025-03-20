@@ -146,6 +146,7 @@ CREATE TABLE "offers" (
     "tags" TEXT[],
     "label" TEXT NOT NULL,
     "terms" TEXT NOT NULL,
+    "averageTradeSpeed" DOUBLE PRECISION,
     "instructions" TEXT NOT NULL,
     "deletedAt" DATE,
     "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,

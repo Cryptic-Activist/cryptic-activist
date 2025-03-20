@@ -19,10 +19,9 @@ import {
 } from 'cryptic-utils';
 
 import { JWT_SECRET } from '@/constants/env';
-import { assignSafeUserData } from '@/utils/responses/users';
 import bcrypt from 'bcryptjs';
+import { debug } from '@/utils/logger/logger';
 import { getRandomHighContrastColor } from '@/utils/color';
-import { validateUsername } from '@/utils/validators/';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -113,9 +112,24 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         firstName: true,
         lastName: true,
         username: true,
-        tier: true,
+        tier: {
+          select: {
+            id: true,
+            name: true,
+            level: true,
+          },
+        },
         profileColor: true,
-        userLanguage: true,
+        userLanguage: {
+          select: {
+            language: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -126,15 +140,35 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       return;
     }
 
-    // @ts-ignore
-    const safeUser = await assignSafeUserData(user);
+    const lastLoginAt = new Date();
+
+    await updateUser({
+      where: {
+        id: user.id,
+      },
+      toUpdate: {
+        lastLoginAt,
+      },
+    });
+
+    const {
+      firstName: _firstName,
+      lastName: _lastName,
+      lastLoginAt: _lastLoginAt,
+      ...rest
+    } = user;
 
     res.status(200).send({
-      ...safeUser,
+      names: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      lastLoginAt,
+      ...rest,
     });
     return;
   } catch (err) {
-    console.log({ err });
+    debug(err);
     res.status(500).send({
       errors: [err.message],
     });
@@ -146,20 +180,6 @@ export const register = async (req: Request, res: Response) => {
   const { names, username, password } = req.body;
 
   try {
-    const errors: string[] = [];
-    const cleanBody = sanitize({ ...names, username }, []);
-    const usernameValidation = await validateUsername(cleanBody.username);
-
-    if (!usernameValidation.valid) {
-      cleanBody.username = generateUniqueUsername(cleanBody.username);
-    }
-
-    if (errors.length > 0) {
-      res.status(400).send({
-        errors,
-      });
-    }
-
     const generatedSalt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, generatedSalt);
     const privateKeysArrObj = await generatePrivateKeysBip39();
@@ -183,9 +203,9 @@ export const register = async (req: Request, res: Response) => {
       where: { id: '' },
       update: {},
       create: {
-        firstName: cleanBody.firstName,
-        lastName: cleanBody.lastName,
-        username: cleanBody.username,
+        firstName: names.firstName,
+        lastName: names.lastName,
+        username: username,
         password: hash,
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,

@@ -7,7 +7,6 @@ import {
 } from 'cryptic-utils';
 import { getAdmin, getAdmins } from 'base-ca';
 
-import { assignSafeAdminData } from '@/utils/responses/users';
 import { mapAdmins } from '@/utils/map/admins';
 
 const validateCredentials = async (username: string) => {
@@ -132,19 +131,16 @@ export const getAdminById = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const user = await getAdmin({ where: { id: userId } });
+    const admin = await getAdmin({ where: { id: userId } });
 
-    if (!user) {
+    if (!admin) {
       res.status(404).send({
         errors: ['Admin not found'],
       });
     }
 
-    // @ts-ignore
-    const safeAdmin = await assignSafeAdminData(user);
-
     res.status(200).send({
-      ...safeAdmin,
+      ...admin,
     });
   } catch (err) {
     res.status(500).send({
@@ -158,19 +154,16 @@ export const getAdminByAdminname = async (req: Request, res: Response) => {
     const { params } = req;
     const { username } = params;
 
-    const user = await getAdmin({ where: { username } });
+    const admin = await getAdmin({ where: { username } });
 
-    if (!user) {
+    if (!admin) {
       res.status(404).send({
         errors: ['Admin not found'],
       });
     }
 
-    // @ts-ignore
-    const safeAdmin = await assignSafeAdminData(user);
-
     res.status(200).send({
-      ...safeAdmin,
+      ...admin,
     });
   } catch (err) {
     res.status(500).send({

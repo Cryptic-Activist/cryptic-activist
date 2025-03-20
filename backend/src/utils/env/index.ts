@@ -1,4 +1,4 @@
-import { warning } from '@utils/logger/logger';
+import { warning } from '@/utils/logger/logger';
 
 export function checkEnvironmentVariable(): void {
   const missingEnvs: string[] = [];

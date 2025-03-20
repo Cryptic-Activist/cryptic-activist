@@ -26,7 +26,7 @@ const fetchCreatePaymentMethodCategory = async (
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchListPaymentMethodCategories = async () => {
@@ -38,7 +38,7 @@ const fetchListPaymentMethodCategories = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const setter = (

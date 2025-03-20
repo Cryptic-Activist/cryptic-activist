@@ -11,6 +11,9 @@ type Vendor = {
   lastName: string;
   username: string;
   profileColor: string;
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Offer = {
@@ -29,6 +32,7 @@ export type Offer = {
   limitMin: number;
   limitMax: number;
   timeLimit: number;
+  averageTradeSpeed: number;
   tags: string[];
   label: string;
   terms: string;
@@ -75,6 +79,7 @@ export type OffersSetter = {
     limitMin: number;
     limitMax: number;
     timeLimit: number;
+    averageTradeSpeed: number;
     tags: string[];
     label: string;
     terms: string;

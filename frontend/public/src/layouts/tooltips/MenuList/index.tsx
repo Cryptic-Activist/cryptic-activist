@@ -8,7 +8,7 @@ import { useRootStore } from '@/store';
 
 const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   const { logout } = useUser();
-  const { toggleDrawer } = useNavigationBar();
+  const { toggleTooltip } = useNavigationBar();
   const { onDisconnectWallet } = useBlockchain();
   const {
     navigationBar: { resetNavigationBar },
@@ -23,7 +23,7 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   return (
     <ul className={styles.container} ref={ref}>
       {items.map(({ label, href }, index) => (
-        <li key={index} onClick={() => toggleDrawer('user')}>
+        <li key={index} onClick={() => toggleTooltip('user')}>
           <Link href={href}>{label}</Link>
         </li>
       ))}

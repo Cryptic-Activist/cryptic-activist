@@ -18,7 +18,7 @@ const fetchCreateUser = async (data: CreateUserParams) => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchListUsers = async () => {
@@ -28,7 +28,7 @@ const fetchListUsers = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const setter = (

@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { FaClone } from 'react-icons/fa';
+import React, { useLayoutEffect } from 'react';
+import { usePrivateKeys, useRegister } from '@/hooks';
 
 import { Button } from '@/components';
+import { FaClone } from 'react-icons/fa';
 import { IMPORTANT_ACTIONS } from '@/constants/layouts';
-import { usePrivateKeys, useRegister } from '@/hooks';
 import { Template } from '@/layouts/modals';
-
 import styles from './index.module.scss';
 
 const PrivateKeys = () => {

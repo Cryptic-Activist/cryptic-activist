@@ -25,7 +25,7 @@ const fetchCreateCryptocurrency = async (data: CreateCryptocurrencyParams) => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchListCryptocurrencies = async () => {
@@ -35,7 +35,7 @@ const fetchListCryptocurrencies = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchCreateAllCryptocurrencies = async () => {
@@ -57,7 +57,7 @@ const fetchCreateAllCryptocurrencies = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const setter = (

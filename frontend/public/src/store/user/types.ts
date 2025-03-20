@@ -5,14 +5,17 @@ type Language = {
   name: string;
 };
 
+type Names = {
+  firstName?: string;
+  lastName?: string;
+};
+
 export type User = {
   id?: string;
-  names?: {
-    firstName?: string;
-    lastName?: string;
-  };
+  names?: Names;
   username?: string;
   profileColor?: string;
+  lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];
@@ -30,12 +33,10 @@ export type UserStore = {
 
 export type UserSetter = {
   id?: string;
-  names?: {
-    firstName?: string;
-    lastName?: string;
-  };
+  names?: Names;
   username?: string;
   profileColor?: string;
+  lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];

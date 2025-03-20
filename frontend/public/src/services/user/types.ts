@@ -24,4 +24,5 @@ export type GetUserInfoReturn = {
   createdAt: string;
   updatedAt: string;
   languages: Language[];
+  lastLoginAt: string;
 };

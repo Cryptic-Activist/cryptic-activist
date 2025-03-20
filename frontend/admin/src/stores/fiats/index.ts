@@ -18,7 +18,7 @@ const fetchCreateFiat = async (data: CreateFiatParams) => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchListFiats = async () => {
@@ -28,7 +28,7 @@ const fetchListFiats = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchCreateAllFiats = async () => {
@@ -38,7 +38,7 @@ const fetchCreateAllFiats = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const setter = (
