@@ -87,7 +87,7 @@ export const getCryptocurrencies = async ({
   const cryptocurrencies = await prisma.cryptocurrency.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
-    where,
+    ...(where && { where }),
   });
 
   return cryptocurrencies;

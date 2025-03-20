@@ -7,7 +7,6 @@ import {
 } from 'cryptic-utils';
 import { getTrades, getUser, getUsers } from 'base-ca';
 
-import { assignSafeUserData } from '@/utils/responses/users';
 import { mapUsers } from '@/utils/map/users';
 
 const validateCredentials = async (username: string) => {
@@ -118,53 +117,6 @@ export async function getUsersController(req: Request, res: Response) {
   }
 }
 
-// export async function getMultipleUsersController(req: Request, res: Response) {
-//   try {
-//     const { query } = req;
-//     const { user } = query;
-
-//     const users = await getUsersByMultiple(
-//       { offers: true, userLanguage: true },
-//       {
-//         OR: [
-//           {
-//             username: {
-//               contains: user as string,
-//               mode: 'insensitive',
-//             },
-//           },
-//           {
-//             firstName: {
-//               contains: user as string,
-//               mode: 'insensitive',
-//             },
-//           },
-//           {
-//             lastName: {
-//               contains: user as string,
-//               mode: 'insensitive',
-//             },
-//           },
-//         ],
-//       },
-//     );
-
-//     if (!users) {
-//       res.status(400).send({
-//         errors: ['Users not found'],
-//       });
-//     }
-
-//     res.status(200).send({
-//       ...users,
-//     });
-//   } catch (err) {
-//     res.status(500).send({
-//       errors: [err.message],
-//     });
-//   }
-// }
-
 export async function getUserVerify(req: Request, res: Response) {
   try {
     const { id, username } = req.query;
@@ -190,7 +142,7 @@ export async function getUserVerify(req: Request, res: Response) {
     }
 
     res.status(200).send({
-      names: { first_name: user?.firstName, last_name: user?.lastName },
+      names: { firstName: user?.firstName, lastName: user?.lastName },
       username: user?.username,
     });
   } catch (err) {
@@ -216,11 +168,8 @@ export const getUserById = async (req: Request, res: Response) => {
       });
     }
 
-    // @ts-ignore
-    const safeUser = await assignSafeUserData(user);
-
     res.status(200).send({
-      ...safeUser,
+      ...user,
     });
   } catch (err) {
     res.status(500).send({
@@ -252,22 +201,9 @@ export const getUserByUsername = async (req: Request, res: Response) => {
       });
     }
 
-    const trades = await getTrades(
-      {
-        chat: false,
-        cryptocurrency: false,
-        fiat: false,
-        offer: false,
-        trader: false,
-        vendor: false,
-      },
-      { vendorId: user?.id },
-    );
+    const trades = await getTrades({ where: { vendorId: user?.id } });
 
-    // @ts-ignore
-    const safeUser = await assignSafeUserData(user);
-
-    res.status(200).send({ ...safeUser, tradesCount: trades.length });
+    res.status(200).send({ ...user, tradesCount: trades.length });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

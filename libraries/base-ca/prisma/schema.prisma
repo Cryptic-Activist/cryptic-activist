@@ -152,30 +152,31 @@ model Language {
 }
 
 model Offer {
-  id               String         @id @default(uuid())
-  offerType        String
-  pricingType      String
-  listAt           Float
-  limitMin         Float
-  limitMax         Float
-  timeLimit        Float
-  tags             String[]
-  label            String
-  terms            String
-  instructions     String
-  deletedAt        DateTime?      @db.Date
-  createdAt        DateTime?      @default(now()) @db.Date
-  updatedAt        DateTime?      @updatedAt @db.Date
-  vendor           User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
-  vendorId         String
-  cryptocurrency   Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cryptocurrencyId String
-  paymentMethod    PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  paymentMethodId  String
-  fiat             Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fiatId           String
-  feedbacks        Feedback[]     @relation("feedbackOffer")
-  trades           Trade[]        @relation("tradeOffer")
+  id                String         @id @default(uuid())
+  offerType         String
+  pricingType       String
+  listAt            Float
+  limitMin          Float
+  limitMax          Float
+  timeLimit         Float
+  tags              String[]
+  label             String
+  terms             String
+  averageTradeSpeed Float?
+  instructions      String
+  deletedAt         DateTime?      @db.Date
+  createdAt         DateTime?      @default(now()) @db.Date
+  updatedAt         DateTime?      @updatedAt @db.Date
+  vendor            User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
+  vendorId          String
+  cryptocurrency    Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cryptocurrencyId  String
+  paymentMethod     PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethodId   String
+  fiat              Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fiatId            String
+  feedbacks         Feedback[]     @relation("feedbackOffer")
+  trades            Trade[]        @relation("tradeOffer")
 
   @@map("offers")
 }

@@ -10,7 +10,7 @@ import {
   FaSpinner,
 } from 'react-icons/fa6';
 import type { ItemProps, ListProps, RatesProps } from './types';
-import { getInitials, toCapitalize } from '@/utils';
+import { getInitials, timeSince, toCapitalize } from '@/utils';
 
 import { FC } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -85,7 +85,7 @@ const Item: FC<ItemProps> = ({ offer, currentPrice, type }) => {
           </div>
           <div className={styles.status}>
             <FaCircle size={10} />
-            <span>41 minutes ago</span>
+            <span>{timeSince(offer.vendor.lastLoginAt)}</span>
           </div>
         </div>
       </div>
@@ -101,7 +101,11 @@ const Item: FC<ItemProps> = ({ offer, currentPrice, type }) => {
         </ul>
       </div>
       <div className={styles.avgTradeSpeed}>
-        <p className={styles.speed}>Under a minute</p>
+        <p className={styles.speed}>
+          {offer.averageTradeSpeed
+            ? offer.averageTradeSpeed
+            : 'No estimates yet'}
+        </p>
       </div>
       <div className={styles.rates}>
         <Rates offer={offer} currentPrice={currentPrice} />

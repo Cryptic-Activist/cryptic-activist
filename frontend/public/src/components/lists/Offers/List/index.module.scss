@@ -56,6 +56,8 @@
 .vendorAvatar {
   width: 3.5rem;
   height: 3.5rem;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
   border-radius: 0.4em;
   color: globals.$white;
   display: flex;
@@ -113,7 +115,7 @@
     color: globals.$status-offline;
   }
   span {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 }
 

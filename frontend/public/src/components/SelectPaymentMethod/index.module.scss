@@ -63,11 +63,26 @@
   }
 }
 
+.categoriesList,
+.paymentMethodsList {
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
+}
+
 .categoriesList {
   border-right: 1px solid globals.$border-color-dark;
+  overflow-y: scroll;
 }
 
 .paymentMethodsList {
+  overflow-y: scroll;
 }
 
 .selected {

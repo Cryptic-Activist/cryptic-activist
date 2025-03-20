@@ -44,7 +44,7 @@ const getToken = async (
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const getAdminInfoFromToken = async (
@@ -59,7 +59,7 @@ const getAdminInfoFromToken = async (
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const loginAdmin = async (adminData: LoginAdminParams) => {

@@ -21,7 +21,7 @@ const fetchCreatePaymentMethod = async (data: CreatePaymentMethodParams) => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const fetchListPaymentMethod = async () => {
@@ -31,7 +31,7 @@ const fetchListPaymentMethod = async () => {
 		return null;
 	}
 
-	return response.data.results;
+	return response.data;
 };
 
 const setter = (

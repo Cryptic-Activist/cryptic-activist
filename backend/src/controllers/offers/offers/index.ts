@@ -118,6 +118,7 @@ export const getOffersPaginationController = async (
             lastName: true,
             username: true,
             profileColor: true,
+            lastLoginAt: true,
             id: true,
           },
         },

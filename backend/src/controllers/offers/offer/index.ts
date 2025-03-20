@@ -42,6 +42,7 @@ export const getOfferController = async (req: Request, res: Response) => {
         instructions: true,
         createdAt: true,
         updatedAt: true,
+        averageTradeSpeed: true,
         vendor: {
           select: {
             id: true,

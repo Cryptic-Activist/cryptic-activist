@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { createTrade, getTrade, updateTrade } from 'base-ca';
 
-import { sanitizeInputGetTrade } from '@/utils/sanitizer/trade';
-
 export async function index(req: Request, res: Response) {
   try {
   } catch (err) {
@@ -34,10 +32,8 @@ export async function cancelTrade(req: Request, res: Response) {
   try {
     const { id } = req.body;
 
-    const cleanReqBody = sanitizeInputGetTrade({ id });
-
     const trade = await updateTrade({
-      where: { id: cleanReqBody.id },
+      where: { id: id },
       toUpdate: { status: 'CANCELLED', endedAt: new Date() },
     });
 
@@ -53,10 +49,8 @@ export async function setPaidTrade(req: Request, res: Response) {
   try {
     const { id } = req.body;
 
-    const cleanReqBody = sanitizeInputGetTrade({ id });
-
     const trade = await updateTrade({
-      where: { id: cleanReqBody.id },
+      where: { id },
       toUpdate: { status: 'CANCELLED', endedAt: new Date() },
     });
 

@@ -9,7 +9,6 @@ export const fetchOffersPagination = async ({
   cursor,
   ...rest
 }: FetchOffersParams) => {
-  console.log({ rest });
   const params = new URLSearchParams({ limit: limit.toString(), ...rest });
   if (cursor) {
     params.set('cursor', cursor);
