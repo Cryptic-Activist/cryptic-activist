@@ -116,3 +116,8 @@ export const getBlocksPagination = async ({
 
   return blocks;
 };
+
+export const countBlocks = async () => {
+  const count = await prisma.block.count();
+  return count;
+};

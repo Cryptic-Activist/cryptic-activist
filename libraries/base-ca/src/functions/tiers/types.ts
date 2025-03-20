@@ -24,6 +24,7 @@ export type GetTiersParams = {
   where?: Prisma.TierWhereInput;
   limit?: number;
   select?: Prisma.TierSelect;
+  orderBy?: Prisma.TierOrderByWithAggregationInput;
 };
 
 export type GetTiersPaginationParams = {

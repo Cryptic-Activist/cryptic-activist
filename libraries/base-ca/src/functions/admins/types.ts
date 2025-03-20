@@ -24,6 +24,7 @@ export type GetAdminsParams = {
   where?: Prisma.AdminWhereInput;
   limit?: number;
   select?: Prisma.AdminSelect;
+  orderBy?: Prisma.AdminOrderByWithAggregationInput;
 };
 
 export type GetAdminsPaginationParams = {

@@ -83,6 +83,7 @@ export const createCryptocurrencyCoinGecko = async (
       name: response.data.name,
       symbol: response.data.symbol.toUpperCase(),
       coingeckoId: response.data.id,
+      image: response.data.image,
     });
 
     if (!newCrypto) {

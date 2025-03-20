@@ -1,6 +1,5 @@
 import {
   getAllUsers,
-  getMultipleUsersController,
   getRandomCredentials,
   getUserById,
   getUserByUsername,
@@ -8,12 +7,9 @@ import {
   getUserVerify,
   getUsersController,
 } from '@/controllers/users';
-import {
-  validateGetMultipleUserRequest,
-  validateGetUserRequest,
-} from './middleware';
 
 import { Router } from 'express';
+import { validateGetUserRequest } from './middleware';
 
 const router = Router();
 
@@ -28,12 +24,6 @@ router.get('/random/credentials', getRandomCredentials);
 router.get('/get', validateGetUserRequest, getUserController);
 
 router.get('/get/users', validateGetUserRequest, getUsersController);
-
-router.get(
-  '/get/multiple/users',
-  validateGetMultipleUserRequest,
-  getMultipleUsersController,
-);
 
 router.get('/get/verify', validateGetUserRequest, getUserVerify);
 

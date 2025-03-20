@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { connect } from 'http2';
 import { createFeedback as createFeedbackBaseCa } from 'base-ca';
 import { sanitize } from 'cryptic-utils';
 
@@ -18,11 +19,12 @@ export const createFeedback = async (req: Request, res: Response) => {
   );
 
   try {
-    // @ts-ignore
     const feedback = await createFeedbackBaseCa({
-      vendorId: cleanReqBody.vendor_id,
-      userId: cleanReqBody.user_id,
-      offerId: cleanReqBody.offer_id,
+      vendor: {
+        connect: cleanReqBody.vendor_id,
+      },
+      trader: { connect: cleanReqBody.user_id },
+      offer: { connect: cleanReqBody.offer_id },
       message: cleanReqBody.message,
       type: cleanReqBody.type,
     });

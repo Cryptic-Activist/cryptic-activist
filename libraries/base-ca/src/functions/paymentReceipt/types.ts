@@ -26,6 +26,7 @@ export type GetPaymentReceiptsParams = {
   where?: Prisma.PaymentReceiptWhereInput;
   limit?: number;
   select?: Prisma.PaymentReceiptSelect;
+  orderBy?: Prisma.PaymentReceiptOrderByWithAggregationInput;
 };
 
 export type GetPaymentReceiptsPaginationParams = {

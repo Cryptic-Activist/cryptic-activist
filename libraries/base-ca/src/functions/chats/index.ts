@@ -116,3 +116,8 @@ export const getChatsPagination = async ({
 
   return chats;
 };
+
+export const countChats = async () => {
+  const count = await prisma.chat.count();
+  return count;
+};

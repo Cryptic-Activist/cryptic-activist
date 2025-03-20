@@ -120,3 +120,8 @@ export const getLanguagesPagination = async ({
 
   return languages;
 };
+
+export const countLanguages = async () => {
+  const count = await prisma.language.count();
+  return count;
+};

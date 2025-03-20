@@ -24,6 +24,7 @@ export type GetLanguagesParams = {
   where?: Prisma.LanguageWhereInput;
   limit?: number;
   select?: Prisma.LanguageSelect;
+  orderBy?: Prisma.LanguageOrderByWithAggregationInput;
 };
 
 export type GetLanguagesPaginationParams = {

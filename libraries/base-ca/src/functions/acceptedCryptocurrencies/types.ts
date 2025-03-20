@@ -24,6 +24,7 @@ export type GetAcceptedCryptocurrenciesParams = {
   where?: Prisma.AcceptedCryptocurrencyWhereInput;
   limit?: number;
   select?: Prisma.AcceptedCryptocurrencySelect;
+  orderBy?: Prisma.AcceptedCryptocurrencyOrderByWithAggregationInput;
 };
 
 export type GetAcceptedCryptocurrenciesPaginationParams = {

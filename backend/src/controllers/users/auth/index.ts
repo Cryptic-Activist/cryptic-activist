@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import {
   associateUserToLanguage,
+  countUsers,
   createLanguage,
   createUser,
   getUser,
+  getUsers,
   updateUser,
 } from 'base-ca';
 import {
@@ -27,7 +29,11 @@ export const login = async (req: Request, res: Response) => {
   try {
     const errors: string[] = [];
 
-    const user = await getUser({ username }, {});
+    const user = await getUser({
+      where: {
+        username,
+      },
+    });
 
     if (!user) {
       errors.push('User not found');
@@ -99,10 +105,12 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await getUser(
-      { id: decoded.userId as string },
-      { userLanguage: true },
-    );
+    const user = await getUser({
+      where: { id: decoded.userId as string },
+      select: {
+        userLanguage: true,
+      },
+    });
 
     if (!user) {
       res.status(404).send({
@@ -130,6 +138,9 @@ export const register = async (req: Request, res: Response) => {
   const { names, username, password } = req.body;
 
   try {
+    const test = await countUsers();
+    console.log({ test });
+
     const errors: string[] = [];
 
     const cleanBody = sanitize({ ...names, username }, []);
@@ -172,6 +183,7 @@ export const register = async (req: Request, res: Response) => {
     });
     return;
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -183,7 +195,7 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
   const { username, privateKeys } = req.body;
 
   try {
-    const user = await getUser({ username }, {});
+    const user = await getUser({ where: username });
 
     if (!user) {
       res.status(400).send({
@@ -208,7 +220,12 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
       }
     });
 
-    await updateUser({ id: user?.id }, { isVerified: true });
+    await updateUser({
+      where: { id: user?.id },
+      toUpdate: {
+        isVerified: true,
+      },
+    });
 
     res.status(200).send({});
     return;

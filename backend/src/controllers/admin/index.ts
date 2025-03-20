@@ -11,7 +11,7 @@ import { assignSafeAdminData } from '@/utils/responses/users';
 import { mapAdmins } from '@/utils/map/admins';
 
 const validateCredentials = async (username: string) => {
-  const user = await getAdmin({ username });
+  const user = await getAdmin({ where: { username } });
 
   if (!user) {
     return true;
@@ -43,7 +43,7 @@ export const getRandomCredentials = async (_req: Request, res: Response) => {
 
 export const getAllAdmins = async (_req: Request, res: Response) => {
   try {
-    const admins = await getAdmins();
+    const admins = await getAdmins({});
 
     const mapped = mapAdmins(admins);
 
@@ -57,7 +57,7 @@ export const getAllAdmins = async (_req: Request, res: Response) => {
   }
 };
 
-export const getAdminController = (req: Request, res: Response) => {
+export const getAdminController = async (req: Request, res: Response) => {
   try {
     // const { associations } = req.query;
     const { associations } = req.query;
@@ -74,8 +74,7 @@ export const getAdminController = (req: Request, res: Response) => {
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    // @ts-ignore
-    const user = await getAdmin({ ...where }, cleanReqQuery.associations);
+    const user = await getAdmin({ where });
 
     if (!user) {
       res.status(400).send({
@@ -133,7 +132,7 @@ export const getAdminById = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const user = await getAdmin({ id: userId });
+    const user = await getAdmin({ where: { id: userId } });
 
     if (!user) {
       res.status(404).send({
@@ -159,7 +158,7 @@ export const getAdminByAdminname = async (req: Request, res: Response) => {
     const { params } = req;
     const { username } = params;
 
-    const user = await getAdmin({ username });
+    const user = await getAdmin({ where: { username } });
 
     if (!user) {
       res.status(404).send({

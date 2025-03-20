@@ -24,6 +24,7 @@ export type GetFeedbacksParams = {
   where?: Prisma.FeedbackWhereInput;
   limit?: number;
   select?: Prisma.FeedbackSelect;
+  orderBy?: Prisma.FeedbackOrderByWithAggregationInput;
 };
 
 export type GetFeedbacksPaginationParams = {

@@ -114,3 +114,8 @@ export const getKYCsPagination = async ({
 
   return kycs;
 };
+
+export const countKYCs = async () => {
+  const count = await prisma.kYC.count();
+  return count;
+};

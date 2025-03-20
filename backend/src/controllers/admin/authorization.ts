@@ -25,7 +25,7 @@ export const authorize = async (req: Request, res: Response) => {
 
     const decoded = decodeToken(authorizationArr![1], JWT_SECRET);
 
-    const admin = await getAdmin({ id: decoded.id });
+    const admin = await getAdmin({ where: { id: decoded.id } });
 
     if (!admin) {
       res.status(401).send({

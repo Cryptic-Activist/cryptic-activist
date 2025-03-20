@@ -24,6 +24,7 @@ export type GetOffersParams = {
   where?: Prisma.OfferWhereInput;
   limit?: number;
   select?: Prisma.OfferSelect;
+  orderBy?: Prisma.OfferOrderByWithAggregationInput;
 };
 
 export type GetOffersPaginationParams = {

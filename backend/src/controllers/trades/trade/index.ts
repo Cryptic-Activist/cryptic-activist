@@ -20,15 +20,9 @@ export async function createTradeController(req: Request, res: Response) {
 
     const newTrade = await createTrade(body);
 
-    res.status(200).send({
-      status_code: 200,
-      results: newTrade,
-      errors: [],
-    });
+    res.status(200).send(newTrade);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -40,22 +34,14 @@ export async function cancelTrade(req: Request, res: Response) {
 
     const cleanReqBody = sanitizeInputGetTrade({ id });
 
-    // @ts-ignore
-    const trade = await updateTrade(
-      // @ts-ignore
-      { id: cleanReqBody.id },
-      { state: 'canceled', endedAt: new Date() },
-    );
-
-    res.status(200).send({
-      status_code: 200,
-      results: trade,
-      errors: [],
+    const trade = await updateTrade({
+      where: { id: cleanReqBody.id },
+      toUpdate: { status: 'CANCELLED', endedAt: new Date() },
     });
+
+    res.status(200).send(trade);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -67,22 +53,14 @@ export async function setPaidTrade(req: Request, res: Response) {
 
     const cleanReqBody = sanitizeInputGetTrade({ id });
 
-    // @ts-ignore
-    const trade = await updateTrade(
-      // @ts-ignore
-      { id: cleanReqBody.id },
-      { state: 'canceled', endedAt: new Date() },
-    );
-
-    res.status(200).send({
-      status_code: 200,
-      results: trade,
-      errors: [],
+    const trade = await updateTrade({
+      where: { id: cleanReqBody.id },
+      toUpdate: { status: 'CANCELLED', endedAt: new Date() },
     });
+
+    res.status(200).send(trade);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -93,9 +71,9 @@ export async function getTradeController(req: Request, res: Response) {
     const { params } = req;
     const { id } = params;
 
-    const trade = await getTrade(
-      { id },
-      {
+    const trade = await getTrade({
+      where: { id },
+      select: {
         chat: true,
         cryptocurrency: true,
         fiat: true,
@@ -103,27 +81,17 @@ export async function getTradeController(req: Request, res: Response) {
         trader: true,
         vendor: true,
       },
-    );
+    });
 
     if (!trade) {
-      res.status(204).send({
-        status_code: 204,
-        results: {},
-        errors: [],
-      });
+      res.status(204).send();
     }
 
     // const safeTrade = safeTradeValuesAssigner(trade);
 
-    res.status(200).send({
-      status_code: 200,
-      results: trade,
-      errors: [],
-    });
+    res.status(200).send(trade);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

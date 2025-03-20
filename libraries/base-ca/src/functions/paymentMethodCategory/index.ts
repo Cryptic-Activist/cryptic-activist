@@ -130,3 +130,8 @@ export const getPaymentMethodCategoriesPagination = async ({
 
   return paymentMethodCategories;
 };
+
+export const countPaymentMethodCategories = async () => {
+  const count = await prisma.paymentMethodCategory.count();
+  return count;
+};

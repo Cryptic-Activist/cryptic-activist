@@ -11,9 +11,7 @@ export async function getPaymentMethods(req: Request, res: Response) {
     const { associations } = req.query;
 
     const paymentMethods = await getPaymentMethodsCB({
-      offers: false,
-      paymentMethodCategory: false,
-      _count: false,
+      select: { offers: false, paymentMethodCategory: false, _count: false },
     });
 
     res.status(200).send(paymentMethods);
@@ -36,7 +34,9 @@ export async function createPaymentMethodController(
 
     const newPaymentMethod = await createPaymentMethod({
       name,
-      paymentMethodCategoryId: id,
+      paymentMethodCategory: {
+        connect: { id },
+      },
     });
 
     res.status(200).send({
@@ -60,16 +60,9 @@ export async function getPaymentMethodsByCategoryController(
 
     const cleanCategoryId = sanitize(categoryId, []);
 
-    const paymentMethods = await getPaymentMethodsCB(
-      {
-        _count: false,
-        offers: false,
-        paymentMethodCategory: false,
-      },
-      {
-        paymentMethodCategoryId: cleanCategoryId,
-      },
-    );
+    const paymentMethods = await getPaymentMethodsCB({
+      where: { paymentMethodCategoryId: cleanCategoryId },
+    });
 
     res.status(200).send(paymentMethods);
   } catch (err) {

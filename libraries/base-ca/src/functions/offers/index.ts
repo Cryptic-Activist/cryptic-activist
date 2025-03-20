@@ -116,3 +116,8 @@ export const getOffersPagination = async ({
 
   return offers;
 };
+
+export const countOffers = async () => {
+  const count = await prisma.offer.count();
+  return count;
+};

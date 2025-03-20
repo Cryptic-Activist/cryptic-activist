@@ -116,3 +116,8 @@ export const getTradesPagination = async ({
 
   return trades;
 };
+
+export const countTrades = async () => {
+  const count = await prisma.trade.count();
+  return count;
+};

@@ -24,6 +24,7 @@ export type GetTradesParams = {
   where?: Prisma.TradeWhereInput;
   limit?: number;
   select?: Prisma.TradeSelect;
+  orderBy?: Prisma.TradeOrderByWithAggregationInput;
 };
 
 export type GetTradesPaginationParams = {

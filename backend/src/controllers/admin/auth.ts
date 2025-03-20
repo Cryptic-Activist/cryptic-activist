@@ -21,7 +21,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const errors: string[] = [];
 
-    const admin = await getAdmin({ username });
+    const admin = await getAdmin({ where: { username } });
 
     if (!admin) {
       errors.push('User not found');
@@ -84,7 +84,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(401).send({});
     }
 
-    const admin = await getAdmin({ id: decoded.id });
+    const admin = await getAdmin({ where: { id: decoded.id } });
 
     if (!admin) {
       res.status(404).send({

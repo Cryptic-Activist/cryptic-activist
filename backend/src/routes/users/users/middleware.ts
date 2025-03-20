@@ -1,6 +1,5 @@
 import {
   AssociateLanguageToUser,
-  GetMultipleUsers,
   GetUser,
   IndexLanguagesByUser,
   RemoveLangaugeFromUser,
@@ -15,24 +14,6 @@ export const validateGetUserRequest = (
   const { query } = req;
 
   const validated = GetUser.safeParse(query);
-
-  if (!validated.success) {
-    res.status(400).send({
-      errors: validated.error,
-    });
-  }
-
-  next();
-};
-
-export const validateGetMultipleUserRequest = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  const { query } = req;
-
-  const validated = GetMultipleUsers.safeParse(query);
 
   if (!validated.success) {
     res.status(400).send({
