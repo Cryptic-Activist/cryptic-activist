@@ -1,71 +1,116 @@
-import { Admin, PrismaClient } from '@prisma/client';
-
+import { Admin, BatchPayload, prisma } from '../../services/prisma';
 import {
-  AdminDynamicType,
-  CreateAdminParams,
-  GetAdminReturnType,
-  WhereAdminParams,
+  CreateAdmin,
+  CreateManyAdmins,
+  DeleteAdminParams,
+  GetAdminParams,
+  GetAdminsPaginationParams,
+  GetAdminsParams,
+  UpdateAdminParams,
+  WhereAdmin,
 } from './types';
 
-const prisma = new PrismaClient();
-
 export const createAdmin = async (
-  params: CreateAdminParams
+  params: CreateAdmin
 ): Promise<Admin> => {
-  const created = await prisma.admin.create({
-    data: params,
-  });
-  return created;
+  try {
+    const admin = await prisma.admin.findFirst({
+      where: params as WhereAdmin,
+    });
+
+    if (admin) {
+      return admin;
+    }
+
+    const newAdmin = await prisma.admin.create({
+      data: params,
+    });
+
+    return newAdmin;
+  } catch (error: any) {
+    throw Error(error);
+  }
 };
 
-export const updateAdmin = async (
-  where: WhereAdminParams,
-  toUpdate: WhereAdminParams
-): Promise<Admin> => {
+export const createManyAdmins = async (
+  params: CreateManyAdmins
+): Promise<BatchPayload> => {
+  try {
+    const newAdmins = await prisma.admin.createMany({
+      data: params,
+    });
+
+    return newAdmins;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateAdmin = async ({
+  toUpdate,
+  where,
+}: UpdateAdminParams): Promise<Admin> => {
   const updated = await prisma.admin.update({
     where,
     data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteAdmin = async (where: Admin): Promise<Admin> => {
-  const deleted = await prisma.admin.delete({ where });
+export const deleteAdmin = async ({
+  where,
+}: DeleteAdminParams): Promise<Admin> => {
+  const deleted = await prisma.admin.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getAdmin = async (
-  where: WhereAdminParams
-): Promise<Admin | null> => {
+export const getAdmin = async ({
+  where,
+  select,
+}: GetAdminParams): Promise<Admin | null> => {
   const admin = await prisma.admin.findFirst({
+    ...(select && { select }),
     where,
   });
 
-  if (!admin) return null;
+  if (!admin) {
+    return null;
+  }
 
   return admin;
 };
 
-export const getAdmins = async (
-  where?: WhereAdminParams,
-  limit?: number
-): Promise<Admin[]> => {
+export const getAdmins = async ({
+  limit,
+  where,
+  select,
+}: GetAdminsParams): Promise<Admin[]> => {
   const admins = await prisma.admin.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
   });
 
   return admins;
 };
 
-export const getAdminsPagination = async (
-  limit: number,
-  offset: number,
-  where?: WhereAdminParams
-): Promise<Admin[]> => {
+export const getAdminsPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetAdminsPaginationParams): Promise<Admin[]> => {
   const admins = await prisma.admin.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
   });
 

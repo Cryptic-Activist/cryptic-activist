@@ -1,74 +1,121 @@
-import { SystemMessage, prisma } from '../../services/prisma';
 import {
-  CreateSystemMessageParams,
-  SystemMessageAssociationsType,
-  WhereSystemMessageParams,
+  BatchPayload,
+  SystemMessage,
+  prisma,
+} from '../../services/prisma';
+import {
+  CreateManySystemMessages,
+  CreateSystemMessage,
+  DeleteSystemMessageParams,
+  GetSystemMessageParams,
+  GetSystemMessagesPaginationParams,
+  GetSystemMessagesParams,
+  UpdateSystemMessageParams,
+  WhereSystemMessage,
 } from './types';
 
 export const createSystemMessage = async (
-  params: CreateSystemMessageParams
+  params: CreateSystemMessage
 ): Promise<SystemMessage> => {
-  const created = await prisma.systemMessage.create({ data: params });
-  return created;
+  try {
+    const systemMessage = await prisma.systemMessage.findFirst({
+      where: params as WhereSystemMessage,
+    });
+
+    if (systemMessage) {
+      return systemMessage;
+    }
+
+    const newSystemMessage = await prisma.systemMessage.create({
+      data: params,
+    });
+
+    return newSystemMessage;
+  } catch (error: any) {
+    throw Error(error);
+  }
 };
 
-export const updateSystemMessage = async (
-  toUpdate: WhereSystemMessageParams,
-  where: WhereSystemMessageParams
-): Promise<SystemMessage> => {
+export const createManySystemMessages = async (
+  params: CreateManySystemMessages[]
+): Promise<BatchPayload> => {
+  try {
+    const newSystemMessages = await prisma.systemMessage.createMany({
+      data: params,
+    });
+
+    return newSystemMessages;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateSystemMessage = async ({
+  toUpdate,
+  where,
+}: UpdateSystemMessageParams): Promise<SystemMessage> => {
   const updated = await prisma.systemMessage.update({
     where,
     data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteSystemMessage = async (
-  where: WhereSystemMessageParams
-): Promise<SystemMessage> => {
-  const deleted = await prisma.systemMessage.delete({ where });
+export const deleteSystemMessage = async ({
+  where,
+}: DeleteSystemMessageParams): Promise<SystemMessage> => {
+  const deleted = await prisma.systemMessage.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getSystemMessage = async (
-  where: WhereSystemMessageParams,
-  associations: SystemMessageAssociationsType
-): Promise<SystemMessage | null> => {
+export const getSystemMessage = async ({
+  where,
+  select,
+}: GetSystemMessageParams): Promise<SystemMessage | null> => {
   const systemMessage = await prisma.systemMessage.findFirst({
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
-  if (!systemMessage) return null;
+  if (!systemMessage) {
+    return null;
+  }
 
   return systemMessage;
 };
 
-export const getSystemMessages = async (
-  associations: SystemMessageAssociationsType,
-  where?: WhereSystemMessageParams,
-  limit?: number
-): Promise<SystemMessage[]> => {
+export const getSystemMessages = async ({
+  limit,
+  where,
+  select,
+}: GetSystemMessagesParams): Promise<SystemMessage[]> => {
   const systemMessages = await prisma.systemMessage.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   return systemMessages;
 };
 
-export const getSystemMessagesPagination = async (
-  associations: SystemMessageAssociationsType,
-  limit: number,
-  offset: number,
-  where?: WhereSystemMessageParams
-): Promise<SystemMessage[]> => {
+export const getSystemMessagesPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetSystemMessagesPaginationParams): Promise<SystemMessage[]> => {
   const systemMessages = await prisma.systemMessage.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
-    include: associations,
   });
 
   return systemMessages;

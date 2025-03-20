@@ -1,25 +1,30 @@
-import { Trust, prisma } from '../../services/prisma';
-import type {
-  CreateTrustParamsType,
-  DeleteTrustWhereType,
-  GetTrustReturnType,
-  GetTrustWhereType,
-  TrustAssociationsArrayType,
-  UpdateTrustToUpdateType,
-  UpdateTrustWhereType,
+import { BatchPayload, Trust, prisma } from '../../services/prisma';
+import {
+  CreateManyTrusts,
+  CreateTrust,
+  DeleteTrustParams,
+  GetTrustParams,
+  GetTrustsPaginationParams,
+  GetTrustsParams,
+  UpdateTrustParams,
+  WhereTrust,
 } from './types';
 
 export const createTrust = async (
-  params: CreateTrustParamsType
-): Promise<Trust | undefined> => {
+  params: CreateTrust
+): Promise<Trust> => {
   try {
-    const trust = await prisma.trust.findFirst({ where: params });
+    const trust = await prisma.trust.findFirst({
+      where: params as WhereTrust,
+    });
 
     if (trust) {
       return trust;
     }
 
-    const newTrust = await prisma.trust.create({ data: params });
+    const newTrust = await prisma.trust.create({
+      data: params,
+    });
 
     return newTrust;
   } catch (error: any) {
@@ -27,31 +32,48 @@ export const createTrust = async (
   }
 };
 
-export const updateTrust = async (
-  where: UpdateTrustWhereType,
-  toUpdate: UpdateTrustToUpdateType
-): Promise<Trust> => {
+export const createManyTrusts = async (
+  params: CreateManyTrusts[]
+): Promise<BatchPayload> => {
+  try {
+    const newTrusts = await prisma.trust.createMany({
+      data: params,
+    });
+
+    return newTrusts;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateTrust = async ({
+  toUpdate,
+  where,
+}: UpdateTrustParams): Promise<Trust> => {
   const updated = await prisma.trust.update({
-    data: toUpdate,
     where,
+    data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteTrust = async (
-  where: DeleteTrustWhereType
-): Promise<Trust> => {
-  const deleted = await prisma.trust.delete({ where });
+export const deleteTrust = async ({
+  where,
+}: DeleteTrustParams): Promise<Trust> => {
+  const deleted = await prisma.trust.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getTrust = async (
-  where: GetTrustWhereType,
-  associations: TrustAssociationsArrayType
-): Promise<Trust | null> => {
+export const getTrust = async ({
+  where,
+  select,
+}: GetTrustParams): Promise<Trust | null> => {
   const trust = await prisma.trust.findFirst({
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   if (!trust) {
@@ -61,39 +83,36 @@ export const getTrust = async (
   return trust;
 };
 
-export const getTrusts = async (
-  associations: TrustAssociationsArrayType,
-  where?: GetTrustWhereType,
-  limit?: number
-): Promise<Trust[]> => {
+export const getTrusts = async ({
+  limit,
+  where,
+  select,
+}: GetTrustsParams): Promise<Trust[]> => {
   const trusts = await prisma.trust.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   return trusts;
 };
 
-export const getTrustsPagination = async (
-  associations: TrustAssociationsArrayType,
-  limit: number,
-  offset: number,
-  where?: GetTrustWhereType
-): Promise<Trust[]> => {
-  const users = await prisma.trust.findMany({
+export const getTrustsPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetTrustsPaginationParams): Promise<Trust[]> => {
+  const trusts = await prisma.trust.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
-    include: associations,
   });
 
-  return users;
-};
-
-export const countTrusts = async (
-  where?: GetTrustWhereType
-): Promise<number> => {
-  const count = await prisma.trust.count({ where });
-  return count;
+  return trusts;
 };

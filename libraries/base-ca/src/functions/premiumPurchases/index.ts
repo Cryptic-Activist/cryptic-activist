@@ -1,109 +1,125 @@
 import {
-  CreateOfferParams,
-  DeleteOfferParams,
-  GetOfferParams,
-  GetOffersPaginationParams,
-  GetOffersParams,
-  UpdateOfferParams,
-} from './types';
-import { Offer, prisma } from '@/services/prisma';
+  BatchPayload,
+  PremiumPurchase,
+  prisma,
+} from '../../services/prisma';
 import {
-  createParamsRemapping,
-  updateParamsRemapping,
-} from '../../utils/remap/offers';
+  CreateManyPremiumPurchases,
+  CreatePremiumPurchase,
+  DeletePremiumPurchaseParams,
+  GetPremiumPurchaseParams,
+  GetPremiumPurchasesPaginationParams,
+  GetPremiumPurchasesParams,
+  UpdatePremiumPurchaseParams,
+  WherePremiumPurchase,
+} from './types';
 
-export const createOffer = async (
-  params: CreateOfferParams
-): Promise<Offer> => {
+export const createPremiumPurchase = async (
+  params: CreatePremiumPurchase
+): Promise<PremiumPurchase> => {
   try {
-    const newParams = createParamsRemapping(params);
-
-    const offer = await prisma.offer.findFirst({
-      where: newParams,
+    const premiumPurchase = await prisma.premiumPurchase.findFirst({
+      where: params as WherePremiumPurchase,
     });
 
-    if (offer) {
-      return offer;
+    if (premiumPurchase) {
+      return premiumPurchase;
     }
 
-    const newOffer = await prisma.offer.create({ data: params });
+    const newPremiumPurchase = await prisma.premiumPurchase.create({
+      data: params,
+    });
 
-    return newOffer;
+    return newPremiumPurchase;
   } catch (error: any) {
     throw Error(error);
   }
 };
 
-export const updateOffer = async ({
+export const createManyPremiumPurchases = async (
+  params: CreateManyPremiumPurchases[]
+): Promise<BatchPayload> => {
+  try {
+    const newPremiumPurchases =
+      await prisma.premiumPurchase.createMany({
+        data: params,
+      });
+
+    return newPremiumPurchases;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updatePremiumPurchase = async ({
   toUpdate,
   where,
-}: UpdateOfferParams): Promise<Offer> => {
-  const newParams = updateParamsRemapping(toUpdate);
-  const updated = await prisma.offer.update({
+}: UpdatePremiumPurchaseParams): Promise<PremiumPurchase> => {
+  const updated = await prisma.premiumPurchase.update({
     where,
-    data: newParams,
+    data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteOffer = async ({
+export const deletePremiumPurchase = async ({
   where,
-}: DeleteOfferParams): Promise<Offer> => {
-  const deleted = await prisma.offer.delete({ where });
+}: DeletePremiumPurchaseParams): Promise<PremiumPurchase> => {
+  const deleted = await prisma.premiumPurchase.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getOffer = async ({
-  associations,
+export const getPremiumPurchase = async ({
   where,
   select,
-}: GetOfferParams) => {
-  const offer = await prisma.offer.findFirst({
-    ...(associations && { include: associations }),
+}: GetPremiumPurchaseParams): Promise<PremiumPurchase | null> => {
+  const premiumPurchase = await prisma.premiumPurchase.findFirst({
     ...(select && { select }),
     where,
   });
 
-  if (!offer) return null;
+  if (!premiumPurchase) {
+    return null;
+  }
 
-  return offer;
+  return premiumPurchase;
 };
 
-export const getOffers = async ({
-  associations,
+export const getPremiumPurchases = async ({
   limit,
   where,
   select,
-}: GetOffersParams): Promise<Offer[]> => {
-  const offers = await prisma.offer.findMany({
+}: GetPremiumPurchasesParams): Promise<PremiumPurchase[]> => {
+  const premiumPurchases = await prisma.premiumPurchase.findMany({
     ...(limit && { take: limit }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     where,
   });
 
-  return offers;
+  return premiumPurchases;
 };
 
-export const getOffersPagination = async ({
-  associations,
+export const getPremiumPurchasesPagination = async ({
   limit,
   select,
   where,
   offset,
   cursor,
   orderBy,
-}: GetOffersPaginationParams): Promise<Offer[]> => {
-  console.log({ cursor });
-  const offers = await prisma.offer.findMany({
+}: GetPremiumPurchasesPaginationParams): Promise<
+  PremiumPurchase[]
+> => {
+  const premiumPurchases = await prisma.premiumPurchase.findMany({
     take: limit,
     ...(offset && { skip: offset }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     ...(cursor && { cursor }),
     ...(orderBy && { orderBy }),
     where,
   });
 
-  return offers;
+  return premiumPurchases;
 };

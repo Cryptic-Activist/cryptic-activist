@@ -1,27 +1,30 @@
-import { Block, prisma } from '@/services/prisma';
-
-import type {
-  BlockAssociationsType,
-  CreateBlockParamsType,
-  DeleteBlockWhereType,
-  GetBlockWhereType,
-  UpdateBlockToUpdateType,
-  UpdateBlockWhereType,
+import { BatchPayload, Block, prisma } from '../../services/prisma';
+import {
+  CreateBlock,
+  CreateManyBlocks,
+  DeleteBlockParams,
+  GetBlockParams,
+  GetBlocksPaginationParams,
+  GetBlocksParams,
+  UpdateBlockParams,
+  WhereBlock,
 } from './types';
 
 export const createBlock = async (
-  params: CreateBlockParamsType
+  params: CreateBlock
 ): Promise<Block> => {
   try {
     const block = await prisma.block.findFirst({
-      where: params,
+      where: params as WhereBlock,
     });
 
     if (block) {
       return block;
     }
 
-    const newBlock = await prisma.block.create({ data: params });
+    const newBlock = await prisma.block.create({
+      data: params,
+    });
 
     return newBlock;
   } catch (error: any) {
@@ -29,10 +32,24 @@ export const createBlock = async (
   }
 };
 
-export const updateBlock = async (
-  where: UpdateBlockWhereType,
-  toUpdate: UpdateBlockToUpdateType
-): Promise<Block> => {
+export const createManyBlocks = async (
+  params: CreateManyBlocks[]
+): Promise<BatchPayload> => {
+  try {
+    const newBlocks = await prisma.block.createMany({
+      data: params,
+    });
+
+    return newBlocks;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateBlock = async ({
+  toUpdate,
+  where,
+}: UpdateBlockParams): Promise<Block> => {
   const updated = await prisma.block.update({
     where,
     data: toUpdate,
@@ -41,20 +58,22 @@ export const updateBlock = async (
   return updated;
 };
 
-export const deleteBlock = async (
-  where: DeleteBlockWhereType
-): Promise<Block> => {
-  const deleted = await prisma.block.delete({ where });
+export const deleteBlock = async ({
+  where,
+}: DeleteBlockParams): Promise<Block> => {
+  const deleted = await prisma.block.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getBlock = async (
-  where: GetBlockWhereType,
-  associations: BlockAssociationsType
-): Promise<Block | null> => {
+export const getBlock = async ({
+  where,
+  select,
+}: GetBlockParams): Promise<Block | null> => {
   const block = await prisma.block.findFirst({
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   if (!block) {
@@ -64,40 +83,36 @@ export const getBlock = async (
   return block;
 };
 
-export const getBlocks = async (
-  associations: BlockAssociationsType,
-  where?: GetBlockWhereType,
-  limit?: number
-): Promise<Block[]> => {
+export const getBlocks = async ({
+  limit,
+  where,
+  select,
+}: GetBlocksParams): Promise<Block[]> => {
   const blocks = await prisma.block.findMany({
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    include: associations,
-    take: limit,
   });
 
   return blocks;
 };
 
-export const getBlocksPagination = async (
-  associations: BlockAssociationsType,
-  limit: number,
-  offset: number,
-  where?: GetBlockWhereType
-): Promise<Block[]> => {
+export const getBlocksPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetBlocksPaginationParams): Promise<Block[]> => {
   const blocks = await prisma.block.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
-    include: associations,
   });
 
   return blocks;
-};
-
-export const countBlocks = async (
-  where?: GetBlockWhereType
-): Promise<number> => {
-  const blocks = await prisma.block.findMany({ where });
-
-  return blocks.length;
 };

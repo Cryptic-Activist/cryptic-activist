@@ -1,109 +1,116 @@
+import { BatchPayload, KYC, prisma } from '../../services/prisma';
 import {
-  CreateOfferParams,
-  DeleteOfferParams,
-  GetOfferParams,
-  GetOffersPaginationParams,
-  GetOffersParams,
-  UpdateOfferParams,
+  CreateKYC,
+  CreateManyKYCs,
+  DeleteKYCParams,
+  GetKYCParams,
+  GetKYCsPaginationParams,
+  GetKYCsParams,
+  UpdateKYCParams,
+  WhereKYC,
 } from './types';
-import { Offer, prisma } from '@/services/prisma';
-import {
-  createParamsRemapping,
-  updateParamsRemapping,
-} from '../../utils/remap/offers';
 
-export const createOffer = async (
-  params: CreateOfferParams
-): Promise<Offer> => {
+export const createKYC = async (params: CreateKYC): Promise<KYC> => {
   try {
-    const newParams = createParamsRemapping(params);
-
-    const offer = await prisma.offer.findFirst({
-      where: newParams,
+    const kYC = await prisma.kYC.findFirst({
+      where: params as WhereKYC,
     });
 
-    if (offer) {
-      return offer;
+    if (kYC) {
+      return kYC;
     }
 
-    const newOffer = await prisma.offer.create({ data: params });
+    const newKYC = await prisma.kYC.create({
+      data: params,
+    });
 
-    return newOffer;
+    return newKYC;
   } catch (error: any) {
     throw Error(error);
   }
 };
 
-export const updateOffer = async ({
+export const createManyKYCs = async (
+  params: CreateManyKYCs[]
+): Promise<BatchPayload> => {
+  try {
+    const newKYCs = await prisma.kYC.createMany({
+      data: params,
+    });
+
+    return newKYCs;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateKYC = async ({
   toUpdate,
   where,
-}: UpdateOfferParams): Promise<Offer> => {
-  const newParams = updateParamsRemapping(toUpdate);
-  const updated = await prisma.offer.update({
+}: UpdateKYCParams): Promise<KYC> => {
+  const updated = await prisma.kYC.update({
     where,
-    data: newParams,
+    data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteOffer = async ({
+export const deleteKYC = async ({
   where,
-}: DeleteOfferParams): Promise<Offer> => {
-  const deleted = await prisma.offer.delete({ where });
+}: DeleteKYCParams): Promise<KYC> => {
+  const deleted = await prisma.kYC.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getOffer = async ({
-  associations,
+export const getKYC = async ({
   where,
   select,
-}: GetOfferParams) => {
-  const offer = await prisma.offer.findFirst({
-    ...(associations && { include: associations }),
+}: GetKYCParams): Promise<KYC | null> => {
+  const kYC = await prisma.kYC.findFirst({
     ...(select && { select }),
     where,
   });
 
-  if (!offer) return null;
+  if (!kYC) {
+    return null;
+  }
 
-  return offer;
+  return kYC;
 };
 
-export const getOffers = async ({
-  associations,
+export const getKYCs = async ({
   limit,
   where,
   select,
-}: GetOffersParams): Promise<Offer[]> => {
-  const offers = await prisma.offer.findMany({
+}: GetKYCsParams): Promise<KYC[]> => {
+  const kycs = await prisma.kYC.findMany({
     ...(limit && { take: limit }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     where,
   });
 
-  return offers;
+  return kycs;
 };
 
-export const getOffersPagination = async ({
-  associations,
+export const getKYCsPagination = async ({
   limit,
   select,
   where,
   offset,
   cursor,
   orderBy,
-}: GetOffersPaginationParams): Promise<Offer[]> => {
-  console.log({ cursor });
-  const offers = await prisma.offer.findMany({
+}: GetKYCsPaginationParams): Promise<KYC[]> => {
+  const kycs = await prisma.kYC.findMany({
     take: limit,
     ...(offset && { skip: offset }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     ...(cursor && { cursor }),
     ...(orderBy && { orderBy }),
     where,
   });
 
-  return offers;
+  return kycs;
 };

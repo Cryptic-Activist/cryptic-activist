@@ -1,39 +1,38 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreateBlockParamsType = {
-  blockerId: string;
-  blockedId: string;
+export type CreateBlock = Prisma.BlockCreateInput;
+
+export type CreateManyBlocks = Prisma.BlockCreateManyInput;
+
+export type WhereBlock = Prisma.BlockWhereUniqueInput;
+
+export type UpdateBlockParams = {
+  toUpdate: Prisma.BlockUpdateInput;
+  where: Prisma.BlockWhereUniqueInput;
 };
 
-export type BlockDynamicType = {
-  id?: string;
-  blockerId?: string;
-  blockedId?: string;
-  isDeleted?: boolean;
-  whenDeleted?: null | DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeleteBlockParams = {
+  where: Prisma.BlockWhereUniqueInput;
 };
 
-export type UpdateBlockWhereType = BlockDynamicType;
-
-export type UpdateBlockToUpdateType = BlockDynamicType;
-
-export type DeleteBlockWhereType = BlockDynamicType;
-
-export type GetBlockWhereType = BlockDynamicType;
-
-export type BlockAssociationsType = {
-  blocked: boolean;
-  blocker: boolean;
+export type GetBlockParams = {
+  where?: Prisma.BlockWhereInput;
+  select?: Prisma.BlockSelect;
 };
 
-export type GetBlockReturnType = {
-  id: string;
-  blockerId: string;
-  blockedId: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
+export type GetBlocksParams = {
+  where?: Prisma.BlockWhereInput;
+  limit?: number;
+  select?: Prisma.BlockSelect;
+};
+
+export type GetBlocksPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.BlockWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.BlockWhereInput;
+  select?: Prisma.BlockSelect;
+  orderBy?: Prisma.BlockOrderByWithAggregationInput;
 };

@@ -1,30 +1,41 @@
-import { DateType } from '@/functions/types';
+import { Prisma } from '@/services/prisma';
 
-export type CreatePaymentMethodCategoryParams = {
-  name: string;
+export type CreatePaymentMethodCategory =
+  Prisma.PaymentMethodCategoryCreateInput;
+
+export type CreateManyPaymentMethodCategories =
+  Prisma.PaymentMethodCategoryCreateManyInput;
+
+export type WherePaymentMethodCategory =
+  Prisma.PaymentMethodCategoryWhereUniqueInput;
+
+export type UpdatePaymentMethodCategoryParams = {
+  toUpdate: Prisma.PaymentMethodCategoryUpdateInput;
+  where: Prisma.PaymentMethodCategoryWhereUniqueInput;
 };
 
-export type WherePaymentMethodCategoryParams = {
-  id?: string;
-  name?: string;
-  isDeleted?: boolean;
-  whenDeleted?: DateType;
-  createdAt?: DateType;
-  updatedAt?: DateType;
+export type DeletePaymentMethodCategoryParams = {
+  where: Prisma.PaymentMethodCategoryWhereUniqueInput;
 };
 
-export type PaymentMethodCategoryDynamicType =
-  WherePaymentMethodCategoryParams;
+export type GetPaymentMethodCategoryParams = {
+  where?: Prisma.PaymentMethodCategoryWhereInput;
+  select?: Prisma.PaymentMethodCategorySelect;
+};
 
-export type PaymentMethodCategoryAssociationsArrayType =
-  | []
-  | ['payment_method_category'];
+export type GetPaymentMethodCategoriesParams = {
+  where?: Prisma.PaymentMethodCategoryWhereInput;
+  limit?: number;
+  select?: Prisma.PaymentMethodCategorySelect;
+};
 
-export type GetPaymentMethodCategoryReturnType = {
-  id: string;
-  name: string;
-  isDeleted: boolean;
-  whenDeleted: DateType;
-  createdAt: DateType;
-  updatedAt: DateType;
+export type GetPaymentMethodCategoriesPaginationParams = {
+  limit: number;
+  offset?: number;
+  cursor?: Prisma.PaymentMethodCategoryWhereUniqueInput & {
+    id: string;
+  };
+  where?: Prisma.PaymentMethodCategoryWhereInput;
+  select?: Prisma.PaymentMethodCategorySelect;
+  orderBy?: Prisma.PaymentMethodCategoryOrderByWithAggregationInput;
 };

@@ -1,34 +1,46 @@
+import { BatchPayload, Tier, prisma } from '../../services/prisma';
 import {
-  CreateTierParams,
+  CreateManyTiers,
+  CreateTier,
   DeleteTierParams,
   GetTierParams,
   GetTiersPaginationParams,
   GetTiersParams,
   UpdateTierParams,
+  WhereTier,
 } from './types';
-import { Tier, prisma } from '@/services/prisma';
-import {
-  createParamsRemapping,
-  updateParamsRemapping,
-} from '../../utils/remap/offers';
 
 export const createTier = async (
-  params: CreateTierParams
+  params: CreateTier
 ): Promise<Tier> => {
   try {
-    const newParams = createParamsRemapping(params);
-
-    const offer = await prisma.offer.findFirst({
-      where: newParams,
+    const tier = await prisma.tier.findFirst({
+      where: params as WhereTier,
     });
 
-    if (offer) {
-      return offer;
+    if (tier) {
+      return tier;
     }
 
-    const newTier = await prisma.offer.create({ data: params });
+    const newTier = await prisma.tier.create({
+      data: params,
+    });
 
     return newTier;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const createManyTiers = async (
+  params: CreateManyTiers[]
+): Promise<BatchPayload> => {
+  try {
+    const newTiers = await prisma.tier.createMany({
+      data: params,
+    });
+
+    return newTiers;
   } catch (error: any) {
     throw Error(error);
   }
@@ -38,55 +50,54 @@ export const updateTier = async ({
   toUpdate,
   where,
 }: UpdateTierParams): Promise<Tier> => {
-  const newParams = updateParamsRemapping(toUpdate);
-  const updated = await prisma.offer.update({
+  const updated = await prisma.tier.update({
     where,
-    data: newParams,
+    data: toUpdate,
   });
+
   return updated;
 };
 
 export const deleteTier = async ({
   where,
 }: DeleteTierParams): Promise<Tier> => {
-  const deleted = await prisma.offer.delete({ where });
+  const deleted = await prisma.tier.delete({
+    where,
+  });
   return deleted;
 };
 
 export const getTier = async ({
-  associations,
   where,
   select,
-}: GetTierParams) => {
-  const offer = await prisma.offer.findFirst({
-    ...(associations && { include: associations }),
+}: GetTierParams): Promise<Tier | null> => {
+  const tier = await prisma.tier.findFirst({
     ...(select && { select }),
     where,
   });
 
-  if (!offer) return null;
+  if (!tier) {
+    return null;
+  }
 
-  return offer;
+  return tier;
 };
 
 export const getTiers = async ({
-  associations,
   limit,
   where,
   select,
 }: GetTiersParams): Promise<Tier[]> => {
-  const offers = await prisma.offer.findMany({
+  const tiers = await prisma.tier.findMany({
     ...(limit && { take: limit }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     where,
   });
 
-  return offers;
+  return tiers;
 };
 
 export const getTiersPagination = async ({
-  associations,
   limit,
   select,
   where,
@@ -94,16 +105,14 @@ export const getTiersPagination = async ({
   cursor,
   orderBy,
 }: GetTiersPaginationParams): Promise<Tier[]> => {
-  console.log({ cursor });
-  const offers = await prisma.offer.findMany({
+  const tiers = await prisma.tier.findMany({
     take: limit,
     ...(offset && { skip: offset }),
-    ...(associations && { include: associations }),
     ...(select && { select }),
     ...(cursor && { cursor }),
     ...(orderBy && { orderBy }),
     where,
   });
 
-  return offers;
+  return tiers;
 };

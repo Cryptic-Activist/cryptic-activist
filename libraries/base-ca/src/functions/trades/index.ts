@@ -1,82 +1,117 @@
-import { Trade, prisma } from '../../services/prisma';
+import { BatchPayload, Trade, prisma } from '../../services/prisma';
 import {
-  createParamsRemapping,
-  getParamsRemapping,
-} from '../../utils/remap/trades';
-import {
-  CreateTradeParams,
-  TradeAssociationsArrayType,
-  WhereTradeParams,
+  CreateManyTrades,
+  CreateTrade,
+  DeleteTradeParams,
+  GetTradeParams,
+  GetTradesPaginationParams,
+  GetTradesParams,
+  UpdateTradeParams,
+  WhereTrade,
 } from './types';
 
 export const createTrade = async (
-  params: CreateTradeParams
-): Promise<Trade | null> => {
-  const remapped = createParamsRemapping(params);
-  const created = await prisma.trade.create({ data: remapped });
-  return created;
+  params: CreateTrade
+): Promise<Trade> => {
+  try {
+    const trade = await prisma.trade.findFirst({
+      where: params as WhereTrade,
+    });
+
+    if (trade) {
+      return trade;
+    }
+
+    const newTrade = await prisma.trade.create({
+      data: params,
+    });
+
+    return newTrade;
+  } catch (error: any) {
+    throw Error(error);
+  }
 };
 
-export const updateTrade = async (
-  toUpdate: WhereTradeParams,
-  where: WhereTradeParams
-): Promise<Trade> => {
+export const createManyTrades = async (
+  params: CreateManyTrades[]
+): Promise<BatchPayload> => {
+  try {
+    const newTrades = await prisma.trade.createMany({
+      data: params,
+    });
+
+    return newTrades;
+  } catch (error: any) {
+    throw Error(error);
+  }
+};
+
+export const updateTrade = async ({
+  toUpdate,
+  where,
+}: UpdateTradeParams): Promise<Trade> => {
   const updated = await prisma.trade.update({
-    data: toUpdate,
     where,
+    data: toUpdate,
   });
+
   return updated;
 };
 
-export const deleteTrade = async (
-  where: WhereTradeParams
-): Promise<Trade> => {
-  const deleted = await prisma.trade.delete({ where });
+export const deleteTrade = async ({
+  where,
+}: DeleteTradeParams): Promise<Trade> => {
+  const deleted = await prisma.trade.delete({
+    where,
+  });
   return deleted;
 };
 
-export const getTrade = async (
-  where: WhereTradeParams,
-  associations: TradeAssociationsArrayType
-): Promise<Trade | null> => {
-  const remapped = getParamsRemapping(where);
+export const getTrade = async ({
+  where,
+  select,
+}: GetTradeParams): Promise<Trade | null> => {
   const trade = await prisma.trade.findFirst({
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
-  if (!trade) return null;
+  if (!trade) {
+    return null;
+  }
 
   return trade;
 };
 
-export const getTrades = async (
-  associations: TradeAssociationsArrayType,
-  where?: WhereTradeParams,
-  limit?: number
-): Promise<Trade[]> => {
-  const remapped = getParamsRemapping(where);
+export const getTrades = async ({
+  limit,
+  where,
+  select,
+}: GetTradesParams): Promise<Trade[]> => {
   const trades = await prisma.trade.findMany({
-    take: limit,
+    ...(limit && { take: limit }),
+    ...(select && { select }),
     where,
-    include: associations,
   });
 
   return trades;
 };
 
-export const getTradesPagination = async (
-  associations: TradeAssociationsArrayType,
-  limit: number,
-  offset: number,
-  where?: WhereTradeParams
-): Promise<Trade[]> => {
-  const remapped = getParamsRemapping(where);
+export const getTradesPagination = async ({
+  limit,
+  select,
+  where,
+  offset,
+  cursor,
+  orderBy,
+}: GetTradesPaginationParams): Promise<Trade[]> => {
   const trades = await prisma.trade.findMany({
     take: limit,
-    skip: offset,
+    ...(offset && { skip: offset }),
+    ...(select && { select }),
+    ...(cursor && { cursor }),
+    ...(orderBy && { orderBy }),
     where,
-    include: associations,
   });
 
   return trades;
