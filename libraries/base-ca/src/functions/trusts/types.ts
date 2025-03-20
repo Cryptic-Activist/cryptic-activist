@@ -24,6 +24,7 @@ export type GetTrustsParams = {
   where?: Prisma.TrustWhereInput;
   limit?: number;
   select?: Prisma.TrustSelect;
+  orderBy?: Prisma.TrustOrderByWithAggregationInput;
 };
 
 export type GetTrustsPaginationParams = {

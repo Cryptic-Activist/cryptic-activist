@@ -25,6 +25,7 @@ export type GetPaymentMethodsParams = {
   where?: Prisma.PaymentMethodWhereInput;
   limit?: number;
   select?: Prisma.PaymentMethodSelect;
+  orderBy?: Prisma.PaymentMethodOrderByWithAggregationInput;
 };
 
 export type GetPaymentMethodsPaginationParams = {

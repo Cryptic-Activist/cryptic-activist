@@ -24,6 +24,7 @@ export type GetBlocksParams = {
   where?: Prisma.BlockWhereInput;
   limit?: number;
   select?: Prisma.BlockSelect;
+  orderBy?: Prisma.BlockOrderByWithAggregationInput;
 };
 
 export type GetBlocksPaginationParams = {

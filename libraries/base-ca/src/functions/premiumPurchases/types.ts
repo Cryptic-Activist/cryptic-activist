@@ -26,6 +26,7 @@ export type GetPremiumPurchasesParams = {
   where?: Prisma.PremiumPurchaseWhereInput;
   limit?: number;
   select?: Prisma.PremiumPurchaseSelect;
+  orderBy?: Prisma.PremiumPurchaseOrderByWithAggregationInput;
 };
 
 export type GetPremiumPurchasesPaginationParams = {

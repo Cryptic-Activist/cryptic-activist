@@ -24,6 +24,7 @@ export type GetUsersParams = {
   where?: Prisma.UserWhereInput;
   limit?: number;
   select?: Prisma.UserSelect;
+  orderBy?: Prisma.UserOrderByWithAggregationInput;
 };
 
 export type GetUsersPaginationParams = {

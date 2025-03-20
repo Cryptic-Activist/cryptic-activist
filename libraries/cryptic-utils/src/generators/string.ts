@@ -19,7 +19,6 @@ const getDictionaries = () => {
   const randTwo = getRandomNumber(0, 4);
   const firstDicts = [adjectives, colors];
   const secondDicts = [animals, countries, languages, names, starWars];
-  console.log({ randOne, randTwo });
 
   return [firstDicts[randOne], secondDicts[randTwo]];
 };

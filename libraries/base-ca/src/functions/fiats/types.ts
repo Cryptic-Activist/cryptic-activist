@@ -24,6 +24,7 @@ export type GetFiatsParams = {
   where?: Prisma.FiatWhereInput;
   limit?: number;
   select?: Prisma.FiatSelect;
+  orderBy?: Prisma.FiatOrderByWithAggregationInput;
 };
 
 export type GetFiatsPaginationParams = {

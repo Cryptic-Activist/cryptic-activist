@@ -120,3 +120,8 @@ export const getSystemMessagesPagination = async ({
 
   return systemMessages;
 };
+
+export const countSystemMessages = async () => {
+  const count = await prisma.systemMessage.count();
+  return count;
+};

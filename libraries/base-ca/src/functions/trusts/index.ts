@@ -116,3 +116,8 @@ export const getTrustsPagination = async ({
 
   return trusts;
 };
+
+export const countTrusts = async () => {
+  const count = await prisma.trust.count();
+  return count;
+};

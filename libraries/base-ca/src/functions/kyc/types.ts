@@ -24,6 +24,7 @@ export type GetKYCsParams = {
   where?: Prisma.KYCWhereInput;
   limit?: number;
   select?: Prisma.KYCSelect;
+  orderBy?: Prisma.KYCOrderByWithAggregationInput;
 };
 
 export type GetKYCsPaginationParams = {

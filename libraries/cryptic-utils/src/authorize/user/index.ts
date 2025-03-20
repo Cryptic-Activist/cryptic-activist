@@ -1,8 +1,7 @@
-import { getUser } from 'base-ca';
-
-import { decodeToken } from '../../generators';
-import { validateAuthorization } from '../../validators';
 import { AuthorizeUser } from './type';
+import { decodeToken } from '../../generators';
+import { getUser } from 'base-ca';
+import { validateAuthorization } from '../../validators';
 
 export const authorizeUser = async (
   secret: string,
@@ -20,7 +19,7 @@ export const authorizeUser = async (
     return { errors: decoded };
   }
 
-  const tokenizedUser = await getUser({ id: decoded.userId }, {});
+  const tokenizedUser = await getUser({ where: { id: decoded.userId } });
 
   if (!tokenizedUser) {
     return { errors: ['Invalid token or user was not found.'] };

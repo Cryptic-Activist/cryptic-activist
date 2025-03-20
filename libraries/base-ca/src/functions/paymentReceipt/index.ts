@@ -122,3 +122,8 @@ export const getPaymentReceiptsPagination = async ({
 
   return paymentReceipts;
 };
+
+export const countPaymentReceipts = async () => {
+  const count = await prisma.paymentReceipt.count();
+  return count;
+};

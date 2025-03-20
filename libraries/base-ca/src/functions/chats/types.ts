@@ -24,6 +24,7 @@ export type GetChatsParams = {
   where?: Prisma.ChatWhereInput;
   limit?: number;
   select?: Prisma.ChatSelect;
+  orderBy?: Prisma.ChatOrderByWithAggregationInput;
 };
 
 export type GetChatsPaginationParams = {

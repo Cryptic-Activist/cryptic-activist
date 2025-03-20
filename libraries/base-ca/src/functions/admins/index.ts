@@ -116,3 +116,8 @@ export const getAdminsPagination = async ({
 
   return admins;
 };
+
+export const countAdmins = async () => {
+  const count = await prisma.admin.count();
+  return count;
+};

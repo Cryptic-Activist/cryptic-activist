@@ -10,12 +10,18 @@ import {
   UserWhereInput,
 } from './types';
 
+import { getUsersParamsRemapping } from '@/utils/remap/user';
+
 export const createUser = async (
   params: CreateUser
 ): Promise<User> => {
   try {
+    const remapped = getUsersParamsRemapping(
+      params as UserWhereInput
+    );
+    console.log({ remapped });
     const user = await prisma.user.findFirst({
-      where: params as UserWhereInput,
+      where: remapped as UserWhereInput,
     });
 
     if (user) {
@@ -115,4 +121,9 @@ export const getUsersPagination = async ({
   });
 
   return users;
+};
+
+export const countUsers = async () => {
+  const count = await prisma.user.count();
+  return count;
 };

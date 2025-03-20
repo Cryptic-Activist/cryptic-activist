@@ -12,10 +12,7 @@ export async function getSystemMessagesController(req: Request, res: Response) {
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    const systemMessages = await getSystemMessages(
-      cleanReqQuery.associations,
-      where,
-    );
+    const systemMessages = await getSystemMessages({ where });
 
     res.status(200).send({
       results: systemMessages,

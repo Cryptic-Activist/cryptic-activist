@@ -123,3 +123,8 @@ export const getPremiumPurchasesPagination = async ({
 
   return premiumPurchases;
 };
+
+export const countPremiumPurchases = async () => {
+  const count = await prisma.premiumPurchase.count();
+  return count;
+};

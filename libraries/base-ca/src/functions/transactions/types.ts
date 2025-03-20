@@ -25,6 +25,7 @@ export type GetTransactionsParams = {
   where?: Prisma.TransactionWhereInput;
   limit?: number;
   select?: Prisma.TransactionSelect;
+  orderBy?: Prisma.TransactionOrderByWithAggregationInput;
 };
 
 export type GetTransactionsPaginationParams = {

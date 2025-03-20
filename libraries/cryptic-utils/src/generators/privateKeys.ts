@@ -1,7 +1,7 @@
-import { getUser } from 'base-ca';
 import bcrypt from 'bcryptjs';
 import { generateMnemonic } from 'bip39';
 import { generateRandomAdjective } from './string';
+import { getUser } from 'base-ca';
 
 export const encryptPrivateKey = async (key: string): Promise<string> => {
   const genSalt = await bcrypt.genSalt(10);
@@ -33,7 +33,13 @@ export const generatePrivateKeys = async (): Promise<{
       encryptedPrivateKeysArr.push(encrypted);
     }
 
-    userObj = await getUser({ privateKeys: encryptedPrivateKeysArr }, {});
+    userObj = await getUser({
+      where: {
+        privateKeys: {
+          equals: privateKeysArr,
+        },
+      },
+    });
   } while (userObj);
 
   return {

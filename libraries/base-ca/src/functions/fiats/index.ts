@@ -116,3 +116,8 @@ export const getFiatsPagination = async ({
 
   return fiats;
 };
+
+export const countFiats = async () => {
+  const count = await prisma.fiat.count();
+  return count;
+};

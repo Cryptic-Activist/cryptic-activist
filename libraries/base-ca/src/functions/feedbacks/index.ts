@@ -120,3 +120,8 @@ export const getFeedbacksPagination = async ({
 
   return feedbacks;
 };
+
+export const countFeedbacks = async () => {
+  const count = await prisma.feedback.count();
+  return count;
+};

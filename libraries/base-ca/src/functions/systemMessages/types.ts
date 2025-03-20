@@ -25,6 +25,7 @@ export type GetSystemMessagesParams = {
   where?: Prisma.SystemMessageWhereInput;
   limit?: number;
   select?: Prisma.SystemMessageSelect;
+  orderBy?: Prisma.SystemMessageOrderByWithAggregationInput;
 };
 
 export type GetSystemMessagesPaginationParams = {

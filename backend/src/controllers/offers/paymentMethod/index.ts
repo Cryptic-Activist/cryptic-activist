@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
-import { getPaymentMethod, safePaymentMethodValuesAssigner } from 'base-ca';
+
+import { getPaymentMethod } from 'base-ca';
 
 export const getPaymentMethodController = async (
   req: Request,
@@ -15,16 +16,9 @@ export const getPaymentMethodController = async (
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    const paymentMethod = await getPaymentMethod(
-      { ...where },
-      cleanReqQuery.associations,
-    );
+    const paymentMethod = await getPaymentMethod({ ...where });
 
-    const safePaymentMethod = safePaymentMethodValuesAssigner(paymentMethod);
-
-    res.status(200).send({
-      ...safePaymentMethod,
-    });
+    res.status(200).send(paymentMethod);
   } catch (err) {
     res.status(500).send({
       status_code: 500,

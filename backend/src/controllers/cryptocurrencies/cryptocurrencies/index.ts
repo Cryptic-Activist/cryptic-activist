@@ -14,7 +14,7 @@ import { getQueries } from '@/utils/axios';
 
 export const index = async (_req: Request, res: Response) => {
   try {
-    const cryptocurrencies = await getCryptocurrencies();
+    const cryptocurrencies = await getCryptocurrencies({});
 
     res.status(200).send([...cryptocurrencies]);
   } catch (err) {
@@ -60,7 +60,7 @@ export const createCryptocurrenciesCoinGecko = async (
   res: Response,
 ) => {
   try {
-    const acceptedCryptocurrencies = await getAcceptedCryptocurrencies();
+    const acceptedCryptocurrencies = await getAcceptedCryptocurrencies({});
     const ids = acceptedCryptocurrencies
       .map((accepted) => {
         return accepted.coingeckoId;

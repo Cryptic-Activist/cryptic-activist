@@ -123,3 +123,8 @@ export const getCryptocurrenciesPagination = async ({
 
   return cryptocurrencies;
 };
+
+export const countCryptocurrencies = async () => {
+  const count = await prisma.cryptocurrency.count();
+  return count;
+};

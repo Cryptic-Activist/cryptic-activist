@@ -5,13 +5,13 @@ import {
   sanitize,
   slugifyStringLowerCase,
 } from 'cryptic-utils';
-import { getTrades, getUser, getUsers, getUsersByMultiple } from 'base-ca';
+import { getTrades, getUser, getUsers } from 'base-ca';
 
 import { assignSafeUserData } from '@/utils/responses/users';
 import { mapUsers } from '@/utils/map/users';
 
 const validateCredentials = async (username: string) => {
-  const user = await getUser({ username }, {});
+  const user = await getUser({ where: { username } });
 
   if (!user) {
     return true;
@@ -43,7 +43,11 @@ export async function getRandomCredentials(_req: Request, res: Response) {
 
 export async function getAllUsers(_req: Request, res: Response) {
   try {
-    const users = await getUsers({ blocked: true });
+    const users = await getUsers({
+      select: {
+        blocked: true,
+      },
+    });
 
     const mapped = mapUsers(users);
 
@@ -90,57 +94,13 @@ export async function getUsersController(req: Request, res: Response) {
     const { query } = req;
     const { user } = query;
 
-    const users = await getUsers(
-      { offers: true, userLanguage: true },
-      { username: user as string },
-    );
-
-    if (!users) {
-      res.status(400).send({
-        errors: ['Users not found'],
-      });
-    }
-
-    res.status(200).send({
-      ...users,
-    });
-  } catch (err) {
-    res.status(500).send({
-      errors: [err.message],
-    });
-  }
-}
-
-export async function getMultipleUsersController(req: Request, res: Response) {
-  try {
-    const { query } = req;
-    const { user } = query;
-
-    const users = await getUsersByMultiple(
-      { offers: true, userLanguage: true },
-      {
-        OR: [
-          {
-            username: {
-              contains: user as string,
-              mode: 'insensitive',
-            },
-          },
-          {
-            firstName: {
-              contains: user as string,
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: user as string,
-              mode: 'insensitive',
-            },
-          },
-        ],
+    const users = await getUsers({
+      where: { username: user as string },
+      select: {
+        offers: true,
+        userLanguage: true,
       },
-    );
+    });
 
     if (!users) {
       res.status(400).send({
@@ -157,6 +117,53 @@ export async function getMultipleUsersController(req: Request, res: Response) {
     });
   }
 }
+
+// export async function getMultipleUsersController(req: Request, res: Response) {
+//   try {
+//     const { query } = req;
+//     const { user } = query;
+
+//     const users = await getUsersByMultiple(
+//       { offers: true, userLanguage: true },
+//       {
+//         OR: [
+//           {
+//             username: {
+//               contains: user as string,
+//               mode: 'insensitive',
+//             },
+//           },
+//           {
+//             firstName: {
+//               contains: user as string,
+//               mode: 'insensitive',
+//             },
+//           },
+//           {
+//             lastName: {
+//               contains: user as string,
+//               mode: 'insensitive',
+//             },
+//           },
+//         ],
+//       },
+//     );
+
+//     if (!users) {
+//       res.status(400).send({
+//         errors: ['Users not found'],
+//       });
+//     }
+
+//     res.status(200).send({
+//       ...users,
+//     });
+//   } catch (err) {
+//     res.status(500).send({
+//       errors: [err.message],
+//     });
+//   }
+// }
 
 export async function getUserVerify(req: Request, res: Response) {
   try {
@@ -174,7 +181,7 @@ export async function getUserVerify(req: Request, res: Response) {
 
     const cleanQuery = sanitize(queryObj, []);
 
-    const user = await getUser(cleanQuery, {});
+    const user = await getUser({ where: cleanQuery });
 
     if (!user) {
       res.status(400).send({
@@ -198,7 +205,10 @@ export const getUserById = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const user = await getUser({ id: userId }, { userLanguage: true });
+    const user = await getUser({
+      where: { id: userId },
+      select: { userLanguage: true },
+    });
 
     if (!user) {
       res.status(404).send({
@@ -224,10 +234,17 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     const { params } = req;
     const { username } = params;
 
-    const user = await getUser(
-      { username },
-      { userLanguage: true, blocked: true, blockers: true, trusted: true },
-    );
+    const user = await getUser({
+      where: {
+        username,
+      },
+      select: {
+        userLanguage: true,
+        blocked: true,
+        blockers: true,
+        trusted: true,
+      },
+    });
 
     if (!user) {
       res.status(404).send({

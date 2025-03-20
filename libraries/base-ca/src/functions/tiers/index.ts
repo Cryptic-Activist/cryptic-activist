@@ -116,3 +116,8 @@ export const getTiersPagination = async ({
 
   return tiers;
 };
+
+export const countTiers = async () => {
+  const count = await prisma.tier.count();
+  return count;
+};

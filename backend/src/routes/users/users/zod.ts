@@ -15,8 +15,4 @@ export const AssociateLanguageToUser = z.object({
   languageName: z.string(),
 });
 
-export const GetMultipleUsers = z.object({
-  user: z.string(),
-});
-
 export const RemoveLangaugeFromUser = AssociateLanguageToUser;
