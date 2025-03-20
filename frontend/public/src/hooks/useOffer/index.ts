@@ -91,8 +91,6 @@ const useOffer = () => {
     }
   }, [queryOffer.data]);
 
-  console.log({ fiatAmount, cryptocurrencyAmount });
-
   useEffect(() => {
     calculateCryptocurrencyAmount();
   }, [fiatAmount, currentPrice]);

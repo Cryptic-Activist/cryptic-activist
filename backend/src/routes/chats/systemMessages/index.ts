@@ -1,22 +1,9 @@
-import { RequestHandler, Router } from 'express';
-import {
-  createSystemMessageController,
-  getSystemMessagesController,
-} from '@/controllers/chats';
-
+import { Router } from 'express';
 import { authenticateUser } from '@/middlewares/authorization';
-
-// import { validateCreateSystemMessage } from '../../middlewares/validators/request/systemMessages';
+import { getSystemMessagesController } from '@/controllers/chats';
 
 const router = Router();
 
 router.get('', authenticateUser, getSystemMessagesController);
-
-// router.post(
-//   '/create',
-//   authenticateUser,
-//   validateCreateSystemMessage,
-//   createSystemMessageController,
-// );
 
 export default router;

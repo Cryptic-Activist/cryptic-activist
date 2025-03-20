@@ -10,15 +10,12 @@ export async function getPaymentMethods(req: Request, res: Response) {
   try {
     const { associations } = req.query;
 
-    const paymentMethods = await getPaymentMethodsCB({
-      select: { offers: false, paymentMethodCategory: false, _count: false },
-    });
+    const paymentMethods = await getPaymentMethodsCB({});
 
     res.status(200).send(paymentMethods);
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -48,8 +45,6 @@ export async function createPaymentMethodController(
     });
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -71,8 +66,6 @@ export async function getPaymentMethodsByCategoryController(
     res.status(200).send(paymentMethods);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

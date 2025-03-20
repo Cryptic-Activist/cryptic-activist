@@ -13,6 +13,7 @@ const useOffers = () => {
   const { user } = useUser();
 
   const initialFetch = async () => {
+    console.log('test');
     offers.setHasError(false);
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
@@ -64,7 +65,6 @@ const useOffers = () => {
     retry: 3,
     onError: (error) => {
       offers.setHasError(true);
-      console.log('Error fetching offers', error);
     },
   });
 

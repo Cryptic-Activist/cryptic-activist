@@ -21,8 +21,6 @@ export const getPaymentMethodController = async (
     res.status(200).send(paymentMethod);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

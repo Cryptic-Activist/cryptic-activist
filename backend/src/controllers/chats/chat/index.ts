@@ -11,15 +11,9 @@ export const createChatController = async (req: Request, res: Response) => {
       where: { id: '' },
     });
 
-    res.status(200).send({
-      status_code: 200,
-      results: newChat,
-      errors: [],
-    });
+    res.status(200).send(newChat);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
