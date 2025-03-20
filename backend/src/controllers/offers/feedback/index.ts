@@ -33,15 +33,9 @@ export const createFeedback = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).send({
-      status_code: 201,
-      results: feedback,
-      errors: [],
-    });
+    res.status(201).send(feedback);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

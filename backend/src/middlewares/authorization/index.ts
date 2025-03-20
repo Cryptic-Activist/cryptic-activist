@@ -30,7 +30,7 @@ export const authenticateUser = async (
       return;
     }
 
-    const user = await getUser({ id: decoded.userId }, {});
+    const user = await getUser({ where: { id: decoded.userId } });
 
     if (!user) {
       res.status(401).send({

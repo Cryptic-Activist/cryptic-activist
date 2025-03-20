@@ -10,9 +10,7 @@ import {
   useUser,
 } from '@/hooks';
 
-import { set } from 'react-hook-form';
 import { useEffect } from 'react';
-import { useRootStore } from '@/store';
 
 const InitialSettings = () => {
   const { getFiats, getFiat, fiats } = useFiats();

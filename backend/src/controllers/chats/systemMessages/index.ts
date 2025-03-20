@@ -14,13 +14,9 @@ export async function getSystemMessagesController(req: Request, res: Response) {
 
     const systemMessages = await getSystemMessages({ where });
 
-    res.status(200).send({
-      results: systemMessages,
-      errors: [],
-    });
+    res.status(200).send(systemMessages);
   } catch (err) {
     res.status(500).send({
-      results: {},
       errors: [err.message],
     });
   }
@@ -39,14 +35,9 @@ export const createSystemMessageController = async (
       create: body,
     });
 
-    res.status(200).send({
-      status_code: 200,
-      results: createdSystemMessage,
-      errors: [],
-    });
+    res.status(200).send(createdSystemMessage);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
       errors: [err.message],
     });
   }

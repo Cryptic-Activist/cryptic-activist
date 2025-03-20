@@ -7,8 +7,6 @@ export async function index(req: Request, res: Response) {
   try {
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

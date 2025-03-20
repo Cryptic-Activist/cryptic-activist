@@ -21,16 +21,10 @@ export const createPaymentMethodCategoryController = async (
       create: cleanName,
     });
 
-    res.status(200).send({
-      status_code: 200,
-      results: newPaymentMethodCategory,
-      errors: [],
-    });
+    res.status(200).send(newPaymentMethodCategory);
     return;
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
     return;
@@ -49,8 +43,6 @@ export const getPaymentMethodCategories = async (
     res.status(200).send(paymentMethodCategories);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }

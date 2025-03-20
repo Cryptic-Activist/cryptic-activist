@@ -22,15 +22,9 @@ export async function countFeedbacksController(req: Request, res: Response) {
     // @ts-ignore
     const counts = await countFeedbacks(cleanReqBody);
 
-    res.status(200).send({
-      status_code: 200,
-      results: counts,
-      errors: [],
-    });
+    res.status(200).send(counts);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -41,15 +35,9 @@ export async function indexFeedbacks(req: Request, res: Response) {
     // @ts-ignore
     const feedbacks = await getFeedbacks(null, []);
 
-    res.status(200).send({
-      status_code: 200,
-      results: feedbacks,
-      errors: [],
-    });
+    res.status(200).send(feedbacks);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -60,13 +48,6 @@ export async function indexFeedbacksPagination(req: Request, res: Response) {
     const { limit, skip } = req.query;
     const { vendor_id, user_id, offer_id, message, type } = req.body;
 
-    const cleanReqQuery = sanitize(
-      {
-        limit: limit.toString(),
-        skip: skip.toString(),
-      },
-      [],
-    );
     const cleanReqBody = sanitize(
       {
         vendor_id,
@@ -78,23 +59,15 @@ export async function indexFeedbacksPagination(req: Request, res: Response) {
       [],
     );
 
-    const feedbacks = await getFeedbacksPagination(
-      cleanReqQuery.limit,
-      cleanReqQuery.skip,
-      ['user', 'offer'],
-      // @ts-ignore
-      cleanReqBody,
-    );
-
-    res.status(200).send({
-      status_code: 200,
-      results: feedbacks,
-      errors: [],
+    const feedbacks = await getFeedbacksPagination({
+      limit: cleanReqBody.limit,
+      offset: cleanReqBody.skip,
+      select: { offer: true, vendor: true },
     });
+
+    res.status(200).send(feedbacks);
   } catch (err) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [err.message],
     });
   }
@@ -105,17 +78,11 @@ export const getFeedbacksByUser = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const feedbacks = await getFeedbacks({ vendorId: userId });
+    const feedbacks = await getFeedbacks({ where: { vendorId: userId } });
 
-    res.status(200).send({
-      status_code: 200,
-      results: feedbacks,
-      errors: [],
-    });
+    res.status(200).send(feedbacks);
   } catch (error) {
     res.status(500).send({
-      status_code: 500,
-      results: {},
       errors: [error.message],
     });
   }
