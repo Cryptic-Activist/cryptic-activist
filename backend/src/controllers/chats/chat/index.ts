@@ -5,7 +5,11 @@ import { createChat } from 'base-ca';
 export const createChatController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
-    const newChat = await createChat(body);
+    const newChat = await createChat({
+      create: body,
+      update: {},
+      where: { id: '' },
+    });
 
     res.status(200).send({
       status_code: 200,

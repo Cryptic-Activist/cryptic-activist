@@ -33,7 +33,11 @@ export const createSystemMessageController = async (
   try {
     const { body } = req;
 
-    const createdSystemMessage = await createSystemMessage(body);
+    const createdSystemMessage = await createSystemMessage({
+      where: { id: '' },
+      update: {},
+      create: body,
+    });
 
     res.status(200).send({
       status_code: 200,

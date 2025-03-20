@@ -127,10 +127,16 @@ export async function register(req: Request, res: Response) {
     const hash = await bcrypt.hash(password, generatedSalt);
 
     const admin = await createAdmin({
-      firstName: cleanBody.firstName,
-      lastName: cleanBody.lastName,
-      username: cleanBody.username,
-      password: hash,
+      where: {
+        id: '',
+      },
+      update: {},
+      create: {
+        firstName: cleanBody.firstName,
+        lastName: cleanBody.lastName,
+        username: cleanBody.username,
+        password: hash,
+      },
     });
 
     if (!admin) {

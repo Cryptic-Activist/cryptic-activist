@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
 import { createOffer, getOffer } from 'base-ca';
 
-import { convertAssociationStringToObject } from '@/utils/map';
-
 export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
 
-    const newOffer = await createOffer(body);
+    const newOffer = await createOffer({
+      where: { id: '' },
+      update: {},
+      create: { ...body },
+    });
 
     res.status(200).send(newOffer);
   } catch (err: any) {
@@ -20,13 +22,7 @@ export const createOfferController = async (req: Request, res: Response) => {
 
 export const getOfferController = async (req: Request, res: Response) => {
   try {
-    const { query, params } = req;
-    const { associations } = query;
-    const { id } = params;
-
-    const associationsObject = convertAssociationStringToObject(
-      associations as string,
-    );
+    const { id } = req.params;
 
     const offer = await getOffer({
       where: {

@@ -14,6 +14,11 @@ import crypto from 'crypto';
 import { getRandomNumber } from './numbers';
 import slugify from 'slugify';
 
+const removeSpecialCharsAndNumbers = (string: string) => {
+  const regex = /[^a-zA-Z]/g;
+  return string.replace(regex, '');
+};
+
 const getDictionaries = () => {
   const randOne = getRandomNumber(0, 1);
   const randTwo = getRandomNumber(0, 4);
@@ -34,12 +39,13 @@ export function generateRandomNames(): string[] {
   const shortName: string = uniqueNamesGenerator(customConfig);
   const names = shortName
     .split(' ')
-    .map(
-      (name: string) =>
+    .map((name: string) =>
+      removeSpecialCharsAndNumbers(
         `${name.substring(0, 1).toUpperCase()}${name.substring(
           1,
           name.length,
         )}`,
+      ),
     );
 
   return names;
