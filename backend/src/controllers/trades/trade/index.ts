@@ -18,7 +18,11 @@ export async function createTradeController(req: Request, res: Response) {
   try {
     const { body } = req;
 
-    const newTrade = await createTrade(body);
+    const newTrade = await createTrade({
+      where: { id: '' },
+      update: {},
+      create: { ...body },
+    });
 
     res.status(200).send(newTrade);
   } catch (err) {

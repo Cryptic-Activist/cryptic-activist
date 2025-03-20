@@ -37,6 +37,8 @@ const useUser = () => {
     setValue,
   } = useForm({ resolver: loginResolver });
 
+  console.log({ errors });
+
   const onSubmit: OnSubmit = (data) => {
     const { password, username } = data;
     mutation.mutate({ password, username });

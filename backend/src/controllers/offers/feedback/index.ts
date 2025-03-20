@@ -20,13 +20,17 @@ export const createFeedback = async (req: Request, res: Response) => {
 
   try {
     const feedback = await createFeedbackBaseCa({
-      vendor: {
-        connect: cleanReqBody.vendor_id,
+      where: { id: '' },
+      update: {},
+      create: {
+        vendor: {
+          connect: cleanReqBody.vendor_id,
+        },
+        trader: { connect: cleanReqBody.user_id },
+        offer: { connect: cleanReqBody.offer_id },
+        message: cleanReqBody.message,
+        type: cleanReqBody.type,
       },
-      trader: { connect: cleanReqBody.user_id },
-      offer: { connect: cleanReqBody.offer_id },
-      message: cleanReqBody.message,
-      type: cleanReqBody.type,
     });
 
     res.status(201).send({

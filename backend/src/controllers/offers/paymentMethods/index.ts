@@ -33,9 +33,13 @@ export async function createPaymentMethodController(
     const { id } = paymentMethodCategory;
 
     const newPaymentMethod = await createPaymentMethod({
-      name,
-      paymentMethodCategory: {
-        connect: { id },
+      where: { id: '' },
+      update: {},
+      create: {
+        name,
+        paymentMethodCategory: {
+          connect: { id },
+        },
       },
     });
 

@@ -80,10 +80,14 @@ export const createCryptocurrencyCoinGecko = async (
     }
 
     const newCrypto = await createCryptocurrency({
-      name: response.data.name,
-      symbol: response.data.symbol.toUpperCase(),
-      coingeckoId: response.data.id,
-      image: response.data.image,
+      where: { id: '' },
+      update: {},
+      create: {
+        name: response.data.name,
+        symbol: response.data.symbol.toUpperCase(),
+        coingeckoId: response.data.id,
+        image: response.data.image,
+      },
     });
 
     if (!newCrypto) {

@@ -15,8 +15,11 @@ export const createPaymentMethodCategoryController = async (
 
     const cleanName = sanitize({ name }, []);
 
-    const newPaymentMethodCategory =
-      await createPaymentMethodCategory(cleanName);
+    const newPaymentMethodCategory = await createPaymentMethodCategory({
+      where: { id: '' },
+      update: {},
+      create: cleanName,
+    });
 
     res.status(200).send({
       status_code: 200,

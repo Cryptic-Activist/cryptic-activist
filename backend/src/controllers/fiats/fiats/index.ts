@@ -25,9 +25,13 @@ export const createFiatController = async (req: Request, res: Response) => {
     const { name, symbol, country } = req.body;
 
     const newFiat = await createFiat({
-      name,
-      symbol,
-      country,
+      where: { id: '' },
+      update: {},
+      create: {
+        name,
+        symbol,
+        country,
+      },
     });
 
     res.status(200).send(newFiat);
@@ -43,9 +47,13 @@ export const createFiatsJSON = async (_req: Request, res: Response) => {
   try {
     fiatsJson.forEach(async (fiat) => {
       await createFiat({
-        name: fiat.name,
-        symbol: fiat.symbol,
-        country: fiat.country,
+        where: { id: '' },
+        update: {},
+        create: {
+          name: fiat.name,
+          symbol: fiat.symbol,
+          country: fiat.country,
+        },
       });
     });
 

@@ -146,13 +146,8 @@ export const register = async (req: Request, res: Response) => {
   const { names, username, password } = req.body;
 
   try {
-    const test = await countUsers();
-    console.log({ test });
-
     const errors: string[] = [];
-
     const cleanBody = sanitize({ ...names, username }, []);
-
     const usernameValidation = await validateUsername(cleanBody.username);
 
     if (!usernameValidation.valid) {
@@ -170,12 +165,18 @@ export const register = async (req: Request, res: Response) => {
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
     const tier = await createTier({
-      name: 'Bronze',
-      description: 'Bronze tier description',
-      discount: 0.01,
-      level: 0,
-      minVolume: 100,
-      tradingFee: 0.05,
+      where: {
+        name: 'Bronze',
+      },
+      update: {},
+      create: {
+        name: 'Bronze',
+        description: 'Bronze tier description',
+        discount: 0.01,
+        level: 0,
+        minVolume: 100,
+        tradingFee: 0.05,
+      },
     });
 
     const user = await createUser({
@@ -192,7 +193,11 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    const language = await createLanguage({ name: 'English' });
+    const language = await createLanguage({
+      where: { name: 'English' },
+      update: {},
+      create: { name: 'English' },
+    });
 
     await associateUserToLanguage({ userId: user.id, languageId: language.id });
 

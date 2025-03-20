@@ -34,10 +34,14 @@ export async function indexCoinGecko(_req: Request, res: Response) {
 
     const createdCryptocurrencyMapped = filtered.map(async (cryptocurrency) => {
       const createdCryptocurrency = await createCryptocurrency({
-        coingeckoId: cryptocurrency.id,
-        name: cryptocurrency.name,
-        symbol: cryptocurrency.symbol,
-        image: cryptocurrency.name,
+        where: { id: '' },
+        update: {},
+        create: {
+          coingeckoId: cryptocurrency.id,
+          name: cryptocurrency.name,
+          symbol: cryptocurrency.symbol,
+          image: cryptocurrency.name,
+        },
       });
 
       return createdCryptocurrency;
@@ -101,9 +105,13 @@ export const createAcceptedCryptocurrencyCoinGecko = async (
     const coin = await getCoin(coingeckoId);
 
     const createdAcceptedCryptocurrency = await createAcceptedCryptocurrency({
-      coingeckoId: coin.id,
-      name: coin.name,
-      symbol: coin.symbol,
+      where: { id: '' },
+      update: {},
+      create: {
+        coingeckoId: coin.id,
+        name: coin.name,
+        symbol: coin.symbol,
+      },
     });
 
     res.status(200).send(createdAcceptedCryptocurrency);
