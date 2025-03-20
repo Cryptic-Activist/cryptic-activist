@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreatePaymentReceipt = Prisma.PaymentReceiptCreateInput;
+export type CreatePaymentReceipt = Prisma.PaymentReceiptUpsertArgs;
 
 export type CreateManyPaymentReceipts =
   Prisma.PaymentReceiptCreateManyInput;

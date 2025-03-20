@@ -11,24 +11,15 @@ import {
   GetPremiumPurchasesPaginationParams,
   GetPremiumPurchasesParams,
   UpdatePremiumPurchaseParams,
-  WherePremiumPurchase,
 } from './types';
 
 export const createPremiumPurchase = async (
   params: CreatePremiumPurchase
 ): Promise<PremiumPurchase> => {
   try {
-    const premiumPurchase = await prisma.premiumPurchase.findFirst({
-      where: params as WherePremiumPurchase,
-    });
-
-    if (premiumPurchase) {
-      return premiumPurchase;
-    }
-
-    const newPremiumPurchase = await prisma.premiumPurchase.create({
-      data: params,
-    });
+    const newPremiumPurchase = await prisma.premiumPurchase.upsert(
+      params
+    );
 
     return newPremiumPurchase;
   } catch (error: any) {

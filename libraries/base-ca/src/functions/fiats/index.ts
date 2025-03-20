@@ -7,24 +7,13 @@ import {
   GetFiatsPaginationParams,
   GetFiatsParams,
   UpdateFiatParams,
-  WhereFiat,
 } from './types';
 
 export const createFiat = async (
   params: CreateFiat
 ): Promise<Fiat> => {
   try {
-    const fiat = await prisma.fiat.findFirst({
-      where: params as WhereFiat,
-    });
-
-    if (fiat) {
-      return fiat;
-    }
-
-    const newFiat = await prisma.fiat.create({
-      data: params,
-    });
+    const newFiat = await prisma.fiat.upsert(params);
 
     return newFiat;
   } catch (error: any) {

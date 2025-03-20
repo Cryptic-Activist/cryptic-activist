@@ -7,24 +7,13 @@ import {
   GetOffersPaginationParams,
   GetOffersParams,
   UpdateOfferParams,
-  WhereOffer,
 } from './types';
 
 export const createOffer = async (
   params: CreateOffer
 ): Promise<Offer> => {
   try {
-    const offer = await prisma.offer.findFirst({
-      where: params as WhereOffer,
-    });
-
-    if (offer) {
-      return offer;
-    }
-
-    const newOffer = await prisma.offer.create({
-      data: params,
-    });
+    const newOffer = await prisma.offer.upsert(params);
 
     return newOffer;
   } catch (error: any) {

@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateOffer = Prisma.OfferCreateInput;
+export type CreateOffer = Prisma.OfferUpsertArgs;
 
 export type CreateManyOffers = Prisma.OfferCreateManyInput;
 

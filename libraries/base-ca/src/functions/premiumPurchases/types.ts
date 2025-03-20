@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreatePremiumPurchase = Prisma.PremiumPurchaseCreateInput;
+export type CreatePremiumPurchase = Prisma.PremiumPurchaseUpsertArgs;
 
 export type CreateManyPremiumPurchases =
   Prisma.PremiumPurchaseCreateManyInput;

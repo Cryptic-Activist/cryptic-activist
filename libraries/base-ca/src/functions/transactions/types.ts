@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateTransaction = Prisma.TransactionCreateInput;
+export type CreateTransaction = Prisma.TransactionUpsertArgs;
 
 export type CreateManyTransactions =
   Prisma.TransactionCreateManyInput;

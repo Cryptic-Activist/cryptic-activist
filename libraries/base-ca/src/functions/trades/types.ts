@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateTrade = Prisma.TradeCreateInput;
+export type CreateTrade = Prisma.TradeUpsertArgs;
 
 export type CreateManyTrades = Prisma.TradeCreateManyInput;
 

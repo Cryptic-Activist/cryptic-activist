@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateSystemMessage = Prisma.SystemMessageCreateInput;
+export type CreateSystemMessage = Prisma.SystemMessageUpsertArgs;
 
 export type CreateManySystemMessages =
   Prisma.SystemMessageCreateManyInput;

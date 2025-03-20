@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateTrust = Prisma.TrustCreateInput;
+export type CreateTrust = Prisma.TrustUpsertArgs;
 
 export type CreateManyTrusts = Prisma.TrustCreateManyInput;
 

@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateUser = Prisma.UserCreateInput;
+export type CreateUser = Prisma.UserUpsertArgs;
 
 export type CreateManyUsers = Prisma.UserCreateManyInput;
 

@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateBlock = Prisma.BlockCreateInput;
+export type CreateBlock = Prisma.BlockUpsertArgs;
 
 export type CreateManyBlocks = Prisma.BlockCreateManyInput;
 

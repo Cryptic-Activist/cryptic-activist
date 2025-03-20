@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateFeedback = Prisma.FeedbackCreateInput;
+export type CreateFeedback = Prisma.FeedbackUpsertArgs;
 
 export type CreateManyFeedbacks = Prisma.FeedbackCreateManyInput;
 

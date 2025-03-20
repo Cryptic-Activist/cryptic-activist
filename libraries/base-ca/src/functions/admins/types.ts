@@ -1,6 +1,6 @@
 import { Prisma } from '@/services/prisma';
 
-export type CreateAdmin = Prisma.AdminCreateInput;
+export type CreateAdmin = Prisma.AdminUpsertArgs;
 
 export type CreateManyAdmins = Prisma.AdminCreateManyInput;
 
