@@ -1,5 +1,15 @@
 import { Request, Response } from 'express';
-import { createTrade, getTrade, updateTrade } from 'base-ca';
+import {
+  createTrade,
+  getCryptocurrency,
+  getFiat,
+  getTrade,
+  getUser,
+  updateTrade,
+} from 'base-ca';
+
+import { calculateTradingFee } from '@/utils/fees';
+import { getCoinPrice } from '@/services/coinGecko';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -92,3 +102,46 @@ export async function getTradeController(req: Request, res: Response) {
     });
   }
 }
+
+export const calculateReceivingAmount = async (req: Request, res: Response) => {
+  try {
+    const { userId, cryptocurrencyId, fiatId, fiatAmount } = req.query;
+    const user = await getUser({
+      where: { id: userId as string },
+      select: {
+        tier: { select: { level: true, tradingFee: true } },
+        isPremium: true,
+      },
+    });
+    const fiat = await getFiat({
+      where: { id: fiatId as string },
+      select: { symbol: true },
+    });
+    const cryptocurrency = await getCryptocurrency({
+      where: { id: cryptocurrencyId as string },
+      select: {
+        coingeckoId: true,
+      },
+    });
+
+    const currentPrice = await getCoinPrice(
+      cryptocurrency!.coingeckoId,
+      fiat!.symbol,
+    );
+
+    console.log({ currentPrice });
+
+    // const buyerFee = calculateTradingFee({});
+
+    // if (user?.isPremium) {
+    // }
+    // console.log({ feeRate });
+
+    res.status(200).send();
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};

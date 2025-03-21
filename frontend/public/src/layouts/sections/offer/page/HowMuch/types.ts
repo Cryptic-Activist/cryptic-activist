@@ -8,9 +8,9 @@ export type HowMuchProps = {
   onChange: (value: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   createTrade: {
-    fiatAmount: number;
-    willReceiveFiat: number;
     cryptocurrencyAmount?: number;
+    fiatAmount: number;
+    receivingFiatAmount?: number;
     isTradeAvailability: boolean;
   };
 };

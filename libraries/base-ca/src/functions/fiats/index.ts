@@ -9,9 +9,7 @@ import {
   UpdateFiatParams,
 } from './types';
 
-export const createFiat = async (
-  params: CreateFiat
-): Promise<Fiat> => {
+export const createFiat = async (params: CreateFiat) => {
   try {
     const newFiat = await prisma.fiat.upsert(params);
 
@@ -21,9 +19,7 @@ export const createFiat = async (
   }
 };
 
-export const createManyFiats = async (
-  params: CreateManyFiats[]
-): Promise<BatchPayload> => {
+export const createManyFiats = async (params: CreateManyFiats[]) => {
   try {
     const newFiats = await prisma.fiat.createMany({
       data: params,
@@ -38,7 +34,7 @@ export const createManyFiats = async (
 export const updateFiat = async ({
   toUpdate,
   where,
-}: UpdateFiatParams): Promise<Fiat> => {
+}: UpdateFiatParams) => {
   const updated = await prisma.fiat.update({
     where,
     data: toUpdate,
@@ -47,19 +43,14 @@ export const updateFiat = async ({
   return updated;
 };
 
-export const deleteFiat = async ({
-  where,
-}: DeleteFiatParams): Promise<Fiat> => {
+export const deleteFiat = async ({ where }: DeleteFiatParams) => {
   const deleted = await prisma.fiat.delete({
     where,
   });
   return deleted;
 };
 
-export const getFiat = async ({
-  where,
-  select,
-}: GetFiatParams): Promise<Fiat | null> => {
+export const getFiat = async ({ where, select }: GetFiatParams) => {
   const fiat = await prisma.fiat.findFirst({
     ...(select && { select }),
     where,
@@ -76,7 +67,7 @@ export const getFiats = async ({
   limit,
   where,
   select,
-}: GetFiatsParams): Promise<Fiat[]> => {
+}: GetFiatsParams) => {
   const fiats = await prisma.fiat.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
@@ -93,7 +84,7 @@ export const getFiatsPagination = async ({
   offset,
   cursor,
   orderBy,
-}: GetFiatsPaginationParams): Promise<Fiat[]> => {
+}: GetFiatsPaginationParams) => {
   const fiats = await prisma.fiat.findMany({
     take: limit,
     ...(offset && { skip: offset }),

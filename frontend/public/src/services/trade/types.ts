@@ -7,3 +7,10 @@ export type StartTradeParam = {
   cryptocurrencyAmount: number;
   fiatAmount: number;
 };
+
+export type getCurrentTradingFeeParams = {
+  userId: string;
+  cryptocurrencyId: string;
+  fiatId: string;
+  fiatAmount: number;
+};

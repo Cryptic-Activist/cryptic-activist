@@ -13,9 +13,7 @@ import {
   UpdateFeedbackParams,
 } from './types';
 
-export const createFeedback = async (
-  params: CreateFeedback
-): Promise<Feedback> => {
+export const createFeedback = async (params: CreateFeedback) => {
   try {
     const newFeedback = await prisma.feedback.upsert(params);
 
@@ -27,7 +25,7 @@ export const createFeedback = async (
 
 export const createManyFeedbacks = async (
   params: CreateManyFeedbacks[]
-): Promise<BatchPayload> => {
+) => {
   try {
     const newFeedbacks = await prisma.feedback.createMany({
       data: params,
@@ -42,7 +40,7 @@ export const createManyFeedbacks = async (
 export const updateFeedback = async ({
   toUpdate,
   where,
-}: UpdateFeedbackParams): Promise<Feedback> => {
+}: UpdateFeedbackParams) => {
   const updated = await prisma.feedback.update({
     where,
     data: toUpdate,
@@ -53,7 +51,7 @@ export const updateFeedback = async ({
 
 export const deleteFeedback = async ({
   where,
-}: DeleteFeedbackParams): Promise<Feedback> => {
+}: DeleteFeedbackParams) => {
   const deleted = await prisma.feedback.delete({
     where,
   });
@@ -63,7 +61,7 @@ export const deleteFeedback = async ({
 export const getFeedback = async ({
   where,
   select,
-}: GetFeedbackParams): Promise<Feedback | null> => {
+}: GetFeedbackParams) => {
   const feedback = await prisma.feedback.findFirst({
     ...(select && { select }),
     where,
@@ -80,7 +78,7 @@ export const getFeedbacks = async ({
   limit,
   where,
   select,
-}: GetFeedbacksParams): Promise<Feedback[]> => {
+}: GetFeedbacksParams) => {
   const feedbacks = await prisma.feedback.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
@@ -97,7 +95,7 @@ export const getFeedbacksPagination = async ({
   offset,
   cursor,
   orderBy,
-}: GetFeedbacksPaginationParams): Promise<Feedback[]> => {
+}: GetFeedbacksPaginationParams) => {
   const feedbacks = await prisma.feedback.findMany({
     take: limit,
     ...(offset && { skip: offset }),

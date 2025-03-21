@@ -11,8 +11,7 @@ export const getPrice = async (req: Request, res: Response) => {
 
     // @ts-ignore
     const price = await getCoinPrice(id, fiatSymbol);
-    // @ts-ignore
-    if (price && price[id] && Object.entries(price[id]).length > 0) {
+    if (price) {
       res.status(200).send({
         ...price,
       });

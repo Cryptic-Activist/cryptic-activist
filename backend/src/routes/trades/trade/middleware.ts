@@ -1,4 +1,4 @@
-import { CreateTrade, GetTrade } from './zod';
+import { CalculateReceivingAmount, CreateTrade, GetTrade } from './zod';
 import { NextFunction, Request, Response } from 'express';
 
 export function validateCreateTrade(
@@ -13,9 +13,6 @@ export function validateCreateTrade(
     next();
   } else {
     res.status(400).send({
-      status_code: 400,
-      results: {},
-      // @ts-ignore
       errors: validated.error,
     });
   }
@@ -33,8 +30,6 @@ export function validateGetTrade(
     next();
   } else {
     res.status(400).send({
-      status_code: 400,
-      results: {},
       // @ts-ignore
       errors: validated.errors,
     });
@@ -103,4 +98,21 @@ export function validateSetPaidTrade(
   }
 
   next();
+}
+
+export function validateCalculateReceivingAmount(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const { query } = req;
+  const validated = CalculateReceivingAmount.safeParse(query);
+
+  if (validated.success) {
+    next();
+  } else {
+    res.status(400).send({
+      errors: validated.error,
+    });
+  }
 }
