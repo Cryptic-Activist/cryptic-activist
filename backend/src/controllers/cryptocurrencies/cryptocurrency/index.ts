@@ -11,9 +11,10 @@ export const getPrice = async (req: Request, res: Response) => {
 
     // @ts-ignore
     const price = await getCoinPrice(id, fiatSymbol);
+    console.log({ price });
     if (price) {
       res.status(200).send({
-        ...price,
+        price,
       });
       return;
     }

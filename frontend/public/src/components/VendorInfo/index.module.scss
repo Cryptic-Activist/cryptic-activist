@@ -1,0 +1,75 @@
+@use "../../styles/globals.module.scss";
+
+.vendor {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.vendorAvatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+  border-radius: 0.4em;
+  color: globals.$white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid globals.$black;
+}
+
+.namesCounters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.names {
+  color: globals.$black;
+  font-size: 1rem;
+}
+
+.namesUsernameLink {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+.namesCheck {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.check {
+  color: globals.$blue-check;
+}
+
+.checkTooltip {
+  background-color: globals.$white;
+  border-radius: 0.4em;
+  border: 1px solid globals.$black;
+  color: globals.$black;
+  padding: 0.3em;
+  text-align: start;
+  width: 15rem;
+  box-shadow: 0 0 4px 1px globals.$box-shadow-default-color;
+}
+
+.vendorUsername {
+  font-size: 0.8rem;
+  color: globals.$text-description-color;
+}
+
+.status {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+  svg {
+    color: globals.$status-offline;
+  }
+  span {
+    font-size: 0.8rem;
+  }
+}

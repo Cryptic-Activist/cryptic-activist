@@ -21,27 +21,20 @@ const useOffer = () => {
 
   const [fiatAmount, setFiatAmount] = useState(offer?.limitMin || 100);
   const [cryptocurrencyAmount, setCryptocurrencyAmount] = useState<number>();
-  const [receivingFiatAmount, setReceivingFiatAmount] = useState<number>();
+  const [receivingFiatAmount, setReceivingFiatAmount] = useState<number>(100);
 
   const isTradeAvailability =
     isLoggedIn() &&
     cryptocurrencyAmount !== Infinity &&
     cryptocurrencyAmount !== null;
 
-  const queryCurrentTradingFee = useQuery({
-    queryKey: ['currentFee', fiatAmount],
-    queryFn: async () => {
-      if (user.id && offer.cryptocurrency?.id && offer.fiat?.id && fiatAmount) {
-        const currentTradingFee = await getCurrentTradingFee({
-          cryptocurrencyId: offer.cryptocurrency?.id,
-          fiatAmount,
-          fiatId: offer.fiat?.id,
-          userId: user.id,
-        });
-        return currentTradingFee;
-      }
-    },
+  const mutationCurrentTradingFee = useMutation({
+    mutationKey: ['currentFee'],
+    mutationFn: getCurrentTradingFee,
     retry: 3,
+    onSuccess: (data) => {
+      setReceivingFiatAmount(200);
+    },
   });
   const queryOffer = useQuery({
     queryKey: ['offer', id],
@@ -62,7 +55,8 @@ const useOffer = () => {
   const calculateCryptocurrencyAmount = () => {
     if (fiatAmount && currentPrice) {
       const amount = fiatAmount / currentPrice;
-      setCryptocurrencyAmount(amount);
+      const rounded = parseFloat(amount.toFixed(8));
+      setCryptocurrencyAmount(rounded);
     }
   };
 
@@ -108,10 +102,15 @@ const useOffer = () => {
   }, [fiatAmount, currentPrice]);
 
   useEffect(() => {
-    if (queryCurrentTradingFee.isSuccess) {
-      setReceivingFiatAmount(queryCurrentTradingFee.data.receivingAmount);
+    if (user.id && offer.cryptocurrency?.id && offer.fiat?.id && fiatAmount) {
+      mutationCurrentTradingFee.mutate({
+        cryptocurrencyId: offer.cryptocurrency.id,
+        fiatAmount,
+        fiatId: offer.fiat.id,
+        userId: user.id,
+      });
     }
-  }, [queryCurrentTradingFee.data, queryCurrentTradingFee.isSuccess]);
+  }, [user.id, offer.cryptocurrency?.id, offer.fiat?.id, fiatAmount]);
 
   return {
     offer,

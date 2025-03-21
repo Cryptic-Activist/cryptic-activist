@@ -29,6 +29,12 @@ export const getOfferController = async (req: Request, res: Response) => {
         id: id as string,
       },
       select: {
+        _count: {
+          select: {
+            feedbacks: true,
+            trades: true,
+          },
+        },
         id: true,
         offerType: true,
         pricingType: true,
@@ -45,11 +51,54 @@ export const getOfferController = async (req: Request, res: Response) => {
         averageTradeSpeed: true,
         vendor: {
           select: {
+            _count: {
+              select: {
+                blockers: true,
+                trusters: true,
+                feedbackTrader: true,
+                tradeVendor: true,
+              },
+            },
             id: true,
             username: true,
             firstName: true,
             lastName: true,
             createdAt: true,
+            profileColor: true,
+            lastLoginAt: true,
+            kyc: true,
+            feedbacksVendor: {
+              orderBy: {
+                createdAt: 'desc',
+              },
+              take: 2,
+              select: {
+                trader: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    username: true,
+                    profileColor: true,
+                  },
+                },
+              },
+            },
+            userLanguage: {
+              select: {
+                language: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+            tier: {
+              select: {
+                name: true,
+                level: true,
+              },
+            },
           },
         },
         cryptocurrency: {

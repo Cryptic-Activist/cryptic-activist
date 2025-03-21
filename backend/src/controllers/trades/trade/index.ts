@@ -137,7 +137,7 @@ export const calculateReceivingAmount = async (req: Request, res: Response) => {
     // }
     // console.log({ feeRate });
 
-    res.status(200).send();
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

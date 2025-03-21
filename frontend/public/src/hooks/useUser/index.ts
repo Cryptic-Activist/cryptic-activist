@@ -24,7 +24,6 @@ const useUser = () => {
     queryKey: ['login'],
     queryFn: async () => {
       const decoded = await decodeAccessToken();
-      console.log({ decoded });
       user.setUser({ ...decoded });
       return user;
     },

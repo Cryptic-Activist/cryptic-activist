@@ -1,9 +1,13 @@
-import { FC } from 'react';
+'use client';
 
-import styles from './index.module.scss';
+import { FC, useState } from 'react';
+
 import { TooltipProps } from './types';
+import styles from './index.module.scss';
 
 const Tooltip: FC<TooltipProps> = ({ children, position, spacing }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const getSpacing = () => {
     if (!position || !spacing) return '';
 
@@ -18,11 +22,19 @@ const Tooltip: FC<TooltipProps> = ({ children, position, spacing }) => {
     }
   };
 
+  const onHoverToggle = () => {
+    setIsOpen((prev) => !prev);
+  };
+
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      onMouseEnter={onHoverToggle}
+      onMouseLeave={onHoverToggle}
+    >
       {children[0]}
       <div className={styles.tooltip} style={{ transform: getSpacing() }}>
-        {children[1]}
+        {isOpen && children[1]}
       </div>
     </div>
   );

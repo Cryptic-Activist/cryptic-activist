@@ -46,14 +46,11 @@ export const useAppStore: StateCreator<
         return;
       }
 
-      const crypto = Object.values(currentPrice.data)[0] as object;
-      const price: number = Object.values(crypto)[0];
-
       const {
         app: { currentPrice: _currentPrice, setAppValue },
       } = get();
 
-      setAppValue({ currentPrice: price }, 'app/setCurrentPrice');
+      setAppValue({ currentPrice: currentPrice.price }, 'app/setCurrentPrice');
     },
     removeToast: (id) => {
       const {

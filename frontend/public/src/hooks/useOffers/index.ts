@@ -13,7 +13,6 @@ const useOffers = () => {
   const { user } = useUser();
 
   const initialFetch = async () => {
-    console.log('test');
     offers.setHasError(false);
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
