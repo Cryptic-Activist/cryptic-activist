@@ -24,8 +24,8 @@ $feedback-negative: #ff3a3a;
 $progress-bar-separator-color: #ddd;
 $blue-check: #0585ff;
 
-$navbigation-bar-height: calc(4rem + 1px);
-$footer-height: calc(23rem + 1px);
+$navbigation-bar-height: calc(4rem);
+$footer-height: calc(23rem);
 $main-content-height: calc(100vh - $navbigation-bar-height - $footer-height);
 
 $box-shadow-default-color: rgba(0, 0, 0, 0.3);
