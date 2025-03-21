@@ -11,7 +11,10 @@ export const getCoinPrice = async (ids: string, fiatSymbol: string) => {
     return null;
   }
 
-  return response.data;
+  const crypto = Object.values(response.data)[0] as object;
+  const price = Object.values(crypto)[0];
+
+  return price;
 };
 
 export const getCoins = async (queriesParams: Queries) => {

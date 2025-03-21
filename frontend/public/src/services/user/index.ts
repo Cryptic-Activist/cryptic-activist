@@ -29,7 +29,7 @@ export const getUserFromToken = async (
   const response = await fetchGet(
     `${BACKEND}/users/auth/login/decode/token/${token}`,
     {
-      Authorization: getBearerToken(token),
+      Authorization: getBearerToken(),
     }
   );
 

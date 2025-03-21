@@ -14,7 +14,7 @@ const HowMuch: FC<HowMuchProps> = ({
   createTrade: {
     cryptocurrencyAmount,
     fiatAmount,
-    willReceiveFiat,
+    receivingFiatAmount,
     isTradeAvailability,
   },
 }) => {
@@ -31,11 +31,13 @@ const HowMuch: FC<HowMuchProps> = ({
             width="8rem"
             label="Will Pay"
           />
-          <p>
-            You will receive{' '}
-            <strong>{`${willReceiveFiat} ${offer.fiat?.symbol}`}</strong> in{' '}
-            <strong>{offer.cryptocurrency?.name}</strong>
-          </p>
+          {receivingFiatAmount && (
+            <p>
+              You will receive{' '}
+              <strong>{`${receivingFiatAmount} ${offer.fiat?.symbol}`}</strong>{' '}
+              in <strong>{offer.cryptocurrency?.name}</strong>
+            </p>
+          )}
         </div>
       </form>
     </div>

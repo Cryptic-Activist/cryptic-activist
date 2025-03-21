@@ -372,7 +372,8 @@ model User {
   password                 String
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean
-  lastLoginAt              DateTime?                  @db.Date
+  isPremium                Boolean?                   @default(false) @db.Boolean
+  lastLoginAt              DateTime?                  @db.Timestamptz
   createdById              String? // Admin who created the account (Foreign key)
   lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
   createdBy                Admin?                     @relation("UserCreatedBy", fields: [createdById], references: [id]) // Relation to Admin

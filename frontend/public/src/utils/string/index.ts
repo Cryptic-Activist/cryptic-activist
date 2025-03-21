@@ -1,3 +1,5 @@
+import { getCookie } from '../browser';
+
 export const toCapitalize = (string: string): string => {
   return `${string.substring(0, 1).toUpperCase()}${string.substring(
     1,
@@ -32,4 +34,7 @@ export const convertArrayOfStringsToString = (array: string[]): string => {
   return converted;
 };
 
-export const getBearerToken = (token: string) => `Bearer ${token}`;
+export const getBearerToken = () => {
+  const accessToken = getCookie('accessToken');
+  return `Bearer ${accessToken}`;
+};

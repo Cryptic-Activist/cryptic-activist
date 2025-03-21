@@ -9,9 +9,7 @@ import {
   UpdateUserParams,
 } from './types';
 
-export const createUser = async (
-  params: CreateUser
-): Promise<User> => {
+export const createUser = async (params: CreateUser) => {
   try {
     const newUser = await prisma.user.upsert(params);
     return newUser;
@@ -20,9 +18,7 @@ export const createUser = async (
   }
 };
 
-export const createManyUsers = async (
-  params: CreateManyUsers[]
-): Promise<BatchPayload> => {
+export const createManyUsers = async (params: CreateManyUsers[]) => {
   try {
     const newUsers = await prisma.user.createMany({
       data: params,
@@ -37,7 +33,7 @@ export const createManyUsers = async (
 export const updateUser = async ({
   toUpdate,
   where,
-}: UpdateUserParams): Promise<User> => {
+}: UpdateUserParams) => {
   const updated = await prisma.user.update({
     where,
     data: toUpdate,
@@ -46,19 +42,14 @@ export const updateUser = async ({
   return updated;
 };
 
-export const deleteUser = async ({
-  where,
-}: DeleteUserParams): Promise<User> => {
+export const deleteUser = async ({ where }: DeleteUserParams) => {
   const deleted = await prisma.user.delete({
     where,
   });
   return deleted;
 };
 
-export const getUser = async ({
-  where,
-  select,
-}: GetUserParams): Promise<User | null> => {
+export const getUser = async ({ where, select }: GetUserParams) => {
   const user = await prisma.user.findFirst({
     ...(select && { select }),
     where,
@@ -75,7 +66,7 @@ export const getUsers = async ({
   limit,
   where,
   select,
-}: GetUsersParams): Promise<User[]> => {
+}: GetUsersParams) => {
   const users = await prisma.user.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
@@ -92,7 +83,7 @@ export const getUsersPagination = async ({
   offset,
   cursor,
   orderBy,
-}: GetUsersPaginationParams): Promise<User[]> => {
+}: GetUsersPaginationParams) => {
   const users = await prisma.user.findMany({
     take: limit,
     ...(offset && { skip: offset }),

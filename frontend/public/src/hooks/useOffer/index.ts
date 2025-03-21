@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-import { getCurrentTradeFee, startTrade } from '@/services/trade';
+import { getCurrentTradingFee, startTrade } from '@/services/trade';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { getOffer } from '@/services/offer';
@@ -21,16 +21,26 @@ const useOffer = () => {
 
   const [fiatAmount, setFiatAmount] = useState(offer?.limitMin || 100);
   const [cryptocurrencyAmount, setCryptocurrencyAmount] = useState<number>();
-  const [willReceiveFiat, setWillReceiveFiat] = useState<number | null>(null);
+  const [receivingFiatAmount, setReceivingFiatAmount] = useState<number>();
 
   const isTradeAvailability =
     isLoggedIn() &&
     cryptocurrencyAmount !== Infinity &&
     cryptocurrencyAmount !== null;
 
-  const queryCurrentFee = useQuery({
-    queryKey: ['currentFee'],
-    queryFn: getCurrentTradeFee,
+  const queryCurrentTradingFee = useQuery({
+    queryKey: ['currentFee', fiatAmount],
+    queryFn: async () => {
+      if (user.id && offer.cryptocurrency?.id && offer.fiat?.id && fiatAmount) {
+        const currentTradingFee = await getCurrentTradingFee({
+          cryptocurrencyId: offer.cryptocurrency?.id,
+          fiatAmount,
+          fiatId: offer.fiat?.id,
+          userId: user.id,
+        });
+        return currentTradingFee;
+      }
+    },
     retry: 3,
   });
   const queryOffer = useQuery({
@@ -59,6 +69,8 @@ const useOffer = () => {
   const handleFiatAmount = useCallback((amount: number): void => {
     setFiatAmount(amount);
   }, []);
+
+  const calculateReceivingAmount = () => {};
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -95,6 +107,12 @@ const useOffer = () => {
     calculateCryptocurrencyAmount();
   }, [fiatAmount, currentPrice]);
 
+  useEffect(() => {
+    if (queryCurrentTradingFee.isSuccess) {
+      setReceivingFiatAmount(queryCurrentTradingFee.data.receivingAmount);
+    }
+  }, [queryCurrentTradingFee.data, queryCurrentTradingFee.isSuccess]);
+
   return {
     offer,
     queryOffer,
@@ -104,7 +122,7 @@ const useOffer = () => {
     createTrade: {
       cryptocurrencyAmount,
       fiatAmount,
-      willReceiveFiat,
+      receivingFiatAmount,
       isTradeAvailability,
     },
   };
