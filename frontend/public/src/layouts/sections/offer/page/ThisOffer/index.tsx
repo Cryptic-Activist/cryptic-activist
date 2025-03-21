@@ -22,8 +22,10 @@ const ThisOffer: FC<ThisOfferProps> = ({ offer }) => {
         <span>Time limit: {offer.timeLimit}</span>
 
         <ul className={styles.tags}>
-          {offer.tags?.map((tag) => (
-            <li className={styles.tag}>{tag}</li>
+          {offer.tags?.map((tag, index) => (
+            <li key={index} className={styles.tag}>
+              {tag}
+            </li>
           ))}
         </ul>
       </div>
