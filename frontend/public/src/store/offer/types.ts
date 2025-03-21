@@ -5,12 +5,50 @@ type OfferType = 'sell' | 'buy';
 
 type TradePricingType = 'market' | 'fixed';
 
-type Vendor = {
+export type TierName = 'Bronze' | 'Silver' | 'Gold' | 'Platinum' | 'Diamond';
+
+export type Tier = {
+  level: number;
+  name: TierName;
+};
+
+export type KYC = {
+  id?: string;
+};
+
+export type UserLanguage = {
+  language: {
+    name: string;
+  };
+};
+
+export type Count = {
+  blockers?: number;
+  trusters?: number;
+  feedbackTrader?: number;
+  tradeVendor?: number;
+};
+
+export type FeedbacksVendor = {
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  profileColor?: string;
+};
+
+export type Vendor = {
+  _count?: Count;
   id: string;
   firstName: string;
   lastName: string;
   username: string;
   profileColor: string;
+  lastLoginAt: string;
+  tier?: Tier;
+  kyc?: KYC;
+  userLanguage?: UserLanguage[];
+  feedbacksVendor?: FeedbacksVendor[];
 };
 
 export type Offer = {

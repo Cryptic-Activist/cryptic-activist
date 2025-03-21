@@ -11,19 +11,37 @@
   gap: 1rem;
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .howMuch {
   grid-area: howMuch;
+  grid-row: 1;
+  grid-column: 1;
+  justify-content: space-between;
 }
 
 .vendor {
   grid-area: vendor;
+  grid-row: 2;
+  grid-column: 1;
 }
 
 .offer {
   grid-area: offer;
+  grid-row: 1 / span 2;
+  grid-column: 2;
 }
 
 .heading {
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.9rem;
 }

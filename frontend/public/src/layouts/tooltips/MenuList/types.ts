@@ -1,3 +1,5 @@
+import { RefObject } from 'react';
+
 type Item = {
   label: string;
   href: string;
@@ -5,4 +7,5 @@ type Item = {
 
 export type MenuListProps = {
   items: Item[];
+  ref: RefObject<any>;
 };

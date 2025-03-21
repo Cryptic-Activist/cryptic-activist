@@ -10,24 +10,32 @@ const ProfileImage: FC<ProfileImageProps> = ({ size, user }) => {
     size === 'xSmall'
       ? {
           height: '3.5rem',
+          minHeight: '3.5rem',
           width: '3.5rem',
+          minWidth: '3.5rem',
           fontSize: '1.8rem',
         }
       : size === 'small'
       ? {
           height: '5rem',
+          minHeight: '5rem',
           width: '5rem',
+          minWidth: '5rem',
           fontSize: '2.5rem',
         }
       : size === 'medium'
       ? {
           height: '10rem',
+          minHeight: '10rem',
           width: '10rem',
+          minWidth: '10rem',
           fontSize: '4rem',
         }
       : {
           height: '15rem',
+          minHeight: '15rem',
           width: '15rem',
+          minWidth: '15rem',
           fontSize: '5rem',
         };
 

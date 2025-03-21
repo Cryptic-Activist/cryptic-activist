@@ -4,6 +4,7 @@ import { HowMuch, ThisOffer, ThisVendor } from '@/layouts/sections/offer/page';
 import { useDynamicTitle, useOffer } from '@/hooks';
 
 import React from 'react';
+import { User } from '@/store/user/types';
 import styles from './index.module.scss';
 
 const OfferPage = () => {
@@ -20,8 +21,8 @@ const OfferPage = () => {
         createTrade={createTrade}
         onSubmit={onSubmit}
       />
-      <ThisOffer />
-      <ThisVendor />
+      <ThisOffer offer={offer} />
+      <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />
     </div>
   );
 };

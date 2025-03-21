@@ -1,6 +1,8 @@
-import { User } from '@/store/user/types';
+import { UserSetter } from '@/store/user/types';
+
+export type Size = 'xSmall' | 'small' | 'medium' | 'large';
 
 export type ProfileImageProps = {
-  size?: 'xSmall' | 'small' | 'medium' | 'large';
-  user?: User;
+  size?: Size;
+  user?: UserSetter;
 };

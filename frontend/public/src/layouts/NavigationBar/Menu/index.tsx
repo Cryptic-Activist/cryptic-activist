@@ -54,7 +54,7 @@ const Menu = () => {
         </Button>
       )}
       {isWalletConnected && <ConnectedWallet />}
-      <Tooltip position="bottom" spacing={55}>
+      <div className={styles.tooltipContainer}>
         {isLoggedIn() ? (
           <Button theme="transparent" onClick={handleToggleUserTooltip}>
             <>{user.names?.firstName}</>
@@ -66,14 +66,13 @@ const Menu = () => {
           </Button>
         )}
         {userTooltip ? (
-          <>
-            {/* @ts-ignore */}
+          <div className={styles.tooltip}>
             <MenuList ref={ref} items={menuUserList} />
-          </>
+          </div>
         ) : (
           <></>
         )}
-      </Tooltip>
+      </div>
     </div>
   );
 };
