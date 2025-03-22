@@ -3,7 +3,7 @@
 .container {
   width: 1400px;
   min-height: calc(globals.$main-content-height - 1rem);
-  margin: 0 auto;
+  margin: 0 auto 1rem auto;
   display: grid;
   grid-template-rows: 35% 65%;
   grid-template-columns: 45% 55%;
@@ -27,5 +27,6 @@
   .container {
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
   }
 }

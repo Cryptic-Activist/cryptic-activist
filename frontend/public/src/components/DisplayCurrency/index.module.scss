@@ -1,0 +1,12 @@
+@use "../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.4em;
+  border-radius: 0.5em;
+  border: 1px solid globals.$black;
+  align-items: center;
+  width: fit-content;
+  box-shadow: 0 0 3px 1px globals.$box-shadow-default-color;
+}

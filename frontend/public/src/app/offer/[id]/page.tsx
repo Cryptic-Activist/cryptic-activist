@@ -1,7 +1,7 @@
 'use client';
 
 import { HowMuch, ThisOffer, ThisVendor } from '@/layouts/sections/offer/page';
-import { useDynamicTitle, useOffer } from '@/hooks';
+import { useApp, useDynamicTitle, useOffer } from '@/hooks';
 
 import React from 'react';
 import { User } from '@/store/user/types';
@@ -11,6 +11,9 @@ const OfferPage = () => {
   const {} = useDynamicTitle('Offer | Cryptic Activist');
   const { offer, queryOffer, handleFiatAmount, createTrade, onSubmit } =
     useOffer();
+  const {
+    app: { currentPrice },
+  } = useApp();
 
   return (
     <div className={styles.container}>
@@ -21,7 +24,7 @@ const OfferPage = () => {
         createTrade={createTrade}
         onSubmit={onSubmit}
       />
-      <ThisOffer offer={offer} />
+      <ThisOffer offer={offer} currentPrice={currentPrice} />
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />
     </div>
   );
