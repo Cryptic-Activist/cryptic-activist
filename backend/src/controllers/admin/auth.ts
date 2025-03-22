@@ -10,7 +10,6 @@ import {
 } from 'cryptic-utils';
 
 import { JWT_SECRET } from '@/constants/env';
-import { assignSafeAdminData } from '@/utils/responses/users';
 import bcrypt from 'bcryptjs';
 
 // import { validateAdminUsername } from '@/utils/validators';
@@ -91,10 +90,8 @@ export async function loginDecodeToken(req: Request, res: Response) {
         errors: ['User not found'],
       });
     }
-    // @ts-ignore
-    const safeAdmin = await assignSafeAdminData(admin);
 
-    res.status(200).send({ ...safeAdmin });
+    res.status(200).send(admin);
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
