@@ -25,3 +25,18 @@
     box-shadow: 0 0 2px 1px globals.$box-shadow-default-color;
   }
 }
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.subHeading {
+  font-size: 1rem;
+}
+
+.rowSection {
+  display: flex;
+  gap: 1rem;
+}

@@ -114,6 +114,7 @@ export const getOfferController = async (req: Request, res: Response) => {
             id: true,
             name: true,
             symbol: true,
+            country: true,
           },
         },
         paymentMethod: {
