@@ -51,7 +51,6 @@ const ThisOffer: FC<ThisOfferProps> = ({ offer, currentPrice }) => {
             <span>{`${offer.limitMax} ${offer.fiat?.symbol}`}</span>
           </div>
         </section>
-        <span>Pricing Type: {offer.pricingType}</span>
         <section className={styles.section}>
           <h4 className={styles.subHeading}>Pricing Type</h4>
           {offer.pricingType && (
