@@ -8,16 +8,12 @@ import styles from './index.module.scss';
 import { toUpperCase } from '@/utils';
 
 const HowMuch: FC<HowMuchProps> = ({
+  user,
   offer,
   queryOffer,
   onChange,
   onSubmit,
-  createTrade: {
-    cryptocurrencyAmount,
-    fiatAmount,
-    receivingFiatAmount,
-    isTradeAvailability,
-  },
+  createTrade: { cryptocurrencyAmount, receivingFiatAmount },
 }) => {
   return (
     <div
@@ -30,16 +26,22 @@ const HowMuch: FC<HowMuchProps> = ({
           <form onSubmit={onSubmit} className={styles.form}>
             <div className={styles.inputContainer}>
               <div className={styles.inputSymbolContainer}>
-                <InputNumber
-                  id="howMuch"
-                  onChange={onChange}
-                  value={fiatAmount}
-                  width="7rem"
-                  label="Will Pay"
-                />
-                {offer.fiat?.symbol && <span>{offer.fiat.symbol}</span>}
+                {offer.limitMin && (
+                  <InputNumber
+                    id="howMuch"
+                    onChange={onChange}
+                    value={offer.limitMin}
+                    isDisabled={!offer.limitMin}
+                    min={offer.limitMin}
+                    max={offer.limitMax}
+                    width="7rem"
+                    label="Will Pay"
+                    symbol={offer.fiat?.symbol}
+                  />
+                )}
               </div>
-              {receivingFiatAmount && (
+              {!user?.id && <p>You must logged in to see the rates</p>}
+              {user?.id && receivingFiatAmount && (
                 <p>
                   You will receive{' '}
                   <strong>

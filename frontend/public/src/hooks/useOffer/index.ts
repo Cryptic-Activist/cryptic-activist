@@ -6,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { getOffer } from '@/services/offer';
 import useApp from '../useApp';
+import useDebounce from '../useDebounce';
 import { useParams } from 'next/navigation';
 import { useRootStore } from '@/store';
 import useUser from '../useUser';
@@ -18,22 +19,20 @@ const useOffer = () => {
   const params = useParams();
   const id = params.id?.toString();
   const { offer } = useRootStore();
-
   const [fiatAmount, setFiatAmount] = useState(offer?.limitMin || 100);
   const [cryptocurrencyAmount, setCryptocurrencyAmount] = useState<number>();
-  const [receivingFiatAmount, setReceivingFiatAmount] = useState<number>(100);
-
-  const isTradeAvailability =
-    isLoggedIn() &&
-    cryptocurrencyAmount !== Infinity &&
-    cryptocurrencyAmount !== null;
+  const [receivingFiatAmount, setReceivingFiatAmount] = useState<number | null>(
+    null
+  );
 
   const mutationCurrentTradingFee = useMutation({
     mutationKey: ['currentFee'],
     mutationFn: getCurrentTradingFee,
     retry: 3,
     onSuccess: (data) => {
-      setReceivingFiatAmount(200);
+      console.log({ data });
+      setReceivingFiatAmount(data.finalFiatAmount);
+      setCryptocurrencyAmount(data.finalCryptoAmount);
     },
   });
   const queryOffer = useQuery({
@@ -60,11 +59,9 @@ const useOffer = () => {
     }
   };
 
-  const handleFiatAmount = useCallback((amount: number): void => {
+  const handleFiatAmount = useDebounce((amount: number): void => {
     setFiatAmount(amount);
-  }, []);
-
-  const calculateReceivingAmount = () => {};
+  }, 1500);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -102,15 +99,28 @@ const useOffer = () => {
   }, [fiatAmount, currentPrice]);
 
   useEffect(() => {
-    if (user.id && offer.cryptocurrency?.id && offer.fiat?.id && fiatAmount) {
+    if (
+      user.id &&
+      offer.cryptocurrency?.id &&
+      offer.fiat?.id &&
+      fiatAmount &&
+      currentPrice
+    ) {
       mutationCurrentTradingFee.mutate({
         cryptocurrencyId: offer.cryptocurrency.id,
         fiatAmount,
         fiatId: offer.fiat.id,
         userId: user.id,
+        currentPrice,
       });
     }
-  }, [user.id, offer.cryptocurrency?.id, offer.fiat?.id, fiatAmount]);
+  }, [
+    user.id,
+    offer.cryptocurrency?.id,
+    offer.fiat?.id,
+    fiatAmount,
+    currentPrice,
+  ]);
 
   return {
     offer,
@@ -122,7 +132,6 @@ const useOffer = () => {
       cryptocurrencyAmount,
       fiatAmount,
       receivingFiatAmount,
-      isTradeAvailability,
     },
   };
 };

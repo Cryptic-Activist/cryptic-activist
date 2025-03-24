@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 export const CreateTrade = z.object({
   vendorId: z.string(),
-  traderId: z.string(),
   offerId: z.string(),
   cryptocurrencyId: z.string(),
   fiatId: z.string(),
@@ -23,13 +22,21 @@ export const CalculateReceivingAmount = z
     cryptocurrencyId: z.string(),
     fiatId: z.string(),
     fiatAmount: z.string(),
+    currentPrice: z.string(),
   })
-  .superRefine(({ fiatAmount }, ctx) => {
+  .superRefine(({ fiatAmount, currentPrice }, ctx) => {
     if (!isNumber(fiatAmount)) {
       ctx.addIssue({
         code: 'custom',
         message: 'Fiat amount must be a number',
         path: ['fiatAmount'],
+      });
+    }
+    if (!isNumber(currentPrice)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'currentPrice amount must be a number',
+        path: ['currentPrice'],
       });
     }
   });

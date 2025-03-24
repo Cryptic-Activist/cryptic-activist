@@ -18,12 +18,14 @@ export type DeleteUserParams = {
 export type GetUserParams = {
   where?: Prisma.UserWhereInput;
   select?: Prisma.UserSelect;
+  include?: Prisma.UserInclude;
 };
 
 export type GetUsersParams = {
   where?: Prisma.UserWhereInput;
   limit?: number;
   select?: Prisma.UserSelect;
+  include?: Prisma.UserInclude;
   orderBy?: Prisma.UserOrderByWithAggregationInput;
 };
 
@@ -35,5 +37,6 @@ export type GetUsersPaginationParams = {
   };
   where?: Prisma.UserWhereInput;
   select?: Prisma.UserSelect;
+  include?: Prisma.UserInclude;
   orderBy?: Prisma.UserOrderByWithAggregationInput;
 };
