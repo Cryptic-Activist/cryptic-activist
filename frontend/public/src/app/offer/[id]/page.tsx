@@ -8,8 +8,15 @@ import styles from './index.module.scss';
 
 const OfferPage = () => {
   const {} = useDynamicTitle('Offer | Cryptic Activist');
-  const { offer, queryOffer, handleFiatAmount, createTrade, onSubmit } =
-    useOffer();
+  const {
+    offer,
+    queryOffer,
+    handleFiatAmount,
+    createTrade,
+    onSubmit,
+    isLoggedIn,
+    mutationStartTrade,
+  } = useOffer();
   const {
     app: { currentPrice },
   } = useApp();
@@ -24,6 +31,8 @@ const OfferPage = () => {
         createTrade={createTrade}
         onSubmit={onSubmit}
         user={user}
+        isLoggedIn={isLoggedIn}
+        mutationStartTrade={mutationStartTrade}
       />
       <ThisOffer offer={offer} currentPrice={currentPrice} />
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />

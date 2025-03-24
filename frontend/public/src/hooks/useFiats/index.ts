@@ -1,11 +1,11 @@
 'use client';
 
-import { FiatList, FiatSymbol } from './types';
+import { FiatList, FiatParams } from './types';
+import { setLocalStorage, toLowerCase } from '@/utils';
 import { useEffect, useState } from 'react';
 
 import { Fiat } from '@/store/fiat/types';
 import countryFlags from './countryFlags';
-import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
 import { useRootStore } from '@/store';
 
@@ -14,12 +14,20 @@ const useFiats = () => {
   const { fiats } = useRootStore();
   const [fiatsList, setFiatsList] = useState<FiatList>([]);
 
-  const getFiat = (symbol: FiatSymbol) => {
+  const getFiat = (params: FiatParams) => {
     if (!fiats.data) {
       return null;
     }
 
-    const fiat = fiats.data.filter((f) => f.symbol === symbol);
+    const fiat = fiats.data.filter((f) => {
+      if (params.id) {
+        return f.id === params.id;
+      } else if (params.name) {
+        return f.name === params.name;
+      } else if (params.symbol) {
+        return f.symbol === params.symbol;
+      }
+    });
 
     const hasFound = fiat.length > 0;
 
@@ -44,6 +52,7 @@ const useFiats = () => {
       },
       'app/setDefaultFiat'
     );
+    setLocalStorage('DEFAULT_FIAT_ID', fiat.id);
   };
 
   const filter = (list: FiatList) => {

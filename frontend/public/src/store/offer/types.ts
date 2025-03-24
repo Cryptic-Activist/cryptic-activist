@@ -1,5 +1,6 @@
 import { Cryptocurrency } from '../cryptocurrency/types';
 import { Fiat } from '../fiat/types';
+import { PaymentMethod } from '../paymentMethod/types';
 
 type OfferType = 'sell' | 'buy';
 
@@ -76,6 +77,7 @@ export type OfferStore = {
     id?: string;
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
+    paymentMethod?: PaymentMethod;
     vendor?: Vendor;
     offerType?: OfferType;
     paymentMethodId?: string;
@@ -98,6 +100,7 @@ export type OfferSetter = {
   id?: string;
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
+  paymentMethod?: PaymentMethod;
   vendor?: Vendor;
   offerType?: OfferType;
   paymentMethodId?: string;

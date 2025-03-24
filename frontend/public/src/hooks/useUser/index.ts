@@ -19,6 +19,9 @@ const useUser = () => {
   const mutation = useMutation({
     mutationFn: user.login,
     mutationKey: ['login'],
+    onSuccess: () => {
+      addToast('success', 'Logged in successfully', 5000);
+    },
   });
   const query = useQuery({
     queryKey: ['login'],

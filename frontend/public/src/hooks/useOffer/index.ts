@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { getCurrentTradingFee, startTrade } from '@/services/trade';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
@@ -12,18 +12,23 @@ import { useRootStore } from '@/store';
 import useUser from '../useUser';
 
 const useOffer = () => {
+  const params = useParams();
+  const id = params.id?.toString();
+
   const { isLoggedIn, user } = useUser();
   const {
     app: { currentPrice },
+    addToast,
   } = useApp();
-  const params = useParams();
-  const id = params.id?.toString();
   const { offer } = useRootStore();
+
   const [fiatAmount, setFiatAmount] = useState(offer?.limitMin || 100);
   const [cryptocurrencyAmount, setCryptocurrencyAmount] = useState<number>();
   const [receivingFiatAmount, setReceivingFiatAmount] = useState<number | null>(
     null
   );
+  const [isTradingAvailable, setIsTradingAvailable] = useState(false);
+  // const [localCurrentPr]
 
   const mutationCurrentTradingFee = useMutation({
     mutationKey: ['currentFee'],
@@ -65,26 +70,33 @@ const useOffer = () => {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (
-      cryptocurrencyAmount &&
-      fiatAmount &&
-      user &&
-      user.id &&
-      offer &&
-      offer.fiat &&
-      offer.id &&
-      offer.vendor?.id &&
-      offer.cryptocurrency?.id
-    ) {
-      mutationStartTrade.mutate({
-        cryptocurrencyAmount,
-        fiatAmount,
-        offerId: offer.id,
-        traderId: user.id,
-        fiatId: offer.fiat?.id,
-        vendorId: offer.vendor?.id,
-        cryptocurrencyId: offer.cryptocurrency?.id,
-      });
+
+    if (isTradingAvailable) {
+      if (
+        cryptocurrencyAmount &&
+        fiatAmount &&
+        user &&
+        user.id &&
+        offer &&
+        offer.fiat &&
+        offer.id &&
+        offer.vendor?.id &&
+        offer.cryptocurrency?.id &&
+        offer.paymentMethod?.id
+      ) {
+        mutationStartTrade.mutate({
+          cryptocurrencyAmount,
+          fiatAmount,
+          offerId: offer.id,
+          traderId: user.id,
+          fiatId: offer.fiat?.id,
+          vendorId: offer.vendor?.id,
+          cryptocurrencyId: offer.cryptocurrency?.id,
+          paymentMethodId: offer.paymentMethod.id,
+        });
+      } else {
+        addToast('error', 'Unable to start trading', 5000);
+      }
     }
   };
 
@@ -122,16 +134,27 @@ const useOffer = () => {
     currentPrice,
   ]);
 
+  useEffect(() => {
+    if (isLoggedIn() && user.id && offer.vendor?.id) {
+      setIsTradingAvailable(true);
+    } else {
+      setIsTradingAvailable(false);
+    }
+  }, [user.id, offer.vendor?.id, isLoggedIn]);
+
   return {
     offer,
     queryOffer,
     calculateCryptocurrencyAmount,
     handleFiatAmount,
     onSubmit,
+    isLoggedIn,
+    mutationStartTrade,
     createTrade: {
       cryptocurrencyAmount,
       fiatAmount,
       receivingFiatAmount,
+      isTradingAvailable,
     },
   };
 };

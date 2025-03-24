@@ -2,6 +2,7 @@
 
 import { CryptocurrencyCoinGeckoId, FiatSymbol } from './types';
 import { DEFAULT_CRYPTOCURRENCY_ID, DEFAULT_FIAT_SYMBOL } from '@/constants';
+import { getLocalStorage, setLocalStorage } from '@/utils';
 import {
   useApp,
   useCryptocurrencies,
@@ -10,6 +11,8 @@ import {
   useUser,
 } from '@/hooks';
 
+import { CryptocurrencyParams } from '@/hooks/useCryptocurrencies/types';
+import { FiatParams } from '@/hooks/useFiats/types';
 import { useEffect } from 'react';
 
 const InitialSettings = () => {
@@ -20,8 +23,8 @@ const InitialSettings = () => {
   const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
   const {} = useUser();
 
-  const setDefaultCryptocurrency = (coinGeckoId: CryptocurrencyCoinGeckoId) => {
-    const cryptocurrency = getCryptocurrency(coinGeckoId);
+  const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
+    const cryptocurrency = getCryptocurrency(params);
 
     if (cryptocurrency) {
       setValue(
@@ -38,11 +41,12 @@ const InitialSettings = () => {
         },
         'app/setDefaultCryptocurrency'
       );
+      setLocalStorage('DEFAULT_CRYPTOCURRENCY_ID', cryptocurrency.id);
     }
   };
 
-  const setDefaultFiat = (symbol: FiatSymbol) => {
-    const fiat = getFiat(symbol);
+  const setDefaultFiat = (params: FiatParams) => {
+    const fiat = getFiat(params);
 
     if (fiat) {
       setValue(
@@ -58,6 +62,7 @@ const InitialSettings = () => {
         },
         'app/setDefaultFiat'
       );
+      setLocalStorage('DEFAULT_FIAT_ID', fiat.id);
     }
   };
 
@@ -84,13 +89,29 @@ const InitialSettings = () => {
 
   useEffect(() => {
     if (cryptocurrencies.data) {
-      setDefaultCryptocurrency(DEFAULT_CRYPTOCURRENCY_ID);
+      const localStorageCryptocurrency = getLocalStorage(
+        'DEFAULT_CRYPTOCURRENCY_ID'
+      );
+
+      if (localStorageCryptocurrency) {
+        setDefaultCryptocurrency({ id: localStorageCryptocurrency });
+        return;
+      }
+
+      setDefaultCryptocurrency({ coingeckoId: DEFAULT_CRYPTOCURRENCY_ID });
     }
   }, [cryptocurrencies.data]);
 
   useEffect(() => {
     if (fiats.data) {
-      setDefaultFiat(DEFAULT_FIAT_SYMBOL);
+      const localStorageFiat = getLocalStorage('DEFAULT_FIAT_ID');
+
+      if (localStorageFiat) {
+        setDefaultFiat({ id: localStorageFiat });
+        return;
+      }
+
+      setDefaultFiat({ symbol: DEFAULT_FIAT_SYMBOL });
     }
   }, [fiats.data]);
 

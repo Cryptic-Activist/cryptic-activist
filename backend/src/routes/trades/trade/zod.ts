@@ -2,6 +2,7 @@ import { isNumber } from '@/utils/string';
 import { z } from 'zod';
 
 export const CreateTrade = z.object({
+  traderId: z.string(),
   vendorId: z.string(),
   offerId: z.string(),
   cryptocurrencyId: z.string(),

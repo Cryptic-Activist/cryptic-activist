@@ -1,6 +1,8 @@
+'use client';
+
 import { Button, InputNumber } from '@/components';
 import { Form, Input } from '@/components/forms';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { HowMuchProps } from './types';
 import coreStyles from '../index.module.scss';
@@ -13,17 +15,56 @@ const HowMuch: FC<HowMuchProps> = ({
   queryOffer,
   onChange,
   onSubmit,
-  createTrade: { cryptocurrencyAmount, receivingFiatAmount },
+  mutationStartTrade,
+  createTrade: {
+    cryptocurrencyAmount,
+    receivingFiatAmount,
+    isTradingAvailable,
+  },
+  isLoggedIn,
 }) => {
+  const [submitButtonLabel, setSubmitButtonLabel] = useState('');
+  useEffect(() => {
+    const getSubmitButtonLabel = () => {
+      if (!isLoggedIn()) {
+        return 'Login to start trading';
+      }
+
+      if (user.id === offer.vendor?.id) {
+        return "Can't trade with yourself";
+      }
+
+      if (mutationStartTrade.isPending) {
+        return 'Starting trade...';
+      }
+
+      if (mutationStartTrade.isError) {
+        return 'Some error occurred';
+      }
+
+      return 'Start trading';
+    };
+    const label = getSubmitButtonLabel();
+    setSubmitButtonLabel(label);
+  }, [
+    isLoggedIn,
+    user.id,
+    offer.vendor?.id,
+    isLoggedIn,
+    mutationStartTrade.isPending,
+    mutationStartTrade.isError,
+  ]);
+
   return (
-    <div
+    <form
       className={`${coreStyles.container} ${coreStyles.howMuch} ${styles.container}`}
+      onSubmit={onSubmit}
     >
       <div className={styles.row}>
         <section className={coreStyles.section}>
           <h2 className={coreStyles.heading}>How Much do you want to buy</h2>
 
-          <form onSubmit={onSubmit} className={styles.form}>
+          <div className={styles.form}>
             <div className={styles.inputContainer}>
               <div className={styles.inputSymbolContainer}>
                 {offer.limitMin && (
@@ -69,13 +110,18 @@ const HowMuch: FC<HowMuchProps> = ({
                 )
               )}
             </div>
-          </form>
+          </div>
         </section>
       </div>
-      <Button padding="1rem" fullWidth>
-        Start Trade
+      <Button
+        padding="1rem"
+        fullWidth
+        type="submit"
+        theme={isTradingAvailable ? 'primary' : 'ghost'}
+      >
+        {submitButtonLabel}
       </Button>
-    </div>
+    </form>
   );
 };
 
