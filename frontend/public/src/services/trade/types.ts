@@ -13,4 +13,5 @@ export type getCurrentTradingFeeParams = {
   cryptocurrencyId: string;
   fiatId: string;
   fiatAmount: number;
+  currentPrice: number;
 };

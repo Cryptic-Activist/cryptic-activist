@@ -49,9 +49,14 @@ export const deleteUser = async ({ where }: DeleteUserParams) => {
   return deleted;
 };
 
-export const getUser = async ({ where, select }: GetUserParams) => {
+export const getUser = async ({
+  where,
+  select,
+  include,
+}: GetUserParams) => {
   const user = await prisma.user.findFirst({
     ...(select && { select }),
+    ...(include && { include }),
     where,
   });
 
@@ -66,10 +71,14 @@ export const getUsers = async ({
   limit,
   where,
   select,
+  include,
+  orderBy,
 }: GetUsersParams) => {
   const users = await prisma.user.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
+    ...(include && { include }),
+    ...(orderBy && { orderBy }),
     where,
   });
 
@@ -79,6 +88,7 @@ export const getUsers = async ({
 export const getUsersPagination = async ({
   limit,
   select,
+  include,
   where,
   offset,
   cursor,
@@ -88,6 +98,7 @@ export const getUsersPagination = async ({
     take: limit,
     ...(offset && { skip: offset }),
     ...(select && { select }),
+    ...(include && { include }),
     ...(cursor && { cursor }),
     ...(orderBy && { orderBy }),
     where,

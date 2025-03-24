@@ -25,3 +25,6 @@ export const BACKEND = process.env.BACKEND as string;
 
 export const FRONTEND_ADMIN = process.env.FRONTEND_ADMIN as string;
 export const FRONTEND_PUBLIC = process.env.FRONTEND_PUBLIC as string;
+export const DEFAULT_PREMIUM_DISCOUNT = parseFloat(
+  process.env.DEFAULT_PREMIUM_DISCOUNT as string,
+);

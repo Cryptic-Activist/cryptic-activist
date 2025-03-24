@@ -19,13 +19,33 @@ const InputNumber: FC<InputNumberProps> = ({
   width,
 }) => {
   const [localValue, setLocalValue] = useState(value.toString());
+  const [localErrorMessage, setLocalErrorMessage] = useState(errorMessage);
 
-  const errorStyle = errorMessage ? styles.error : '';
+  const errorStyle = localErrorMessage?.length ? styles.error : '';
 
   const handleOnChange = (event: FormEvent<HTMLInputElement>) => {
+    setLocalErrorMessage('');
     const value = event.currentTarget.value;
     const regex = /[^0-9.]/g;
     const sanitazed = value.replace(regex, '');
+    const parsedValue = parseFloat(sanitazed);
+
+    console.log({ value });
+    if (value.length === 0) {
+      setLocalErrorMessage('Invalid amount');
+    }
+
+    if (min) {
+      if (parsedValue < min) {
+        setLocalErrorMessage('Amount is below the allowed minimum');
+      }
+    }
+    if (max) {
+      if (parsedValue > max) {
+        setLocalErrorMessage('Amount is above the allowed minimum');
+      }
+    }
+
     setLocalValue(sanitazed);
   };
 
@@ -53,7 +73,7 @@ const InputNumber: FC<InputNumberProps> = ({
       <div className={`${styles.container} ${errorStyle}`}>
         <input
           type="number"
-          className={styles.input}
+          className={`${styles.input} ${styles.error}`}
           onChange={handleOnChange}
           value={localValue}
           min={min}
@@ -65,8 +85,8 @@ const InputNumber: FC<InputNumberProps> = ({
         />
         {symbol && <span className={styles.symbol}>{symbol}</span>}
       </div>
-      {errorMessage && (
-        <span className={styles.errorMessage}>{errorMessage}</span>
+      {localErrorMessage && (
+        <span className={styles.errorMessage}>{localErrorMessage}</span>
       )}
     </div>
   );

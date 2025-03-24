@@ -1,10 +1,9 @@
 'use client';
 
 import { HowMuch, ThisOffer, ThisVendor } from '@/layouts/sections/offer/page';
-import { useApp, useDynamicTitle, useOffer } from '@/hooks';
+import { useApp, useDynamicTitle, useOffer, useUser } from '@/hooks';
 
 import React from 'react';
-import { User } from '@/store/user/types';
 import styles from './index.module.scss';
 
 const OfferPage = () => {
@@ -14,6 +13,7 @@ const OfferPage = () => {
   const {
     app: { currentPrice },
   } = useApp();
+  const { user } = useUser();
 
   return (
     <div className={styles.container}>
@@ -23,6 +23,7 @@ const OfferPage = () => {
         onChange={handleFiatAmount}
         createTrade={createTrade}
         onSubmit={onSubmit}
+        user={user}
       />
       <ThisOffer offer={offer} currentPrice={currentPrice} />
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />

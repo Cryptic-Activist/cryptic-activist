@@ -3,11 +3,14 @@ import {
   createTrade,
   getCryptocurrency,
   getFiat,
+  getTier,
   getTrade,
   getUser,
   updateTrade,
 } from 'base-ca';
 
+import { CalculateReceivingAmountQueries } from './types';
+import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { calculateTradingFee } from '@/utils/fees';
 import { getCoinPrice } from '@/services/coinGecko';
 
@@ -103,20 +106,38 @@ export async function getTradeController(req: Request, res: Response) {
   }
 }
 
-export const calculateReceivingAmount = async (req: Request, res: Response) => {
+export const calculateReceivingAmount = async (
+  req: Request<{}, {}, {}, CalculateReceivingAmountQueries>,
+  res: Response,
+) => {
   try {
-    const { userId, cryptocurrencyId, fiatId, fiatAmount } = req.query;
+    const { userId, cryptocurrencyId, fiatId, fiatAmount, currentPrice } =
+      req.query;
+
+    const parsedFiatAmount = parseFloat(fiatAmount);
+    const parsedCurrentPrice = parseFloat(currentPrice);
+
     const user = await getUser({
       where: { id: userId as string },
       select: {
-        tier: { select: { level: true, tradingFee: true } },
         isPremium: true,
+        tierId: true,
       },
     });
+
+    if (!user) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+    }
+
     const fiat = await getFiat({
       where: { id: fiatId as string },
       select: { symbol: true },
     });
+
+    if (!fiat) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+    }
+
     const cryptocurrency = await getCryptocurrency({
       where: { id: cryptocurrencyId as string },
       select: {
@@ -124,20 +145,34 @@ export const calculateReceivingAmount = async (req: Request, res: Response) => {
       },
     });
 
-    const currentPrice = await getCoinPrice(
-      cryptocurrency!.coingeckoId,
-      fiat!.symbol,
-    );
+    if (!cryptocurrency) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+    }
 
-    console.log({ currentPrice });
+    const tier = await getTier({ where: { id: user?.tierId as string } });
 
-    // const buyerFee = calculateTradingFee({});
+    if (!tier) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+    }
 
-    // if (user?.isPremium) {
-    // }
-    // console.log({ feeRate });
+    let feeRate = tier?.tradingFee! - tier?.discount!;
 
-    res.status(200).send({ ok: true });
+    if (user?.isPremium) {
+      feeRate -= DEFAULT_PREMIUM_DISCOUNT;
+    }
+
+    const tradingFee = parsedFiatAmount * feeRate;
+    const finalFiatAmount = parsedFiatAmount - tradingFee;
+
+    const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
+
+    res.status(200).send({
+      fiatAmount,
+      tradingFee,
+      finalFiatAmount,
+      currentPrice,
+      finalCryptoAmount: parseFloat(finalCryptoAmount),
+    });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
