@@ -1,3 +1,9 @@
+export type FiatParams = {
+  id?: string;
+  symbol?: string;
+  name?: string;
+};
+
 export type FiatSymbol = string;
 
 export type FiatList = {

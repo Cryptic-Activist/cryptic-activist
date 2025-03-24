@@ -11,8 +11,6 @@ import {
 
 import { CalculateReceivingAmountQueries } from './types';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
-import { calculateTradingFee } from '@/utils/fees';
-import { getCoinPrice } from '@/services/coinGecko';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -27,14 +25,27 @@ export async function createTradeController(req: Request, res: Response) {
   try {
     const { body } = req;
 
+    console.log({ body });
+
     const newTrade = await createTrade({
       where: { id: '' },
       update: {},
-      create: { ...body },
+      create: {
+        traderId: body.traderId,
+        vendorId: body.vendorId,
+        offerId: body.offerId,
+        cryptocurrencyId: body.cryptocurrencyId,
+        fiatId: body.fiatId,
+        cryptocurrencyAmount: body.cryptocurrencyAmount,
+        fiatAmount: body.fiatAmount,
+        status: 'IN_PROGRESS',
+        paymentMethodId: body.paymentMethodId,
+      },
     });
 
     res.status(200).send(newTrade);
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

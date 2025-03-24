@@ -1,7 +1,7 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .wrapper {
-  position: absolute;
+  position: fixed;
   bottom: 1rem;
   right: 1rem;
   z-index: 9;
@@ -55,7 +55,7 @@
 }
 
 .success {
-  background-color: rgb(50, 181, 50);
+  background-color: rgb(144, 254, 144);
   border-color: rgb(24, 90, 24);
   .closeBtn,
   .content {

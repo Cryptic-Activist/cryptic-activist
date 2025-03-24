@@ -1,8 +1,9 @@
 'use client';
 
+import { CryptocurrencyCoinGeckoId, CryptocurrencyParams } from './types';
+import { setLocalStorage, toLowerCase } from '@/utils';
+
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
-import { CryptocurrencyCoinGeckoId } from './types';
-import { toLowerCase } from '@/utils';
 import { useApp } from '@/hooks';
 import { useRootStore } from '@/store';
 import { useState } from 'react';
@@ -14,14 +15,22 @@ const useCryptocurrency = () => {
     cryptocurrencies.data
   );
 
-  const getCryptocurrency = (coingeckoId: CryptocurrencyCoinGeckoId) => {
+  const getCryptocurrency = (params: CryptocurrencyParams) => {
     if (!cryptocurrencies.data) {
       return null;
     }
 
-    const cryptocurrency = cryptocurrencies.data?.filter(
-      (crypto) => crypto.coingeckoId === coingeckoId
-    );
+    const cryptocurrency = cryptocurrencies.data?.filter((crypto) => {
+      if (params.id) {
+        return crypto.id === params.id;
+      } else if (params.name) {
+        return crypto.name === params.name;
+      } else if (params.symbol) {
+        return crypto.symbol === params.symbol;
+      } else if (params.coingeckoId) {
+        return crypto.coingeckoId === params.coingeckoId;
+      }
+    });
 
     const hasFound = cryptocurrency.length > 0;
 
@@ -47,6 +56,7 @@ const useCryptocurrency = () => {
       },
       'app/setDefaultCryptocurrency'
     );
+    setLocalStorage('DEFAULT_CRYPTOCURRENCY_ID', cryptocurrency.id);
   };
 
   const filterCryptocurrencies = (term: string) => {

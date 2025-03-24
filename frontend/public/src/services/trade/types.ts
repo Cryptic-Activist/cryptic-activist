@@ -4,6 +4,7 @@ export type StartTradeParam = {
   offerId: string;
   cryptocurrencyId: string;
   fiatId: string;
+  paymentMethodId: string;
   cryptocurrencyAmount: number;
   fiatAmount: number;
 };

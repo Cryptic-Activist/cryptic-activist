@@ -5,7 +5,10 @@ import { getBearerToken, getQueries } from '@/utils';
 import { BACKEND } from '@/constants';
 
 export const startTrade = async (params: StartTradeParam) => {
-  const response = await fetchPost(`${BACKEND}/trades/trade/create`, params);
+  const bearerToken = getBearerToken();
+  const response = await fetchPost(`${BACKEND}/trades/trade/create`, params, {
+    Authorization: bearerToken,
+  });
 
   if (response.status !== 200) return null;
 
