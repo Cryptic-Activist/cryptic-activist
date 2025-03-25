@@ -19,5 +19,6 @@ export { default as Tier } from './Tier';
 export { default as VendorInfo } from './VendorInfo';
 export { default as Info } from './Info';
 export { default as DisplayCurrency } from './DisplayCurrency';
+export { default as Chat } from './Chat';
 export * from './lists';
 export * from './offer';

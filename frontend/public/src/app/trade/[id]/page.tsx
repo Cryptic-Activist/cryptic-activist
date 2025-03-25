@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Chat } from '@/components';
 import React, { FC, useEffect } from 'react';
 import {
   TradeCancelationProps,
@@ -9,7 +10,6 @@ import {
 } from './types';
 import { useCountDown, useTrade } from '@/hooks';
 
-import { Button } from '@/components';
 import styles from './index.module.scss';
 import { toUpperCase } from '@/utils';
 
@@ -69,8 +69,8 @@ const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
       </Button>
       <p>
         After the payment is made do not forget to click on{' '}
-        <strong>Paid</strong> within the stipulated negociation time frame. If
-        you do not do this, the negociation will end and the{' '}
+        <strong>Paid</strong> within the stipulated negotiation time frame. If
+        you do not do this, the negotiation will end and the{' '}
         {trade.cryptocurrency?.name} trading amount will return to the vendor's
         wallet.
       </p>
@@ -78,7 +78,7 @@ const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
         <Button size={18}>Cancel</Button>
         <p>
           Click on <strong>Cancel</strong> if you don't want to continue
-          negociating with this vendor
+          negotiating with this vendor
         </p>
       </div>
     </section>
@@ -126,7 +126,7 @@ const TradePage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.trade}>
-        <h1 className={styles.heading}>Negociation has started</h1>
+        <h1 className={styles.heading}>Negotiation has started</h1>
         <span className={styles.warning}>
           If anyone ask you to trade outside of the Cryptic Activist Catalog
           platform does not accept such request.
@@ -136,7 +136,11 @@ const TradePage = () => {
         <TradeCancelation trade={trade} timeLeft={timeLeftInMinutes} />
         <TradeInstructions trade={trade} />
       </div>
-      <div>Chat</div>
+      <div>
+        {trade.vendor && trade.trader && (
+          <Chat receiver={trade.vendor} sender={trade.trader} />
+        )}
+      </div>
     </div>
   );
 };
