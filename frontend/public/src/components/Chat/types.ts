@@ -1,12 +1,22 @@
-import { Trader, Vendor } from '@/store/trade/types';
+import { TradeSetter, Trader, Vendor } from '@/store/trade/types';
 
-export type ChatProps = {
+import { Message } from '@/hooks/useSocket/types';
+
+export type Props = {
   sender: Trader;
   receiver: Vendor;
 };
 
-export type HeaderProps = ChatProps;
+export type ChatProps = Props & {
+  trade: TradeSetter;
+};
 
-export type ContentProps = ChatProps;
+export type HeaderProps = Props;
 
-export type InputsProps = ChatProps;
+export type ContentProps = Props & {
+  messages: Message[];
+};
+
+export type InputsProps = Props & {
+  sendMessage: (content: string) => void;
+};

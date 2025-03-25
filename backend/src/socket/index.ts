@@ -1,77 +1,128 @@
-import {} from // createOnlineUser,
-// deleteOnlineUser,
-// getOnlineUser,
-// setup,
-// createSystemMessage,
-'base-ca';
+import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
+import { Message, User, UserInfo } from './types';
 
-import {
-  ADMIN_BOT_NAMES,
-  ADMIN_JOIN_MESSAGE,
-  ADMIN_MESSAGE,
-  DISCONNECT,
-  END,
-  GO_ONLINE,
-  JOIN,
-  MESSAGE,
-  ROOM_DATA,
-  SEND_SYSTEM_MESSAGE,
-} from 'cryptic-utils';
+const socketHandler = (
+  io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+) => {
+  // Store active users and their room information
+  const users = new Map<string, UserInfo>();
+  const rooms = new Map<string, Set<string>>();
+  const roomMessages = new Map<string, Message[]>();
 
-import { Socket } from 'socket.io';
+  io.on('connection', (socket: SocketIO) => {
+    console.log('New client connected:', socket.id);
 
-// import {
-//   addTrader,
-//   getUser,
-//   getUsersInRoom,
-//   removeUser,
-// } from '@utils/helpers/users';
+    // Join trade room
+    socket.on('join_room', (data: { roomId: string; user: User }) => {
+      const { roomId, user } = data;
+      console.log(`Room ${roomId} joined`);
 
-export default function socketEvents(io) {
-  // setup(true);
+      // Ensure room doesn't exceed 3 users
+      if (!rooms.has(roomId)) {
+        rooms.set(roomId, new Set());
+      }
 
-  io.on('connection', (socket: Socket) => {
-    socket.on(GO_ONLINE, async ({ user }) => {
-      // const userObj = await getOnlineUser({ user_id: user.id });
-      // if (!userObj) {
-      //   await createOnlineUser({ socket_id: socket.id, user_id: user.id });
-      // }
-    });
+      const roomUsers = rooms.get(roomId)!;
 
-    socket.on(JOIN, ({ room, trader, vendor }) => {
-      socket.join(room);
+      if (roomUsers.size >= 3) {
+        socket.emit('room_error', 'Trade room is full');
+        return;
+      }
 
-      socket.emit(ADMIN_MESSAGE, {
-        user: ADMIN_BOT_NAMES,
-        message: ADMIN_JOIN_MESSAGE(trader, vendor),
+      // Add user to room
+      roomUsers.add(socket.id);
+      socket.join(roomId);
+
+      // Store user information
+      users.set(socket.id, {
+        id: socket.id,
+        user,
+        roomId,
       });
 
-      socket.broadcast.to(room).emit(MESSAGE, { user: { text: '' } });
+      // Initialize room messages if not exists
+      if (!roomMessages.has(roomId)) {
+        roomMessages.set(roomId, []);
+      }
 
-      io.to(room).emit(ROOM_DATA, {
-        room: {
-          data: '',
-        },
-      });
+      // Send existing room messages
+      const existingMessages = roomMessages.get(roomId) || [];
+      socket.emit('room_messages', existingMessages);
+
+      // Notify room about new user
+      io.to(roomId).emit(
+        'room_users_update',
+        Array.from(roomUsers).map((userId) => users.get(userId)?.user.username),
+      );
     });
 
-    // socket.on(SEND_CHAT_MESSAGE, ({ user, message }) => {});
+    // Send message in trade room
+    socket.on('send_message', (data: { roomId: string; content: string }) => {
+      const { roomId, content } = data;
+      console.log('message sent to room' + roomId);
+      const user = users.get(socket.id);
 
-    socket.on(END, async ({ user }) => {
-      // await deleteOnlineUser({ user_id: user.id });
+      console.log({ data });
+
+      if (!user) return;
+
+      const newMessage: Message = {
+        id: `msg_${Date.now()}`,
+        senderId: socket.id,
+        content,
+        user: user.user,
+        timestamp: Date.now(),
+      };
+
+      // Store message in room history
+      const roomMessageHistory = roomMessages.get(roomId) || [];
+      roomMessageHistory.push(newMessage);
+      roomMessages.set(roomId, roomMessageHistory);
+
+      // Broadcast to room
+      io.to(roomId).emit('receive_message', newMessage);
     });
 
-    // socket.on(ALERT_NEW_TRADE_STARTED, async () => {});
+    // Leave trade room
+    socket.on('leave_room', (roomId: string) => {
+      console.log(`room ${roomId} left`);
+      const roomUsers = rooms.get(roomId);
+      if (roomUsers) {
+        roomUsers.delete(socket.id);
+        socket.leave(roomId);
 
-    socket.on(SEND_SYSTEM_MESSAGE, async ({ user_id, trade_id, message }) => {
-      // await createSystemMessage({ user_id, trade_id, message });
+        // Notify room about user leaving
+        io.to(roomId).emit(
+          'room_users_update',
+          Array.from(roomUsers).map(
+            (userId) => users.get(userId)?.user.username,
+          ),
+        );
+      }
+      users.delete(socket.id);
     });
 
-    socket.on(DISCONNECT, async () => {
-      // const userObj = await getOnlineUser({ socket_id: socket.id });
-      // if (userObj) {
-      //   await deleteOnlineUser({ socket_id: socket.id });
-      // }
+    // Disconnection handling
+    socket.on('disconnect', () => {
+      console.log('disconnected');
+      const user = users.get(socket.id);
+      if (user && user.roomId) {
+        const roomUsers = rooms.get(user.roomId);
+        if (roomUsers) {
+          roomUsers.delete(socket.id);
+
+          // Notify room about user leaving
+          io.to(user.roomId).emit(
+            'room_users_update',
+            Array.from(roomUsers).map(
+              (userId) => users.get(userId)?.user.username,
+            ),
+          );
+        }
+      }
+      users.delete(socket.id);
     });
   });
-}
+};
+
+export default socketHandler;

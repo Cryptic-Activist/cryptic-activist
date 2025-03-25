@@ -1,10 +1,13 @@
+'use client';
+
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
 import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
-import React, { FC } from 'react';
+import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
 import styles from './index.module.scss';
 import { timeSince } from '@/utils';
+import { useSocket } from '@/hooks';
 
 const Header: FC<HeaderProps> = ({ receiver, sender }) => {
   return (
@@ -77,13 +80,32 @@ const Content: FC<ContentProps> = ({ receiver, sender }) => {
   );
 };
 
-const Inputs: FC<InputsProps> = ({ receiver, sender }) => {
+const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
+  const [message, setMessage] = useState('');
+
+  // console.log({ message });
+
+  const submitMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    sendMessage(message);
+    setMessage('');
+  };
+
+  const onChangeMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = event.currentTarget.value;
+    setMessage(value);
+  };
+
   return (
-    <form className={styles.inputs}>
+    <form className={styles.inputs} onSubmit={submitMessage}>
       <button className={styles.button} title="Attachments">
         <FaPaperclip size={20} />
       </button>
-      <input className={styles.input} />
+      <textarea
+        className={styles.textarea}
+        onChange={onChangeMessage}
+        value={message}
+      />
       <button className={styles.button} title="Send message" type="submit">
         <FaPaperPlane size={20} />
       </button>
@@ -91,12 +113,17 @@ const Inputs: FC<InputsProps> = ({ receiver, sender }) => {
   );
 };
 
-const Chat: FC<ChatProps> = ({ receiver, sender }) => {
+const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
+  const { sendMessage, messages } = useSocket({
+    roomId: trade.chat?.id,
+    user: trade.trader,
+  });
+
   return (
     <div className={styles.container}>
       <Header receiver={receiver} sender={sender} />
-      <Content receiver={receiver} sender={sender} />
-      <Inputs receiver={receiver} sender={sender} />
+      <Content receiver={receiver} sender={sender} messages={messages} />
+      <Inputs receiver={receiver} sender={sender} sendMessage={sendMessage} />
     </div>
   );
 };

@@ -51,6 +51,9 @@ export type User = {
 
 export type Vendor = User;
 export type Trader = User;
+export type Chat = {
+  id: string;
+};
 
 export type PaymentReceipt = {
   name: string;
@@ -83,6 +86,7 @@ export type Trade = {
     cryptocurrencyAmount?: number;
     paid?: boolean;
     status?: Status;
+    chat?: Chat;
   };
 };
 
@@ -103,6 +107,7 @@ export type TradeStore = {
     cryptocurrencyAmount?: number;
     paid?: boolean;
     status?: Status;
+    chat?: Chat;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
     resetTrade: () => void;
@@ -125,6 +130,7 @@ export type TradeSetter = {
   cryptocurrencyAmount?: number;
   paid?: boolean;
   status?: Status;
+  chat?: Chat;
 };
 
 export type Value = TradeSetter;
