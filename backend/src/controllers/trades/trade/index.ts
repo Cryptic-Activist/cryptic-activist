@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import {
   createChat,
   createTrade,
+  getChat,
   getCryptocurrency,
   getFiat,
   getTier,
@@ -103,6 +104,7 @@ export async function getTradeController(req: Request, res: Response) {
     const trade = await getTrade({
       where: { id },
       select: {
+        id: true,
         fiatAmount: true,
         cryptocurrencyAmount: true,
         paymentMethod: {
@@ -168,13 +170,24 @@ export async function getTradeController(req: Request, res: Response) {
     });
 
     if (!trade) {
-      res.status(204).send();
+      res.status(204).send({ errors: ['Unable to retrieve trade'] });
       return;
     }
 
-    res.status(200).send(trade);
+    const chat = await getChat({
+      where: { tradeId: trade.id },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!chat) {
+      res.status(204).send({ errors: ['Unable to retrieve chat'] });
+      return;
+    }
+
+    res.status(200).send({ ...trade, chat });
   } catch (err) {
-    console.log({ errorTest: err });
     res.status(500).send({
       errors: [err.message],
     });

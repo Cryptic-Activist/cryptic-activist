@@ -24,6 +24,7 @@ export const useTradeSlice: StateCreator<
     status: undefined,
     trader: undefined,
     vendor: undefined,
+    chat: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => ({
@@ -46,6 +47,7 @@ export const useTradeSlice: StateCreator<
             status: params.status ?? trade.status,
             trader: params.trader ?? trade.trader,
             vendor: params.vendor ?? trade.vendor,
+            chat: params.chat ?? trade.chat,
           },
         }),
         false,

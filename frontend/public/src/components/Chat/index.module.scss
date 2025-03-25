@@ -7,7 +7,7 @@
   max-height: calc(globals.$main-content-height - 1rem);
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
   display: grid;
-  grid-template-rows: 3rem 1fr 4rem;
+  grid-template-rows: 3rem 1fr 6rem;
 }
 
 .header {
@@ -90,10 +90,24 @@
     border: none;
     cursor: pointer;
   }
-  .input {
+  .textarea {
     background-color: transparent;
     border: none;
     font-size: 1rem;
+    field-sizing: content;
+    width: 100%;
+    resize: none;
+    padding: 0.5em;
+    field-sizing: content;
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: globals.$secondary;
+    }
     &:focus {
       outline: none;
     }

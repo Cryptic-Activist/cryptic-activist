@@ -15,3 +15,4 @@ export { default as useOffers } from './useOffers';
 export { default as useOffer } from './useOffer';
 export { default as useDynamicTitle } from './useDynamicTitle';
 export { default as useTrade } from './useTrade';
+export { default as useSocket } from './useSocket';

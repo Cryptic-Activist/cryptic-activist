@@ -76,7 +76,7 @@ const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
       </p>
       <div className={styles.row}>
         <Button size={18}>Cancel</Button>
-        <p>
+        <p className={styles.statement}>
           Click on <strong>Cancel</strong> if you don't want to continue
           negotiating with this vendor
         </p>
@@ -103,8 +103,10 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
       <div className={styles.labelContentContainer}>
         <h3 className={styles.subHeading}>Tags</h3>
         <ul className={styles.tags}>
-          {trade.offer?.tags?.map((tag) => (
-            <li className={styles.tag}>{tag}</li>
+          {trade.offer?.tags?.map((tag, index) => (
+            <li key={index} className={styles.tag}>
+              {tag}
+            </li>
           ))}
         </ul>
       </div>
@@ -137,8 +139,8 @@ const TradePage = () => {
         <TradeInstructions trade={trade} />
       </div>
       <div>
-        {trade.vendor && trade.trader && (
-          <Chat receiver={trade.vendor} sender={trade.trader} />
+        {trade.id && trade.vendor && trade.trader && (
+          <Chat receiver={trade.vendor} sender={trade.trader} trade={trade} />
         )}
       </div>
     </div>
