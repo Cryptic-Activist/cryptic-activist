@@ -3,7 +3,7 @@ import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 import { fetchFiats } from '@/services/fiats';
 
-export const useFiatsStore: StateCreator<
+export const useFiatsSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

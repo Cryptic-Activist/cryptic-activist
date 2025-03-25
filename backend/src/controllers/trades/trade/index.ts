@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import {
+  createChat,
   createTrade,
   getCryptocurrency,
   getFiat,
@@ -43,7 +44,15 @@ export async function createTradeController(req: Request, res: Response) {
       },
     });
 
-    res.status(200).send(newTrade);
+    const newChat = await createChat({
+      where: { id: '' },
+      update: {},
+      create: {
+        tradeId: newTrade.id,
+      },
+    });
+
+    res.status(200).send({ trade: { ...newTrade }, chat: { ...newChat } });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -94,23 +103,78 @@ export async function getTradeController(req: Request, res: Response) {
     const trade = await getTrade({
       where: { id },
       select: {
-        chat: true,
-        cryptocurrency: true,
-        fiat: true,
-        offer: true,
-        trader: true,
-        vendor: true,
+        fiatAmount: true,
+        cryptocurrencyAmount: true,
+        paymentMethod: {
+          select: {
+            name: true,
+          },
+        },
+        paymentReceipt: true,
+        status: true,
+        chat: {
+          select: {
+            id: true,
+          },
+        },
+        cryptocurrency: {
+          select: {
+            coingeckoId: true,
+            name: true,
+            symbol: true,
+            image: true,
+          },
+        },
+        fiat: {
+          select: {
+            name: true,
+            symbol: true,
+            country: true,
+          },
+        },
+        offer: {
+          select: {
+            id: true,
+            tags: true,
+            instructions: true,
+            terms: true,
+            offerType: true,
+            timeLimit: true,
+          },
+        },
+        trader: {
+          select: {
+            id: true,
+            profileColor: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            isPremium: true,
+            lastLoginAt: true,
+          },
+        },
+        vendor: {
+          select: {
+            id: true,
+            profileColor: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            isPremium: true,
+            lastLoginAt: true,
+          },
+        },
       },
     });
 
     if (!trade) {
       res.status(204).send();
+      return;
     }
-
-    // const safeTrade = safeTradeValuesAssigner(trade);
 
     res.status(200).send(trade);
   } catch (err) {
+    console.log({ errorTest: err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -138,6 +202,7 @@ export const calculateReceivingAmount = async (
 
     if (!user) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
     }
 
     const fiat = await getFiat({
@@ -147,6 +212,7 @@ export const calculateReceivingAmount = async (
 
     if (!fiat) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
     }
 
     const cryptocurrency = await getCryptocurrency({
@@ -158,12 +224,14 @@ export const calculateReceivingAmount = async (
 
     if (!cryptocurrency) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
     }
 
     const tier = await getTier({ where: { id: user?.tierId as string } });
 
     if (!tier) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
     }
 
     let feeRate = tier?.tradingFee! - tier?.discount!;

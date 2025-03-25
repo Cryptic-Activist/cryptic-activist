@@ -2,7 +2,7 @@ import { CreateOfferStore } from './types';
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 
-export const useCreateOfferStore: StateCreator<
+export const useCreateOfferSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

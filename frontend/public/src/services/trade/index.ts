@@ -29,3 +29,17 @@ export const getCurrentTradingFee = async (
 
   return response.data;
 };
+
+export const getTrade = async (id: string) => {
+  const queries = getQueries({
+    associations: 'cryptocurrency,fiat,paymentMethod,vendor',
+  });
+  const bearerToken = getBearerToken();
+  const response = await fetchGet(`${BACKEND}/trades/trade/` + id + queries, {
+    Authorization: bearerToken,
+  });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};

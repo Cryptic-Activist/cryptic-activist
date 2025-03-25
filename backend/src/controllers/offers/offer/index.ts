@@ -107,6 +107,7 @@ export const getOfferController = async (req: Request, res: Response) => {
             name: true,
             symbol: true,
             image: true,
+            coingeckoId: true,
           },
         },
         fiat: {

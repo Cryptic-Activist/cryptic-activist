@@ -2,7 +2,7 @@ import { RegisterStore } from './types';
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 
-export const useRegisterStore: StateCreator<
+export const useRegisterSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

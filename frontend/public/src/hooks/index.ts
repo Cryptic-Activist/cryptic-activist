@@ -14,3 +14,4 @@ export { default as useCreateOffer } from './useCreateOffer';
 export { default as useOffers } from './useOffers';
 export { default as useOffer } from './useOffer';
 export { default as useDynamicTitle } from './useDynamicTitle';
+export { default as useTrade } from './useTrade';

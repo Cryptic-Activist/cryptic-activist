@@ -2,7 +2,7 @@ import { FiatStore } from './types';
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 
-export const useFiatStore: StateCreator<
+export const useFiatSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

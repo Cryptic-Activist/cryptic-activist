@@ -15,3 +15,4 @@ export * from './paymentMethods';
 export * from './verifyAccount';
 export * from './offers';
 export * from './offer';
+export * from './trade';

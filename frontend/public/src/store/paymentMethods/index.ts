@@ -7,7 +7,7 @@ import { PaymentMethodsStore } from './types';
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 
-export const usePaymentMethodsStore: StateCreator<
+export const usePaymentMethodsSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

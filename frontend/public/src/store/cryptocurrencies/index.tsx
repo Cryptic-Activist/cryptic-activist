@@ -3,7 +3,7 @@ import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 import { fetchCryptocurrencies } from '@/services/cryptocurrencies';
 
-export const useCryptocurrenciesStore: StateCreator<
+export const useCryptocurrenciesSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],
