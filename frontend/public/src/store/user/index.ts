@@ -11,7 +11,7 @@ import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 import { UserStore } from './types';
 
-export const useUserStore: StateCreator<
+export const useUserSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

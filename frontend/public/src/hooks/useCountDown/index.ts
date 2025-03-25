@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const useCountdown = () => {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -25,6 +25,13 @@ const useCountdown = () => {
     const remainingSeconds = seconds % 60;
     const remainingMilliseconds = milliseconds % 1000;
 
+    return { seconds, minutes, remainingSeconds, remainingMilliseconds };
+  };
+
+  const timeLeftFormatted = (miliseconds: number) => {
+    const { minutes, remainingMilliseconds, remainingSeconds, seconds } =
+      formatTime(miliseconds);
+
     return `${minutes}:${
       remainingSeconds < 10 ? '0' : ''
     }${remainingSeconds}.${remainingMilliseconds}`;
@@ -34,10 +41,17 @@ const useCountdown = () => {
     return (miliseconds / 1000).toFixed(0) + 's';
   };
 
+  const formatTimeToMinutes = (miliseconds: number) => {
+    const { minutes, remainingSeconds } = formatTime(miliseconds);
+
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
   return {
     timeLeftInMiliseconds: timeLeft,
     timeLeftInSeconds: formatTimeToSeconds(timeLeft),
-    timeLeftFormatted: formatTime(timeLeft),
+    timeLeftFormatted: timeLeftFormatted(timeLeft),
+    timeLeftInMinutes: formatTimeToMinutes(timeLeft),
     startCountDown,
   };
 };

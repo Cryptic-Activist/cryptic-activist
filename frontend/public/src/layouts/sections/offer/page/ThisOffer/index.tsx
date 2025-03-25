@@ -12,7 +12,9 @@ const ThisOffer: FC<ThisOfferProps> = ({ offer, currentPrice }) => {
   const buildListAtCalculation = () => {
     if (currentPrice && offer.listAt) {
       const total = calculatePercentageIncrease(currentPrice, offer.listAt);
-      return `${currentPrice} ${offer.fiat?.symbol} + ${offer.listAt}% = ${total} ${offer.fiat?.symbol}`;
+      return `${currentPrice} ${offer.fiat?.symbol} + ${
+        offer.listAt
+      }% = ${total.toFixed(2)} ${offer.fiat?.symbol}`;
     }
   };
 

@@ -1,41 +1,41 @@
 'use client';
 
+import {} from '@/services/cryptocurrencies';
+
 import { FormEvent, useEffect, useState } from 'react';
 import { getCurrentTradingFee, startTrade } from '@/services/trade';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useParams, useRouter } from 'next/navigation';
 
+import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import useApp from '../useApp';
 import useDebounce from '../useDebounce';
-import { useParams } from 'next/navigation';
 import { useRootStore } from '@/store';
 import useUser from '../useUser';
 
 const useOffer = () => {
   const params = useParams();
   const id = params.id?.toString();
+  const router = useRouter();
 
   const { isLoggedIn, user } = useUser();
-  const {
-    app: { currentPrice },
-    addToast,
-  } = useApp();
+  const { addToast } = useApp();
   const { offer } = useRootStore();
 
+  const [localCurrentPrice, setLocalCurrentPrice] = useState();
   const [fiatAmount, setFiatAmount] = useState(offer?.limitMin || 100);
   const [cryptocurrencyAmount, setCryptocurrencyAmount] = useState<number>();
   const [receivingFiatAmount, setReceivingFiatAmount] = useState<number | null>(
     null
   );
   const [isTradingAvailable, setIsTradingAvailable] = useState(false);
-  // const [localCurrentPr]
 
   const mutationCurrentTradingFee = useMutation({
     mutationKey: ['currentFee'],
     mutationFn: getCurrentTradingFee,
     retry: 3,
     onSuccess: (data) => {
-      console.log({ data });
       setReceivingFiatAmount(data.finalFiatAmount);
       setCryptocurrencyAmount(data.finalCryptoAmount);
     },
@@ -54,11 +54,22 @@ const useOffer = () => {
   const mutationStartTrade = useMutation({
     mutationFn: startTrade,
     mutationKey: ['startTrade'],
+    onSuccess: (data) => {
+      router.push('/trade/' + data.trade.id);
+    },
+  });
+  const mutationCurrentPrice = useMutation({
+    mutationKey: ['currentPrice'],
+    mutationFn: ({ id, fiatSymbol }: { id: string; fiatSymbol: string }) =>
+      fetchCurrentPrice(id, fiatSymbol),
+    onSuccess: (data) => {
+      setLocalCurrentPrice(data.price);
+    },
   });
 
   const calculateCryptocurrencyAmount = () => {
-    if (fiatAmount && currentPrice) {
-      const amount = fiatAmount / currentPrice;
+    if (fiatAmount && localCurrentPrice) {
+      const amount = fiatAmount / localCurrentPrice;
       const rounded = parseFloat(amount.toFixed(8));
       setCryptocurrencyAmount(rounded);
     }
@@ -108,7 +119,7 @@ const useOffer = () => {
 
   useEffect(() => {
     calculateCryptocurrencyAmount();
-  }, [fiatAmount, currentPrice]);
+  }, [fiatAmount, localCurrentPrice]);
 
   useEffect(() => {
     if (
@@ -116,14 +127,14 @@ const useOffer = () => {
       offer.cryptocurrency?.id &&
       offer.fiat?.id &&
       fiatAmount &&
-      currentPrice
+      localCurrentPrice
     ) {
       mutationCurrentTradingFee.mutate({
         cryptocurrencyId: offer.cryptocurrency.id,
         fiatAmount,
         fiatId: offer.fiat.id,
         userId: user.id,
-        currentPrice,
+        currentPrice: localCurrentPrice,
       });
     }
   }, [
@@ -131,7 +142,7 @@ const useOffer = () => {
     offer.cryptocurrency?.id,
     offer.fiat?.id,
     fiatAmount,
-    currentPrice,
+    localCurrentPrice,
   ]);
 
   useEffect(() => {
@@ -142,6 +153,15 @@ const useOffer = () => {
     }
   }, [user.id, offer.vendor?.id, isLoggedIn]);
 
+  useEffect(() => {
+    if (offer.fiat?.symbol && offer.cryptocurrency?.coingeckoId) {
+      mutationCurrentPrice.mutate({
+        fiatSymbol: offer.fiat.symbol,
+        id: offer.cryptocurrency.coingeckoId,
+      });
+    }
+  }, [offer.fiat?.symbol, offer.cryptocurrency?.coingeckoId]);
+
   return {
     offer,
     queryOffer,
@@ -150,6 +170,7 @@ const useOffer = () => {
     onSubmit,
     isLoggedIn,
     mutationStartTrade,
+    localCurrentPrice,
     createTrade: {
       cryptocurrencyAmount,
       fiatAmount,

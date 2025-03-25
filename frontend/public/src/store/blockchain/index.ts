@@ -2,7 +2,7 @@ import { BlockchainStore } from './types';
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 
-export const useBlockchainStore: StateCreator<
+export const useBlockchainSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

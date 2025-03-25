@@ -30,7 +30,6 @@ const InputNumber: FC<InputNumberProps> = ({
     const sanitazed = value.replace(regex, '');
     const parsedValue = parseFloat(sanitazed);
 
-    console.log({ value });
     if (value.length === 0) {
       setLocalErrorMessage('Invalid amount');
     }

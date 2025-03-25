@@ -30,7 +30,7 @@ router.put('/cancel', authenticateUser, validateCancelTrade, cancelTrade);
 
 router.put('/paid', authenticateUser, validateSetPaidTrade);
 
-router.get('/get/:id', authenticateUser, getTradeController);
+router.get('/:id', authenticateUser, getTradeController);
 
 router.get(
   '/calculate-receiving',

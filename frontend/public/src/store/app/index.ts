@@ -4,7 +4,7 @@ import { StateCreator } from 'zustand';
 import { fetchCurrentPrice } from '@/services/app';
 import { generateUUID } from '@/utils';
 
-export const useAppStore: StateCreator<
+export const useAppSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

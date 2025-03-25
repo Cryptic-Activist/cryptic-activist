@@ -16,10 +16,8 @@ const OfferPage = () => {
     onSubmit,
     isLoggedIn,
     mutationStartTrade,
+    localCurrentPrice,
   } = useOffer();
-  const {
-    app: { currentPrice },
-  } = useApp();
   const { user } = useUser();
 
   return (
@@ -34,7 +32,7 @@ const OfferPage = () => {
         isLoggedIn={isLoggedIn}
         mutationStartTrade={mutationStartTrade}
       />
-      <ThisOffer offer={offer} currentPrice={currentPrice} />
+      <ThisOffer offer={offer} currentPrice={localCurrentPrice} />
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />
     </div>
   );

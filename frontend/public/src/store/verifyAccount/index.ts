@@ -3,7 +3,7 @@ import { StateCreator } from 'zustand';
 import { VerifyAccountStore } from './types';
 import { submitPrivateKeysVerification } from '@/services/verifyAccount';
 
-export const useVerifyAccountStore: StateCreator<
+export const useVerifyAccountSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],

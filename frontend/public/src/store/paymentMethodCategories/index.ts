@@ -3,7 +3,7 @@ import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 import { fetchPaymentMethodCategories } from '@/services/paymentMethodCategories';
 
-export const usePaymentMethodCategoriesStore: StateCreator<
+export const usePaymentMethodCategoriesSlice: StateCreator<
   RootStore,
   [['zustand/devtools', never]],
   [],
