@@ -65,10 +65,13 @@
   border: none;
 }
 
-.content {
+.list {
   height: 100%;
   width: 100%;
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   &::-webkit-scrollbar {
     width: 5px;
   }
@@ -78,6 +81,44 @@
   &::-webkit-scrollbar-thumb {
     background: globals.$secondary;
   }
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: fit-content;
+  max-width: 70%;
+  .message {
+    border-radius: 0.4rem;
+    padding: 0.4em;
+    width: fit-content;
+  }
+}
+
+.usernameTime {
+  display: flex;
+  gap: 0.2rem;
+  align-self: flex-end;
+}
+
+.username,
+.time {
+  font-size: 0.8rem;
+}
+
+.sender {
+  align-self: flex-end;
+  margin-right: 0.5rem;
+  .message {
+    background-color: #a5d3ff;
+    align-self: flex-end;
+  }
+}
+
+.receiver {
+  background-color: #dedede;
+  margin-left: 0.5rem;
 }
 
 .inputs {
