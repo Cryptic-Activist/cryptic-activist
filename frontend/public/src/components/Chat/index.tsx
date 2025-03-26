@@ -3,10 +3,10 @@
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
 import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
 import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
+import { formatTimestamp, timeSince } from '@/utils';
 
 import { FaEllipsisV } from 'react-icons/fa';
 import styles from './index.module.scss';
-import { timeSince } from '@/utils';
 import { useSocket } from '@/hooks';
 
 const Header: FC<HeaderProps> = ({ receiver, sender }) => {
@@ -36,54 +36,30 @@ const Header: FC<HeaderProps> = ({ receiver, sender }) => {
   );
 };
 
-const Content: FC<ContentProps> = ({ receiver, sender }) => {
+const Content: FC<ContentProps> = ({ receiver, sender, messages }) => {
   return (
-    <div className={styles.content}>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-      <h1>Test</h1>
-    </div>
+    <ul className={styles.list}>
+      {messages.map((message, index) => {
+        const messageStyle =
+          message.user.id === sender.id ? styles.sender : styles.receiver;
+        return (
+          <li key={index} className={`${styles.listItem} ${messageStyle}`}>
+            <div className={styles.usernameTime}>
+              <span className={styles.username}>{message.user.username}</span>
+              <span className={styles.time}>
+                {formatTimestamp(message.timestamp)}
+              </span>
+            </div>
+            <p className={styles.message}>{message.content}</p>
+          </li>
+        );
+      })}
+    </ul>
   );
 };
 
 const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
-
-  // console.log({ message });
 
   const submitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

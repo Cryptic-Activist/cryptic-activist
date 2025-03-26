@@ -8,6 +8,6 @@ export type UseSocketParams = {
 export type Message = {
   id: string;
   content: string;
-  user: string;
+  user: UserSetter;
   timestamp: number;
 };

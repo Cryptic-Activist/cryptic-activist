@@ -23,20 +23,16 @@ export const formatFullDate = (date?: string) => {
   return `${month} ${day}, ${year}`;
 };
 
-export function timeSince(dateString: string) {
-  // Parse the input date string into a Date object
+export const timeSince = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
 
-  // Validate the date is valid
   if (isNaN(date.getTime())) {
     return 'Invalid date';
   }
 
-  // Calculate the time difference in milliseconds
   const timeDiff = now.getTime() - date.getTime();
 
-  // Convert milliseconds to various time units
   const seconds = Math.floor(timeDiff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -44,7 +40,6 @@ export function timeSince(dateString: string) {
   const weeks = Math.floor(days / 7);
   const years = Math.floor(days / 365);
 
-  // Return the appropriate string based on the time difference
   if (seconds < 60) {
     return 'less than a minute ago';
   } else if (minutes < 60) {
@@ -58,4 +53,11 @@ export function timeSince(dateString: string) {
   } else {
     return years === 1 ? '1 year ago' : `${years} years ago`;
   }
-}
+};
+
+export const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
