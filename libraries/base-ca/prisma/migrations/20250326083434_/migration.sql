@@ -240,12 +240,13 @@ CREATE TABLE "tiers" (
 -- CreateTable
 CREATE TABLE "trades" (
     "id" TEXT NOT NULL,
-    "paymentReceiptId" TEXT NOT NULL,
+    "paymentReceiptId" TEXT,
     "vendorId" TEXT NOT NULL,
     "traderId" TEXT NOT NULL,
     "offerId" TEXT NOT NULL,
     "cryptocurrencyId" TEXT NOT NULL,
     "fiatId" TEXT NOT NULL,
+    "paymentMethodId" TEXT NOT NULL,
     "cryptocurrencyAmount" DOUBLE PRECISION NOT NULL,
     "fiatAmount" DOUBLE PRECISION NOT NULL,
     "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -318,7 +319,8 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
-    "lastLoginAt" DATE,
+    "isPremium" BOOLEAN DEFAULT false,
+    "lastLoginAt" TIMESTAMPTZ,
     "createdById" TEXT,
     "lastUpdatedById" TEXT,
     "deletedAt" DATE,
@@ -424,7 +426,7 @@ ALTER TABLE "premium_purchases" ADD CONSTRAINT "premium_purchases_userId_fkey" F
 ALTER TABLE "system_messages" ADD CONSTRAINT "system_messages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentReceiptId_fkey" FOREIGN KEY ("paymentReceiptId") REFERENCES "payment_receipts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentReceiptId_fkey" FOREIGN KEY ("paymentReceiptId") REFERENCES "payment_receipts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -440,6 +442,9 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_cryptocurrencyId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") REFERENCES "fiats"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -21,6 +21,7 @@
   "lint-staged": {},
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@swc/core": "^1.11.13",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
