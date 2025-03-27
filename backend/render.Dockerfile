@@ -1,49 +1,57 @@
-FROM node:lts-alpine AS base
+#
+# 1) BUILD STAGE
+#
+FROM node:lts-alpine as build
 WORKDIR /app
 
-# Install system dependencies
+# Install any OS-level dependencies you need
 RUN apk add --no-cache openssl
 
-# Copy backend package files
-COPY backend/package*.json ./
+# Copy the entire monorepo so that the libraries folder is available
+COPY . .
 
-# Install dependencies stage
-FROM base AS dependencies
+# 1A) Install and build the base-ca library
+WORKDIR /app/libraries/base-ca
+RUN npm install \
+    && npm run generate \
+    && npm run migrate \
+    && npm run build
+
+# 1B) Install and build the cryptic-utils library
+WORKDIR /app/libraries/cryptic-utils
+RUN npm install \
+    && npm run build
+
+# 1C) Now install and build the backend
+WORKDIR /app/backend
+
+# Important: since your backend/package.json has:
+#  "base-ca": "file:./libraries/base-ca"
+#  "cryptic-utils": "file:./libraries/cryptic-utils"
+# NPM will symlink these local folders into node_modules.
+# But we must have already built them, or `dist/index.js` won't exist.
 RUN npm install
-
-# Build stage
-FROM base AS builder
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY backend .
-COPY libraries/base-ca ./libraries/base-ca
 RUN npm run build
 
-# Production stage
-FROM base AS production
+#
+# 2) PRODUCTION STAGE
+#
+FROM node:lts-alpine as production
 WORKDIR /app
+RUN apk add --no-cache openssl
 
-# Copy only production-necessary files
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
+# Copy over the built artifacts from the build stage
+COPY --from=build /app/backend/dist ./dist
+COPY --from=build /app/backend/package*.json ./
+COPY --from=build /app/backend/node_modules ./node_modules
 
-# Copy Prisma schema from base-ca library
-COPY libraries/base-ca/prisma ./prisma
-COPY libraries/base-ca/prisma/schema.prisma ./prisma/schema.prisma
+# Copy Prisma schema from the library if you need migrations at runtime
+COPY --from=build /app/libraries/base-ca/prisma ./prisma
 
-# Copy local libraries
-COPY libraries/base-ca ./libraries/base-ca
-COPY libraries/cryptic-utils ./libraries/cryptic-utils
-
-# Set environment to production
-ENV NODE_ENV=production
-
-# Add entrypoint script
-COPY backend/entrypoint.sh /entrypoint.sh
+# Copy the backend entrypoint script
+COPY --from=build /app/backend/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Expose the application port
+ENV NODE_ENV=production
 EXPOSE 5000
-
-# Use entrypoint script
 ENTRYPOINT ["/entrypoint.sh"]
