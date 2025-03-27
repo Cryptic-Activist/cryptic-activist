@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'export',
+  output: 'standalone',
   env: {
     APP_NAME: process.env.APP_NAME,
     BACKEND: process.env.BACKEND,

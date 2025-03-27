@@ -25,6 +25,8 @@ const eslintConfig = [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      // Use this rukle when cicurlar imports breaks the build step
+      // 'import/no-cycle': ['error', { maxDepth: Infinity }],
     },
   },
 ];

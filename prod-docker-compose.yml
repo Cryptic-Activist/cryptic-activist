@@ -64,24 +64,24 @@ services:
           cpus: '2'
 
 
-  # frontend-public:
-  #   build:
-  #     context: frontend/public/
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - envs/frontend-public.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - backend
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         memory: 2GB
-  #         cpus: '1'
+  frontend-public:
+    build:
+      context: frontend/public/
+      dockerfile: prod.Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - envs/frontend-public.env
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 2GB
+          cpus: '1'
 
   frontend-admin:
     build:

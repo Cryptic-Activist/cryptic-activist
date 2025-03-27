@@ -44,6 +44,7 @@
     "@types/redux-devtools-extension": "^2.13.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "eslint-plugin-import": "^2.31.0",
     "pino-pretty": "^13.0.0",
     "typescript": "^5"
   },
