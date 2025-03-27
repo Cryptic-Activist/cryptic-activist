@@ -1,9 +1,9 @@
 'use client';
 
-import { CryptocurrencyCoinGeckoId, CryptocurrencyParams } from './types';
 import { setLocalStorage, toLowerCase } from '@/utils';
 
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
+import { CryptocurrencyParams } from './types';
 import { useApp } from '@/hooks';
 import { useRootStore } from '@/store';
 import { useState } from 'react';

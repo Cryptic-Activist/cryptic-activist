@@ -20,13 +20,12 @@ const VerifyAccount = () => {
 
     step,
     usernameErrors,
-    privateKeysErrors,
   } = useVerifyAccount();
   const {
     navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();
 
-  const [privateKeysArray, setPrivateKeysArray] = useState<string[]>(
+  const [privateKeysArray, _setPrivateKeysArray] = useState<string[]>(
     Array(12).fill('')
   );
   const links = [

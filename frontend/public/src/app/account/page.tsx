@@ -6,7 +6,8 @@ import { useDynamicTitle, useUser } from '@/hooks';
 import FeedbackCount from '@/components/FeedbackCount';
 import { ProfileImageInfo } from '@/layouts';
 import styles from './index.module.scss';
-import withAuth from '@/hoc/withAuth';
+
+// import withAuth from '@/hoc/withAuth';
 
 const Account = () => {
   const { user } = useUser();

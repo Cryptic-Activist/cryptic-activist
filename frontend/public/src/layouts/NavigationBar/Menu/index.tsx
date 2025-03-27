@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ConnectedWallet, Tooltip } from '@/components';
+import { Button, ConnectedWallet } from '@/components';
 import { menuList, menuUserList } from './data';
 import {
   useBlockchain,

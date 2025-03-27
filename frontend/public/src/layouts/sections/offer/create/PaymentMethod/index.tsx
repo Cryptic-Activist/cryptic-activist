@@ -88,7 +88,8 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
           <h3 className={stylesCore.asideHeading}>About the Payment Method</h3>
           <section className={stylesCore.horizontalGroup}>
             <p className={stylesCore.asideStatement}>
-              In this step you'll be asked for the payment method of your offer
+              In this step you&apos;ll be asked for the payment method of your
+              offer
             </p>
             <p className={stylesCore.asideStatement}>
               Make your selection on payment method and move onto the next step.

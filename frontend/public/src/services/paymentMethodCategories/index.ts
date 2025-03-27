@@ -1,6 +1,5 @@
-import { AxiosResponse, fetchGet } from '@/services/axios';
-
 import { BACKEND } from '@/constants';
+import { fetchGet } from '@/services/axios';
 
 export const fetchPaymentMethodCategories = async () => {
   const response = await fetchGet(

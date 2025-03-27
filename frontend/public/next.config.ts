@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
     APP_NAME: process.env.APP_NAME,
     BACKEND: process.env.BACKEND,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {

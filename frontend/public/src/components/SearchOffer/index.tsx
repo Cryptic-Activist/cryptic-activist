@@ -1,9 +1,8 @@
-import { Button, Selector } from '@/components';
-
 import CurrentPrice from '../CurrentPrice';
 import { FC } from 'react';
 import type { SearchOfferProps } from './types';
 import { SelectWithInput } from '@/components';
+import { Selector } from '@/components';
 import TypeSelector from './TypeSelector';
 import styles from './index.module.scss';
 

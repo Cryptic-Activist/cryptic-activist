@@ -1,10 +1,10 @@
 'use client';
 
 import { useApp, useUser } from '@/hooks';
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { fetchOffersPagination } from '@/services/offers';
+import { useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
 
 const useOffers = () => {
@@ -62,7 +62,7 @@ const useOffers = () => {
     mutationKey: ['initialFetch', 'offers'],
     mutationFn: initialFetch,
     retry: 3,
-    onError: (error) => {
+    onError: () => {
       offers.setHasError(true);
     },
   });

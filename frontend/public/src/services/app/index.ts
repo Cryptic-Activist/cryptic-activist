@@ -1,6 +1,5 @@
-import { AxiosResponse, fetchGet } from '@/services/axios';
-
 import { BACKEND } from '@/constants';
+import { fetchGet } from '@/services/axios';
 import { getQueries } from '@/utils';
 
 export const fetchCurrentPrice = async (id: string, fiatSymbol: string) => {

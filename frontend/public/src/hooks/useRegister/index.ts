@@ -1,16 +1,16 @@
 'use client';
 
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import { OnSubmit, OnSubmitPayload } from './types';
 import {
   getRandomCredentials,
   onSubmitUserRegistration,
 } from '@/services/register';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { OnSubmit } from './types';
 import { registerResolver } from './zod';
 import { useCountDown } from '..';
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useRootStore } from '@/store';
 
 const useRegister = () => {

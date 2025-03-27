@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useLayoutEffect } from 'react';
 import { usePrivateKeys, useRegister } from '@/hooks';
 
 import { Button } from '@/components';
 import { FaClone } from 'react-icons/fa';
 import { IMPORTANT_ACTIONS } from '@/constants/layouts';
+import React from 'react';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
 

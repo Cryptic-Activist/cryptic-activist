@@ -34,4 +34,6 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   );
 });
 
+MenuList.displayName = 'MenuList';
+
 export default MenuList;

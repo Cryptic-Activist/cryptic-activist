@@ -1,6 +1,5 @@
 'use client';
 
-import { CryptocurrencyCoinGeckoId, FiatSymbol } from './types';
 import { DEFAULT_CRYPTOCURRENCY_ID, DEFAULT_FIAT_SYMBOL } from '@/constants';
 import { getLocalStorage, setLocalStorage } from '@/utils';
 import {

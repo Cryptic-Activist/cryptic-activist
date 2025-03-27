@@ -10,7 +10,7 @@ export const fetchCryptocurrencies = async () => {
     }
 
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

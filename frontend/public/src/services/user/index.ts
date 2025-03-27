@@ -1,11 +1,6 @@
 import { GetUserInfoReturn, GetUserTokenResponse, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import {
-  getBearerToken,
-  getCookie,
-  getLocalStorage,
-  removeLocalStorage,
-} from '@/utils';
+import { getBearerToken, getCookie, removeLocalStorage } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
@@ -53,7 +48,7 @@ export const decodeAccessToken = async () => {
     }
 
     return userInfo;
-  } catch (err) {
+  } catch (_err) {
     removeLocalStorage('accessToken');
     removeLocalStorage('refreshToken');
 
