@@ -1,27 +1,24 @@
-import {
-  useAppSlice,
-  useBlockchainSlice,
-  useCreateOfferSlice,
-  useCryptocurrenciesSlice,
-  useCryptocurrencySlice,
-  useFiatSlice,
-  useFiatsSlice,
-  useNavigationBarSlice,
-  useOfferSlice,
-  useOffersSlice,
-  usePaymentMethodCategoriesSlice,
-  usePaymentMethodSlice,
-  usePaymentMethodsSlice,
-  useRegisterSlice,
-  useTradeSlice,
-  useUserSlice,
-  useVerifyAccountSlice,
-} from '..';
-
 import { IS_DEVELOPMENT } from '@/constants';
 import { RootStore } from './types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useAppSlice } from '@/store/app';
+import { useBlockchainSlice } from '@/store/blockchain';
+import { useCreateOfferSlice } from '@/store/createOffer';
+import { useCryptocurrenciesSlice } from '@/store/cryptocurrencies';
+import { useCryptocurrencySlice } from '@/store/cryptocurrency';
+import { useFiatSlice } from '@/store/fiat';
+import { useFiatsSlice } from '@/store/fiats';
+import { useNavigationBarSlice } from '@/store/navigationBar';
+import { useOfferSlice } from '@/store/offer';
+import { useOffersSlice } from '@/store/offers';
+import { usePaymentMethodCategoriesSlice } from '@/store/paymentMethodCategories';
+import { usePaymentMethodSlice } from '@/store/paymentMethod';
+import { usePaymentMethodsSlice } from '@/store/paymentMethods';
+import { useRegisterSlice } from '@/store/register';
+import { useTradeSlice } from '@/store/trade';
+import { useUserSlice } from '@/store/user';
+import { useVerifyAccountSlice } from '@/store/verifyAccount';
 
 export const useRootStore = create<RootStore>()(
   devtools(
