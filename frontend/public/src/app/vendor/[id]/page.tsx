@@ -1,7 +1,5 @@
 import React from 'react';
 
-const VendorPage = () => {
+export default function VendorPage() {
   return <div>VendorPage</div>;
-};
-
-export default VendorPage;
+}

@@ -1,5 +1,3 @@
-const BecomeAVendor = () => {
+export default function BecomeAVendor() {
   return <div>BecomeAVendor</div>;
-};
-
-export default BecomeAVendor;
+}

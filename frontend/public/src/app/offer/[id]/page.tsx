@@ -6,7 +6,7 @@ import { useDynamicTitle, useOffer, useUser } from '@/hooks';
 import React from 'react';
 import styles from './index.module.scss';
 
-const OfferPage = () => {
+export default function OfferPage() {
   const {} = useDynamicTitle('Offer | Cryptic Activist');
   const {
     offer,
@@ -36,6 +36,4 @@ const OfferPage = () => {
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />
     </div>
   );
-};
-
-export default OfferPage;
+}

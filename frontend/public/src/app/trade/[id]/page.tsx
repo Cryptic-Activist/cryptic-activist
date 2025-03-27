@@ -114,7 +114,7 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
   );
 };
 
-const TradePage = () => {
+export default function TradePage() {
   const { trade } = useTrade();
   const { timeLeftInMinutes, startCountDown } = useCountDown();
 
@@ -145,6 +145,4 @@ const TradePage = () => {
       </div>
     </div>
   );
-};
-
-export default TradePage;
+}
