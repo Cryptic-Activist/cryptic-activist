@@ -19,7 +19,7 @@
 .item {
   display: flex;
   gap: 0.7rem;
-  align-items: start;
+  align-items: flex-start;
   cursor: pointer !important;
   background-color: globals.$white;
   border: none;
