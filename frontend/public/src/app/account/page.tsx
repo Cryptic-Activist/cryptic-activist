@@ -9,7 +9,7 @@ import styles from './index.module.scss';
 
 // import withAuth from '@/hoc/withAuth';
 
-const Account = () => {
+export default function Account() {
   const { user } = useUser();
   const {} = useDynamicTitle('Account | Cryptic Activist');
 
@@ -23,6 +23,4 @@ const Account = () => {
       </div>
     </div>
   );
-};
-
-export default Account;
+}

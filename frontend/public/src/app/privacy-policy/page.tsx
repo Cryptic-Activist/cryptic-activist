@@ -1,5 +1,3 @@
-const PrivacyPolicy = () => {
+export default function PrivacyPolicy() {
   return <div>PrivacyPolicy</div>;
-};
-
-export default PrivacyPolicy;
+}

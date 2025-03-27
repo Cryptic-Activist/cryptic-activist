@@ -1,5 +1,3 @@
-const AccountMessages = () => {
+export default function AccountMessages() {
   return <div>AccountMessages</div>;
-};
-
-export default AccountMessages;
+}

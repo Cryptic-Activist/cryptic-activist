@@ -5,7 +5,7 @@ import { useCreateOffer, useDynamicTitle } from '@/hooks';
 
 import React from 'react';
 
-const Page = () => {
+export default function Page() {
   const {
     createOffer,
     step,
@@ -52,6 +52,4 @@ const Page = () => {
       )}
     </>
   );
-};
-
-export default Page;
+}

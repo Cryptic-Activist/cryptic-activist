@@ -4,7 +4,7 @@ import { Offers, SearchOffer } from '@/components';
 
 import styles from './page.module.scss';
 
-const Vendors = () => {
+export default function Vendors() {
   return (
     <div className={styles.container}>
       <div className={styles.searchContainer}>
@@ -13,6 +13,4 @@ const Vendors = () => {
       <Offers height="85vh" />
     </div>
   );
-};
-
-export default Vendors;
+}

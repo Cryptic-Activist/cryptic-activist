@@ -1,5 +1,3 @@
-const Imprint = () => {
+export default function Imprint() {
   return <div>Imprint</div>;
-};
-
-export default Imprint;
+}
