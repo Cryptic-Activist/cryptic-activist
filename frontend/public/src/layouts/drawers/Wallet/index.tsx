@@ -56,7 +56,7 @@ const Wallet = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  const { toggleDrawer, navigationBar } = useNavigationBar();
+  const { toggleDrawer } = useNavigationBar();
   const { blockchain, onDisconnectWallet } = useBlockchain();
   const { user } = useUser();
 

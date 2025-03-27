@@ -100,7 +100,7 @@ export const useUserSlice: StateCreator<
           'user/decodeAccessToken'
         );
         return user;
-      } catch (err) {
+      } catch (_err) {
         removeLocalStorage('accessToken');
         removeLocalStorage('refreshToken');
         return null;
@@ -152,7 +152,7 @@ export const useUserSlice: StateCreator<
           },
           'user/login'
         );
-      } catch (err) {
+      } catch (_err) {
         removeLocalStorage('accessToken');
         removeLocalStorage('refreshToken');
         throw Error('Unable to login');

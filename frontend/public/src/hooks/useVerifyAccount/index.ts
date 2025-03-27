@@ -22,7 +22,6 @@ const useVerifyAccount = () => {
     register: privateKeysRegister,
     handleSubmit: handleSubmitPrivateKeys,
     formState: { errors: privateKeysErrors },
-    getValues,
   } = useForm({ resolver: verifyAccountPrivateKeysResolver });
 
   useEffect(() => {

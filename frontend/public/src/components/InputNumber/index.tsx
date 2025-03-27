@@ -1,6 +1,5 @@
 'use client';
 
-import { FaMinus, FaPlus } from 'react-icons/fa6';
 import React, { FC, FormEvent, useEffect, useState } from 'react';
 
 import { InputNumberProps } from './types';
@@ -9,7 +8,6 @@ import styles from './index.module.scss';
 const InputNumber: FC<InputNumberProps> = ({
   onChange,
   value,
-  step = 1,
   symbol,
   min,
   max,

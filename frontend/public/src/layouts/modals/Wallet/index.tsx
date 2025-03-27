@@ -2,15 +2,11 @@ import React, { FC, Fragment } from 'react';
 
 import { BRAVE_WALLET } from '@/constants';
 import { Button } from '@/components';
-import Image from 'next/image';
 import { ProviderProps } from './types';
 import { Template } from '@/layouts/modals';
-import { WalletName } from '@/hooks/useBlockchain/types';
 import { checkInstalledWallet } from '@/services/blockchain';
 import styles from './index.module.scss';
-import { toCapitalize } from '@/utils';
 import useBlockchain from '@/hooks/useBlockchain';
-import { useConnect } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
 
 const Provider: FC<ProviderProps> = ({ connector, onConnectWallet }) => {
@@ -42,7 +38,7 @@ const Provider: FC<ProviderProps> = ({ connector, onConnectWallet }) => {
 };
 
 const Wallet = () => {
-  const { connectors, connect, onConnectWallet } = useBlockchain();
+  const { connectors, onConnectWallet } = useBlockchain();
 
   return (
     <Template heading="Select Wallet" width="24rem">

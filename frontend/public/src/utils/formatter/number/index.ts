@@ -6,4 +6,4 @@ export const toFixed = (number: number, decimals: number) => {
   return parseFloat(number.toFixed(decimals));
 };
 
-export const increaseValueByPercent = (value: number, percent: number) => {};
+// export const increaseValueByPercent = (value: number, percent: number) => {};

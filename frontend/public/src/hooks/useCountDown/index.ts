@@ -29,7 +29,7 @@ const useCountdown = () => {
   };
 
   const timeLeftFormatted = (miliseconds: number) => {
-    const { minutes, remainingMilliseconds, remainingSeconds, seconds } =
+    const { minutes, remainingMilliseconds, remainingSeconds } =
       formatTime(miliseconds);
 
     return `${minutes}:${

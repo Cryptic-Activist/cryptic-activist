@@ -1,11 +1,10 @@
 'use client';
 
-import { toCapitalize, toUpperCase } from '@/utils';
-
 import { Fiat } from '@/store/fiat/types';
 import Flag from './Flag';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
 import { useFiats } from '@/hooks';
 import { useRootStore } from '@/store';
 

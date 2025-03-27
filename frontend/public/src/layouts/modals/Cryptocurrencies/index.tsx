@@ -1,11 +1,10 @@
 'use client';
 
-import { toCapitalize, toUpperCase } from '@/utils';
-
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import Image from 'next/image';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
 import { useCryptocurrencies } from '@/hooks';
 import { useRootStore } from '@/store';
 

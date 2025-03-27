@@ -1,11 +1,9 @@
 'use client';
 
 import { PaymentMethod, TradeInstructions, TradePricing } from '@/layouts';
-import React, { useEffect } from 'react';
 import { useCreateOffer, useDynamicTitle } from '@/hooks';
 
-import Head from 'next/head';
-import { Metadata } from 'next';
+import React from 'react';
 
 const Page = () => {
   const {

@@ -9,7 +9,7 @@ import { FaEllipsisV } from 'react-icons/fa';
 import styles from './index.module.scss';
 import { useSocket } from '@/hooks';
 
-const Header: FC<HeaderProps> = ({ receiver, sender }) => {
+const Header: FC<HeaderProps> = ({ receiver, sender: _sender }) => {
   return (
     <header className={styles.header}>
       <div className={styles.vendor}>
@@ -36,7 +36,11 @@ const Header: FC<HeaderProps> = ({ receiver, sender }) => {
   );
 };
 
-const Content: FC<ContentProps> = ({ receiver, sender, messages }) => {
+const Content: FC<ContentProps> = ({
+  receiver: _receiver,
+  sender,
+  messages,
+}) => {
   return (
     <ul className={styles.list}>
       {messages.map((message, index) => {
@@ -58,7 +62,11 @@ const Content: FC<ContentProps> = ({ receiver, sender, messages }) => {
   );
 };
 
-const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
+const Inputs: FC<InputsProps> = ({
+  receiver: _receiver,
+  sender: _sender,
+  sendMessage,
+}) => {
   const [message, setMessage] = useState('');
 
   const submitMessage = (event: FormEvent<HTMLFormElement>) => {

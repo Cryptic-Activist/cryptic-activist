@@ -9,8 +9,7 @@ import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
 
 const Login = () => {
-  const { errors, formValues, loginFormRegister, onSubmit, handleSubmit } =
-    useUser();
+  const { errors, loginFormRegister, onSubmit, handleSubmit } = useUser();
   const {
     navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();

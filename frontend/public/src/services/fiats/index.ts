@@ -10,7 +10,7 @@ export const fetchFiats = async () => {
     }
 
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { HowMuch, ThisOffer, ThisVendor } from '@/layouts/sections/offer/page';
-import { useApp, useDynamicTitle, useOffer, useUser } from '@/hooks';
+import { useDynamicTitle, useOffer, useUser } from '@/hooks';
 
 import React from 'react';
 import styles from './index.module.scss';

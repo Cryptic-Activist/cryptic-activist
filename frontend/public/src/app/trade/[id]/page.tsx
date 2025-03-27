@@ -71,13 +71,13 @@ const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
         After the payment is made do not forget to click on{' '}
         <strong>Paid</strong> within the stipulated negotiation time frame. If
         you do not do this, the negotiation will end and the{' '}
-        {trade.cryptocurrency?.name} trading amount will return to the vendor's
-        wallet.
+        {trade.cryptocurrency?.name} trading amount will return to the
+        vendor&apos;s wallet.
       </p>
       <div className={styles.row}>
         <Button size={18}>Cancel</Button>
         <p className={styles.statement}>
-          Click on <strong>Cancel</strong> if you don't want to continue
+          Click on <strong>Cancel</strong> if you don&apos;t want to continue
           negotiating with this vendor
         </p>
       </div>
@@ -115,7 +115,7 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 const TradePage = () => {
-  const { queryTrade, trade } = useTrade();
+  const { trade } = useTrade();
   const { timeLeftInMinutes, startCountDown } = useCountDown();
 
   useEffect(() => {

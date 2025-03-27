@@ -19,7 +19,7 @@ export const getCurrentPath = () => {
 export const getCookie = (name: string) => {
   if (typeof document !== 'undefined') {
     const cookies = document.cookie.split('; ');
-    for (let cookie of cookies) {
+    for (const cookie of cookies) {
       const [key, value] = cookie.split('=');
       if (key === name) {
         return decodeURIComponent(value);

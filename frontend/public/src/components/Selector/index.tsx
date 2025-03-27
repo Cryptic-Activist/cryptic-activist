@@ -1,6 +1,6 @@
 'use client';
 
-import { BuildCryptocurrencyLabel, BuildLabel, SelectorProps } from './types';
+import { BuildCryptocurrencyLabel, SelectorProps } from './types';
 import {
   FC,
   JSXElementConstructor,
@@ -8,12 +8,12 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { toCapitalize, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar } from '@/hooks';
 
 import Image from 'next/image';
 import countryFlags from '@/hooks/useFiats/countryFlags';
 import styles from './index.module.scss';
+import { toCapitalize } from '@/utils';
 
 const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
   const [label, setLabel] = useState<
@@ -40,25 +40,22 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
   };
 
   const getButtonLabel = () => {
-    let localLabel;
-
-    switch (type) {
-      case 'cryptocurrency': {
-        localLabel = buildLabel(
-          defaults.cryptocurrency?.image!,
-          defaults.cryptocurrency?.name!
+    const build = () => {
+      if (type === 'cryptocurrency' && defaults.cryptocurrency) {
+        return buildLabel(
+          defaults.cryptocurrency.image,
+          defaults.cryptocurrency.name
         );
-        break;
-      }
-      case 'fiat': {
-        localLabel = buildLabel(
-          countryFlags[defaults.fiat?.country!],
-          defaults.fiat?.name!
+      } else if (type === 'fiat' && defaults.fiat) {
+        return buildLabel(
+          countryFlags[defaults.fiat.country],
+          defaults.fiat.name
         );
       }
-    }
+      return 'No data';
+    };
 
-    setLabel(localLabel);
+    setLabel(build());
   };
 
   const handleClick = () => {

@@ -1,7 +1,5 @@
 'use client';
 
-import {} from '@/services/cryptocurrencies';
-
 import { FormEvent, useEffect, useState } from 'react';
 import { getCurrentTradingFee, startTrade } from '@/services/trade';
 import { useMutation, useQuery } from '@tanstack/react-query';
