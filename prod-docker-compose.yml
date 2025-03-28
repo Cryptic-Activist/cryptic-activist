@@ -32,11 +32,6 @@ services:
       - "5432:5432"
     networks:
       - app-network
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 2GB
-    #       cpus: '1'
 
   backend:
     build:
@@ -57,11 +52,6 @@ services:
       - app-network
     depends_on:
       - postgres
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 4GB
-    #       cpus: '2'
 
 
   # frontend-public:
@@ -77,11 +67,6 @@ services:
   #     - app-network
   #   depends_on:
   #     - backend
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 2GB
-    #       cpus: '1'
 
   frontend-admin:
     build:
@@ -96,11 +81,6 @@ services:
       - app-network
     depends_on:
       - backend
-    # deploy:
-    #   resources:
-    #     limits:
-    #       memory: 2GB
-    #       cpus: '1'
 
   # nginx:
   #   image: nginx:alpine
