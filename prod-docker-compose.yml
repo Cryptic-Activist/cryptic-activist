@@ -54,19 +54,19 @@ services:
       - postgres
 
 
-  # frontend-public:
-  #   build:
-  #     context: frontend/public/
-  #     dockerfile: prod.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - envs/frontend-public.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - backend
+  frontend-public:
+    build:
+      context: frontend/public/
+      dockerfile: prod.Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - envs/frontend-public.env
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
   frontend-admin:
     build:
