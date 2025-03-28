@@ -45,11 +45,11 @@
   "dependencies": {
     "@prisma/client": "^6.4.1",
     "axios": "^1.8.1",
-    "base-ca": "file:./libraries/base-ca",
+    "base-ca": "*",
     "bcryptjs": "^3.0.2",
     "chalk": "^5.4.1",
     "cors": "^2.8.5",
-    "cryptic-utils": "file:./libraries/cryptic-utils",
+    "cryptic-utils": "*",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",

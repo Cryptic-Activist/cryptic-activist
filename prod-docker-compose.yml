@@ -35,16 +35,16 @@ services:
 
   backend:
     build:
-      context: .  # Root project directory
-      dockerfile: backend/prod.Dockerfile
-      target: production
-    restart: always
+      context: .
+      dockerfile: prod.Dockerfile
+      target: backend
+    env_file:
+      - ./envs/backend.env
     ports:
       - "5000:5000"
+    restart: always
     volumes:
       - backend-uploads:/app/uploads
-    env_file:
-      - envs/backend.env
     environment:
       - NODE_ENV=production
       - NODE_OPTIONS=--max-old-space-size=4096
@@ -54,34 +54,33 @@ services:
       - postgres
 
 
-  # frontend-public:
-  #   build:
-  #     context: frontend/public/
-  #     dockerfile: prod.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - envs/frontend-public.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - backend
-
-  frontend-admin:
+  public:
     build:
-      context: frontend/admin/
+      context: .
       dockerfile: prod.Dockerfile
-    restart: always
+      target: public
     ports:
-      - "3001:3001"
+      - "3000:3000"
     env_file:
-      - envs/frontend-admin.env
+      - ./envs/frontend-public.env
     networks:
       - app-network
     depends_on:
       - backend
 
+  admin:
+    build:
+      context: .
+      dockerfile: prod.Dockerfile
+      target: admin
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./envs/frontend-admin.env
+    networks:
+      - app-network
+    depends_on:
+      - backend
   # nginx:
   #   image: nginx:alpine
   #   volumes:
