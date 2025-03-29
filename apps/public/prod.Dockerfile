@@ -1,42 +1,54 @@
-# Stage 1: Install dependencies
-FROM node:lts-alpine AS deps
-WORKDIR /app
+FROM node:18-alpine AS base
 
-# Install dependencies (include lockfile for deterministic builds)
-COPY package.json package-lock.json* ./
-RUN npm ci
+# This Dockerfile is copy-pasted into our main docs at /docs/handbook/deploying-with-docker.
+# Make sure you update both files!
 
-# Stage 2: Build the application
-FROM node:lts-alpine AS builder
+FROM base AS builder
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk update
+RUN apk add --no-cache libc6-compat
+# Set working directory
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+RUN yarn global add turbo
 COPY . .
+RUN turbo prune admin --docker
 
-# Set standalone output in next.config.js (or via env)
-ENV NEXT_OUTPUT=standalone
-
-# Build the app
-RUN npm run build
-
-# Stage 3: Production image
-FROM node:lts-alpine AS runner
+# Add lockfile and package.json's of isolated subworkspace
+FROM base AS installer
+RUN apk update
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-ENV NODE_ENV=production
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN yarn install
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Build the project
+COPY --from=builder /app/out/full/ .
 
-# Copy standalone build artifacts from builder
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Uncomment and use build args to enable remote caching
+# ARG TURBO_TEAM
+# ENV TURBO_TEAM=$TURBO_TEAM
 
-# Set permissions
+# ARG TURBO_TOKEN
+# ENV TURBO_TOKEN=$TURBO_TOKEN
+
+RUN yarn turbo build
+
+FROM base AS runner
+WORKDIR /app
+
+# Don't run production as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
-EXPOSE 3000
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/public ./apps/admin/public
 
-# Use Node.js to run the server (no 'serve' needed)
-CMD ["node", "server.js"]
+EXPOSE 3001
+
+CMD node apps/admin/server.js
