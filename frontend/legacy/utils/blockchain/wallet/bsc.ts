@@ -1,3 +1,0 @@
-const walletAddress = "";
-
-export { walletAddress };
