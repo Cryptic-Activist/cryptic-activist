@@ -1,0 +1,20 @@
+.container {
+  width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.mainInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: 90%;
+  }
+}

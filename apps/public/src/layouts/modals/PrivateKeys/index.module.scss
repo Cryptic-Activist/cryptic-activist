@@ -1,0 +1,42 @@
+@use '../../../styles/globals.module.scss';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  font-size: globals.$font-size-m;
+  color: globals.$secondary;
+}
+
+.importantSection {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.important {
+  font-size: globals.$font-size-l;
+  background-color: globals.$secondary;
+  color: globals.$primary;
+  border-radius: globals.$border-radius-4;
+  padding: 0.4rem 0.8rem;
+  text-wrap: nowrap;
+}
+
+.privateKeysList {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.inline {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}

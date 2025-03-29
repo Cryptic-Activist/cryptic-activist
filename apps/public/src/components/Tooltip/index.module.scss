@@ -1,0 +1,10 @@
+.container {
+  position: relative;
+}
+
+.tooltip {
+  top: 0;
+  left: 0;
+  position: absolute;
+  z-index: 5;
+}

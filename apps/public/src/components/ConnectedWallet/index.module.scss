@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  width: 10rem;
+  overflow-x: hidden;
+  gap: 0.5rem;
+  position: relative;
+  background-color: #fff;
+  align-items: center;
+  border-radius: 2rem;
+  padding: 0.2em;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.profileColor {
+  width: 1.8rem;
+  height: 1.8rem;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  display: flex;
+  border-radius: 1rem;
+}
+
+.address {
+  width: 7rem;
+  overflow-x: hidden;
+  font-size: 1rem;
+  align-self: center;
+  transform: translateY(1px);
+}

@@ -1,0 +1,18 @@
+@use "../../../styles/globals.module.scss";
+
+.menu {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tooltipContainer {
+  z-index: 6;
+  position: relative;
+}
+
+.tooltip {
+  position: absolute;
+  top: 3.3rem;
+  right: 0.5rem;
+}

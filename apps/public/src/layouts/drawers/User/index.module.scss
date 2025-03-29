@@ -1,0 +1,154 @@
+@use "../../../styles/globals.module.scss";
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: globals.$semi-transparent-background;
+  z-index: 9;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 2rem 25rem;
+  position: fixed;
+  top: 0;
+  right: -27rem;
+  width: 27rem;
+  height: 100vh;
+  z-index: 9;
+  transition: right ease-in-out 0.5s;
+  animation: opening 0.3s ease-out;
+}
+
+.closeButton {
+  background-color: globals.$secondary;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1rem;
+  border: none;
+  svg {
+    color: globals.$primary;
+  }
+}
+
+.opened {
+  right: 0;
+}
+
+.closed {
+  right: -27rem;
+}
+
+@keyframes opening {
+  0% {
+    right: -27rem;
+  }
+  100% {
+    right: 0;
+  }
+}
+
+.content {
+  width: 25rem;
+  background-color: globals.$primary;
+  display: flex;
+  flex-direction: column;
+}
+
+.userWalletContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.menuButton,
+.subMenuItem,
+.subMenuButton,
+.subMenuItem,
+.link {
+  background-color: transparent;
+  border: none;
+  padding: 1rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: globals.$black;
+  a {
+    text-decoration: none;
+    color: globals.$black;
+  }
+  &:hover {
+    background-color: globals.$primary-darken-15;
+  }
+  &:active {
+    background-color: globals.$primary-darken-20;
+  }
+}
+
+.subMenuItem {
+  background-color: globals.$primary-darken-15;
+  &:hover {
+    background-color: globals.$primary-darken-20;
+  }
+  &:active {
+    background-color: globals.$primary-darken-25;
+  }
+}
+
+.subMenuButton {
+  button {
+    font-size: 1.2rem;
+    background-color: transparent;
+    border: none;
+  }
+  background-color: globals.$primary-darken-15;
+  &:hover {
+    background-color: globals.$primary-darken-20;
+  }
+  &:active {
+    background-color: globals.$primary-darken-25;
+  }
+}
+
+.link {
+  text-decoration: none;
+}
+
+.userButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: center;
+  .userButtonNames {
+    font-size: 1.5rem;
+  }
+  .userButtonUsername {
+    font-size: 1rem;
+  }
+}
+
+.userContentList {
+  height: auto;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+}
+
+.userContentListOpened {
+  max-height: 14rem;
+}
+
+@media (max-width: 430px) {
+  .container {
+    width: 100%;
+  }
+}

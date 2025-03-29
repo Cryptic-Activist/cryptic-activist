@@ -1,0 +1,58 @@
+@use "../../styles/globals.module.scss";
+
+.list {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.listItemWrapper {
+  position: relative;
+}
+
+.listItem {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.listItemNumber {
+  height: 3rem;
+  width: 3rem;
+  border: 1px solid globals.$border-color-dark;
+  border-radius: globals.$border-radius-100;
+  font-size: globals.$font-size-l;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: globals.$white;
+  cursor: pointer;
+}
+
+.completed {
+  cursor: pointer;
+}
+
+.currentStep {
+  .listItemNumber {
+    background-color: globals.$primary;
+  }
+  .statement {
+    font-weight: 700;
+  }
+}
+
+.statement {
+  font-size: globals.$font-size-l;
+}
+
+.separator {
+  height: 0.2rem;
+  width: calc(100% - 3.5rem);
+  background-color: globals.$progress-bar-separator-color;
+  position: absolute;
+  top: 30%;
+  left: calc(3rem + 1rem);
+}

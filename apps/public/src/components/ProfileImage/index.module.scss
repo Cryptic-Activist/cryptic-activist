@@ -1,0 +1,14 @@
+@use "../../styles/globals.module.scss";
+
+.container {
+  box-shadow: inset 0px 0px 10px 0px globals.$box-shadow-default-color;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px solid globals.$secondary;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  color: globals.$white;
+}

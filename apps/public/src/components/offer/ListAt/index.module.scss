@@ -1,0 +1,22 @@
+@use "../../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+}
+
+.pricingTypeRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.onEachStatement {
+  font-size: 1rem;
+}
+
+.statement {
+  font-size: 1rem;
+  color: globals.$text-color-dark;
+}

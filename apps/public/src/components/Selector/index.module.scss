@@ -1,0 +1,35 @@
+@use "../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.selector {
+  border-radius: 0.4rem;
+  border: 1px solid globals.$secondary;
+  background-color: globals.$white;
+  font-size: 1rem;
+  padding: 0.8rem;
+  cursor: pointer;
+  width: fit-content;
+  height: fit-content;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.labelContent {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 1.1rem;
+}

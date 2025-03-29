@@ -1,0 +1,13 @@
+@use "../../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.description {
+  font-size: 1rem;
+  color: globals.$text-description-color;
+  text-align: left;
+}

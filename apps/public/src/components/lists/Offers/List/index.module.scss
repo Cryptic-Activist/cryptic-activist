@@ -1,0 +1,215 @@
+@use "../../../../styles/globals.module.scss";
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
+}
+
+.spinner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    animation: spin 1s linear infinite;
+  }
+}
+
+.item {
+  list-style: none;
+  border: 1px solid globals.$black;
+  border-left: none;
+  border-right: none;
+  padding: 0.8rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.vendor {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.vendorAvatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+  border-radius: 0.4em;
+  color: globals.$white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid globals.$black;
+}
+
+.namesCounters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.names {
+  color: globals.$black;
+  font-size: 1rem;
+}
+
+.namesUsernameLink {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+.vendorUsername {
+  font-size: 0.8rem;
+  color: globals.$text-description-color;
+}
+
+.counters {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.counter {
+  display: flex;
+  gap: 0.3rem;
+  span {
+    display: flex;
+  }
+}
+
+.trades {
+  svg {
+    color: globals.$feedback-positive;
+  }
+}
+
+.status {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+  svg {
+    color: globals.$status-offline;
+  }
+  span {
+    font-size: 0.8rem;
+  }
+}
+
+.labelTermsTags,
+.avgTradeSpeed,
+.rates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 1rem;
+}
+
+.terms {
+  font-size: 1rem;
+}
+
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  list-style: none;
+  padding: 0.4em;
+  border-radius: 0.4em;
+  background-color: #dedede;
+}
+
+.rates {
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.prices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.cryptoPrice {
+  font-size: 1rem;
+  text-align: end;
+}
+
+.percentage {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.percentAmount {
+  font-weight: 900;
+}
+
+.limits {
+  font-size: 1rem;
+}
+
+.endOfList {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.pullDownToRefresh,
+.releaseToRefresh {
+  text-align: center;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .item {
+    grid-template-columns: none;
+    grid-template-areas:
+      "vendor avgTradeSpeed"
+      "labelTermsTags rates";
+  }
+  .vendor {
+    grid-area: vendor;
+  }
+  .labelTermsTags {
+    grid-area: labelTermsTags;
+  }
+  .avgTradeSpeed {
+    grid-area: avgTradeSpeed;
+    .speed {
+      text-align: end;
+    }
+  }
+  .rates {
+    grid-area: rates;
+  }
+}
