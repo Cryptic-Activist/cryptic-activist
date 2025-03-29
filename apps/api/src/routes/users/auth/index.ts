@@ -34,4 +34,8 @@ router.post(
 
 router.get('/authenticate', authenticateUser, authenticate);
 
+router.get('/funny', (_req, res) => {
+  res.status(301).send({ ok: true });
+});
+
 export default router;

@@ -1,49 +1,47 @@
-FROM node:lts-alpine AS base
-WORKDIR /app
+FROM node:18-alpine AS base
 
-# Install system dependencies
-RUN apk add --no-cache openssl
+# The web Dockerfile is copy-pasted into our main docs at /docs/handbook/deploying-with-docker.
+# Make sure you update this Dockerfile, the Dockerfile in the web workspace and copy that over to Dockerfile in the docs.
 
-# Copy backend package files
-COPY backend/package*.json ./
-
-# Install dependencies stage
-FROM base AS dependencies
-RUN npm install
-
-# Build stage
 FROM base AS builder
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY backend .
-COPY libraries/base-ca ./libraries/base-ca
-RUN npm run build
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk update
+RUN apk add --no-cache libc6-compat
+# Set working directory
+WORKDIR /app
+RUN yarn global add turbo
+COPY . .
+RUN turbo prune api --docker
 
-# Production stage
-FROM base AS production
+# Add lockfile and package.json's of isolated subworkspace
+FROM base AS installer
+RUN apk update
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy only production-necessary files
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
+# First install dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN yarn install
 
-# Copy Prisma schema from base-ca library
-COPY libraries/base-ca/prisma ./prisma
-COPY libraries/base-ca/prisma/schema.prisma ./prisma/schema.prisma
+# Build the project and its dependencies
+COPY --from=builder /app/out/full/ .
 
-# Copy local libraries
-COPY libraries/base-ca ./libraries/base-ca
-COPY libraries/cryptic-utils ./libraries/cryptic-utils
+# Uncomment and use build args to enable remote caching
+# ARG TURBO_TEAM
+# ENV TURBO_TEAM=$TURBO_TEAM
 
-# Set environment to production
-ENV NODE_ENV=production
+# ARG TURBO_TOKEN
+# ENV TURBO_TOKEN=$TURBO_TOKEN
 
-# Add entrypoint script
-COPY backend/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN yarn turbo build
 
-# Expose the application port
-EXPOSE 5000
+FROM base AS runner
+WORKDIR /app
 
-# Use entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+# Don't run production as root
+RUN addgroup --system --gid 1001 expressjs
+RUN adduser --system --uid 1001 expressjs
+USER expressjs
+COPY --from=installer /app .
+
+CMD node apps/api/dist/server.js

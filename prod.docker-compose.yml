@@ -33,48 +33,47 @@ services:
   #   networks:
   #     - app-network
 
-  # api:
-  #   build:
-  #     context: .  # Root project directory
-  #     dockerfile: apps/api/prod.Dockerfile
-  #     target: production
-  #   restart: always
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - backend-uploads:/app/uploads
-  #   env_file:
-  #     - envs/api.env
-  #   environment:
-  #     - NODE_ENV=production
-  #     - NODE_OPTIONS=--max-old-space-size=4096
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - postgres
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/prod.Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend-uploads:/app/uploads
+    env_file:
+      - envs/api.env
+    environment:
+      - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=4096
+    networks:
+      - app-network
+    # depends_on:
+    #   - postgres
 
 
-  # public:
-  #   build:
-  #     context: apps/public/
-  #     dockerfile: prod.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - envs/public.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - api
+  public:
+    build:
+      context: .
+      dockerfile: ./apps/public/prod.Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - envs/public.env
+    networks:
+      - app-network
+    # depends_on:
+    #   - api
 
   admin:
     build:
-      context: apps/admin/
-      dockerfile: prod.Dockerfile
+      context: .
+      dockerfile: ./apps/admin/prod.Dockerfile
     restart: always
     ports:
-      - "3001:3001"
+      - "3001:3000"
     env_file:
       - envs/admin.env
     networks:
