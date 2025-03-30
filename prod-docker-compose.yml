@@ -54,33 +54,33 @@ services:
       - postgres
 
 
-  # frontend-public:
-  #   build:
-  #     context: frontend/public/
-  #     dockerfile: prod.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   env_file:
-  #     - envs/frontend-public.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - backend
+  frontend-public:
+    build:
+      context: frontend/public/
+      dockerfile: prod.Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - envs/frontend-public.env
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
-  # frontend-admin:
-  #   build:
-  #     context: frontend/admin/
-  #     dockerfile: prod.Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "3001:3001"
-  #   env_file:
-  #     - envs/frontend-admin.env
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - backend
+  frontend-admin:
+    build:
+      context: frontend/admin/
+      dockerfile: prod.Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    env_file:
+      - envs/frontend-admin.env
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
   # nginx:
   #   image: nginx:alpine
