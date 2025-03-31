@@ -40,6 +40,9 @@ ENV NODE_ENV=production
 
 # Add entrypoint script
 COPY backend/entrypoint.sh /entrypoint.sh
+COPY envs/backend.env dist/.env
+COPY envs/base-ca.env libraries/base-ca/.env
+RUN npm run bootstrap 
 RUN chmod +x /entrypoint.sh
 
 # Expose the application port
