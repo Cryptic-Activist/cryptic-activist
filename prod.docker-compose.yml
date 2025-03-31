@@ -33,26 +33,26 @@ services:
     networks:
       - app-network
 
-  backend:
-    container_name: backend
-    build:
-      context: .
-      dockerfile: backend/prod.Dockerfile
-      target: production
-    restart: always
-    ports:
-      - "5000:5000"
-    volumes:
-      - backend-uploads:/app/uploads
-    env_file:
-      - envs/backend.env
-    environment:
-      - NODE_ENV=production
-      - NODE_OPTIONS=--max-old-space-size=8192
-    networks:
-      - app-network
-    depends_on:
-      - postgres
+  # backend:
+  #   container_name: backend
+  #   build:
+  #     context: .
+  #     dockerfile: backend/prod.Dockerfile
+  #     target: production
+  #   restart: always
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - backend-uploads:/app/uploads
+  #   env_file:
+  #     - envs/backend.env
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NODE_OPTIONS=--max-old-space-size=8192
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - postgres
 
 
   frontend-public:
@@ -67,8 +67,8 @@ services:
       - envs/frontend-public.env
     networks:
       - app-network
-    depends_on:
-      - backend
+    # depends_on:
+    #   - backend
 
   frontend-admin:
     container_name: admin
@@ -82,8 +82,8 @@ services:
       - envs/frontend-admin.env
     networks:
       - app-network
-    depends_on:
-      - backend
+    # depends_on:
+    #   - backend
 
   nginx:
     image: nginx:alpine
@@ -98,6 +98,6 @@ services:
     networks:
       - app-network
     depends_on:
-      - backend
+      # - backend
       - frontend-public
       - frontend-admin
