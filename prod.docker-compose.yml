@@ -47,7 +47,7 @@ services:
       - envs/backend.env
     environment:
       - NODE_ENV=production
-      - NODE_OPTIONS=--max-old-space-size=4096
+      - NODE_OPTIONS=--max-old-space-size=8192
     networks:
       - app-network
     depends_on:
