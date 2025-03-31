@@ -53,11 +53,6 @@ services:
       - app-network
     depends_on:
       - postgres
-    deploy:
-      resources:
-        limits:
-          memory: 4GB
-          cpus: '2'
 
 
   frontend-public:
