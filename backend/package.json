@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint --fix",
-    "build:base-ca": "cd ./libraries/base-ca && npm ci && npm run generate && npm run build",
+    "build:base-ca": "cd ./libraries/base-ca && npm ci && npm run build",
     "build:cryptic-utils": "cd ./libraries/cryptic-utils && npm ci && npm run build",
     "bootstrap": "npm run build:base-ca && npm run build:cryptic-utils"
   },

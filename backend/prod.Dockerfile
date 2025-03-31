@@ -42,7 +42,8 @@ ENV NODE_ENV=production
 COPY backend/entrypoint.sh /entrypoint.sh
 COPY envs/backend.env dist/.env
 COPY envs/base-ca.env libraries/base-ca/.env
-RUN npm run bootstrap 
+RUN npm run build:base-ca 
+RUN npm run build:cryptic-utils 
 RUN chmod +x /entrypoint.sh
 
 # Expose the application port
