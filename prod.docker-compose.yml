@@ -34,6 +34,7 @@ services:
       - app-network
 
   backend:
+    container_name: backend
     build:
       context: .
       dockerfile: backend/prod.Dockerfile
@@ -55,6 +56,7 @@ services:
 
 
   frontend-public:
+    container_name: public
     build:
       context: frontend/public/
       dockerfile: prod.Dockerfile
@@ -69,6 +71,7 @@ services:
       - backend
 
   frontend-admin:
+    container_name: admin
     build:
       context: frontend/admin/
       dockerfile: prod.Dockerfile
@@ -90,6 +93,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    env_file:
+      - envs/nginx.env
     networks:
       - app-network
     depends_on:
