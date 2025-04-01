@@ -2,35 +2,36 @@ name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: 
-      - main
+    branches: [ main ]  # Trigger deployment on push to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-
+    
     steps:
-    - name: Add SSH Key
-      uses: webfactory/ssh-agent@v0.7.0
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
       with:
         ssh-private-key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-
-    - name: Verify SSH Host
+        
+    - name: Add host key to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts
+        
+    - name: Deploy to DigitalOcean Droplet
+      run: |
+        ssh ${{ secrets.DIGITAL_OCEAN_USERNAME }}@${{ secrets.DROPLET_IP }} << 'EOF'
+          # Navigate to your application directory
+          cd app/
+          
+          # Pull latest changes from your repository
+          git pull origin main
+          
+          docker compose -f prod.docker-compose.yml up -d --build
 
-
-    - name: Deploy to DigitalOcean
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        script: |
-          export TAG=${{ github.sha }}
-          export DATABASE_URL=${{ secrets.DATABASE_URL }}
-          cd /app
-          docker-compose -f prod.docker-compose.yml up -d --build
-
+          echo "Deployment completed successfully"
+        EOF
