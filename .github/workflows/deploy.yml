@@ -12,12 +12,12 @@ jobs:
     - name: Test SSH Connection
       uses: appleboy/ssh-action@v1.2.2
       with:
-        host: ${{ secrets.DO_HOST }}
+        host: 134.122.65.53
         username: root
-        key: ${{ secrets.DO_SSH_KEY }}
+        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         port: 22
         script: echo "SSH Connected Successfully"
-        
+
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
