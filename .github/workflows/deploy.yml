@@ -12,8 +12,8 @@ jobs:
     - name: Test SSH Connection
       uses: appleboy/ssh-action@v1.2.2
       with:
-        host: 134.122.65.53
-        username: root
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         port: 22
         script: echo "SSH Connected Successfully"
@@ -21,8 +21,8 @@ jobs:
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
-        host: 134.122.65.53
-        username: root
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         script: |
           cd app
