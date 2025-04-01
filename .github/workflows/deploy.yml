@@ -11,6 +11,7 @@ jobs:
 
     steps:
     - name: Deploy to DigitalOcean
+      run: echo "DIGITAL_OCEAN_HOST=${{ secrets.DIGITAL_OCEAN_HOST }}"
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
