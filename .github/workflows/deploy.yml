@@ -16,7 +16,9 @@ jobs:
       - name: Install doctl (DigitalOcean CLI)
         run: |
           curl -sL -o doctl.tar.gz https://github.com/digitalocean/doctl/releases/download/v1.124.0/doctl-1.124.0-linux-amd64.tar.gz -o doctl.tar.gz
-          file doctl.tar.gz
+          tar -xzf doctl.tar.gz
+          sudo mv doctl /usr/local/bin
+          rm doctl.tar.gz
 
       - name: Authenticate with DigitalOcean
         run: doctl auth init --access-token "${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}"
