@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    secrets: inherit
 
     steps:
     - name: Deploy to DigitalOcean
@@ -21,4 +22,3 @@ jobs:
           export DATABASE_URL=${{ secrets.DATABASE_URL }}
           cd /app
           docker-compose -f prod.docker-compose.yml up -d --build
-    secrets: inherit
