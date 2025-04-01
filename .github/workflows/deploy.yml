@@ -9,15 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Test SSH Connection
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        port: 22
-        script: echo "SSH Connected Successfully"
-
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
