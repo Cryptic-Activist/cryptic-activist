@@ -45,7 +45,7 @@ services:
     volumes:
       - backend-uploads:/app/uploads
     env_file:
-      - envs/backend.env
+      - envs/prod.backend.env
     environment:
       - NODE_ENV=production
       - NODE_OPTIONS=--max-old-space-size=8192
@@ -64,7 +64,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - envs/frontend-public.env
+      - envs/prod.frontend-public.env
     networks:
       - app-network
     depends_on:
@@ -79,7 +79,7 @@ services:
     ports:
       - "3001:3001"
     env_file:
-      - envs/frontend-admin.env
+      - envs/prod.frontend-admin.env
     networks:
       - app-network
     depends_on:
