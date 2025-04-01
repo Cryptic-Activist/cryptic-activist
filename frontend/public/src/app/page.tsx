@@ -4,7 +4,7 @@ import styles from './page.module.scss';
 export default function Home() {
   return (
     <div className={styles.container}>
-      <h1>Hello World!</h1>
+      <h1>Deployed via Github Actions</h1>
       <OfferList />
     </div>
   );
