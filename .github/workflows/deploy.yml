@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to DigitalOcean
-      uses: appleboy/ssh-action@v0.1.10
+      uses: appleboy/ssh-action@v1.2.2
       with:
         host: 134.122.65.53
-        username: davi-silva
+        username: root
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         script: |
           cd /app
