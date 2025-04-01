@@ -33,3 +33,4 @@ jobs:
             git pull origin main
             docker compose -f prod.docker-compose.yml up --build -d
           EOF
+
