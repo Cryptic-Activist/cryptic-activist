@@ -25,5 +25,4 @@ jobs:
         username: root
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         script: |
-          cd /app
-          docker-compose -f prod.docker-compose.yml up -d --build
+          ls -la
