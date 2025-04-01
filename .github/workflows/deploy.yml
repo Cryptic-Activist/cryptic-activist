@@ -11,6 +11,17 @@ jobs:
 
 
     steps:
+    - name: Add SSH Key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+
+    - name: Verify SSH Host
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts
+
+
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v0.1.10
       with:
