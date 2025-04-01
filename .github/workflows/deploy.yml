@@ -12,8 +12,8 @@ jobs:
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+        host: 134.122.65.53
+        username: davi-silva
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         script: |
           cd /app
