@@ -7,6 +7,7 @@ export const fetchGet = async (
   headers?: AxiosRequestHeaders | any,
   timeout = 5000
 ) => {
+  console.log({ endpoint, headers });
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
