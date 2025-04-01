@@ -13,12 +13,12 @@ jobs:
     - name: Deploy to DigitalOcean
       run: echo "DIGITAL_OCEAN_HOST=${{ secrets.DIGITAL_OCEAN_HOST }}"
       # uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        script: |
-          export TAG=${{ github.sha }}
-          export DATABASE_URL=${{ secrets.DATABASE_URL }}
-          cd /app
-          docker-compose -f prod.docker-compose.yml up -d --build
+      # with:
+      #   host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+      #   username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+      #   key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+      #   script: |
+      #     export TAG=${{ github.sha }}
+      #     export DATABASE_URL=${{ secrets.DATABASE_URL }}
+      #     cd /app
+      #     docker-compose -f prod.docker-compose.yml up -d --build
