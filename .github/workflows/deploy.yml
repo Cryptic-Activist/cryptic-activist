@@ -5,21 +5,9 @@ on:
     branches: 
       - main
 
-  workflow_call:
-    secrets:
-      DIGITAL_OCEAN_HOST:
-        required: true
-      DIGITAL_OCEAN_SSH_KEY:
-        required: true
-      DIGITAL_OCEAN_USERNAME:
-        required: true
-      DATABASE_URL:
-        required: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    secrets: inherit
 
     steps:
     - name: Deploy to DigitalOcean
