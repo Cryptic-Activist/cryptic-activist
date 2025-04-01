@@ -3,6 +3,7 @@ import { fetchGet } from '@/services/axios';
 
 export const fetchCryptocurrencies = async () => {
   try {
+    console.log({ testEndpoint: BACKEND + '/cryptocurrencies' });
     const response = await fetchGet(BACKEND + '/cryptocurrencies');
 
     if (response.status !== 200) {
