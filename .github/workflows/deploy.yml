@@ -1,19 +1,33 @@
 name: Deploy to DigitalOcean
 
 on:
- push:
-   branches: [main]
-
-permissions:
-  contents: read
+  push:
+    branches:
+      - main
 
 jobs:
- deploy-app:
-   runs-on: ubuntu-latest
-   steps:
-     - name: Checkout repository
-       uses: actions/checkout@v4
-     - name: Deploy the app
-       uses: digitalocean/app_action/deploy@v2
-       with:
-         token: ${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }} 
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install doctl (DigitalOcean CLI)
+        run: |
+          curl -sL https://github.com/digitalocean/doctl/releases/latest/download/doctl-linux-amd64.tar.gz | tar -xzv
+          sudo mv doctl /usr/local/bin
+
+      - name: Authenticate with DigitalOcean
+        run: doctl auth init --access-token "${{ secrets.DIGITAL_OCEAN_ACCESS_TOKEN }}"
+
+      - name: Verify Authentication
+        run: doctl account get
+
+      - name: Connect to Droplet and Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd app/
+            git pull origin main
+            docker compose -f prod.docker-compose.yml up --build -d
+          EOF
