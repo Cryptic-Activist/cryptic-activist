@@ -13,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set standalone output in next.config.js (or via env)
-ENV NEXT_OUTPUT=standalone
+ENV NEXT_OUTPUT standalone
 
 # Build the app
 RUN npm run build
@@ -22,11 +22,8 @@ RUN npm run build
 FROM node:lts-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
-ENV NEXT_PUBLIC_FRONTEND_PUBLIC=${NEXT_PUBLIC_FRONTEND_PUBLIC}
-ENV NEXT_PUBLIC_FRONTEND_ADMIN=${NEXT_PUBLIC_FRONTEND_ADMIN}
-ENV NEXT_PUBLIC_BACKEND=${NEXT_PUBLIC_BACKEND}
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
