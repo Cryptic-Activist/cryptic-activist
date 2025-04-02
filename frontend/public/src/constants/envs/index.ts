@@ -8,6 +8,4 @@ export const BACKEND = IS_DEVELOPMENT
   ? (process.env.BACKEND as string)
   : (process.env.NEXT_PUBLIC_BACKEND as string);
 
-console.log({
-  Client: import.meta.env.NEXT_PUBLIC_BACKEND,
-});
+console.log({ BACKENDED: process.env.BACKEND });
