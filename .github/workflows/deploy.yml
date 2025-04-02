@@ -17,4 +17,7 @@ jobs:
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
         script: |
           cd app
+          git pull origin main
+          docker compose down
+          docker compose pull
           docker compose -f prod.docker-compose.yml up -d --build
