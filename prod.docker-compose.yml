@@ -60,8 +60,6 @@ services:
     build:
       context: frontend/public/
       dockerfile: prod.Dockerfile
-      args:
-        NEXT_PUBLIC_BACKEND: ${NEXT_PUBLIC_BACKEND}
     restart: always
     ports:
       - "3000:3000"
