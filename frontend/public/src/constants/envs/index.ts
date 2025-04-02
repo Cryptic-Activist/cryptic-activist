@@ -9,8 +9,5 @@ export const BACKEND = IS_DEVELOPMENT
   : (process.env.NEXT_PUBLIC_BACKEND as string);
 
 console.log({
-  APP_NAME,
-  BACKEND,
-  Server: process.env.BACKEND,
-  Client: process.env.NEXT_PUBLIC_BACKEND,
+  Client: import.meta.env.NEXT_PUBLIC_BACKEND,
 });
