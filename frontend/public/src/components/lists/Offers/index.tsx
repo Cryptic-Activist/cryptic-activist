@@ -5,7 +5,6 @@ import Header from './Header';
 import List from './List';
 import { NODE_ENV } from '@/constants';
 import { OffersProps } from './types';
-import { constrainedMemory } from 'process';
 import styles from './index.module.scss';
 import { useApp } from '@/hooks';
 
