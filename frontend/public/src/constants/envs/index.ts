@@ -7,3 +7,10 @@ export const APP_NAME = IS_DEVELOPMENT
 export const BACKEND = IS_DEVELOPMENT
   ? (process.env.BACKEND as string)
   : (process.env.NEXT_PUBLIC_BACKEND as string);
+
+console.log({
+  APP_NAME,
+  BACKEND,
+  Server: process.env.BACKEND,
+  Client: process.env.NEXT_PUBLIC_BACKEND,
+});
