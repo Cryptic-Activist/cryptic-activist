@@ -1,10 +1,17 @@
 import type { NextConfig } from 'next';
 
+export const NODE_ENV = process.env.NODE_ENV as string;
+export const IS_DEVELOPMENT = NODE_ENV === 'development';
+
 const nextConfig: NextConfig = {
   output: 'standalone',
   env: {
-    APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
-    BACKEND: process.env.NEXT_PUBLIC_BACKEND,
+    APP_NAME: IS_DEVELOPMENT
+      ? process.env.APP_NAME
+      : process.env.NEXT_PUBLIC_APP_NAME,
+    BACKEND: IS_DEVELOPMENT
+      ? process.env.BACKEND
+      : process.env.NEXT_PUBLIC_BACKEND,
   },
   images: {
     remotePatterns: [
