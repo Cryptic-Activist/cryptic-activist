@@ -27,19 +27,25 @@ export const useUserSlice: StateCreator<
     updatedAt: undefined,
     setUserValue: (params, actionName = 'user/setValue') => {
       set(
-        ({ user }) => ({
-          user: {
-            ...user,
-            id: params.id ?? user.id,
-            languages: params.languages ?? user.languages,
-            names: params.names ?? user.names,
-            profileColor: params.profileColor ?? user.profileColor,
-            username: params.username ?? user.username,
-            lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
-            createdAt: params.createdAt ?? user.createdAt,
-            updatedAt: params.updatedAt ?? user.updatedAt,
-          },
-        }),
+        ({ user }) => {
+          const languages = params.userLanguage?.map((language) => ({
+            id: language.language.id,
+            name: language.language.name,
+          }));
+          return {
+            user: {
+              ...user,
+              id: params.id ?? user.id,
+              languages: languages ?? user.languages,
+              names: params.names ?? user.names,
+              profileColor: params.profileColor ?? user.profileColor,
+              username: params.username ?? user.username,
+              lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
+              createdAt: params.createdAt ?? user.createdAt,
+              updatedAt: params.updatedAt ?? user.updatedAt,
+            },
+          };
+        },
         false,
         actionName
       );
