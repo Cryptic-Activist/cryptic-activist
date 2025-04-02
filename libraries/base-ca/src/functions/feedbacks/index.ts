@@ -8,6 +8,7 @@ import {
   CreateManyFeedbacks,
   DeleteFeedbackParams,
   GetFeedbackParams,
+  GetFeedbacksCountParams,
   GetFeedbacksPaginationParams,
   GetFeedbacksParams,
   UpdateFeedbackParams,
@@ -108,7 +109,11 @@ export const getFeedbacksPagination = async ({
   return feedbacks;
 };
 
-export const countFeedbacks = async () => {
-  const count = await prisma.feedback.count();
+export const countFeedbacks = async ({
+  where,
+}: GetFeedbacksCountParams) => {
+  const count = await prisma.feedback.count({
+    ...(where && { where }),
+  });
   return count;
 };

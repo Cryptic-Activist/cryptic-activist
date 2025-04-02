@@ -9,6 +9,15 @@ type UserLanguage = {
   language: Language;
 }[];
 
+type Count = {
+  blocked: number;
+  blockers: number;
+  feedbackTrader: number;
+  trusted: number;
+  trusters: number;
+  trades: number;
+};
+
 type Names = {
   firstName?: string;
   lastName?: string;
@@ -23,6 +32,7 @@ export type User = {
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];
+  _count?: Count;
   setUserValue: (value: Value, actionName: `user/${string}`) => void;
   setUser: (user: Value) => void;
   resetUser: () => void;
@@ -45,6 +55,7 @@ export type UserSetter = {
   updatedAt?: string;
   languages?: Language[];
   userLanguage?: UserLanguage;
+  _count?: Count;
 };
 
 export type Value = UserSetter;

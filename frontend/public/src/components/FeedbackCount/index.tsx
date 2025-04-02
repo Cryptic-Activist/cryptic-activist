@@ -1,13 +1,15 @@
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
 
-import styles from './index.module.scss';
 import type { FeedbackCountProps } from './types';
+import styles from './index.module.scss';
 
 const FeedbackCount: FC<FeedbackCountProps> = ({
   negativeCount,
   positiveCount,
 }) => {
+  const countFeedbacks = useCallback(() => {}, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.positive}>

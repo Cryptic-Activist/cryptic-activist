@@ -4,6 +4,7 @@ import {
   CreateTrade,
   DeleteTradeParams,
   GetTradeParams,
+  GetTradesCountParams,
   GetTradesPaginationParams,
   GetTradesParams,
   UpdateTradeParams,
@@ -106,7 +107,11 @@ export const getTradesPagination = async ({
   return trades;
 };
 
-export const countTrades = async () => {
-  const count = await prisma.trade.count();
+export const countTrades = async ({
+  where,
+}: GetTradesCountParams) => {
+  const count = await prisma.trade.count({
+    ...(where && { where }),
+  });
   return count;
 };
