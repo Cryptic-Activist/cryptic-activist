@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
@@ -20,4 +21,3 @@ jobs:
           git pull origin main
           docker compose pull
           docker compose -f prod.docker-compose.yml up -d --build
-        timeout-minutes: 20  
