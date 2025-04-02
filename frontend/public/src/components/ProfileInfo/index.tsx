@@ -1,11 +1,10 @@
 'use client';
 
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 
-import { formatFullDate } from '@/utils';
-
-import styles from './index.module.scss';
 import type { ProfileInfoProps } from './types';
+import { formatFullDate } from '@/utils';
+import styles from './index.module.scss';
 
 const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
   return (
@@ -17,6 +16,18 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
           {user?.languages?.map((language, index) => (
             <span key={index}>{language.name}</span>
           ))}
+        </li>
+        <li>
+          <span>{user?._count?.trades}</span> Trades
+        </li>
+        <li>
+          Trusted by <span>{user?._count?.trades} people</span>
+        </li>
+        <li>
+          Blocked by <span>{user?._count?.blockers} people</span>
+        </li>
+        <li>
+          Has blocked <span>{user?._count?.blocked} people</span>
         </li>
         <li>
           Joined on: <span>{formatFullDate(user?.createdAt)}</span>

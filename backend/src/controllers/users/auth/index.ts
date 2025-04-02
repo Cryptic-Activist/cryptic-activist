@@ -1,10 +1,13 @@
 import { Request, Response } from 'express';
 import {
   associateUserToLanguage,
+  countFeedbacks,
+  countTrades,
   countUsers,
   createLanguage,
   createTier,
   createUser,
+  getTrades,
   getUser,
   getUsers,
   updateUser,
@@ -108,10 +111,19 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
     const user = await getUser({
       where: { id: decoded.userId as string },
       select: {
+        _count: {
+          select: {
+            blocked: true,
+            blockers: true,
+            trusted: true,
+            trusters: true,
+          },
+        },
         id: true,
         firstName: true,
         lastName: true,
         username: true,
+        createdAt: true,
         tier: {
           select: {
             id: true,
@@ -151,12 +163,21 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       },
     });
 
+    // const _count = {
+    //   user
+    // }
+
     const {
       firstName: _firstName,
       lastName: _lastName,
       lastLoginAt: _lastLoginAt,
+      // @ts-ignore
+      _count,
       ...rest
     } = user;
+
+    const userTradesCount = await countTrades({ where: { vendorId: user.id } });
+    const userPositiveFeedbacksCount = await countFeedbacks();
 
     res.status(200).send({
       names: {
@@ -164,6 +185,10 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         lastName: user.lastName,
       },
       lastLoginAt,
+      _count: {
+        ..._count,
+        trades: userTradesCount,
+      },
       ...rest,
     });
     return;

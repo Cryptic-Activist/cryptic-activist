@@ -43,6 +43,7 @@ export const useUserSlice: StateCreator<
               lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
               createdAt: params.createdAt ?? user.createdAt,
               updatedAt: params.updatedAt ?? user.updatedAt,
+              _count: params._count ?? user._count,
             },
           };
         },

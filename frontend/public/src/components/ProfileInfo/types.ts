@@ -1,5 +1,5 @@
-import { User } from '@/store/user/types';
+import { UserSetter } from '@/store/user/types';
 
 export type ProfileInfoProps = {
-  user?: User;
+  user?: UserSetter;
 };
