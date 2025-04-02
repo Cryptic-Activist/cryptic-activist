@@ -19,7 +19,7 @@ export default function Account() {
       <div className={styles.mainInfo}>
         <ProfileNameUsername names={user?.names} username={user?.username} />
         <Status status="offline" />
-        <FeedbackCount positiveCount={13} negativeCount={2} />
+        <FeedbackCount feedbacksCount={user._count?.feedbackCount} />
       </div>
     </div>
   );

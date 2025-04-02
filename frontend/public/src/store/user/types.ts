@@ -9,10 +9,16 @@ type UserLanguage = {
   language: Language;
 }[];
 
+type FeedbacksCount = {
+  negative: number;
+  neutral: number;
+  positive: number;
+};
+
 type Count = {
   blocked: number;
   blockers: number;
-  feedbackTrader: number;
+  feedbackCount: FeedbacksCount;
   trusted: number;
   trusters: number;
   trades: number;
