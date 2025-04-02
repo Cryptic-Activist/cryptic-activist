@@ -5,6 +5,10 @@ type Language = {
   name: string;
 };
 
+type UserLanguage = {
+  language: Language;
+}[];
+
 type Names = {
   firstName?: string;
   lastName?: string;
@@ -40,6 +44,7 @@ export type UserSetter = {
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];
+  userLanguage?: UserLanguage;
 };
 
 export type Value = UserSetter;
