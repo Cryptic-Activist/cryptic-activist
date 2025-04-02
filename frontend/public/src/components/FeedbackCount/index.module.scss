@@ -1,8 +1,8 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .countStatement {
@@ -21,14 +21,15 @@
 }
 
 .positive,
-.negative {
+.negative,
+.neutral {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   align-items: center;
-  padding: 1rem;
+  padding: 0.5rem;
   border-width: 1px;
   border-style: solid;
-  border-radius: 0.4rem;
+  border-radius: 4rem;
   svg {
     font-size: 1.5rem;
   }
@@ -44,4 +45,26 @@
   border-color: rgba(globals.$feedback-negative, 0.55);
   background-color: rgba(globals.$feedback-negative, 0.1);
   color: globals.$feedback-negative;
+}
+
+.neutral {
+  border-color: rgba(globals.$feedback-neutral, 0.55);
+  background-color: rgba(globals.$feedback-neutral, 0.1);
+  color: globals.$feedback-neutral;
+}
+
+.dialogContainer {
+  display: flex;
+  background-color: globals.$white;
+  border-radius: 0.4em;
+}
+
+.dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4em;
+  border-radius: 0.4em;
+  width: 10rem;
+  text-align: center;
 }

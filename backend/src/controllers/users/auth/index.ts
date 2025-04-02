@@ -177,7 +177,21 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
     } = user;
 
     const userTradesCount = await countTrades({ where: { vendorId: user.id } });
-    const userPositiveFeedbacksCount = await countFeedbacks();
+    const userPositiveFeedbacksCount = await countFeedbacks({
+      where: {
+        type: 'POSITIVE',
+      },
+    });
+    const userNeutralFeedbacksCount = await countFeedbacks({
+      where: {
+        type: 'NEUTRAL',
+      },
+    });
+    const userNegativeFeedbacksCount = await countFeedbacks({
+      where: {
+        type: 'NEGATIVE',
+      },
+    });
 
     res.status(200).send({
       names: {
@@ -188,6 +202,11 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       _count: {
         ..._count,
         trades: userTradesCount,
+        feedbacks: {
+          negative: userNegativeFeedbacksCount,
+          neutral: userNeutralFeedbacksCount,
+          positive: userPositiveFeedbacksCount,
+        },
       },
       ...rest,
     });
