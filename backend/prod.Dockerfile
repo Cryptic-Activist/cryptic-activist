@@ -39,10 +39,10 @@ COPY libraries/cryptic-utils ./libraries/cryptic-utils
 ENV NODE_ENV=production
 
 # Add entrypoint script
-COPY backend/entrypoint.sh /entrypoint.sh
-COPY envs/backend.env dist/.env
-COPY envs/base-ca.env libraries/base-ca/.env
-COPY envs/base-ca.env libraries/base-ca/dist/.env
+COPY backend/prod.entrypoint.sh /entrypoint.sh
+COPY envs/prod.backend.env dist/.env
+COPY envs/prod.base-ca.env libraries/base-ca/.env
+COPY envs/prod.base-ca.env libraries/base-ca/dist/.env
 
 RUN npm run build:base-ca 
 RUN npm run build:cryptic-utils 
