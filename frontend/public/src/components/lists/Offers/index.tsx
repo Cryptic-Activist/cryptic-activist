@@ -11,6 +11,7 @@ const Offers: FC<OffersProps> = ({ height }) => {
   const {
     app: { currentPrice, type },
   } = useApp();
+
   return (
     <div className={styles.container}>
       <Header />
