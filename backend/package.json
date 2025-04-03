@@ -13,6 +13,7 @@
     "lint": "eslint --fix",
     "build:base-ca": "cd ./libraries/base-ca && npm ci && npm run build",
     "build:cryptic-utils": "cd ./libraries/cryptic-utils && npm ci && npm run build",
+    "migrate:dev": "cd libraries/base-ca && npx prisma migrate dev",
     "bootstrap": "npm run build:base-ca && npm run build:cryptic-utils"
   },
   "husky": {
