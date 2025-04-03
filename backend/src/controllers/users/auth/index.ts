@@ -282,7 +282,7 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
   const { username, privateKeys } = req.body;
 
   try {
-    const user = await getUser({ where: username });
+    const user = await getUser({ where: { username } });
 
     if (!user) {
       res.status(400).send({

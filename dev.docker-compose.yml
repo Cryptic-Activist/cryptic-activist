@@ -11,7 +11,7 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .env
+      - envs/dev.postgres.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./dump.sql:/dump.sql
@@ -25,7 +25,7 @@ services:
     container_name: pgAdmin4
     restart: always
     env_file:
-      - pgAdmin.env
+      - envs/dev.pgAdmin.env
     ports:
       - "5050:80"
     networks:
@@ -43,16 +43,16 @@ services:
       - ./libraries/base-ca:/app/libraries/base-ca
       - ./libraries/cryptic-utils:/app/libraries/cryptic-utils
     env_file:
-      - envs/backend.env
+      - envs/dev.backend.env
     environment:
       - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run dev"]
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run migrate:dev && npm run dev"]
     deploy:
       resources:
         limits:
-          memory: 6GB
+          memory: 4GB
     depends_on:
       - postgres
 
@@ -64,7 +64,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - envs/frontend-public.env
+      - envs/dev.frontend-public.env
     volumes:
       - ./frontend/public:/app
       - /app/node_modules
@@ -80,7 +80,7 @@ services:
     ports:
       - "3001:3001"
     env_file:
-      - envs/frontend-admin.env
+      - envs/dev.frontend-admin.env
     volumes:
       - ./frontend/admin:/app
       - /app/node_modules
