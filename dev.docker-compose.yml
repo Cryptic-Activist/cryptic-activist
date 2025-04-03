@@ -48,11 +48,11 @@ services:
       - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npx prisma migrate dev && npm run dev"]
+    entrypoint: ["sh", "-c", "npm run bootstrap && npm run migrate:dev && npm run dev"]
     deploy:
       resources:
         limits:
-          memory: 6GB
+          memory: 4GB
     depends_on:
       - postgres
 
