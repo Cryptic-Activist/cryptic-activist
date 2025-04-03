@@ -49,11 +49,17 @@ export const useVerifyAccountSlice: StateCreator<
       const setValue = get().verifyAccount.setVerifyAccountValue;
 
       if (!submitted) {
-        setValue({ isSubmitted: false }, 'verifyAccount/verifyPrivateKeys');
+        setValue(
+          { isSubmitted: false },
+          'verifyAccount/verifyPrivateKeysSubmitionError'
+        );
         return false;
       }
 
-      setValue({ isSubmitted: true }, 'verifyAccount/verifyPrivateKeys');
+      setValue(
+        { isSubmitted: true },
+        'verifyAccount/verifyPrivateKeysSubmitionSuccess'
+      );
       return true;
     },
   },

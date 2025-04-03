@@ -25,7 +25,7 @@ services:
     container_name: postgres
     restart: always
     env_file:
-      - envs/postgres.env
+      - envs/prod.postgres.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
