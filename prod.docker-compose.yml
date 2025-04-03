@@ -96,7 +96,7 @@ services:
       - "80:80"
       - "443:443"
     env_file:
-      - envs/nginx.env
+      - envs/prod.nginx.env
     networks:
       - app-network
     depends_on:
