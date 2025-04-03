@@ -58,8 +58,8 @@ services:
   frontend-public:
     container_name: public
     build:
-      context: frontend/public/
-      dockerfile: prod.Dockerfile
+      context: .
+      dockerfile: frontend/public/prod.Dockerfile
     restart: always
     ports:
       - "3000:3000"
@@ -73,8 +73,8 @@ services:
   frontend-admin:
     container_name: admin
     build:
-      context: frontend/admin/
-      dockerfile: prod.Dockerfile
+      context: .
+      dockerfile: frontend/admin/prod.Dockerfile
     restart: always
     ports:
       - "3001:3001"

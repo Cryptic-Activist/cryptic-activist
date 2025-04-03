@@ -3,14 +3,15 @@ FROM node:lts-alpine AS deps
 WORKDIR /app
 
 # Install dependencies (include lockfile for deterministic builds)
-COPY package.json package-lock.json* ./
+COPY frontend/public/package.json frontend/public/package-lock.json* ./
 RUN npm ci
 
 # Stage 2: Build the application
 FROM node:lts-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY frontend/public/ .
+COPY envs/prod.frontend-public.env .env
 
 # Set standalone output in next.config.js (or via env)
 ENV NEXT_OUTPUT standalone
