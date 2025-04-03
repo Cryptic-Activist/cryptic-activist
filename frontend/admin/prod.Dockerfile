@@ -5,14 +5,15 @@ FROM base AS deps
 WORKDIR /app
 
 # Install dependencies
-COPY ./package.json ./package-lock.json* ./
+COPY frontend/admin/package.json frontend/admin/package-lock.json* ./
 RUN npm ci
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY frontend/admin/ .
+COPY envs/prod.frontend-admin.env .env
 
 # Build the application
 RUN npm run build
