@@ -15,7 +15,7 @@ jobs:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
         username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 30m
+        command_timeout: 60m
         script: |
           cd app
           git pull origin main
