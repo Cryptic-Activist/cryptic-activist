@@ -1,6 +1,6 @@
 #!/bin/sh
 
-npx prisma migrate deploy
+# npx prisma migrate deploy
 
 npx prisma generate
 
