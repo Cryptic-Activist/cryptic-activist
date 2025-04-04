@@ -66,7 +66,7 @@ export default function BecomeAVendor() {
             verification.
           </li>
           <li>
-            <strong>Approval & Onboarding:</strong> Upon approval, you'll
+            <strong>Approval & Onboarding:</strong> Upon approval, you&apos;ll
             receive a vendor badge, access to enhanced tools, and onboarding
             guidance.
           </li>

@@ -50,8 +50,8 @@ export default function Help() {
       <section className={styles.section}>
         <h2>Contact Us</h2>
         <p>
-          If you can't find the answer you're looking for, please reach out to
-          our support team:
+          If you can&apos;t find the answer you&apos;re looking for, please
+          reach out to our support team:
         </p>
         <p>
           Email:{' '}

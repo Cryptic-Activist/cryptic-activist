@@ -30,7 +30,7 @@ export default function Imprint() {
         <h2>Jurisdiction & Applicable Law</h2>
         <p>
           This platform is governed by the laws of [Your Jurisdiction]. Any
-          disputes will be resolved in [Your Jurisdiction's Courts].
+          disputes will be resolved in [Your Jurisdiction&apos;s Courts].
         </p>
       </section>
       <section className={styles.section}>
