@@ -1,5 +1,4 @@
 import { Offer } from '@/store/offers/types';
-import { Type } from '@/store/app/types';
 
 export type CurrentOffersProps = {
   vendorId: string;

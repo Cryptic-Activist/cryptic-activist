@@ -3,7 +3,6 @@
 import {
   CurrentOffers,
   FeedbackCount,
-  Feedbacks,
   ProfileNameUsername,
   Status,
 } from '@/components';
