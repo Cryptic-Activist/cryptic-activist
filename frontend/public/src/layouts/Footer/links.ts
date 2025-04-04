@@ -42,6 +42,10 @@ export const links: Links = [
         label: 'About Us',
         href: '/about-us',
       },
+      {
+        label: 'Help',
+        href: '/help',
+      },
     ],
   },
 ];
