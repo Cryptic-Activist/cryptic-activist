@@ -1,7 +1,6 @@
 export const menuList = [
   { label: 'Home', href: '/' },
   { label: 'Vendors', href: '/vendors' },
-  { label: 'Help', href: '/help' },
 ];
 
 export const menuUserList = [

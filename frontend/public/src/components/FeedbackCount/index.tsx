@@ -1,7 +1,7 @@
 import type { DialogProps, FeedbackCountProps } from './types';
-import { FC, useCallback } from 'react';
 import { FaHeart, FaHeartCrack, FaRegHeart } from 'react-icons/fa6';
 
+import { FC } from 'react';
 import Tooltip from '../Tooltip';
 import styles from './index.module.scss';
 
@@ -12,7 +12,7 @@ const Dialog: FC<DialogProps> = ({ message, style }) => (
 );
 
 const FeedbackCount: FC<FeedbackCountProps> = ({ feedbacksCount }) => {
-  const countFeedbacks = useCallback(() => {}, []);
+  // const countFeedbacks = useCallback(() => {}, []);
 
   return (
     <div className={styles.container}>

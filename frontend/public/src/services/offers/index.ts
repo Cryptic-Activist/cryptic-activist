@@ -20,6 +20,14 @@ export const fetchOffersPagination = async ({
   return response.data;
 };
 
+export const fetchCurrentVendorOffers = async (vendorId: string) => {
+  const response = await fetchGet(`${BACKEND}/offers/vendor/${vendorId}`);
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
 export const submitOfferCreate = async (data: CreateOfferSetter) => {
   const payload = {
     vendorId: data.vendorId,

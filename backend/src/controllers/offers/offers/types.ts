@@ -5,6 +5,10 @@ export type GetOffersRequest = {
   fiatId?: string;
 };
 
+export type GetCurrentVendorOffersRequest = {
+  id: string;
+};
+
 export type GetOffersPaginationRequest = {
   limit: string;
   offset: string;

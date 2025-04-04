@@ -1,4 +1,4 @@
-import { GetOffers, GetOffersPagination } from './zod';
+import { GetCurrentVendorOffers, GetOffers, GetOffersPagination } from './zod';
 import { NextFunction, Request, Response } from 'express';
 
 export const validateGetOffers = (
@@ -14,6 +14,26 @@ export const validateGetOffers = (
     res.status(400).send({
       errors: validated.error,
     });
+  }
+
+  next();
+};
+
+export const validateGetCurrentVendorOffers = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { params } = req;
+  console.log({ params });
+
+  const validated = GetCurrentVendorOffers.safeParse(params);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+    return;
   }
 
   next();
