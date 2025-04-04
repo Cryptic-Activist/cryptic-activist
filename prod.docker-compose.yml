@@ -65,6 +65,8 @@ services:
       - "3000:3000"
     env_file:
       - envs/prod.frontend-public.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=8192
     networks:
       - app-network
     depends_on:
@@ -80,6 +82,8 @@ services:
       - "3001:3001"
     env_file:
       - envs/prod.frontend-admin.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=8192
     networks:
       - app-network
     depends_on:
