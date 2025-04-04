@@ -1,7 +1,8 @@
 import { ProfileImage, ProfileInfo } from '@/components';
+
 import { FC } from 'react';
-import styles from './index.module.scss';
 import { ProfileSection } from './types';
+import styles from './index.module.scss';
 
 const ProfileImageInfo: FC<ProfileSection> = ({ user }) => {
   return (
