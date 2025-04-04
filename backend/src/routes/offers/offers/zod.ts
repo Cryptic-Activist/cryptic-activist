@@ -7,6 +7,10 @@ export const GetOffers = z.object({
   fiatId: z.string().min(2).optional(),
 });
 
+export const GetCurrentVendorOffers = z.object({
+  id: z.string().min(2),
+});
+
 export const GetOffersPagination = z
   .object({
     limit: z.string(),

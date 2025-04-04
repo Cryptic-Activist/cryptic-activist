@@ -1,13 +1,13 @@
-import { UserSetter } from '@/store/user/types';
+import { User } from '@/store/trade/types';
 
 export type UseSocketParams = {
   roomId?: string;
-  user?: UserSetter;
+  user?: User;
 };
 
 export type Message = {
   id: string;
   content: string;
-  user: UserSetter;
+  user: User;
   timestamp: number;
 };
