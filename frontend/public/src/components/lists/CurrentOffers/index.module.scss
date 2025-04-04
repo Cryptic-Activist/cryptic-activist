@@ -1,2 +1,95 @@
+@use "../../../styles/globals.module.scss";
+
 .container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+}
+
+.offersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border: 1px solid globals.$black;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 0.4rem globals.$box-shadow-default-color;
+  background-color: globals.$white;
+  overflow-y: scroll;
+  max-height: 30rem;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
+  li:first-child {
+    border-top: none;
+  }
+
+  li:last-child {
+    border-bottom: none;
+  }
+}
+
+.offerItem {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 1rem;
+  border-top: 1px solid globals.$border-color-dark;
+  border-bottom: 1px solid globals.$border-color-dark;
+}
+
+.vendorName {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  list-style: none;
+  padding: 0.4em;
+  border-radius: 0.4em;
+  background-color: #dedede;
+}
+
+.labelTermsTags,
+.rates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.percentage {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.percentAmount {
+  font-weight: 900;
+}
+
+.pricesButtonContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.prices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
 }

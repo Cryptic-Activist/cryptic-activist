@@ -1,9 +1,14 @@
 'use client';
 
-import { ProfileNameUsername, Status } from '@/components';
+import {
+  CurrentOffers,
+  FeedbackCount,
+  Feedbacks,
+  ProfileNameUsername,
+  Status,
+} from '@/components';
 import { useDynamicTitle, useUser } from '@/hooks';
 
-import FeedbackCount from '@/components/FeedbackCount';
 import { ProfileImageInfo } from '@/layouts';
 import styles from './index.module.scss';
 
@@ -20,6 +25,8 @@ export default function Account() {
         <ProfileNameUsername names={user?.names} username={user?.username} />
         <Status status="offline" />
         <FeedbackCount feedbacksCount={user._count?.feedbackCount} />
+        {user.id && <CurrentOffers vendorId={user.id} />}
+        {/* <Feedbacks /> */}
       </div>
     </div>
   );

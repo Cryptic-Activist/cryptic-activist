@@ -1,4 +1,4 @@
-@use '../../styles/globals.module.scss';
+@use "../../styles/globals.module.scss";
 
 .container {
   border-radius: 0.4rem;
@@ -26,5 +26,20 @@
     span {
       font-weight: 600;
     }
+  }
+}
+
+@media (max-width: 850px) {
+  .container {
+    border: none;
+    box-shadow: none;
+  }
+  .header {
+    border-bottom: none;
+    display: none;
+  }
+  .list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
   }
 }

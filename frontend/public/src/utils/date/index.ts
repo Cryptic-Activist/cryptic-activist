@@ -23,7 +23,9 @@ export const formatFullDate = (date?: string) => {
   return `${month} ${day}, ${year}`;
 };
 
-export const timeSince = (dateString: string) => {
+export const timeSince = (dateString?: string) => {
+  if (!dateString) return '';
+
   const date = new Date(dateString);
   const now = new Date();
 

@@ -28,8 +28,9 @@ const useRegister = () => {
     queryKey: ['register'],
     queryFn: getRandomCredentials,
     retry: 3,
-    gcTime: 0,
-    staleTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
   const {
     register: registerForm,
