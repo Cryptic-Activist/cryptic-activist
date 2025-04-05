@@ -2,8 +2,8 @@
 
 import { BsChevronCompactDown } from 'react-icons/bs';
 import { Button } from '@/components';
-import { HeroBackground } from '@/assets';
-import Image from 'next/image';
+// import { HeroBackground } from '@/assets';
+// import Image from 'next/image';
 import styles from './index.module.scss';
 import { useNavigationBar } from '@/hooks';
 
