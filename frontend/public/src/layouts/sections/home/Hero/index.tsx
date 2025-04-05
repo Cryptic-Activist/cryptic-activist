@@ -2,6 +2,8 @@
 
 import { BsChevronCompactDown } from 'react-icons/bs';
 import { Button } from '@/components';
+import { HeroBackground } from '@/assets';
+import Image from 'next/image';
 import styles from './index.module.scss';
 import { useNavigationBar } from '@/hooks';
 
@@ -10,6 +12,13 @@ const Hero = () => {
 
   return (
     <section className={styles.hero}>
+      {/* <Image
+        src={HeroBackground.src}
+        alt="Hero background"
+        height={200}
+        width={240}
+        className={styles.backgroundImage}
+      /> */}
       <div className={styles.titles}>
         <h1>Buy & Sell Crypto for Fiat Securely - No Middlemen, No Hassle</h1>
         <h2>

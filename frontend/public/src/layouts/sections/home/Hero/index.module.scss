@@ -5,6 +5,13 @@
   justify-content: center;
   padding: 6rem;
   gap: 2rem;
+  position: relative;
+}
+
+.backgroundImage {
+  position: absolute;
+  z-index: -1;
+  right: 20%;
 }
 
 .titles {
@@ -59,12 +66,5 @@
     h1 {
       font-size: 1.3rem;
     }
-  }
-}
-
-@media (max-width: 486px) {
-  .cta {
-    flex-direction: column;
-    align-items: center;
   }
 }
