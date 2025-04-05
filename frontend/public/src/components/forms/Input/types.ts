@@ -23,4 +23,5 @@ export type InputProps = {
     | undefined;
   width?: string;
   focus?: boolean;
+  style?: string;
 };

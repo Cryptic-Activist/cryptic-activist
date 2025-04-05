@@ -18,6 +18,7 @@ const Input: FC<InputProps> = ({
   errorMessage,
   width,
   focus = true,
+  style,
   onChange,
   ...rest
 }) => {
@@ -29,7 +30,7 @@ const Input: FC<InputProps> = ({
   };
 
   return (
-    <div className={styles.inputContainer}>
+    <div className={`${styles.inputContainer} ${style}`}>
       {id && id.length && label && type !== 'hidden' && (
         <div className={styles.labelLinkContainer}>
           <label htmlFor={id} className={styles.label}>
