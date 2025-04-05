@@ -28,6 +28,9 @@
 .featureBox {
   background: #f9fafb;
   border-left: 4px solid globals.$black;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
   padding: 1.25rem;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);

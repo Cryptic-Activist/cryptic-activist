@@ -53,3 +53,9 @@
 .secondaryButton:hover {
   background-color: #c7d2fe;
 }
+
+@media (max-width: 1090px) {
+  .container {
+    width: 90%;
+  }
+}
