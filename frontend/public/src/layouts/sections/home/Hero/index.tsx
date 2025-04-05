@@ -2,6 +2,7 @@
 
 import { BsChevronCompactDown } from 'react-icons/bs';
 import { Button } from '@/components';
+import Link from 'next/link';
 // import { HeroBackground } from '@/assets';
 // import Image from 'next/image';
 import styles from './index.module.scss';
@@ -38,10 +39,10 @@ const Hero = () => {
           Sign Up & Trade
         </Button>
       </div>
-      <a className={styles.howItWorks}>
+      <Link href="#howItWorks" className={styles.howItWorks}>
         <p>How It Works</p>
         <BsChevronCompactDown size={20} />
-      </a>
+      </Link>
     </section>
   );
 };
