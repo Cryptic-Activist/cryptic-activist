@@ -39,6 +39,7 @@ const Tags: FC<TagsProps> = ({ createOffer, onChange }) => {
         width="50%"
         onChange={handleTags}
         value={tags}
+        style={styles.input}
       />
       <p className={styles.statement}>
         Select a maximum of 5 tags that best describe your offer terms.

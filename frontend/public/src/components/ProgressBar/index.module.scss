@@ -56,3 +56,14 @@
   top: 30%;
   left: calc(3rem + 1rem);
 }
+
+@media (max-width: 768px) {
+  .listItemNumber {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: globals.$font-size-m;
+  }
+  .statement {
+    font-size: globals.$font-size-m;
+  }
+}
