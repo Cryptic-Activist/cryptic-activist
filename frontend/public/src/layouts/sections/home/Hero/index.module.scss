@@ -1,0 +1,70 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem;
+  gap: 2rem;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  h1 {
+    font-size: 2rem;
+  }
+  h2 {
+    font-size: 1.2rem;
+  }
+}
+
+.cta {
+  display: flex;
+  gap: 1rem;
+}
+
+.howItWorks {
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .titles {
+    h1 {
+      font-size: 1.8rem;
+    }
+    h2 {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .titles {
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+@media (max-width: 610px) {
+  .titles {
+    h1 {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+@media (max-width: 486px) {
+  .cta {
+    flex-direction: column;
+    align-items: center;
+  }
+}
