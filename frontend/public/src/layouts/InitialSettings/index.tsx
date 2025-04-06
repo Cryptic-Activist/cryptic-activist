@@ -11,7 +11,6 @@ import {
 } from '@/hooks';
 
 import { CryptocurrencyParams } from '@/hooks/useCryptocurrencies/types';
-import { CurrentOffers } from '@/components';
 import { FiatParams } from '@/hooks/useFiats/types';
 import { Type } from '@/store/app/types';
 import { useEffect } from 'react';
@@ -107,7 +106,7 @@ const InitialSettings = () => {
       );
 
       if (localStorageCryptocurrency) {
-        let maxAttempts = 1;
+        const maxAttempts = 1;
         for (let i = 0; i < maxAttempts; i++) {
           const wasSet = setDefaultCryptocurrency({
             id: localStorageCryptocurrency,
@@ -131,7 +130,7 @@ const InitialSettings = () => {
       const localStorageFiat = getLocalStorage('DEFAULT_FIAT_ID');
 
       if (localStorageFiat) {
-        let maxAttempts = 1;
+        const maxAttempts = 1;
         for (let i = 0; i < maxAttempts; i++) {
           const wasSet = setDefaultFiat({ id: localStorageFiat });
 
