@@ -1,7 +1,7 @@
 'use client';
 
 import { DEFAULT_CRYPTOCURRENCY_ID, DEFAULT_FIAT_SYMBOL } from '@/constants';
-import { getLocalStorage, setLocalStorage } from '@/utils';
+import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/utils';
 import {
   useApp,
   useCryptocurrencies,
@@ -11,6 +11,7 @@ import {
 } from '@/hooks';
 
 import { CryptocurrencyParams } from '@/hooks/useCryptocurrencies/types';
+import { CurrentOffers } from '@/components';
 import { FiatParams } from '@/hooks/useFiats/types';
 import { Type } from '@/store/app/types';
 import { useEffect } from 'react';
@@ -25,6 +26,11 @@ const InitialSettings = () => {
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);
+
+    if (!cryptocurrency) {
+      removeLocalStorage('DEFAULT_CRYPTOCURRENCY_ID');
+      return false;
+    }
 
     if (cryptocurrency) {
       setValue(
@@ -42,11 +48,17 @@ const InitialSettings = () => {
         'app/setDefaultCryptocurrency'
       );
       setLocalStorage('DEFAULT_CRYPTOCURRENCY_ID', cryptocurrency.id);
+      return true;
     }
   };
 
   const setDefaultFiat = (params: FiatParams) => {
     const fiat = getFiat(params);
+
+    if (!fiat) {
+      removeLocalStorage('DEFAULT_FIAT_ID');
+      return false;
+    }
 
     if (fiat) {
       setValue(
@@ -63,6 +75,7 @@ const InitialSettings = () => {
         'app/setDefaultFiat'
       );
       setLocalStorage('DEFAULT_FIAT_ID', fiat.id);
+      return true;
     }
   };
 
@@ -94,7 +107,18 @@ const InitialSettings = () => {
       );
 
       if (localStorageCryptocurrency) {
-        setDefaultCryptocurrency({ id: localStorageCryptocurrency });
+        let maxAttempts = 1;
+        for (let i = 0; i < maxAttempts; i++) {
+          const wasSet = setDefaultCryptocurrency({
+            id: localStorageCryptocurrency,
+          });
+
+          if (wasSet) {
+            return;
+          }
+
+          i++;
+        }
         return;
       }
 
@@ -107,7 +131,16 @@ const InitialSettings = () => {
       const localStorageFiat = getLocalStorage('DEFAULT_FIAT_ID');
 
       if (localStorageFiat) {
-        setDefaultFiat({ id: localStorageFiat });
+        let maxAttempts = 1;
+        for (let i = 0; i < maxAttempts; i++) {
+          const wasSet = setDefaultFiat({ id: localStorageFiat });
+
+          if (wasSet) {
+            return;
+          }
+
+          i++;
+        }
         return;
       }
 
