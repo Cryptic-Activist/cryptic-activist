@@ -1,6 +1,6 @@
 import { GetUserInfoReturn, GetUserTokenResponse, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import { getBearerToken, getCookie, removeLocalStorage } from '@/utils';
+import { getCookie, removeLocalStorage } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
@@ -24,7 +24,7 @@ export const getUserFromToken = async (
   const response = await fetchGet(
     `${BACKEND}/users/auth/login/decode/token/${token}`,
     {
-      Authorization: getBearerToken(),
+      Authorization: `Bearer ${token}`,
     }
   );
 
