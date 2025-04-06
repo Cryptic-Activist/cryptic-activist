@@ -10,7 +10,7 @@ import {
 } from './types';
 import { useCountDown, useTrade } from '@/hooks';
 
-import styles from './index.module.scss';
+import styles from './page.module.scss';
 import { toUpperCase } from '@/utils';
 
 const TradePaymentInstructions: FC<TradePaymentInstructionsProps> = ({
