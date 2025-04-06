@@ -2,11 +2,12 @@
 
 .container {
   width: 1400px;
-  min-height: calc(globals.$main-content-height - 1rem);
-  max-height: calc(globals.$main-content-height - 1rem);
+  // min-height: 80vmin;
+  // min-height: calc(globals.$main-content-height - 1rem);
+  // max-height: calc(globals.$main-content-height - 1rem);
   margin: 0 auto 1rem auto;
   display: grid;
-  grid-template-rows: 39% 61%;
+  grid-template-rows: 45% 55%;
   grid-template-columns: 45% 55%;
   gap: 1rem;
   padding: 1rem 0;
