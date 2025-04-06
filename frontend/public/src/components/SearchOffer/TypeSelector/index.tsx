@@ -1,33 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-import { Selected } from './types';
+import { setLocalStorage } from '@/utils';
 import styles from './index.module.scss';
 import { useApp } from '@/hooks';
 
 const TypeSelector = () => {
-  const { setValue } = useApp();
-  const [selected, setSelected] = useState<Selected>('buy');
+  const {
+    setValue,
+    app: { type },
+  } = useApp();
 
   const selectType = () => {
-    setSelected((prev) => (prev === 'buy' ? 'sell' : 'buy'));
+    const newSelection = type === 'buy' ? 'sell' : 'buy';
+    setValue({ type: newSelection }, 'app/setType');
+    setLocalStorage('APP_TYPE', newSelection);
   };
-
-  useEffect(() => {
-    setValue({ type: selected }, 'app/setType');
-  }, [selected]);
 
   return (
     <div className={styles.container}>
       <button
-        className={selected === 'buy' ? styles.selected : ''}
+        className={type === 'buy' ? styles.selected : ''}
         onClick={selectType}
       >
         Buy
       </button>
       <button
-        className={selected === 'sell' ? styles.selected : ''}
+        className={type === 'sell' ? styles.selected : ''}
         onClick={selectType}
       >
         Sell
