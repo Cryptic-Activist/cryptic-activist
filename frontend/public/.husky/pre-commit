@@ -1,2 +1,1 @@
-npx list-staged
-ls -la
+npm run lint
