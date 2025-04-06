@@ -1,2 +1,2 @@
-cd frontend/public && npm run build
+cd frontend/public && npm run lint
 

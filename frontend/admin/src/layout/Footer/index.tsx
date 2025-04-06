@@ -2,8 +2,8 @@ import styles from './styles.module.scss';
 
 const Footer = () => {
 	return (
-		<footer>
-			<p>
+		<footer className={styles.footer}>
+			<p className={styles.statement}>
 				&copy;{' '}
 				{`${new Date().getFullYear()} Cryptic Activist Catalog - All rights reserved`}
 			</p>
