@@ -7,9 +7,9 @@ import { useAdmin } from '@/hooks';
 const NavigationBar = () => {
 	const { admin } = useAdmin();
 
-	// const toggleLogin = () => {
-	//   openModal({ modal: "login" });
-	// };
+	const toggleLogin = () => {
+		openModal({ modal: 'login' });
+	};
 
 	return (
 		<nav className={styles.nav}>
@@ -36,7 +36,9 @@ const NavigationBar = () => {
 								{admin.data?.firstName}
 							</button>
 						) : (
-							<button className={styles.userButton}>Login</button>
+							<button className={styles.userButton} onClick={toggleLogin}>
+								Login
+							</button>
 						)}
 					</li>
 				</ul>
