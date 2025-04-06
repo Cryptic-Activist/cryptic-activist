@@ -11,6 +11,12 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "lint-staged": {
+    "**/*.{json,js,ts,jsx,tsx,html}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
     "@tanstack/react-form": "^1.1.2",
