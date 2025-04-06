@@ -12,6 +12,7 @@ import {
 
 import { CryptocurrencyParams } from '@/hooks/useCryptocurrencies/types';
 import { FiatParams } from '@/hooks/useFiats/types';
+import { Type } from '@/store/app/types';
 import { useEffect } from 'react';
 
 const InitialSettings = () => {
@@ -113,6 +114,13 @@ const InitialSettings = () => {
       setDefaultFiat({ symbol: DEFAULT_FIAT_SYMBOL });
     }
   }, [fiats.data]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const localStorageAppType = getLocalStorage('APP_TYPE');
+      setValue({ type: localStorageAppType as Type });
+    }
+  }, [typeof window]);
 
   useEffect(() => {
     setCurrentPrice();
