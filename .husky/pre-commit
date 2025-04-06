@@ -1,5 +1,2 @@
-
-ls -la
-
 cd frontend/public && npm run lint
 
