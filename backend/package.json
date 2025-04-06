@@ -16,10 +16,12 @@
     "migrate:dev": "cd libraries/base-ca && npx prisma migrate dev",
     "bootstrap": "npm run build:base-ca && npm run build:cryptic-utils"
   },
-  "husky": {
-    "hooks": {}
+  "lint-staged": {
+    "**/*.{json,js,ts,jsx,tsx,html}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
-  "lint-staged": {},
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@swc/core": "^1.11.13",
