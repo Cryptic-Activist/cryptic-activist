@@ -17,7 +17,7 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
           ))}
         </li>
         <li>
-          <span>{user?._count?.trades}</span> Trades
+          Number of trades: <span>{user?._count?.trades}</span>
         </li>
         <li>
           Trusted by <span>{user?._count?.trades} people</span>

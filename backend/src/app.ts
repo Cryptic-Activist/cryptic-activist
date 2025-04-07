@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import { Server } from 'socket.io';
+import { connectDB } from 'base-ca';
 import { createServer } from 'node:http';
 import express from 'express';
 import middleware from '@/middlewares';
@@ -16,5 +17,7 @@ socketHandler(io);
 middleware(app);
 
 routes(app);
+
+connectDB();
 
 export default server;

@@ -41,20 +41,25 @@ const Content: FC<ContentProps> = ({
   sender,
   messages,
 }) => {
+  console.log({ messages });
   return (
     <ul className={styles.list}>
       {messages.map((message, index) => {
+        // const user
+        // const senderContent =
+        // const messageStyle =
+        //   message.user.id === sender.id ? styles.sender : styles.receiver;
+        console.log({ message, sender });
         const messageStyle =
-          message.user.id === sender.id ? styles.sender : styles.receiver;
+          sender.id === message.from.id ? styles.sender : styles.receiver;
         return (
           <li key={index} className={`${styles.listItem} ${messageStyle}`}>
-            <div className={styles.usernameTime}>
-              <span className={styles.username}>{message.user.username}</span>
+            <div className={styles.message}>
+              <p>{message.message}</p>
               <span className={styles.time}>
                 {formatTimestamp(message.timestamp)}
               </span>
             </div>
-            <p className={styles.message}>{message.content}</p>
           </li>
         );
       })}
@@ -62,16 +67,19 @@ const Content: FC<ContentProps> = ({
   );
 };
 
-const Inputs: FC<InputsProps> = ({
-  receiver: _receiver,
-  sender: _sender,
-  sendMessage,
-}) => {
+const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
 
   const submitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    sendMessage(message);
+    sendMessage({
+      content: {
+        from: sender,
+        to: receiver,
+        message,
+        timestamp: Date(),
+      },
+    });
     setMessage('');
   };
 
@@ -100,7 +108,7 @@ const Inputs: FC<InputsProps> = ({
 const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
   const { sendMessage, messages } = useSocket({
     roomId: trade.chat?.id,
-    user: trade.trader,
+    user: sender,
   });
 
   return (

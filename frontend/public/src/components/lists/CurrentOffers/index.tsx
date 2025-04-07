@@ -89,24 +89,25 @@ const CurrentOffers: FC<CurrentOffersProps> = ({ vendorId }) => {
     }
   }, [user, vendorId]);
 
+  console.log({ data });
+
   return (
     <section className={styles.container}>
       <h2>Current Offers</h2>
-      <ul className={styles.offersList}>
-        {isPending && (
-          <li className={styles.loadingItem}>
-            <span>Loading...</span>
-          </li>
-        )}
-        {data?.map((offer: any) => (
-          <Item
-            key={offer.id}
-            offer={offer}
-            currentPrice={currentPrice}
-            isCurrentUser={isCurrentUser}
-          />
-        ))}
-      </ul>
+      {isPending && <p>Loading...</p>}
+      {data?.length === 0 && 'No current offers'}
+      {data?.length > 0 && (
+        <ul className={styles.offersList}>
+          {data?.map((offer: any) => (
+            <Item
+              key={offer.id}
+              offer={offer}
+              currentPrice={currentPrice}
+              isCurrentUser={isCurrentUser}
+            />
+          ))}
+        </ul>
+      )}
     </section>
   );
 };

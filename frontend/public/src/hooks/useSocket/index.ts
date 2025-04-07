@@ -1,6 +1,6 @@
 'use client';
 
-import { Message, UseSocketParams } from './types';
+import { Message, SendMessageParams, UseSocketParams } from './types';
 import io, { Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,10 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
   const [roomUsers, setRoomUsers] = useState<string[]>([]);
   const [roomError, setRoomError] = useState<string | null>(null);
 
+  const appendMessage = (message: Message) => {
+    setMessages((prevMessages) => [...prevMessages, message]);
+  };
+
   useEffect(() => {
     if (roomId && user) {
       // Establish socket connection
@@ -21,6 +25,7 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
 
       newSocket.on('connect', () => {
         // Join room
+        console.log('connected');
         newSocket.emit('join_room', { roomId, user });
       });
 
@@ -56,10 +61,10 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
     }
   }, [roomId, user]);
 
-  const sendMessage = (content: string) => {
-    if (socket && content.trim()) {
-      console.log({ content });
-      socket.emit('send_message', { roomId, content });
+  const sendMessage = (params: SendMessageParams) => {
+    if (socket) {
+      socket.emit('send_message', params);
+      appendMessage(params.content);
     }
   };
 
@@ -68,6 +73,7 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
     roomUsers,
     roomError,
     sendMessage,
+    appendMessage,
   };
 };
 

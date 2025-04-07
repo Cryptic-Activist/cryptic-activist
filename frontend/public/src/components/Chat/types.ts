@@ -1,6 +1,5 @@
+import { Message, SendMessageParams } from '@/hooks/useSocket/types';
 import { TradeSetter, Trader, Vendor } from '@/store/trade/types';
-
-import { Message } from '@/hooks/useSocket/types';
 
 export type Props = {
   sender: Trader;
@@ -18,5 +17,5 @@ export type ContentProps = Props & {
 };
 
 export type InputsProps = Props & {
-  sendMessage: (content: string) => void;
+  sendMessage: (params: SendMessageParams) => void;
 };
