@@ -57,7 +57,7 @@ export const timeSince = (dateString?: string) => {
   }
 };
 
-export const formatTimestamp = (timestamp: number) => {
+export const formatTimestamp = (timestamp: number | string) => {
   const date = new Date(timestamp);
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
