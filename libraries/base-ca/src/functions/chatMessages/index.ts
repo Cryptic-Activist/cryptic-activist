@@ -27,7 +27,7 @@ export const createManyChatMessages = async (
 ) => {
   try {
     const newChatMessages = await ChatMessage.insertMany(params);
-    // Mimic Prisma's BatchPayload by returning an object with the inserted count.
+
     return { count: newChatMessages.length };
   } catch (error: any) {
     throw Error(error);
@@ -67,7 +67,10 @@ export const getChatMessages = async ({
   where,
   orderBy,
 }: GetChatMessagesParams) => {
-  let query = ChatMessage.find({ chatId: where?.chatId });
+  let query = ChatMessage.find(
+    { chatId: where?.chatId },
+    'createdAt from message to'
+  );
 
   if (orderBy) {
     query = query.sort(orderBy);
