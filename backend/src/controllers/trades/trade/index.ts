@@ -188,6 +188,7 @@ export async function getTradeController(req: Request, res: Response) {
 
     res.status(200).send({ ...trade, chat });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

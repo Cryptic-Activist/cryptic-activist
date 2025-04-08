@@ -40,5 +40,5 @@ export interface GetChatMessagesParams {
   where?: {
     chatId: string;
   };
-  orderBy?: Record<string, 'asc' | 'desc'>;
+  orderBy?: 'asc' | 'desc';
 }

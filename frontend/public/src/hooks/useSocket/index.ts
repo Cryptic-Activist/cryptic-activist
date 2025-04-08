@@ -6,14 +6,23 @@ import { useEffect, useState } from 'react';
 
 import { BACKEND } from '@/constants';
 
-const useSocket = ({ roomId, user }: UseSocketParams) => {
+const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [roomUsers, setRoomUsers] = useState<string[]>([]);
   const [roomError, setRoomError] = useState<string | null>(null);
 
+  console.log({ onStatusChange });
+
   const appendMessage = (message: Message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
+  };
+
+  const sendMessage = (params: SendMessageParams) => {
+    if (socket) {
+      socket.emit('send_message', { roomId, ...params });
+      appendMessage(params.content);
+    }
   };
 
   useEffect(() => {
@@ -25,7 +34,6 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
 
       newSocket.on('connect', () => {
         // Join room
-        console.log('connected');
         newSocket.emit('join_room', { roomId, user });
       });
 
@@ -49,6 +57,14 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
         setRoomError(error);
       });
 
+      newSocket.on('room_full', (data) => {
+        console.log({ data });
+      });
+
+      newSocket.on('user_status', (data) => {
+        onStatusChange(data.status);
+      });
+
       setSocket(newSocket);
 
       // Cleanup on unmount
@@ -60,13 +76,6 @@ const useSocket = ({ roomId, user }: UseSocketParams) => {
       };
     }
   }, [roomId, user]);
-
-  const sendMessage = (params: SendMessageParams) => {
-    if (socket) {
-      socket.emit('send_message', params);
-      appendMessage(params.content);
-    }
-  };
 
   return {
     messages,

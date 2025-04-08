@@ -20,8 +20,8 @@ export interface Attachment {
 
 export type MessageContent = {
   id: string;
-  from: User;
-  to: User;
+  from: string;
+  to: string;
   message: string;
   attachment?: Attachment;
   timestamp: string;

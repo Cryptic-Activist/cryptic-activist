@@ -55,13 +55,14 @@ services:
       - app-network
 
   mongo-express:
-    image: mongo-express:0.54.0
+    image: mongo-express
     container_name: mongo-express
     env_file:
       - envs/dev.mongo-express.env
+    networks:
+      - app-network
     ports:
       - "8082:8081"
-    restart: always
     depends_on:
       - mongodb
 

@@ -44,6 +44,7 @@ export const authenticateUser = async (
 
     next();
   } catch (errors) {
+    console.log(errors);
     res.status(500).send({
       errors,
     });

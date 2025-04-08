@@ -1,6 +1,9 @@
+type Status = 'online' | 'offline';
+
 export type UseSocketParams = {
   roomId?: string;
   user?: User;
+  onStatusChange: (status: Status) => void;
 };
 
 type User = {
@@ -11,12 +14,14 @@ type User = {
 };
 
 export type Message = {
-  from: User;
-  to: User;
+  from: string;
+  to: string;
   message: string;
-  timestamp: string;
   attachment?: Attachment;
+  createdAt: string;
 };
+
+export type Messages = Message[];
 
 export interface Attachment {
   type: string;

@@ -11,7 +11,9 @@ const redisClient = redis.createClient({
 
 redisClient
   .connect()
-  .then(() => console.log('Redis connected'))
+  .then(() =>
+    console.log(`Redis Connected: ${REDIS_HOST}:${REDIS_PORT}`)
+  )
   .catch(console.error);
 
 export { redisClient };

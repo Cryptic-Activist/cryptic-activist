@@ -89,8 +89,6 @@ const CurrentOffers: FC<CurrentOffersProps> = ({ vendorId }) => {
     }
   }, [user, vendorId]);
 
-  console.log({ data });
-
   return (
     <section className={styles.container}>
       <h2>Current Offers</h2>
