@@ -22,6 +22,7 @@ const InitialSettings = () => {
   const { getPaymentMethods } = usePaymentMethods();
   const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
   const {} = useUser();
+  // const {} = useNotification();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);

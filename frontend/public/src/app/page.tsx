@@ -11,7 +11,6 @@ import {
 import styles from './page.module.scss';
 
 export default function Home() {
-  console.log('Home');
   return (
     <div className={styles.container}>
       <Hero />

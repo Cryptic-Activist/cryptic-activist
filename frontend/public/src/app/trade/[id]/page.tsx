@@ -8,10 +8,11 @@ import {
   TradePaymentInstructionsProps,
   TradeStatementProps,
 } from './types';
-import { useCountDown, useTrade } from '@/hooks';
+import { useCountDown, useTrade, useUser } from '@/hooks';
 
 import styles from './page.module.scss';
 import { toUpperCase } from '@/utils';
+import { useRouter } from 'next/navigation';
 
 const TradePaymentInstructions: FC<TradePaymentInstructionsProps> = ({
   trade,
@@ -116,7 +117,9 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 
 export default function TradePage() {
   const { trade } = useTrade();
+  const { user, query } = useUser();
   const { timeLeftInMinutes, startCountDown } = useCountDown();
+  const router = useRouter();
 
   useEffect(() => {
     if (trade.offer?.timeLimit) {
@@ -124,6 +127,16 @@ export default function TradePage() {
       startCountDown(miliseconds);
     }
   }, [trade.offer?.timeLimit]);
+
+  useEffect(() => {
+    if (query.isSuccess && !user.id) {
+      router.back();
+      return;
+    }
+    if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
+      router.back();
+    }
+  }, [trade.trader?.id, user.id, query.isSuccess]);
 
   return (
     <div className={styles.container}>

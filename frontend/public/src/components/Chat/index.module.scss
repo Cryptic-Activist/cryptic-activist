@@ -3,8 +3,7 @@
 .container {
   border: 1px solid globals.$black;
   border-radius: 0.4em;
-  min-height: calc(globals.$main-content-height - 1rem);
-  max-height: calc(globals.$main-content-height - 1rem);
+  min-height: 50rem;
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
   display: grid;
   grid-template-rows: 3rem 1fr 6rem;
@@ -36,13 +35,20 @@
     .username {
       font-size: 1rem;
     }
+    .online {
+      svg {
+        color: globals.$status-online;
+      }
+    }
+    .offline {
+      svg {
+        color: globals.$status-offline;
+      }
+    }
     .status {
       display: flex;
       gap: 0.25rem;
       align-items: center;
-      svg {
-        color: globals.$status-offline;
-      }
 
       .lastSeen {
         font-size: 0.8rem;
@@ -72,6 +78,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+  padding: 0.5rem;
   &::-webkit-scrollbar {
     width: 5px;
   }
@@ -81,6 +88,12 @@
   &::-webkit-scrollbar-thumb {
     background: globals.$secondary;
   }
+}
+
+.message {
+  display: flex;
+  gap: 0.2rem;
+  align-items: flex-end;
 }
 
 .listItem {
@@ -102,9 +115,8 @@
   align-self: flex-end;
 }
 
-.username,
 .time {
-  font-size: 0.8rem;
+  font-size: 0.65rem;
 }
 
 .sender {
@@ -117,8 +129,14 @@
 }
 
 .receiver {
-  background-color: #dedede;
   margin-left: 0.5rem;
+  align-self: flex-start;
+  .usernameTime {
+    align-self: flex-start;
+  }
+  .message {
+    background-color: #dedede;
+  }
 }
 
 .inputs {
@@ -154,3 +172,9 @@
     }
   }
 }
+
+// @media (max-height: 930px) {
+//   .container {
+//     min-height: 90vh;
+//   }
+// }

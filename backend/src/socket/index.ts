@@ -1,5 +1,12 @@
 import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
-import { Message, User, UserInfo } from './types';
+import { SendMessageParams, User, UserInfo } from './types';
+import {
+  createChatMessage,
+  getChat,
+  getChatMessages,
+  redisClient,
+  updateUser,
+} from 'base-ca';
 
 const socketHandler = (
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
@@ -7,80 +14,75 @@ const socketHandler = (
   // Store active users and their room information
   const users = new Map<string, UserInfo>();
   const rooms = new Map<string, Set<string>>();
-  const roomMessages = new Map<string, Message[]>();
 
   io.on('connection', (socket: SocketIO) => {
-    console.log('New client connected:', socket.id);
-
     // Join trade room
-    socket.on('join_room', (data: { roomId: string; user: User }) => {
+    socket.on('join_room', async (data: { roomId: string; user: User }) => {
       const { roomId, user } = data;
-      console.log(`Room ${roomId} joined`);
-
-      // Ensure room doesn't exceed 3 users
-      if (!rooms.has(roomId)) {
-        rooms.set(roomId, new Set());
-      }
-
-      const roomUsers = rooms.get(roomId)!;
-
-      if (roomUsers.size >= 3) {
-        socket.emit('room_error', 'Trade room is full');
-        return;
-      }
-
-      // Add user to room
-      roomUsers.add(socket.id);
-      socket.join(roomId);
-
-      // Store user information
-      users.set(socket.id, {
-        id: socket.id,
-        user,
-        roomId,
-      });
-
-      // Initialize room messages if not exists
-      if (!roomMessages.has(roomId)) {
-        roomMessages.set(roomId, []);
-      }
+      await redisClient.hSet('onlineUsers', user.id, socket.id);
 
       // Send existing room messages
-      const existingMessages = roomMessages.get(roomId) || [];
-      socket.emit('room_messages', existingMessages);
+      const chatMessages = await getChatMessages({
+        where: { chatId: roomId },
+        orderBy: 'desc',
+      });
+      socket.emit('room_messages', chatMessages);
+
+      // const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+
+      // io.emit('user_status', { userId, status: 'offline' });
 
       // Notify room about new user
-      io.to(roomId).emit(
-        'room_users_update',
-        Array.from(roomUsers).map((userId) => users.get(userId)?.user.username),
-      );
+      io.to(roomId).emit('room_users_update', {});
+      io.emit('user_status', { user, status: 'online' });
     });
 
     // Send message in trade room
-    socket.on('send_message', (data: { roomId: string; content: string }) => {
+    socket.on('send_message', async (data: SendMessageParams) => {
       const { roomId, content } = data;
-      console.log('message sent to room' + roomId);
-      const user = users.get(socket.id);
+      const { from, to, message } = content;
 
-      console.log({ data });
+      const chat = await getChat({
+        where: {
+          id: roomId,
+        },
+      });
 
-      if (!user) return;
+      if (chat?.id) {
+        const newMessage = await createChatMessage({
+          chatId: chat.id,
+          from: from,
+          message,
+          to: to,
+        });
 
-      const newMessage: Message = {
-        id: `msg_${Date.now()}`,
-        senderId: socket.id,
-        content,
-        user: user.user,
-        timestamp: Date.now(),
-      };
-
-      // Store message in room history
-      const roomMessageHistory = roomMessages.get(roomId) || [];
-      roomMessageHistory.push(newMessage);
-      roomMessages.set(roomId, roomMessageHistory);
-
-      // Broadcast to room
-      io.to(roomId).emit('receive_message', newMessage);
+        // Check if recipient is online via Redis
+        const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+        if (recipientSocketId) {
+          // Deliver message in real time
+          io.to(recipientSocketId).emit('receive_message', {
+            from,
+            to,
+            createdAt: newMessage.createdAt,
+            message,
+          });
+        } else {
+          // If offline, send a push notification if subscription exists
+          // const subscriptionString = await redisClient.hGet(
+          //   'pushSubscriptions',
+          //   to,
+          // );
+          // if (subscriptionString) {
+          //   const subscription = JSON.parse(subscriptionString);
+          //   const payload = JSON.stringify({
+          //     title: 'New Message',
+          //     body: message,
+          //   });
+          //   // webpush.sendNotification(subscription, payload)
+          //   //   .catch(error => console.error('Push notification error:', error));
+          // }
+        }
+      }
     });
 
     // Leave trade room
@@ -103,8 +105,24 @@ const socketHandler = (
     });
 
     // Disconnection handling
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log('disconnected');
+      const onlineUsers = await redisClient.hGetAll('onlineUsers');
+
+      for (const [userId, sockId] of Object.entries(onlineUsers)) {
+        if (sockId === socket.id) {
+          await redisClient.hDel('onlineUsers', userId);
+          await updateUser({
+            where: { id: userId },
+            toUpdate: {
+              lastLoginAt: new Date(),
+            },
+          });
+          io.emit('user_status', { userId, status: 'offline' });
+          break;
+        }
+      }
+
       const user = users.get(socket.id);
       if (user && user.roomId) {
         const roomUsers = rooms.get(user.roomId);
