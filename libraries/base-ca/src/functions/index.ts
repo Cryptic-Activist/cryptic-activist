@@ -2,6 +2,7 @@ export * from './acceptedCryptocurrencies';
 export * from './admins';
 export * from './blocks';
 export * from './chats';
+export * from './chatMessages';
 export * from './cryptocurrencies';
 export * from './feedbacks';
 export * from './fiats';

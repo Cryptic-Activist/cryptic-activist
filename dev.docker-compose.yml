@@ -5,10 +5,70 @@ networks:
 volumes:
   postgres-data:
     driver: local
+  redis-data:
+    driver: local
+  mongodb-data:
+    driver: local
 
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: always
+    env_file:
+      - envs/dev.redis.env
+    networks:
+      - app-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    container_name: redis-commander
+    environment:
+      REDIS_HOSTS: redis
+      REDIS_HOST: redis
+      REDIS_PORT: redis:6379
+      REDIS_PASSWORD: root
+      HTTP_USER: root
+      HTTP_PASSWORD: root
+    ports:
+      - 8081:8081
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:6-jammy
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    env_file:
+      - envs/dev.mongodb.env
+    restart: always
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    env_file:
+      - envs/dev.mongo-express.env
+    networks:
+      - app-network
+    ports:
+      - "8082:8081"
+    depends_on:
+      - mongodb
+
   postgres:
     image: postgres:latest
+    container_name: postgres
     restart: always
     env_file:
       - envs/dev.postgres.env
@@ -32,6 +92,7 @@ services:
       - app-network
 
   backend:
+    container_name: backend
     build:
       context: backend/
       dockerfile: dev.Dockerfile
@@ -55,9 +116,12 @@ services:
           memory: 4GB
     depends_on:
       - postgres
+      - redis
+      - mongodb
 
 
   frontend-public:
+    container_name: public
     build:
       context: frontend/public/
       dockerfile: dev.Dockerfile
@@ -74,6 +138,7 @@ services:
       - backend
 
   frontend-admin:
+    container_name: admin
     build:
       context: frontend/admin/
       dockerfile: dev.Dockerfile
