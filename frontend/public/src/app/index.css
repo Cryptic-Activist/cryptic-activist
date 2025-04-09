@@ -5,7 +5,8 @@
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-decoration: none;;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
