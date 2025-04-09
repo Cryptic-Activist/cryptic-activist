@@ -1,11 +1,9 @@
 'use client';
 
 import { FC } from 'react';
-
-import { useNavigationBar } from '@/hooks';
-
-import styles from './index.module.scss';
 import type { TemplateProps } from './types';
+import styles from './index.module.scss';
+import { useNavigationBar } from '@/hooks';
 
 const Template: FC<TemplateProps> = ({
   children,
@@ -13,6 +11,7 @@ const Template: FC<TemplateProps> = ({
   heading,
   successMessage,
   allowClose = true,
+  name,
 }) => {
   const { resetNavigationBar, navigationBar } = useNavigationBar();
 
@@ -22,10 +21,19 @@ const Template: FC<TemplateProps> = ({
     }
   };
 
+  const privateKeysStyle =
+    name === 'privateKeys' ? styles.privateKeysContainer : '';
+
+  const verifyAccountStyle =
+    name === 'verifyAccount' ? styles.verifyAccountContainer : '';
+
   return (
     <>
       <div className={styles.bg} onClick={closeModal} />
-      <div className={styles.container} style={{ width }}>
+      <div
+        className={`${styles.container} ${privateKeysStyle} ${verifyAccountStyle}`}
+        style={{ width }}
+      >
         {heading && <h1 className={styles.heading}>{heading}</h1>}
         {navigationBar.status === 'loading' ? (
           <p>Loading</p>
