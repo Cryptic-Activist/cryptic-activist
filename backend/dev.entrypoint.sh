@@ -1,7 +1,5 @@
 #!/bin/sh
 
-ls -la && ls -la libraries/base-ca
-
 npm run bootstrap
 
 cd libraries/base-ca
