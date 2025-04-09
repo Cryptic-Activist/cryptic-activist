@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useTrade, useUser } from '@/hooks';
+import { useSocket, useTrade, useUser } from '@/hooks';
 
 import { Chat } from '@/components';
 import styles from './page.module.scss';
@@ -11,6 +11,12 @@ const TradeVendor = () => {
   const { trade } = useTrade();
   const { user, query } = useUser();
   const router = useRouter();
+
+  const { sendMessage, messages, receiverStatus } = useSocket({
+    roomId: trade.chat?.id,
+    user: trade.vendor,
+    timeLimit: trade.offer?.timeLimit,
+  });
 
   useEffect(() => {
     if (query.isSuccess && !user.id) {
@@ -35,7 +41,13 @@ const TradeVendor = () => {
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (
-          <Chat receiver={trade.trader} sender={trade.vendor} trade={trade} />
+          <Chat
+            receiver={trade.trader}
+            sender={trade.vendor}
+            receiverStatus={receiverStatus}
+            onSendMessage={sendMessage}
+            messages={messages}
+          />
         )}
       </div>
     </div>

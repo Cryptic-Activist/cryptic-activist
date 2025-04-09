@@ -1,18 +1,29 @@
 'use client';
 
-import { Message, SendMessageParams, UseSocketParams } from './types';
+import {
+  Message,
+  ReceiverStatus,
+  SendMessageParams,
+  SetAsPaidParams,
+  UseSocketParams,
+} from './types';
 import io, { Socket } from 'socket.io-client';
 import { useEffect, useState } from 'react';
 
 import { BACKEND } from '@/constants';
 
-const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
+const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [roomUsers, setRoomUsers] = useState<string[]>([]);
   const [roomError, setRoomError] = useState<string | null>(null);
+  const [receiverStatus, setReceiverStatus] =
+    useState<ReceiverStatus>('online');
+  const [isTradePaid, setIsTradePaid] = useState(null);
 
-  console.log({ onStatusChange });
+  const onStatusChange = (status: ReceiverStatus) => {
+    setReceiverStatus(status);
+  };
 
   const appendMessage = (message: Message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -25,6 +36,12 @@ const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
     }
   };
 
+  const setAsPaid = (params: SetAsPaidParams) => {
+    if (socket) {
+      socket.emit('trade_set_paid', { roomId, ...params });
+    }
+  };
+
   useEffect(() => {
     if (roomId && user) {
       // Establish socket connection
@@ -34,7 +51,7 @@ const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
 
       newSocket.on('connect', () => {
         // Join room
-        newSocket.emit('join_room', { roomId, user });
+        newSocket.emit('join_room', { roomId, user, timeLimit });
       });
 
       // Handle existing room messages
@@ -65,6 +82,14 @@ const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
         onStatusChange(data.status);
       });
 
+      newSocket.on('trade_set_paid_success', (data) => {
+        setIsTradePaid(data.isPaid);
+      });
+
+      newSocket.on('trade_set_paid_error', (data) => {
+        setIsTradePaid(data.error);
+      });
+
       setSocket(newSocket);
 
       // Cleanup on unmount
@@ -81,8 +106,11 @@ const useSocket = ({ roomId, user, onStatusChange }: UseSocketParams) => {
     messages,
     roomUsers,
     roomError,
+    receiverStatus,
     sendMessage,
     appendMessage,
+    setAsPaid,
+    isTradePaid,
   };
 };
 

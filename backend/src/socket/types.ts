@@ -31,3 +31,9 @@ export type SendMessageParams = {
   roomId: string;
   content: MessageContent;
 };
+
+export type SetTradeAsPaidParams = {
+  roomId: string;
+  from: string;
+  to: string;
+};

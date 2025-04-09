@@ -8,7 +8,7 @@ import {
   TradePaymentInstructionsProps,
   TradeStatementProps,
 } from './types';
-import { useCountDown, useTrade, useUser } from '@/hooks';
+import { useCountDown, useSocket, useTrade, useUser } from '@/hooks';
 
 import styles from './page.module.scss';
 import { toUpperCase } from '@/utils';
@@ -56,12 +56,25 @@ const TradeStatement: FC<TradeStatementProps> = ({ trade }) => {
   );
 };
 
-const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
+const TradeCancelation: FC<TradeCancelationProps> = ({
+  trade,
+  timeLeft,
+  onSetAsPaid,
+  isTradePaid,
+}) => {
   return (
     <section className={styles.section}>
-      <Button>
+      <Button
+        onClick={() =>
+          onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
+        }
+      >
         <div className={styles.paidButton}>
-          <strong>Paid</strong>
+          <strong>
+            {isTradePaid === null && 'Set as Paid'}
+            {isTradePaid === false && 'An Error Occured'}
+            {isTradePaid && 'Paid'}
+          </strong>
           <div className={styles.remainingTime}>
             <span>Remaining time: </span>
             <span className={styles.time}>{timeLeft}</span>
@@ -121,6 +134,13 @@ export default function TradePage() {
   const { timeLeftInMinutes, startCountDown } = useCountDown();
   const router = useRouter();
 
+  const { sendMessage, messages, receiverStatus, setAsPaid, isTradePaid } =
+    useSocket({
+      roomId: trade.chat?.id,
+      user: trade.trader,
+      timeLimit: trade.offer?.timeLimit,
+    });
+
   useEffect(() => {
     if (trade.offer?.timeLimit) {
       const miliseconds = trade.offer?.timeLimit * 1000 * 60;
@@ -148,12 +168,23 @@ export default function TradePage() {
         </span>
         <TradePaymentInstructions trade={trade} />
         <TradeStatement trade={trade} />
-        <TradeCancelation trade={trade} timeLeft={timeLeftInMinutes} />
+        <TradeCancelation
+          trade={trade}
+          timeLeft={timeLeftInMinutes}
+          onSetAsPaid={setAsPaid}
+          isTradePaid={isTradePaid}
+        />
         <TradeInstructions trade={trade} />
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (
-          <Chat receiver={trade.vendor} sender={trade.trader} trade={trade} />
+          <Chat
+            receiver={trade.vendor}
+            sender={trade.trader}
+            receiverStatus={receiverStatus}
+            onSendMessage={sendMessage}
+            messages={messages}
+          />
         )}
       </div>
     </div>

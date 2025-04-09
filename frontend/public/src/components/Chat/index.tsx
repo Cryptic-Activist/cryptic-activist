@@ -1,19 +1,12 @@
 'use client';
 
-import {
-  ChatProps,
-  ContentProps,
-  HeaderProps,
-  InputsProps,
-  ReceiverStatus,
-} from './types';
+import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
 import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
 import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
-import { formatTimestamp, timeSince } from '@/utils';
 
 import { FaEllipsisV } from 'react-icons/fa';
+import { formatTimestamp } from '@/utils';
 import styles from './index.module.scss';
-import { useSocket } from '@/hooks';
 
 const Header: FC<HeaderProps> = ({
   receiver,
@@ -28,17 +21,23 @@ const Header: FC<HeaderProps> = ({
       <div className={styles.vendor}>
         <div
           className={styles.profileColor}
-          style={{ backgroundColor: receiver.profileColor }}
+          style={{ backgroundColor: receiver?.profileColor }}
         />
         <div className={styles.names}>
-          <span className={styles.username}>{receiver.username}</span>
+          <span className={styles.username}>{receiver?.username}</span>
           <div className={`${styles.status} ${indicatorStyle}`}>
-            <FaCircle size={8} className={styles.indicator} />
+            {receiverStatus === 'online' && (
+              <>
+                <FaCircle size={8} className={styles.indicator} />
+                <span className={styles.lastSeen}>Online</span>
+              </>
+            )}
+            {/* <FaCircle size={8} className={styles.indicator} />
             <span className={styles.lastSeen}>
               {receiverStatus === 'online'
                 ? 'Online'
-                : timeSince(receiver.lastLoginAt)}
-            </span>
+                : timeSince(receiver?.lastLoginAt)}
+            </span> */}
           </div>
         </div>
       </div>
@@ -60,7 +59,7 @@ const Content: FC<ContentProps> = ({
     <ul className={styles.list}>
       {messages.map((message, index) => {
         const messageStyle =
-          sender.id === message.from ? styles.sender : styles.receiver;
+          sender?.id === message.from ? styles.sender : styles.receiver;
         return (
           <li key={index} className={`${styles.listItem} ${messageStyle}`}>
             <div className={styles.message}>
@@ -114,20 +113,13 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   );
 };
 
-const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
-  const [receiverStatus, setReceiverStatus] =
-    useState<ReceiverStatus>('online');
-
-  const onStatusChange = (status: ReceiverStatus) => {
-    setReceiverStatus(status);
-  };
-
-  const { sendMessage, messages } = useSocket({
-    roomId: trade.chat?.id,
-    user: sender,
-    onStatusChange,
-  });
-
+const Chat: FC<ChatProps> = ({
+  receiverStatus,
+  messages,
+  onSendMessage,
+  receiver,
+  sender,
+}) => {
   return (
     <div className={styles.container}>
       <Header
@@ -136,7 +128,7 @@ const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
         receiverStatus={receiverStatus}
       />
       <Content receiver={receiver} sender={sender} messages={messages} />
-      <Inputs receiver={receiver} sender={sender} sendMessage={sendMessage} />
+      <Inputs receiver={receiver} sender={sender} sendMessage={onSendMessage} />
     </div>
   );
 };
