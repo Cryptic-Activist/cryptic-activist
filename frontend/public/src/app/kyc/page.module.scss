@@ -1,0 +1,68 @@
+.container {
+  padding: 1rem 0;
+  width: 1400px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.intro {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: #000000;
+}
+
+.stepsList {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+}
+
+.stepsList li {
+  margin-bottom: 1.5rem;
+}
+
+.stepsList strong {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.detailsList {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.detailsList li {
+  margin-bottom: 0.75rem;
+}
+
+.notice {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #92400e;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: 90%;
+  }
+}
