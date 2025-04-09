@@ -7,6 +7,7 @@ import {
   GetTradesCountParams,
   GetTradesPaginationParams,
   GetTradesParams,
+  UpdateManyTradesParams,
   UpdateTradeParams,
 } from './types';
 
@@ -41,6 +42,18 @@ export const updateTrade = async ({
   where,
 }: UpdateTradeParams): Promise<Trade> => {
   const updated = await prisma.trade.update({
+    where,
+    data: toUpdate,
+  });
+
+  return updated;
+};
+
+export const updateManyTrades = async ({
+  toUpdate,
+  where,
+}: UpdateManyTradesParams) => {
+  const updated = await prisma.trade.updateMany({
     where,
     data: toUpdate,
   });

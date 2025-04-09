@@ -3,7 +3,8 @@ type Status = 'online' | 'offline';
 export type UseSocketParams = {
   roomId?: string;
   user?: User;
-  onStatusChange: (status: Status) => void;
+  timeLimit?: number;
+  onStatusChange?: (status: Status) => void;
 };
 
 type User = {
@@ -39,4 +40,11 @@ export type MessageContent = {
 
 export type SendMessageParams = {
   content: Message;
+};
+
+export type ReceiverStatus = 'online' | 'offline';
+
+export type SetAsPaidParams = {
+  from?: string;
+  to?: string;
 };

@@ -1,16 +1,22 @@
-import { Message, SendMessageParams } from '@/hooks/useSocket/types';
-import { TradeSetter, Trader, Vendor } from '@/store/trade/types';
+import {
+  Message,
+  ReceiverStatus,
+  SendMessageParams,
+} from '@/hooks/useSocket/types';
+import { Trader, Vendor } from '@/store/trade/types';
 
-export type ReceiverStatus = 'online' | 'offline';
+type SendMessage = (params: SendMessageParams) => void;
 
 export type Props = {
   sender: Trader;
   receiver: Vendor;
 };
 
-export type ChatProps = Props & {
-  trade: TradeSetter;
-};
+export type ChatProps = {
+  receiverStatus: ReceiverStatus;
+  onSendMessage: SendMessage;
+  messages: Message[];
+} & Props;
 
 export type HeaderProps = Props & {
   receiverStatus: ReceiverStatus;
@@ -21,5 +27,5 @@ export type ContentProps = Props & {
 };
 
 export type InputsProps = Props & {
-  sendMessage: (params: SendMessageParams) => void;
+  sendMessage: SendMessage;
 };

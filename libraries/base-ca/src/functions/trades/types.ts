@@ -11,6 +11,11 @@ export type UpdateTradeParams = {
   where: Prisma.TradeWhereUniqueInput;
 };
 
+export type UpdateManyTradesParams = {
+  toUpdate: Prisma.TradeUpdateInput;
+  where: Prisma.TradeWhereInput;
+};
+
 export type DeleteTradeParams = {
   where: Prisma.TradeWhereUniqueInput;
 };
