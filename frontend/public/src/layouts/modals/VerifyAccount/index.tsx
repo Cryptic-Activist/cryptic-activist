@@ -49,6 +49,7 @@ const VerifyAccount = () => {
     <Template
       width={`${step === 'verification' ? '40rem' : '18rem'}`}
       heading="Verify Account"
+      name="verifyAccount"
     >
       <div className={styles.container}>
         {step === 'username' && (
@@ -78,7 +79,7 @@ const VerifyAccount = () => {
             className={styles.verifyAccountPrivateKeysForm}
           >
             <ul className={styles.verifyAccountList}>
-              {privateKeysArray.map((privateKeyInput, index) => {
+              {privateKeysArray.map((_privateKeyInput, index) => {
                 const privateKeyNumber = index + 1;
 
                 return (
@@ -91,12 +92,6 @@ const VerifyAccount = () => {
                       name={`privateKey${privateKeyNumber}`}
                       id={`privateKey${privateKeyNumber}`}
                       required
-                      // value={}
-                      width="9rem"
-                      // errorMessage={
-                      //   privateKeysErrors[`privateKey${privateKeyNumber}`]
-                      //     ?.message
-                      // }
                     />
                   </li>
                 );

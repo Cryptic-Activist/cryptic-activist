@@ -15,7 +15,12 @@ const PrivateKeys = () => {
     usePrivateKeys();
 
   return (
-    <Template width="45rem" heading="Private Keys" allowClose={false}>
+    <Template
+      width="45rem"
+      heading="Private Keys"
+      allowClose={false}
+      name="privateKeys"
+    >
       <div className={styles.container}>
         <p className={styles.message}>
           The private keys are used for a few important things on the{' '}

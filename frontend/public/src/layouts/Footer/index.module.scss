@@ -39,7 +39,7 @@
 
 @media (max-width: 1030px) {
   .footer {
-    height: 40rem;
+    height: 48rem;
   }
   .brandLinksContainer {
     margin: 0 auto;
@@ -47,5 +47,8 @@
     align-items: center;
     flex-direction: column;
     gap: 4rem;
+  }
+  .statement {
+    font-size: 0.9rem;
   }
 }
