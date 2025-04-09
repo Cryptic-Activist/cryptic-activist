@@ -7,6 +7,11 @@ volumes:
     driver: local
   backend-uploads:
     driver: local
+  redis-data:
+    driver: local
+  mongodb-data:
+    driver: local
+
 
 services:
   redis:
