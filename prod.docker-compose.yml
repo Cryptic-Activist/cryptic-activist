@@ -9,16 +9,32 @@ volumes:
     driver: local
 
 services:
-  # pgadmin4:
-  #   image: dpage/pgadmin4
-  #   container_name: pgAdmin4
-  #   restart: always
-  #   env_file:
-  #     - envs/pgAdmin.env
-  #   ports:
-  #     - "5050:80"
-  #   networks:
-  #     - app-network
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: always
+    env_file:
+      - envs/prod.redis.env
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:6-jammy
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    env_file:
+      - envs/prod.mongodb.env
+    restart: always
+    networks:
+      - app-network
 
   postgres:
     image: postgres:latest
