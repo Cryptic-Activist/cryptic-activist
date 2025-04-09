@@ -12,6 +12,14 @@ export const links: Links = [
         label: 'Become a Vendor',
         href: '/become-a-vendor',
       },
+      {
+        label: 'Fees',
+        href: '/fees',
+      },
+      {
+        label: 'Tier System',
+        href: '/tier',
+      },
     ],
   },
   {
@@ -32,6 +40,10 @@ export const links: Links = [
       {
         label: 'Imprint',
         href: '/imprint',
+      },
+      {
+        label: 'KYC',
+        href: '/kyc',
       },
     ],
   },
