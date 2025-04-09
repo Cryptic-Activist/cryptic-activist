@@ -1,7 +1,20 @@
+@use "../../../styles/globals.module.scss";
+
 .container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: scroll;
+  padding-right: 0.2rem;
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
 }
 
 .links {
@@ -24,12 +37,27 @@
 }
 
 .verifyAccountList {
-  display: flex;
-  flex-direction: row;
-  gap: 5px;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
   li {
     list-style: none;
+  }
+}
+
+@media (max-width: 670px) {
+  .verifyAccountList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 401px) {
+  .verifyAccountList {
+    li {
+      width: 100%;
+    }
+  }
+  .input {
+    width: 100% !important;
   }
 }

@@ -1,4 +1,4 @@
-@use '../../../styles/globals.module.scss';
+@use "../../../styles/globals.module.scss";
 
 .bg {
   position: fixed;
@@ -33,10 +33,28 @@
   &::before {
     position: absolute;
     transform: translate(-10px, 2px);
-    content: '';
+    content: "";
     width: 2px;
     height: 18px;
     display: block;
     background-color: globals.$secondary;
+  }
+}
+
+@media (max-width: 795px) {
+  .privateKeysContainer {
+    width: 90% !important;
+  }
+}
+
+@media (max-width: 715px) {
+  .verifyAccountContainer {
+    width: 90% !important;
+  }
+}
+
+@media (max-height: 1220px) {
+  .container {
+    max-height: 95% !important;
   }
 }
