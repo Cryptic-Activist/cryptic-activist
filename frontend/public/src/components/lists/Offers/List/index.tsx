@@ -149,18 +149,6 @@ const List: FC<ListProps> = ({ currentPrice, type, height, id }) => {
           }
           scrollableTarget={id}
           refreshFunction={initialFetch}
-          pullDownToRefresh
-          pullDownToRefreshThreshold={80}
-          pullDownToRefreshContent={
-            <h3 className={styles.pullDownToRefresh}>
-              &#8595; Pull down to refresh
-            </h3>
-          }
-          releaseToRefreshContent={
-            <h3 className={styles.releaseToRefresh}>
-              &#8593; Release to refresh
-            </h3>
-          }
         >
           {offers.data?.map((offer, index) => (
             <Item
