@@ -1,6 +1,7 @@
 import {
   calculateReceivingAmount,
   cancelTrade,
+  checkTradePaid,
   createTradeController,
   getTradeController,
   index,
@@ -27,6 +28,8 @@ router.post(
 );
 
 router.put('/cancel', authenticateUser, validateCancelTrade, cancelTrade);
+
+router.put('/:id/paid', authenticateUser, checkTradePaid);
 
 router.put('/paid', authenticateUser, validateSetPaidTrade);
 

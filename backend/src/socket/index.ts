@@ -1,6 +1,7 @@
 import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
 import {
   SendMessageParams,
+  SetTradeAsCanceledParams,
   SetTradeAsPaidParams,
   User,
   UserInfo,
@@ -9,6 +10,7 @@ import {
   createChatMessage,
   getChat,
   getChatMessages,
+  getTrade,
   redisClient,
   updateManyTrades,
   updateTrade,
@@ -135,20 +137,18 @@ const socketHandler = (
           tradeId: true,
         },
       });
-
       const updatedTrade = await updateTrade({
         where: {
           id: chat?.tradeId,
         },
         toUpdate: {
           paid: true,
+          status: 'COMPLETED',
         },
       });
 
       const senderSocketId = await redisClient.hGet('onlineUsers', from);
       const recipientSocketId = await redisClient.hGet('onlineUsers', to);
-
-      console.log({ senderSocketId, recipientSocketId });
 
       if (!updatedTrade) {
         if (recipientSocketId) {
@@ -169,31 +169,54 @@ const socketHandler = (
       if (senderSocketId) {
         io.to(senderSocketId).emit('trade_set_paid_success', { isPaid: true });
       }
+    });
 
-      // if (recipientSocketId) {
-      //   // Deliver message in real time
-      //   io.to(recipientSocketId).emit('receive_message', {
-      //     from,
-      //     to,
-      //     createdAt: newMessage.createdAt,
-      //     message,
-      //   });
-      // } else {
-      // If offline, send a push notification if subscription exists
-      // const subscriptionString = await redisClient.hGet(
-      //   'pushSubscriptions',
-      //   to,
-      // );
-      // if (subscriptionString) {
-      //   const subscription = JSON.parse(subscriptionString);
-      //   const payload = JSON.stringify({
-      //     title: 'New Message',
-      //     body: message,
-      //   });
-      //   // webpush.sendNotification(subscription, payload)
-      //   //   .catch(error => console.error('Push notification error:', error));
-      // }
-      // }
+    // Set trade as Canceled
+    socket.on('trade_set_canceled', async (data: SetTradeAsCanceledParams) => {
+      const { from, to, roomId } = data;
+
+      const chat = await getChat({
+        where: { id: roomId },
+        select: {
+          tradeId: true,
+        },
+      });
+      const updatedTrade = await updateTrade({
+        where: {
+          id: chat?.tradeId,
+        },
+        toUpdate: {
+          paid: false,
+          status: 'CANCELLED',
+        },
+      });
+
+      const senderSocketId = await redisClient.hGet('onlineUsers', from);
+      const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+
+      if (!updatedTrade) {
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('trade_set_canceled_error', {
+            error: true,
+          });
+        }
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('trade_set_canceled_error', {
+            error: true,
+          });
+        }
+      }
+
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('trade_set_canceled_success', {
+          canceled: true,
+        });
+      }
+      if (senderSocketId) {
+        io.to(senderSocketId).emit('trade_set_canceled_success', {
+          canceled: true,
+        });
+      }
     });
 
     // Leave trade room

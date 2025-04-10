@@ -1,8 +1,15 @@
 'use client';
 
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
-import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
-import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
+import { FaCircle, FaPaperPlane } from 'react-icons/fa6';
+import React, {
+  ChangeEvent,
+  FC,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useState,
+} from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
 import { formatTimestamp } from '@/utils';
@@ -26,7 +33,7 @@ const Header: FC<HeaderProps> = ({
         <div className={styles.names}>
           <span className={styles.username}>{receiver?.username}</span>
           <div className={`${styles.status} ${indicatorStyle}`}>
-            {receiverStatus === 'online' && (
+            {receiver.id && receiverStatus === 'online' && (
               <>
                 <FaCircle size={8} className={styles.indicator} />
                 <span className={styles.lastSeen}>Online</span>
@@ -78,17 +85,23 @@ const Content: FC<ContentProps> = ({
 const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
 
+  const handleSendMessage = () => {
+    if (message.length > 0) {
+      sendMessage({
+        content: {
+          from: sender.id,
+          to: receiver.id,
+          message,
+          createdAt: Date(),
+        },
+      });
+      setMessage('');
+    }
+  };
+
   const submitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    sendMessage({
-      content: {
-        from: sender.id,
-        to: receiver.id,
-        message,
-        createdAt: Date(),
-      },
-    });
-    setMessage('');
+    handleSendMessage();
   };
 
   const onChangeMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -96,15 +109,33 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
     setMessage(value);
   };
 
+  const onKeyDownInput = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.shiftKey && e.key === 'Enter') {
+      return;
+    }
+    if (e.key === 'Enter') {
+      handleSendMessage();
+      e.currentTarget.focus();
+      e.currentTarget.setSelectionRange(0, 0);
+    }
+  };
+
+  useEffect(() => {
+    if (message === '\n') {
+      setMessage('');
+    }
+  }, [message]);
+
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
-      <button className={styles.button} title="Attachments">
+      {/* <button className={styles.button} title="Attachments">
         <FaPaperclip size={20} />
-      </button>
+      </button> */}
       <textarea
         className={styles.textarea}
         onChange={onChangeMessage}
         value={message}
+        onKeyDown={onKeyDownInput}
       />
       <button className={styles.button} title="Send message" type="submit">
         <FaPaperPlane size={20} />

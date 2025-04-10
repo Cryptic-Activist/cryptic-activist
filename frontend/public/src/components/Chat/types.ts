@@ -2,7 +2,7 @@ import {
   Message,
   ReceiverStatus,
   SendMessageParams,
-} from '@/hooks/useSocket/types';
+} from '@/hooks/useTradeSocket/types';
 import { Trader, Vendor } from '@/store/trade/types';
 
 type SendMessage = (params: SendMessageParams) => void;

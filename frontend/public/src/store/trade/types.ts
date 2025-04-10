@@ -60,7 +60,7 @@ export type PaymentReceipt = {
   url: string;
 };
 
-enum Status {
+export enum Status {
   PENDING,
   IN_PROGRESS,
   COMPLETED,

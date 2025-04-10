@@ -43,3 +43,14 @@ export const getTrade = async (id: string) => {
 
   return response.data;
 };
+
+export const checkTradePaid = async (id: string) => {
+  const bearerToken = getBearerToken();
+  const response = await fetchGet(`${BACKEND}/trades/trade/` + id + '/paid', {
+    Authorization: bearerToken,
+  });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
