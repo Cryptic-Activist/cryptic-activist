@@ -79,6 +79,31 @@ export async function cancelTrade(req: Request, res: Response) {
   }
 }
 
+export async function checkTradePaid(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const trade = await getTrade({
+      where: { id },
+    });
+
+    if (!trade) {
+      res.status(400).send({
+        error: 'Trade not found',
+      });
+      return;
+    }
+
+    res.status(200).send({
+      isPaid: trade?.paid,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
 export async function setPaidTrade(req: Request, res: Response) {
   try {
     const { id } = req.body;
@@ -107,13 +132,14 @@ export async function getTradeController(req: Request, res: Response) {
         id: true,
         fiatAmount: true,
         cryptocurrencyAmount: true,
+        paymentReceipt: true,
+        status: true,
+        paid: true,
         paymentMethod: {
           select: {
             name: true,
           },
         },
-        paymentReceipt: true,
-        status: true,
         chat: {
           select: {
             id: true,

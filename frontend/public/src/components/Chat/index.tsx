@@ -1,19 +1,19 @@
 'use client';
 
-import {
-  ChatProps,
-  ContentProps,
-  HeaderProps,
-  InputsProps,
-  ReceiverStatus,
-} from './types';
-import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
-import React, { ChangeEvent, FC, FormEvent, useState } from 'react';
-import { formatTimestamp, timeSince } from '@/utils';
+import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
+import { FaCircle, FaPaperPlane } from 'react-icons/fa6';
+import React, {
+  ChangeEvent,
+  FC,
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useState,
+} from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
+import { formatTimestamp } from '@/utils';
 import styles from './index.module.scss';
-import { useSocket } from '@/hooks';
 
 const Header: FC<HeaderProps> = ({
   receiver,
@@ -28,17 +28,23 @@ const Header: FC<HeaderProps> = ({
       <div className={styles.vendor}>
         <div
           className={styles.profileColor}
-          style={{ backgroundColor: receiver.profileColor }}
+          style={{ backgroundColor: receiver?.profileColor }}
         />
         <div className={styles.names}>
-          <span className={styles.username}>{receiver.username}</span>
+          <span className={styles.username}>{receiver?.username}</span>
           <div className={`${styles.status} ${indicatorStyle}`}>
-            <FaCircle size={8} className={styles.indicator} />
+            {receiver.id && receiverStatus === 'online' && (
+              <>
+                <FaCircle size={8} className={styles.indicator} />
+                <span className={styles.lastSeen}>Online</span>
+              </>
+            )}
+            {/* <FaCircle size={8} className={styles.indicator} />
             <span className={styles.lastSeen}>
               {receiverStatus === 'online'
                 ? 'Online'
-                : timeSince(receiver.lastLoginAt)}
-            </span>
+                : timeSince(receiver?.lastLoginAt)}
+            </span> */}
           </div>
         </div>
       </div>
@@ -60,7 +66,7 @@ const Content: FC<ContentProps> = ({
     <ul className={styles.list}>
       {messages.map((message, index) => {
         const messageStyle =
-          sender.id === message.from ? styles.sender : styles.receiver;
+          sender?.id === message.from ? styles.sender : styles.receiver;
         return (
           <li key={index} className={`${styles.listItem} ${messageStyle}`}>
             <div className={styles.message}>
@@ -79,17 +85,23 @@ const Content: FC<ContentProps> = ({
 const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
 
+  const handleSendMessage = () => {
+    if (message.length > 0) {
+      sendMessage({
+        content: {
+          from: sender.id,
+          to: receiver.id,
+          message,
+          createdAt: Date(),
+        },
+      });
+      setMessage('');
+    }
+  };
+
   const submitMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    sendMessage({
-      content: {
-        from: sender.id,
-        to: receiver.id,
-        message,
-        createdAt: Date(),
-      },
-    });
-    setMessage('');
+    handleSendMessage();
   };
 
   const onChangeMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -97,15 +109,33 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
     setMessage(value);
   };
 
+  const onKeyDownInput = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.shiftKey && e.key === 'Enter') {
+      return;
+    }
+    if (e.key === 'Enter') {
+      handleSendMessage();
+      e.currentTarget.focus();
+      e.currentTarget.setSelectionRange(0, 0);
+    }
+  };
+
+  useEffect(() => {
+    if (message === '\n') {
+      setMessage('');
+    }
+  }, [message]);
+
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
-      <button className={styles.button} title="Attachments">
+      {/* <button className={styles.button} title="Attachments">
         <FaPaperclip size={20} />
-      </button>
+      </button> */}
       <textarea
         className={styles.textarea}
         onChange={onChangeMessage}
         value={message}
+        onKeyDown={onKeyDownInput}
       />
       <button className={styles.button} title="Send message" type="submit">
         <FaPaperPlane size={20} />
@@ -114,20 +144,13 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   );
 };
 
-const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
-  const [receiverStatus, setReceiverStatus] =
-    useState<ReceiverStatus>('online');
-
-  const onStatusChange = (status: ReceiverStatus) => {
-    setReceiverStatus(status);
-  };
-
-  const { sendMessage, messages } = useSocket({
-    roomId: trade.chat?.id,
-    user: sender,
-    onStatusChange,
-  });
-
+const Chat: FC<ChatProps> = ({
+  receiverStatus,
+  messages,
+  onSendMessage,
+  receiver,
+  sender,
+}) => {
   return (
     <div className={styles.container}>
       <Header
@@ -136,7 +159,7 @@ const Chat: FC<ChatProps> = ({ receiver, sender, trade }) => {
         receiverStatus={receiverStatus}
       />
       <Content receiver={receiver} sender={sender} messages={messages} />
-      <Inputs receiver={receiver} sender={sender} sendMessage={sendMessage} />
+      <Inputs receiver={receiver} sender={sender} sendMessage={onSendMessage} />
     </div>
   );
 };

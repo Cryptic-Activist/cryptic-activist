@@ -27,7 +27,6 @@ const NavigationBar = () => {
           </>
         ) : (
           <div className={styles.searchMenu}>
-            {/* <Search /> */}
             <Menu />
           </div>
         )}
