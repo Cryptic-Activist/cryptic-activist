@@ -5,10 +5,12 @@ import { menuList, menuUserList } from './data';
 import {
   useBlockchain,
   useNavigationBar,
+  useNotification,
   useOutsideClick,
   useUser,
 } from '@/hooks';
 
+import { FaCircle } from 'react-icons/fa6';
 import { MenuList } from '@/layouts/tooltips';
 import styles from './index.module.scss';
 
@@ -22,6 +24,7 @@ const Menu = () => {
   } = useNavigationBar();
   const { user, query: userQuery, isLoggedIn } = useUser();
   const { isWalletConnected } = useBlockchain();
+  const { notifications } = useNotification();
 
   const handleToggleUserTooltip = () => {
     toggleTooltip('user');
@@ -57,7 +60,13 @@ const Menu = () => {
       <div className={styles.tooltipContainer}>
         {isLoggedIn() ? (
           <Button theme="transparent" onClick={handleToggleUserTooltip}>
-            <>{user.names?.firstName}</>
+            <div className={styles.nameIndicatorContainer}>
+              <span>{user.names?.firstName}</span>
+              <span className={styles.notificationInidicator}>
+                {notifications.hasNewNotification ? <FaCircle size={7} /> : ''}
+              </span>
+            </div>
+            <></>
           </Button>
         ) : (
           <Button theme="transparent" onClick={handleToggleLogin}>

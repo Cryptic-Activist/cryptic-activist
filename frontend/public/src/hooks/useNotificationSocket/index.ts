@@ -23,6 +23,7 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
 
       newSocket.on('notification_system', () => {
         addToast('info', 'New message received', 10000);
+        notifications.setHasNewNotification(true);
       });
 
       notifications.setSocket(newSocket);
@@ -35,7 +36,7 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
     }
   }, [user]);
 
-  return { notifications };
+  return {};
 };
 
 export default useNotificationSocket;
