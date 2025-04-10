@@ -41,3 +41,7 @@ export type SetTradeAs = {
 export type SetTradeAsPaidParams = SetTradeAs;
 
 export type SetTradeAsCanceledParams = SetTradeAs;
+
+export type NotificationTradeStartSentParams = {
+  tradeId: string;
+};
