@@ -106,12 +106,12 @@ const socketHandler = (
 
           const tradeUrl = FRONTEND_PUBLIC + '/trade/' + trade.id + '/vendor';
           const notificationMessage = `${trader?.firstName} ${trader?.lastName} has started trading with you. Go and trade.`;
-          console.log({ notificationMessage });
           const newSystemMessage = await createSystemMessage({
             create: {
               userId: trade.vendorId,
               url: tradeUrl,
               message: notificationMessage,
+              createdAt: new Date().toISOString(),
             },
             update: {},
             where: { id: '' },

@@ -26,9 +26,9 @@ model Admin {
   username     String    @unique @db.VarChar(120)
   password     String
   isVerified   Boolean?  @default(false) @db.Boolean
-  deletedAt    DateTime? @db.Date
-  createdAt    DateTime? @default(now()) @db.Date
-  updatedAt    DateTime? @updatedAt @db.Date
+  deletedAt    DateTime?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
   kyc          KYC[]
   createdUsers User[]    @relation("UserCreatedBy") // All users created by this admin
   updatedUsers User[]    @relation("UserLastUpdatedBy") // All users updated by this admin
@@ -43,9 +43,9 @@ model Block {
   blocked   User      @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is blocked
   blockedId String
   reason    String?   @db.VarChar(255)
-  deletedAt DateTime? @db.Date
-  createdAt DateTime? @default(now()) @db.Date
-  updatedAt DateTime? @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 
   @@unique([blockerId, blockedId]) // Prevent duplicate block records
   @@map("blocks")
@@ -53,9 +53,9 @@ model Block {
 
 model Chat {
   id        String    @id @default(uuid())
-  deletedAt DateTime? @db.Date
-  createdAt DateTime? @default(now()) @db.Date
-  updatedAt DateTime? @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
   trade     Trade     @relation(fields: [tradeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tradeId   String    @unique
 
@@ -68,9 +68,9 @@ model Cryptocurrency {
   symbol      String    @db.VarChar(200)
   name        String    @db.VarChar(200)
   image       String
-  deletedAt   DateTime? @db.Date
-  createdAt   DateTime? @default(now()) @db.Date
-  updatedAt   DateTime? @updatedAt @db.Date
+  deletedAt   DateTime?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
   offers      Offer[]   @relation("offer")
   trades      Trade[]   @relation("trade")
 
@@ -93,9 +93,9 @@ model Feedback {
   offerId   String
   message   String       @db.VarChar(256)
   type      FeedbackType
-  deletedAt DateTime?    @db.Date
-  createdAt DateTime?    @default(now()) @db.Date
-  updatedAt DateTime?    @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime?    @default(now())
+  updatedAt DateTime?    @updatedAt
 
   @@map("feedbacks")
 }
@@ -105,9 +105,9 @@ model Fiat {
   name      String    @db.VarChar(30)
   symbol    String    @db.VarChar(10)
   country   String    @db.VarChar(100)
-  deletedAt DateTime? @db.Date
-  createdAt DateTime? @default(now()) @db.Date
-  updatedAt DateTime? @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
   offers    Offer[]   @relation("offer")
   trades    Trade[]   @relation("trade")
 
@@ -132,10 +132,10 @@ model KYC {
   rejectionReason String? // Optional reason for rejection
   reviewedBy      String? // Admin who reviewed the KYC
   reviewer        Admin?    @relation(fields: [reviewedBy], references: [id])
-  reviewedAt      DateTime? @db.Date
-  deletedAt       DateTime? @db.Date
-  createdAt       DateTime? @default(now()) @db.Date
-  updatedAt       DateTime? @updatedAt @db.Date
+  reviewedAt      DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
 
   @@map("kyc")
 }
@@ -143,9 +143,9 @@ model KYC {
 model Language {
   id           String         @id @default(uuid())
   name         String         @unique @db.VarChar(50)
-  deletedAt    DateTime?      @db.Date
-  createdAt    DateTime?      @default(now()) @db.Date
-  updatedAt    DateTime?      @updatedAt @db.Date
+  deletedAt    DateTime?
+  createdAt    DateTime?      @default(now())
+  updatedAt    DateTime?      @updatedAt
   UserLanguage UserLanguage[]
 
   @@map("languages")
@@ -164,9 +164,9 @@ model Offer {
   terms             String
   averageTradeSpeed Float?
   instructions      String
-  deletedAt         DateTime?      @db.Date
-  createdAt         DateTime?      @default(now()) @db.Date
-  updatedAt         DateTime?      @updatedAt @db.Date
+  deletedAt         DateTime?
+  createdAt         DateTime?      @default(now())
+  updatedAt         DateTime?      @updatedAt
   vendor            User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
   vendorId          String
   cryptocurrency    Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -184,9 +184,9 @@ model Offer {
 model PaymentMethod {
   id                      String                @id @default(uuid())
   name                    String                @db.VarChar(60)
-  deletedAt               DateTime?             @db.Date
-  createdAt               DateTime?             @default(now()) @db.Date
-  updatedAt               DateTime?             @updatedAt @db.Date
+  deletedAt               DateTime?
+  createdAt               DateTime?             @default(now())
+  updatedAt               DateTime?             @updatedAt
   paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id], onUpdate: Cascade)
   paymentMethodCategoryId String
   offers                  Offer[]               @relation("offer")
@@ -198,9 +198,9 @@ model PaymentMethod {
 model PaymentMethodCategory {
   id             String          @id @default(uuid())
   name           String          @db.VarChar(60)
-  deletedAt      DateTime?       @db.Date
-  createdAt      DateTime?       @default(now()) @db.Date
-  updatedAt      DateTime?       @updatedAt @db.Date
+  deletedAt      DateTime?
+  createdAt      DateTime?       @default(now())
+  updatedAt      DateTime?       @updatedAt
   paymentMethods PaymentMethod[]
 
   @@map("payment_method_categories")
@@ -211,9 +211,9 @@ model PaymentReceipt {
   name      String    @db.VarChar(60)
   key       String
   url       String
-  deletedAt DateTime? @db.Date
-  createdAt DateTime? @default(now()) @db.Date
-  updatedAt DateTime? @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
   trade     Trade[]
 
   @@map("payment_receipts")
@@ -227,9 +227,9 @@ model PremiumPurchase {
   expectedAmount Float
   status         String // e.g., "pending", "completed", "failed"
   transactionId  String?
-  deletedAt      DateTime? @db.Date
-  createdAt      DateTime? @default(now()) @db.Date
-  updatedAt      DateTime? @updatedAt @db.Date
+  deletedAt      DateTime?
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
 
   @@map("premium_purchases")
 }
@@ -239,9 +239,9 @@ model SystemMessage {
   message   String    @db.VarChar(256)
   whenSeen  DateTime?
   url       String
-  deletedAt DateTime? @db.Date
-  createdAt DateTime? @default(now()) @db.Date
-  updatedAt DateTime? @updatedAt @db.Date
+  deletedAt DateTime?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
   User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
 
@@ -294,10 +294,10 @@ model Trade {
   expiredAt            DateTime? // Time when the trade should be considered expired
   status               TradeStatus
   paid                 Boolean?        @default(false) @db.Boolean
-  escrowReleaseDate    DateTime?       @db.Date
-  deletedAt            DateTime?       @db.Date
-  createdAt            DateTime?       @default(now()) @db.Date
-  updatedAt            DateTime?       @updatedAt @db.Date
+  escrowReleaseDate    DateTime?
+  deletedAt            DateTime?
+  createdAt            DateTime?       @default(now())
+  updatedAt            DateTime?       @updatedAt
 
   @@map("trades")
 }
@@ -333,9 +333,9 @@ model Transaction {
   currency                   String
   status                     TransactionStatus // e.g., 'pending', 'completed', 'failed'
   gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)
-  deletedAt                  DateTime?                @db.Date
-  createdAt                  DateTime?                @default(now()) @db.Date
-  updatedAt                  DateTime?                @updatedAt @db.Date
+  deletedAt                  DateTime?
+  createdAt                  DateTime?                @default(now())
+  updatedAt                  DateTime?                @updatedAt
 
   @@unique([gatewayTransactionId]) // Prevent duplicate transactions
   @@map("transactions")
@@ -348,9 +348,9 @@ model Trust {
   trusted    User      @relation("trusted", fields: [trustedId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who is trusted
   trustedId  String
   trustLabel Int?
-  deletedAt  DateTime? @db.Date
-  createdAt  DateTime? @default(now()) @db.Date
-  updatedAt  DateTime? @updatedAt @db.Date
+  deletedAt  DateTime?
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
 
   @@unique([trusterId, trustedId]) // Prevent duplicate trust records
   @@map("trusts")
@@ -381,9 +381,9 @@ model User {
   lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
   createdBy                Admin?                     @relation("UserCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
   lastUpdatedBy            Admin?                     @relation("UserLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
-  deletedAt                DateTime?                  @db.Date
-  createdAt                DateTime?                  @default(now()) @db.Date
-  updatedAt                DateTime?                  @updatedAt @db.Date
+  deletedAt                DateTime?
+  createdAt                DateTime?                  @default(now())
+  updatedAt                DateTime?                  @updatedAt
   userLanguage             UserLanguage[]
   systemMessages           SystemMessage[]
   trusters                 Trust[]                    @relation("trusters")

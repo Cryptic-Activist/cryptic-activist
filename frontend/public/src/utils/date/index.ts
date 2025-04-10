@@ -23,6 +23,12 @@ export const formatFullDate = (date?: string) => {
   return `${month} ${day}, ${year}`;
 };
 
+export const formatFullDateTime = (date?: string) => {
+  if (!date) return null;
+
+  return new Date(date).toLocaleString('en-GB');
+};
+
 export const timeSince = (dateString?: string) => {
   if (!dateString) return '';
 
