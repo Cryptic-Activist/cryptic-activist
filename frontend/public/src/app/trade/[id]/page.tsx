@@ -8,7 +8,7 @@ import {
   TradePaymentInstructionsProps,
   TradeStatementProps,
 } from './types';
-import { useCountDown, useTrade, useUser } from '@/hooks';
+import { useCountDown, useTrade, useTradeSocket, useUser } from '@/hooks';
 
 import styles from './page.module.scss';
 import { toUpperCase } from '@/utils';
@@ -56,12 +56,24 @@ const TradeStatement: FC<TradeStatementProps> = ({ trade }) => {
   );
 };
 
-const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
+const TradeCancelation: FC<TradeCancelationProps> = ({
+  trade,
+  timeLeft,
+  onSetAsPaid,
+  onSetAsCanceled,
+}) => {
   return (
     <section className={styles.section}>
-      <Button>
+      <Button
+        onClick={() =>
+          onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
+        }
+      >
         <div className={styles.paidButton}>
-          <strong>Paid</strong>
+          <strong>
+            {trade.paid === false && 'Set as Paid'}
+            {trade.paid && 'Paid'}
+          </strong>
           <div className={styles.remainingTime}>
             <span>Remaining time: </span>
             <span className={styles.time}>{timeLeft}</span>
@@ -76,7 +88,14 @@ const TradeCancelation: FC<TradeCancelationProps> = ({ trade, timeLeft }) => {
         vendor&apos;s wallet.
       </p>
       <div className={styles.row}>
-        <Button size={18}>Cancel</Button>
+        <Button
+          size={18}
+          onClick={() => {
+            onSetAsCanceled({ from: trade.trader?.id, to: trade.vendor?.id });
+          }}
+        >
+          Cancel
+        </Button>
         <p className={styles.statement}>
           Click on <strong>Cancel</strong> if you don&apos;t want to continue
           negotiating with this vendor
@@ -116,17 +135,27 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 export default function TradePage() {
-  const { trade } = useTrade();
+  const { trade, setPaid, setCanceled } = useTrade();
   const { user, query } = useUser();
-  const { timeLeftInMinutes, startCountDown } = useCountDown();
+  const { timeLeftInMinutes, startCountDown: _startCountDown } = useCountDown();
   const router = useRouter();
 
-  useEffect(() => {
-    if (trade.offer?.timeLimit) {
-      const miliseconds = trade.offer?.timeLimit * 1000 * 60;
-      startCountDown(miliseconds);
-    }
-  }, [trade.offer?.timeLimit]);
+  const { sendMessage, messages, receiverStatus, setAsPaid, setAsCanceled } =
+    useTradeSocket({
+      roomId: trade.chat?.id,
+      user: trade.trader,
+      timeLimit: trade.offer?.timeLimit,
+      tradePaid: trade.paid,
+      onSetPaid: setPaid,
+      onSetCanceled: setCanceled,
+    });
+
+  // useEffect(() => {
+  //   if (trade.offer?.timeLimit) {
+  //     const miliseconds = trade.offer?.timeLimit * 1000 * 60;
+  //     startCountDown(miliseconds);
+  //   }
+  // }, [trade.offer?.timeLimit]);
 
   useEffect(() => {
     if (query.isSuccess && !user.id) {
@@ -148,12 +177,23 @@ export default function TradePage() {
         </span>
         <TradePaymentInstructions trade={trade} />
         <TradeStatement trade={trade} />
-        <TradeCancelation trade={trade} timeLeft={timeLeftInMinutes} />
+        <TradeCancelation
+          trade={trade}
+          timeLeft={timeLeftInMinutes}
+          onSetAsPaid={setAsPaid}
+          onSetAsCanceled={setAsCanceled}
+        />
         <TradeInstructions trade={trade} />
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (
-          <Chat receiver={trade.vendor} sender={trade.trader} trade={trade} />
+          <Chat
+            receiver={trade.vendor}
+            sender={trade.trader}
+            receiverStatus={receiverStatus}
+            onSendMessage={sendMessage}
+            messages={messages}
+          />
         )}
       </div>
     </div>

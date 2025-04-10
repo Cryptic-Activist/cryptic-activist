@@ -1,37 +1,37 @@
 'use client';
 
-import styles from './page.module.scss';
-import { useState } from 'react';
+import { useNotification, useUser } from '@/hooks';
 
-const dummyNotifications = [
-  {
-    id: 1,
-    title: 'Account Verified',
-    message:
-      'Your KYC verification is complete. Enjoy increased trading limits!',
-    date: '2025-04-01T10:15:00Z',
-    read: false,
-  },
-  {
-    id: 2,
-    title: 'New Trading Feature',
-    message:
-      'Explore our new feature designed to enhance your trading experience.',
-    date: '2025-03-28T14:35:00Z',
-    read: true,
-  },
-  {
-    id: 3,
-    title: 'Scheduled Maintenance',
-    message:
-      'Our system will be under maintenance on 2025-04-05 from 02:00 AM to 04:00 AM UTC. Please plan accordingly.',
-    date: '2025-03-30T08:00:00Z',
-    read: false,
-  },
-];
+import Link from 'next/link';
+import { getNotifications } from '@/services/notifications';
+import styles from './page.module.scss';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 const SystemMessages = () => {
-  const [notifications, _setNotifications] = useState(dummyNotifications);
+  const {
+    user: { id },
+  } = useUser();
+  const { notifications } = useNotification();
+
+  const { data, isPending, isSuccess } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      if (id) {
+        const response = await getNotifications(id);
+        return response;
+      }
+    },
+    enabled: !!id,
+    refetchOnMount: true,
+  });
+
+  useEffect(() => {
+    notifications.setNotificationValue(
+      { notifications: data },
+      'notifications/getNotifications'
+    );
+  }, [data]);
 
   return (
     <div className={styles.container}>
@@ -39,25 +39,27 @@ const SystemMessages = () => {
       <p className={styles.intro}>
         Stay updated with the latest alerts and updates from our platform.
       </p>
-      {notifications.length === 0 ? (
+      {isPending && '...'}
+      {notifications.notifications.length === 0 && isSuccess ? (
         <p className={styles.noMessages}>No new notifications.</p>
       ) : (
         <div className={styles.notificationList}>
-          {notifications.map((note) => (
-            <div
+          {notifications.notifications.map((note) => (
+            <Link
               key={note.id}
               className={`${styles.notificationCard} ${
-                note.read ? styles.read : styles.unread
+                note.whenSeen ? styles.read : styles.unread
               }`}
+              href={note.url}
             >
               <div className={styles.notificationHeader}>
-                <h2 className={styles.notificationTitle}>{note.title}</h2>
+                <h2 className={styles.notificationTitle}>System Message</h2>
                 <span className={styles.notificationDate}>
-                  {new Date(note.date).toLocaleString()}
+                  {new Date(note.createdAt).toLocaleString()}
                 </span>
               </div>
               <p className={styles.notificationMessage}>{note.message}</p>
-            </div>
+            </Link>
           ))}
         </div>
       )}

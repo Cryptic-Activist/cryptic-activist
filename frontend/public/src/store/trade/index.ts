@@ -27,29 +27,31 @@ export const useTradeSlice: StateCreator<
     chat: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
-        ({ trade }) => ({
-          trade: {
-            ...trade,
-            cryptocurrency: params.cryptocurrency ?? trade.cryptocurrency,
-            cryptocurrencyAmount:
-              params.cryptocurrencyAmount ?? trade.cryptocurrencyAmount,
-            endedAt: params.endedAt ?? trade.endedAt,
-            escrowReleaseDate:
-              params.escrowReleaseDate ?? trade.escrowReleaseDate,
-            expiredAt: params.expiredAt ?? trade.expiredAt,
-            fiat: params.fiat ?? trade.fiat,
-            fiatAmount: params.fiatAmount ?? trade.fiatAmount,
-            id: params.id ?? trade.id,
-            offer: params.offer ?? trade.offer,
-            paid: params.paid ?? trade.paid,
-            paymentMethod: params.paymentMethod ?? trade.paymentMethod,
-            paymentReceipt: params.paymentReceipt ?? trade.paymentReceipt,
-            status: params.status ?? trade.status,
-            trader: params.trader ?? trade.trader,
-            vendor: params.vendor ?? trade.vendor,
-            chat: params.chat ?? trade.chat,
-          },
-        }),
+        ({ trade }) => {
+          return {
+            trade: {
+              ...trade,
+              cryptocurrency: params.cryptocurrency ?? trade.cryptocurrency,
+              cryptocurrencyAmount:
+                params.cryptocurrencyAmount ?? trade.cryptocurrencyAmount,
+              endedAt: params.endedAt ?? trade.endedAt,
+              escrowReleaseDate:
+                params.escrowReleaseDate ?? trade.escrowReleaseDate,
+              expiredAt: params.expiredAt ?? trade.expiredAt,
+              fiat: params.fiat ?? trade.fiat,
+              fiatAmount: params.fiatAmount ?? trade.fiatAmount,
+              id: params.id ?? trade.id,
+              offer: params.offer ?? trade.offer,
+              paid: params.paid ?? trade.paid,
+              paymentMethod: params.paymentMethod ?? trade.paymentMethod,
+              paymentReceipt: params.paymentReceipt ?? trade.paymentReceipt,
+              status: params.status ?? trade.status,
+              trader: params.trader ?? trade.trader,
+              vendor: params.vendor ?? trade.vendor,
+              chat: params.chat ?? trade.chat,
+            },
+          };
+        },
         false,
         actionName
       );

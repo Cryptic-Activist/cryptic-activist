@@ -9,6 +9,7 @@ import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import useApp from '../useApp';
 import useDebounce from '../useDebounce';
+import useNotification from '../useNotification';
 import { useRootStore } from '@/store';
 import useUser from '../useUser';
 
@@ -19,6 +20,7 @@ const useOffer = () => {
 
   const { isLoggedIn, user } = useUser();
   const { addToast } = useApp();
+  const { notifications } = useNotification();
   const { offer } = useRootStore();
 
   const [localCurrentPrice, setLocalCurrentPrice] = useState();
@@ -77,7 +79,7 @@ const useOffer = () => {
     setFiatAmount(amount);
   }, 1500);
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isTradingAvailable) {
@@ -93,7 +95,7 @@ const useOffer = () => {
         offer.cryptocurrency?.id &&
         offer.paymentMethod?.id
       ) {
-        mutationStartTrade.mutate({
+        const newTrade = await mutationStartTrade.mutateAsync({
           cryptocurrencyAmount,
           fiatAmount,
           offerId: offer.id,
@@ -102,6 +104,9 @@ const useOffer = () => {
           vendorId: offer.vendor?.id,
           cryptocurrencyId: offer.cryptocurrency?.id,
           paymentMethodId: offer.paymentMethod.id,
+        });
+        notifications.socket?.emit('notification_trade_start_sent', {
+          tradeId: newTrade.trade.id,
         });
       } else {
         addToast('error', 'Unable to start trading', 5000);

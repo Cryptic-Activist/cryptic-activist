@@ -171,7 +171,14 @@ export const getOffersPaginationController = async (
       select: {
         id: true,
         _count: {
-          select: { trades: true, feedbacks: true },
+          select: {
+            trades: {
+              where: {
+                status: 'COMPLETED',
+              },
+            },
+            feedbacks: true,
+          },
         },
         label: true,
         terms: true,

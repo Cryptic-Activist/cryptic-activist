@@ -4,9 +4,10 @@
   border: 1px solid globals.$black;
   border-radius: 0.4em;
   min-height: 50rem;
+  max-height: 60vh;
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
   display: grid;
-  grid-template-rows: 3rem 1fr 6rem;
+  grid-template-rows: 3rem 1fr 4rem;
 }
 
 .header {
@@ -94,6 +95,7 @@
   display: flex;
   gap: 0.2rem;
   align-items: flex-end;
+  white-space: pre-line;
 }
 
 .listItem {
@@ -143,7 +145,8 @@
   display: flex;
   border-top: 1px solid globals.$black;
   display: grid;
-  grid-template-columns: 4rem 1fr 4rem;
+  // grid-template-columns: 4rem 1fr 4rem;
+  grid-template-columns: 1fr 4rem;
   .button {
     background-color: transparent;
     border: none;
@@ -157,7 +160,6 @@
     width: 100%;
     resize: none;
     padding: 0.5em;
-    field-sizing: content;
     &::-webkit-scrollbar {
       width: 5px;
     }
@@ -173,8 +175,9 @@
   }
 }
 
-// @media (max-height: 930px) {
-//   .container {
-//     min-height: 90vh;
-//   }
-// }
+@media (max-height: 930px) {
+  .container {
+    min-height: 90vh;
+    max-height: 90vh;
+  }
+}

@@ -1,6 +1,12 @@
 import { FC, forwardRef } from 'react';
-import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
+import {
+  useBlockchain,
+  useNavigationBar,
+  useNotification,
+  useUser,
+} from '@/hooks';
 
+import { FaCircle } from 'react-icons/fa6';
 import Link from 'next/link';
 import type { MenuListProps } from './types';
 import styles from './index.module.scss';
@@ -10,6 +16,7 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   const { logout } = useUser();
   const { toggleTooltip } = useNavigationBar();
   const { onDisconnectWallet } = useBlockchain();
+  const { notifications } = useNotification();
   const {
     navigationBar: { resetNavigationBar },
   } = useRootStore();
@@ -20,11 +27,30 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
     logout();
   };
 
+  const handleClick = (label: string) => {
+    toggleTooltip('user');
+    if (notifications.hasNewNotification && label === 'Messages') {
+      notifications.setHasNewNotification(false);
+    }
+  };
+
   return (
     <ul className={styles.container} ref={ref}>
       {items.map(({ label, href }, index) => (
-        <li key={index} onClick={() => toggleTooltip('user')}>
+        <li
+          key={index}
+          onClick={() => {
+            handleClick(label);
+          }}
+        >
           <Link href={href}>{label}</Link>
+          {notifications.hasNewNotification && label === 'Messages' ? (
+            <span className={styles.notificationInidicator}>
+              <FaCircle size={7} />
+            </span>
+          ) : (
+            ''
+          )}
         </li>
       ))}
       <li>
