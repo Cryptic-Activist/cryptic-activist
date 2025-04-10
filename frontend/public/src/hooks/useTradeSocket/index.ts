@@ -55,6 +55,7 @@ const useTradeSocket = ({
       socket.emit('trade_set_canceled', { roomId, ...params });
     }
   };
+
   useEffect(() => {
     if (roomId && user) {
       // Establish socket connection

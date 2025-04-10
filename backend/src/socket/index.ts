@@ -1,5 +1,6 @@
 import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
 import {
+  NotificationTradeStartSentParams,
   SendMessageParams,
   SetTradeAsCanceledParams,
   SetTradeAsPaidParams,
@@ -8,14 +9,18 @@ import {
 } from './types';
 import {
   createChatMessage,
+  createSystemMessage,
   getChat,
   getChatMessages,
   getTrade,
+  getUser,
   redisClient,
   updateManyTrades,
   updateTrade,
   updateUser,
 } from 'base-ca';
+
+import { FRONTEND_PUBLIC } from '@/constants/env';
 
 const socketHandler = (
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
@@ -44,12 +49,17 @@ const socketHandler = (
   };
 
   io.on('connection', (socket: SocketIO) => {
+    // Join website
+    socket.on('join', async (data: { user: User }) => {
+      const { user } = data;
+      await redisClient.hSet('onlineUsers', user.id, socket.id);
+    });
     // Join trade room
     socket.on(
       'join_room',
       async (data: { roomId: string; user: User; timeLimit: number }) => {
         const { roomId, user, timeLimit: _timeLimit } = data;
-        await redisClient.hSet('onlineUsers', user.id, socket.id);
+        await redisClient.hSet('onlineTradingUsers', user.id, socket.id);
 
         // Send existing room messages
         const chatMessages = await getChatMessages({
@@ -58,24 +68,66 @@ const socketHandler = (
         });
         socket.emit('room_messages', chatMessages);
 
-        // const recipientSocketId = await redisClient.hGet('onlineUsers', to);
-
-        // io.emit('user_status', { userId, status: 'offline' });
-
         // Notify room about new user
         io.to(roomId).emit('room_users_update', {});
         io.emit('user_status', { user, status: 'online' });
+      },
+    );
 
-        // let timeLimitMiliseconds = timeLimit * 1000 * 60;
-        // console.log({ timeLimitMiliseconds });
+    // Notify the vendor about new trade
+    socket.on(
+      'notification_trade_start_sent',
+      async (data: NotificationTradeStartSentParams) => {
+        const { tradeId } = data;
 
-        // Send the current countdown value to the newly connected client
-        // socket.emit('timer_update', timeLimitMiliseconds);
+        const trade = await getTrade({
+          where: {
+            id: tradeId,
+          },
+          select: {
+            id: true,
+            traderId: true,
+            vendorId: true,
+          },
+        });
 
-        // // Optional: Start the countdown when the first client connects
-        // if (!timer) {
-        //   startCountdown(timeLimitMiliseconds);
-        // }
+        if (trade?.id) {
+          const trader = await getUser({
+            where: {
+              id: trade.traderId,
+            },
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              tradeVendor: true,
+            },
+          });
+
+          const tradeUrl = FRONTEND_PUBLIC + '/trade/' + trade.id + '/vendor';
+          const notificationMessage = `${trader?.firstName} ${trader?.lastName} has started trading with you. Go and trade.`;
+          console.log({ notificationMessage });
+          const newSystemMessage = await createSystemMessage({
+            create: {
+              userId: trade.vendorId,
+              url: tradeUrl,
+              message: notificationMessage,
+            },
+            update: {},
+            where: { id: '' },
+          });
+          // // Check if recipient is online via Redis
+          const recipientSocketId = await redisClient.hGet(
+            'onlineUsers',
+            trade.vendorId,
+          );
+          if (recipientSocketId) {
+            // Deliver message in real time
+            io.to(recipientSocketId).emit('notification_system', {
+              message: newSystemMessage.message,
+            });
+          }
+        }
       },
     );
 
@@ -99,7 +151,10 @@ const socketHandler = (
         });
 
         // Check if recipient is online via Redis
-        const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+        const recipientSocketId = await redisClient.hGet(
+          'onlineTradingUsers',
+          to,
+        );
         if (recipientSocketId) {
           // Deliver message in real time
           io.to(recipientSocketId).emit('receive_message', {
@@ -147,8 +202,11 @@ const socketHandler = (
         },
       });
 
-      const senderSocketId = await redisClient.hGet('onlineUsers', from);
-      const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
+      const recipientSocketId = await redisClient.hGet(
+        'onlineTradingUsers',
+        to,
+      );
 
       if (!updatedTrade) {
         if (recipientSocketId) {
@@ -191,8 +249,11 @@ const socketHandler = (
         },
       });
 
-      const senderSocketId = await redisClient.hGet('onlineUsers', from);
-      const recipientSocketId = await redisClient.hGet('onlineUsers', to);
+      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
+      const recipientSocketId = await redisClient.hGet(
+        'onlineTradingUsers',
+        to,
+      );
 
       if (!updatedTrade) {
         if (recipientSocketId) {
@@ -240,9 +301,24 @@ const socketHandler = (
 
     // Disconnection handling
     socket.on('disconnect', async () => {
-      console.log('disconnected');
-      const onlineUsers = await redisClient.hGetAll('onlineUsers');
+      const onlineTradingUsers =
+        await redisClient.hGetAll('onlineTradingUsers');
 
+      for (const [userId, sockId] of Object.entries(onlineTradingUsers)) {
+        if (sockId === socket.id) {
+          await redisClient.hDel('onlineTradingUsers', userId);
+          await updateUser({
+            where: { id: userId },
+            toUpdate: {
+              lastLoginAt: new Date(),
+            },
+          });
+          io.emit('user_status', { userId, status: 'offline' });
+          break;
+        }
+      }
+
+      const onlineUsers = await redisClient.hGetAll('onlineUsers');
       for (const [userId, sockId] of Object.entries(onlineUsers)) {
         if (sockId === socket.id) {
           await redisClient.hDel('onlineUsers', userId);
@@ -256,23 +332,6 @@ const socketHandler = (
           break;
         }
       }
-
-      const user = users.get(socket.id);
-      if (user && user.roomId) {
-        const roomUsers = rooms.get(user.roomId);
-        if (roomUsers) {
-          roomUsers.delete(socket.id);
-
-          // Notify room about user leaving
-          io.to(user.roomId).emit(
-            'room_users_update',
-            Array.from(roomUsers).map(
-              (userId) => users.get(userId)?.user.username,
-            ),
-          );
-        }
-      }
-      users.delete(socket.id);
     });
   });
 };

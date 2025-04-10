@@ -18,3 +18,4 @@ export { default as useTrade } from './useTrade';
 export { default as useTradeSocket } from './useTradeSocket';
 export { default as useNotification } from './useNotification';
 export { default as useRouter } from './useRouter';
+export { default as useNotificationSocket } from './useNotificationSocket';

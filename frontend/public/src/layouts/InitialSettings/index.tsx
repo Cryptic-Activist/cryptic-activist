@@ -6,6 +6,7 @@ import {
   useApp,
   useCryptocurrencies,
   useFiats,
+  useNotificationSocket,
   usePaymentMethods,
   useUser,
 } from '@/hooks';
@@ -21,8 +22,8 @@ const InitialSettings = () => {
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
   const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
-  const {} = useUser();
-  // const {} = useNotification();
+  const { user } = useUser();
+  const {} = useNotificationSocket({ user });
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);

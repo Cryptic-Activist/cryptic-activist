@@ -28,7 +28,6 @@ export const useTradeSlice: StateCreator<
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
-          console.log({ params, trade });
           return {
             trade: {
               ...trade,
