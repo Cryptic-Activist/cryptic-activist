@@ -3,6 +3,7 @@
 import { useNotification, useUser } from '@/hooks';
 
 import Link from 'next/link';
+import { formatFullDateTime } from '@/utils';
 import { getNotifications } from '@/services/notifications';
 import styles from './page.module.scss';
 import { useEffect } from 'react';
@@ -55,7 +56,7 @@ const SystemMessages = () => {
               <div className={styles.notificationHeader}>
                 <h2 className={styles.notificationTitle}>System Message</h2>
                 <span className={styles.notificationDate}>
-                  {new Date(note.createdAt).toLocaleString()}
+                  {formatFullDateTime(note.createdAt)}
                 </span>
               </div>
               <p className={styles.notificationMessage}>{note.message}</p>
