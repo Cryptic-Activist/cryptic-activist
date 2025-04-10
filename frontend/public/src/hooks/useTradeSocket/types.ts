@@ -4,7 +4,10 @@ export type UseSocketParams = {
   roomId?: string;
   user?: User;
   timeLimit?: number;
+  tradePaid?: boolean;
   onStatusChange?: (status: Status) => void;
+  onSetPaid: (isPaid: boolean) => void;
+  onSetCanceled: () => void;
 };
 
 type User = {
@@ -44,7 +47,11 @@ export type SendMessageParams = {
 
 export type ReceiverStatus = 'online' | 'offline';
 
-export type SetAsPaidParams = {
+export type SetAsParams = {
   from?: string;
   to?: string;
 };
+
+export type SetAsPaidParams = SetAsParams;
+
+export type SetAsCanceledParams = SetAsParams;

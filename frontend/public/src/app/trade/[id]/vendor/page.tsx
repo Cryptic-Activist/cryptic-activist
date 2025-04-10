@@ -1,21 +1,24 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useSocket, useTrade, useUser } from '@/hooks';
+import { useTrade, useTradeSocket, useUser } from '@/hooks';
 
 import { Chat } from '@/components';
 import styles from './page.module.scss';
 import { useRouter } from 'next/navigation';
 
 const TradeVendor = () => {
-  const { trade } = useTrade();
+  const { trade, setPaid, setCanceled } = useTrade();
   const { user, query } = useUser();
   const router = useRouter();
 
-  const { sendMessage, messages, receiverStatus } = useSocket({
+  const { sendMessage, messages, receiverStatus } = useTradeSocket({
     roomId: trade.chat?.id,
     user: trade.vendor,
     timeLimit: trade.offer?.timeLimit,
+    tradePaid: trade.paid,
+    onSetPaid: setPaid,
+    onSetCanceled: setCanceled,
   });
 
   useEffect(() => {
@@ -23,7 +26,6 @@ const TradeVendor = () => {
       router.back();
       return;
     }
-    console.log({ userId: user.id, vendorId: trade.vendor?.id });
     if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
       router.back();
     }

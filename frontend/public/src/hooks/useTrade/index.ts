@@ -1,5 +1,6 @@
 'use client';
 
+import { Status } from '@/store/trade/types';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -29,7 +30,19 @@ const useTrade = () => {
     }
   }, [queryTrade.data]);
 
-  return { queryTrade, trade };
+  const setPaid = (isPaid: boolean) => {
+    trade.setTradeValue({
+      paid: isPaid,
+    });
+  };
+
+  const setCanceled = () => {
+    trade.setTradeValue({
+      status: Status.CANCELLED,
+    });
+  };
+
+  return { queryTrade, trade, setPaid, setCanceled };
 };
 
 export default useTrade;

@@ -8,18 +8,26 @@ import {
   UseSocketParams,
 } from './types';
 import io, { Socket } from 'socket.io-client';
+import { useApp, useRouter } from '@/hooks';
 import { useEffect, useState } from 'react';
 
 import { BACKEND } from '@/constants';
 
-const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
+const useTradeSocket = ({
+  roomId,
+  user,
+  timeLimit,
+  onSetPaid,
+  onSetCanceled,
+}: UseSocketParams) => {
+  const { addToast } = useApp();
+  const { replace } = useRouter();
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [roomUsers, setRoomUsers] = useState<string[]>([]);
   const [roomError, setRoomError] = useState<string | null>(null);
   const [receiverStatus, setReceiverStatus] =
     useState<ReceiverStatus>('online');
-  const [isTradePaid, setIsTradePaid] = useState(null);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -42,6 +50,11 @@ const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
     }
   };
 
+  const setAsCanceled = (params: SetAsPaidParams) => {
+    if (socket) {
+      socket.emit('trade_set_canceled', { roomId, ...params });
+    }
+  };
   useEffect(() => {
     if (roomId && user) {
       // Establish socket connection
@@ -61,12 +74,8 @@ const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
 
       // Listen for new messages
       newSocket.on('receive_message', (message: Message) => {
+        console.log('receiving messages...');
         setMessages((prevMessages) => [...prevMessages, message]);
-      });
-
-      // Listen for room user updates
-      newSocket.on('room_users_update', (users: string[]) => {
-        setRoomUsers(users);
       });
 
       // Handle room errors
@@ -83,11 +92,36 @@ const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
       });
 
       newSocket.on('trade_set_paid_success', (data) => {
-        setIsTradePaid(data.isPaid);
+        onSetPaid(data.isPaid);
+        addToast('success', 'Trade has been successfully executed', 8000);
+        setTimeout(() => {
+          replace('/', {
+            scroll: true,
+          });
+        }, 2000);
+      });
+
+      newSocket.on('trade_set_canceled_success', () => {
+        onSetCanceled();
+        addToast('info', 'Trade has been successfully canceled', 8000);
+        setTimeout(() => {
+          replace('/', {
+            scroll: true,
+          });
+        }, 2000);
       });
 
       newSocket.on('trade_set_paid_error', (data) => {
-        setIsTradePaid(data.error);
+        if (data.error) {
+          onSetPaid(false);
+          addToast('error', 'Unable to set the trade as paid', 8000);
+        }
+      });
+
+      newSocket.on('trade_set_canceled_error', (data) => {
+        if (data.error) {
+          addToast('error', 'Unable to cancel the trade', 8000);
+        }
       });
 
       setSocket(newSocket);
@@ -104,14 +138,13 @@ const useSocket = ({ roomId, user, timeLimit }: UseSocketParams) => {
 
   return {
     messages,
-    roomUsers,
     roomError,
     receiverStatus,
     sendMessage,
     appendMessage,
     setAsPaid,
-    isTradePaid,
+    setAsCanceled,
   };
 };
 
-export default useSocket;
+export default useTradeSocket;
