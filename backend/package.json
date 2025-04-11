@@ -54,6 +54,7 @@
     "cors": "^2.8.5",
     "cryptic-utils": "file:./libraries/cryptic-utils",
     "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "sanitize-html": "^2.14.0",
