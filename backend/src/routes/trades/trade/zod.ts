@@ -1,15 +1,27 @@
 import { isNumber } from '@/utils/string';
 import { z } from 'zod';
 
-export const CreateTrade = z.object({
-  traderId: z.string(),
-  vendorId: z.string(),
-  offerId: z.string(),
-  cryptocurrencyId: z.string(),
-  fiatId: z.string(),
-  cryptocurrencyAmount: z.number().gt(0),
-  fiatAmount: z.number().gt(0),
-});
+export const CreateTrade = z
+  .object({
+    traderId: z.string(),
+    vendorId: z.string(),
+    offerId: z.string(),
+    cryptocurrencyId: z.string(),
+    fiatId: z.string(),
+    cryptocurrencyAmount: z.number().gt(0),
+    fiatAmount: z.number().gt(0),
+    traderWalletAddress: z.string().min(1),
+  })
+  .superRefine(({ traderWalletAddress }, ctx) => {
+    const regex = /^0x[a-fA-F0-9]{40}$/;
+    if (!regex.test(traderWalletAddress)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['traderWalletId'],
+        message: 'Invalid wallet address',
+      });
+    }
+  });
 
 export const GetTrade = z.object({
   id: z.string(),

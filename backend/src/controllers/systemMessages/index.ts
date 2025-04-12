@@ -13,6 +13,9 @@ export const getSystemMessagesController = async (
       where: {
         userId,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     res.status(200).send(systemMessages);

@@ -29,7 +29,10 @@ const useBlockchain = () => {
   const { connect, connectors } = useConnect();
   const balance = useBalance({ address: account?.address as `0x${string}` });
   const { isConnected } = useAccount();
-  const { isLoggedIn } = useUser();
+  const {
+    isLoggedIn,
+    user: { id },
+  } = useUser();
   const isWalletConnected = isLoggedIn() && isConnected;
 
   const resetWalletNavigation = () => {
@@ -52,15 +55,17 @@ const useBlockchain = () => {
 
   useAccountEffect({
     async onConnect({ address, chain, connector }) {
-      setBlockchainValue(
-        {
-          account: { address: address },
-          chain,
-          wallet: connector.name,
-          balance: balance.data,
-        },
-        'blockchain/setWalletDetails'
-      );
+      if (id && chain?.name) {
+        setBlockchainValue(
+          {
+            account: { address: address },
+            chain,
+            wallet: connector.name,
+            balance: balance.data,
+          },
+          'blockchain/setWalletDetails'
+        );
+      }
     },
     onDisconnect() {
       resetWalletNavigation();

@@ -13,6 +13,9 @@ CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
 -- CreateEnum
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 
+-- CreateEnum
+CREATE TYPE "WalletType" AS ENUM ('ETHEREUM', 'SOLANA');
+
 -- CreateTable
 CREATE TABLE "accepted_cryptocurrencies" (
     "id" TEXT NOT NULL,
@@ -332,6 +335,16 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "wallet" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "type" "WalletType" NOT NULL,
+
+    CONSTRAINT "wallet_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cryptocurrencies"("coingeckoId");
 
@@ -475,3 +488,6 @@ ALTER TABLE "users" ADD CONSTRAINT "users_lastUpdatedById_fkey" FOREIGN KEY ("la
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_tierId_fkey" FOREIGN KEY ("tierId") REFERENCES "tiers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "wallet" ADD CONSTRAINT "wallet_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

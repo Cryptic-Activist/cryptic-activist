@@ -17,11 +17,13 @@ const useTradeSocket = ({
   roomId,
   user,
   timeLimit,
+  trade,
+  walletAddress,
   onSetPaid,
   onSetCanceled,
 }: UseSocketParams) => {
   const { addToast } = useApp();
-  const { replace } = useRouter();
+  const { replace, back } = useRouter();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -64,8 +66,24 @@ const useTradeSocket = ({
       });
 
       newSocket.on('connect', () => {
+        const vendorWalletAddress =
+          user.id === trade.vendor?.id ? walletAddress : undefined;
         // Join room
-        newSocket.emit('join_room', { roomId, user, timeLimit });
+        newSocket.emit('join_room', {
+          roomId,
+          user,
+          timeLimit,
+          vendorWalletAddress,
+          tradeId: trade.id,
+          userId: user.id,
+          trade,
+        });
+      });
+
+      // Handle existing room messages
+      newSocket.on('trade_error', (payload) => {
+        back();
+        addToast('error', payload.error, 10000);
       });
 
       // Handle existing room messages
