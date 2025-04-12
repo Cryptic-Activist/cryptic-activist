@@ -49,6 +49,10 @@ export const useTradeSlice: StateCreator<
               trader: params.trader ?? trade.trader,
               vendor: params.vendor ?? trade.vendor,
               chat: params.chat ?? trade.chat,
+              traderWalletAddress:
+                params.traderWalletAddress ?? trade.traderWalletAddress,
+              vendorWalletAddress:
+                params.vendorWalletAddress ?? trade.vendorWalletAddress,
             },
           };
         },

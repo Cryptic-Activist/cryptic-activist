@@ -42,7 +42,19 @@ const useTrade = () => {
     });
   };
 
-  return { queryTrade, trade, setPaid, setCanceled };
+  const setVendorWalletAddress = (walletAddress: string) => {
+    trade.setTradeValue({
+      vendorWalletAddress: walletAddress,
+    });
+  };
+
+  return {
+    queryTrade,
+    trade,
+    setPaid,
+    setCanceled,
+    setVendorWalletAddress,
+  };
 };
 
 export default useTrade;

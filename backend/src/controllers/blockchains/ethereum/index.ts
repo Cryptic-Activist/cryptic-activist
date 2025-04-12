@@ -10,9 +10,7 @@ export const getEscrowContractController = async (
   try {
     const contract = getEscrowContract(ETHEREUM_ESCROW_ADDRESS);
 
-    // Call read-only function example
-    const state = await contract.tradeState();
-    res.status(200).json({ tradeState: state.toString(), contract });
+    res.status(200).json({ contract });
   } catch (error) {
     res.status(500).json({ error });
   }

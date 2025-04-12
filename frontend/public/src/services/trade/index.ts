@@ -1,5 +1,5 @@
 import { StartTradeParam, getCurrentTradingFeeParams } from './types';
-import { fetchGet, fetchPost } from '@/services/axios';
+import { fetchGet, fetchPost, fetchPut } from '@/services/axios';
 import { getBearerToken, getQueries } from '@/utils';
 
 import { BACKEND } from '@/constants';
@@ -49,6 +49,26 @@ export const checkTradePaid = async (id: string) => {
   const response = await fetchGet(`${BACKEND}/trades/trade/` + id + '/paid', {
     Authorization: bearerToken,
   });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+export const updateTradeVendorWalletAddress = async (
+  tradeId: string,
+  vendorWalletAddress: string
+) => {
+  const bearerToken = getBearerToken();
+  const response = await fetchPut(
+    `${BACKEND}/trades/trade/` + tradeId + '/vendor-wallet-address',
+    {
+      vendorWalletAddress,
+    },
+    {
+      Authorization: bearerToken,
+    }
+  );
 
   if (response.status !== 200) return null;
 

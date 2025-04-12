@@ -1,7 +1,7 @@
 'use client';
 
 import { HowMuch, ThisOffer, ThisVendor } from '@/layouts/sections/offer/page';
-import { useDynamicTitle, useOffer, useUser } from '@/hooks';
+import { useBlockchain, useDynamicTitle, useOffer, useUser } from '@/hooks';
 
 import React from 'react';
 import styles from './index.module.scss';
@@ -19,6 +19,7 @@ export default function OfferPage() {
     localCurrentPrice,
   } = useOffer();
   const { user } = useUser();
+  const { blockchain } = useBlockchain();
 
   return (
     <div className={styles.container}>
@@ -31,6 +32,7 @@ export default function OfferPage() {
         user={user}
         isLoggedIn={isLoggedIn}
         mutationStartTrade={mutationStartTrade}
+        blockchain={blockchain}
       />
       <ThisOffer offer={offer} currentPrice={localCurrentPrice} />
       <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />

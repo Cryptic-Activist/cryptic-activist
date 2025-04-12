@@ -1,3 +1,5 @@
+import { TradeSetter } from '@/store/trade/types';
+
 type Status = 'online' | 'offline';
 
 export type UseSocketParams = {
@@ -5,9 +7,12 @@ export type UseSocketParams = {
   user?: User;
   timeLimit?: number;
   tradePaid?: boolean;
+  trade: TradeSetter;
+  walletAddress?: string;
   onStatusChange?: (status: Status) => void;
   onSetPaid: (isPaid: boolean) => void;
   onSetCanceled: () => void;
+  onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
 };
 
 type User = {

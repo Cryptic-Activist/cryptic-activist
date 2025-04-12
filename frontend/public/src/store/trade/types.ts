@@ -86,6 +86,8 @@ export type Trade = {
     cryptocurrencyAmount?: number;
     paid?: boolean;
     status?: Status;
+    traderWalletAddress?: string;
+    vendorWalletAddress?: string;
     chat?: Chat;
   };
 };
@@ -107,6 +109,8 @@ export type TradeStore = {
     cryptocurrencyAmount?: number;
     paid?: boolean;
     status?: Status;
+    traderWalletAddress?: string;
+    vendorWalletAddress?: string;
     chat?: Chat;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
@@ -130,6 +134,8 @@ export type TradeSetter = {
   cryptocurrencyAmount?: number;
   paid?: boolean;
   status?: Status;
+  traderWalletAddress?: string;
+  vendorWalletAddress?: string;
   chat?: Chat;
 };
 

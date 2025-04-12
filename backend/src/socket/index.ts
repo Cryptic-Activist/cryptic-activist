@@ -57,9 +57,42 @@ const socketHandler = (
     // Join trade room
     socket.on(
       'join_room',
-      async (data: { roomId: string; user: User; timeLimit: number }) => {
-        const { roomId, user, timeLimit: _timeLimit } = data;
+      async (data: {
+        roomId: string;
+        user: User;
+        timeLimit: number;
+        vendorWalletAddress: string;
+        tradeId: string;
+      }) => {
+        const {
+          roomId,
+          user,
+          timeLimit: _timeLimit,
+          vendorWalletAddress,
+          tradeId,
+        } = data;
         await redisClient.hSet('onlineTradingUsers', user.id, socket.id);
+
+        if (vendorWalletAddress) {
+          const trade = await getTrade({ where: { id: tradeId } });
+
+          if (trade?.vendorWalletAddress === trade?.traderWalletAddress) {
+            socket.emit('trade_error', {
+              error: "Vendor's wallet can not be the same as Trader's wallet",
+            });
+            return;
+          }
+
+          const updatedVendorWalletAddress = await updateTrade({
+            where: {
+              id: tradeId,
+            },
+            toUpdate: {
+              vendorWalletAddress,
+            },
+          });
+          console.log({ updatedVendorWalletAddress });
+        }
 
         // Send existing room messages
         const chatMessages = await getChatMessages({

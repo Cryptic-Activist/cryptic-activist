@@ -276,8 +276,10 @@ model Trade {
   paymentReceiptId     String?
   vendor               User            @relation("vendorTrade", fields: [vendorId], references: [id])
   vendorId             String
+  vendorWalletAddress  String?
   trader               User            @relation("traderTrade", fields: [traderId], references: [id])
   traderId             String
+  traderWalletAddress  String
   offer                Offer           @relation("tradeOffer", fields: [offerId], references: [id])
   offerId              String
   cryptocurrency       Cryptocurrency  @relation("trade", fields: [cryptocurrencyId], references: [id])

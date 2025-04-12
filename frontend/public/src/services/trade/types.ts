@@ -7,6 +7,7 @@ export type StartTradeParam = {
   paymentMethodId: string;
   cryptocurrencyAmount: number;
   fiatAmount: number;
+  traderWalletAddress: string;
 };
 
 export type getCurrentTradingFeeParams = {

@@ -14,6 +14,7 @@ const HowMuch: FC<HowMuchProps> = ({
   queryOffer,
   onChange,
   onSubmit,
+  blockchain,
   mutationStartTrade,
   createTrade: {
     cryptocurrencyAmount,
@@ -28,17 +29,17 @@ const HowMuch: FC<HowMuchProps> = ({
       if (!isLoggedIn()) {
         return 'Login to start trading';
       }
-
       if (user.id === offer.vendor?.id) {
         return "Can't trade with yourself";
       }
-
       if (mutationStartTrade.isPending) {
         return 'Starting trade...';
       }
-
       if (mutationStartTrade.isError) {
         return 'Some error occurred';
+      }
+      if (!blockchain.account?.address) {
+        return 'Connect your wallet before trading';
       }
 
       return 'Start trading';
