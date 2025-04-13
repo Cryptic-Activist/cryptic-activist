@@ -32,17 +32,17 @@ const TradeVendor = () => {
     }
     if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
       router.back();
+      return;
     }
     if (!blockchain.account?.address) {
       router.back();
+      return;
     }
     if (
       trade.vendorWalletAddress &&
       blockchain.account?.address !== trade.vendorWalletAddress
     ) {
       router.back();
-    }
-    if (trade.id && blockchain.account?.address) {
     }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
 

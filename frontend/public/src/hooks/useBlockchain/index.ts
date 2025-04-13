@@ -6,6 +6,7 @@ import {
   useAccountEffect,
   useBalance,
   useConnect,
+  useSwitchAccount,
 } from 'wagmi';
 
 import { BRAVE_WALLET } from '@/constants';
@@ -27,8 +28,9 @@ const useBlockchain = () => {
     navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();
   const { connect, connectors } = useConnect();
-  const balance = useBalance({ address: account?.address as `0x${string}` });
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const balance = useBalance({ address: address as `0x${string}` });
+  const { connectors: connectorsSwitch } = useSwitchAccount();
   const {
     isLoggedIn,
     user: { id },
@@ -77,6 +79,21 @@ const useBlockchain = () => {
       setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
   }, [balance.isSuccess]);
+
+  useEffect(() => {
+    if (id && chain?.name && address) {
+      console.log({ connectorsSwitch: connectorsSwitch[0].getChainId() });
+      setBlockchainValue(
+        {
+          account: { address: address },
+          chain,
+          wallet: connectorsSwitch[0].name,
+          balance: balance.data,
+        },
+        'blockchain/setWalletDetails'
+      );
+    }
+  }, [address]);
 
   return {
     blockchain: {

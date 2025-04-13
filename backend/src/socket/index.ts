@@ -76,7 +76,12 @@ const socketHandler = (
         if (vendorWalletAddress) {
           const trade = await getTrade({ where: { id: tradeId } });
 
-          if (trade?.vendorWalletAddress === trade?.traderWalletAddress) {
+          console.log({
+            tradeVendorWalletAddress: trade?.traderWalletAddress,
+            vendorWalletAddress,
+          });
+
+          if (trade?.traderWalletAddress === vendorWalletAddress) {
             socket.emit('trade_error', {
               error: "Vendor's wallet can not be the same as Trader's wallet",
             });

@@ -146,6 +146,7 @@ export default function TradePage() {
       user: trade.trader,
       timeLimit: trade.offer?.timeLimit,
       tradePaid: trade.paid,
+      trade,
       onSetPaid: setPaid,
       onSetCanceled: setCanceled,
     });
