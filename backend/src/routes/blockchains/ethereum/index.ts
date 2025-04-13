@@ -1,19 +1,19 @@
 import {
-  confirmFiatReceived,
-  confirmFiatSent,
-  depositByBuyer,
-  depositBySeller,
-  escalateDispute,
+  cancelTradeController,
+  confirmFiatReceivedController,
+  confirmFiatSentController,
+  depositByBuyerController,
+  depositBySellerController,
+  escalateDisputeController,
   getEscrowContractController,
-  getEstimatedTradeCost,
-  initTrade,
-  raiseDispute,
-  releaseTrade,
-  resolveDispute,
+  getEstimatedTradeCostController,
+  initTradeController,
+  raiseDisputeController,
+  releaseTradeController,
+  resolveDisputeController,
 } from '@/controllers/blockchains/ethereum';
 
 import { Router } from 'express';
-import { cancelTrade } from '@/controllers/trades';
 
 const router = Router();
 
@@ -36,28 +36,28 @@ const router = Router();
  * }
  */
 
-router.get('/estimate-trade-cost', getEstimatedTradeCost);
+router.get('/estimate-trade-cost', getEstimatedTradeCostController);
 
 router.get('/escrow', getEscrowContractController);
 
-router.post('/init-trade', initTrade);
+router.post('/init-trade', initTradeController);
 
-router.post('/deposit-by-buyer', depositByBuyer);
+router.post('/deposit-by-buyer', depositByBuyerController);
 
-router.post('/deposit-by-seller', depositBySeller);
+router.post('/deposit-by-seller', depositBySellerController);
 
-router.post('/confirm-fiat-sent', confirmFiatSent);
+router.post('/confirm-fiat-sent', confirmFiatSentController);
 
-router.post('/confirm-fiat-received', confirmFiatReceived);
+router.post('/confirm-fiat-received', confirmFiatReceivedController);
 
-router.post('/release-trade', releaseTrade);
+router.post('/release-trade', releaseTradeController);
 
-router.post('/cancel-trade', cancelTrade);
+router.post('/cancel-trade', cancelTradeController);
 
-router.post('/raise-dispute', raiseDispute);
+router.post('/raise-dispute', raiseDisputeController);
 
-router.post('/escalate-dispute', escalateDispute);
+router.post('/escalate-dispute', escalateDisputeController);
 
-router.post('/resolve-dispute', resolveDispute);
+router.post('/resolve-dispute', resolveDisputeController);
 
 export default router;

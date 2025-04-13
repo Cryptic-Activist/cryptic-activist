@@ -32,3 +32,5 @@ export const DEFAULT_PREMIUM_DISCOUNT = parseFloat(
 export const ETHEREUM_NETWORK_URL = process.env.ETHEREUM_NETWORK_URL as string;
 export const ETHEREUM_ESCROW_ADDRESS = process.env
   .ETHEREUM_ESCROW_ADDRESS as `0x${string}`;
+export const ETHEREUM_ESCROW_PRIVATE_KEY = process.env
+  .ETHEREUM_ESCROW_PRIVATE_KEY as `0x${string}`;
