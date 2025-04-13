@@ -1,6 +1,7 @@
 {
   "name": "@cryptic-activist/ethereum-smart-contracts",
   "scripts": {
+    "dev": "npx hardhat node",
     "build:dev": "cd .. && cp -r ethereum-smart-contracts ../backend/libraries"
   },
   "devDependencies": {

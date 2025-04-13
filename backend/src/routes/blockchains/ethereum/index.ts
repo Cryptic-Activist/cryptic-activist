@@ -5,6 +5,7 @@ import {
   depositBySeller,
   escalateDispute,
   getEscrowContractController,
+  getEstimatedTradeCost,
   initTrade,
   raiseDispute,
   releaseTrade,
@@ -34,6 +35,8 @@ const router = Router();
  *   "platformWallet": "0xPlatformWalletAddress"
  * }
  */
+
+router.get('/estimate-trade-cost', getEstimatedTradeCost);
 
 router.get('/escrow', getEscrowContractController);
 
