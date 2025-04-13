@@ -1,9 +1,13 @@
 'use client';
 
 import { PaymentMethod, TradeInstructions, TradePricing } from '@/layouts';
-import { useCreateOffer, useDynamicTitle } from '@/hooks';
-
-import React from 'react';
+import React, { useEffect } from 'react';
+import {
+  useBlockchain,
+  useCreateOffer,
+  useDynamicTitle,
+  useRouter,
+} from '@/hooks';
 
 export default function Page() {
   const {
@@ -16,6 +20,14 @@ export default function Page() {
     resetCreateOffer,
   } = useCreateOffer();
   const {} = useDynamicTitle('Create an Offer | Cryptic Activist');
+  const { blockchain } = useBlockchain();
+  const { back } = useRouter();
+
+  useEffect(() => {
+    if (!blockchain.account?.address) {
+      back();
+    }
+  }, [blockchain]);
 
   return (
     <>

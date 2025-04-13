@@ -18,6 +18,7 @@ const useCreateOffer = () => {
     app: { defaults },
   } = useApp();
   const { user } = useUser();
+
   const [step, setStep] = useState(0);
   const onClickEvents = {
     0: () => toStep(0),

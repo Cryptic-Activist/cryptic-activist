@@ -1,14 +1,27 @@
 import { Request, Response } from 'express';
 import {
+  cancelTrade,
+  confirmFiatReceived,
+  confirmFiatSent,
+  depositByBuyer,
+  depositBySeller,
+  escalateDispute,
   getEscrowContract,
   getProvider,
+  initTrade,
+  raiseDispute,
+  releaseTrade,
+  resolveDispute,
 } from '@/services/blockchains/ethereum';
 
-import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
+import { ethers } from 'ethers';
 
-export const getEstimatedTradeCost = async (req: Request, res: Response) => {
+export const getEstimatedTradeCostController = async (
+  _req: Request,
+  res: Response,
+) => {
   try {
-    const contract = await getEscrowContract();
+    const contract = getEscrowContract();
 
     const estimatedGasInitTrade = await contract.confirmFiatSent.estimateGas({
       buyer: '0x648BD3c2AF9061a19ecA3a05BD22f618986B6D7A',
@@ -37,8 +50,10 @@ export const getEstimatedTradeCost = async (req: Request, res: Response) => {
     const estimateGasRaiseDispute = await contract.raiseDispute.estimateGas();
     const estimateGasEscalateDispute =
       await contract.escalateDispute.estimateGas();
-    // const estimateGasResolveDispute =
-    //   await contract.resolveDispute.estimateGas();
+    const estimateGasResolveDispute = await contract.resolveDispute.estimateGas(
+      true,
+      1,
+    );
 
     const estimates = [
       estimatedGasInitTrade,
@@ -50,21 +65,30 @@ export const getEstimatedTradeCost = async (req: Request, res: Response) => {
       estimateGasCancelTrade,
       estimateGasRaiseDispute,
       estimateGasEscalateDispute,
+      estimateGasResolveDispute,
     ];
 
-    const sumEstimates = estimates.reduce((accumulator, currentValue) => {
+    const totalGasEstimates = estimates.reduce((accumulator, currentValue) => {
       return accumulator + currentValue;
     });
+    const provider = getProvider();
+    const feeData = await provider.getFeeData();
+    const gasPrice = feeData.gasPrice as bigint;
 
-    res.status(200).json({ estimate: sumEstimates.toString() });
+    // Calculate total cost in Wei
+    const totalCostWei = totalGasEstimates * gasPrice;
+
+    // Convert to ether
+    const totalCostEther = ethers.formatEther(totalCostWei);
+
+    res.status(200).json({ totalCostEther });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error });
   }
 };
 
 export const getEscrowContractController = async (
-  req: Request,
+  _req: Request,
   res: Response,
 ) => {
   try {
@@ -76,145 +100,105 @@ export const getEscrowContractController = async (
   }
 };
 
-export const initTrade = async (req: Request, res: Response) => {
+export const initTradeController = async (req: Request, res: Response) => {
   try {
-    const {
-      buyer,
-      seller,
-      arbitrator,
-      cryptoAmount,
-      buyerCollateral,
-      sellerCollateral,
-      depositDuration,
-      confirmationDuration,
-      disputeTimeout,
-      feeRate,
-      platformWallet,
-    } = req.body;
+    const tradeInitiated = await initTrade(req.body);
 
-    const contract = await getEscrowContract();
-
-    const tx = await contract.initTrade(
-      buyer,
-      seller,
-      arbitrator,
-      cryptoAmount,
-      buyerCollateral,
-      sellerCollateral,
-      depositDuration,
-      confirmationDuration,
-      disputeTimeout,
-      feeRate,
-      platformWallet,
-    );
-    await tx.wait();
-    res.json({ message: 'Trade initialized', txHash: tx.hash });
+    res.json(tradeInitiated);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const depositByBuyer = async (req: Request, res: Response) => {
+export const depositByBuyerController = async (req: Request, res: Response) => {
   try {
-    const { value } = req.body;
-    const contract = await getEscrowContract();
-    // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.depositByBuyer({ value });
-    await tx.wait();
-    res.json({ message: 'Buyer deposit successful', txHash: tx.hash });
+    const depositedByBuyer = await depositByBuyer(req.body);
+    res.json(depositedByBuyer);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const depositBySeller = async (req: Request, res: Response) => {
+export const depositBySellerController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const { value } = req.body;
-    const contract = await getEscrowContract();
-    const tx = await contract.depositBySeller({ value });
-    await tx.wait();
-    res.json({ message: 'Seller deposit successful', txHash: tx.hash });
+    const depositedBySeller = await depositBySeller(req.body);
+    res.json(depositedBySeller);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const confirmFiatSent = async (req: Request, res: Response) => {
+export const confirmFiatSentController = async (
+  _req: Request,
+  res: Response,
+) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.confirmFiatSent();
-    await tx.wait();
-    res.json({ message: 'Fiat sent confirmed', txHash: tx.hash });
+    const confirmedFiatSent = await confirmFiatSent();
+    res.json(confirmedFiatSent);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const confirmFiatReceived = async (req: Request, res: Response) => {
+export const confirmFiatReceivedController = async (
+  _req: Request,
+  res: Response,
+) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.confirmFiatReceived();
-    await tx.wait();
-    res.json({ message: 'Fiat received confirmed', txHash: tx.hash });
+    const confirmedFiatReceived = await confirmFiatReceived();
+    res.json(confirmedFiatReceived);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const releaseTrade = async (req: Request, res: Response) => {
+export const releaseTradeController = async (_req: Request, res: Response) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.releaseTrade();
-    await tx.wait();
-    res.json({ message: 'Trade released', txHash: tx.hash });
+    const releasedTrade = await releaseTrade();
+    res.json(releasedTrade);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const cancelTrade = async (req: Request, res: Response) => {
+export const cancelTradeController = async (_req: Request, res: Response) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.cancelTrade();
-    await tx.wait();
-    res.json({ message: 'Trade cancelled', txHash: tx.hash });
+    const canceledTrade = await cancelTrade();
+    res.json(canceledTrade);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const raiseDispute = async (req: Request, res: Response) => {
+export const raiseDisputeController = async (_req: Request, res: Response) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.raiseDispute();
-    await tx.wait();
-    res.json({ message: 'Dispute raised', txHash: tx.hash });
+    const raisedDispute = await raiseDispute();
+    res.json(raisedDispute);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const escalateDispute = async (req: Request, res: Response) => {
+export const escalateDisputeController = async (
+  _req: Request,
+  res: Response,
+) => {
   try {
-    const contract = await getEscrowContract();
-    const tx = await contract.escalateDispute();
-    await tx.wait();
-    res.json({
-      message: 'Dispute escalated - trade cancelled',
-      txHash: tx.hash,
-    });
+    const escalatedDispute = await escalateDispute();
+    res.json(escalatedDispute);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const resolveDispute = async (req: Request, res: Response) => {
+export const resolveDisputeController = async (req: Request, res: Response) => {
   try {
     const { decision, penalizedParty } = req.body;
-    const contract = await getEscrowContract();
-    const tx = await contract.resolveDispute(decision, penalizedParty);
-    await tx.wait();
-    res.json({ message: 'Dispute resolved', txHash: tx.hash });
+    const resolvedDispute = await resolveDispute(decision, penalizedParty);
+    res.json(resolvedDispute);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
