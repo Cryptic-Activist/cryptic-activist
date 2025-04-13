@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { createCryptocurrency, getCryptocurrency } from 'base-ca';
+import { createCryptocurrency, getCryptocurrency, redisClient } from 'base-ca';
 
 import { fetchGet } from '@/services/axios';
 import { getCoinPrice } from '@/services/coinGecko';
@@ -9,8 +9,20 @@ export const getPrice = async (req: Request, res: Response) => {
     const { query } = req;
     const { id, fiatSymbol } = query;
 
-    // @ts-ignore
-    const price = await getCoinPrice(id, fiatSymbol);
+    const cachedCryptoPrice = await redisClient.get(fiatSymbol as string);
+
+    console.log({ cachedCryptoPrice });
+
+    if (cachedCryptoPrice) {
+      res.status(200).send({ price: parseFloat(cachedCryptoPrice) });
+      return;
+    }
+
+    const price = await getCoinPrice(id as string, fiatSymbol as string);
+
+    // Cache the crypto price from 30 minutes
+    await redisClient.setEx(fiatSymbol as string, 1800, JSON.stringify(price));
+
     if (price) {
       res.status(200).send({
         price,
@@ -23,6 +35,7 @@ export const getPrice = async (req: Request, res: Response) => {
     });
     return;
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
