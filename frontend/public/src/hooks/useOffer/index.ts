@@ -172,7 +172,8 @@ const useOffer = () => {
       isLoggedIn() &&
       user.id &&
       offer.vendor?.id &&
-      blockchain.account?.address
+      blockchain.account?.address &&
+      cryptocurrencyAmount
     ) {
       setIsTradingAvailable(true);
     } else {

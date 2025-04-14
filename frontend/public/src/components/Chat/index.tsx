@@ -67,6 +67,17 @@ const Content: FC<ContentProps> = ({
       {messages.map((message, index) => {
         const messageStyle =
           sender?.id === message.from ? styles.sender : styles.receiver;
+
+        const isInfoMessage = message.type === 'info';
+
+        if (isInfoMessage) {
+          return (
+            <li key={index} className={styles.listItemChatInfo}>
+              <p className={styles.infoMessage}>{message.message}</p>
+            </li>
+          );
+        }
+
         return (
           <li key={index} className={`${styles.listItem} ${messageStyle}`}>
             <div className={styles.message}>

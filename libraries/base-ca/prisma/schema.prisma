@@ -297,6 +297,7 @@ model Trade {
   expiredAt            DateTime? // Time when the trade should be considered expired
   status               TradeStatus
   paid                 Boolean?        @default(false) @db.Boolean
+  paymentConfirmed     Boolean?        @default(false) @db.Boolean
   escrowReleaseDate    DateTime?       @db.Date
   deletedAt            DateTime?       @db.Date
   createdAt            DateTime?       @default(now()) @db.Date

@@ -42,6 +42,12 @@ const useTrade = () => {
     });
   };
 
+  const setReceived = (hasReceived: boolean) => {
+    trade.setTradeValue({
+      paymentConfirmed: hasReceived,
+    });
+  };
+
   const setVendorWalletAddress = (walletAddress: string) => {
     trade.setTradeValue({
       vendorWalletAddress: walletAddress,
@@ -53,6 +59,7 @@ const useTrade = () => {
     trade,
     setPaid,
     setCanceled,
+    setReceived,
     setVendorWalletAddress,
   };
 };

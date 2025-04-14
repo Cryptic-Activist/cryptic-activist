@@ -14,6 +14,7 @@ const ChatMessageSchema: Schema = new Schema(
     chatId: { type: String, required: true },
     from: { type: String, required: true },
     to: { type: String, required: true },
+    type: { type: String, required: false },
     message: { type: String, required: true },
     attachment: { type: AttachmentSchema, required: false },
   },

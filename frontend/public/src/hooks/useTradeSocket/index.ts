@@ -21,6 +21,7 @@ const useTradeSocket = ({
   walletAddress,
   onSetPaid,
   onSetCanceled,
+  onSetReceived,
 }: UseSocketParams) => {
   const { addToast } = useApp();
   const { replace, back } = useRouter();
@@ -55,6 +56,12 @@ const useTradeSocket = ({
   const setAsCanceled = (params: SetAsPaidParams) => {
     if (socket) {
       socket.emit('trade_set_canceled', { roomId, ...params });
+    }
+  };
+
+  const setAsPaymentReceived = (params: SetAsPaidParams) => {
+    if (socket) {
+      socket.emit('trade_set_payment_confirmed', { roomId, ...params });
     }
   };
 
@@ -93,7 +100,6 @@ const useTradeSocket = ({
 
       // Listen for new messages
       newSocket.on('receive_message', (message: Message) => {
-        console.log('receiving messages...');
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
@@ -113,11 +119,11 @@ const useTradeSocket = ({
       newSocket.on('trade_set_paid_success', (data) => {
         onSetPaid(data.isPaid);
         addToast('success', 'Trade has been successfully executed', 8000);
-        setTimeout(() => {
-          replace('/', {
-            scroll: true,
-          });
-        }, 2000);
+      });
+
+      newSocket.on('trade_set_payment_confirmed_success', (data) => {
+        onSetReceived(data.hasReceived);
+        addToast('success', 'Payment has been set as received', 8000);
       });
 
       newSocket.on('trade_set_canceled_success', () => {
@@ -143,6 +149,17 @@ const useTradeSocket = ({
         }
       });
 
+      newSocket.on('trade_set_payment_confirmed_error', (data) => {
+        if (data.error) {
+          onSetReceived(false);
+          addToast('error', 'Unable to set the payment as received', 8000);
+        }
+      });
+
+      newSocket.on('chat_info_message', (message: Message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+
       setSocket(newSocket);
 
       // Cleanup on unmount
@@ -163,6 +180,7 @@ const useTradeSocket = ({
     appendMessage,
     setAsPaid,
     setAsCanceled,
+    setAsPaymentReceived,
   };
 };
 

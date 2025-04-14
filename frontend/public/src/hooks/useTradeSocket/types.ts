@@ -12,6 +12,7 @@ export type UseSocketParams = {
   onStatusChange?: (status: Status) => void;
   onSetPaid: (isPaid: boolean) => void;
   onSetCanceled: () => void;
+  onSetReceived: (hasReceived: boolean) => void;
   onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
 };
 
@@ -25,6 +26,7 @@ type User = {
 export type Message = {
   from: string;
   to: string;
+  type?: string;
   message: string;
   attachment?: Attachment;
   createdAt: string;

@@ -99,6 +99,8 @@
   min-height: 3rem;
   display: flex;
   border-radius: 2rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .provider {
@@ -161,4 +163,12 @@
   .valueString {
     font-size: 1.5rem;
   }
+}
+
+.ethereumBgColor {
+  background-color: #7c86c8;
+}
+
+.polygonBgColor {
+  background-color: #631cf1;
 }

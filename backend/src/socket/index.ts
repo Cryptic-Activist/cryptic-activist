@@ -144,7 +144,6 @@ const socketHandler = (
 
           const tradeUrl = FRONTEND_PUBLIC + '/trade/' + trade.id + '/vendor';
           const notificationMessage = `${trader?.firstName} ${trader?.lastName} has started trading with you. Go and trade.`;
-          console.log({ notificationMessage });
           const newSystemMessage = await createSystemMessage({
             create: {
               userId: trade.vendorId,
@@ -201,21 +200,6 @@ const socketHandler = (
             createdAt: newMessage.createdAt,
             message,
           });
-        } else {
-          // If offline, send a push notification if subscription exists
-          // const subscriptionString = await redisClient.hGet(
-          //   'pushSubscriptions',
-          //   to,
-          // );
-          // if (subscriptionString) {
-          //   const subscription = JSON.parse(subscriptionString);
-          //   const payload = JSON.stringify({
-          //     title: 'New Message',
-          //     body: message,
-          //   });
-          //   // webpush.sendNotification(subscription, payload)
-          //   //   .catch(error => console.error('Push notification error:', error));
-          // }
         }
       }
     });
@@ -236,7 +220,6 @@ const socketHandler = (
         },
         toUpdate: {
           paid: true,
-          status: 'COMPLETED',
         },
       });
 
@@ -261,11 +244,101 @@ const socketHandler = (
         io.to(recipientSocketId).emit('trade_set_paid_success', {
           isPaid: true,
         });
+        io.to(recipientSocketId).emit('chat_info_message', {
+          from,
+          to,
+          type: 'info',
+          message: 'Trader has set trade as Paid',
+        });
       }
       if (senderSocketId) {
         io.to(senderSocketId).emit('trade_set_paid_success', { isPaid: true });
+        io.to(senderSocketId).emit('chat_info_message', {
+          from,
+          to,
+          type: 'info',
+          message: 'Trader has set trade as Paid',
+        });
       }
     });
+
+    // Set trade payment as received
+    socket.on(
+      'trade_set_payment_confirmed',
+      async (data: SetTradeAsPaidParams) => {
+        const { from, to, roomId } = data;
+
+        const chat = await getChat({
+          where: { id: roomId },
+          select: {
+            tradeId: true,
+          },
+        });
+        const updatedTrade = await updateTrade({
+          where: {
+            id: chat?.tradeId,
+          },
+          toUpdate: {
+            paymentConfirmed: true,
+          },
+        });
+
+        const senderSocketId = await redisClient.hGet(
+          'onlineTradingUsers',
+          from,
+        );
+        const recipientSocketId = await redisClient.hGet(
+          'onlineTradingUsers',
+          to,
+        );
+
+        if (!updatedTrade) {
+          if (recipientSocketId) {
+            io.to(recipientSocketId).emit('trade_set_payment_confirmed_error', {
+              error: true,
+            });
+          }
+          if (senderSocketId) {
+            io.to(senderSocketId).emit('trade_set_payment_confirmed_error', {
+              error: true,
+            });
+          }
+        }
+
+        if (recipientSocketId) {
+          io.to(recipientSocketId).emit('trade_set_payment_confirmed_success', {
+            isPaid: true,
+          });
+          io.to(recipientSocketId).emit('chat_info_message', {
+            from,
+            to,
+            type: 'info',
+            message: 'Vendor has set payment as Received',
+          });
+        }
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('trade_set_payment_confirmed_success', {
+            isPaid: true,
+          });
+          io.to(senderSocketId).emit('chat_info_message', {
+            from,
+            to,
+            type: 'info',
+            message: 'Vendor has set payment as Received',
+          });
+        }
+
+        if (chat?.id) {
+          await createChatMessage({
+            chatId: chat.id,
+            from: from,
+            type: 'info',
+            message: 'Vendor has set payment as Received',
+            to: to,
+          });
+        }
+      },
+    );
 
     // Set trade as Canceled
     socket.on('trade_set_canceled', async (data: SetTradeAsCanceledParams) => {
