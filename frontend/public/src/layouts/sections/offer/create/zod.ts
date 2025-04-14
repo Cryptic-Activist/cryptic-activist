@@ -22,3 +22,4 @@ export const ZodTags = z.array(z.string());
 export const ZodLabel = z.string().min(1);
 export const ZodTerms = z.string().min(1);
 export const ZodInstructions = z.string().min(1);
+export const ZodVendorWalletAddress = z.string().min(2);

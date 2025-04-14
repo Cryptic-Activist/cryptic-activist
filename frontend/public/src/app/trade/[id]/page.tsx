@@ -135,7 +135,7 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled } = useTrade();
+  const { trade, setPaid, setCanceled, setReceived } = useTrade();
   const { user, query } = useUser();
   const { timeLeftInMinutes, startCountDown: _startCountDown } = useCountDown();
   const router = useRouter();
@@ -149,6 +149,7 @@ export default function TradePage() {
       trade,
       onSetPaid: setPaid,
       onSetCanceled: setCanceled,
+      onSetReceived: setReceived,
     });
 
   // useEffect(() => {

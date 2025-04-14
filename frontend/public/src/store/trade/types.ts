@@ -85,6 +85,7 @@ export type Trade = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     paid?: boolean;
+    paymentConfirmed?: boolean;
     status?: Status;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
@@ -108,6 +109,7 @@ export type TradeStore = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     paid?: boolean;
+    paymentConfirmed?: boolean;
     status?: Status;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
@@ -133,6 +135,7 @@ export type TradeSetter = {
   fiatAmount?: number;
   cryptocurrencyAmount?: number;
   paid?: boolean;
+  paymentConfirmed?: boolean;
   status?: Status;
   traderWalletAddress?: string;
   vendorWalletAddress?: string;

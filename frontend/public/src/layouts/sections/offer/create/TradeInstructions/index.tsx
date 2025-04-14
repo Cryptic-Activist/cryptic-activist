@@ -21,6 +21,7 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
   createOffer,
   step,
   onClickEvents,
+  vendorWalletAddress,
 }) => {
   const router = useRouter();
 
@@ -36,8 +37,8 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
   });
 
   const submitOffer = () => {
-    if (createOffer.isTradeInstructionsCompleted) {
-      createOfferMutation.mutate(createOffer);
+    if (createOffer.isTradeInstructionsCompleted && vendorWalletAddress) {
+      createOfferMutation.mutate({ ...createOffer, vendorWalletAddress });
     }
   };
 

@@ -111,6 +111,17 @@
   }
 }
 
+.listItemChatInfo {
+  text-align: center;
+  width: 100%;
+  .infoMessage {
+    padding: 0.2em;
+    text-align: center;
+    font-size: 0.9rem;
+    color: globals.$text-description-color;
+  }
+}
+
 .usernameTime {
   display: flex;
   gap: 0.2rem;

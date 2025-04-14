@@ -28,7 +28,9 @@ export const fetchCurrentVendorOffers = async (vendorId: string) => {
   return response.data;
 };
 
-export const submitOfferCreate = async (data: CreateOfferSetter) => {
+export const submitOfferCreate = async (
+  data: CreateOfferSetter & { vendorWalletAddress: string }
+) => {
   const payload = {
     vendorId: data.vendorId,
     cryptocurrencyId: data.cryptocurrency?.id,
@@ -44,6 +46,7 @@ export const submitOfferCreate = async (data: CreateOfferSetter) => {
     label: data.label,
     terms: data.terms,
     instructions: data.instructions,
+    vendorWalletAddress: data.vendorWalletAddress,
   };
   const response = await fetchPost(BACKEND + '/offers/offer/create', payload);
 

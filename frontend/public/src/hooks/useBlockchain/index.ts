@@ -30,7 +30,7 @@ const useBlockchain = () => {
   const { connect, connectors } = useConnect();
   const { isConnected, address } = useAccount();
   const balance = useBalance({ address: address as `0x${string}` });
-  const { connectors: connectorsSwitch } = useSwitchAccount();
+  const {} = useSwitchAccount();
   const {
     isLoggedIn,
     user: { id },
@@ -56,11 +56,14 @@ const useBlockchain = () => {
   };
 
   useAccountEffect({
-    async onConnect({ address, chain, connector }) {
-      if (id && chain?.name) {
+    async onConnect({ connector, address: onConnectAddress, chain }) {
+      // const address = await connector.getAccounts();
+      // const chain = await connector.getChainId();
+
+      if (id) {
         setBlockchainValue(
           {
-            account: { address: address },
+            account: { address: onConnectAddress },
             chain,
             wallet: connector.name,
             balance: balance.data,
@@ -75,25 +78,26 @@ const useBlockchain = () => {
   });
 
   useEffect(() => {
-    if (balance.isSuccess) {
+    if (id && balance.isSuccess) {
       setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
-  }, [balance.isSuccess]);
+  }, [balance.isSuccess, id]);
 
-  useEffect(() => {
-    if (id && chain?.name && address) {
-      console.log({ connectorsSwitch: connectorsSwitch[0].getChainId() });
-      setBlockchainValue(
-        {
-          account: { address: address },
-          chain,
-          wallet: connectorsSwitch[0].name,
-          balance: balance.data,
-        },
-        'blockchain/setWalletDetails'
-      );
-    }
-  }, [address]);
+  // useEffect(() => {
+  //   if (id && address) {
+  //     setBlockchainValue(
+  //       {
+  //         account: { address: address },
+  //         chain,
+  //         wallet: connectorsSwitch[0].name,
+  //         balance: balance.data,
+  //       },
+  //       'blockchain/setWalletDetails'
+  //     );
+  //   }
+  // }, [address]);
+
+  // console.log({ status, address });
 
   return {
     blockchain: {

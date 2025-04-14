@@ -14,7 +14,7 @@ export const getSystemMessagesController = async (
         userId,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: 'asc',
       },
     });
 

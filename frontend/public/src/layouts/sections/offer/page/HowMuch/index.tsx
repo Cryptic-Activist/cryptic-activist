@@ -35,7 +35,7 @@ const HowMuch: FC<HowMuchProps> = ({
       if (mutationStartTrade.isPending) {
         return 'Starting trade...';
       }
-      if (mutationStartTrade.isError) {
+      if (mutationStartTrade.isError || !cryptocurrencyAmount) {
         return 'Some error occurred';
       }
       if (!blockchain.account?.address) {
@@ -54,6 +54,8 @@ const HowMuch: FC<HowMuchProps> = ({
     mutationStartTrade.isPending,
     mutationStartTrade.isError,
   ]);
+
+  console.log({ cryptocurrencyAmount });
 
   return (
     <form

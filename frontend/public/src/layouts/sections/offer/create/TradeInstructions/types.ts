@@ -11,4 +11,5 @@ export type CreateOfferTradeInstructionsProps = {
   step: number;
   onClickEvents: { [key: number]: () => void };
   saveCreateOfferLocally: () => void;
+  vendorWalletAddress?: string;
 };

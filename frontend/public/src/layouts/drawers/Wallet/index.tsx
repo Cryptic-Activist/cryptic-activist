@@ -1,12 +1,13 @@
 'use client';
 
 import { BRAVE_WALLET, METAMASK } from '@/constants';
-import { Brave, MetaMask } from '@/assets';
+import { Brave, EthereumLogo, MetaMask, PolygonLogo } from '@/assets';
 import { FaChevronRight, FaPowerOff } from 'react-icons/fa';
 import { ProviderImageProps, ValueContainerProps } from './types';
 import React, { FC, useEffect, useState } from 'react';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 
+import Image from 'next/image';
 import { copyToClipboard } from '@/utils';
 import styles from './index.module.scss';
 
@@ -59,6 +60,8 @@ const Wallet = () => {
   const { toggleDrawer } = useNavigationBar();
   const { blockchain, onDisconnectWallet } = useBlockchain();
   const { user } = useUser();
+  const isEthereum = blockchain?.chain?.name === 'Ethereum';
+  const isPolygon = blockchain?.chain?.name === 'Polygon';
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
@@ -80,6 +83,9 @@ const Wallet = () => {
     }, 1500);
   }, [isCopied]);
 
+  const ethereumBgColor = isEthereum ? styles.ethereumBgColor : '';
+  const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
+
   return (
     <>
       <div className={styles.background} />
@@ -95,12 +101,35 @@ const Wallet = () => {
               onClick={onCopyAddress}
             >
               <div className={styles.profileColorProvider}>
-                <span
-                  className={styles.profileColor}
+                <div
+                  className={`${styles.profileColor} ${ethereumBgColor} ${polygonBgColor}`}
                   style={{
-                    backgroundColor: user.profileColor,
+                    backgroundColor: !blockchain?.chain?.name
+                      ? user.profileColor
+                      : '',
                   }}
-                />
+                >
+                  {isEthereum ? (
+                    <Image
+                      src={EthereumLogo.src}
+                      alt="Ethereum Logo"
+                      width={30}
+                      height={30}
+                    />
+                  ) : (
+                    ''
+                  )}
+                  {isPolygon ? (
+                    <Image
+                      src={PolygonLogo.src}
+                      alt="Polygon Logo"
+                      width={30}
+                      height={30}
+                    />
+                  ) : (
+                    ''
+                  )}
+                </div>
                 <ProviderImage provider={blockchain.wallet} />
               </div>
 

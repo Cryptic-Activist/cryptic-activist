@@ -11,8 +11,6 @@ export const getPrice = async (req: Request, res: Response) => {
 
     const cachedCryptoPrice = await redisClient.get(fiatSymbol as string);
 
-    console.log({ cachedCryptoPrice });
-
     if (cachedCryptoPrice) {
       res.status(200).send({ price: parseFloat(cachedCryptoPrice) });
       return;
@@ -20,8 +18,8 @@ export const getPrice = async (req: Request, res: Response) => {
 
     const price = await getCoinPrice(id as string, fiatSymbol as string);
 
-    // Cache the crypto price from 30 minutes
-    await redisClient.setEx(fiatSymbol as string, 1800, JSON.stringify(price));
+    // Cache the crypto price from 60 seconds
+    await redisClient.setEx(fiatSymbol as string, 60, JSON.stringify(price));
 
     if (price) {
       res.status(200).send({

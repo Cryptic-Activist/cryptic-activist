@@ -78,7 +78,7 @@ const CurrentOffers: FC<CurrentOffersProps> = ({ vendorId }) => {
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     retry: 3,
     enabled: !!vendorId,
   });
