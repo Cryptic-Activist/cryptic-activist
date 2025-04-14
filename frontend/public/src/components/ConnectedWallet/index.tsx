@@ -18,6 +18,7 @@ const ConnectedWallet = () => {
   } = useNavigationBar();
   const isEthereum = blockchain?.chain?.name === 'Ethereum';
   const isPolygon = blockchain?.chain?.name === 'Polygon';
+  const isLocalhost = blockchain.chain?.name === 'Localhost';
 
   const openWallet = () => {
     if (!wallet) {
@@ -25,7 +26,8 @@ const ConnectedWallet = () => {
     }
   };
 
-  const ethereumBgColor = isEthereum ? styles.ethereumBgColor : '';
+  const ethereumBgColor =
+    isEthereum || isLocalhost ? styles.ethereumBgColor : '';
   const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
 
   return (
@@ -36,7 +38,7 @@ const ConnectedWallet = () => {
           backgroundColor: !blockchain?.chain?.name ? user.profileColor : '',
         }}
       >
-        {isEthereum ? (
+        {isEthereum || isLocalhost ? (
           <Image
             src={EthereumLogo.src}
             alt="Ethereum Logo"

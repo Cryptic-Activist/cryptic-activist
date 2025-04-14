@@ -35,20 +35,10 @@ const ProviderImage: FC<ProviderImageProps> = ({ provider }) => {
 };
 
 const ValueContainer: FC<ValueContainerProps> = ({ label, value }) => {
-  const valueType = typeof value;
-  const isValueNumber = valueType === 'number';
-  const isValueString = valueType === 'string';
-
   return (
     <div className={styles.valueContainer}>
       <label className={styles.label}>{label}</label>
-      <span
-        className={`${isValueNumber ? styles.valueNumber : ''} ${
-          isValueString ? styles.valueString : ''
-        }`}
-      >
-        {value}
-      </span>
+      <span className={styles.value}>{value}</span>
     </div>
   );
 };
@@ -60,8 +50,10 @@ const Wallet = () => {
   const { toggleDrawer } = useNavigationBar();
   const { blockchain, onDisconnectWallet } = useBlockchain();
   const { user } = useUser();
+
   const isEthereum = blockchain?.chain?.name === 'Ethereum';
   const isPolygon = blockchain?.chain?.name === 'Polygon';
+  const isLocalhost = blockchain.chain?.name === 'Localhost';
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
@@ -83,7 +75,8 @@ const Wallet = () => {
     }, 1500);
   }, [isCopied]);
 
-  const ethereumBgColor = isEthereum ? styles.ethereumBgColor : '';
+  const ethereumBgColor =
+    isEthereum || isLocalhost ? styles.ethereumBgColor : '';
   const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
 
   return (
@@ -109,7 +102,7 @@ const Wallet = () => {
                       : '',
                   }}
                 >
-                  {isEthereum ? (
+                  {isEthereum || isLocalhost ? (
                     <Image
                       src={EthereumLogo.src}
                       alt="Ethereum Logo"
@@ -141,18 +134,23 @@ const Wallet = () => {
               <FaPowerOff size={24} />
             </button>
           </div>
-          <section className={styles.section}>
+          <section className={styles.row}>
+            <div className={styles.column}>
+              <ValueContainer label={'Chain ID'} value={blockchain.chain?.id} />
+              <ValueContainer
+                label={'Blockchain'}
+                value={blockchain.chain?.name}
+              />
+            </div>
             <ValueContainer
               label={'Balance'}
               value={
                 blockchain.balance?.formatted
-                  ? parseFloat(blockchain.balance?.formatted)
+                  ? `${parseFloat(blockchain.balance?.formatted)} ${
+                      blockchain.chain.nativeCurrency.symbol
+                    }`
                   : ''
               }
-            />
-            <ValueContainer
-              label={'Blockchain'}
-              value={blockchain.chain?.name}
             />
           </section>
         </div>
