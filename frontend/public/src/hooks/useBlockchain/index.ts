@@ -60,6 +60,8 @@ const useBlockchain = () => {
       // const address = await connector.getAccounts();
       // const chain = await connector.getChainId();
 
+      console.log({ connector, onConnectAddress, chain });
+
       if (id) {
         setBlockchainValue(
           {

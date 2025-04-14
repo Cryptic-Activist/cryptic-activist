@@ -20,6 +20,7 @@ export interface UpdateChatMessageParams {
     from: string;
     to: string;
     message: string;
+    type?: 'info' | string;
     attachment?: Attachment;
   }>;
 }

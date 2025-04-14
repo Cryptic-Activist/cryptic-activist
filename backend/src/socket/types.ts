@@ -45,3 +45,5 @@ export type SetTradeAsCanceledParams = SetTradeAs;
 export type NotificationTradeStartSentParams = {
   tradeId: string;
 };
+
+export type WalletAddress = `0x${string}`;

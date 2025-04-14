@@ -1,4 +1,5 @@
 import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
+import { ETHEREUM_ESCROW_ADDRESS, FRONTEND_PUBLIC } from '@/constants/env';
 import {
   NotificationTradeStartSentParams,
   SendMessageParams,
@@ -6,7 +7,17 @@ import {
   SetTradeAsPaidParams,
   User,
   UserInfo,
+  WalletAddress,
 } from './types';
+import {
+  cancelTrade,
+  confirmFiatReceived,
+  confirmFiatSent,
+  depositByBuyer,
+  depositBySeller,
+  initTrade,
+  releaseTrade,
+} from '@/services/blockchains/ethereum';
 import {
   createChatMessage,
   createSystemMessage,
@@ -19,8 +30,6 @@ import {
   updateTrade,
   updateUser,
 } from 'base-ca';
-
-import { FRONTEND_PUBLIC } from '@/constants/env';
 
 const socketHandler = (
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
@@ -76,11 +85,6 @@ const socketHandler = (
         if (vendorWalletAddress) {
           const trade = await getTrade({ where: { id: tradeId } });
 
-          console.log({
-            tradeVendorWalletAddress: trade?.traderWalletAddress,
-            vendorWalletAddress,
-          });
-
           if (trade?.traderWalletAddress === vendorWalletAddress) {
             socket.emit('trade_error', {
               error: "Vendor's wallet can not be the same as Trader's wallet",
@@ -88,7 +92,7 @@ const socketHandler = (
             return;
           }
 
-          const updatedVendorWalletAddress = await updateTrade({
+          const updatedTrade = await updateTrade({
             where: {
               id: tradeId,
             },
@@ -96,7 +100,29 @@ const socketHandler = (
               vendorWalletAddress,
             },
           });
-          console.log({ updatedVendorWalletAddress });
+
+          const tradeInitialized = await initTrade({
+            buyer: updatedTrade.traderWalletAddress as WalletAddress,
+            seller: updatedTrade.vendorWalletAddress as WalletAddress,
+            arbitrator: ETHEREUM_ESCROW_ADDRESS,
+            cryptoAmount: '1000000000000000000',
+            buyerCollateral: '1000000000000000000',
+            sellerCollateral: '1000000000000000000',
+            depositDuration: 30,
+            confirmationDuration: 60,
+            disputeTimeout: 120,
+            feeRate: 50,
+            platformWallet: ETHEREUM_ESCROW_ADDRESS,
+          });
+
+          console.log({ tradeInitialized });
+
+          if (tradeInitialized.message === 'Trade initialized') {
+            const depositedByBuyer = await depositByBuyer(1000000000000000000n);
+            const depositedBySeller =
+              await depositBySeller(1000000000000000000n);
+            console.log({ depositedByBuyer, depositedBySeller });
+          }
         }
 
         // Send existing room messages
@@ -208,6 +234,21 @@ const socketHandler = (
     socket.on('trade_set_paid', async (data: SetTradeAsPaidParams) => {
       const { from, to, roomId } = data;
 
+      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
+      const recipientSocketId = await redisClient.hGet(
+        'onlineTradingUsers',
+        to,
+      );
+
+      const confirmedFiatSent = await confirmFiatSent();
+
+      console.log({ confirmedFiatSent });
+
+      if (confirmedFiatSent.message !== 'Fiat sent confirmed') {
+        io.to(senderSocketId!).emit('trade_set_paid_error', { error: true });
+        return;
+      }
+
       const chat = await getChat({
         where: { id: roomId },
         select: {
@@ -222,12 +263,6 @@ const socketHandler = (
           paid: true,
         },
       });
-
-      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
-      const recipientSocketId = await redisClient.hGet(
-        'onlineTradingUsers',
-        to,
-      );
 
       if (!updatedTrade) {
         if (recipientSocketId) {
@@ -267,11 +302,42 @@ const socketHandler = (
       'trade_set_payment_confirmed',
       async (data: SetTradeAsPaidParams) => {
         const { from, to, roomId } = data;
+        const senderSocketId = await redisClient.hGet(
+          'onlineTradingUsers',
+          from,
+        );
+        const recipientSocketId = await redisClient.hGet(
+          'onlineTradingUsers',
+          to,
+        );
+
+        const confirmedFiatReceived = await confirmFiatReceived();
+
+        console.log({ confirmedFiatReceived });
+
+        if (confirmedFiatReceived.message !== 'Fiat received confirmed') {
+          io.to(senderSocketId!).emit('trade_set_payment_confirmed_error', {
+            error: true,
+          });
+          return;
+        }
+
+        const releasedTrade = await releaseTrade();
+
+        console.log({ releasedTrade });
+
+        if (releasedTrade.message !== 'Trade released') {
+          io.to(senderSocketId!).emit('trade_release_error', {
+            error: true,
+          });
+          return;
+        }
 
         const chat = await getChat({
           where: { id: roomId },
           select: {
             tradeId: true,
+            id: true,
           },
         });
         const updatedTrade = await updateTrade({
@@ -282,15 +348,6 @@ const socketHandler = (
             paymentConfirmed: true,
           },
         });
-
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
 
         if (!updatedTrade) {
           if (recipientSocketId) {
@@ -328,9 +385,9 @@ const socketHandler = (
           });
         }
 
-        if (chat?.id) {
-          await createChatMessage({
-            chatId: chat.id,
+        if (roomId) {
+          const newInfoMesage = await createChatMessage({
+            chatId: roomId,
             from: from,
             type: 'info',
             message: 'Vendor has set payment as Received',
@@ -343,6 +400,20 @@ const socketHandler = (
     // Set trade as Canceled
     socket.on('trade_set_canceled', async (data: SetTradeAsCanceledParams) => {
       const { from, to, roomId } = data;
+      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
+      const recipientSocketId = await redisClient.hGet(
+        'onlineTradingUsers',
+        to,
+      );
+
+      const canceledTrade = await cancelTrade();
+
+      if (canceledTrade.message !== 'Trade cancelled') {
+        io.to(senderSocketId!).emit('trade_set_canceled_error', {
+          error: true,
+        });
+        return;
+      }
 
       const chat = await getChat({
         where: { id: roomId },
@@ -359,12 +430,6 @@ const socketHandler = (
           status: 'CANCELLED',
         },
       });
-
-      const senderSocketId = await redisClient.hGet('onlineTradingUsers', from);
-      const recipientSocketId = await redisClient.hGet(
-        'onlineTradingUsers',
-        to,
-      );
 
       if (!updatedTrade) {
         if (recipientSocketId) {
@@ -393,7 +458,6 @@ const socketHandler = (
 
     // Leave trade room
     socket.on('leave_room', (roomId: string) => {
-      console.log(`room ${roomId} left`);
       const roomUsers = rooms.get(roomId);
       if (roomUsers) {
         roomUsers.delete(socket.id);
