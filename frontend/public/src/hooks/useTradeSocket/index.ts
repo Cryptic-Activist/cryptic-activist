@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import { BACKEND } from '@/constants';
 
 const useTradeSocket = ({
-  roomId,
+  chatId,
   user,
   timeLimit,
   trade,
@@ -31,6 +31,7 @@ const useTradeSocket = ({
   const [roomError, setRoomError] = useState<string | null>(null);
   const [receiverStatus, setReceiverStatus] =
     useState<ReceiverStatus>('online');
+  const [escrowReleased, setEscrowRelease] = useState(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -42,31 +43,31 @@ const useTradeSocket = ({
 
   const sendMessage = (params: SendMessageParams) => {
     if (socket) {
-      socket.emit('send_message', { roomId, ...params });
+      socket.emit('send_message', { chatId, ...params });
       appendMessage(params.content);
     }
   };
 
   const setAsPaid = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_paid', { roomId, ...params });
+      socket.emit('trade_set_paid', { chatId, ...params });
     }
   };
 
   const setAsCanceled = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_canceled', { roomId, ...params });
+      socket.emit('trade_set_canceled', { chatId, ...params });
     }
   };
 
   const setAsPaymentReceived = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_payment_confirmed', { roomId, ...params });
+      socket.emit('trade_set_payment_confirmed', { chatId, ...params });
     }
   };
 
   useEffect(() => {
-    if (roomId && user) {
+    if (chatId && user) {
       // Establish socket connection
       const newSocket = io(BACKEND, {
         transports: ['websocket'],
@@ -75,9 +76,10 @@ const useTradeSocket = ({
       newSocket.on('connect', () => {
         const vendorWalletAddress =
           user.id === trade.vendor?.id ? walletAddress : undefined;
+        console.log({ vendorWalletAddress });
         // Join room
         newSocket.emit('join_room', {
-          roomId,
+          chatId,
           user,
           timeLimit,
           vendorWalletAddress,
@@ -165,17 +167,24 @@ const useTradeSocket = ({
       // Cleanup on unmount
       return () => {
         if (newSocket) {
-          newSocket.emit('leave_room', roomId);
+          newSocket.emit('leave_room', chatId);
           newSocket.disconnect();
         }
       };
     }
-  }, [roomId, user]);
+  }, [chatId, user]);
+
+  useEffect(() => {
+    if (trade.escrowReleaseDate) {
+      setEscrowRelease(true);
+    }
+  }, [trade.escrowReleaseDate]);
 
   return {
     messages,
     roomError,
     receiverStatus,
+    escrowReleased,
     sendMessage,
     appendMessage,
     setAsPaid,

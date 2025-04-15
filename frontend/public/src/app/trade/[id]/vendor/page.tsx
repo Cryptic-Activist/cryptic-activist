@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Chat } from '@/components';
 import React, { useEffect } from 'react';
 import {
   useApp,
@@ -9,7 +10,6 @@ import {
   useUser,
 } from '@/hooks';
 
-import { Chat } from '@/components';
 import styles from './page.module.scss';
 import { useRouter } from 'next/navigation';
 
@@ -28,7 +28,7 @@ const TradeVendor = () => {
     messages,
     receiverStatus,
   } = useTradeSocket({
-    roomId: trade.chat?.id,
+    chatId: trade.chat?.id,
     user: trade.vendor,
     timeLimit: trade.offer?.timeLimit,
     tradePaid: trade.paid,
@@ -77,7 +77,7 @@ const TradeVendor = () => {
         </span>
         <p>{`${trade.trader?.firstName} ${trade.trader?.lastName}`}</p>
         {trade.paid && (
-          <button
+          <Button
             type="button"
             onClick={() =>
               setAsPaymentReceived({
@@ -87,9 +87,9 @@ const TradeVendor = () => {
             }
           >
             Set as Payment Received
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           onClick={() =>
             setAsCanceled({
               from: trade.trader?.id,
@@ -98,7 +98,7 @@ const TradeVendor = () => {
           }
         >
           Cancel
-        </button>
+        </Button>
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (

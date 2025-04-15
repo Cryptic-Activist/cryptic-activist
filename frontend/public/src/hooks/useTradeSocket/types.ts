@@ -3,7 +3,7 @@ import { TradeSetter } from '@/store/trade/types';
 type Status = 'online' | 'offline';
 
 export type UseSocketParams = {
-  roomId?: string;
+  chatId?: string;
   user?: User;
   timeLimit?: number;
   tradePaid?: boolean;
