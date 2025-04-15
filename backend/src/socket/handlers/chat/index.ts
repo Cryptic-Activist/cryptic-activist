@@ -15,6 +15,7 @@ import {
 } from '@/services/blockchains/ethereum';
 
 import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
+import { parseEther } from 'ethers';
 
 export default class Chat {
   private socket: Socket;
@@ -53,6 +54,12 @@ export default class Chat {
                 vendorId: true,
                 traderWalletAddress: true,
                 vendorWalletAddress: true,
+                cryptocurrencyAmount: true,
+                offer: {
+                  select: {
+                    timeLimit: true,
+                  },
+                },
               },
             },
           },
@@ -94,16 +101,37 @@ export default class Chat {
             //   type: 'info',
             //   message: 'Vendor has entered the chat',
             // });
+            const cryptoAmountWei = parseEther(
+              chat.trade.cryptocurrencyAmount.toString(),
+            ).toString();
+            const depositDuration = (chat.trade.offer.timeLimit * 60) / 4;
+            const confirmationDuration = (chat.trade.offer.timeLimit * 60) / 2;
+            const disputeTimeout = chat.trade.offer.timeLimit * 60 * 2;
+
+            console.log({
+              buyer: updatedTrade.traderWalletAddress as WalletAddress,
+              seller: updatedTrade.vendorWalletAddress as WalletAddress,
+              arbitrator: ETHEREUM_ESCROW_ADDRESS,
+              cryptoAmount: cryptoAmountWei,
+              buyerCollateral: '1000000000000000000',
+              sellerCollateral: '1000000000000000000',
+              depositDuration,
+              confirmationDuration,
+              disputeTimeout,
+              feeRate: 50,
+              platformWallet: ETHEREUM_ESCROW_ADDRESS,
+            });
+
             const tradeInitialized = await initTrade({
               buyer: updatedTrade.traderWalletAddress as WalletAddress,
               seller: updatedTrade.vendorWalletAddress as WalletAddress,
               arbitrator: ETHEREUM_ESCROW_ADDRESS,
-              cryptoAmount: '1000000000000000000',
+              cryptoAmount: cryptoAmountWei,
               buyerCollateral: '1000000000000000000',
               sellerCollateral: '1000000000000000000',
-              depositDuration: 30,
-              confirmationDuration: 60,
-              disputeTimeout: 120,
+              depositDuration,
+              confirmationDuration,
+              disputeTimeout,
               feeRate: 50,
               platformWallet: ETHEREUM_ESCROW_ADDRESS,
             });
