@@ -120,12 +120,21 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_paid_success', (data) => {
         onSetPaid(data.isPaid);
-        addToast('success', 'Trade has been successfully executed', 8000);
+        addToast('info', 'Trade has been set as Paid', 8000);
       });
 
       newSocket.on('trade_set_payment_confirmed_success', (data) => {
         onSetReceived(data.hasReceived);
-        addToast('success', 'Payment has been set as received', 8000);
+        addToast('info', 'Payment has been set as Received', 8000);
+      });
+
+      newSocket.on('escrow_released', () => {
+        setEscrowRelease(true);
+        addToast(
+          'success',
+          'Trade has been successfully executed. Escrow was released.',
+          8000
+        );
       });
 
       newSocket.on('trade_set_canceled_success', () => {
