@@ -8,9 +8,12 @@ import {
   cancelTrade,
   confirmFiatReceived,
   confirmFiatSent,
+  getProvider,
   releaseTrade,
 } from '@/services/blockchains/ethereum';
 import { createChatMessage, getChat, redisClient, updateTrade } from 'base-ca';
+
+import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
 
 export default class Trade {
   private socket: Socket;
@@ -114,6 +117,8 @@ export default class Trade {
 
         const confirmedFiatReceived = await confirmFiatReceived();
 
+        console.log({ confirmedFiatReceived });
+
         if (confirmedFiatReceived.message !== 'Fiat received confirmed') {
           this.io
             .to(senderSocketId!)
@@ -124,6 +129,8 @@ export default class Trade {
         }
 
         const releasedTrade = await releaseTrade();
+
+        console.log({ releasedTrade });
 
         if (releasedTrade.message !== 'Trade released') {
           this.io.to(senderSocketId!).emit('trade_release_error', {

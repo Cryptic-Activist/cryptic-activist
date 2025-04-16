@@ -5,13 +5,13 @@ import React, { useEffect } from 'react';
 import {
   useApp,
   useBlockchain,
+  useRouter,
   useTrade,
   useTradeSocket,
   useUser,
 } from '@/hooks';
 
 import styles from './page.module.scss';
-import { useRouter } from 'next/navigation';
 
 const TradeVendor = () => {
   const { trade, setPaid, setCanceled, setReceived, setVendorWalletAddress } =
@@ -19,7 +19,7 @@ const TradeVendor = () => {
   const { user, query } = useUser();
   const { addToast } = useApp();
   const { blockchain } = useBlockchain();
-  const router = useRouter();
+  const { replace, back } = useRouter();
 
   const {
     sendMessage,
@@ -27,6 +27,7 @@ const TradeVendor = () => {
     setAsPaymentReceived,
     messages,
     receiverStatus,
+    // escrowReleased,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.vendor,
@@ -42,16 +43,16 @@ const TradeVendor = () => {
 
   useEffect(() => {
     if (query.isSuccess && !user.id) {
-      router.back();
+      back();
       return;
     }
     if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
-      router.back();
+      back();
       return;
     }
     if (!blockchain.account?.address) {
       addToast('error', 'You must have a wallet connected to trade', 10000);
-      router.back();
+      back();
       return;
     }
     if (
@@ -63,7 +64,7 @@ const TradeVendor = () => {
         'The current connected wallet must be the same one used to create the offer',
         10000
       );
-      router.back();
+      back();
     }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
 
@@ -86,7 +87,7 @@ const TradeVendor = () => {
               })
             }
           >
-            Set as Payment Received
+            <strong>Set as Payment Received</strong>
           </Button>
         )}
         <Button
@@ -99,6 +100,7 @@ const TradeVendor = () => {
         >
           Cancel
         </Button>
+        <Button onClick={() => replace('/vendors')}>Leave trade</Button>
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (

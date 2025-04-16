@@ -1,3 +1,7 @@
+import {
+  ETHEREUM_ESCROW_ADDRESS,
+  ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
+} from '@/constants/env';
 import type { IO, Socket, WalletAddress } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
@@ -11,10 +15,11 @@ import {
 import {
   depositByBuyer,
   depositBySeller,
+  getProvider,
+  getTradeDetails,
   initTrade,
 } from '@/services/blockchains/ethereum';
 
-import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
 import { parseEther } from 'ethers';
 
 export default class Chat {
@@ -55,9 +60,20 @@ export default class Chat {
                 traderWalletAddress: true,
                 vendorWalletAddress: true,
                 cryptocurrencyAmount: true,
+                trader: {
+                  select: {
+                    tier: {
+                      select: {
+                        tradingFee: true,
+                        discount: true,
+                      },
+                    },
+                  },
+                },
                 offer: {
                   select: {
                     timeLimit: true,
+                    offerType: true,
                   },
                 },
               },
@@ -101,40 +117,58 @@ export default class Chat {
             //   type: 'info',
             //   message: 'Vendor has entered the chat',
             // });
+
+            const buyer =
+              // @ts-ignore
+              chat.trade.offer.offerType === 'buy'
+                ? (updatedTrade.traderWalletAddress as WalletAddress)
+                : (updatedTrade.vendorWalletAddress as WalletAddress);
+            const seller =
+              // @ts-ignore
+              chat.trade.offer.offerType === 'buy'
+                ? (updatedTrade.vendorWalletAddress as WalletAddress)
+                : (updatedTrade.traderWalletAddress as WalletAddress);
             const cryptoAmountWei = parseEther(
+              // @ts-ignore
               chat.trade.cryptocurrencyAmount.toString(),
             ).toString();
+            // @ts-ignore
             const depositDuration = (chat.trade.offer.timeLimit * 60) / 4;
+            // @ts-ignore
             const confirmationDuration = (chat.trade.offer.timeLimit * 60) / 2;
+            // @ts-ignore
             const disputeTimeout = chat.trade.offer.timeLimit * 60 * 2;
-
-            console.log({
-              buyer: updatedTrade.traderWalletAddress as WalletAddress,
-              seller: updatedTrade.vendorWalletAddress as WalletAddress,
-              arbitrator: ETHEREUM_ESCROW_ADDRESS,
-              cryptoAmount: cryptoAmountWei,
-              buyerCollateral: '1000000000000000000',
-              sellerCollateral: '1000000000000000000',
-              depositDuration,
-              confirmationDuration,
-              disputeTimeout,
-              feeRate: 50,
-              platformWallet: ETHEREUM_ESCROW_ADDRESS,
-            });
+            const buyerCollateral = parseEther(
+              // @ts-ignore
+              (chat.trade.cryptocurrencyAmount * 0.25).toString(),
+            ).toString();
+            const sellerCollateral = parseEther(
+              // @ts-ignore
+              (chat.trade.cryptocurrencyAmount * 0.25).toString(),
+            ).toString();
+            const feeRate =
+              // @ts-ignore
+              (chat.trade.trader.tier.tradingFee -
+                // @ts-ignore
+                chat.trade.trader.tier.discount) *
+              1000;
 
             const tradeInitialized = await initTrade({
-              buyer: updatedTrade.traderWalletAddress as WalletAddress,
-              seller: updatedTrade.vendorWalletAddress as WalletAddress,
-              arbitrator: ETHEREUM_ESCROW_ADDRESS,
-              cryptoAmount: cryptoAmountWei,
+              buyer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // _buyer: the buyer's wallet address
+              seller: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // _seller: the seller's wallet address
+              arbitrator: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65', // _arbitrator: the designated arbitrator's address
+              cryptoAmount: '1000000000000000000',
               buyerCollateral: '1000000000000000000',
               sellerCollateral: '1000000000000000000',
-              depositDuration,
-              confirmationDuration,
-              disputeTimeout,
-              feeRate: 50,
-              platformWallet: ETHEREUM_ESCROW_ADDRESS,
+              depositDuration: 3600, // depositDuration: 1 hour
+              confirmationDuration: 7200, // _confirmationDuration: 2 hours
+              disputeTimeout: 14400, // _disputeTimeout: 4 hours
+              feeRate: 50, // _feeRate: 0.5% fee in basis points
+              platformWallet: '0x90F79bf6EB2c4f870365E785982E1f101E93b906', // _platformWallet: platform's wallet address
+              profitMargin: 50000000000000000n, // _profitMargin: 0.05 ETH in wei
             });
+
+            console.log({ tradeInitialized });
 
             if (tradeInitialized.message === 'Trade initialized') {
               await createChatMessage({
@@ -146,8 +180,16 @@ export default class Chat {
               });
               const depositedByBuyer =
                 await depositByBuyer(1000000000000000000n);
+              console.log({ depositedByBuyer });
               const depositedBySeller =
                 await depositBySeller(1000000000000000000n);
+              console.log({ depositedBySeller });
+
+              console.log({ Just: 'Before trade details' });
+
+              const tradeDetails = await getTradeDetails();
+
+              console.log({ tradeDetails });
 
               await createChatMessage({
                 chatId,

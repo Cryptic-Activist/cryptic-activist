@@ -124,7 +124,7 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
       <div className={styles.labelContentContainer}>
         <h3 className={styles.subHeading}>
           Follow the{' '}
-          <strong>{`${trade.vendor?.firstName} ${trade.vendor?.firstName}`}</strong>{' '}
+          <strong>{`${trade.vendor?.firstName} ${trade.vendor?.lastName}`}</strong>{' '}
           instructions
         </h3>
         <p className={styles.instructions}>{trade.offer?.instructions}</p>

@@ -44,6 +44,7 @@ export const initTrade = async (params: InitTradeParams) => {
     params.disputeTimeout,
     params.feeRate,
     params.platformWallet,
+    params.profitMargin,
   );
   await tx.wait();
   return { message: 'Trade initialized', txHash: tx.hash };
@@ -117,4 +118,12 @@ export const resolveDispute = async (
   const tx = await contract.resolveDispute(decision, penalizedParty);
   await tx.wait();
   return { message: 'Dispute resolved', txHash: tx.hash };
+};
+
+export const getTradeDetails = async () => {
+  const contract = getEscrowContract();
+  // Buyer deposits require sending value along with the transaction.
+  const tx = await contract.getTradeBasicDetails();
+  await tx.wait();
+  return { message: 'Trade details', txHash: tx.hash, details: tx };
 };

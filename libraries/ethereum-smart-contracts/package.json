@@ -2,13 +2,15 @@
   "name": "@cryptic-activist/ethereum-smart-contracts",
   "scripts": {
     "dev": "npx hardhat node",
-    "build:dev": "cd .. && cp -r ethereum-smart-contracts ../backend/libraries"
+    "build:dev": "cd .. && cp -r ethereum-smart-contracts ../backend/libraries",
+    "deploy": "./deploy.sh"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "hardhat": "^2.23.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.3.0"
+    "@openzeppelin/contracts": "^5.3.0",
+    "dotenv": "^16.5.0"
   }
 }
