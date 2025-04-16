@@ -13,11 +13,12 @@ import {
   updateUser,
 } from 'base-ca';
 import {
+  createTrade,
   depositByBuyer,
   depositBySeller,
+  getEscrowContract,
   getProvider,
   getTradeDetails,
-  initTrade,
 } from '@/services/blockchains/ethereum';
 
 import { parseEther } from 'ethers';
@@ -153,69 +154,84 @@ export default class Chat {
                 chat.trade.trader.tier.discount) *
               1000;
 
-            const tradeInitialized = await initTrade({
-              buyer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // _buyer: the buyer's wallet address
-              seller: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // _seller: the seller's wallet address
-              arbitrator: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65', // _arbitrator: the designated arbitrator's address
-              cryptoAmount: '1000000000000000000',
-              buyerCollateral: '1000000000000000000',
-              sellerCollateral: '1000000000000000000',
-              depositDuration: 3600, // depositDuration: 1 hour
-              confirmationDuration: 7200, // _confirmationDuration: 2 hours
-              disputeTimeout: 14400, // _disputeTimeout: 4 hours
-              feeRate: 50, // _feeRate: 0.5% fee in basis points
-              platformWallet: '0x90F79bf6EB2c4f870365E785982E1f101E93b906', // _platformWallet: platform's wallet address
-              profitMargin: 50000000000000000n, // _profitMargin: 0.05 ETH in wei
+            const contract = getEscrowContract();
+            console.log({ contract });
+
+            const tradeCreated = await createTrade({
+              buyer: '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4',
+              seller: '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2',
+              arbitrator: '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db',
+              cryptoAmount: parseEther('1.5'),
+              buyerCollateral: parseEther('0.3'),
+              sellerCollateral: parseEther('0.3'),
+              feeRate: 150,
+              tradeDuration: 86400,
+              profitMargin: 250,
             });
 
-            console.log({ tradeInitialized });
+            console.log({ tradeCreated });
 
-            if (tradeInitialized.message === 'Trade initialized') {
-              await createChatMessage({
-                chatId,
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: tradeInitialized.message,
-              });
-              const depositedByBuyer =
-                await depositByBuyer(1000000000000000000n);
-              console.log({ depositedByBuyer });
-              const depositedBySeller =
-                await depositBySeller(1000000000000000000n);
-              console.log({ depositedBySeller });
+            // const tradeCreated = await createTrade({
+            //   buyer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // _buyer: the buyer's wallet address
+            //   seller: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // _seller: the seller's wallet address
+            //   arbitrator: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65', // _arbitrator: the designated arbitrator's address
+            //   platformWallet: '0x90F79bf6EB2c4f870365E785982E1f101E93b906', // _platformWallet: platform's wallet address
+            //   cryptoAmount: '3',
+            //   buyerCollateral: '1',
+            //   sellerCollateral: '1',
+            //   feeRate: 200, // _feeRate: 2% fee in basis points
+            //   profitMargin: 250, // _profitMargin: 0.05 ETH in wei
+            //   tradeDuration: 3600,
+            // });
 
-              console.log({ Just: 'Before trade details' });
+            // console.log({ tradeCreated });
 
-              const tradeDetails = await getTradeDetails();
+            // if (tradeInitialized.message === 'Trade initialized') {
+            //   await createChatMessage({
+            //     chatId,
+            //     from: 'none',
+            //     to: 'none',
+            //     type: 'info',
+            //     message: tradeInitialized.message,
+            //   });
+            //   // const depositedByBuyer =
+            //   //   await depositByBuyer(1000000000000000000n);
+            //   // console.log({ depositedByBuyer });
+            //   // const depositedBySeller =
+            //   //   await depositBySeller(1000000000000000000n);
+            //   // console.log({ depositedBySeller });
 
-              console.log({ tradeDetails });
+            //   // console.log({ Just: 'Before trade details' });
 
-              await createChatMessage({
-                chatId,
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: depositedByBuyer.message,
-              });
-              await createChatMessage({
-                chatId,
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: depositedBySeller.message,
-              });
+            //   // const tradeDetails = await getTradeDetails();
 
-              await updateTrade({
-                where: {
-                  // @ts-ignore
-                  id: chat?.trade.id,
-                },
-                toUpdate: {
-                  status: 'IN_PROGRESS',
-                },
-              });
-            }
+            //   // console.log({ tradeDetails });
+
+            //   // await createChatMessage({
+            //   //   chatId,
+            //   //   from: 'none',
+            //   //   to: 'none',
+            //   //   type: 'info',
+            //   //   message: depositedByBuyer.message,
+            //   // });
+            //   // await createChatMessage({
+            //   //   chatId,
+            //   //   from: 'none',
+            //   //   to: 'none',
+            //   //   type: 'info',
+            //   //   message: depositedBySeller.message,
+            //   // });
+
+            //   await updateTrade({
+            //     where: {
+            //       // @ts-ignore
+            //       id: chat?.trade.id,
+            //     },
+            //     toUpdate: {
+            //       status: 'IN_PROGRESS',
+            //     },
+            //   });
+            // }
           }
         }
 

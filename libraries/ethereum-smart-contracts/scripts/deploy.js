@@ -1,36 +1,74 @@
-const { ethers } = require("hardhat");
+// scripts/deploy-multi-escrow.js
+const hre = require("hardhat");
 
 async function main() {
-  // Get the deployer account
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Starting deployment of MultiTradeEscrow contract...");
+
+  // Get deployer account
+  const [deployer] = await hre.ethers.getSigners();
+  console.log(`Deploying contracts with the account: ${deployer.address}`);
 
   // Check deployer balance
-  const balance = await ethers.provider.getBalance(deployer.address);
-  console.log("Deployer balance:", ethers.formatEther(balance), "ETH");
+  const balance = await deployer.provider.getBalance(deployer.address);
+  console.log(`Account balance: ${hre.ethers.formatEther(balance)} ETH`);
 
-  // Get the Escrow contract factory
-  const Escrow = await ethers.getContractFactory("Escrow");
+  // Deployment parameters
+  const params = {
+    platformWallet: "0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB",
+    defaultFeeRate: 150, // 1.5% platform fee
+    defaultProfitMargin: 250, // 2.5% profit margin
+  };
 
-  // Deploy the Escrow contract
-  console.log("Deploying Escrow contract...");
-  const escrow = await Escrow.deploy();
+  // Deploy the contract
+  const MultiTradeEscrow = await hre.ethers.getContractFactory(
+    "MultiTradeEscrow"
+  );
+  const escrow = await MultiTradeEscrow.deploy(
+    params.platformWallet,
+    params.defaultFeeRate,
+    params.defaultProfitMargin
+  );
 
-  // Wait for the contract to be deployed
   await escrow.waitForDeployment();
-
-  // Get the deployed contract address
   const escrowAddress = await escrow.getAddress();
-  console.log("Escrow contract address:", escrowAddress);
+  console.log(`MultiTradeEscrow deployed to: ${escrowAddress}`);
 
-  // Verify the contract owner (optional)
-  const owner = await escrow.owner();
-  console.log("Contract owner:", owner);
+  // Verify contract on Etherscan (if on supported network)
+  if (network.name !== "hardhat" && network.name !== "localhost") {
+    console.log("Waiting for block confirmations...");
+    await escrow.deploymentTransaction().wait(6); // wait for 6 confirmations
+
+    console.log("Verifying contract on Etherscan...");
+    try {
+      await hre.run("verify:verify", {
+        address: escrowAddress,
+        constructorArguments: [
+          params.platformWallet,
+          params.defaultFeeRate,
+          params.defaultProfitMargin,
+        ],
+      });
+      console.log("Contract verified on Etherscan");
+    } catch (error) {
+      console.error("Error verifying contract:", error);
+    }
+  }
+
+  // Return deployment info
+  return {
+    escrowAddress: escrowAddress,
+    deployerAddress: deployer.address,
+    params: params,
+  };
 }
 
 main()
-  .then(() => process.exit(0))
+  .then((deployInfo) => {
+    console.log("Deployment completed successfully!");
+    console.log(JSON.stringify(deployInfo, null, 2));
+    process.exit(0);
+  })
   .catch((error) => {
-    console.error("Deployment failed:", error);
+    console.error(error);
     process.exit(1);
   });
