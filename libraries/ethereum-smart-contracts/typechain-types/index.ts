@@ -8,5 +8,5 @@ export type { contracts };
 export * as factories from "./factories";
 export type { Ownable } from "./@openzeppelin/contracts/access/Ownable";
 export { Ownable__factory } from "./factories/@openzeppelin/contracts/access/Ownable__factory";
-export type { Escrow } from "./contracts/Escrow";
-export { Escrow__factory } from "./factories/contracts/Escrow__factory";
+export type { MultiTradeEscrow } from "./contracts/MultiTradeEscrow";
+export { MultiTradeEscrow__factory } from "./factories/contracts/MultiTradeEscrow__factory";

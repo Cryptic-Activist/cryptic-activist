@@ -23,27 +23,26 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export interface EscrowInterface extends Interface {
+export interface MultiTradeEscrowInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "DISPUTE_PERIOD"
-      | "arbitrator"
-      | "buyer"
-      | "buyerCollateral"
       | "cancelTrade"
       | "confirmTrade"
-      | "cryptoAmount"
+      | "createTrade"
+      | "defaultFeeRate"
+      | "defaultProfitMargin"
       | "disputeTrade"
-      | "feeRate"
       | "fundTrade"
-      | "getBalance"
+      | "getContractBalance"
+      | "getTrade"
+      | "owner"
       | "platformWallet"
-      | "profitMargin"
       | "resolveDispute"
-      | "seller"
-      | "sellerCollateral"
-      | "state"
-      | "tradeDeadline"
+      | "tradeCount"
+      | "trades"
+      | "updateDefaultFeeRate"
+      | "updateDefaultProfitMargin"
+      | "updatePlatformWallet"
   ): FunctionFragment;
 
   getEvent(
@@ -58,74 +57,82 @@ export interface EscrowInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "DISPUTE_PERIOD",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "arbitrator",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "buyer", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "buyerCollateral",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "cancelTrade",
-    values?: undefined
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "confirmTrade",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createTrade",
+    values: [
+      AddressLike,
+      AddressLike,
+      AddressLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "defaultFeeRate",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "cryptoAmount",
+    functionFragment: "defaultProfitMargin",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "disputeTrade",
-    values?: undefined
+    values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "feeRate", values?: undefined): string;
-  encodeFunctionData(functionFragment: "fundTrade", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getBalance",
+    functionFragment: "fundTrade",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getContractBalance",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "getTrade",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "platformWallet",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "profitMargin",
+    functionFragment: "resolveDispute",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "tradeCount",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "resolveDispute",
+    functionFragment: "trades",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "seller", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "sellerCollateral",
-    values?: undefined
+    functionFragment: "updateDefaultFeeRate",
+    values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "state", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "tradeDeadline",
-    values?: undefined
+    functionFragment: "updateDefaultProfitMargin",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updatePlatformWallet",
+    values: [AddressLike]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "DISPUTE_PERIOD",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "arbitrator", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "buyer", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "buyerCollateral",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "cancelTrade",
     data: BytesLike
   ): Result;
@@ -134,52 +141,67 @@ export interface EscrowInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "cryptoAmount",
+    functionFragment: "createTrade",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "defaultFeeRate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "defaultProfitMargin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "disputeTrade",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "feeRate", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "fundTrade", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getBalance", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "platformWallet",
+    functionFragment: "getContractBalance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getTrade", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "profitMargin",
+    functionFragment: "platformWallet",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "resolveDispute",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "seller", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "tradeCount", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "trades", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "sellerCollateral",
+    functionFragment: "updateDefaultFeeRate",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "tradeDeadline",
+    functionFragment: "updateDefaultProfitMargin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updatePlatformWallet",
     data: BytesLike
   ): Result;
 }
 
 export namespace ArbitrationResolvedEvent {
   export type InputTuple = [
+    tradeId: BigNumberish,
     winner: AddressLike,
     buyerAmount: BigNumberish,
     sellerAmount: BigNumberish
   ];
   export type OutputTuple = [
+    tradeId: bigint,
     winner: string,
     buyerAmount: bigint,
     sellerAmount: bigint
   ];
   export interface OutputObject {
+    tradeId: bigint;
     winner: string;
     buyerAmount: bigint;
     sellerAmount: bigint;
@@ -191,9 +213,11 @@ export namespace ArbitrationResolvedEvent {
 }
 
 export namespace TradeCancelledEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
+  export type InputTuple = [tradeId: BigNumberish];
+  export type OutputTuple = [tradeId: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
+  }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
   export type Log = TypedEventLog<Event>;
@@ -201,9 +225,11 @@ export namespace TradeCancelledEvent {
 }
 
 export namespace TradeCompletedEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
+  export type InputTuple = [tradeId: BigNumberish];
+  export type OutputTuple = [tradeId: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
+  }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
   export type Log = TypedEventLog<Event>;
@@ -211,9 +237,11 @@ export namespace TradeCompletedEvent {
 }
 
 export namespace TradeConfirmedEvent {
-  export type InputTuple = [];
-  export type OutputTuple = [];
-  export interface OutputObject {}
+  export type InputTuple = [tradeId: BigNumberish];
+  export type OutputTuple = [tradeId: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
+  }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
   export type Log = TypedEventLog<Event>;
@@ -222,12 +250,19 @@ export namespace TradeConfirmedEvent {
 
 export namespace TradeCreatedEvent {
   export type InputTuple = [
+    tradeId: BigNumberish,
     buyer: AddressLike,
     seller: AddressLike,
     amount: BigNumberish
   ];
-  export type OutputTuple = [buyer: string, seller: string, amount: bigint];
+  export type OutputTuple = [
+    tradeId: bigint,
+    buyer: string,
+    seller: string,
+    amount: bigint
+  ];
   export interface OutputObject {
+    tradeId: bigint;
     buyer: string;
     seller: string;
     amount: bigint;
@@ -239,9 +274,10 @@ export namespace TradeCreatedEvent {
 }
 
 export namespace TradeDisputedEvent {
-  export type InputTuple = [initiator: AddressLike];
-  export type OutputTuple = [initiator: string];
+  export type InputTuple = [tradeId: BigNumberish, initiator: AddressLike];
+  export type OutputTuple = [tradeId: bigint, initiator: string];
   export interface OutputObject {
+    tradeId: bigint;
     initiator: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -252,11 +288,17 @@ export namespace TradeDisputedEvent {
 
 export namespace TradeFundedEvent {
   export type InputTuple = [
+    tradeId: BigNumberish,
     amount: BigNumberish,
     sellerCollateral: BigNumberish
   ];
-  export type OutputTuple = [amount: bigint, sellerCollateral: bigint];
+  export type OutputTuple = [
+    tradeId: bigint,
+    amount: bigint,
+    sellerCollateral: bigint
+  ];
   export interface OutputObject {
+    tradeId: bigint;
     amount: bigint;
     sellerCollateral: bigint;
   }
@@ -266,11 +308,11 @@ export namespace TradeFundedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface Escrow extends BaseContract {
-  connect(runner?: ContractRunner | null): Escrow;
+export interface MultiTradeEscrow extends BaseContract {
+  connect(runner?: ContractRunner | null): MultiTradeEscrow;
   waitForDeployment(): Promise<this>;
 
-  interface: EscrowInterface;
+  interface: MultiTradeEscrowInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -309,104 +351,279 @@ export interface Escrow extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  DISPUTE_PERIOD: TypedContractMethod<[], [bigint], "view">;
-
-  arbitrator: TypedContractMethod<[], [string], "view">;
-
-  buyer: TypedContractMethod<[], [string], "view">;
-
-  buyerCollateral: TypedContractMethod<[], [bigint], "view">;
-
-  cancelTrade: TypedContractMethod<[], [void], "nonpayable">;
-
-  confirmTrade: TypedContractMethod<[], [void], "payable">;
-
-  cryptoAmount: TypedContractMethod<[], [bigint], "view">;
-
-  disputeTrade: TypedContractMethod<[], [void], "nonpayable">;
-
-  feeRate: TypedContractMethod<[], [bigint], "view">;
-
-  fundTrade: TypedContractMethod<[], [void], "payable">;
-
-  getBalance: TypedContractMethod<[], [bigint], "view">;
-
-  platformWallet: TypedContractMethod<[], [string], "view">;
-
-  profitMargin: TypedContractMethod<[], [bigint], "view">;
-
-  resolveDispute: TypedContractMethod<
-    [buyerPercentage: BigNumberish],
+  cancelTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  seller: TypedContractMethod<[], [string], "view">;
+  confirmTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "payable"
+  >;
 
-  sellerCollateral: TypedContractMethod<[], [bigint], "view">;
+  createTrade: TypedContractMethod<
+    [
+      _buyer: AddressLike,
+      _seller: AddressLike,
+      _arbitrator: AddressLike,
+      _cryptoAmount: BigNumberish,
+      _buyerCollateral: BigNumberish,
+      _sellerCollateral: BigNumberish,
+      _tradeDuration: BigNumberish,
+      _feeRate: BigNumberish,
+      _profitMargin: BigNumberish
+    ],
+    [bigint],
+    "nonpayable"
+  >;
 
-  state: TypedContractMethod<[], [bigint], "view">;
+  defaultFeeRate: TypedContractMethod<[], [bigint], "view">;
 
-  tradeDeadline: TypedContractMethod<[], [bigint], "view">;
+  defaultProfitMargin: TypedContractMethod<[], [bigint], "view">;
+
+  disputeTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  fundTrade: TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+
+  getContractBalance: TypedContractMethod<[], [bigint], "view">;
+
+  getTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [
+      [
+        string,
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        buyer: string;
+        seller: string;
+        arbitrator: string;
+        cryptoAmount: bigint;
+        buyerCollateral: bigint;
+        sellerCollateral: bigint;
+        feeRate: bigint;
+        profitMargin: bigint;
+        tradeDeadline: bigint;
+        state: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  platformWallet: TypedContractMethod<[], [string], "view">;
+
+  resolveDispute: TypedContractMethod<
+    [_tradeId: BigNumberish, buyerPercentage: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  tradeCount: TypedContractMethod<[], [bigint], "view">;
+
+  trades: TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [
+        bigint,
+        string,
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        id: bigint;
+        buyer: string;
+        seller: string;
+        arbitrator: string;
+        cryptoAmount: bigint;
+        buyerCollateral: bigint;
+        sellerCollateral: bigint;
+        feeRate: bigint;
+        profitMargin: bigint;
+        tradeDeadline: bigint;
+        state: bigint;
+      }
+    ],
+    "view"
+  >;
+
+  updateDefaultFeeRate: TypedContractMethod<
+    [_newFeeRate: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  updateDefaultProfitMargin: TypedContractMethod<
+    [_newProfitMargin: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  updatePlatformWallet: TypedContractMethod<
+    [_newPlatformWallet: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
-    nameOrSignature: "DISPUTE_PERIOD"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "arbitrator"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "buyer"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "buyerCollateral"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "cancelTrade"
-  ): TypedContractMethod<[], [void], "nonpayable">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "confirmTrade"
-  ): TypedContractMethod<[], [void], "payable">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
   getFunction(
-    nameOrSignature: "cryptoAmount"
+    nameOrSignature: "createTrade"
+  ): TypedContractMethod<
+    [
+      _buyer: AddressLike,
+      _seller: AddressLike,
+      _arbitrator: AddressLike,
+      _cryptoAmount: BigNumberish,
+      _buyerCollateral: BigNumberish,
+      _sellerCollateral: BigNumberish,
+      _tradeDuration: BigNumberish,
+      _feeRate: BigNumberish,
+      _profitMargin: BigNumberish
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "defaultFeeRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "defaultProfitMargin"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "disputeTrade"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "feeRate"
-  ): TypedContractMethod<[], [bigint], "view">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "fundTrade"
-  ): TypedContractMethod<[], [void], "payable">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
   getFunction(
-    nameOrSignature: "getBalance"
+    nameOrSignature: "getContractBalance"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getTrade"
+  ): TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [
+      [
+        string,
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        buyer: string;
+        seller: string;
+        arbitrator: string;
+        cryptoAmount: bigint;
+        buyerCollateral: bigint;
+        sellerCollateral: bigint;
+        feeRate: bigint;
+        profitMargin: bigint;
+        tradeDeadline: bigint;
+        state: bigint;
+      }
+    ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "platformWallet"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "profitMargin"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "resolveDispute"
-  ): TypedContractMethod<[buyerPercentage: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [_tradeId: BigNumberish, buyerPercentage: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
-    nameOrSignature: "seller"
-  ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "sellerCollateral"
+    nameOrSignature: "tradeCount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "state"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "trades"
+  ): TypedContractMethod<
+    [arg0: BigNumberish],
+    [
+      [
+        bigint,
+        string,
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ] & {
+        id: bigint;
+        buyer: string;
+        seller: string;
+        arbitrator: string;
+        cryptoAmount: bigint;
+        buyerCollateral: bigint;
+        sellerCollateral: bigint;
+        feeRate: bigint;
+        profitMargin: bigint;
+        tradeDeadline: bigint;
+        state: bigint;
+      }
+    ],
+    "view"
+  >;
   getFunction(
-    nameOrSignature: "tradeDeadline"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "updateDefaultFeeRate"
+  ): TypedContractMethod<[_newFeeRate: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateDefaultProfitMargin"
+  ): TypedContractMethod<
+    [_newProfitMargin: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "updatePlatformWallet"
+  ): TypedContractMethod<
+    [_newPlatformWallet: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
   getEvent(
     key: "ArbitrationResolved"
@@ -459,7 +676,7 @@ export interface Escrow extends BaseContract {
   >;
 
   filters: {
-    "ArbitrationResolved(address,uint256,uint256)": TypedContractEvent<
+    "ArbitrationResolved(uint256,address,uint256,uint256)": TypedContractEvent<
       ArbitrationResolvedEvent.InputTuple,
       ArbitrationResolvedEvent.OutputTuple,
       ArbitrationResolvedEvent.OutputObject
@@ -470,7 +687,7 @@ export interface Escrow extends BaseContract {
       ArbitrationResolvedEvent.OutputObject
     >;
 
-    "TradeCancelled()": TypedContractEvent<
+    "TradeCancelled(uint256)": TypedContractEvent<
       TradeCancelledEvent.InputTuple,
       TradeCancelledEvent.OutputTuple,
       TradeCancelledEvent.OutputObject
@@ -481,7 +698,7 @@ export interface Escrow extends BaseContract {
       TradeCancelledEvent.OutputObject
     >;
 
-    "TradeCompleted()": TypedContractEvent<
+    "TradeCompleted(uint256)": TypedContractEvent<
       TradeCompletedEvent.InputTuple,
       TradeCompletedEvent.OutputTuple,
       TradeCompletedEvent.OutputObject
@@ -492,7 +709,7 @@ export interface Escrow extends BaseContract {
       TradeCompletedEvent.OutputObject
     >;
 
-    "TradeConfirmed()": TypedContractEvent<
+    "TradeConfirmed(uint256)": TypedContractEvent<
       TradeConfirmedEvent.InputTuple,
       TradeConfirmedEvent.OutputTuple,
       TradeConfirmedEvent.OutputObject
@@ -503,7 +720,7 @@ export interface Escrow extends BaseContract {
       TradeConfirmedEvent.OutputObject
     >;
 
-    "TradeCreated(address,address,uint256)": TypedContractEvent<
+    "TradeCreated(uint256,address,address,uint256)": TypedContractEvent<
       TradeCreatedEvent.InputTuple,
       TradeCreatedEvent.OutputTuple,
       TradeCreatedEvent.OutputObject
@@ -514,7 +731,7 @@ export interface Escrow extends BaseContract {
       TradeCreatedEvent.OutputObject
     >;
 
-    "TradeDisputed(address)": TypedContractEvent<
+    "TradeDisputed(uint256,address)": TypedContractEvent<
       TradeDisputedEvent.InputTuple,
       TradeDisputedEvent.OutputTuple,
       TradeDisputedEvent.OutputObject
@@ -525,7 +742,7 @@ export interface Escrow extends BaseContract {
       TradeDisputedEvent.OutputObject
     >;
 
-    "TradeFunded(uint256,uint256)": TypedContractEvent<
+    "TradeFunded(uint256,uint256,uint256)": TypedContractEvent<
       TradeFundedEvent.InputTuple,
       TradeFundedEvent.OutputTuple,
       TradeFundedEvent.OutputObject

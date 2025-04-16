@@ -6,7 +6,7 @@ import {
 
 import { InitTradeParams } from './types';
 // Import the ABI that Truffle generated (e.g., from build/contracts/Escrow.json)
-import escrowArtifact from '@/contracts/ethereum/Escrow.json';
+import escrowArtifact from '@/contracts/ethereum/MultiTradeEscrow.json';
 import { ethers } from 'ethers';
 
 export const getProvider = () => {
@@ -29,25 +29,36 @@ export const getEscrowContract = () => {
   );
 };
 
-export const initTrade = async (params: InitTradeParams) => {
-  const contract = getEscrowContract();
+export const getContractFactory = () => {
+  const signer = getSigner();
+  const factory = new ethers.ContractFactory(
+    escrowArtifact.abi,
+    escrowArtifact.bytecode,
+    signer,
+  );
+  return factory;
+};
 
-  const tx = await contract.initTrade(
+export const createTrade = async (params: InitTradeParams) => {
+  const contract = getContractFactory();
+
+  console.log({ params });
+
+  const escrow = await contract.deploy(
     params.buyer,
     params.seller,
     params.arbitrator,
     params.cryptoAmount,
     params.buyerCollateral,
     params.sellerCollateral,
-    params.depositDuration,
-    params.confirmationDuration,
-    params.disputeTimeout,
+    params.tradeDuration,
     params.feeRate,
-    params.platformWallet,
     params.profitMargin,
   );
-  await tx.wait();
-  return { message: 'Trade initialized', txHash: tx.hash };
+
+  console.log(`Escrow deployed to: ${escrow.target}`);
+
+  return { escrow };
 };
 
 export const depositByBuyer = async (value: bigint) => {

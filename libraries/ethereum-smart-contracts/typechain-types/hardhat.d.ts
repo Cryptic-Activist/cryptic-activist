@@ -18,9 +18,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
-      name: "Escrow",
+      name: "MultiTradeEscrow",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Escrow__factory>;
+    ): Promise<Contracts.MultiTradeEscrow__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -28,19 +28,19 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
     getContractAt(
-      name: "Escrow",
+      name: "MultiTradeEscrow",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.Escrow>;
+    ): Promise<Contracts.MultiTradeEscrow>;
 
     deployContract(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
     deployContract(
-      name: "Escrow",
+      name: "MultiTradeEscrow",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Escrow>;
+    ): Promise<Contracts.MultiTradeEscrow>;
 
     deployContract(
       name: "Ownable",
@@ -48,10 +48,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
     deployContract(
-      name: "Escrow",
+      name: "MultiTradeEscrow",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Escrow>;
+    ): Promise<Contracts.MultiTradeEscrow>;
 
     // default types
     getContractFactory(
