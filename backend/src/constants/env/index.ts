@@ -34,3 +34,5 @@ export const ETHEREUM_ESCROW_ADDRESS = process.env
   .ETHEREUM_ESCROW_ADDRESS as `0x${string}`;
 export const ETHEREUM_ESCROW_PRIVATE_KEY = process.env
   .ETHEREUM_ESCROW_PRIVATE_KEY as `0x${string}`;
+export const ETHEREUM_ESCROW_ARBITRATOR_ADDRESS = process.env
+  .ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as `0x${string}`;

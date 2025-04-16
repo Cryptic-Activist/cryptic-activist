@@ -45,9 +45,11 @@ export interface EscrowInterface extends Interface {
       | "feeRate"
       | "fiatReceivedConfirmed"
       | "fiatSentConfirmed"
+      | "getTradeBasicDetails"
       | "initTrade"
       | "owner"
       | "platformWallet"
+      | "profitMargin"
       | "raiseDispute"
       | "releaseTrade"
       | "renounceOwnership"
@@ -148,6 +150,10 @@ export interface EscrowInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getTradeBasicDetails",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "initTrade",
     values: [
       AddressLike,
@@ -160,12 +166,17 @@ export interface EscrowInterface extends Interface {
       BigNumberish,
       BigNumberish,
       BigNumberish,
-      AddressLike
+      AddressLike,
+      BigNumberish
     ]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "platformWallet",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "profitMargin",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -277,10 +288,18 @@ export interface EscrowInterface extends Interface {
     functionFragment: "fiatSentConfirmed",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTradeBasicDetails",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "initTrade", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "platformWallet",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "profitMargin",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -460,7 +479,8 @@ export namespace TradeInitializedEvent {
     confirmationDuration: BigNumberish,
     disputeTimeout: BigNumberish,
     feeRate: BigNumberish,
-    platformWallet: AddressLike
+    platformWallet: AddressLike,
+    profitMargin: BigNumberish
   ];
   export type OutputTuple = [
     buyer: string,
@@ -470,7 +490,8 @@ export namespace TradeInitializedEvent {
     confirmationDuration: bigint,
     disputeTimeout: bigint,
     feeRate: bigint,
-    platformWallet: string
+    platformWallet: string,
+    profitMargin: bigint
   ];
   export interface OutputObject {
     buyer: string;
@@ -481,6 +502,7 @@ export namespace TradeInitializedEvent {
     disputeTimeout: bigint;
     feeRate: bigint;
     platformWallet: string;
+    profitMargin: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -591,6 +613,8 @@ export interface Escrow extends BaseContract {
 
   fiatSentConfirmed: TypedContractMethod<[], [boolean], "view">;
 
+  getTradeBasicDetails: TypedContractMethod<[], [bigint], "view">;
+
   initTrade: TypedContractMethod<
     [
       _buyer: AddressLike,
@@ -603,7 +627,8 @@ export interface Escrow extends BaseContract {
       _confirmationDuration: BigNumberish,
       _disputeTimeout: BigNumberish,
       _feeRate: BigNumberish,
-      _platformWallet: AddressLike
+      _platformWallet: AddressLike,
+      _profitMargin: BigNumberish
     ],
     [void],
     "nonpayable"
@@ -612,6 +637,8 @@ export interface Escrow extends BaseContract {
   owner: TypedContractMethod<[], [string], "view">;
 
   platformWallet: TypedContractMethod<[], [string], "view">;
+
+  profitMargin: TypedContractMethod<[], [bigint], "view">;
 
   raiseDispute: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -713,6 +740,9 @@ export interface Escrow extends BaseContract {
     nameOrSignature: "fiatSentConfirmed"
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
+    nameOrSignature: "getTradeBasicDetails"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "initTrade"
   ): TypedContractMethod<
     [
@@ -726,7 +756,8 @@ export interface Escrow extends BaseContract {
       _confirmationDuration: BigNumberish,
       _disputeTimeout: BigNumberish,
       _feeRate: BigNumberish,
-      _platformWallet: AddressLike
+      _platformWallet: AddressLike,
+      _profitMargin: BigNumberish
     ],
     [void],
     "nonpayable"
@@ -737,6 +768,9 @@ export interface Escrow extends BaseContract {
   getFunction(
     nameOrSignature: "platformWallet"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "profitMargin"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "raiseDispute"
   ): TypedContractMethod<[], [void], "nonpayable">;
@@ -975,7 +1009,7 @@ export interface Escrow extends BaseContract {
       TradeCancelledEvent.OutputObject
     >;
 
-    "TradeInitialized(address,address,address,uint256,uint256,uint256,uint256,address)": TypedContractEvent<
+    "TradeInitialized(address,address,address,uint256,uint256,uint256,uint256,address,uint256)": TypedContractEvent<
       TradeInitializedEvent.InputTuple,
       TradeInitializedEvent.OutputTuple,
       TradeInitializedEvent.OutputObject

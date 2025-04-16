@@ -12,4 +12,5 @@ export type InitTradeParams = {
   disputeTimeout: number;
   feeRate: number;
   platformWallet: Address;
+  profitMargin: bigint;
 };

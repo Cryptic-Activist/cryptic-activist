@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -10,17 +10,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * This contract is deployed only once and reused for each trade. For each new trade,
  * the owner initializes trade-specific parameters via initTrade(), dynamically setting:
  *   - Buyer, Seller, and arbitrator addresses.
- *   - Trade amounts (crypto amount, buyer collateral, and seller collateral).
+ *   - Trade amounts (cryptoAmount, buyerCollateral, and sellerCollateral).
  *   - Duration parameters (deposit duration, confirmation duration, dispute timeout).
- *   - Fee parameters (fee rate in basis points and platform wallet).
+ *   - Fee parameters (fee rate in basis points, platform wallet, and an additional profitMargin).
  *
- * Features:
- *  - Buyer and Seller deposits with collateral, with deposit and confirmation deadlines.
- *  - Off-chain fiat payment confirmations.
- *  - Timeout mechanism: if deposits or confirmations are not received on time, the trade may be cancelled.
- *  - Dispute resolution process, with a dispute timeout and escalation option.
- *  - Reentrancy protection using a simple lock.
- *  - Trading fee: A dynamic fee deducted from the crypto amount is sent to a platform wallet upon trade release.
+ * In this design:
+ *  - The seller must deposit: cryptoAmount + sellerCollateral + feeTotal,
+ *    where feeTotal = (cryptoAmount * feeRate/10000) + profitMargin.
+ *  - The buyer deposits buyerCollateral.
+ *
+ * Upon a successful trade release:
+ *  - The buyer receives their full collateral back, plus the full cryptoAmount.
+ *    (Thus, their balance increases by exactly cryptoAmount.)
+ *  - The platform receives feeTotal.
+ *  - The seller receives only their sellerCollateral.
+ *
+ * This means that the seller effectively pays the trade value plus fees, and the buyer’s net gain is the full trade amount.
  */
 contract Escrow is Ownable {
     // Dynamic trade participants and parameters (set during trade initialization)
@@ -29,11 +34,14 @@ contract Escrow is Ownable {
     address public arbitrator;
     address public platformWallet;
     uint256 public feeRate; // in basis points, e.g., 50 means 0.5%
+    
+    // Additional profit margin (in wei) collected from the seller's deposit.
+    uint256 public profitMargin;
 
     // Trade amounts (in wei) for the current trade.
-    uint256 public cryptoAmount;      
-    uint256 public buyerCollateral;   
-    uint256 public sellerCollateral;  
+    uint256 public cryptoAmount;      // The crypto trade value (intended for buyer)
+    uint256 public buyerCollateral;   // The buyer's collateral deposit.
+    uint256 public sellerCollateral;  // The seller's collateral deposit.
 
     // Trade-specific deadlines.
     uint256 public depositDeadline;
@@ -79,7 +87,8 @@ contract Escrow is Ownable {
         uint256 confirmationDuration,
         uint256 disputeTimeout,
         uint256 feeRate,
-        address platformWallet
+        address platformWallet,
+        uint256 profitMargin
     );
     event Deposited(address indexed party, uint256 amount);
     event FiatSentConfirmed(address indexed buyer);
@@ -94,7 +103,7 @@ contract Escrow is Ownable {
     event FeeUpdated(uint256 newFeeRate, address newPlatformWallet);
 
     /**
-     * @notice Constructor initializes the Ownable base with the deployer's address.
+     * @notice Constructor initializes the Ownable base.
      * Initially, no trade is active.
      */
     constructor() Ownable(msg.sender) {
@@ -126,20 +135,23 @@ contract Escrow is Ownable {
      * @notice Initializes a new trade with dynamic parameters.
      *
      * Requirements:
-     *   - Only the owner (platform) may call this.
-     *   - No trade is currently active (the previous trade is COMPLETE, CANCELLED, or not yet initialized).
+     *   - Only the owner may call this.
+     *   - No trade is currently active (previous trade is COMPLETE, CANCELLED, or not yet initialized).
+     *   - Note: The seller must eventually deposit (cryptoAmount + sellerCollateral + feeTotal),
+     *           where feeTotal = (cryptoAmount * feeRate/10000) + profitMargin.
      *
      * @param _buyer The crypto buyer for this trade.
      * @param _seller The crypto seller for this trade.
      * @param _arbitrator The arbitrator for this trade.
-     * @param _cryptoAmount The crypto amount (in wei) deposited by the seller.
+     * @param _cryptoAmount The trade value (in wei) that the seller provides for the buyer.
      * @param _buyerCollateral The buyer's collateral (in wei).
      * @param _sellerCollateral The seller's collateral (in wei).
      * @param depositDuration Duration (in seconds) until deposits must be complete.
      * @param _confirmationDuration Duration (in seconds) for fiat confirmations after deposits.
      * @param _disputeTimeout Duration (in seconds) for arbitrator dispute resolution.
-     * @param _feeRate The fee rate (in basis points) for this trade.
-     * @param _platformWallet The platform wallet address for this trade.
+     * @param _feeRate The fee rate (in basis points) to apply to cryptoAmount.
+     * @param _platformWallet The platform wallet address for fee collection.
+     * @param _profitMargin The additional profit margin (in wei) to be collected from the seller.
      */
     function initTrade(
         address payable _buyer,
@@ -152,7 +164,8 @@ contract Escrow is Ownable {
         uint256 _confirmationDuration,
         uint256 _disputeTimeout,
         uint256 _feeRate,
-        address _platformWallet
+        address _platformWallet,
+        uint256 _profitMargin
     ) external onlyOwner {
         require(
             tradeState == State.COMPLETE ||
@@ -160,6 +173,7 @@ contract Escrow is Ownable {
             tradeState == State.AWAITING_TRADE_INIT,
             "Existing trade in progress"
         );
+        // (Assume buyerCollateral is validated externally to cover any margin if needed.)
         buyer = _buyer;
         seller = _seller;
         arbitrator = _arbitrator;
@@ -171,13 +185,14 @@ contract Escrow is Ownable {
         disputeTimeout = _disputeTimeout;
         feeRate = _feeRate;
         platformWallet = _platformWallet;
+        profitMargin = _profitMargin;
         // Reset trade flags.
         buyerDeposited = false;
         sellerDeposited = false;
         fiatSentConfirmed = false;
         fiatReceivedConfirmed = false;
         tradeState = State.AWAITING_DEPOSITS;
-        emit TradeInitialized(_buyer, _seller, _arbitrator, depositDeadline, _confirmationDuration, _disputeTimeout, _feeRate, _platformWallet);
+        emit TradeInitialized(_buyer, _seller, _arbitrator, depositDeadline, _confirmationDuration, _disputeTimeout, _feeRate, _platformWallet, _profitMargin);
     }
 
     /**
@@ -196,15 +211,20 @@ contract Escrow is Ownable {
     }
 
     /**
-     * @notice Seller deposits the crypto amount plus his collateral.
+     * @notice Seller deposits the crypto amount plus his collateral plus fee & profit.
+     * The seller must deposit: cryptoAmount + sellerCollateral + feeTotal,
+     * where feeTotal = (cryptoAmount * feeRate / 10000) + profitMargin.
      */
     function depositBySeller() external payable nonReentrant {
         require(tradeState == State.AWAITING_DEPOSITS, "Deposits not allowed");
         require(block.timestamp <= depositDeadline, "Deposit deadline passed");
         require(msg.sender == seller, "Only seller can deposit");
         require(!sellerDeposited, "Seller already deposited");
-        require(msg.value == cryptoAmount + sellerCollateral, "Incorrect seller deposit amount");
-
+        uint256 fee = (cryptoAmount * feeRate) / 10000;
+        uint256 feeTotal = fee + profitMargin;
+        uint256 requiredValue = cryptoAmount + sellerCollateral + feeTotal;
+        require(msg.value == requiredValue, "Incorrect seller deposit amount");
+        
         sellerDeposited = true;
         emit Deposited(seller, msg.value);
         _checkDepositsComplete();
@@ -244,9 +264,14 @@ contract Escrow is Ownable {
 
     /**
      * @notice Releases the trade under normal conditions.
-     * - A fee is deducted and sent to the platform wallet.
-     * - Buyer receives (cryptoAmount - fee) plus buyer collateral.
-     * - Seller receives seller collateral.
+     *
+     * Transfer outcomes:
+     * - Buyer receives: their full buyerCollateral refund plus the entire cryptoAmount.
+     *   (This means their wallet increases by exactly cryptoAmount.)
+     * - Platform receives: feeTotal = (cryptoAmount * feeRate/10000) + profitMargin.
+     * - Seller receives: only their sellerCollateral refund.
+     *
+     * Note: The cryptoAmount comes from the seller's deposit.
      */
     function releaseTrade() external nonReentrant {
         require(tradeState == State.AWAITING_CONFIRMATIONS, "Trade not in confirmation phase");
@@ -255,30 +280,40 @@ contract Escrow is Ownable {
         
         tradeState = State.COMPLETE;
         uint256 fee = (cryptoAmount * feeRate) / 10000;
-        uint256 buyerAmount = (cryptoAmount - fee) + buyerCollateral;
-        uint256 sellerAmount = sellerCollateral;
+        uint256 feeTotal = fee + profitMargin;
+        
+        // Expect contract balance to be exactly: 
+        // buyerCollateral + cryptoAmount + sellerCollateral + feeTotal.
+        uint256 expectedBalance = buyerCollateral + cryptoAmount + sellerCollateral + feeTotal;
+        require(address(this).balance >= expectedBalance, "Insufficient contract balance");
+
+        // Execute transfers:
+        // 1. Refund buyer's collateral.
+        (bool refundBuyer, ) = buyer.call{value: buyerCollateral}("");
+        require(refundBuyer, "Refund to buyer failed");
+        // 2. Transfer trade amount (cryptoAmount) to buyer.
+        (bool sendToBuyer, ) = buyer.call{value: cryptoAmount}("");
+        require(sendToBuyer, "Transfer of trade amount to buyer failed");
+        // 3. Transfer fee+profitMargin to platform.
+        (bool sendToPlatform, ) = platformWallet.call{value: feeTotal}("");
+        require(sendToPlatform, "Transfer to platform failed");
+        // 4. Refund seller's collateral.
+        (bool refundSeller, ) = seller.call{value: sellerCollateral}("");
+        require(refundSeller, "Refund to seller failed");
 
         // Clear deposit flags.
         buyerDeposited = false;
         sellerDeposited = false;
 
-        // Transfer funds.
-        (bool sentBuyer, ) = buyer.call{value: buyerAmount}("");
-        require(sentBuyer, "Transfer to buyer failed");
-        (bool sentPlatform, ) = platformWallet.call{value: fee}("");
-        require(sentPlatform, "Transfer to platform failed");
-        (bool sentSeller, ) = seller.call{value: sellerAmount}("");
-        require(sentSeller, "Transfer to seller failed");
-
         emit TradeReleased(cryptoAmount, buyerCollateral, sellerCollateral);
     }
 
     /**
-     * @notice Cancels the trade if deadlines are exceeded.
+     * @notice Cancels the trade if deadlines are exceeded, refunding deposits in full.
      */
     function cancelTrade() public nonReentrant {
         require(
-            tradeState == State.AWAITING_DEPOSITS || tradeState == State.AWAITING_CONFIRMATIONS, 
+            tradeState == State.AWAITING_DEPOSITS || tradeState == State.AWAITING_CONFIRMATIONS,
             "Cannot cancel now"
         );
         if (tradeState == State.AWAITING_DEPOSITS) {
@@ -287,25 +322,27 @@ contract Escrow is Ownable {
             require(block.timestamp > confirmationDeadline, "Confirmation deadline not reached");
         }
         tradeState = State.CANCELLED;
-
-        // Refund deposits.
+        
+        // Refund buyer's collateral.
         if (buyerDeposited) {
-            uint256 amount = buyerCollateral;
+            (bool refundBuyer, ) = buyer.call{value: buyerCollateral}("");
+            require(refundBuyer, "Refund to buyer failed");
             buyerDeposited = false;
-            (bool sent, ) = buyer.call{value: amount}("");
-            require(sent, "Refund to buyer failed");
         }
+        // Refund seller's full deposit.
         if (sellerDeposited) {
-            uint256 amount = cryptoAmount + sellerCollateral;
+            uint256 fee = (cryptoAmount * feeRate) / 10000;
+            uint256 feeTotal = fee + profitMargin;
+            uint256 refundSeller = cryptoAmount + sellerCollateral + feeTotal;
+            (bool refundSellerSent, ) = seller.call{value: refundSeller}("");
+            require(refundSellerSent, "Refund to seller failed");
             sellerDeposited = false;
-            (bool sent, ) = seller.call{value: amount}("");
-            require(sent, "Refund to seller failed");
         }
         emit TradeCancelled();
     }
 
     /**
-     * @notice Either party may raise a dispute if confirmation deadline is exceeded.
+     * @notice Either party may raise a dispute if the confirmation deadline is exceeded.
      */
     function raiseDispute() external nonReentrant {
         require(tradeState == State.AWAITING_CONFIRMATIONS, "Dispute not allowed in current state");
@@ -322,25 +359,27 @@ contract Escrow is Ownable {
         require(tradeState == State.DISPUTED, "No active dispute");
         require(block.timestamp > disputeRaisedAt + disputeTimeout, "Dispute timeout not reached");
         tradeState = State.CANCELLED;
-        // Refund deposits.
+        // Refund buyer's collateral.
         if (buyerDeposited) {
-            uint256 amount = buyerCollateral;
+            (bool refundBuyer, ) = buyer.call{value: buyerCollateral}("");
+            require(refundBuyer, "Refund to buyer failed");
             buyerDeposited = false;
-            (bool sent, ) = buyer.call{value: amount}("");
-            require(sent, "Refund to buyer failed");
         }
+        // Refund seller's deposit in full.
         if (sellerDeposited) {
-            uint256 amount = cryptoAmount + sellerCollateral;
+            uint256 fee = (cryptoAmount * feeRate) / 10000;
+            uint256 feeTotal = fee + profitMargin;
+            uint256 refundSeller = cryptoAmount + sellerCollateral + feeTotal;
+            (bool refundSellerSent, ) = seller.call{value: refundSeller}("");
+            require(refundSellerSent, "Refund to seller failed");
             sellerDeposited = false;
-            (bool sent, ) = seller.call{value: amount}("");
-            require(sent, "Refund to seller failed");
         }
         emit DisputeEscalated();
     }
 
     /**
      * @notice The arbitrator resolves a dispute.
-     * @param decision If true, trade is released (with fee charged); if false, trade is cancelled.
+     * @param decision If true, trade is released (fee and profit applied); if false, trade is cancelled.
      * @param penalizedParty Indicates which party is penalized (0: none, 1: buyer, 2: seller).
      */
     function resolveDispute(bool decision, uint8 penalizedParty) external nonReentrant {
@@ -350,54 +389,77 @@ contract Escrow is Ownable {
 
         uint256 buyerAmount;
         uint256 sellerAmount;
-        uint256 fee = 0; // Only applied upon trade release.
+        uint256 fee = (cryptoAmount * feeRate) / 10000;
+        uint256 feeTotal = fee + profitMargin;
         
         if (decision) {
-            fee = (cryptoAmount * feeRate) / 10000;
             if (penalizedParty == 1) {
-                // Buyer penalized: forfeits collateral.
-                buyerAmount = (cryptoAmount - fee);
+                // Buyer penalized: forfeits buyerCollateral.
+                buyerAmount = cryptoAmount;
                 sellerAmount = sellerCollateral + buyerCollateral;
             } else if (penalizedParty == 2) {
-                // Seller penalized: forfeits collateral.
-                buyerAmount = (cryptoAmount - fee) + buyerCollateral + sellerCollateral;
+                // Seller penalized: forfeits sellerCollateral.
+                buyerAmount = cryptoAmount;
                 sellerAmount = 0;
             } else {
-                // No penalty: normal release.
-                buyerAmount = (cryptoAmount - fee) + buyerCollateral;
+                // Normal release.
+                buyerAmount = cryptoAmount;
                 sellerAmount = sellerCollateral;
             }
+            // Process transfers for a normal release.
+            (bool refundBuyer, ) = buyer.call{value: buyerCollateral}("");
+            require(refundBuyer, "Refund to buyer failed");
+            (bool sendBuyer, ) = buyer.call{value: buyerAmount}("");
+            require(sendBuyer, "Transfer to buyer failed");
+            (bool sendPlatform, ) = platformWallet.call{value: feeTotal}("");
+            require(sendPlatform, "Transfer to platform failed");
+            (bool refundSeller, ) = seller.call{value: sellerCollateral}("");
+            require(refundSeller, "Refund to seller failed");
         } else {
-            // Trade cancelled: no fee charged.
+            // Trade cancelled: refund in full.
             if (penalizedParty == 1) {
                 buyerAmount = 0;
                 sellerAmount = cryptoAmount + sellerCollateral + buyerCollateral;
             } else if (penalizedParty == 2) {
-                buyerAmount = cryptoAmount + buyerCollateral + sellerCollateral;
+                buyerAmount = cryptoAmount + sellerCollateral + buyerCollateral;
                 sellerAmount = 0;
             } else {
                 buyerAmount = buyerCollateral;
                 sellerAmount = cryptoAmount + sellerCollateral;
             }
+            if (buyerAmount > 0) {
+                (bool refundBuyer, ) = buyer.call{value: buyerAmount}("");
+                require(refundBuyer, "Refund to buyer failed");
+            }
+            if (sellerAmount > 0) {
+                (bool refundSeller, ) = seller.call{value: sellerAmount}("");
+                require(refundSeller, "Refund to seller failed");
+            }
         }
-
+        
         tradeState = State.COMPLETE;
         buyerDeposited = false;
         sellerDeposited = false;
 
-        if (buyerAmount > 0) {
-            (bool sentBuyer, ) = buyer.call{value: buyerAmount}("");
-            require(sentBuyer, "Transfer to buyer failed");
-        }
-        if (fee > 0 && decision) {
-            (bool sentPlatform, ) = platformWallet.call{value: fee}("");
-            require(sentPlatform, "Transfer to platform failed");
-        }
-        if (sellerAmount > 0) {
-            (bool sentSeller, ) = seller.call{value: sellerAmount}("");
-            require(sentSeller, "Transfer to seller failed");
-        }
-
         emit DisputeResolved(decision, penalizedParty);
+    }
+
+    // Returns the basic trade details.
+    function getTradeBasicDetails() external view returns (
+        // address _buyer,
+        // address _seller,
+        // address _arbitrator,
+        uint256 _cryptoAmount
+        // uint256 _buyerCollateral,
+        // uint256 _sellerCollateral
+    ) {
+        return (
+            // buyer,
+            // seller,
+            // arbitrator,
+            cryptoAmount
+            // buyerCollateral,
+            // sellerCollateral
+        );
     }
 }
