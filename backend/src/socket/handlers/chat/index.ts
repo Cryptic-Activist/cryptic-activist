@@ -5,6 +5,16 @@ import {
 import type { IO, Socket, WalletAddress } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
+  confirmTrade,
+  createTrade,
+  depositBySeller,
+  fundTrade,
+  getEscrowContract,
+  getProvider,
+  getSigner,
+  getTradeDetails,
+} from '@/services/blockchains/ethereum';
+import {
   createChatMessage,
   getChat,
   getChatMessages,
@@ -12,14 +22,6 @@ import {
   updateTrade,
   updateUser,
 } from 'base-ca';
-import {
-  createTrade,
-  depositByBuyer,
-  depositBySeller,
-  getEscrowContract,
-  getProvider,
-  getTradeDetails,
-} from '@/services/blockchains/ethereum';
 
 import { parseEther } from 'ethers';
 
@@ -122,31 +124,26 @@ export default class Chat {
             const buyer =
               // @ts-ignore
               chat.trade.offer.offerType === 'buy'
-                ? (updatedTrade.traderWalletAddress as WalletAddress)
-                : (updatedTrade.vendorWalletAddress as WalletAddress);
+                ? (updatedTrade.vendorWalletAddress as WalletAddress)
+                : (updatedTrade.traderWalletAddress as WalletAddress);
             const seller =
               // @ts-ignore
               chat.trade.offer.offerType === 'buy'
-                ? (updatedTrade.vendorWalletAddress as WalletAddress)
-                : (updatedTrade.traderWalletAddress as WalletAddress);
+                ? (updatedTrade.traderWalletAddress as WalletAddress)
+                : (updatedTrade.vendorWalletAddress as WalletAddress);
             const cryptoAmountWei = parseEther(
               // @ts-ignore
               chat.trade.cryptocurrencyAmount.toString(),
             ).toString();
+            const tradeDuration = chat.trade.offer.timeLimit * 60;
             // @ts-ignore
             const depositDuration = (chat.trade.offer.timeLimit * 60) / 4;
             // @ts-ignore
             const confirmationDuration = (chat.trade.offer.timeLimit * 60) / 2;
             // @ts-ignore
             const disputeTimeout = chat.trade.offer.timeLimit * 60 * 2;
-            const buyerCollateral = parseEther(
-              // @ts-ignore
-              (chat.trade.cryptocurrencyAmount * 0.25).toString(),
-            ).toString();
-            const sellerCollateral = parseEther(
-              // @ts-ignore
-              (chat.trade.cryptocurrencyAmount * 0.25).toString(),
-            ).toString();
+            const buyerCollateral = chat.trade.cryptocurrencyAmount * 0.25;
+            const sellerCollateral = chat.trade.cryptocurrencyAmount * 0.25;
             const feeRate =
               // @ts-ignore
               (chat.trade.trader.tier.tradingFee -
@@ -155,18 +152,39 @@ export default class Chat {
               1000;
 
             const tradeCreated = await createTrade({
-              buyer: '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4',
-              seller: '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2',
+              buyer,
+              seller,
               arbitrator: '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db',
-              cryptoAmount: '1.5',
-              buyerCollateral: '0.3',
-              sellerCollateral: '0.3',
-              tradeDuration: 604800,
+              cryptoAmount: chat.trade.cryptocurrencyAmount,
+              buyerCollateral: buyerCollateral,
+              sellerCollateral: sellerCollateral,
+              tradeDuration,
               feeRate: 250,
               profitMargin: 150,
             });
 
-            console.log({ tradeCreated });
+            console.log({ tradeId: tradeCreated?.tradeId });
+
+            const fundAmountSeller =
+              chat.trade.cryptocurrencyAmount + sellerCollateral;
+
+            console.log({
+              fundAmountSeller,
+            });
+
+            const tradeFunded = await fundTrade(
+              tradeCreated?.tradeId,
+              chat.trade.cryptocurrencyAmount + sellerCollateral,
+            );
+
+            console.log({ tradeFunded });
+
+            const confirmedTrade = await confirmTrade(
+              tradeCreated?.tradeId,
+              buyerCollateral,
+            );
+
+            console.log({ confirmedTrade });
 
             // const tradeCreated = await createTrade({
             //   buyer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // _buyer: the buyer's wallet address
