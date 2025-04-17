@@ -4,9 +4,9 @@ export type InitTradeParams = {
   buyer: Address;
   seller: Address;
   arbitrator: Address;
-  cryptoAmount: string;
-  buyerCollateral: string;
-  sellerCollateral: string;
+  cryptoAmount: number;
+  buyerCollateral: number;
+  sellerCollateral: number;
   feeRate: number;
   tradeDuration: number;
   profitMargin: number;

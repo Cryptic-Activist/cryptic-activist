@@ -14,7 +14,7 @@ async function main() {
 
   // Deployment parameters
   const params = {
-    platformWallet: "0x78731D3Ca6b7E34aC0F824c42a7cC18A495cabaB",
+    platformWallet: "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
     defaultFeeRate: 150, // 1.5% platform fee
     defaultProfitMargin: 250, // 2.5% profit margin
   };

@@ -26,12 +26,14 @@ import type {
 export interface MultiTradeEscrowInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "autoCancelTrades"
       | "cancelTrade"
       | "confirmTrade"
       | "createTrade"
       | "defaultFeeRate"
       | "defaultProfitMargin"
       | "disputeTrade"
+      | "forceCancelTrade"
       | "fundTrade"
       | "getContractBalance"
       | "getTrade"
@@ -56,6 +58,10 @@ export interface MultiTradeEscrowInterface extends Interface {
       | "TradeFunded"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "autoCancelTrades",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "cancelTrade",
     values: [BigNumberish]
@@ -88,6 +94,10 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "disputeTrade",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "forceCancelTrade",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -133,6 +143,10 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "autoCancelTrades",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "cancelTrade",
     data: BytesLike
   ): Result;
@@ -154,6 +168,10 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "disputeTrade",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "forceCancelTrade",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "fundTrade", data: BytesLike): Result;
@@ -351,6 +369,8 @@ export interface MultiTradeEscrow extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  autoCancelTrades: TypedContractMethod<[], [void], "nonpayable">;
+
   cancelTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [void],
@@ -384,6 +404,12 @@ export interface MultiTradeEscrow extends BaseContract {
   defaultProfitMargin: TypedContractMethod<[], [bigint], "view">;
 
   disputeTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  forceCancelTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [void],
     "nonpayable"
@@ -490,6 +516,9 @@ export interface MultiTradeEscrow extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "autoCancelTrades"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "cancelTrade"
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
@@ -520,6 +549,9 @@ export interface MultiTradeEscrow extends BaseContract {
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "disputeTrade"
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "forceCancelTrade"
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "fundTrade"

@@ -147,7 +147,7 @@ contract MultiTradeEscrow {
     function fundTrade(uint256 _tradeId) 
         external 
         payable 
-        onlySeller(_tradeId) 
+        onlyOwner() 
         inState(_tradeId, TradeState.Created) 
         tradeExists(_tradeId) 
     {
@@ -164,7 +164,7 @@ contract MultiTradeEscrow {
     function confirmTrade(uint256 _tradeId) 
         external 
         payable 
-        onlyBuyer(_tradeId) 
+        onlyOwner() 
         inState(_tradeId, TradeState.Funded) 
         tradeExists(_tradeId) 
     {
@@ -183,7 +183,7 @@ contract MultiTradeEscrow {
      */
     function disputeTrade(uint256 _tradeId) 
         external 
-        onlyTradeParticipant(_tradeId) 
+        onlyOwner() 
         inState(_tradeId, TradeState.Funded) 
         tradeExists(_tradeId) 
     {
@@ -199,7 +199,7 @@ contract MultiTradeEscrow {
      */
     function resolveDispute(uint256 _tradeId, uint256 buyerPercentage) 
         external 
-        onlyArbitrator(_tradeId) 
+        onlyOwner() 
         inState(_tradeId, TradeState.Disputed) 
         tradeExists(_tradeId) 
     {
@@ -253,10 +253,12 @@ contract MultiTradeEscrow {
     /**
      * @dev Cancels the trade after deadline if not completed
      */
-    function _cancelTrade(uint256 _tradeId) internal tradeExists(_tradeId) {
+    function _cancelTrade(uint256 _tradeId, bool _forceCancel) internal tradeExists(_tradeId) {
         Trade storage trade = trades[_tradeId];
         
-        require(block.timestamp > trade.tradeDeadline, "Trade deadline not reached");
+        if (!_forceCancel) {
+            require(block.timestamp > trade.tradeDeadline, "Trade deadline not reached");
+        }
         require(
             trade.state == TradeState.Created || 
             trade.state == TradeState.Funded, 
@@ -273,20 +275,24 @@ contract MultiTradeEscrow {
     }
 
     function cancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
-        _cancelTrade(_tradeId);
+        _cancelTrade(_tradeId, false);
     }
 
-    // Loop through all existing trades
     function autoCancelTrades() external {
+        // Loop through all existing trades
         uint256 i;
         for (i = 0; i < tradeCount; i++) {
             Trade storage trade = trades[i];
             
             if(block.timestamp > trade.tradeDeadline && 
             trade.state != TradeState.Cancelled) {  
-                _cancelTrade(trade.id);
+                _cancelTrade(trade.id, false);
             }
         }
+    }
+
+    function forceCancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
+        _cancelTrade(_tradeId, true);
     }
     
     /**
