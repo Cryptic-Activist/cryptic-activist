@@ -3,11 +3,11 @@ import {
   ETHEREUM_ESCROW_PRIVATE_KEY,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
+import { ethers, parseEther } from 'ethers';
 
 import { InitTradeParams } from './types';
 // Import the ABI that Truffle generated (e.g., from build/contracts/Escrow.json)
 import escrowArtifact from '@/contracts/ethereum/MultiTradeEscrow.json';
-import { ethers } from 'ethers';
 
 export const getProvider = () => {
   const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
@@ -40,25 +40,41 @@ export const getContractFactory = () => {
 };
 
 export const createTrade = async (params: InitTradeParams) => {
-  const contract = getContractFactory();
+  const contract = getEscrowContract();
 
   console.log({ params });
 
-  const escrow = await contract.deploy(
+  // Convert ether values to wei
+  const cryptoAmountWei = parseEther(params.cryptoAmount.toString());
+  const buyerCollateralWei = parseEther(params.buyerCollateral.toString());
+  const sellerCollateralWei = parseEther(params.sellerCollateral.toString());
+
+  console.log(
     params.buyer,
     params.seller,
     params.arbitrator,
-    params.cryptoAmount,
-    params.buyerCollateral,
-    params.sellerCollateral,
+    cryptoAmountWei,
+    buyerCollateralWei,
+    sellerCollateralWei,
     params.tradeDuration,
     params.feeRate,
     params.profitMargin,
   );
 
-  console.log(`Escrow deployed to: ${escrow.target}`);
+  const tx = await contract.createTrade(
+    params.buyer,
+    params.seller,
+    params.arbitrator,
+    cryptoAmountWei,
+    buyerCollateralWei,
+    sellerCollateralWei,
+    params.tradeDuration,
+    params.feeRate,
+    params.profitMargin,
+  );
 
-  return { escrow };
+  const receipt = await tx.wait();
+  return { receipt };
 };
 
 export const depositByBuyer = async (value: bigint) => {

@@ -238,12 +238,13 @@ contract MultiTradeEscrow {
         uint256 platformProfit = (trade.cryptoAmount * trade.profitMargin) / 10000;
         uint256 totalPlatformAmount = platformFee + platformProfit;
         
-        uint256 sellerAmount = trade.cryptoAmount - totalPlatformAmount + trade.sellerCollateral;
-        
+        uint256 sellerAmount = trade.sellerCollateral;
+        uint256 buyerAmount = trade.cryptoAmount + trade.buyerCollateral - totalPlatformAmount;
+
         // Transfer funds
         payable(platformWallet).transfer(totalPlatformAmount);
         payable(trade.seller).transfer(sellerAmount);
-        payable(trade.buyer).transfer(trade.buyerCollateral);
+        payable(trade.buyer).transfer(buyerAmount);
         
         trade.state = TradeState.Completed;
         emit TradeCompleted(_tradeId);
@@ -252,7 +253,7 @@ contract MultiTradeEscrow {
     /**
      * @dev Cancels the trade after deadline if not completed
      */
-    function cancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
+    function _cancelTrade(uint256 _tradeId) internal tradeExists(_tradeId) {
         Trade storage trade = trades[_tradeId];
         
         require(block.timestamp > trade.tradeDeadline, "Trade deadline not reached");
@@ -269,6 +270,23 @@ contract MultiTradeEscrow {
         
         trade.state = TradeState.Cancelled;
         emit TradeCancelled(_tradeId);
+    }
+
+    function cancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
+        _cancelTrade(_tradeId);
+    }
+
+    // Loop through all existing trades
+    function autoCancelTrades() external {
+        uint256 i;
+        for (i = 0; i < tradeCount; i++) {
+            Trade storage trade = trades[i];
+            
+            if(block.timestamp > trade.tradeDeadline && 
+            trade.state != TradeState.Cancelled) {  
+                _cancelTrade(trade.id);
+            }
+        }
     }
     
     /**
