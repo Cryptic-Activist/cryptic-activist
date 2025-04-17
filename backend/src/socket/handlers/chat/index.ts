@@ -154,19 +154,16 @@ export default class Chat {
                 chat.trade.trader.tier.discount) *
               1000;
 
-            const contract = getEscrowContract();
-            console.log({ contract });
-
             const tradeCreated = await createTrade({
               buyer: '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4',
               seller: '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2',
               arbitrator: '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db',
-              cryptoAmount: parseEther('1.5'),
-              buyerCollateral: parseEther('0.3'),
-              sellerCollateral: parseEther('0.3'),
-              feeRate: 150,
-              tradeDuration: 86400,
-              profitMargin: 250,
+              cryptoAmount: '1.5',
+              buyerCollateral: '0.3',
+              sellerCollateral: '0.3',
+              tradeDuration: 604800,
+              feeRate: 250,
+              profitMargin: 150,
             });
 
             console.log({ tradeCreated });
