@@ -11,3 +11,5 @@ export type InitTradeParams = {
   tradeDuration: number;
   profitMargin: number;
 };
+
+export type Token = 'chainlnik' | 'pol';

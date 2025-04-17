@@ -5,6 +5,7 @@ import {
 import type { IO, Socket, WalletAddress } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
+  approveToken,
   confirmTrade,
   createTrade,
   depositBySeller,
@@ -150,6 +151,13 @@ export default class Chat {
                 // @ts-ignore
                 chat.trade.trader.tier.discount) *
               1000;
+
+            const approvedToken = await approveToken(
+              'chainlnik',
+              chat.trade.cryptocurrencyAmount,
+            );
+
+            console.log({ approvedToken });
 
             const tradeCreated = await createTrade({
               buyer,

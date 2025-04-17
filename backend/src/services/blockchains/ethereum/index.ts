@@ -5,11 +5,11 @@ import {
   ETHEREUM_ESCROW_PRIVATE_KEY,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
+import { InitTradeParams, Token } from './types';
 import { Interface, ethers, parseEther } from 'ethers';
+import { abis, addresses } from './data';
 
-import { InitTradeParams } from './types';
-// Import the ABI that Truffle generated (e.g., from build/contracts/Escrow.json)
-import escrowArtifact from '@/contracts/ethereum/MultiTradeEscrow.json';
+import escrowArtifact from '@/contracts/ethereum/artifacts/MultiTradeEscrow.json';
 
 const iface = new Interface(escrowArtifact.abi);
 
@@ -22,6 +22,14 @@ export const getSigner = () => {
   const provider = getProvider();
   const signer = new ethers.Wallet(ETHEREUM_DEPLOYER_PRIVATE_KEY, provider);
   return signer;
+};
+
+export const getToken = (token: Token) => {
+  const address = addresses.chainlink;
+  const abi = abis.chainlink;
+  const signer = getSigner();
+  console.log({ address, abi, signer });
+  return new ethers.Contract(address, abi, signer);
 };
 
 export const getEscrowContract = () => {
@@ -41,6 +49,19 @@ export const getContractFactory = () => {
     signer,
   );
   return factory;
+};
+
+export const approveToken = async (_token: Token, amount: number) => {
+  const token = getToken(_token);
+  const amountWei = parseEther(amount.toString());
+
+  const approvedTx = await token.approve(
+    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+    amountWei,
+  );
+
+  const approved = await approvedTx.wait();
+  return approved;
 };
 
 export const decodeFunctionData = (receipt: any) => {
