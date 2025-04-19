@@ -15,6 +15,7 @@ export type TradeStatementProps = TradeProps;
 
 export type TradeCancelationProps = TradeProps & {
   timeLeft: string;
+  escrowReleased: boolean;
   onSetAsPaid: (params: SetAsPaidParams) => void;
   onSetAsCanceled: (params: SetAsCanceledParams) => void;
 };

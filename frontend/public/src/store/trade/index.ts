@@ -43,12 +43,18 @@ export const useTradeSlice: StateCreator<
               id: params.id ?? trade.id,
               offer: params.offer ?? trade.offer,
               paid: params.paid ?? trade.paid,
+              paymentConfirmed:
+                params.paymentConfirmed ?? trade.paymentConfirmed,
               paymentMethod: params.paymentMethod ?? trade.paymentMethod,
               paymentReceipt: params.paymentReceipt ?? trade.paymentReceipt,
               status: params.status ?? trade.status,
               trader: params.trader ?? trade.trader,
               vendor: params.vendor ?? trade.vendor,
               chat: params.chat ?? trade.chat,
+              traderWalletAddress:
+                params.traderWalletAddress ?? trade.traderWalletAddress,
+              vendorWalletAddress:
+                params.vendorWalletAddress ?? trade.vendorWalletAddress,
             },
           };
         },

@@ -9,9 +9,7 @@ import {
   UpdateChatParams,
 } from './types';
 
-export const createChat = async (
-  params: CreateChat
-): Promise<Chat> => {
+export const createChat = async (params: CreateChat) => {
   try {
     const newChat = await prisma.chat.upsert(params);
 
@@ -21,9 +19,7 @@ export const createChat = async (
   }
 };
 
-export const createManyChats = async (
-  params: CreateManyChats[]
-): Promise<BatchPayload> => {
+export const createManyChats = async (params: CreateManyChats[]) => {
   try {
     const newChats = await prisma.chat.createMany({
       data: params,
@@ -38,7 +34,7 @@ export const createManyChats = async (
 export const updateChat = async ({
   toUpdate,
   where,
-}: UpdateChatParams): Promise<Chat> => {
+}: UpdateChatParams) => {
   const updated = await prisma.chat.update({
     where,
     data: toUpdate,
@@ -47,19 +43,14 @@ export const updateChat = async ({
   return updated;
 };
 
-export const deleteChat = async ({
-  where,
-}: DeleteChatParams): Promise<Chat> => {
+export const deleteChat = async ({ where }: DeleteChatParams) => {
   const deleted = await prisma.chat.delete({
     where,
   });
   return deleted;
 };
 
-export const getChat = async ({
-  where,
-  select,
-}: GetChatParams): Promise<Chat | null> => {
+export const getChat = async ({ where, select }: GetChatParams) => {
   const chat = await prisma.chat.findFirst({
     ...(select && { select }),
     where,
@@ -76,7 +67,7 @@ export const getChats = async ({
   limit,
   where,
   select,
-}: GetChatsParams): Promise<Chat[]> => {
+}: GetChatsParams) => {
   const chats = await prisma.chat.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
@@ -93,7 +84,7 @@ export const getChatsPagination = async ({
   offset,
   cursor,
   orderBy,
-}: GetChatsPaginationParams): Promise<Chat[]> => {
+}: GetChatsPaginationParams) => {
   const chats = await prisma.chat.findMany({
     take: limit,
     ...(offset && { skip: offset }),

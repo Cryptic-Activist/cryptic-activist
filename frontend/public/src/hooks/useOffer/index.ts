@@ -8,7 +8,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import useApp from '../useApp';
+import useBlockchain from '../useBlockchain';
 import useDebounce from '../useDebounce';
+import useNavigationBar from '../useNavigationBar';
 import useNotification from '../useNotification';
 import { useRootStore } from '@/store';
 import useUser from '../useUser';
@@ -21,6 +23,9 @@ const useOffer = () => {
   const { isLoggedIn, user } = useUser();
   const { addToast } = useApp();
   const { notifications } = useNotification();
+  const { blockchain } = useBlockchain();
+  const { toggleModal } = useNavigationBar();
+
   const { offer } = useRootStore();
 
   const [localCurrentPrice, setLocalCurrentPrice] = useState();
@@ -93,7 +98,8 @@ const useOffer = () => {
         offer.id &&
         offer.vendor?.id &&
         offer.cryptocurrency?.id &&
-        offer.paymentMethod?.id
+        offer.paymentMethod?.id &&
+        blockchain.account?.address
       ) {
         const newTrade = await mutationStartTrade.mutateAsync({
           cryptocurrencyAmount,
@@ -104,12 +110,25 @@ const useOffer = () => {
           vendorId: offer.vendor?.id,
           cryptocurrencyId: offer.cryptocurrency?.id,
           paymentMethodId: offer.paymentMethod.id,
+          traderWalletAddress: blockchain.account.address,
         });
         notifications.socket?.emit('notification_trade_start_sent', {
           tradeId: newTrade.trade.id,
         });
       } else {
         addToast('error', 'Unable to start trading', 5000);
+      }
+    } else {
+      if (!isLoggedIn()) {
+        toggleModal('login');
+        return;
+      }
+      if (user.id === offer.vendor?.id) {
+        return;
+      }
+      if (user.id !== offer.vendor?.id && !blockchain.account?.address) {
+        toggleModal('blockchain');
+        return;
       }
     }
   };
@@ -149,12 +168,18 @@ const useOffer = () => {
   ]);
 
   useEffect(() => {
-    if (isLoggedIn() && user.id && offer.vendor?.id) {
+    if (
+      isLoggedIn() &&
+      user.id &&
+      offer.vendor?.id &&
+      blockchain.account?.address &&
+      cryptocurrencyAmount
+    ) {
       setIsTradingAvailable(true);
     } else {
       setIsTradingAvailable(false);
     }
-  }, [user.id, offer.vendor?.id, isLoggedIn]);
+  }, [user.id, offer.vendor?.id, isLoggedIn, blockchain]);
 
   useEffect(() => {
     if (offer.fiat?.symbol && offer.cryptocurrency?.coingeckoId) {

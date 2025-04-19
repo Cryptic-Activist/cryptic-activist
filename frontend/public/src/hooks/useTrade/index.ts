@@ -42,7 +42,26 @@ const useTrade = () => {
     });
   };
 
-  return { queryTrade, trade, setPaid, setCanceled };
+  const setPaymentConfirmed = (hasReceived: boolean) => {
+    trade.setTradeValue({
+      paymentConfirmed: hasReceived,
+    });
+  };
+
+  const setVendorWalletAddress = (walletAddress: string) => {
+    trade.setTradeValue({
+      vendorWalletAddress: walletAddress,
+    });
+  };
+
+  return {
+    queryTrade,
+    trade,
+    setPaid,
+    setCanceled,
+    setPaymentConfirmed,
+    setVendorWalletAddress,
+  };
 };
 
 export default useTrade;

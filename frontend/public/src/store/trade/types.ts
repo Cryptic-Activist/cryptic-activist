@@ -85,7 +85,10 @@ export type Trade = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     paid?: boolean;
+    paymentConfirmed?: boolean;
     status?: Status;
+    traderWalletAddress?: string;
+    vendorWalletAddress?: string;
     chat?: Chat;
   };
 };
@@ -106,7 +109,10 @@ export type TradeStore = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     paid?: boolean;
+    paymentConfirmed?: boolean;
     status?: Status;
+    traderWalletAddress?: string;
+    vendorWalletAddress?: string;
     chat?: Chat;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
@@ -129,7 +135,10 @@ export type TradeSetter = {
   fiatAmount?: number;
   cryptocurrencyAmount?: number;
   paid?: boolean;
+  paymentConfirmed?: boolean;
   status?: Status;
+  traderWalletAddress?: string;
+  vendorWalletAddress?: string;
   chat?: Chat;
 };
 

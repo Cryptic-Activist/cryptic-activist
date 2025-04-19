@@ -6,7 +6,7 @@ import {
   CreateOfferTradePricing,
 } from './zod';
 import { getLocalStorage, setLocalStorage } from '@/utils';
-import { useApp, useUser } from '@/hooks';
+import { useApp, useBlockchain, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -18,6 +18,10 @@ const useCreateOffer = () => {
     app: { defaults },
   } = useApp();
   const { user } = useUser();
+  const {
+    blockchain: { account },
+  } = useBlockchain();
+
   const [step, setStep] = useState(0);
   const onClickEvents = {
     0: () => toStep(0),
@@ -110,6 +114,7 @@ const useCreateOffer = () => {
       label: createOffer?.label,
       terms: createOffer?.terms,
       instructions: createOffer?.instructions,
+      vendorWalletAddress: account?.address,
     });
 
     createOffer.setCreateOfferValue(
@@ -123,6 +128,7 @@ const useCreateOffer = () => {
     createOffer?.label,
     createOffer?.terms,
     createOffer?.instructions,
+    account?.address,
   ]);
 
   const toStep = (step: number) => {

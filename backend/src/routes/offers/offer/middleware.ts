@@ -15,6 +15,7 @@ export const validateCreateOffer = (
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();

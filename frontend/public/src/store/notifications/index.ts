@@ -45,8 +45,6 @@ export const useNotificationsSlice: StateCreator<
     setHasNewNotification: (hasNotification: boolean) => {
       const setValue = get().notifications.setNotificationValue;
 
-      console.log({ hasNotification });
-
       setValue(
         { hasNewNotification: hasNotification },
         'notifications/setHasNewNotification'

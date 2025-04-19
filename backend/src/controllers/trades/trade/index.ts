@@ -27,8 +27,6 @@ export async function createTradeController(req: Request, res: Response) {
   try {
     const { body } = req;
 
-    console.log({ body });
-
     const newTrade = await createTrade({
       where: { id: '' },
       update: {},
@@ -40,8 +38,10 @@ export async function createTradeController(req: Request, res: Response) {
         fiatId: body.fiatId,
         cryptocurrencyAmount: body.cryptocurrencyAmount,
         fiatAmount: body.fiatAmount,
-        status: 'IN_PROGRESS',
+        status: 'PENDING',
+        startedAt: new Date(),
         paymentMethodId: body.paymentMethodId,
+        traderWalletAddress: body.traderWalletAddress,
       },
     });
 
@@ -134,6 +134,7 @@ export async function getTradeController(req: Request, res: Response) {
         cryptocurrencyAmount: true,
         paymentReceipt: true,
         status: true,
+        escrowReleaseDate: true,
         paid: true,
         paymentMethod: {
           select: {

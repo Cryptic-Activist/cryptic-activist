@@ -8,11 +8,16 @@ import {
   TradePaymentInstructionsProps,
   TradeStatementProps,
 } from './types';
-import { useCountDown, useTrade, useTradeSocket, useUser } from '@/hooks';
+import {
+  useCountDown,
+  useRouter,
+  useTrade,
+  useTradeSocket,
+  useUser,
+} from '@/hooks';
 
 import styles from './page.module.scss';
 import { toUpperCase } from '@/utils';
-import { useRouter } from 'next/navigation';
 
 const TradePaymentInstructions: FC<TradePaymentInstructionsProps> = ({
   trade,
@@ -59,27 +64,34 @@ const TradeStatement: FC<TradeStatementProps> = ({ trade }) => {
 const TradeCancelation: FC<TradeCancelationProps> = ({
   trade,
   timeLeft,
+  escrowReleased,
   onSetAsPaid,
   onSetAsCanceled,
 }) => {
+  const { replace } = useRouter();
   return (
     <section className={styles.section}>
-      <Button
-        onClick={() =>
-          onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
-        }
-      >
-        <div className={styles.paidButton}>
-          <strong>
-            {trade.paid === false && 'Set as Paid'}
-            {trade.paid && 'Paid'}
-          </strong>
-          <div className={styles.remainingTime}>
-            <span>Remaining time: </span>
-            <span className={styles.time}>{timeLeft}</span>
+      {!escrowReleased && !trade.paid && (
+        <Button
+          onClick={() =>
+            onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
+          }
+        >
+          <div className={styles.paidButton}>
+            <strong>
+              {trade.paid === false && 'Set as Paid'}
+              {trade.paid && 'Paid'}
+            </strong>
+            <div className={styles.remainingTime}>
+              <span>Remaining time: </span>
+              <span className={styles.time}>{timeLeft}</span>
+            </div>
           </div>
-        </div>
-      </Button>
+        </Button>
+      )}
+      {escrowReleased && (
+        <Button onClick={() => replace('/vendors')}>Leave trade</Button>
+      )}
       <p>
         After the payment is made do not forget to click on{' '}
         <strong>Paid</strong> within the stipulated negotiation time frame. If
@@ -88,14 +100,16 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
         vendor&apos;s wallet.
       </p>
       <div className={styles.row}>
-        <Button
-          size={18}
-          onClick={() => {
-            onSetAsCanceled({ from: trade.trader?.id, to: trade.vendor?.id });
-          }}
-        >
-          Cancel
-        </Button>
+        {!escrowReleased && (
+          <Button
+            size={18}
+            onClick={() => {
+              onSetAsCanceled({ from: trade.trader?.id, to: trade.vendor?.id });
+            }}
+          >
+            Cancel
+          </Button>
+        )}
         <p className={styles.statement}>
           Click on <strong>Cancel</strong> if you don&apos;t want to continue
           negotiating with this vendor
@@ -111,7 +125,7 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
       <div className={styles.labelContentContainer}>
         <h3 className={styles.subHeading}>
           Follow the{' '}
-          <strong>{`${trade.vendor?.firstName} ${trade.vendor?.firstName}`}</strong>{' '}
+          <strong>{`${trade.vendor?.firstName} ${trade.vendor?.lastName}`}</strong>{' '}
           instructions
         </h3>
         <p className={styles.instructions}>{trade.offer?.instructions}</p>
@@ -135,20 +149,27 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled } = useTrade();
+  const { trade, setPaid, setCanceled, setPaymentConfirmed } = useTrade();
   const { user, query } = useUser();
   const { timeLeftInMinutes, startCountDown: _startCountDown } = useCountDown();
-  const router = useRouter();
 
-  const { sendMessage, messages, receiverStatus, setAsPaid, setAsCanceled } =
-    useTradeSocket({
-      roomId: trade.chat?.id,
-      user: trade.trader,
-      timeLimit: trade.offer?.timeLimit,
-      tradePaid: trade.paid,
-      onSetPaid: setPaid,
-      onSetCanceled: setCanceled,
-    });
+  const {
+    sendMessage,
+    messages,
+    receiverStatus,
+    escrowReleased,
+    setAsPaid,
+    setAsCanceled,
+  } = useTradeSocket({
+    chatId: trade.chat?.id,
+    user: trade.trader,
+    timeLimit: trade.offer?.timeLimit,
+    tradePaid: trade.paid,
+    trade,
+    onSetPaid: setPaid,
+    onSetCanceled: setCanceled,
+    onSetPaymentConfirmed: setPaymentConfirmed,
+  });
 
   // useEffect(() => {
   //   if (trade.offer?.timeLimit) {
@@ -158,13 +179,13 @@ export default function TradePage() {
   // }, [trade.offer?.timeLimit]);
 
   useEffect(() => {
-    if (query.isSuccess && !user.id) {
-      router.back();
-      return;
-    }
-    if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
-      router.back();
-    }
+    // if (query.isSuccess && !user.id) {
+    //   router.back();
+    //   return;
+    // }
+    // if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
+    //   router.back();
+    // }
   }, [trade.trader?.id, user.id, query.isSuccess]);
 
   return (
@@ -182,6 +203,7 @@ export default function TradePage() {
           timeLeft={timeLeftInMinutes}
           onSetAsPaid={setAsPaid}
           onSetAsCanceled={setAsCanceled}
+          escrowReleased={escrowReleased}
         />
         <TradeInstructions trade={trade} />
       </div>

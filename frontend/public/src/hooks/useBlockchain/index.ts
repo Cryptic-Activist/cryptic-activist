@@ -6,6 +6,7 @@ import {
   useAccountEffect,
   useBalance,
   useConnect,
+  useSwitchAccount,
 } from 'wagmi';
 
 import { BRAVE_WALLET } from '@/constants';
@@ -27,9 +28,13 @@ const useBlockchain = () => {
     navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();
   const { connect, connectors } = useConnect();
-  const balance = useBalance({ address: account?.address as `0x${string}` });
-  const { isConnected } = useAccount();
-  const { isLoggedIn } = useUser();
+  const { isConnected, address } = useAccount();
+  const balance = useBalance({ address: address as `0x${string}` });
+  const {} = useSwitchAccount();
+  const {
+    isLoggedIn,
+    user: { id },
+  } = useUser();
   const isWalletConnected = isLoggedIn() && isConnected;
 
   const resetWalletNavigation = () => {
@@ -51,16 +56,21 @@ const useBlockchain = () => {
   };
 
   useAccountEffect({
-    async onConnect({ address, chain, connector }) {
-      setBlockchainValue(
-        {
-          account: { address: address },
-          chain,
-          wallet: connector.name,
-          balance: balance.data,
-        },
-        'blockchain/setWalletDetails'
-      );
+    async onConnect({ connector, address: onConnectAddress, chain }) {
+      // const address = await connector.getAccounts();
+      // const chain = await connector.getChainId();
+
+      if (id) {
+        setBlockchainValue(
+          {
+            account: { address: onConnectAddress },
+            chain,
+            wallet: connector.name,
+            balance: balance.data,
+          },
+          'blockchain/setWalletDetails'
+        );
+      }
     },
     onDisconnect() {
       resetWalletNavigation();
@@ -68,10 +78,10 @@ const useBlockchain = () => {
   });
 
   useEffect(() => {
-    if (balance.isSuccess) {
+    if (id && balance.isSuccess) {
       setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
-  }, [balance.isSuccess]);
+  }, [balance.isSuccess, id]);
 
   return {
     blockchain: {
