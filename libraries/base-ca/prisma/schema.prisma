@@ -24,6 +24,7 @@ model Admin {
   firstName    String    @db.VarChar(50)
   lastName     String    @db.VarChar(50)
   username     String    @unique @db.VarChar(120)
+  email        String    @unique @db.VarChar(120)
   password     String
   isVerified   Boolean?  @default(false) @db.Boolean
   deletedAt    DateTime? @db.Date
@@ -378,6 +379,7 @@ model User {
   firstName                String                     @db.VarChar(50)
   lastName                 String                     @db.VarChar(50)
   username                 String                     @unique @db.VarChar(120)
+  email                    String                     @unique @db.VarChar(120)
   password                 String
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean

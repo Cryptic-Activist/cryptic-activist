@@ -12,6 +12,7 @@ import {
   getUsers,
   updateUser,
 } from 'base-ca';
+import { buildVerifyAccountEmail, sendEmail } from '@/services/email';
 import {
   decodeToken,
   generatePrivateKeysBip39,
@@ -24,6 +25,7 @@ import {
 import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { debug } from '@/utils/logger/logger';
+import { generateRandomHash } from '@/utils/string';
 import { getRandomHighContrastColor } from '@/utils/color';
 
 export const login = async (req: Request, res: Response) => {
@@ -221,7 +223,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { names, username, password } = req.body;
+  const { names, username, email, password } = req.body;
 
   try {
     const generatedSalt = await bcrypt.genSalt(10);
@@ -243,13 +245,38 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
+    const existingEmail = await getUser({
+      where: {
+        email,
+      },
+    });
+    if (existingEmail) {
+      res.status(400).send({
+        errors: ['Email already exists'],
+      });
+      return;
+    }
+
+    let newUsername = username;
+
+    const existingUsername = await getUser({
+      where: {
+        username,
+      },
+    });
+    if (existingUsername) {
+      const hash = generateRandomHash(6);
+      newUsername = `${username}-${hash}`;
+    }
+
     const user = await createUser({
       where: { id: '' },
       update: {},
       create: {
         firstName: names.firstName,
         lastName: names.lastName,
-        username: username,
+        username: newUsername,
+        email,
         password: hash,
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,
@@ -265,9 +292,26 @@ export const register = async (req: Request, res: Response) => {
 
     await associateUserToLanguage({ userId: user.id, languageId: language.id });
 
+    const verifyAccountEmailBody = buildVerifyAccountEmail(user);
+
+    const emailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: 'Verify your account',
+      html: verifyAccountEmailBody,
+      text: 'Verify your account',
+    });
+
+    console.log('Email sent:', emailId);
+
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
     });
+
     return;
   } catch (err) {
     console.log({ err });

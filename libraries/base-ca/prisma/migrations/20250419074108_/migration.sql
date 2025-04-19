@@ -29,6 +29,7 @@ CREATE TABLE "admins" (
     "firstName" VARCHAR(50) NOT NULL,
     "lastName" VARCHAR(50) NOT NULL,
     "username" VARCHAR(120) NOT NULL,
+    "email" VARCHAR(120) NOT NULL,
     "password" TEXT NOT NULL,
     "isVerified" BOOLEAN DEFAULT false,
     "deletedAt" DATE,
@@ -257,7 +258,10 @@ CREATE TABLE "trades" (
     "expiredAt" TIMESTAMP(3),
     "status" "TradeStatus" NOT NULL,
     "paid" BOOLEAN DEFAULT false,
+    "paymentConfirmed" BOOLEAN DEFAULT false,
     "escrowReleaseDate" DATE,
+    "blockchainTradeId" BIGINT,
+    "blockchainTransactionHash" TEXT,
     "deletedAt" DATE,
     "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATE,
@@ -319,6 +323,7 @@ CREATE TABLE "users" (
     "firstName" VARCHAR(50) NOT NULL,
     "lastName" VARCHAR(50) NOT NULL,
     "username" VARCHAR(120) NOT NULL,
+    "email" VARCHAR(120) NOT NULL,
     "password" TEXT NOT NULL,
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
@@ -340,6 +345,9 @@ CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cry
 
 -- CreateIndex
 CREATE UNIQUE INDEX "admins_username_key" ON "admins"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admins_email_key" ON "admins"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "blocks_blockerId_blockedId_key" ON "blocks"("blockerId", "blockedId");
@@ -376,6 +384,9 @@ CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "t
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_privateKeys_key" ON "users"("privateKeys");
