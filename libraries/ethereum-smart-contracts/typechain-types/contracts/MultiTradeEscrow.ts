@@ -76,7 +76,7 @@ export interface MultiTradeEscrowInterface extends Interface {
       AddressLike,
       AddressLike,
       AddressLike,
-      AddressLike,
+      BigNumberish,
       BigNumberish,
       BigNumberish,
       BigNumberish,
@@ -389,10 +389,10 @@ export interface MultiTradeEscrow extends BaseContract {
       _buyer: AddressLike,
       _seller: AddressLike,
       _arbitrator: AddressLike,
-      _token: AddressLike,
-      _tokenAmount: BigNumberish,
+      _cryptoAmount: BigNumberish,
       _buyerCollateral: BigNumberish,
       _sellerCollateral: BigNumberish,
+      _sellerTotalDeposit: BigNumberish,
       _tradeDuration: BigNumberish,
       _feeRate: BigNumberish,
       _profitMargin: BigNumberish
@@ -434,14 +434,16 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
+        bigint,
         bigint
       ] & {
         buyer: string;
         seller: string;
         arbitrator: string;
-        tokenAmount: bigint;
+        cryptoAmount: bigint;
         buyerCollateral: bigint;
         sellerCollateral: bigint;
+        sellerTotalDeposit: bigint;
         feeRate: bigint;
         profitMargin: bigint;
         tradeDeadline: bigint;
@@ -471,7 +473,7 @@ export interface MultiTradeEscrow extends BaseContract {
         string,
         string,
         string,
-        string,
+        bigint,
         bigint,
         bigint,
         bigint,
@@ -484,10 +486,10 @@ export interface MultiTradeEscrow extends BaseContract {
         buyer: string;
         seller: string;
         arbitrator: string;
-        token: string;
-        tokenAmount: bigint;
+        cryptoAmount: bigint;
         buyerCollateral: bigint;
         sellerCollateral: bigint;
+        sellerTotalDeposit: bigint;
         feeRate: bigint;
         profitMargin: bigint;
         tradeDeadline: bigint;
@@ -535,10 +537,10 @@ export interface MultiTradeEscrow extends BaseContract {
       _buyer: AddressLike,
       _seller: AddressLike,
       _arbitrator: AddressLike,
-      _token: AddressLike,
-      _tokenAmount: BigNumberish,
+      _cryptoAmount: BigNumberish,
       _buyerCollateral: BigNumberish,
       _sellerCollateral: BigNumberish,
+      _sellerTotalDeposit: BigNumberish,
       _tradeDuration: BigNumberish,
       _feeRate: BigNumberish,
       _profitMargin: BigNumberish
@@ -579,14 +581,16 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
+        bigint,
         bigint
       ] & {
         buyer: string;
         seller: string;
         arbitrator: string;
-        tokenAmount: bigint;
+        cryptoAmount: bigint;
         buyerCollateral: bigint;
         sellerCollateral: bigint;
+        sellerTotalDeposit: bigint;
         feeRate: bigint;
         profitMargin: bigint;
         tradeDeadline: bigint;
@@ -621,7 +625,7 @@ export interface MultiTradeEscrow extends BaseContract {
         string,
         string,
         string,
-        string,
+        bigint,
         bigint,
         bigint,
         bigint,
@@ -634,10 +638,10 @@ export interface MultiTradeEscrow extends BaseContract {
         buyer: string;
         seller: string;
         arbitrator: string;
-        token: string;
-        tokenAmount: bigint;
+        cryptoAmount: bigint;
         buyerCollateral: bigint;
         sellerCollateral: bigint;
+        sellerTotalDeposit: bigint;
         feeRate: bigint;
         profitMargin: bigint;
         tradeDeadline: bigint;

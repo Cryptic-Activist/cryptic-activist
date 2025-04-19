@@ -1,14 +1,17 @@
 import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_ADDRESS,
+  ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_ESCROW_PRIVATE_KEY,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
 import { InitTradeParams, Token } from './types';
 import { Interface, ethers, parseEther } from 'ethers';
+import { Trade, getOffer } from 'base-ca';
 import { abis, addresses } from './data';
 
+import { Address } from './types';
 import escrowArtifact from '@/contracts/ethereum/artifacts/MultiTradeEscrow.json';
 
 const iface = new Interface(escrowArtifact.abi);
@@ -39,16 +42,6 @@ export const getEscrowContract = () => {
     escrowArtifact.abi,
     signer,
   );
-};
-
-export const getContractFactory = () => {
-  const signer = getSigner();
-  const factory = new ethers.ContractFactory(
-    escrowArtifact.abi,
-    escrowArtifact.bytecode,
-    signer,
-  );
-  return factory;
 };
 
 export const approveToken = async (_token: Token, amount: number) => {
@@ -100,53 +93,72 @@ export const decodeFunctionData = (receipt: any) => {
 };
 
 export const createTrade = async (params: InitTradeParams) => {
-  const contract = getEscrowContract();
+  try {
+    const contract = getEscrowContract();
 
-  // Convert ether values to wei
-  const cryptoAmountWei = parseEther(params.cryptoAmount.toString());
-  const buyerCollateralWei = parseEther(params.buyerCollateral.toString());
-  const sellerCollateralWei = parseEther(params.sellerCollateral.toString());
+    const tx = await contract.createTrade(
+      params.buyer,
+      params.seller,
+      params.arbitrator,
+      params.cryptoAmount,
+      params.buyerCollateral,
+      params.sellerCollateral,
+      params.sellerTotalDeposit,
+      params.tradeDuration,
+      params.feeRate,
+      params.profitMargin,
+    );
 
-  const tx = await contract.createTrade(
-    params.buyer,
-    params.seller,
-    params.arbitrator,
-    cryptoAmountWei,
-    buyerCollateralWei,
-    sellerCollateralWei,
-    params.tradeDuration,
-    params.feeRate,
-    params.profitMargin,
-  );
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
 
-  const receipt = await tx.wait();
-  const decoded = decodeFunctionData(receipt);
+    console.log({ receipt, decoded });
 
-  return decoded;
+    return { data: decoded, txHash: tx.hash, message: 'Trade created' };
+  } catch (error) {
+    return {
+      message: 'Error creating trade',
+      error: error,
+    };
+  }
 };
 
-export const fundTrade = async (tradeId: number, value: number) => {
-  const contract = getEscrowContract();
-  // Buyer deposits require sending value along with the transaction.
-  const tx = await contract.fundTrade(tradeId, {
-    value: parseEther(value.toString()),
-  });
-  const receipt = await tx.wait();
-  const decoded = decodeFunctionData(receipt);
+export const fundTrade = async (tradeId: number, value: bigint) => {
+  try {
+    const contract = getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.fundTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
 
-  return decoded;
+    return { data: decoded, txHash: tx.hash, message: 'Trade funded' };
+  } catch (error) {
+    return {
+      message: 'Error funding trade',
+      error: error,
+    };
+  }
 };
 
-export const confirmTrade = async (tradeId: number, value: number) => {
-  const contract = getEscrowContract();
-  // Buyer deposits require sending value along with the transaction.
-  const tx = await contract.confirmTrade(tradeId, {
-    value: parseEther(value.toString()),
-  });
-  const receipt = await tx.wait();
-  const decoded = decodeFunctionData(receipt);
+export const confirmTrade = async (tradeId: bigint, value: bigint) => {
+  try {
+    const contract = getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.confirmTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
 
-  return decoded;
+    return { data: decoded, txHash: tx.hash, message: 'Trade confirmed' };
+  } catch (error) {
+    return {
+      message: 'Error confirming trade',
+      error: error,
+    };
+  }
 };
 
 export const depositBySeller = async (value: bigint) => {
@@ -211,10 +223,56 @@ export const resolveDispute = async (
   return { message: 'Dispute resolved', txHash: tx.hash };
 };
 
-export const getTradeDetails = async () => {
+export const getTradeDetails = async (tradeId: bigint) => {
   const contract = getEscrowContract();
   // Buyer deposits require sending value along with the transaction.
-  const tx = await contract.getTradeBasicDetails();
+  const tx = await contract.getTrade(tradeId);
   await tx.wait();
   return { message: 'Trade details', txHash: tx.hash, details: tx };
+};
+
+export const getCreateTradeDetails = async (trade: Trade) => {
+  const offer = await getOffer({
+    where: { id: trade.offerId },
+    select: {
+      timeLimit: true,
+      offerType: true,
+    },
+  });
+
+  if (!offer) {
+    return null;
+  }
+
+  const isBuyOffer = offer?.offerType === 'buy';
+
+  const buyer = isBuyOffer
+    ? trade.traderWalletAddress
+    : trade.vendorWalletAddress;
+  const seller = isBuyOffer
+    ? trade.vendorWalletAddress
+    : trade.traderWalletAddress;
+  const tradeDuration = offer?.timeLimit * 60; // minutes -> seconds
+  const cryptoAmount = trade.cryptocurrencyAmount;
+  const collateral = cryptoAmount * 0.25;
+  const sellerFundAmount = cryptoAmount + collateral;
+
+  // Converting to Wei
+  const cryptoAmountWei = parseEther(cryptoAmount.toString());
+  const buyerCollateralWei = parseEther(collateral.toString());
+  const sellerCollateralWei = parseEther(collateral.toString());
+  const sellerFundAmountWei = parseEther(sellerFundAmount.toString());
+
+  return {
+    buyer: buyer as Address,
+    seller: seller as Address,
+    arbitrator: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+    cryptoAmountWei,
+    buyerCollateralWei,
+    sellerCollateralWei,
+    sellerFundAmountWei,
+    tradeDuration,
+    feeRate: 250,
+    profitMargin: 150,
+  };
 };

@@ -3,7 +3,6 @@
 import { Button, Chat } from '@/components';
 import React, { useEffect } from 'react';
 import {
-  useApp,
   useBlockchain,
   useRouter,
   useTrade,
@@ -14,20 +13,25 @@ import {
 import styles from './page.module.scss';
 
 const TradeVendor = () => {
-  const { trade, setPaid, setCanceled, setReceived, setVendorWalletAddress } =
-    useTrade();
+  const {
+    trade,
+    setPaid,
+    setCanceled,
+    setPaymentConfirmed,
+    setVendorWalletAddress,
+  } = useTrade();
   const { user, query } = useUser();
-  const { addToast } = useApp();
+  // const { addToast } = useApp();
   const { blockchain } = useBlockchain();
-  const { replace, back } = useRouter();
+  const { replace } = useRouter();
 
   const {
     sendMessage,
     setAsCanceled,
-    setAsPaymentReceived,
+    setAsPaymentConfirmed,
     messages,
     receiverStatus,
-    // escrowReleased,
+    escrowReleased,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.vendor,
@@ -37,35 +41,35 @@ const TradeVendor = () => {
     walletAddress: blockchain.account?.address,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
-    onSetReceived: setReceived,
+    onSetPaymentConfirmed: setPaymentConfirmed,
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
   });
 
   useEffect(() => {
-    if (query.isSuccess && !user.id) {
-      back();
-      return;
-    }
-    if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
-      back();
-      return;
-    }
-    if (!blockchain.account?.address) {
-      addToast('error', 'You must have a wallet connected to trade', 10000);
-      back();
-      return;
-    }
-    if (
-      trade.vendorWalletAddress &&
-      blockchain.account?.address !== trade.vendorWalletAddress
-    ) {
-      addToast(
-        'error',
-        'The current connected wallet must be the same one used to create the offer',
-        10000
-      );
-      back();
-    }
+    // if (query.isSuccess && !user.id) {
+    //   back();
+    //   return;
+    // }
+    // if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
+    //   back();
+    //   return;
+    // }
+    // if (!blockchain.account?.address) {
+    //   addToast('error', 'You must have a wallet connected to trade', 10000);
+    //   back();
+    //   return;
+    // }
+    // if (
+    //   trade.vendorWalletAddress &&
+    //   blockchain.account?.address !== trade.vendorWalletAddress
+    // ) {
+    //   addToast(
+    //     'error',
+    //     'The current connected wallet must be the same one used to create the offer',
+    //     10000
+    //   );
+    //   back();
+    // }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
 
   return (
@@ -77,11 +81,11 @@ const TradeVendor = () => {
           platform does not accept such request.
         </span>
         <p>{`${trade.trader?.firstName} ${trade.trader?.lastName}`}</p>
-        {trade.paid && (
+        {trade.paid && !trade.paymentConfirmed && (
           <Button
             type="button"
             onClick={() =>
-              setAsPaymentReceived({
+              setAsPaymentConfirmed({
                 from: trade.trader?.id,
                 to: trade.vendor?.id,
               })
@@ -90,17 +94,21 @@ const TradeVendor = () => {
             <strong>Set as Payment Received</strong>
           </Button>
         )}
-        <Button
-          onClick={() =>
-            setAsCanceled({
-              from: trade.trader?.id,
-              to: trade.vendor?.id,
-            })
-          }
-        >
-          Cancel
-        </Button>
-        <Button onClick={() => replace('/vendors')}>Leave trade</Button>
+        {!escrowReleased && (
+          <Button
+            onClick={() =>
+              setAsCanceled({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+          >
+            Cancel
+          </Button>
+        )}
+        {escrowReleased && (
+          <Button onClick={() => replace('/vendors')}>Leave trade</Button>
+        )}
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (

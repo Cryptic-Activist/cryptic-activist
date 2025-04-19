@@ -21,10 +21,10 @@ const useTradeSocket = ({
   walletAddress,
   onSetPaid,
   onSetCanceled,
-  onSetReceived,
+  onSetPaymentConfirmed,
 }: UseSocketParams) => {
   const { addToast } = useApp();
-  const { replace, back } = useRouter();
+  const { replace } = useRouter();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,7 +60,7 @@ const useTradeSocket = ({
     }
   };
 
-  const setAsPaymentReceived = (params: SetAsPaidParams) => {
+  const setAsPaymentConfirmed = (params: SetAsPaidParams) => {
     if (socket) {
       socket.emit('trade_set_payment_confirmed', { chatId, ...params });
     }
@@ -76,7 +76,11 @@ const useTradeSocket = ({
       newSocket.on('connect', () => {
         const vendorWalletAddress =
           user.id === trade.vendor?.id ? walletAddress : undefined;
-        console.log({ vendorWalletAddress });
+        console.log({
+          userId: user.id,
+          tradeVendorid: trade.vendor?.id,
+          vendorWalletAddress,
+        });
         // Join room
         newSocket.emit('join_room', {
           chatId,
@@ -91,12 +95,14 @@ const useTradeSocket = ({
 
       // Handle existing room messages
       newSocket.on('trade_error', (payload) => {
-        back();
+        // back();
+        console.log({ payload });
         addToast('error', payload.error, 10000);
       });
 
       // Handle existing room messages
       newSocket.on('room_messages', (existingMessages: Message[]) => {
+        console.log({ existingMessages });
         setMessages(existingMessages);
       });
 
@@ -124,7 +130,7 @@ const useTradeSocket = ({
       });
 
       newSocket.on('trade_set_payment_confirmed_success', (data) => {
-        onSetReceived(data.hasReceived);
+        onSetPaymentConfirmed(data.hasReceived);
         addToast('info', 'Payment has been set as Received', 8000);
       });
 
@@ -162,13 +168,17 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_payment_confirmed_error', (data) => {
         if (data.error) {
-          onSetReceived(false);
+          onSetPaymentConfirmed(false);
           addToast('error', 'Unable to set the payment as received', 8000);
         }
       });
 
       newSocket.on('chat_info_message', (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
+      });
+
+      newSocket.on('blockchain_trade_created', (_payload) => {
+        // setMessages((prevMessages) => [...prevMessages, message]);
       });
 
       setSocket(newSocket);
@@ -198,7 +208,7 @@ const useTradeSocket = ({
     appendMessage,
     setAsPaid,
     setAsCanceled,
-    setAsPaymentReceived,
+    setAsPaymentConfirmed,
   };
 };
 

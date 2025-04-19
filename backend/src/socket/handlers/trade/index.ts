@@ -8,12 +8,20 @@ import {
   cancelTrade,
   confirmFiatReceived,
   confirmFiatSent,
+  confirmTrade,
   getProvider,
   releaseTrade,
 } from '@/services/blockchains/ethereum';
-import { createChatMessage, getChat, redisClient, updateTrade } from 'base-ca';
+import {
+  createChatMessage,
+  getChat,
+  getTrade,
+  redisClient,
+  updateTrade,
+} from 'base-ca';
 
 import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
+import { parseEther } from 'ethers';
 
 export default class Trade {
   private socket: Socket;
@@ -37,17 +45,6 @@ export default class Trade {
           to,
         );
 
-        const confirmedFiatSent = await confirmFiatSent();
-
-        console.log({ confirmedFiatSent });
-
-        if (confirmedFiatSent.message !== 'Fiat sent confirmed') {
-          this.io
-            .to(senderSocketId!)
-            .emit('trade_set_paid_error', { error: true });
-          return;
-        }
-
         const chat = await getChat({
           where: { id: chatId },
           select: {
@@ -64,40 +61,19 @@ export default class Trade {
         });
 
         if (!updatedTrade) {
-          if (recipientSocketId) {
-            this.io.to(recipientSocketId).emit('trade_set_paid_error', {
-              error: true,
-            });
-          }
-          if (senderSocketId) {
-            this.io
-              .to(senderSocketId)
-              .emit('trade_set_paid_error', { error: true });
-          }
+          this.io.to(chatId).emit('trade_set_paid_error', { error: true });
+          return;
         }
 
-        if (recipientSocketId) {
-          this.io.to(recipientSocketId).emit('trade_set_paid_success', {
-            isPaid: true,
-          });
-          this.io.to(recipientSocketId).emit('chat_info_message', {
-            from,
-            to,
-            type: 'info',
-            message: 'Trader has set trade as Paid',
-          });
-        }
-        if (senderSocketId) {
-          this.io
-            .to(senderSocketId)
-            .emit('trade_set_paid_success', { isPaid: true });
-          this.io.to(senderSocketId).emit('chat_info_message', {
-            from,
-            to,
-            type: 'info',
-            message: 'Trader has set trade as Paid',
-          });
-        }
+        this.io.to(chatId).emit('trade_set_paid_success', {
+          isPaid: true,
+        });
+        this.io.to(chatId).emit('chat_info_message', {
+          from,
+          to,
+          type: 'info',
+          message: 'Trader has set trade as Paid',
+        });
       },
     );
   }
@@ -106,46 +82,52 @@ export default class Trade {
     this.socket.on(
       'trade_set_payment_confirmed',
       async ({ chatId, from, to }: SetTradeAsPaymentConfirmed) => {
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
+        const chat = await getChat({
+          where: { id: chatId },
+          select: {
+            tradeId: true,
+          },
+        });
 
-        const confirmedFiatReceived = await confirmFiatReceived();
+        const trade = await getTrade({
+          where: { id: chat?.tradeId },
+          select: {
+            id: true,
+            blockchainTradeId: true,
+            cryptocurrencyAmount: true,
+            vendorWalletAddress: true,
+            traderWalletAddress: true,
+            offer: {
+              select: {
+                timeLimit: true,
+                offerType: true,
+              },
+            },
+          },
+        });
 
-        console.log({ confirmedFiatReceived });
+        if (trade?.blockchainTradeId?.toString()) {
+          const confirmedTrade = await confirmTrade(
+            trade.blockchainTradeId,
+            parseEther(trade?.cryptocurrencyAmount.toString()),
+          );
 
-        if (confirmedFiatReceived.message !== 'Fiat received confirmed') {
-          this.io
-            .to(senderSocketId!)
-            .emit('trade_set_payment_confirmed_error', {
+          console.log({ confirmedTrade });
+
+          if (confirmedTrade.error) {
+            this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
               error: true,
             });
-          return;
-        }
-
-        const releasedTrade = await releaseTrade();
-
-        console.log({ releasedTrade });
-
-        if (releasedTrade.message !== 'Trade released') {
-          this.io.to(senderSocketId!).emit('trade_release_error', {
+            return;
+          }
+        } else {
+          console.log({ trade });
+          this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
             error: true,
           });
           return;
         }
 
-        const chat = await getChat({
-          where: { id: chatId },
-          select: {
-            tradeId: true,
-            id: true,
-          },
-        });
         const updatedTrade = await updateTrade({
           where: {
             id: chat?.tradeId,
@@ -159,66 +141,29 @@ export default class Trade {
         });
 
         if (!updatedTrade) {
-          if (recipientSocketId) {
-            this.io
-              .to(recipientSocketId)
-              .emit('trade_set_payment_confirmed_error', {
-                error: true,
-              });
-          }
-          if (senderSocketId) {
-            this.io
-              .to(senderSocketId)
-              .emit('trade_set_payment_confirmed_error', {
-                error: true,
-              });
-          }
+          this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
+            error: true,
+          });
+          return;
         }
 
-        if (recipientSocketId) {
-          this.io
-            .to(recipientSocketId)
-            .emit('trade_set_payment_confirmed_success', {
-              isPaid: true,
-            });
-          this.io.to(recipientSocketId).emit('chat_info_message', {
-            from,
-            to,
-            type: 'info',
-            message: 'Vendor has set payment as Received',
-          });
-          if (releasedTrade.message === 'Trade released') {
-            this.io.to(recipientSocketId).emit('chat_info_message', {
-              from,
-              to,
-              type: 'info',
-              message: 'Escrow has release the amount to both parties',
-            });
-            this.io.to(recipientSocketId).emit('escrow_released', { ok: true });
-          }
-        }
-        if (senderSocketId) {
-          this.io
-            .to(senderSocketId)
-            .emit('trade_set_payment_confirmed_success', {
-              isPaid: true,
-            });
-          this.io.to(senderSocketId).emit('chat_info_message', {
-            from,
-            to,
-            type: 'info',
-            message: 'Vendor has set payment as Received',
-          });
-          if (releasedTrade.message === 'Trade released') {
-            this.io.to(senderSocketId).emit('chat_info_message', {
-              from,
-              to,
-              type: 'info',
-              message: 'Escrow has release the amount to both parties',
-            });
-            this.io.to(senderSocketId).emit('escrow_released', { ok: true });
-          }
-        }
+        this.io.to(chatId).emit('trade_set_payment_confirmed_success', {
+          isPaid: true,
+        });
+        this.io.to(chatId).emit('chat_info_message', {
+          from,
+          to,
+          type: 'info',
+          message: 'Vendor has set payment as Received',
+        });
+
+        this.io.to(chatId).emit('chat_info_message', {
+          from,
+          to,
+          type: 'info',
+          message: 'Escrow has release the amount to both parties',
+        });
+        this.io.to(chatId).emit('escrow_released', { ok: true });
 
         if (chatId) {
           await createChatMessage({
