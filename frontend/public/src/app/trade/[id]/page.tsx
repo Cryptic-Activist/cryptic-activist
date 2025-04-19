@@ -71,7 +71,7 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
   const { replace } = useRouter();
   return (
     <section className={styles.section}>
-      {!escrowReleased ? (
+      {!escrowReleased && !trade.paid && (
         <Button
           onClick={() =>
             onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
@@ -88,7 +88,8 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
             </div>
           </div>
         </Button>
-      ) : (
+      )}
+      {escrowReleased && (
         <Button onClick={() => replace('/vendors')}>Leave trade</Button>
       )}
       <p>
@@ -148,10 +149,9 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled, setReceived } = useTrade();
+  const { trade, setPaid, setCanceled, setPaymentConfirmed } = useTrade();
   const { user, query } = useUser();
   const { timeLeftInMinutes, startCountDown: _startCountDown } = useCountDown();
-  const router = useRouter();
 
   const {
     sendMessage,
@@ -168,7 +168,7 @@ export default function TradePage() {
     trade,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
-    onSetReceived: setReceived,
+    onSetPaymentConfirmed: setPaymentConfirmed,
   });
 
   // useEffect(() => {
@@ -179,13 +179,13 @@ export default function TradePage() {
   // }, [trade.offer?.timeLimit]);
 
   useEffect(() => {
-    if (query.isSuccess && !user.id) {
-      router.back();
-      return;
-    }
-    if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
-      router.back();
-    }
+    // if (query.isSuccess && !user.id) {
+    //   router.back();
+    //   return;
+    // }
+    // if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
+    //   router.back();
+    // }
   }, [trade.trader?.id, user.id, query.isSuccess]);
 
   return (

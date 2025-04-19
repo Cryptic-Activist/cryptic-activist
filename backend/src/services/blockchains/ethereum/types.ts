@@ -1,12 +1,13 @@
-type Address = `0x${string}`;
+export type Address = `0x${string}`;
 
 export type InitTradeParams = {
   buyer: Address;
   seller: Address;
   arbitrator: Address;
-  cryptoAmount: number;
-  buyerCollateral: number;
-  sellerCollateral: number;
+  cryptoAmount: bigint;
+  buyerCollateral: bigint;
+  sellerCollateral: bigint;
+  sellerTotalDeposit: bigint;
   feeRate: number;
   tradeDuration: number;
   profitMargin: number;

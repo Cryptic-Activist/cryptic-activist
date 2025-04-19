@@ -10,6 +10,7 @@ import {
   createTrade,
   depositBySeller,
   fundTrade,
+  getCreateTradeDetails,
   getEscrowContract,
   getProvider,
   getSigner,
@@ -19,6 +20,7 @@ import {
   createChatMessage,
   getChat,
   getChatMessages,
+  getTrade,
   redisClient,
   updateTrade,
   updateUser,
@@ -53,208 +55,153 @@ export default class Chat {
       }: JoinRoomParams) => {
         await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
 
+        this.socket.join(chatId);
+        this.socket.to(chatId).emit('room_users_update', {
+          user,
+          status: 'online',
+        });
+
         const chat = await getChat({
           where: { id: chatId },
           select: {
-            trade: {
+            tradeId: true,
+          },
+        });
+
+        const trade = await getTrade({
+          where: { id: chat?.tradeId },
+          select: {
+            id: true,
+            traderId: true,
+            vendorId: true,
+            traderWalletAddress: true,
+            vendorWalletAddress: true,
+            cryptocurrencyAmount: true,
+            trader: {
               select: {
-                id: true,
-                traderId: true,
-                vendorId: true,
-                traderWalletAddress: true,
-                vendorWalletAddress: true,
-                cryptocurrencyAmount: true,
-                trader: {
+                tier: {
                   select: {
-                    tier: {
-                      select: {
-                        tradingFee: true,
-                        discount: true,
-                      },
-                    },
+                    tradingFee: true,
+                    discount: true,
                   },
                 },
-                offer: {
-                  select: {
-                    timeLimit: true,
-                    offerType: true,
-                  },
-                },
+              },
+            },
+            offer: {
+              select: {
+                timeLimit: true,
+                offerType: true,
               },
             },
           },
         });
 
-        // @ts-ignore
-        if (!chat?.trade?.id) {
-          this.socket.emit('trade_error', {
+        if (!trade?.id) {
+          this.io.to(chatId).emit('trade_error', {
             error: 'Trade not found',
           });
           return;
         }
 
-        // @ts-ignore
-        if (chat.trade.traderWalletAddress === vendorWalletAddress) {
-          this.socket.emit('trade_error', {
+        if (trade?.traderWalletAddress === vendorWalletAddress) {
+          this.io.to(chatId).emit('trade_error', {
             error: "Vendor's wallet can not be the same as Trader's wallet",
           });
           return;
         }
 
-        // @ts-ignore
         if (vendorWalletAddress) {
-          // @ts-ignore
-          if (!chat.trade.vendorWalletAddress) {
+          if (!trade?.vendorWalletAddress) {
             const updatedTrade = await updateTrade({
               where: {
-                // @ts-ignore
-                id: chat.trade?.id,
+                id: trade?.id,
               },
               toUpdate: {
                 vendorWalletAddress,
               },
             });
-            // await createChatMessage({
-            //   chatId,
-            //   from: 'none',
-            //   to: 'none',
-            //   type: 'info',
-            //   message: 'Vendor has entered the chat',
-            // });
-
-            const buyer =
-              // @ts-ignore
-              chat.trade.offer.offerType === 'buy'
-                ? (updatedTrade.vendorWalletAddress as WalletAddress)
-                : (updatedTrade.traderWalletAddress as WalletAddress);
-            const seller =
-              // @ts-ignore
-              chat.trade.offer.offerType === 'buy'
-                ? (updatedTrade.traderWalletAddress as WalletAddress)
-                : (updatedTrade.vendorWalletAddress as WalletAddress);
-            const cryptoAmountWei = parseEther(
-              // @ts-ignore
-              chat.trade.cryptocurrencyAmount.toString(),
-            ).toString();
-            const tradeDuration = chat.trade.offer.timeLimit * 60;
-            // @ts-ignore
-            const depositDuration = (chat.trade.offer.timeLimit * 60) / 4;
-            // @ts-ignore
-            const confirmationDuration = (chat.trade.offer.timeLimit * 60) / 2;
-            // @ts-ignore
-            const disputeTimeout = chat.trade.offer.timeLimit * 60 * 2;
-            const buyerCollateral = chat.trade.cryptocurrencyAmount * 0.25;
-            const sellerCollateral = chat.trade.cryptocurrencyAmount * 0.25;
-            const feeRate =
-              // @ts-ignore
-              (chat.trade.trader.tier.tradingFee -
-                // @ts-ignore
-                chat.trade.trader.tier.discount) *
-              1000;
-
-            const approvedToken = await approveToken(
-              'chainlnik',
-              chat.trade.cryptocurrencyAmount,
-            );
-
-            console.log({ approvedToken });
-
-            const tradeCreated = await createTrade({
-              buyer,
-              seller,
-              arbitrator: '0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db',
-              cryptoAmount: chat.trade.cryptocurrencyAmount,
-              buyerCollateral: buyerCollateral,
-              sellerCollateral: sellerCollateral,
-              tradeDuration,
-              feeRate: 250,
-              profitMargin: 150,
+            await createChatMessage({
+              chatId,
+              from: 'none',
+              to: 'none',
+              type: 'info',
+              message: 'Vendor has entered the chat',
             });
 
-            console.log({ tradeId: tradeCreated?.tradeId });
+            const createTradeDetails =
+              await getCreateTradeDetails(updatedTrade);
 
-            const fundAmountSeller =
-              chat.trade.cryptocurrencyAmount + sellerCollateral;
+            if (!createTradeDetails) {
+              this.io.to(chatId).emit('trade_error', {
+                error: 'Trade details not found',
+              });
+              return;
+            }
 
-            console.log({
-              fundAmountSeller,
+            const tradeCreated = await createTrade({
+              arbitrator: createTradeDetails.arbitrator,
+              buyer: createTradeDetails.buyer,
+              cryptoAmount: createTradeDetails.cryptoAmountWei,
+              feeRate: createTradeDetails.feeRate,
+              profitMargin: createTradeDetails.profitMargin,
+              seller: createTradeDetails.seller,
+              tradeDuration: createTradeDetails.tradeDuration,
+              buyerCollateral: createTradeDetails.buyerCollateralWei,
+              sellerCollateral: createTradeDetails.sellerCollateralWei,
+              sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
+            });
+
+            if (tradeCreated.error) {
+              this.io.to(chatId).emit('trade_error', {
+                error: tradeCreated.error,
+              });
+              return;
+            }
+
+            await createChatMessage({
+              chatId,
+              from: 'none',
+              to: 'none',
+              type: 'info',
+              message: tradeCreated.message,
+            });
+
+            await updateTrade({
+              where: { id: trade.id },
+              toUpdate: {
+                blockchainTradeId: tradeCreated.data?.tradeId,
+                blockchainTransactionHash: tradeCreated.txHash,
+              },
             });
 
             const tradeFunded = await fundTrade(
-              tradeCreated?.tradeId,
-              chat.trade.cryptocurrencyAmount + sellerCollateral,
+              tradeCreated.data?.tradeId,
+              createTradeDetails.sellerFundAmountWei,
             );
 
-            console.log({ tradeFunded });
+            if (tradeFunded.data) {
+              await createChatMessage({
+                chatId,
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: tradeFunded.message,
+              });
+            }
 
-            const confirmedTrade = await confirmTrade(
-              tradeCreated?.tradeId,
-              buyerCollateral,
-            );
+            await updateTrade({
+              where: {
+                id: trade?.id,
+              },
+              toUpdate: {
+                startedAt: new Date(),
+                status: 'IN_PROGRESS',
+              },
+            });
 
-            console.log({ confirmedTrade });
-
-            // const tradeCreated = await createTrade({
-            //   buyer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', // _buyer: the buyer's wallet address
-            //   seller: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', // _seller: the seller's wallet address
-            //   arbitrator: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65', // _arbitrator: the designated arbitrator's address
-            //   platformWallet: '0x90F79bf6EB2c4f870365E785982E1f101E93b906', // _platformWallet: platform's wallet address
-            //   cryptoAmount: '3',
-            //   buyerCollateral: '1',
-            //   sellerCollateral: '1',
-            //   feeRate: 200, // _feeRate: 2% fee in basis points
-            //   profitMargin: 250, // _profitMargin: 0.05 ETH in wei
-            //   tradeDuration: 3600,
-            // });
-
-            // console.log({ tradeCreated });
-
-            // if (tradeInitialized.message === 'Trade initialized') {
-            //   await createChatMessage({
-            //     chatId,
-            //     from: 'none',
-            //     to: 'none',
-            //     type: 'info',
-            //     message: tradeInitialized.message,
-            //   });
-            //   // const depositedByBuyer =
-            //   //   await depositByBuyer(1000000000000000000n);
-            //   // console.log({ depositedByBuyer });
-            //   // const depositedBySeller =
-            //   //   await depositBySeller(1000000000000000000n);
-            //   // console.log({ depositedBySeller });
-
-            //   // console.log({ Just: 'Before trade details' });
-
-            //   // const tradeDetails = await getTradeDetails();
-
-            //   // console.log({ tradeDetails });
-
-            //   // await createChatMessage({
-            //   //   chatId,
-            //   //   from: 'none',
-            //   //   to: 'none',
-            //   //   type: 'info',
-            //   //   message: depositedByBuyer.message,
-            //   // });
-            //   // await createChatMessage({
-            //   //   chatId,
-            //   //   from: 'none',
-            //   //   to: 'none',
-            //   //   type: 'info',
-            //   //   message: depositedBySeller.message,
-            //   // });
-
-            //   await updateTrade({
-            //     where: {
-            //       // @ts-ignore
-            //       id: chat?.trade.id,
-            //     },
-            //     toUpdate: {
-            //       status: 'IN_PROGRESS',
-            //     },
-            //   });
-            // }
+            this.io.to(chatId).emit('blockchain_trade_created', {
+              blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+            });
           }
         }
 
@@ -264,21 +211,8 @@ export default class Chat {
           orderBy: 'desc',
         });
 
-        this.socket.emit('room_messages', chatMessages);
-
-        // const recipientSocketId = await redisClient.hGet(
-        //   'onlineTradingUsers',
-        //   // @ts-ignore
-        //   chat.trade.traderId,
-        // );
-
-        // if (recipientSocketId) {
-        //   console.log({ chatMessages });
-        //   this.io.to(recipientSocketId).emit('receive_message', chatMessages);
-        // }
-
+        this.io.to(chatId).emit('room_messages', chatMessages);
         // Notify room about new user
-        this.io.to(chatId).emit('room_users_update', {});
         this.io.emit('user_status', { user, status: 'online' });
       },
     );
@@ -289,7 +223,7 @@ export default class Chat {
       this.socket.leave(chatId);
 
       // Notify room about user leaving
-      this.io.to(chatId).emit('room_users_update', {});
+      this.socket.to(chatId).emit('leave_room', {});
     });
   }
 

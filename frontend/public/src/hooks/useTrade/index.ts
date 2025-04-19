@@ -42,7 +42,7 @@ const useTrade = () => {
     });
   };
 
-  const setReceived = (hasReceived: boolean) => {
+  const setPaymentConfirmed = (hasReceived: boolean) => {
     trade.setTradeValue({
       paymentConfirmed: hasReceived,
     });
@@ -59,7 +59,7 @@ const useTrade = () => {
     trade,
     setPaid,
     setCanceled,
-    setReceived,
+    setPaymentConfirmed,
     setVendorWalletAddress,
   };
 };

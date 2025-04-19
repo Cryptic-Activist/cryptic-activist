@@ -2,16 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";  // Safe wrapper for ERC-20 transfers :contentReference[oaicite:0]{index=0}
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/**
- * @title Multi-Trade Escrow
- * @dev Facilitates multiple secure trades between buyers and sellers with arbitration support
- */
 contract MultiTradeEscrow {
-    using SafeERC20 for IERC20;
-
     address public platformWallet;
     address public owner;
     
@@ -26,10 +18,10 @@ contract MultiTradeEscrow {
         address buyer;
         address seller;
         address arbitrator;
-        IERC20  token; 
-        uint256 tokenAmount;
+        uint256 cryptoAmount;
         uint256 buyerCollateral;
         uint256 sellerCollateral;
+        uint256 sellerTotalDeposit;
         uint256 feeRate; // Basis points
         uint256 profitMargin; // Basis points
         uint256 tradeDeadline;
@@ -47,7 +39,7 @@ contract MultiTradeEscrow {
     event TradeCompleted(uint256 indexed tradeId);
     event TradeCancelled(uint256 indexed tradeId);
     event ArbitrationResolved(uint256 indexed tradeId, address winner, uint256 buyerAmount, uint256 sellerAmount);
-    
+
     // Constructor
     constructor(address _platformWallet, uint256 _feeRate, uint256 _profitMargin) {
         require(_platformWallet != address(0), "Invalid platform wallet");
@@ -107,17 +99,16 @@ contract MultiTradeEscrow {
         address _buyer,
         address _seller,
         address _arbitrator,
-        IERC20 _token,
-        uint256 _tokenAmount,
+        uint256 _cryptoAmount,
         uint256 _buyerCollateral,
         uint256 _sellerCollateral,
+        uint256 _sellerTotalDeposit,
         uint256 _tradeDuration,
         uint256 _feeRate,
         uint256 _profitMargin
     ) public returns (uint256) {
         require(_buyer != address(0) && _seller != address(0) && _arbitrator != address(0), "Invalid addresses");
-        require(address(_token) != address(0), "Invalid token");
-        require(_tokenAmount > 0, "Amount must be greater than 0");
+        require(_cryptoAmount > 0, "Amount must be greater than 0");
         
         // Use default fee and margin if 0 is provided
         uint256 feeRate = _feeRate > 0 ? _feeRate : defaultFeeRate;
@@ -135,17 +126,17 @@ contract MultiTradeEscrow {
             buyer: _buyer,
             seller: _seller,
             arbitrator: _arbitrator,
-            token: _token,
-            tokenAmount: _tokenAmount,
+            cryptoAmount: _cryptoAmount,
             buyerCollateral: _buyerCollateral,
             sellerCollateral: _sellerCollateral,
+            sellerTotalDeposit: _sellerTotalDeposit,
             feeRate: feeRate,
             profitMargin: profitMargin,
             tradeDeadline: block.timestamp + _tradeDuration,
             state: TradeState.Created
         });
         
-        emit TradeCreated(tradeId, _buyer, _seller, _tokenAmount);
+        emit TradeCreated(tradeId, _buyer, _seller, _cryptoAmount);
         return tradeId;
     }
     
@@ -160,17 +151,10 @@ contract MultiTradeEscrow {
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
-
-        // Ensure this trade is token‑based
-        require(address(trade.token) != address(0), "No token set for trade");
-
-        require(msg.value == trade.tokenAmount + trade.sellerCollateral, "Incorrect amount sent");
-
-        uint256 total = trade.tokenAmount + trade.sellerCollateral;
-        trade.token.safeTransferFrom(msg.sender, address(this), total);
-
+        require(msg.value == trade.sellerTotalDeposit, "Incorrect amount sent");
+        
         trade.state = TradeState.Funded;
-        emit TradeFunded(_tradeId, trade.tokenAmount, trade.sellerCollateral);
+        emit TradeFunded(_tradeId, trade.cryptoAmount, trade.sellerTotalDeposit);
     }
     
     /**
@@ -184,10 +168,7 @@ contract MultiTradeEscrow {
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
-
         require(msg.value >= trade.buyerCollateral, "Buyer collateral required");
-
-        trade.token.safeTransferFrom(msg.sender, address(this), trade.buyerCollateral);
         
         trade.state = TradeState.BuyerConfirmed;
         emit TradeConfirmed(_tradeId);
@@ -225,11 +206,11 @@ contract MultiTradeEscrow {
         
         Trade storage trade = trades[_tradeId];
         
-        uint256 platformFee = (trade.tokenAmount * trade.feeRate) / 10000;
-        uint256 platformProfit = (trade.tokenAmount * trade.profitMargin) / 10000;
+        uint256 platformFee = (trade.cryptoAmount * trade.feeRate) / 10000;
+        uint256 platformProfit = (trade.cryptoAmount * trade.profitMargin) / 10000;
         uint256 totalPlatformAmount = platformFee + platformProfit;
         
-        uint256 remainingAmount = trade.tokenAmount - totalPlatformAmount;
+        uint256 remainingAmount = trade.cryptoAmount - totalPlatformAmount;
         uint256 buyerAmount = (remainingAmount * buyerPercentage) / 100;
         uint256 sellerAmount = remainingAmount - buyerAmount;
         
@@ -238,9 +219,9 @@ contract MultiTradeEscrow {
         sellerAmount += trade.sellerCollateral;
         
         // Transfer funds
-        trade.token.safeTransfer(platformWallet, totalPlatformAmount);
-        trade.token.safeTransfer(trade.buyer, buyerAmount);
-        trade.token.safeTransfer(trade.seller, sellerAmount);
+        payable(platformWallet).transfer(totalPlatformAmount);
+        payable(trade.buyer).transfer(buyerAmount);
+        payable(trade.seller).transfer(sellerAmount);
         
         trade.state = TradeState.Completed;
         emit ArbitrationResolved(_tradeId, buyerPercentage > 50 ? trade.buyer : trade.seller, buyerAmount, sellerAmount);
@@ -252,17 +233,17 @@ contract MultiTradeEscrow {
     function _completeTrade(uint256 _tradeId) private {
         Trade storage trade = trades[_tradeId];
         
-        uint256 platformFee = (trade.tokenAmount * trade.feeRate) / 10000;
-        uint256 platformProfit = (trade.tokenAmount * trade.profitMargin) / 10000;
+        uint256 platformFee = (trade.cryptoAmount * trade.feeRate) / 10000;
+        uint256 platformProfit = (trade.cryptoAmount * trade.profitMargin) / 10000;
         uint256 totalPlatformAmount = platformFee + platformProfit;
         
         uint256 sellerAmount = trade.sellerCollateral;
-        uint256 buyerAmount = trade.tokenAmount + trade.buyerCollateral - totalPlatformAmount;
+        uint256 buyerAmount = trade.cryptoAmount + trade.buyerCollateral - totalPlatformAmount;
 
         // Transfer funds
-        trade.token.safeTransfer(platformWallet, totalPlatformAmount);
-        trade.token.safeTransfer(trade.seller, sellerAmount);
-        trade.token.safeTransfer(trade.buyer, buyerAmount);
+        payable(platformWallet).transfer(totalPlatformAmount);
+        payable(trade.seller).transfer(sellerAmount);
+        payable(trade.buyer).transfer(buyerAmount);
         
         trade.state = TradeState.Completed;
         emit TradeCompleted(_tradeId);
@@ -285,8 +266,7 @@ contract MultiTradeEscrow {
         
         if (trade.state == TradeState.Funded) {
             // Return funds to seller
-            trade.token.safeTransfer(trade.seller, trade.tokenAmount + trade.sellerCollateral);
-
+            payable(trade.seller).transfer(trade.cryptoAmount + trade.sellerCollateral);
         }
         
         trade.state = TradeState.Cancelled;
@@ -345,9 +325,10 @@ contract MultiTradeEscrow {
         address buyer,
         address seller,
         address arbitrator,
-        uint256 tokenAmount,
+        uint256 cryptoAmount,
         uint256 buyerCollateral,
         uint256 sellerCollateral,
+        uint256 sellerTotalDeposit,
         uint256 feeRate,
         uint256 profitMargin,
         uint256 tradeDeadline,
@@ -358,9 +339,10 @@ contract MultiTradeEscrow {
             trade.buyer,
             trade.seller,
             trade.arbitrator,
-            trade.tokenAmount,
+            trade.cryptoAmount,
             trade.buyerCollateral,
             trade.sellerCollateral,
+            trade.sellerTotalDeposit,
             trade.feeRate,
             trade.profitMargin,
             trade.tradeDeadline,

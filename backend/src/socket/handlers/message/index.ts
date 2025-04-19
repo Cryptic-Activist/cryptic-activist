@@ -37,7 +37,7 @@ export default class Message {
           );
           if (recipientSocketId) {
             // Deliver message in real time
-            this.io.to(recipientSocketId).emit('receive_message', {
+            this.socket.to(chatId).emit('receive_message', {
               from,
               to,
               createdAt: newMessage.createdAt,

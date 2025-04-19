@@ -60,8 +60,6 @@ const useBlockchain = () => {
       // const address = await connector.getAccounts();
       // const chain = await connector.getChainId();
 
-      console.log({ connector, onConnectAddress, chain });
-
       if (id) {
         setBlockchainValue(
           {
@@ -84,22 +82,6 @@ const useBlockchain = () => {
       setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
   }, [balance.isSuccess, id]);
-
-  // useEffect(() => {
-  //   if (id && address) {
-  //     setBlockchainValue(
-  //       {
-  //         account: { address: address },
-  //         chain,
-  //         wallet: connectorsSwitch[0].name,
-  //         balance: balance.data,
-  //       },
-  //       'blockchain/setWalletDetails'
-  //     );
-  //   }
-  // }, [address]);
-
-  // console.log({ status, address });
 
   return {
     blockchain: {
