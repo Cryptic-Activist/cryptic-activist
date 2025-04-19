@@ -1,4 +1,10 @@
-import { Login, PasswordReset, PrivateKeys, Register } from './zod';
+import {
+  AccountVerification,
+  Login,
+  PasswordReset,
+  PrivateKeys,
+  Register,
+} from './zod';
 import { NextFunction, Request, Response } from 'express';
 
 export const validateLogin = (
@@ -63,6 +69,24 @@ export const validatePrivateKeysRequest = (
   const { body } = req;
 
   const validated = PrivateKeys.safeParse(body);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+  }
+
+  next();
+};
+
+export const validateAccountVerificationRequest = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { params } = req;
+
+  const validated = AccountVerification.safeParse(params);
 
   if (!validated.success) {
     res.status(400).send({

@@ -3,9 +3,11 @@ import {
   login,
   loginDecodeToken,
   register,
+  verifyAccount,
   verifyPrivateKeys,
 } from '@/controllers/users/auth';
 import {
+  validateAccountVerificationRequest,
   validateLogin,
   validatePrivateKeysRequest,
   validateRegister,
@@ -25,6 +27,8 @@ router.get(
 );
 
 router.post('/register', validateRegister, register);
+
+router.get('/verify/:token', validateAccountVerificationRequest, verifyAccount);
 
 router.post(
   '/private-keys/verify',

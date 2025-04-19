@@ -35,13 +35,13 @@ const Register = () => {
         toggleModal('login');
       },
     },
-    {
-      label: 'Verify account',
-      onClick: () => {
-        resetNavigationBar();
-        toggleModal('verifyAccount');
-      },
-    },
+    // {
+    //   label: 'Verify account',
+    //   onClick: () => {
+    //     resetNavigationBar();
+    //     toggleModal('verifyAccount');
+    //   },
+    // },
   ];
 
   return (
