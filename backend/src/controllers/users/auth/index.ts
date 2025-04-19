@@ -418,7 +418,14 @@ export const verifyAccount = async (req: Request, res: Response) => {
       return;
     }
 
-    const decoded = decodeToken(token, JWT_SECRET);
+    if (verificationToken.isUsed) {
+      res.status(400).send({
+        errors: ['Verification is invalid'],
+        redirectUrl: `/?account-verified=0`,
+      });
+    }
+
+    const decoded = decodeToken(verificationToken.token, JWT_SECRET);
     if (!decoded) {
       res.status(401).send({
         errors: ['Unable to decode the token'],
