@@ -28,13 +28,13 @@ const Login = () => {
         toggleModal('resetPassword');
       },
     },
-    {
-      label: 'Verify account',
-      onClick: () => {
-        resetNavigationBar();
-        toggleModal('verifyAccount');
-      },
-    },
+    // {
+    //   label: 'Verify account',
+    //   onClick: () => {
+    //     resetNavigationBar();
+    //     toggleModal('verifyAccount');
+    //   },
+    // },
   ];
 
   return (

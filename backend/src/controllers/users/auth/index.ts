@@ -7,10 +7,13 @@ import {
   createLanguage,
   createTier,
   createUser,
+  createVerificationToken,
   getTrades,
   getUser,
   getUsers,
+  getVerificationToken,
   updateUser,
+  updateVerificationToken,
 } from 'base-ca';
 import { buildVerifyAccountEmail, sendEmail } from '@/services/email';
 import {
@@ -25,6 +28,7 @@ import {
 import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { debug } from '@/utils/logger/logger';
+import { generateAccessToken } from '@/utils/generators/jwt/jwt';
 import { generateRandomHash } from '@/utils/string';
 import { getRandomHighContrastColor } from '@/utils/color';
 
@@ -292,8 +296,26 @@ export const register = async (req: Request, res: Response) => {
 
     await associateUserToLanguage({ userId: user.id, languageId: language.id });
 
-    const verifyAccountEmailBody = buildVerifyAccountEmail(user);
+    const token = generateAccessToken(user.id, '30d');
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const newToken = await createVerificationToken({
+      where: { id: '' },
+      update: {},
+      create: {
+        token,
+        expiresAt,
+        isUsed: false,
+      },
+    });
 
+    if (!newToken) {
+      res.status(500).send({
+        errors: ['Unable to create verification token'],
+      });
+      return;
+    }
+
+    const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
     const emailId = await sendEmail({
       from: 'accounts@crypticactivist.com',
       to: user.email,
@@ -359,6 +381,73 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
     });
 
     res.status(200).send({});
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const verifyAccount = async (req: Request, res: Response) => {
+  const { token } = req.params;
+
+  try {
+    const verificationToken = await getVerificationToken({
+      where: {
+        token,
+      },
+    });
+
+    if (!verificationToken) {
+      res.status(400).send({
+        errors: ['Verification token not found'],
+        redirectUrl: `/?account-verified=0`,
+      });
+      return;
+    }
+
+    const isInThePast = new Date(verificationToken.expiresAt) < new Date();
+
+    if (isInThePast) {
+      res.status(400).send({
+        errors: ['Verification token expired'],
+        redirectUrl: '/?account-verified=0',
+      });
+      return;
+    }
+
+    const decoded = decodeToken(token, JWT_SECRET);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+        redirectUrl: '/?account-verified=0',
+      });
+      return;
+    }
+
+    await updateUser({
+      where: {
+        id: decoded.userId as string,
+      },
+      toUpdate: {
+        isVerified: true,
+      },
+    });
+
+    await updateVerificationToken({
+      where: {
+        id: verificationToken.id,
+      },
+      toUpdate: {
+        isUsed: true,
+      },
+    });
+
+    res.status(200).send({
+      redirectUrl: '/?account-verified=1',
+    });
     return;
   } catch (err) {
     res.status(500).send({

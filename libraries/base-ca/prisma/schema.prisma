@@ -414,3 +414,12 @@ model User {
   @@index([username])
   @@map("users")
 }
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  token     String
+  expiresAt DateTime @db.Timestamptz
+  isUsed    Boolean  @default(false) @db.Boolean
+
+  @@unique([id, token])
+}

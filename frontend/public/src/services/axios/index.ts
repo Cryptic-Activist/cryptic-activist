@@ -11,7 +11,7 @@ export const fetchGet = async (
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = axios.get(endpoint, {
+    const response = await axios.get(endpoint, {
       headers,
       signal: controller.signal,
     });
@@ -33,7 +33,7 @@ export const fetchPost = async (
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = axios.post(endpoint, body, {
+    const response = await axios.post(endpoint, body, {
       headers,
       signal: controller.signal,
     });
@@ -55,7 +55,7 @@ export const fetchPut = async (
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = axios.put(endpoint, body, {
+    const response = await axios.put(endpoint, body, {
       headers,
       signal: controller.signal,
     });
@@ -76,7 +76,7 @@ export const fetchDelete = async (
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = axios.delete(endpoint, {
+    const response = await axios.delete(endpoint, {
       ...params,
       signal: controller.signal,
     });

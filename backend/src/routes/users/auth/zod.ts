@@ -1,3 +1,4 @@
+import { token } from 'morgan';
 import { z } from 'zod';
 
 export const Login = z.object({
@@ -31,4 +32,8 @@ export const PasswordReset = z.string();
 export const PrivateKeys = z.object({
   username: z.string().min(3),
   privateKeys: z.string().array().length(12),
+});
+
+export const AccountVerification = z.object({
+  token: z.string().min(1),
 });
