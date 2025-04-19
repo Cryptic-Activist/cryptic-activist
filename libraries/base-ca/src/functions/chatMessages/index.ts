@@ -69,7 +69,7 @@ export const getChatMessages = async ({
 }: GetChatMessagesParams) => {
   let query = ChatMessage.find(
     { chatId: where?.chatId },
-    'createdAt from message to'
+    'createdAt from message type to'
   );
 
   if (orderBy) {

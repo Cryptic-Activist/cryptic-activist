@@ -12,6 +12,7 @@ import {
   ZodTags,
   ZodTerms,
   ZodTimeLimit,
+  ZodVendorWalletAddress,
 } from '@/layouts/sections/offer/create/zod';
 
 import { z } from 'zod';
@@ -58,12 +59,25 @@ export const CreateOfferTradePricing = z
 
 export const createOfferTradePricing = zodResolver(CreateOfferTradePricing);
 
-export const CreateOfferTradeInstructions = z.object({
-  tags: ZodTags,
-  label: ZodLabel,
-  terms: ZodTerms,
-  instructions: ZodInstructions,
-});
+const ethereumWalletAddressRegex = /^0x[a-fA-F0-9]{40}$/;
+
+export const CreateOfferTradeInstructions = z
+  .object({
+    tags: ZodTags,
+    label: ZodLabel,
+    terms: ZodTerms,
+    instructions: ZodInstructions,
+    vendorWalletAddress: ZodVendorWalletAddress,
+  })
+  .superRefine(({ vendorWalletAddress }, ctx) => {
+    if (!ethereumWalletAddressRegex.test(vendorWalletAddress)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Must be a valid wallet address',
+        path: ['vendorWalletAddress'],
+      });
+    }
+  });
 
 export const createOfferTradeInstructions = zodResolver(
   CreateOfferTradeInstructions

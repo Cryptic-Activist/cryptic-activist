@@ -152,31 +152,32 @@ model Language {
 }
 
 model Offer {
-  id                String         @id @default(uuid())
-  offerType         String
-  pricingType       String
-  listAt            Float
-  limitMin          Float
-  limitMax          Float
-  timeLimit         Float
-  tags              String[]
-  label             String
-  terms             String
-  averageTradeSpeed Float?
-  instructions      String
-  deletedAt         DateTime?      @db.Date
-  createdAt         DateTime?      @default(now()) @db.Date
-  updatedAt         DateTime?      @updatedAt @db.Date
-  vendor            User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
-  vendorId          String
-  cryptocurrency    Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cryptocurrencyId  String
-  paymentMethod     PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  paymentMethodId   String
-  fiat              Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fiatId            String
-  feedbacks         Feedback[]     @relation("feedbackOffer")
-  trades            Trade[]        @relation("tradeOffer")
+  id                  String         @id @default(uuid())
+  offerType           String
+  pricingType         String
+  listAt              Float
+  limitMin            Float
+  limitMax            Float
+  timeLimit           Float
+  tags                String[]
+  label               String
+  terms               String
+  averageTradeSpeed   Float?
+  instructions        String
+  deletedAt           DateTime?      @db.Date
+  createdAt           DateTime?      @default(now()) @db.Date
+  updatedAt           DateTime?      @updatedAt @db.Date
+  vendor              User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
+  vendorId            String
+  vendorWalletAddress String
+  cryptocurrency      Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cryptocurrencyId    String
+  paymentMethod       PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethodId     String
+  fiat                Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fiatId              String
+  feedbacks           Feedback[]     @relation("feedbackOffer")
+  trades              Trade[]        @relation("tradeOffer")
 
   @@map("offers")
 }
@@ -271,33 +272,38 @@ enum TradeStatus {
 }
 
 model Trade {
-  id                   String          @id @default(uuid())
-  paymentReceipt       PaymentReceipt? @relation(fields: [paymentReceiptId], references: [id])
-  paymentReceiptId     String?
-  vendor               User            @relation("vendorTrade", fields: [vendorId], references: [id])
-  vendorId             String
-  trader               User            @relation("traderTrade", fields: [traderId], references: [id])
-  traderId             String
-  offer                Offer           @relation("tradeOffer", fields: [offerId], references: [id])
-  offerId              String
-  cryptocurrency       Cryptocurrency  @relation("trade", fields: [cryptocurrencyId], references: [id])
-  cryptocurrencyId     String
-  fiat                 Fiat            @relation("trade", fields: [fiatId], references: [id])
-  fiatId               String
-  paymentMethodId      String
-  paymentMethod        PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
-  chat                 Chat?
-  cryptocurrencyAmount Float
-  fiatAmount           Float
-  startedAt            DateTime        @default(now())
-  endedAt              DateTime?
-  expiredAt            DateTime? // Time when the trade should be considered expired
-  status               TradeStatus
-  paid                 Boolean?        @default(false) @db.Boolean
-  escrowReleaseDate    DateTime?       @db.Date
-  deletedAt            DateTime?       @db.Date
-  createdAt            DateTime?       @default(now()) @db.Date
-  updatedAt            DateTime?       @updatedAt @db.Date
+  id                        String          @id @default(uuid())
+  paymentReceipt            PaymentReceipt? @relation(fields: [paymentReceiptId], references: [id])
+  paymentReceiptId          String?
+  vendor                    User            @relation("vendorTrade", fields: [vendorId], references: [id])
+  vendorId                  String
+  vendorWalletAddress       String?
+  trader                    User            @relation("traderTrade", fields: [traderId], references: [id])
+  traderId                  String
+  traderWalletAddress       String
+  offer                     Offer           @relation("tradeOffer", fields: [offerId], references: [id])
+  offerId                   String
+  cryptocurrency            Cryptocurrency  @relation("trade", fields: [cryptocurrencyId], references: [id])
+  cryptocurrencyId          String
+  fiat                      Fiat            @relation("trade", fields: [fiatId], references: [id])
+  fiatId                    String
+  paymentMethodId           String
+  paymentMethod             PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  chat                      Chat?
+  cryptocurrencyAmount      Float
+  fiatAmount                Float
+  startedAt                 DateTime        @default(now())
+  endedAt                   DateTime?
+  expiredAt                 DateTime? // Time when the trade should be considered expired
+  status                    TradeStatus
+  paid                      Boolean?        @default(false) @db.Boolean
+  paymentConfirmed          Boolean?        @default(false) @db.Boolean
+  escrowReleaseDate         DateTime?       @db.Date
+  blockchainTradeId         BigInt? // Trade ID on the blockchain
+  blockchainTransactionHash String? // Hash of the transaction on the blockchain
+  deletedAt                 DateTime?       @db.Date
+  createdAt                 DateTime?       @default(now()) @db.Date
+  updatedAt                 DateTime?       @updatedAt @db.Date
 
   @@map("trades")
 }

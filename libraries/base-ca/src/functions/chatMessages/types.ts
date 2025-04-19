@@ -5,6 +5,7 @@ export interface CreateChatMessageParams {
   chatId: string;
   from: string;
   to: string;
+  type?: 'info' | string;
   message: string;
   attachment?: Attachment;
 }
@@ -19,6 +20,7 @@ export interface UpdateChatMessageParams {
     from: string;
     to: string;
     message: string;
+    type?: 'info' | string;
     attachment?: Attachment;
   }>;
 }

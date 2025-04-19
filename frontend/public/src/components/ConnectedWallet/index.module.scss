@@ -19,6 +19,9 @@
   min-height: 1.8rem;
   display: flex;
   border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .address {
@@ -27,4 +30,12 @@
   font-size: 1rem;
   align-self: center;
   transform: translateY(1px);
+}
+
+.ethereumBgColor {
+  background-color: #7c86c8;
+}
+
+.polygonBgColor {
+  background-color: #631cf1;
 }

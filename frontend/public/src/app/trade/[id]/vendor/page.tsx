@@ -1,34 +1,75 @@
 'use client';
 
+import { Button, Chat } from '@/components';
 import React, { useEffect } from 'react';
-import { useTrade, useTradeSocket, useUser } from '@/hooks';
+import {
+  useBlockchain,
+  useRouter,
+  useTrade,
+  useTradeSocket,
+  useUser,
+} from '@/hooks';
 
-import { Chat } from '@/components';
 import styles from './page.module.scss';
-import { useRouter } from 'next/navigation';
 
 const TradeVendor = () => {
-  const { trade, setPaid, setCanceled } = useTrade();
+  const {
+    trade,
+    setPaid,
+    setCanceled,
+    setPaymentConfirmed,
+    setVendorWalletAddress,
+  } = useTrade();
   const { user, query } = useUser();
-  const router = useRouter();
+  // const { addToast } = useApp();
+  const { blockchain } = useBlockchain();
+  const { replace } = useRouter();
 
-  const { sendMessage, messages, receiverStatus } = useTradeSocket({
-    roomId: trade.chat?.id,
+  const {
+    sendMessage,
+    setAsCanceled,
+    setAsPaymentConfirmed,
+    messages,
+    receiverStatus,
+    escrowReleased,
+  } = useTradeSocket({
+    chatId: trade.chat?.id,
     user: trade.vendor,
     timeLimit: trade.offer?.timeLimit,
     tradePaid: trade.paid,
+    trade: trade,
+    walletAddress: blockchain.account?.address,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
+    onSetPaymentConfirmed: setPaymentConfirmed,
+    onSetUpdateVendorWalletAddress: setVendorWalletAddress,
   });
 
   useEffect(() => {
-    if (query.isSuccess && !user.id) {
-      router.back();
-      return;
-    }
-    if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
-      router.back();
-    }
+    // if (query.isSuccess && !user.id) {
+    //   back();
+    //   return;
+    // }
+    // if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
+    //   back();
+    //   return;
+    // }
+    // if (!blockchain.account?.address) {
+    //   addToast('error', 'You must have a wallet connected to trade', 10000);
+    //   back();
+    //   return;
+    // }
+    // if (
+    //   trade.vendorWalletAddress &&
+    //   blockchain.account?.address !== trade.vendorWalletAddress
+    // ) {
+    //   addToast(
+    //     'error',
+    //     'The current connected wallet must be the same one used to create the offer',
+    //     10000
+    //   );
+    //   back();
+    // }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
 
   return (
@@ -40,6 +81,34 @@ const TradeVendor = () => {
           platform does not accept such request.
         </span>
         <p>{`${trade.trader?.firstName} ${trade.trader?.lastName}`}</p>
+        {trade.paid && !trade.paymentConfirmed && (
+          <Button
+            type="button"
+            onClick={() =>
+              setAsPaymentConfirmed({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+          >
+            <strong>Set as Payment Received</strong>
+          </Button>
+        )}
+        {!escrowReleased && (
+          <Button
+            onClick={() =>
+              setAsCanceled({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+          >
+            Cancel
+          </Button>
+        )}
+        {escrowReleased && (
+          <Button onClick={() => replace('/vendors')}>Leave trade</Button>
+        )}
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (

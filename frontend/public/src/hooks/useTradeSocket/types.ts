@@ -1,13 +1,19 @@
+import { TradeSetter } from '@/store/trade/types';
+
 type Status = 'online' | 'offline';
 
 export type UseSocketParams = {
-  roomId?: string;
+  chatId?: string;
   user?: User;
   timeLimit?: number;
   tradePaid?: boolean;
+  trade: TradeSetter;
+  walletAddress?: string;
   onStatusChange?: (status: Status) => void;
   onSetPaid: (isPaid: boolean) => void;
   onSetCanceled: () => void;
+  onSetPaymentConfirmed: (hasReceived: boolean) => void;
+  onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
 };
 
 type User = {
@@ -20,6 +26,7 @@ type User = {
 export type Message = {
   from: string;
   to: string;
+  type?: string;
   message: string;
   attachment?: Attachment;
   createdAt: string;

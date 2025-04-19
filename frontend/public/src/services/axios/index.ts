@@ -47,14 +47,16 @@ export const fetchPost = async (
 
 export const fetchPut = async (
   endpoint: string,
-  params: object,
+  body: object,
+  headers?: AxiosRequestHeaders | any,
   timeout = 5000
 ) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = axios.put(endpoint, params, {
+    const response = axios.put(endpoint, body, {
+      headers,
       signal: controller.signal,
     });
     clearTimeout(timeoutId);

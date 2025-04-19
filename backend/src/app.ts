@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { ETHEREUM_ESCROW_CONTRACT_ADDRESS } from './constants/env';
 import { Server } from 'socket.io';
 import { connectDB } from 'base-ca';
 import { createServer } from 'node:http';

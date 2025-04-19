@@ -7,7 +7,7 @@ export const useBlockchainSlice: StateCreator<
   [['zustand/devtools', never]],
   [],
   BlockchainStore
-> = (set, get) => ({
+> = (set, _get) => ({
   blockchain: {
     account: undefined,
     balance: undefined,
@@ -29,14 +29,17 @@ export const useBlockchainSlice: StateCreator<
       );
     },
     resetBlockchain: () => {
-      const setValue = get().blockchain.setBlockchainValue;
-      setValue(
-        {
-          account: undefined,
-          balance: undefined,
-          chain: undefined,
-          wallet: undefined,
-        },
+      set(
+        ({ blockchain }) => ({
+          blockchain: {
+            ...blockchain,
+            account: undefined,
+            balance: undefined,
+            chain: undefined,
+            wallet: undefined,
+          },
+        }),
+        false,
         'blockchain/resetBlockchain'
       );
     },

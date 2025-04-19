@@ -83,7 +83,7 @@
   border-radius: 0.5em;
   transition: background-color 0.2s ease-in-out;
   &:hover {
-    background-color: globals.$primary-darken-10;
+    background-color: globals.$primary-darken-15;
   }
 }
 
@@ -99,6 +99,8 @@
   min-height: 3rem;
   display: flex;
   border-radius: 2rem;
+  align-items: center;
+  justify-content: center;
 }
 
 .provider {
@@ -138,27 +140,38 @@
   }
 }
 
-.section {
+.column {
   display: grid;
   grid-template-columns: repeat(2, 50%);
   gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
 }
 
 .valueContainer {
   display: flex;
   gap: 1px;
   flex-direction: column;
-  background-color: globals.$primary-darken-10;
+  background-color: globals.$primary-darken-15;
   width: 100%;
   padding: 1rem;
   border-radius: 0.5em;
   .label {
     font-size: 0.9rem;
   }
-  .valueNumber {
-    font-size: 2.5rem;
+  .value {
+    font-size: 1.8rem;
   }
-  .valueString {
-    font-size: 1.5rem;
-  }
+}
+
+.ethereumBgColor {
+  background-color: #7c86c8;
+}
+
+.polygonBgColor {
+  background-color: #631cf1;
 }

@@ -59,6 +59,8 @@ services:
     container_name: mongo-express
     env_file:
       - envs/dev.mongo-express.env
+    volumes:
+      - ./data:/data/db
     networks:
       - app-network
     ports:
@@ -88,6 +90,16 @@ services:
       - envs/dev.pgAdmin.env
     ports:
       - "5050:80"
+    networks:
+      - app-network
+
+  hardhat-node:
+    container_name: hardhat-node
+    build: 
+      context: libraries/ethereum-smart-contracts
+      dockerfile: dev.Dockerfile
+    ports:
+      - "8545:8545"
     networks:
       - app-network
 

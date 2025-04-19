@@ -13,6 +13,7 @@ export interface IChatMessage extends Document {
   from: string;
   to: string;
   message?: string;
+  type?: 'info' | string;
   attachment?: Attachment;
   createdAt: Date;
   updatedAt: Date;
