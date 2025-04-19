@@ -6,6 +6,7 @@ export type OnSubmitPayload = {
     lastName: string;
   };
   username: string;
+  email: string;
   confirmPassword: string;
   password: string;
 };

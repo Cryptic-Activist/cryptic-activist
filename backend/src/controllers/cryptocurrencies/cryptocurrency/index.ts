@@ -23,7 +23,7 @@ export const getPrice = async (
     const price = await getCoinPrice(id as string, fiatSymbol as string);
 
     // Cache the crypto price from 60 seconds
-    await redisClient.setEx(chacheKey, 10, JSON.stringify(price));
+    await redisClient.setEx(chacheKey, 60, JSON.stringify(price));
 
     if (price) {
       res.status(200).send({

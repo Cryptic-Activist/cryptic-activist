@@ -10,12 +10,19 @@ export const useRegisterSlice: StateCreator<
 > = (set, get) => ({
   register: {
     privateKeys: undefined,
+    firstName: undefined,
+    lastName: undefined,
+    username: undefined,
     setRegisterValue: (params, actionName = 'register/setValue') => {
       set(
         ({ register }) => ({
           register: {
             ...register,
             privateKeys: params.privateKeys ?? register.privateKeys,
+            firstName: params.firstName ?? register.firstName,
+            lastName: params.lastName ?? register.lastName,
+            username: params.username ?? register.username,
+            email: params.email ?? register.email,
           },
         }),
         false,

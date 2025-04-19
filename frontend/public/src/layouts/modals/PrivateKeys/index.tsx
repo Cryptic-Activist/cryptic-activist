@@ -1,6 +1,6 @@
 'use client';
 
-import { usePrivateKeys, useRegister } from '@/hooks';
+import { useNavigationBar, usePrivateKeys, useRegister } from '@/hooks';
 
 import { Button } from '@/components';
 import { FaClone } from 'react-icons/fa';
@@ -11,8 +11,8 @@ import styles from './index.module.scss';
 
 const PrivateKeys = () => {
   const { register } = useRegister();
-  const { handleCopyPrivateKeysToClipboard, onAccountVerification } =
-    usePrivateKeys();
+  const { resetNavigationBar } = useNavigationBar();
+  const { handleCopyPrivateKeysToClipboard } = usePrivateKeys();
 
   return (
     <Template
@@ -58,9 +58,9 @@ const PrivateKeys = () => {
             align="center"
             type="button"
             theme="primary"
-            onClick={onAccountVerification}
+            onClick={resetNavigationBar}
           >
-            Verify Account
+            Close
           </Button>
         </div>
       </div>
