@@ -55,8 +55,6 @@ const HowMuch: FC<HowMuchProps> = ({
     mutationStartTrade.isError,
   ]);
 
-  console.log({ cryptocurrencyAmount });
-
   return (
     <form
       className={`${coreStyles.container} ${coreStyles.howMuch} ${styles.container}`}

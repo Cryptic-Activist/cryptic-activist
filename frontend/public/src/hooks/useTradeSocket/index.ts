@@ -76,11 +76,6 @@ const useTradeSocket = ({
       newSocket.on('connect', () => {
         const vendorWalletAddress =
           user.id === trade.vendor?.id ? walletAddress : undefined;
-        console.log({
-          userId: user.id,
-          tradeVendorid: trade.vendor?.id,
-          vendorWalletAddress,
-        });
         // Join room
         newSocket.emit('join_room', {
           chatId,
@@ -96,13 +91,11 @@ const useTradeSocket = ({
       // Handle existing room messages
       newSocket.on('trade_error', (payload) => {
         // back();
-        console.log({ payload });
         addToast('error', payload.error, 10000);
       });
 
       // Handle existing room messages
       newSocket.on('room_messages', (existingMessages: Message[]) => {
-        console.log({ existingMessages });
         setMessages(existingMessages);
       });
 
@@ -116,9 +109,7 @@ const useTradeSocket = ({
         setRoomError(error);
       });
 
-      newSocket.on('room_full', (data) => {
-        console.log({ data });
-      });
+      newSocket.on('room_full', (_data) => {});
 
       newSocket.on('user_status', (data) => {
         onStatusChange(data.status);

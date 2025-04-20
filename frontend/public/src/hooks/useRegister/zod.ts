@@ -16,6 +16,7 @@ export const RegisterCredrentials = z
       lastName: ZodLastName,
     }),
     username: ZodUsername,
+    email: z.string().email('Invalid email address'),
     password: ZodPassword,
     confirmPassword: ZodConfirmPassword,
   })

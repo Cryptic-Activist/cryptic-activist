@@ -1,3 +1,4 @@
+import { token } from 'morgan';
 import { z } from 'zod';
 
 export const Login = z.object({
@@ -12,6 +13,7 @@ export const Register = z
       lastName: z.string().min(2),
     }),
     username: z.string().min(5),
+    email: z.string().email('Invalid email'),
     password: z.string().min(8),
     confirmPassword: z.string().min(8),
   })
@@ -31,3 +33,21 @@ export const PrivateKeys = z.object({
   username: z.string().min(3),
   privateKeys: z.string().array().length(12),
 });
+
+export const AccountVerification = z.object({
+  token: z.string().min(1),
+});
+
+export const PassswordReset = z
+  .object({
+    password: z.string().min(8),
+    passwordConfirm: z.string().min(8),
+  })
+  .superRefine(({ password, passwordConfirm }, ctx) => {
+    if (passwordConfirm !== password) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'The password must match',
+      });
+    }
+  });

@@ -13,6 +13,7 @@ import type { PaymentMethodCategoriesStore } from '../paymentMethodCategories/ty
 import type { PaymentMethodStore } from '../paymentMethod/types';
 import type { PaymentMethodsStore } from '../paymentMethods/types';
 import type { RegisterStore } from '../register/types';
+import type { ResetPasswordStore } from '../resetPassword/types';
 import type { TradeStore } from '../trade/types';
 import type { UserStore } from '../user/types';
 import type { VerifyAccountStore } from '../verifyAccount/types';
@@ -34,4 +35,5 @@ export type RootStore = AppStore &
   OffersStore &
   OfferStore &
   TradeStore &
-  NotificationsStore;
+  NotificationsStore &
+  ResetPasswordStore;

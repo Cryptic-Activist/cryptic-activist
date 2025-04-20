@@ -6,12 +6,20 @@ import {
   countUsers,
   createLanguage,
   createTier,
+  createToken,
   createUser,
+  getToken,
   getTrades,
   getUser,
   getUsers,
+  updateToken,
   updateUser,
 } from 'base-ca';
+import {
+  buildResetPasswordEmail,
+  buildVerifyAccountEmail,
+  sendEmail,
+} from '@/services/email';
 import {
   decodeToken,
   generatePrivateKeysBip39,
@@ -24,6 +32,9 @@ import {
 import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { debug } from '@/utils/logger/logger';
+import { generateAccessToken } from '@/utils/generators/jwt';
+import { generateRandomHash } from '@/utils/string';
+import { getExpiresAt } from '@/utils/date';
 import { getRandomHighContrastColor } from '@/utils/color';
 
 export const login = async (req: Request, res: Response) => {
@@ -221,7 +232,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { names, username, password } = req.body;
+  const { names, username, email, password } = req.body;
 
   try {
     const generatedSalt = await bcrypt.genSalt(10);
@@ -243,13 +254,38 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
+    const existingEmail = await getUser({
+      where: {
+        email,
+      },
+    });
+    if (existingEmail) {
+      res.status(400).send({
+        errors: ['Email already exists'],
+      });
+      return;
+    }
+
+    let newUsername = username;
+
+    const existingUsername = await getUser({
+      where: {
+        username,
+      },
+    });
+    if (existingUsername) {
+      const hashUsername = generateRandomHash(6);
+      newUsername = `${username}-${hashUsername}`;
+    }
+
     const user = await createUser({
       where: { id: '' },
       update: {},
       create: {
         firstName: names.firstName,
         lastName: names.lastName,
-        username: username,
+        username: newUsername,
+        email,
         password: hash,
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,
@@ -265,9 +301,45 @@ export const register = async (req: Request, res: Response) => {
 
     await associateUserToLanguage({ userId: user.id, languageId: language.id });
 
+    const expires = '30d';
+    const token = generateAccessToken(user.id, expires);
+    const expiresAt = getExpiresAt(expires);
+    const newToken = await createToken({
+      where: { id: '' },
+      update: {},
+      create: {
+        token,
+        expiresAt,
+        isUsed: false,
+      },
+    });
+
+    if (!newToken) {
+      res.status(500).send({
+        errors: ['Unable to create verification token'],
+      });
+      return;
+    }
+
+    const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
+    const emailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: 'Verify your account - Cryptic Activist',
+      html: verifyAccountEmailBody,
+      text: 'Verify your account',
+    });
+
+    console.log('Email sent:', emailId);
+
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
     });
+
     return;
   } catch (err) {
     console.log({ err });
@@ -317,6 +389,250 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
     res.status(200).send({});
     return;
   } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const verifyAccount = async (req: Request, res: Response) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = decodeToken(token, JWT_SECRET);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+      });
+      return;
+    }
+
+    await updateUser({
+      where: {
+        id: decoded.userId as string,
+      },
+      toUpdate: {
+        isVerified: true,
+      },
+    });
+
+    const verificationToken = await getToken({
+      where: {
+        token,
+      },
+    });
+
+    await updateToken({
+      where: {
+        id: verificationToken?.id,
+      },
+      toUpdate: {
+        isUsed: true,
+      },
+    });
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const resetPasswordRequest = async (req: Request, res: Response) => {
+  const { unique } = req.body;
+
+  try {
+    const user = await getUser({
+      where: {
+        OR: [
+          {
+            email: unique,
+          },
+          {
+            username: unique,
+          },
+        ],
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (!user) {
+      res.status(200).send({
+        ok: true,
+      });
+      return;
+    }
+
+    const expires = '20m';
+    const token = generateAccessToken(user.id, expires);
+    const expiresAt = getExpiresAt(expires);
+    const newToken = await createToken({
+      where: { id: '' },
+      update: {},
+      create: {
+        token,
+        expiresAt,
+        isUsed: false,
+      },
+    });
+
+    if (!newToken) {
+      res.status(500).send({
+        errors: ['Unable to create reset password token'],
+      });
+      return;
+    }
+
+    const resetPasswordEmailBody = buildResetPasswordEmail(user, token);
+    const emailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: 'Password reset - Cryptic Activist',
+      html: resetPasswordEmailBody,
+      text: 'Reset your password',
+    });
+
+    console.log('Email sent:', emailId);
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const resetPasswordVerifyToken = async (req: Request, res: Response) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = decodeToken(token, JWT_SECRET);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+      });
+      return;
+    }
+
+    const user = await getUser({
+      where: {
+        id: decoded.userId as string,
+      },
+    });
+
+    if (!user) {
+      res.status(404).send({
+        errors: ['User not found'],
+      });
+      return;
+    }
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const decoded = decodeToken(token, JWT_SECRET);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+      });
+      return;
+    }
+
+    const user = await getUser({
+      where: {
+        id: decoded.userId as string,
+      },
+    });
+
+    if (!user) {
+      res.status(404).send({
+        errors: ['User not found'],
+      });
+      return;
+    }
+
+    const generatedSalt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, generatedSalt);
+
+    const updatedPassword = await updateUser({
+      where: { id: user.id },
+      toUpdate: { password: hash },
+    });
+
+    if (!updatedPassword) {
+      res.status(400).send({
+        errors: ['Unable to reset password'],
+      });
+      return;
+    }
+
+    const existingToken = await getToken({
+      where: {
+        token,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!existingToken) {
+      res.status(400).send({
+        errors: ['Unable to find token'],
+      });
+      return;
+    }
+
+    const invalidatedToken = await updateToken({
+      where: {
+        id: existingToken?.id,
+      },
+      toUpdate: {
+        isUsed: true,
+      },
+    });
+
+    if (!invalidatedToken) {
+      res.status(400).send({
+        errors: ['Unable to invalidate token'],
+      });
+      return;
+    }
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
