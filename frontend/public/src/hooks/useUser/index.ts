@@ -31,6 +31,8 @@ const useUser = () => {
       return user;
     },
     refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   const {
     register: loginFormRegister,

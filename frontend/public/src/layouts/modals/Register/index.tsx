@@ -35,13 +35,6 @@ const Register = () => {
         toggleModal('login');
       },
     },
-    // {
-    //   label: 'Verify account',
-    //   onClick: () => {
-    //     resetNavigationBar();
-    //     toggleModal('verifyAccount');
-    //   },
-    // },
   ];
 
   return (
@@ -73,24 +66,12 @@ const Register = () => {
               </p>
               <p>
                 If you have any questions, please contact us at{' '}
-                <a href={`mailto:${APP_NAME}`}>{APP_NAME}</a>.
+                <a href={`mailto:${APP_NAME}`} className={styles.email}>
+                  {APP_NAME}
+                </a>
+                .
               </p>
               <p>Thank you for choosing {APP_NAME}!</p>
-              <p>Here are your account details:</p>
-              <ul className={styles.registrationInfoList}>
-                <li>
-                  <strong>First Name:</strong> {register.firstName}
-                </li>
-                <li>
-                  <strong>Last Name:</strong> {register.lastName}
-                </li>
-                <li>
-                  <strong>Username:</strong> {register.username}
-                </li>
-                <li>
-                  <strong>Email:</strong> {register.email}
-                </li>
-              </ul>
             </div>
             <Button
               type="button"

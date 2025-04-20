@@ -415,11 +415,12 @@ model User {
   @@map("users")
 }
 
-model VerificationToken {
+model Token {
   id        String   @id @default(uuid())
   token     String
   expiresAt DateTime @db.Timestamptz
   isUsed    Boolean  @default(false) @db.Boolean
 
   @@unique([id, token])
+  @@map("tokens")
 }

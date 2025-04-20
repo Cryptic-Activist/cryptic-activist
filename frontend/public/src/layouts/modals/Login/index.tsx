@@ -25,16 +25,9 @@ const Login = () => {
       label: 'Forgot password?',
       onClick: () => {
         resetNavigationBar();
-        toggleModal('resetPassword');
+        toggleModal('resetPasswordRequest');
       },
     },
-    // {
-    //   label: 'Verify account',
-    //   onClick: () => {
-    //     resetNavigationBar();
-    //     toggleModal('verifyAccount');
-    //   },
-    // },
   ];
 
   return (
