@@ -7,6 +7,8 @@ import {
   PaymentMethods,
   PrivateKeys,
   Register,
+  ResetPassword,
+  ResetPasswordRequest,
   WalletModal,
 } from '@/layouts/modals';
 
@@ -20,6 +22,12 @@ const AllModals = () => {
       {navigationBar.modals.login ? <Login /> : <></>}
       {navigationBar.modals.register ? <Register /> : <></>}
       {/* {navigationBar.modals.verifyAccount ? <VerifyAccount /> : <></>} */}
+      {navigationBar.modals.resetPasswordRequest ? (
+        <ResetPasswordRequest />
+      ) : (
+        <></>
+      )}
+      {navigationBar.modals.resetPassword ? <ResetPassword /> : <></>}
       {navigationBar.modals.fiats ? <Fiats /> : <></>}
       {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : <></>}
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : <></>}

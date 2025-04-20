@@ -13,6 +13,7 @@ type Tooltips = {
 type Modals = {
   login: boolean;
   register: boolean;
+  resetPasswordRequest: boolean;
   resetPassword: boolean;
   verifyAccount: boolean;
   privateKeys: boolean;
@@ -57,6 +58,7 @@ export type ToggleDrawerActionPayload = {
 export type Modal =
   | 'login'
   | 'register'
+  | 'resetPasswordRequest'
   | 'resetPassword'
   | 'verifyAccount'
   | 'privateKeys'

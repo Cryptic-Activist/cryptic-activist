@@ -37,3 +37,17 @@ export const PrivateKeys = z.object({
 export const AccountVerification = z.object({
   token: z.string().min(1),
 });
+
+export const PassswordReset = z
+  .object({
+    password: z.string().min(8),
+    passwordConfirm: z.string().min(8),
+  })
+  .superRefine(({ password, passwordConfirm }, ctx) => {
+    if (passwordConfirm !== password) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'The password must match',
+      });
+    }
+  });

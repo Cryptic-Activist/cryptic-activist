@@ -1,6 +1,6 @@
 import { FRONTEND_PUBLIC } from '@/constants/env';
 import { User } from 'base-ca';
-import { generateAccessToken } from '@/utils/generators/jwt/jwt';
+import { generateAccessToken } from '@/utils/generators/jwt';
 
 const buildVerifyAccountEmail = (user: User, token: string) => {
   const url = `${FRONTEND_PUBLIC}/account/verify/${token}`;

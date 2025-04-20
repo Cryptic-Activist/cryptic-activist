@@ -1,5 +1,1 @@
-export const IMPORTANT_ACTIONS = [
-  'Account Verification',
-  'Password Reset',
-  'Transaction Confirmation',
-];
+export const IMPORTANT_ACTIONS = ['Password Reset', 'Transaction Confirmation'];

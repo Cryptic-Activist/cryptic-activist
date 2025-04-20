@@ -24,12 +24,11 @@ export default function AccountVerification() {
 
   useEffect(() => {
     if (failureReason) {
-      // @ts-ignore
-      replace(failureReason?.response.data.redirectUrl);
+      replace('/?account-verified=0');
       return;
     }
     if (data) {
-      replace(data?.redirectUrl);
+      replace('/?account-verified=1');
       return;
     }
   }, [failureReason, data]);

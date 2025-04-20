@@ -340,6 +340,16 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "tokens" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expiresAt" TIMESTAMPTZ NOT NULL,
+    "isUsed" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cryptocurrencies"("coingeckoId");
 
@@ -393,6 +403,9 @@ CREATE UNIQUE INDEX "users_privateKeys_key" ON "users"("privateKeys");
 
 -- CreateIndex
 CREATE INDEX "users_username_idx" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
 
 -- AddForeignKey
 ALTER TABLE "blocks" ADD CONSTRAINT "blocks_blockerId_fkey" FOREIGN KEY ("blockerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

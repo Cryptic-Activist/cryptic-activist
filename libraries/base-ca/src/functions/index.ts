@@ -21,4 +21,4 @@ export * from './transactions';
 export * from './trusts';
 export * from './userLanguages';
 export * from './users';
-export * from './verificationTokens';
+export * from './tokens';
