@@ -2,9 +2,9 @@ import { JWT_REFRESH_SECRET, JWT_SECRET } from '@/constants/env';
 
 import jwt from 'jsonwebtoken';
 
-export function generateAccessToken(userId: string): string {
+export function generateAccessToken(userId: string, expiresIn?: any): string {
   return jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: '1d',
+    expiresIn: expiresIn || '1d',
   });
 }
 

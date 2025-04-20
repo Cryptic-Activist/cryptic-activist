@@ -6,8 +6,10 @@ import {
   useApp,
   useCryptocurrencies,
   useFiats,
+  useNavigationBar,
   useNotificationSocket,
   usePaymentMethods,
+  useURL,
   useUser,
 } from '@/hooks';
 
@@ -21,9 +23,11 @@ const InitialSettings = () => {
   const { getCryptocurrencies, getCryptocurrency, cryptocurrencies } =
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
+  const { setValue, setCurrentPrice, app, checkIsMobile, addToast } = useApp();
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
+  const { getSearchParams, removeSearchParam, pathname } = useURL();
+  const { toggleModal } = useNavigationBar();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);
@@ -160,7 +164,36 @@ const InitialSettings = () => {
     setCurrentPrice();
   }, [app.defaults.cryptocurrency?.coingeckoId, app.defaults.fiat?.symbol]);
 
-  return <></>;
+  const handleAccountVerifedParam = () => {
+    const isPasswordResetVerifiedParam = getSearchParams('account-verified');
+    const isAccountVerified = Number(isPasswordResetVerifiedParam);
+    if (isAccountVerified === 1) {
+      addToast(
+        'success',
+        'Account verified successfully, you can login now',
+        5000
+      );
+    } else if (isAccountVerified === 0) {
+      addToast('error', 'Account verification failed', 5000);
+    }
+    removeSearchParam('account-verified');
+  };
+
+  const handlePasswordResetVerifiedParam = () => {
+    const isPasswordResetVerifiedParam = getSearchParams('reset-password');
+    const isPasswordResetVerified = Number(isPasswordResetVerifiedParam);
+    if (isPasswordResetVerified === 1) {
+      toggleModal('resetPassword');
+    } else if (isPasswordResetVerified === 0) {
+      addToast('error', 'Password reset request is invalid', 5000);
+    }
+    removeSearchParam('reset-password');
+  };
+
+  useEffect(() => {
+    handleAccountVerifedParam();
+    handlePasswordResetVerifiedParam();
+  }, [pathname]);
 };
 
 export default InitialSettings;

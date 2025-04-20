@@ -4,16 +4,17 @@ import {
   getRandomCredentials,
   onSubmitUserRegistration,
 } from '@/services/register';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { OnSubmit } from './types';
 import { registerResolver } from './zod';
 import { useCountDown } from '..';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRootStore } from '@/store';
 
 const useRegister = () => {
+  const [successfulRegistration, setSuccessfulRegistration] = useState(false);
   const {
     navigationBar: { resetNavigationBar, toggleModal },
     register,
@@ -41,11 +42,12 @@ const useRegister = () => {
   } = useForm({ resolver: registerResolver });
 
   const onSubmit: OnSubmit = async (data) => {
-    const { confirmPassword, names, password, username } = data;
-    mutation.mutate({
+    const { confirmPassword, names, password, username, email } = data;
+    mutation.mutateAsync({
       confirmPassword,
       password,
       username,
+      email,
       names,
     });
   };
@@ -60,21 +62,38 @@ const useRegister = () => {
 
   useEffect(() => {
     if (mutation.data) {
+      register.setRegisterValue(
+        {
+          firstName: mutation.data.firstName,
+          lastName: mutation.data.lastName,
+          username: mutation.data.username,
+          email: mutation.data.email,
+        },
+        'register/setRegister'
+      );
       register.setPrivateKeys(mutation.data.privateKeys);
       const countdownMs = 5000;
       startCountDown(countdownMs);
       setTimeout(() => {
-        resetNavigationBar();
-        toggleModal('privateKeys');
+        setSuccessfulRegistration(true);
+        // resetNavigationBar();
+        // toggleModal('privateKeys');
       }, countdownMs);
     }
   }, [mutation.data]);
+
+  const toPrivateKeys = () => {
+    resetNavigationBar();
+    toggleModal('privateKeys');
+  };
 
   return {
     getRandomCredentials,
     registerForm,
     handleSubmit,
     onSubmit,
+    toPrivateKeys,
+    successfulRegistration,
     errors,
     query,
     mutation,
@@ -85,6 +104,7 @@ const useRegister = () => {
         lastName: getValues('names.lastName'),
       },
       username: getValues('username'),
+      email: getValues('email'),
       password: getValues('password'),
       confirmPassword: getValues('confirmPassword'),
     },
