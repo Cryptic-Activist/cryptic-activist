@@ -15,7 +15,6 @@ export default function PasswordResetVerify() {
     queryFn: async () => {
       if (token) {
         const verified = await validatePasswordResetToken(token);
-        console.log({ verified });
         return verified;
       }
     },

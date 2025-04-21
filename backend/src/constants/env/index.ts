@@ -43,3 +43,6 @@ export const ETHEREUM_DEPLOYER_ADDRESS = process.env
   .ETHEREUM_DEPLOYER_ADDRESS as `0x${string}`;
 export const ETHEREUM_DEPLOYER_PRIVATE_KEY = process.env
   .ETHEREUM_DEPLOYER_PRIVATE_KEY as `0${string}`;
+
+export const ALTCHA_HMAC_SECRET_KEY = process.env
+  .ALTCHA_HMAC_SECRET_KEY as string;

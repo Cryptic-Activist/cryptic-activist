@@ -25,8 +25,6 @@ export const validatePasswordResetToken = async (token: string) => {
     BACKEND + '/users/auth/password/reset/verify/' + token
   );
 
-  console.log({ response });
-
   if (response.status !== 200) {
     return response.data.errors;
   }
