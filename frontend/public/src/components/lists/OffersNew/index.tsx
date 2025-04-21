@@ -141,7 +141,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
   const { toggleModal } = useNavigationBar();
 
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
-  const [isPaymentMethodOpen, setisPaymentMethoOpen] = useState(false);
+  const [_isPaymentMethodOpen, setisPaymentMethoOpen] = useState(false);
 
   const toggleMoreFilters = () => {
     setIsMoreFiltersOpen((prev) => !prev);
@@ -169,7 +169,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
     updateHeight(isMoreFiltersOpen);
   }, [isMoreFiltersOpen]);
 
-  const ref = useOutsideClick(togglePaymentMethod);
+  const _ref = useOutsideClick(togglePaymentMethod);
 
   return (
     <div className={styles.filterSection}>
@@ -232,7 +232,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
           </button>
         </div>
 
-        <div className={styles.paymentMethodFilter}>
+        {/* <div className={styles.paymentMethodFilter}>
           <button
             className={styles.paymentMethodBtn}
             onClick={togglePaymentMethod}
@@ -279,7 +279,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
         <button
           className={`${styles.advancedFiltersBtn} ${styles.expanded}`}
