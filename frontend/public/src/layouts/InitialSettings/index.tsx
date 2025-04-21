@@ -9,6 +9,7 @@ import {
   useNavigationBar,
   useNotificationSocket,
   usePaymentMethods,
+  useResetPassword,
   useURL,
   useUser,
 } from '@/hooks';
@@ -28,6 +29,7 @@ const InitialSettings = () => {
   const {} = useNotificationSocket({ user });
   const { getSearchParams, clearSearchParams, searchParams } = useURL();
   const { toggleModal } = useNavigationBar();
+  const { resetPassword } = useResetPassword();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);
@@ -182,8 +184,10 @@ const InitialSettings = () => {
 
   const handlePasswordResetVerifiedParam = () => {
     const isPasswordResetVerifiedParam = getSearchParams('reset-password');
+    const token = getSearchParams('token') as string;
     const isPasswordResetVerified = Number(isPasswordResetVerifiedParam);
-    if (isPasswordResetVerified === 1) {
+    if (isPasswordResetVerified === 1 && token) {
+      resetPassword.setResetPassword({ token });
       toggleModal('resetPassword');
     } else if (isPasswordResetVerified === 0) {
       addToast('error', 'Password reset request is invalid', 5000);
