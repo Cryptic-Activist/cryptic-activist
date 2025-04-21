@@ -9,9 +9,10 @@ export type OfferItemProps = {
 export type FilterSectionProps = {
   app: AppStoreSetter;
   setValue: any;
+  updateHeight: (isMoreFiltersOpen: boolean) => void;
 };
 
 export type OffersNewProps = {
-  id: string;
+  id: 'home' | 'vendors';
   height: string;
 };
