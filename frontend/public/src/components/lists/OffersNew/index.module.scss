@@ -468,7 +468,8 @@
       }
     }
 
-    .offerAction {
+    .offerAction,
+    .offerActionMobile {
       display: flex;
       justify-content: flex-end;
       margin-top: 1rem;
@@ -482,6 +483,10 @@
         font-weight: 500;
         align-self: flex-end;
       }
+    }
+
+    .offerActionMobile {
+      display: none;
     }
 
     .verifiedBadge {
@@ -533,11 +538,6 @@
     width: fit-content;
   }
 
-  .exchangeRate {
-    position: absolute;
-    top: 0;
-  }
-
   .advancedFiltersGrid {
     grid-template-columns: 1fr;
   }
@@ -563,5 +563,60 @@
     .buyBtn {
       width: 100%;
     }
+  }
+}
+
+@media (max-width: 1190px) {
+  .offersHeader,
+  .offerItem {
+    grid-template-columns: 16.25rem 20.75rem 1fr 13.75rem !important;
+  }
+}
+
+@media (max-width: 1030px) {
+  .offersHeader {
+    grid-template-columns: unset !important;
+    grid-template-areas:
+      "headerVendor headerLeft"
+      "headerPaymentMethod headerTradeSpeed" !important;
+  }
+  .headerVendor {
+    grid-area: headerVendor;
+  }
+  .headerPaymentMethod {
+    grid-area: headerPaymentMethod;
+  }
+  .headerTradeSpeed {
+    text-align: end;
+    grid-area: headerTradeSpeed;
+  }
+  .offersHeaderLeft {
+    grid-area: headerLeft;
+  }
+
+  .offerItem {
+    grid-template-columns: unset !important;
+    grid-template-areas:
+      "vendor rate"
+      "labels labels"
+      "action action" !important;
+  }
+
+  .traderInfo {
+    grid-area: vendor;
+  }
+
+  .labelTermsTags {
+    grid-area: labels;
+  }
+  .tradeSpeed {
+    display: none;
+  }
+  .offerAction {
+    display: none !important;
+  }
+  .offerActionMobile {
+    display: flex !important;
+    grid-area: action;
   }
 }
