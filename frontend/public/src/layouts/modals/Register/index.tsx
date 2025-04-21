@@ -1,9 +1,9 @@
 'use client';
 
+import { Altcha, Button } from '@/components';
 import { Input, Links } from '@/components/forms';
 
 import { APP_NAME } from '@/constants';
-import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRegister } from '@/hooks';
@@ -146,6 +146,7 @@ const Register = () => {
               register={registerForm}
               errorMessage={errors['confirmPassword']?.message}
             />
+            <Altcha />
             <Button type="submit" padding="1rem" fullWidth>
               <>
                 {mutation.isPending && 'Registering...'}

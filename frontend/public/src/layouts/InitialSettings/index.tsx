@@ -168,7 +168,6 @@ const InitialSettings = () => {
 
   const handleAccountVerifedParam = () => {
     const isPasswordResetVerifiedParam = getSearchParams('account-verified');
-    console.log({ isPasswordResetVerifiedParam });
     const isAccountVerified = Number(isPasswordResetVerifiedParam);
     if (isAccountVerified === 1) {
       addToast(
