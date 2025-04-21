@@ -7,8 +7,8 @@ export const toCapitalize = (string: string): string => {
   )}`;
 };
 
-export const toUpperCase = (text: string) => {
-  return text.toUpperCase();
+export const toUpperCase = (text?: string) => {
+  return text ? text?.toUpperCase() : '';
 };
 
 export const toLowerCase = (text: string) => {
