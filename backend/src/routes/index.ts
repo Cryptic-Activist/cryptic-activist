@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import altcha from './altcha';
 import blockchains from './blockchains';
 import chats from './chats';
 import cryptocurrencies from './cryptocurrencies';
@@ -17,4 +18,5 @@ export default (app: Application): void => {
   app.use('/users', users);
   app.use('/system-messages', systemMessages);
   app.use('/blockchains', blockchains);
+  app.use('/altcha', altcha);
 };
