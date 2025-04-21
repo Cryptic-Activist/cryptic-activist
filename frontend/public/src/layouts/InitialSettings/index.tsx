@@ -26,7 +26,7 @@ const InitialSettings = () => {
   const { setValue, setCurrentPrice, app, checkIsMobile, addToast } = useApp();
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
-  const { getSearchParams, removeSearchParam, pathname } = useURL();
+  const { getSearchParams, clearSearchParams, searchParams } = useURL();
   const { toggleModal } = useNavigationBar();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
@@ -166,6 +166,7 @@ const InitialSettings = () => {
 
   const handleAccountVerifedParam = () => {
     const isPasswordResetVerifiedParam = getSearchParams('account-verified');
+    console.log({ isPasswordResetVerifiedParam });
     const isAccountVerified = Number(isPasswordResetVerifiedParam);
     if (isAccountVerified === 1) {
       addToast(
@@ -176,7 +177,7 @@ const InitialSettings = () => {
     } else if (isAccountVerified === 0) {
       addToast('error', 'Account verification failed', 5000);
     }
-    removeSearchParam('account-verified');
+    clearSearchParams();
   };
 
   const handlePasswordResetVerifiedParam = () => {
@@ -187,13 +188,17 @@ const InitialSettings = () => {
     } else if (isPasswordResetVerified === 0) {
       addToast('error', 'Password reset request is invalid', 5000);
     }
-    removeSearchParam('reset-password');
+    clearSearchParams();
   };
 
   useEffect(() => {
-    handleAccountVerifedParam();
-    handlePasswordResetVerifiedParam();
-  }, [pathname]);
+    if (Object.keys(searchParams).length > 0) {
+      handleAccountVerifedParam();
+      handlePasswordResetVerifiedParam();
+    }
+  }, [searchParams]);
+
+  return null;
 };
 
 export default InitialSettings;

@@ -7,3 +7,7 @@ export const generateRandomHash = (length = 4) => {
   }
   return hash;
 };
+
+export const isNumber = (value: string): boolean => {
+  return !isNaN(Number(value)) && value.trim() !== '';
+};
