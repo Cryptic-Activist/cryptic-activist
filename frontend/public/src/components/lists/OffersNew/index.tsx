@@ -12,7 +12,7 @@ import type {
   OfferItemProps,
   OffersNewProps,
 } from './types';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { getInitials, setLocalStorage, timeSince, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar, useOffers } from '@/hooks';
 
@@ -20,6 +20,7 @@ import { FaSpinner } from 'react-icons/fa';
 import Image from 'next/image';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Info from '@/components/Info';
+import Link from 'next/link';
 import styles from './index.module.scss';
 
 export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
@@ -40,10 +41,12 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
           )}
         </div>
         <div className={styles.traderDetails}>
-          <div
-            className={styles.traderName}
-          >{`${offer.vendor.firstName} ${offer.vendor.lastName}`}</div>
-          <div className={styles.traderUsername}>{offer.vendor.username}</div>
+          <Link href={`/vendor/${offer.vendor.id}`}>
+            <div
+              className={styles.traderName}
+            >{`${offer.vendor.firstName} ${offer.vendor.lastName}`}</div>
+            <div className={styles.traderUsername}>{offer.vendor.username}</div>
+          </Link>
           <div className={styles.traderMetrics}>
             <span className={styles.heartIcon}>
               <FaHeart size={10} /> {offer._count?.feedbacks}
@@ -125,7 +128,11 @@ export const OffersHeader = () => (
   </div>
 );
 
-export const FilterSection: FC<FilterSectionProps> = ({ app, setValue }) => {
+export const FilterSection: FC<FilterSectionProps> = ({
+  app,
+  setValue,
+  updateHeight,
+}) => {
   const { toggleModal } = useNavigationBar();
 
   const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
@@ -152,6 +159,10 @@ export const FilterSection: FC<FilterSectionProps> = ({ app, setValue }) => {
   const openFiatModal = () => {
     toggleModal('fiats');
   };
+
+  useEffect(() => {
+    updateHeight(isMoreFiltersOpen);
+  }, [isMoreFiltersOpen]);
 
   return (
     <div className={styles.filterSection}>
@@ -347,9 +358,22 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
   const { offers, loadMore, initialFetch } = useOffers();
   const { app, setValue } = useApp();
 
+  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+
+  const updateHeight = (_isMoreFiltersOpen: boolean) => {
+    setIsMoreFiltersOpen(_isMoreFiltersOpen);
+  };
+
+  const newHeight =
+    id === 'home' && isMoreFiltersOpen ? { height: '5.45rem' } : { height };
+
   return (
     <div className={styles.tradingContainer}>
-      <FilterSection app={app} setValue={setValue} />
+      <FilterSection
+        app={app}
+        setValue={setValue}
+        updateHeight={updateHeight}
+      />
 
       <div className={styles.offersList}>
         <OffersHeader />
@@ -360,7 +384,7 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
             hasMore={offers.hasMore && !offers.hasError}
             next={loadMore}
             style={{
-              ...(height && { height }),
+              ...(newHeight && { ...newHeight }),
             }}
             loader={
               <div
