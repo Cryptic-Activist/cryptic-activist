@@ -20,8 +20,6 @@ const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
     );
     const [value, setValue] = useState<string | null>(null);
 
-    console.log({ challengeurl: `${BACKEND}/altcha/challenge` });
-
     useImperativeHandle(
       ref,
       () => {
@@ -58,7 +56,7 @@ const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
         style={{
           '--altcha-max-width': '100%',
         }}
-        debug={IS_DEVELOPMENT}
+        debug={false}
         test={IS_DEVELOPMENT}
         floating
         floatingoffset={100}
