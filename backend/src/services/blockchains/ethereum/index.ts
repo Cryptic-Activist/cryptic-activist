@@ -161,34 +161,6 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   }
 };
 
-export const depositBySeller = async (value: bigint) => {
-  const contract = getEscrowContract();
-  const tx = await contract.depositBySeller({ value });
-  await tx.wait();
-  return { message: 'Seller deposit successful', txHash: tx.hash };
-};
-
-export const confirmFiatSent = async () => {
-  const contract = getEscrowContract();
-  const tx = await contract.confirmFiatSent();
-  await tx.wait();
-  return { message: 'Fiat sent confirmed', txHash: tx.hash };
-};
-
-export const confirmFiatReceived = async () => {
-  const contract = getEscrowContract();
-  const tx = await contract.confirmFiatReceived();
-  await tx.wait();
-  return { message: 'Fiat received confirmed', txHash: tx.hash };
-};
-
-export const releaseTrade = async () => {
-  const contract = getEscrowContract();
-  const tx = await contract.releaseTrade();
-  await tx.wait();
-  return { message: 'Trade released', txHash: tx.hash };
-};
-
 export const cancelTrade = async () => {
   const contract = getEscrowContract();
   const tx = await contract.cancelTrade();

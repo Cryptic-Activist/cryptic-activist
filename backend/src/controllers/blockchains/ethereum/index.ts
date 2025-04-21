@@ -1,16 +1,10 @@
 import { Request, Response } from 'express';
 import {
   cancelTrade,
-  confirmFiatReceived,
-  confirmFiatSent,
-  depositByBuyer,
-  depositBySeller,
   escalateDispute,
   getEscrowContract,
   getProvider,
-  initTrade,
   raiseDispute,
-  releaseTrade,
   resolveDispute,
 } from '@/services/blockchains/ethereum';
 
@@ -97,70 +91,6 @@ export const getEscrowContractController = async (
     res.status(200).json({ contract });
   } catch (error) {
     res.status(500).json({ error });
-  }
-};
-
-export const initTradeController = async (req: Request, res: Response) => {
-  try {
-    const tradeInitiated = await initTrade(req.body);
-
-    res.json(tradeInitiated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const depositByBuyerController = async (req: Request, res: Response) => {
-  try {
-    const depositedByBuyer = await depositByBuyer(req.body);
-    res.json(depositedByBuyer);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const depositBySellerController = async (
-  req: Request,
-  res: Response,
-) => {
-  try {
-    const depositedBySeller = await depositBySeller(req.body);
-    res.json(depositedBySeller);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const confirmFiatSentController = async (
-  _req: Request,
-  res: Response,
-) => {
-  try {
-    const confirmedFiatSent = await confirmFiatSent();
-    res.json(confirmedFiatSent);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const confirmFiatReceivedController = async (
-  _req: Request,
-  res: Response,
-) => {
-  try {
-    const confirmedFiatReceived = await confirmFiatReceived();
-    res.json(confirmedFiatReceived);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const releaseTradeController = async (_req: Request, res: Response) => {
-  try {
-    const releasedTrade = await releaseTrade();
-    res.json(releasedTrade);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 };
 

@@ -1,32 +1,46 @@
 'use client';
 
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, usePathname } from 'next/navigation';
 
-import useRouter from '../useRouter';
+import { getQueries } from '@/utils';
+import { useRouter } from '@/hooks';
 
 const useURL = () => {
   const { replace } = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const params = useParams();
 
+  const [searchParams, setSearchParams] = useState<{ [key: string]: string }>(
+    {}
+  );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const entries: { [key: string]: string } = {};
+      params.forEach((value, key) => {
+        entries[key] = value;
+      });
+      setSearchParams(entries);
+    }
+  }, []);
+
   const getSearchParams = (searchParam?: string) => {
-    const paramsObject = Object.fromEntries(searchParams.entries());
-    return searchParam ? paramsObject[searchParam] : paramsObject;
+    return searchParam ? searchParams[searchParam] : searchParams;
   };
 
   const removeSearchParam = (paramKey: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(paramKey);
-    const newUrl = `${pathname}?${params.toString()}`;
+    const deletedProperty = Object.fromEntries(
+      Object.entries(searchParams).filter(([key]) => key !== paramKey)
+    );
+    const queries = getQueries(deletedProperty);
+    const newUrl = pathname + queries;
     replace(newUrl);
   };
 
-  const clearSearchParams = (paramKey: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(paramKey);
-    const newUrl = `${pathname}?${params.toString()}`;
-    replace(newUrl);
+  const clearSearchParams = () => {
+    replace(pathname);
   };
 
   return {
