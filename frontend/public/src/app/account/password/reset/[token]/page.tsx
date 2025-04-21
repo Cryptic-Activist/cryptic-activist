@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useResetPassword, useRouter, useURL } from '@/hooks';
 
 import { useQuery } from '@tanstack/react-query';
+import { useURL } from '@/hooks';
 import { validatePasswordResetToken } from '@/services/resetPassword';
 
 export default function PasswordResetVerify() {
   const { params } = useURL();
   const token = params.token as string;
-
-  const { replace } = useRouter();
-  const { resetPassword } = useResetPassword();
 
   const { failureReason, data } = useQuery({
     queryKey: ['resetPasswordToken', params.token],
@@ -29,14 +26,11 @@ export default function PasswordResetVerify() {
 
   useEffect(() => {
     if (failureReason) {
-      replace('/?reset-password=0');
+      window.location.href = '/?reset-password=1';
       return;
     }
     if (data?.ok) {
-      resetPassword.setResetPassword({
-        token,
-      });
-      replace(`/?reset-password=1`);
+      window.location.href = '/?reset-password=1&token=' + token;
       return;
     }
   }, [failureReason, data]);
