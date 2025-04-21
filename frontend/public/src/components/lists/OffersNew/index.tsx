@@ -140,12 +140,12 @@ export const FilterSection: FC<FilterSectionProps> = ({
 }) => {
   const { toggleModal } = useNavigationBar();
 
-  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const [isMoreFiltersOpen, _setIsMoreFiltersOpen] = useState(false);
   const [_isPaymentMethodOpen, setisPaymentMethoOpen] = useState(false);
 
-  const toggleMoreFilters = () => {
-    setIsMoreFiltersOpen((prev) => !prev);
-  };
+  // const toggleMoreFilters = () => {
+  //   setIsMoreFiltersOpen((prev) => !prev);
+  // };
 
   const togglePaymentMethod = () => {
     setisPaymentMethoOpen((prev) => !prev);
@@ -281,16 +281,16 @@ export const FilterSection: FC<FilterSectionProps> = ({
           )}
         </div> */}
 
-        <button
+        {/* <button
           className={`${styles.advancedFiltersBtn} ${styles.expanded}`}
           onClick={toggleMoreFilters}
         >
           <span>More filters</span>
           <span>{isMoreFiltersOpen ? '▲' : '▼'}</span>
-        </button>
+        </button> */}
       </div>
 
-      {isMoreFiltersOpen && (
+      {/* {isMoreFiltersOpen && (
         <>
           <div className={styles.advancedFiltersPanel}>
             <div className={styles.advancedFiltersGrid}>
@@ -401,7 +401,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
             </div>
           </div>
         </>
-      )}
+      )} */}
     </div>
   );
 };
