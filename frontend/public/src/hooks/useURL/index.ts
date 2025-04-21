@@ -16,13 +16,15 @@ const useURL = () => {
   );
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const entries: { [key: string]: string } = {};
-    params.forEach((value, key) => {
-      entries[key] = value;
-    });
-    setSearchParams(entries);
-  }, [window?.location?.search]);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const entries: { [key: string]: string } = {};
+      params.forEach((value, key) => {
+        entries[key] = value;
+      });
+      setSearchParams(entries);
+    }
+  }, []);
 
   const getSearchParams = (searchParam?: string) => {
     return searchParam ? searchParams[searchParam] : searchParams;
