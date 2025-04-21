@@ -1,15 +1,9 @@
 import {
   cancelTradeController,
-  confirmFiatReceivedController,
-  confirmFiatSentController,
-  depositByBuyerController,
-  depositBySellerController,
   escalateDisputeController,
   getEscrowContractController,
   getEstimatedTradeCostController,
-  initTradeController,
   raiseDisputeController,
-  releaseTradeController,
   resolveDisputeController,
 } from '@/controllers/blockchains/ethereum';
 
@@ -39,18 +33,6 @@ const router = Router();
 router.get('/estimate-trade-cost', getEstimatedTradeCostController);
 
 router.get('/escrow', getEscrowContractController);
-
-router.post('/init-trade', initTradeController);
-
-router.post('/deposit-by-buyer', depositByBuyerController);
-
-router.post('/deposit-by-seller', depositBySellerController);
-
-router.post('/confirm-fiat-sent', confirmFiatSentController);
-
-router.post('/confirm-fiat-received', confirmFiatReceivedController);
-
-router.post('/release-trade', releaseTradeController);
 
 router.post('/cancel-trade', cancelTradeController);
 
