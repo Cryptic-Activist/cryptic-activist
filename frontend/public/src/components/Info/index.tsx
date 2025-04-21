@@ -2,7 +2,6 @@
 
 import React, { FC, useState } from 'react';
 
-import { FaInfo } from 'react-icons/fa6';
 import { InfoProps } from './types';
 import Tooltip from '../Tooltip';
 import styles from './index.module.scss';
@@ -21,7 +20,7 @@ const Info: FC<InfoProps> = ({ message }) => {
         onMouseEnter={toggleMessage}
         onMouseLeave={toggleMessage}
       >
-        <FaInfo size={12} />
+        <span>ⓘ</span>
       </div>
       {isOpen ? <p className={styles.message}>{message}</p> : <></>}
     </Tooltip>
