@@ -56,8 +56,6 @@ const useResetPassword = () => {
         passwordConfirm,
       });
 
-      console.log({ resetedPasswordResponse });
-
       if (resetedPasswordResponse.ok) {
         resetPassword.resetResetPassword();
         setPasswordResetSuccess(true);

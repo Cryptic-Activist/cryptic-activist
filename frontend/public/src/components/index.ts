@@ -21,5 +21,6 @@ export { default as Info } from './Info';
 export { default as DisplayCurrency } from './DisplayCurrency';
 export { default as Chat } from './Chat';
 export { default as FeedbackCount } from './FeedbackCount';
+export { default as Altcha } from './Altcha';
 export * from './lists';
 export * from './offer';

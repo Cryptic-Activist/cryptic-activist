@@ -1,8 +1,8 @@
 'use client';
 
+import { Altcha, Button } from '@/components';
 import { Input, Links } from '@/components/forms';
 
-import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useResetPassword } from '@/hooks';
@@ -62,7 +62,7 @@ const ResetPasswordRequest = () => {
               register={registerResetPasswordRequest}
               errorMessage={errorsResetPasswordRequest['unique']?.message}
             />
-
+            <Altcha />
             <Button type="submit" padding="1rem" fullWidth>
               Reset Password
             </Button>
