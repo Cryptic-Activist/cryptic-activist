@@ -14,7 +14,7 @@ import type {
 } from './types';
 import React, { FC, useEffect, useState } from 'react';
 import { getInitials, setLocalStorage, timeSince, toUpperCase } from '@/utils';
-import { useApp, useNavigationBar, useOffers } from '@/hooks';
+import { useApp, useNavigationBar, useOffers, useOutsideClick } from '@/hooks';
 
 import { FaSpinner } from 'react-icons/fa';
 import Image from 'next/image';
@@ -164,6 +164,8 @@ export const FilterSection: FC<FilterSectionProps> = ({
     updateHeight(isMoreFiltersOpen);
   }, [isMoreFiltersOpen]);
 
+  const ref = useOutsideClick(togglePaymentMethod);
+
   return (
     <div className={styles.filterSection}>
       <div className={styles.primaryFilters}>
@@ -190,14 +192,20 @@ export const FilterSection: FC<FilterSectionProps> = ({
           className={styles.cryptoSelector}
           onClick={openCryptocurrenciesModal}
         >
-          <Image
-            src={app.defaults?.cryptocurrency?.image ?? ''}
-            alt={app.defaults?.cryptocurrency?.name ?? ''}
-            width={30}
-            height={30}
-            className={styles.cryptoIcon}
-          />
-          <span>{app.defaults?.cryptocurrency?.name}</span>
+          {app.defaults?.cryptocurrency?.image ? (
+            <>
+              <Image
+                src={app.defaults?.cryptocurrency?.image}
+                alt={app.defaults?.cryptocurrency?.name}
+                width={30}
+                height={30}
+                className={styles.cryptoIcon}
+              />
+              <span>{app.defaults?.cryptocurrency?.name}</span>
+            </>
+          ) : (
+            <span className={styles.noData}>No Data</span>
+          )}
         </button>
 
         <div className={styles.exchangeRate}>{`1 ${toUpperCase(
@@ -226,7 +234,46 @@ export const FilterSection: FC<FilterSectionProps> = ({
           >
             Payment Method <span>{isPaymentMethodOpen ? '▲' : '▼'}</span>
           </button>
-          {isPaymentMethodOpen && <div></div>}
+          {isPaymentMethodOpen && (
+            <div className={styles.paymentMethodDropdown} ref={ref}>
+              <div className={`${styles.paymentOption} ${styles.selected}`}>
+                <input
+                  type="checkbox"
+                  className={styles.paymentOptionCheckbox}
+                  checked
+                />
+                All Payment Methods
+              </div>
+              <div className={styles.paymentOption}>
+                <input
+                  type="checkbox"
+                  className={styles.paymentOptionCheckbox}
+                />
+                BTC Swap
+              </div>
+              <div className={styles.paymentOption}>
+                <input
+                  type="checkbox"
+                  className={styles.paymentOptionCheckbox}
+                />
+                Wire Transfer
+              </div>
+              <div className={styles.paymentOption}>
+                <input
+                  type="checkbox"
+                  className={styles.paymentOptionCheckbox}
+                />
+                Bank Transfer
+              </div>
+              <div className={styles.paymentOption}>
+                <input
+                  type="checkbox"
+                  className={styles.paymentOptionCheckbox}
+                />
+                Cash Deposit
+              </div>
+            </div>
+          )}
         </div>
 
         <button
