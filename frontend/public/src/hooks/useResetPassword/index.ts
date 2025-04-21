@@ -50,13 +50,15 @@ const useResetPassword = () => {
   const onSubmitResetPassword: OnSubmit = async (data) => {
     const { passwordConfirm, password } = data;
     if (resetPassword.token) {
-      const resetedPassword = await mutationResetPassword.mutateAsync({
+      const resetedPasswordResponse = await mutationResetPassword.mutateAsync({
         token: resetPassword?.token,
         password,
         passwordConfirm,
       });
 
-      if (resetedPassword.ok) {
+      console.log({ resetedPasswordResponse });
+
+      if (resetedPasswordResponse.ok) {
         resetPassword.resetResetPassword();
         setPasswordResetSuccess(true);
       }

@@ -115,15 +115,20 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
           </button>
         </div>
       </div>
+      <div className={styles.offerActionMobile}>
+        <button className={styles.buyBtn}>
+          {app.type === 'buy' ? 'Buy' : 'Sell'}
+        </button>
+      </div>
     </div>
   );
 };
 
 export const OffersHeader = () => (
   <div className={styles.offersHeader}>
-    <div>Vendor</div>
-    <div>Payment Method</div>
-    <div>Trade Speed</div>
+    <div className={styles.headerVendor}>Vendor</div>
+    <div className={styles.headerPaymentMethod}>Payment Method</div>
+    <div className={styles.headerTradeSpeed}>Trade Speed</div>
     <div className={styles.offersHeaderLeft}>Rate</div>
   </div>
 );
