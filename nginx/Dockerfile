@@ -10,4 +10,4 @@ EXPOSE 80
 
 STOPSIGNAL SIGTERM
 
-# CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
