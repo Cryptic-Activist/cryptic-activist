@@ -41,7 +41,6 @@ export const getAltchaChallenge = async (req: Request, res: Response) => {
       signature,
     });
   } catch (err) {
-    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

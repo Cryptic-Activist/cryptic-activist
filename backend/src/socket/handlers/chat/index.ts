@@ -1,21 +1,5 @@
-import {
-  ETHEREUM_ESCROW_ADDRESS,
-  ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
-} from '@/constants/env';
-import type { IO, Socket, WalletAddress } from '../types';
+import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
-import {
-  approveToken,
-  confirmTrade,
-  createTrade,
-  depositBySeller,
-  fundTrade,
-  getCreateTradeDetails,
-  getEscrowContract,
-  getProvider,
-  getSigner,
-  getTradeDetails,
-} from '@/services/blockchains/ethereum';
 import {
   createChatMessage,
   getChat,
@@ -25,8 +9,11 @@ import {
   updateTrade,
   updateUser,
 } from 'base-ca';
-
-import { parseEther } from 'ethers';
+import {
+  createTrade,
+  fundTrade,
+  getCreateTradeDetails,
+} from '@/services/blockchains/ethereum';
 
 export default class Chat {
   private socket: Socket;
@@ -46,13 +33,7 @@ export default class Chat {
   async joinRoom() {
     this.socket.on(
       'join_room',
-      async ({
-        chatId,
-        timitLimit,
-        user,
-        tradeType,
-        vendorWalletAddress,
-      }: JoinRoomParams) => {
+      async ({ chatId, user, vendorWalletAddress }: JoinRoomParams) => {
         await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
 
         this.socket.join(chatId);
@@ -137,6 +118,8 @@ export default class Chat {
               });
               return;
             }
+
+            console.log({ createTradeDetails });
 
             const tradeCreated = await createTrade({
               arbitrator: createTradeDetails.arbitrator,

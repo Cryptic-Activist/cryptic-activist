@@ -29,8 +29,10 @@ import {
   sanitize,
 } from 'cryptic-utils';
 
+import { AccountVerification } from '@/routes/users/auth/zod';
 import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
+import buildAccountCreatedEmail from '@/services/email/templates/account-created';
 import { debug } from '@/utils/logger/logger';
 import { generateAccessToken } from '@/utils/generators/jwt';
 import { generateRandomHash } from '@/utils/string';
@@ -322,15 +324,28 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
-    const emailId = await sendEmail({
+    const accountVerifyEmailId = await sendEmail({
       from: 'accounts@crypticactivist.com',
       to: user.email,
       subject: 'Verify your account - Cryptic Activist',
       html: verifyAccountEmailBody,
       text: 'Verify your account',
     });
+    const accountCreatedEmailBody = buildAccountCreatedEmail(user);
+    const accountCreatedEmailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: 'Account creation - Cryptic Activist',
+      html: accountCreatedEmailBody,
+      text: 'Account creation',
+    });
 
-    console.log('Email sent:', emailId);
+    const promised = await Promise.all([
+      accountVerifyEmailId,
+      accountCreatedEmailId,
+    ]);
+
+    console.log({ promised });
 
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,

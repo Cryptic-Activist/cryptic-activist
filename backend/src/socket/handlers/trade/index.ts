@@ -4,14 +4,7 @@ import {
   SetTradeAsPaidParams,
   SetTradeAsPaymentConfirmed,
 } from './types';
-import {
-  cancelTrade,
-  confirmFiatReceived,
-  confirmFiatSent,
-  confirmTrade,
-  getProvider,
-  releaseTrade,
-} from '@/services/blockchains/ethereum';
+import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import {
   createChatMessage,
   getChat,
@@ -21,7 +14,9 @@ import {
 } from 'base-ca';
 
 import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
+import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
+import { sendEmail } from '@/services/email';
 
 export default class Trade {
   private socket: Socket;
@@ -116,14 +111,13 @@ export default class Trade {
 
           if (confirmedTrade.error) {
             this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
-              error: true,
+              error: 'Unable to confirm trade',
             });
             return;
           }
         } else {
-          console.log({ trade });
           this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
-            error: true,
+            error: 'Unable to find blockchain trade id',
           });
           return;
         }
@@ -142,7 +136,7 @@ export default class Trade {
 
         if (!updatedTrade) {
           this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
-            error: true,
+            error: 'Unable to update trade data',
           });
           return;
         }
@@ -181,6 +175,40 @@ export default class Trade {
             to: to,
           });
         }
+
+        const emailTrade = await getTrade({
+          where: { id: updatedTrade.id },
+          select: {
+            id: true,
+            offer: true,
+            trader: true,
+            vendor: true,
+            paymentMethod: true,
+            fiatAmount: true,
+            cryptocurrencyAmount: true,
+            cryptocurrency: true,
+            fiat: true,
+            startedAt: true,
+            endedAt: true,
+            status: true,
+          },
+        });
+
+        console.log({ emailTrade });
+
+        const accountCreatedEmailBody = await buildTradeConfirmationEmail(
+          emailTrade?.trader,
+          emailTrade!,
+        );
+        const accountCreatedEmailId = await sendEmail({
+          from: 'accounts@crypticactivist.com',
+          to: emailTrade?.trader?.email,
+          subject: 'Trade Confirmation - Cryptic Activist',
+          html: accountCreatedEmailBody,
+          text: 'Trade Confirmation',
+        });
+
+        console.log('Email id:', accountCreatedEmailId);
       },
     );
   }
