@@ -6,11 +6,9 @@ import {
   useApp,
   useCryptocurrencies,
   useFiats,
-  useNavigationBar,
   useNotificationSocket,
+  useParams,
   usePaymentMethods,
-  useResetPassword,
-  useURL,
   useUser,
 } from '@/hooks';
 
@@ -24,12 +22,10 @@ const InitialSettings = () => {
   const { getCryptocurrencies, getCryptocurrency, cryptocurrencies } =
     useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice, app, checkIsMobile, addToast } = useApp();
+  const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
-  const { getSearchParams, clearSearchParams, searchParams } = useURL();
-  const { toggleModal } = useNavigationBar();
-  const { resetPassword } = useResetPassword();
+  const {} = useParams();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);
@@ -165,41 +161,6 @@ const InitialSettings = () => {
   useEffect(() => {
     setCurrentPrice();
   }, [app.defaults.cryptocurrency?.coingeckoId, app.defaults.fiat?.symbol]);
-
-  const handleAccountVerifedParam = () => {
-    const isPasswordResetVerifiedParam = getSearchParams('account-verified');
-    const isAccountVerified = Number(isPasswordResetVerifiedParam);
-    if (isAccountVerified === 1) {
-      addToast(
-        'success',
-        'Account verified successfully, you can login now',
-        5000
-      );
-    } else if (isAccountVerified === 0) {
-      addToast('error', 'Account verification failed', 5000);
-    }
-    clearSearchParams();
-  };
-
-  const handlePasswordResetVerifiedParam = () => {
-    const isPasswordResetVerifiedParam = getSearchParams('reset-password');
-    const token = getSearchParams('token') as string;
-    const isPasswordResetVerified = Number(isPasswordResetVerifiedParam);
-    if (isPasswordResetVerified === 1 && token) {
-      resetPassword.setResetPassword({ token });
-      toggleModal('resetPassword');
-    } else if (isPasswordResetVerified === 0) {
-      addToast('error', 'Password reset request is invalid', 5000);
-    }
-    clearSearchParams();
-  };
-
-  useEffect(() => {
-    if (Object.keys(searchParams).length > 0) {
-      handleAccountVerifedParam();
-      handlePasswordResetVerifiedParam();
-    }
-  }, [searchParams]);
 
   return null;
 };

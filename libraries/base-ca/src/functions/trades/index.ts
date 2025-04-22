@@ -11,9 +11,7 @@ import {
   UpdateTradeParams,
 } from './types';
 
-export const createTrade = async (
-  params: CreateTrade
-): Promise<Trade> => {
+export const createTrade = async (params: CreateTrade) => {
   try {
     const newTrade = await prisma.trade.upsert(params);
 
@@ -25,7 +23,7 @@ export const createTrade = async (
 
 export const createManyTrades = async (
   params: CreateManyTrades[]
-): Promise<BatchPayload> => {
+) => {
   try {
     const newTrades = await prisma.trade.createMany({
       data: params,
@@ -40,7 +38,7 @@ export const createManyTrades = async (
 export const updateTrade = async ({
   toUpdate,
   where,
-}: UpdateTradeParams): Promise<Trade> => {
+}: UpdateTradeParams) => {
   const updated = await prisma.trade.update({
     where,
     data: toUpdate,
@@ -61,19 +59,14 @@ export const updateManyTrades = async ({
   return updated;
 };
 
-export const deleteTrade = async ({
-  where,
-}: DeleteTradeParams): Promise<Trade> => {
+export const deleteTrade = async ({ where }: DeleteTradeParams) => {
   const deleted = await prisma.trade.delete({
     where,
   });
   return deleted;
 };
 
-export const getTrade = async ({
-  where,
-  select,
-}: GetTradeParams): Promise<Trade | null> => {
+export const getTrade = async ({ where, select }: GetTradeParams) => {
   const trade = await prisma.trade.findFirst({
     ...(select && { select }),
     where,
@@ -90,7 +83,7 @@ export const getTrades = async ({
   limit,
   where,
   select,
-}: GetTradesParams): Promise<Trade[]> => {
+}: GetTradesParams) => {
   const trades = await prisma.trade.findMany({
     ...(limit && { take: limit }),
     ...(select && { select }),
@@ -107,7 +100,7 @@ export const getTradesPagination = async ({
   offset,
   cursor,
   orderBy,
-}: GetTradesPaginationParams): Promise<Trade[]> => {
+}: GetTradesPaginationParams) => {
   const trades = await prisma.trade.findMany({
     take: limit,
     ...(offset && { skip: offset }),
