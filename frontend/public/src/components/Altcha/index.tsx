@@ -1,7 +1,5 @@
 'use client';
 
-import 'altcha';
-
 import { BACKEND, IS_DEVELOPMENT } from '@/constants';
 import {
   forwardRef,
@@ -48,6 +46,10 @@ const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
           current.removeEventListener('statechange', handleStateChange);
       }
     }, [onStateChange]);
+
+    useEffect(() => {
+      import('altcha');
+    }, []);
 
     /* Configure your `challengeurl` and remove the `test` attribute, see docs: https://altcha.org/docs/website-integration/#using-altcha-widget  */
     return (
