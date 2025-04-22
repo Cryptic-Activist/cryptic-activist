@@ -60,14 +60,13 @@ export type PaymentReceipt = {
   url: string;
 };
 
-export enum Status {
-  PENDING,
-  IN_PROGRESS,
-  COMPLETED,
-  CANCELLED,
-  DISPUTED,
-  EXPIRED,
-}
+export type Status =
+  | 'PENDING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'DISPUTED'
+  | 'EXPIRED';
 
 export type Trade = {
   trade: {
@@ -80,6 +79,9 @@ export type Trade = {
     trader?: Trader;
     offer?: OfferSetter;
     endedAt?: string;
+    startedAt?: string;
+    blockchainTradeId?: string;
+    blockchainTransactionHash?: string;
     escrowReleaseDate?: string;
     expiredAt?: string;
     fiatAmount?: number;
@@ -104,6 +106,9 @@ export type TradeStore = {
     trader?: Trader;
     offer?: OfferSetter;
     endedAt?: string;
+    startedAt?: string;
+    blockchainTradeId?: string;
+    blockchainTransactionHash?: string;
     escrowReleaseDate?: string;
     expiredAt?: string;
     fiatAmount?: number;
@@ -130,6 +135,9 @@ export type TradeSetter = {
   trader?: Trader;
   offer?: OfferSetter;
   endedAt?: string;
+  startedAt?: string;
+  blockchainTradeId?: string;
+  blockchainTransactionHash?: string;
   escrowReleaseDate?: string;
   expiredAt?: string;
   fiatAmount?: number;

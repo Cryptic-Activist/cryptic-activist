@@ -11,9 +11,12 @@ export const useTradeSlice: StateCreator<
   trade: {
     cryptocurrency: undefined,
     cryptocurrencyAmount: undefined,
+    startedAt: undefined,
     endedAt: undefined,
     escrowReleaseDate: undefined,
     expiredAt: undefined,
+    blockchainTradeId: undefined,
+    blockchainTransactionHash: undefined,
     fiat: undefined,
     fiatAmount: undefined,
     id: undefined,
@@ -35,6 +38,12 @@ export const useTradeSlice: StateCreator<
               cryptocurrencyAmount:
                 params.cryptocurrencyAmount ?? trade.cryptocurrencyAmount,
               endedAt: params.endedAt ?? trade.endedAt,
+              startedAt: params.startedAt ?? trade.startedAt,
+              blockchainTradeId:
+                params.blockchainTradeId ?? trade.blockchainTradeId,
+              blockchainTransactionHash:
+                params.blockchainTransactionHash ??
+                trade.blockchainTransactionHash,
               escrowReleaseDate:
                 params.escrowReleaseDate ?? trade.escrowReleaseDate,
               expiredAt: params.expiredAt ?? trade.expiredAt,
@@ -69,8 +78,31 @@ export const useTradeSlice: StateCreator<
     },
     resetTrade: () => {
       const setValue = get().trade.setTradeValue;
-
-      setValue({}, 'trade/resetTrade');
+      console.log('reseting trade...');
+      setValue(
+        {
+          cryptocurrency: undefined,
+          cryptocurrencyAmount: undefined,
+          startedAt: undefined,
+          endedAt: undefined,
+          escrowReleaseDate: undefined,
+          expiredAt: undefined,
+          blockchainTradeId: undefined,
+          blockchainTransactionHash: undefined,
+          fiat: undefined,
+          fiatAmount: undefined,
+          id: undefined,
+          offer: undefined,
+          paid: undefined,
+          paymentMethod: undefined,
+          paymentReceipt: undefined,
+          status: undefined,
+          trader: undefined,
+          vendor: undefined,
+          chat: undefined,
+        },
+        'trade/resetTrade'
+      );
     },
   },
 });

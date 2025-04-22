@@ -21,10 +21,8 @@ const TradeVendor = () => {
     setVendorWalletAddress,
   } = useTrade();
   const { user, query } = useUser();
-  // const { addToast } = useApp();
   const { blockchain } = useBlockchain();
   const { replace } = useRouter();
-
   const {
     sendMessage,
     setAsCanceled,
@@ -32,6 +30,9 @@ const TradeVendor = () => {
     messages,
     receiverStatus,
     escrowReleased,
+    hasTradeBeenCreateBlockchain,
+    paid,
+    paymentConfirmed,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.vendor,
@@ -39,11 +40,16 @@ const TradeVendor = () => {
     tradePaid: trade.paid,
     trade: trade,
     walletAddress: blockchain.account?.address,
+    resetTrade: trade.resetTrade,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
   });
+  const canSetAsPaymentReceived =
+    paid && !paymentConfirmed && hasTradeBeenCreateBlockchain;
+
+  console.log({ paid, paymentConfirmed, hasTradeBeenCreateBlockchain });
 
   useEffect(() => {
     // if (query.isSuccess && !user.id) {
@@ -81,7 +87,7 @@ const TradeVendor = () => {
           platform does not accept such request.
         </span>
         <p>{`${trade.trader?.firstName} ${trade.trader?.lastName}`}</p>
-        {trade.paid && !trade.paymentConfirmed && (
+        {canSetAsPaymentReceived && (
           <Button
             type="button"
             onClick={() =>

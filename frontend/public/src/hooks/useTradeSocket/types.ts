@@ -9,6 +9,7 @@ export type UseSocketParams = {
   tradePaid?: boolean;
   trade: TradeSetter;
   walletAddress?: string;
+  resetTrade: () => void;
   onStatusChange?: (status: Status) => void;
   onSetPaid: (isPaid: boolean) => void;
   onSetCanceled: () => void;

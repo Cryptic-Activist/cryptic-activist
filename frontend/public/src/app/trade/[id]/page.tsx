@@ -65,13 +65,17 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
   trade,
   timeLeft,
   escrowReleased,
+  hasTradeBeenCreateBlockchain,
+  paid,
   onSetAsPaid,
   onSetAsCanceled,
 }) => {
+  console.log({ escrowReleased, paid, hasTradeBeenCreateBlockchain });
   const { replace } = useRouter();
+  const canSetAsPaid = !escrowReleased && !paid && hasTradeBeenCreateBlockchain;
   return (
     <section className={styles.section}>
-      {!escrowReleased && !trade.paid && (
+      {canSetAsPaid && (
         <Button
           onClick={() =>
             onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
@@ -158,6 +162,8 @@ export default function TradePage() {
     messages,
     receiverStatus,
     escrowReleased,
+    hasTradeBeenCreateBlockchain,
+    paid,
     setAsPaid,
     setAsCanceled,
   } = useTradeSocket({
@@ -166,6 +172,7 @@ export default function TradePage() {
     timeLimit: trade.offer?.timeLimit,
     tradePaid: trade.paid,
     trade,
+    resetTrade: trade.resetTrade,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
@@ -204,6 +211,8 @@ export default function TradePage() {
           onSetAsPaid={setAsPaid}
           onSetAsCanceled={setAsCanceled}
           escrowReleased={escrowReleased}
+          hasTradeBeenCreateBlockchain={hasTradeBeenCreateBlockchain}
+          paid={paid}
         />
         <TradeInstructions trade={trade} />
       </div>

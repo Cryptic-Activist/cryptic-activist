@@ -22,6 +22,7 @@ const useTradeSocket = ({
   onSetPaid,
   onSetCanceled,
   onSetPaymentConfirmed,
+  resetTrade,
 }: UseSocketParams) => {
   const { addToast } = useApp();
   const { replace } = useRouter();
@@ -32,6 +33,10 @@ const useTradeSocket = ({
   const [receiverStatus, setReceiverStatus] =
     useState<ReceiverStatus>('online');
   const [escrowReleased, setEscrowRelease] = useState(false);
+  const [hasTradeBeenCreateBlockchain, setHasTradeBeenCreateBlockchain] =
+    useState(false);
+  const [paid, setPaid] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -117,6 +122,7 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_paid_success', (data) => {
         onSetPaid(data.isPaid);
+        setPaid(true);
         addToast('info', 'Trade has been set as Paid', 8000);
       });
 
@@ -126,6 +132,7 @@ const useTradeSocket = ({
       });
 
       newSocket.on('escrow_released', () => {
+        setPaymentConfirmed(true);
         setEscrowRelease(true);
         addToast(
           'success',
@@ -169,7 +176,7 @@ const useTradeSocket = ({
       });
 
       newSocket.on('blockchain_trade_created', (_payload) => {
-        // setMessages((prevMessages) => [...prevMessages, message]);
+        setHasTradeBeenCreateBlockchain(true);
       });
 
       setSocket(newSocket);
@@ -185,16 +192,50 @@ const useTradeSocket = ({
   }, [chatId, user]);
 
   useEffect(() => {
+    if (trade.blockchainTradeId) {
+      setHasTradeBeenCreateBlockchain(true);
+    }
+  }, [trade.blockchainTradeId]);
+
+  useEffect(() => {
+    if (trade.paid) {
+      console.log({ tradeTested: trade });
+      setPaid(true);
+    }
+  }, [trade.paid]);
+
+  useEffect(() => {
+    if (trade.paymentConfirmed) {
+      setPaymentConfirmed(true);
+    }
+  }, [trade.paymentConfirmed]);
+
+  useEffect(() => {
     if (trade.escrowReleaseDate) {
       setEscrowRelease(true);
     }
   }, [trade.escrowReleaseDate]);
+
+  useEffect(() => {
+    // Reset all states on unmount
+    return () => {
+      setEscrowRelease(false);
+      setPaid(false);
+      setPaymentConfirmed(false);
+      setHasTradeBeenCreateBlockchain(false);
+      resetTrade();
+      setMessages([]);
+    };
+  }, []);
 
   return {
     messages,
     roomError,
     receiverStatus,
     escrowReleased,
+    hasTradeBeenCreateBlockchain,
+    paid,
+    paymentConfirmed,
     sendMessage,
     appendMessage,
     setAsPaid,

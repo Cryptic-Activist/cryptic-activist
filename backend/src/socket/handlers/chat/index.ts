@@ -119,8 +119,6 @@ export default class Chat {
               return;
             }
 
-            console.log({ createTradeDetails });
-
             const tradeCreated = await createTrade({
               arbitrator: createTradeDetails.arbitrator,
               buyer: createTradeDetails.buyer,
@@ -171,6 +169,8 @@ export default class Chat {
                 message: tradeFunded.message,
               });
             }
+
+            console.log('TRADE HAS STARTED');
 
             await updateTrade({
               where: {

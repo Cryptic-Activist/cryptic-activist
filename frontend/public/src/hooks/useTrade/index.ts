@@ -1,6 +1,5 @@
 'use client';
 
-import { Status } from '@/store/trade/types';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -38,7 +37,7 @@ const useTrade = () => {
 
   const setCanceled = () => {
     trade.setTradeValue({
-      status: Status.CANCELLED,
+      status: 'CANCELLED',
     });
   };
 

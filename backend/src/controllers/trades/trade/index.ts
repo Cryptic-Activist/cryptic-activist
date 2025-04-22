@@ -135,7 +135,13 @@ export async function getTradeController(req: Request, res: Response) {
         paymentReceipt: true,
         status: true,
         escrowReleaseDate: true,
+        endedAt: true,
+        startedAt: true,
+        expiredAt: true,
+        paymentConfirmed: true,
         paid: true,
+        blockchainTradeId: true,
+        blockchainTransactionHash: true,
         paymentMethod: {
           select: {
             name: true,
@@ -213,7 +219,13 @@ export async function getTradeController(req: Request, res: Response) {
       return;
     }
 
-    res.status(200).send({ ...trade, chat });
+    res
+      .status(200)
+      .send({
+        ...trade,
+        blockchainTradeId: trade.blockchainTradeId?.toString(),
+        chat,
+      });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
