@@ -58,7 +58,7 @@ const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
         style={{
           '--altcha-max-width': '100%',
         }}
-        debug={false}
+        debug={IS_DEVELOPMENT}
         test={IS_DEVELOPMENT}
         floating
         floatingoffset={100}

@@ -61,6 +61,7 @@ export const decodeFunctionData = (receipt: any) => {
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
+      console.log({ 'parsedLog.name': log });
       if (parsedLog) {
         switch (parsedLog.name) {
           case 'TradeCreated': {
@@ -87,6 +88,7 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (error) {
+      console.log({ error });
       continue;
     }
   }

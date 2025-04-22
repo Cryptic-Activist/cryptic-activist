@@ -110,15 +110,15 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
           className={styles.limits}
         >{`Limits: ${offer.limitMin} - ${offer.limitMax} ${offer.fiat.symbol}`}</div>
         <div className={styles.offerAction}>
-          <button className={styles.buyBtn}>
+          <Link href={`/offer/${offer.id}`} className={styles.buyBtn}>
             {app.type === 'buy' ? 'Buy' : 'Sell'}
-          </button>
+          </Link>
         </div>
       </div>
       <div className={styles.offerActionMobile}>
-        <button className={styles.buyBtn}>
+        <Link href={`/offer/${offer.id}`} className={styles.buyBtn}>
           {app.type === 'buy' ? 'Buy' : 'Sell'}
-        </button>
+        </Link>
       </div>
     </div>
   );
