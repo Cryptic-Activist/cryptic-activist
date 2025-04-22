@@ -11,3 +11,7 @@ export const generateRandomHash = (length = 4) => {
 export const isNumber = (value: string): boolean => {
   return !isNaN(Number(value)) && value.trim() !== '';
 };
+
+export const toUpperCase = (text?: string) => {
+  return text ? text?.toUpperCase() : '';
+};

@@ -25,7 +25,7 @@ export default function PasswordResetVerify() {
 
   useEffect(() => {
     if (failureReason) {
-      window.location.href = '/?reset-password=1';
+      window.location.href = '/?reset-password=0';
       return;
     }
     if (data?.ok) {
