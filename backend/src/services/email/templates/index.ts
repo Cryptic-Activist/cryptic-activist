@@ -2,3 +2,8 @@ export { default as buildVerifyAccountEmail } from './user-registration';
 export { default as buildResetPasswordEmail } from './password-reset';
 export { default as buildAccountCreated } from './account-created';
 export { default as buildTradeConfirmation } from './trade-confirmation';
+export { default as buildKYCVerification } from './kyc-verification';
+export { default as buildAccountStatement } from './account-statement';
+export { default as buildNewLoginDetected } from './security-alert-new-login-device';
+export { default as buildReferralReward } from './referral-reward';
+export { default as buildTwoFactorAuthentication } from './two-factor-authentication';
