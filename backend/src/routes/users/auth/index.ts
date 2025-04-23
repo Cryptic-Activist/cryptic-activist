@@ -1,11 +1,13 @@
 import {
   authenticate,
+  generate2FA,
   login,
   loginDecodeToken,
   register,
   resetPassword,
   resetPasswordRequest,
   resetPasswordVerifyToken,
+  verify2FA,
   verifyAccount,
   verifyPrivateKeys,
 } from '@/controllers/users/auth';
@@ -56,5 +58,9 @@ router.post(
 );
 
 router.get('/authenticate', authenticateUser, authenticate);
+
+router.get('/2fa/generate', authenticateUser, generate2FA);
+
+router.get('/2fa/verify', authenticateUser, verify2FA);
 
 export default router;

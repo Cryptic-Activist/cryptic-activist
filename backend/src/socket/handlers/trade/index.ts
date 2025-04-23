@@ -5,15 +5,9 @@ import {
   SetTradeAsPaymentConfirmed,
 } from './types';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
-import {
-  createChatMessage,
-  getChat,
-  getTrade,
-  redisClient,
-  updateTrade,
-} from 'base-ca';
+import { prisma, redisClient } from '@/services/db';
 
-import { ETHEREUM_ESCROW_ADDRESS } from '@/constants/env';
+import ChatMessage from '@/models/ChatMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { sendEmail } from '@/services/email';
@@ -40,17 +34,17 @@ export default class Trade {
           to,
         );
 
-        const chat = await getChat({
+        const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
             tradeId: true,
           },
         });
-        const updatedTrade = await updateTrade({
+        const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
-          toUpdate: {
+          data: {
             paid: true,
           },
         });
@@ -77,14 +71,14 @@ export default class Trade {
     this.socket.on(
       'trade_set_payment_confirmed',
       async ({ chatId, from, to }: SetTradeAsPaymentConfirmed) => {
-        const chat = await getChat({
+        const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
             tradeId: true,
           },
         });
 
-        const trade = await getTrade({
+        const trade = await prisma.trade.findFirst({
           where: { id: chat?.tradeId },
           select: {
             id: true,
@@ -122,11 +116,11 @@ export default class Trade {
           return;
         }
 
-        const updatedTrade = await updateTrade({
+        const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
-          toUpdate: {
+          data: {
             paymentConfirmed: true,
             status: 'COMPLETED',
             endedAt: new Date(),
@@ -160,14 +154,14 @@ export default class Trade {
         this.io.to(chatId).emit('escrow_released', { ok: true });
 
         if (chatId) {
-          await createChatMessage({
+          await ChatMessage.create({
             chatId: chatId,
             from: from,
             type: 'info',
             message: 'Vendor has set payment as Received',
             to: to,
           });
-          await createChatMessage({
+          await ChatMessage.create({
             chatId: chatId,
             from: from,
             type: 'info',
@@ -176,7 +170,7 @@ export default class Trade {
           });
         }
 
-        const emailTrade = await getTrade({
+        const emailTrade = await prisma.trade.findFirst({
           where: { id: updatedTrade.id },
           select: {
             id: true,
@@ -202,7 +196,7 @@ export default class Trade {
         );
         const accountCreatedEmailId = await sendEmail({
           from: 'accounts@crypticactivist.com',
-          to: emailTrade?.trader?.email,
+          to: emailTrade?.trader!.email!,
           subject: 'Trade Confirmation - Cryptic Activist',
           html: accountCreatedEmailBody,
           text: 'Trade Confirmation',
@@ -235,17 +229,17 @@ export default class Trade {
           return;
         }
 
-        const chat = await getChat({
+        const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
             tradeId: true,
           },
         });
-        const updatedTrade = await updateTrade({
+        const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
-          toUpdate: {
+          data: {
             paid: false,
             status: 'CANCELLED',
           },

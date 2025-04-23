@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
 import { JWT_SECRET } from '@/constants/env';
-import { decodeToken } from 'cryptic-utils';
-import { getAdmin } from 'base-ca';
+import { decodeToken } from '@/utils/generators/jwt';
+import { prisma } from '@/services/db/prisma';
 
 export const authorize = async (req: Request, res: Response) => {
   try {
@@ -23,9 +23,13 @@ export const authorize = async (req: Request, res: Response) => {
       });
     }
 
-    const decoded = decodeToken(authorizationArr![1], JWT_SECRET);
+    const decoded = decodeToken(authorizationArr![1]);
 
-    const admin = await getAdmin({ where: { id: decoded.id } });
+    const admin = await prisma.admin.findFirst({
+      where: {
+        id: decoded.id,
+      },
+    });
 
     if (!admin) {
       res.status(401).send({

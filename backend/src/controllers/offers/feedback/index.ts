@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 
-import { connect } from 'http2';
-import { createFeedback as createFeedbackBaseCa } from 'base-ca';
-import { sanitize } from 'cryptic-utils';
+import { prisma } from '@/services/db/prisma';
+import { sanitize } from '@/utils/sanitizer';
 
 export const createFeedback = async (req: Request, res: Response) => {
   const { vendor_id, user_id, offer_id, message, type } = req.body;
@@ -19,10 +18,8 @@ export const createFeedback = async (req: Request, res: Response) => {
   );
 
   try {
-    const feedback = await createFeedbackBaseCa({
-      where: { id: '' },
-      update: {},
-      create: {
+    const feedback = await prisma.feedback.create({
+      data: {
         vendor: {
           connect: cleanReqBody.vendor_id,
         },

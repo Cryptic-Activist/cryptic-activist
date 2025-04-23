@@ -8,7 +8,7 @@ import {
 } from './zod';
 import { NextFunction, Request, Response } from 'express';
 
-import { getToken } from 'base-ca';
+import { prisma } from '@/services/db';
 
 export const validateLogin = (
   req: Request,
@@ -98,7 +98,7 @@ export const validateToken = async (
     return;
   }
 
-  const verificationToken = await getToken({
+  const verificationToken = await prisma.token.findFirst({
     where: {
       token,
       isUsed: false,

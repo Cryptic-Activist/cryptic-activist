@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
+import { sanitize, sanitizeQueryArray } from '@/utils/sanitizer';
 
-import { getPaymentMethod } from 'base-ca';
+import { convertWhere } from '@/utils/object';
+import { prisma } from '@/services/db';
 
 export const getPaymentMethodController = async (
   req: Request,
@@ -16,7 +17,7 @@ export const getPaymentMethodController = async (
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    const paymentMethod = await getPaymentMethod({ ...where });
+    const paymentMethod = await prisma.paymentMethod.findFirst({ ...where });
 
     res.status(200).send(paymentMethod);
   } catch (err) {

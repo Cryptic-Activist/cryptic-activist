@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import { ETHEREUM_ESCROW_CONTRACT_ADDRESS } from './constants/env';
 import { Server } from 'socket.io';
-import { connectDB } from 'base-ca';
+import { connectDB } from '@/services/db';
 import { createServer } from 'node:http';
 import express from 'express';
 import middleware from '@/middlewares';

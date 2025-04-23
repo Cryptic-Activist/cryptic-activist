@@ -1,5 +1,5 @@
 import { IO, Socket } from '../types';
-import { createSystemMessage, getTrade, getUser, redisClient } from 'base-ca';
+import { prisma, redisClient } from '@/services/db';
 
 import { FRONTEND_PUBLIC } from '@/constants/env';
 import { TradeStartSentParams } from './types';
@@ -17,7 +17,7 @@ export default class Notification {
     this.socket.on(
       'notification_trade_start_sent',
       async ({ tradeId }: TradeStartSentParams) => {
-        const trade = await getTrade({
+        const trade = await prisma.trade.findFirst({
           where: {
             id: tradeId,
           },
@@ -29,7 +29,7 @@ export default class Notification {
         });
 
         if (trade?.id) {
-          const trader = await getUser({
+          const trader = await prisma.user.findFirst({
             where: {
               id: trade.traderId,
             },
@@ -43,14 +43,12 @@ export default class Notification {
 
           const tradeUrl = FRONTEND_PUBLIC + '/trade/' + trade.id + '/vendor';
           const notificationMessage = `${trader?.firstName} ${trader?.lastName} has started trading with you. Go and trade.`;
-          const newSystemMessage = await createSystemMessage({
-            create: {
+          const newSystemMessage = await prisma.systemMessage.create({
+            data: {
               userId: trade.vendorId,
               url: tradeUrl,
               message: notificationMessage,
             },
-            update: {},
-            where: { id: '' },
           });
           // // Check if recipient is online via Redis
           const recipientSocketId = await redisClient.hGet(

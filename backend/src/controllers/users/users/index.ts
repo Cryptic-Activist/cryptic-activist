@@ -1,16 +1,13 @@
 import { Request, Response } from 'express';
-import {
-  convertWhere,
-  generateRandomNames,
-  sanitize,
-  slugifyStringLowerCase,
-} from 'cryptic-utils';
-import { getTrades, getUser, getUsers } from 'base-ca';
+import { generateRandomNames, slugifyStringLowerCase } from '@/utils/string';
 
+import { convertWhere } from '@/utils/object';
 import { mapUsers } from '@/utils/map/users';
+import { prisma } from '@/services/db';
+import { sanitize } from '@/utils/sanitizer';
 
 const validateCredentials = async (username: string) => {
-  const user = await getUser({ where: { username } });
+  const user = await prisma.user.findFirst({ where: { username } });
 
   if (!user) {
     return true;
@@ -42,7 +39,7 @@ export async function getRandomCredentials(_req: Request, res: Response) {
 
 export async function getAllUsers(_req: Request, res: Response) {
   try {
-    const users = await getUsers({
+    const users = await prisma.user.findMany({
       select: {
         blocked: true,
       },
@@ -69,8 +66,7 @@ export async function getUserController(req: Request, res: Response) {
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    // @ts-ignore
-    const user = await getUser({ ...where }, cleanReqQuery.associations);
+    const user = await prisma.user.findFirst({ ...where });
 
     if (!user) {
       res.status(400).send({
@@ -93,7 +89,7 @@ export async function getUsersController(req: Request, res: Response) {
     const { query } = req;
     const { user } = query;
 
-    const users = await getUsers({
+    const users = await prisma.user.findMany({
       where: { username: user as string },
       select: {
         offers: true,
@@ -133,7 +129,7 @@ export async function getUserVerify(req: Request, res: Response) {
 
     const cleanQuery = sanitize(queryObj, []);
 
-    const user = await getUser({ where: cleanQuery });
+    const user = await prisma.user.findFirst({ where: cleanQuery });
 
     if (!user) {
       res.status(400).send({
@@ -157,7 +153,7 @@ export const getUserById = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: { id: userId },
       select: { userLanguage: true },
     });
@@ -183,11 +179,12 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     const { params } = req;
     const { username } = params;
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: {
         username,
       },
       select: {
+        id: true,
         userLanguage: true,
         blocked: true,
         blockers: true,
@@ -201,7 +198,9 @@ export const getUserByUsername = async (req: Request, res: Response) => {
       });
     }
 
-    const trades = await getTrades({ where: { vendorId: user?.id } });
+    const trades = await prisma.trade.findMany({
+      where: { vendorId: user!.id },
+    });
 
     res.status(200).send({ ...user, tradesCount: trades.length });
   } catch (err) {

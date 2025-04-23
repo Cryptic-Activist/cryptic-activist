@@ -1,16 +1,12 @@
 import { Request, Response } from 'express';
-import {
-  associateUserToLanguage,
-  disassociateUserToLanguage,
-  getLanguage,
-  getUser,
-} from 'base-ca';
+
+import { prisma } from '@/services/db';
 
 export async function indexByUser(req: Request, res: Response) {
   try {
     const { user_id } = req.params;
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: { id: user_id },
       select: {
         userLanguage: true,
@@ -32,7 +28,7 @@ export const associateLanguage = async (req: Request, res: Response) => {
     const { user_id } = req.params;
     const { languageName } = req.body;
 
-    const language = await getLanguage({
+    const language = await prisma.language.findFirst({
       where: {
         name: languageName,
       },

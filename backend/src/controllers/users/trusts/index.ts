@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import { countTrusts as crypticBaseCountTrusts } from 'base-ca';
-import { sanitize } from 'cryptic-utils';
+import { prisma } from '@/services/db';
+import { sanitize } from '@/utils/sanitizer';
 
 export async function countTrusts(req: Request, res: Response) {
   try {
@@ -9,8 +9,10 @@ export async function countTrusts(req: Request, res: Response) {
 
     const cleanQuery = sanitize({ userId }, []);
 
-    const count = await crypticBaseCountTrusts({
-      trustedId: cleanQuery.userId,
+    const count = await prisma.trust.count({
+      where: {
+        trustedId: cleanQuery.userId,
+      },
     });
 
     res.status(200).send({

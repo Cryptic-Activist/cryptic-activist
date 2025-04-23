@@ -8,11 +8,11 @@ import {
 } from '@/constants/env';
 import { InitTradeParams, Token } from './types';
 import { Interface, ethers, parseEther } from 'ethers';
-import { Trade, getOffer } from 'base-ca';
 import { abis, addresses } from './data';
 
 import { Address } from './types';
 import escrowArtifact from '@/contracts/ethereum/artifacts/MultiTradeEscrow.json';
+import { prisma } from '@/services/db';
 
 const iface = new Interface(escrowArtifact.abi);
 
@@ -205,8 +205,8 @@ export const getTradeDetails = async (tradeId: bigint) => {
   return { message: 'Trade details', txHash: tx.hash, details: tx };
 };
 
-export const getCreateTradeDetails = async (trade: Trade) => {
-  const offer = await getOffer({
+export const getCreateTradeDetails = async (trade: any) => {
+  const offer = await prisma.offer.findFirst({
     where: { id: trade.offerId },
     select: {
       timeLimit: true,
