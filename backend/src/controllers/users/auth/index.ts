@@ -115,6 +115,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         firstName: true,
         lastName: true,
         username: true,
+        email: true,
         createdAt: true,
         lastLoginAt: true,
         tier: {
@@ -661,6 +662,13 @@ export const generate2FA = async (req: Request, res: Response) => {
     const secret = speakeasy.generateSecret({
       name: 'CrypticActivist (' + email + ')',
     });
+    console.log({ secret });
+    if (!secret.otpauth_url) {
+      res.status(400).send({
+        errors: ['Unable to get otpauth_url'],
+      });
+      return;
+    }
     // Save secret.base32 to user record, encrypted
     await prisma.user.update({
       where: {
@@ -671,15 +679,8 @@ export const generate2FA = async (req: Request, res: Response) => {
       },
     });
 
-    if (!secret.otpauth_url) {
-      res.status(400).send({
-        errors: ['Unable to get otpauth_url'],
-      });
-      return;
-    }
-
     const qrDataUrl = QRCode.toDataURL(secret.otpauth_url);
-    res.status(400).json({ qr: qrDataUrl });
+    res.status(200).json({ qr: qrDataUrl });
     return;
   } catch (err) {
     res.status(500).send({

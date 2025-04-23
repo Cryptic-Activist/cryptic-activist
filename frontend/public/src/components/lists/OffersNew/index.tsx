@@ -12,7 +12,7 @@ import type {
   OfferItemProps,
   OffersNewProps,
 } from './types';
-import React, { FC, useEffect, useState } from 'react';
+import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { getInitials, setLocalStorage, timeSince, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar, useOffers, useOutsideClick } from '@/hooks';
 
@@ -22,6 +22,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Info from '@/components/Info';
 import Link from 'next/link';
 import styles from './index.module.scss';
+import useDebounce from '@/hooks/useDebounce';
 
 export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
   const isRatePositive = offer.pricingType === 'market' && offer.listAt > 0;
@@ -165,6 +166,16 @@ export const FilterSection: FC<FilterSectionProps> = ({
     toggleModal('fiats');
   };
 
+  const handleAmount = useDebounce((e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    console.log({ value });
+    setValue({
+      defaults: {
+        amount: value,
+      },
+    });
+  }, 1500);
+
   useEffect(() => {
     updateHeight(isMoreFiltersOpen);
   }, [isMoreFiltersOpen]);
@@ -226,6 +237,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
             type="text"
             placeholder="Amount"
             className={styles.amountInput}
+            onChange={handleAmount}
           />
           <button className={styles.currencySelector} onClick={openFiatModal}>
             {toUpperCase(app.defaults?.fiat?.symbol)}

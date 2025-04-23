@@ -33,6 +33,7 @@ export type User = {
   id?: string;
   names?: Names;
   username?: string;
+  email?: string;
   profileColor?: string;
   lastLoginAt?: string;
   createdAt?: string;
@@ -55,6 +56,7 @@ export type UserSetter = {
   id?: string;
   names?: Names;
   username?: string;
+  email?: string;
   profileColor?: string;
   lastLoginAt?: string;
   createdAt?: string;

@@ -20,6 +20,7 @@ export const useUserSlice: StateCreator<
   user: {
     id: undefined,
     names: undefined,
+    email: undefined,
     languages: undefined,
     profileColor: undefined,
     username: undefined,
@@ -40,6 +41,7 @@ export const useUserSlice: StateCreator<
               names: params.names ?? user.names,
               profileColor: params.profileColor ?? user.profileColor,
               username: params.username ?? user.username,
+              email: params.email ?? user.email,
               lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
               createdAt: params.createdAt ?? user.createdAt,
               updatedAt: params.updatedAt ?? user.updatedAt,
@@ -62,6 +64,7 @@ export const useUserSlice: StateCreator<
             ...user,
             id: undefined,
             languages: undefined,
+            email: undefined,
             names: undefined,
             profileColor: undefined,
             username: undefined,

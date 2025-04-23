@@ -1,1 +1,1 @@
-export type GetQueryParams = { [key: string]: string | number };
+export type GetQueryParams = { [key: string]: string | number | null };

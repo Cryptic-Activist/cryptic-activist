@@ -15,7 +15,6 @@ RUN npm install
 FROM base AS builder
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY backend .
-COPY libraries/base-ca ./libraries/base-ca
 RUN npm run build
 
 # Production stage
@@ -27,26 +26,14 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 
-# Copy Prisma schema from base-ca library
-COPY libraries/base-ca/prisma ./prisma
-COPY libraries/base-ca/prisma/schema.prisma ./prisma/schema.prisma
-
-# Copy local libraries
-COPY libraries/base-ca ./libraries/base-ca
-COPY libraries/cryptic-utils ./libraries/cryptic-utils
-
 # Set environment to production
 ENV NODE_ENV=production
 
 # Add entrypoint script
 COPY backend/prod.entrypoint.sh /entrypoint.sh
 COPY envs/prod.backend.env dist/.env
-COPY envs/prod.base-ca.env libraries/base-ca/.env
-COPY envs/prod.base-ca.env libraries/base-ca/dist/.env
 
-RUN npm run build:base-ca 
-RUN npm run build:cryptic-utils 
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /prod.entrypoint.sh
 
 # Expose the application port
 EXPOSE 5000

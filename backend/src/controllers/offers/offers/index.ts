@@ -150,10 +150,12 @@ export const getOffersPaginationController = async (
     limit,
     excludedVendorId,
     cursor,
+    amount,
   } = req.query as unknown as GetOffersPaginationRequest;
 
   const take = parseInt(limit, 10) || 20;
   const cursorObj = cursor ? { id: cursor } : undefined;
+  const amountNum = typeof amount === 'string' ? parseFloat(amount) : amount;
 
   try {
     const offers = await prisma.offer.findMany({
@@ -166,8 +168,14 @@ export const getOffersPaginationController = async (
         offerType,
         paymentMethodId,
         vendorId: {
-          notIn: excludedVendorId,
+          ...(excludedVendorId && { notIn: [excludedVendorId] }),
         },
+        ...(amount && {
+          AND: [
+            { limitMin: { lte: amountNum } },
+            { limitMax: { gte: amountNum } },
+          ],
+        }),
       },
       select: {
         id: true,

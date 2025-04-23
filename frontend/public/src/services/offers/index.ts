@@ -3,17 +3,20 @@ import { fetchGet, fetchPost } from '@/services/axios';
 import { BACKEND } from '@/constants';
 import { CreateOfferSetter } from '@/store/createOffer/types';
 import { FetchOffersParams } from './types';
+import { getQueries } from '@/utils';
 
 export const fetchOffersPagination = async ({
-  limit,
   cursor,
   ...rest
 }: FetchOffersParams) => {
-  const params = new URLSearchParams({ limit: limit.toString(), ...rest });
+  const queriesObj = {
+    ...rest,
+  } as unknown as FetchOffersParams;
   if (cursor) {
-    params.set('cursor', cursor);
+    queriesObj.cursor = cursor;
   }
-  const response = await fetchGet(`${BACKEND}/offers/pagination?` + params);
+  const queries = getQueries(queriesObj as any);
+  const response = await fetchGet(`${BACKEND}/offers/pagination` + queries);
 
   if (response.status !== 200) return null;
 

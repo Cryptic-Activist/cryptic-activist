@@ -4,6 +4,7 @@ export type FetchOffersParams = {
   paymentMethodId?: string;
   fiatId?: string;
   excludedVendorId?: string;
+  amount?: number;
   limit: number;
   cursor: string | null;
 };

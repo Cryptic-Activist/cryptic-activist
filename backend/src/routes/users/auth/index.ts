@@ -59,8 +59,8 @@ router.post(
 
 router.get('/authenticate', authenticateUser, authenticate);
 
-router.get('/2fa/generate', authenticateUser, generate2FA);
+router.post('/2fa/generate', authenticateUser, generate2FA);
 
-router.get('/2fa/verify', authenticateUser, verify2FA);
+router.post('/2fa/verify/:token', authenticateUser, verify2FA);
 
 export default router;
