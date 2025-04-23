@@ -18,6 +18,7 @@ const useOffers = () => {
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
       // paymentMethodId: app.defaults.paymentMethod?.id,
+      amount: app.defaults.amount,
       offerType: app.type,
       excludedVendorId: user.id,
       limit: 5,
@@ -97,6 +98,7 @@ const useOffers = () => {
     app.defaults.cryptocurrency?.id,
     app.defaults.fiat?.id,
     app.defaults.paymentMethod?.id,
+    app.defaults.amount,
     app.type,
     user.id,
   ]);

@@ -32,6 +32,7 @@ export const useAppSlice: StateCreator<
               fiat: params.defaults?.fiat ?? app.defaults.fiat,
               paymentMethod:
                 params.defaults?.paymentMethod ?? app.defaults.paymentMethod,
+              amount: params.defaults?.amount ?? app.defaults.amount,
             },
           },
         }),
