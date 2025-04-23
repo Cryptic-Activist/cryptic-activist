@@ -1,18 +1,22 @@
 import { JWT_REFRESH_SECRET, JWT_SECRET } from '@/constants/env';
+import jwt, { Secret } from 'jsonwebtoken';
 
-import jwt from 'jsonwebtoken';
+import { GenerateTokenParam } from './types';
 
-export function generateAccessToken(userId: string, expiresIn?: any): string {
-  return jwt.sign({ userId }, JWT_SECRET, {
+export const generateToken = ({
+  objectToTokenize,
+  expiresIn,
+}: GenerateTokenParam) => {
+  return jwt.sign(objectToTokenize, JWT_SECRET as Secret, {
     expiresIn: expiresIn || '1d',
   });
-}
+};
 
-export function generateRefreshToken(userId: string): string {
+export const generateRefreshToken = (userId: string) => {
   return jwt.sign({ userId }, JWT_REFRESH_SECRET);
-}
+};
 
-export function decodeToken(token: string): any {
+export const decodeToken = (token: string) => {
   let userObj: any;
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return {};
@@ -21,4 +25,4 @@ export function decodeToken(token: string): any {
   });
 
   return userObj;
-}
+};

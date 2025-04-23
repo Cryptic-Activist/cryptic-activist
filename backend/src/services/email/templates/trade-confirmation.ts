@@ -1,5 +1,3 @@
-import '@formatjs/intl-durationformat';
-
 import { Trade, User } from 'base-ca';
 
 import { FRONTEND_PUBLIC } from '@/constants/env';

@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
-import { createOffer, getOffer } from 'base-ca';
+
+import { prisma } from '@/services/db/prisma';
 
 export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
 
-    const newOffer = await createOffer({
-      where: { id: '' },
-      update: {},
-      create: { ...body },
+    const newOffer = await prisma.offer.create({
+      data: { ...body },
     });
 
     res.status(200).send(newOffer);
@@ -24,7 +23,7 @@ export const getOfferController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const offer = await getOffer({
+    const offer = await prisma.offer.findFirst({
       where: {
         id: id as string,
       },

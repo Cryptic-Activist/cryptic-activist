@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { getSystemMessages } from 'base-ca';
+import { prisma } from '@/services/db';
 
 export const getSystemMessagesController = async (
   req: Request,
@@ -9,7 +9,7 @@ export const getSystemMessagesController = async (
   try {
     const { userId } = req.params;
 
-    const systemMessages = await getSystemMessages({
+    const systemMessages = await prisma.systemMessage.findMany({
       where: {
         userId,
       },

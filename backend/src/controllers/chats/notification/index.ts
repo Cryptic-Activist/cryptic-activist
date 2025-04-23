@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { redisClient } from 'base-ca';
+import { redisClient } from '@/services/db/redis';
 
 export const subscribeNotification = async (req: Request, res: Response) => {
   try {

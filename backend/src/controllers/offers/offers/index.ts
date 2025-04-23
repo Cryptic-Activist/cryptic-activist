@@ -4,7 +4,8 @@ import {
   GetOffersRequest,
 } from './types';
 import { Request, Response } from 'express';
-import { getOffers, getOffersPagination } from 'base-ca';
+
+import { prisma } from '@/services/db/prisma';
 
 export const getOffersController = async (
   req: Request<{}, {}, {}, GetOffersRequest>,
@@ -13,7 +14,7 @@ export const getOffersController = async (
   const { cryptocurrencyId, fiatId, offerType, paymentMethodId } = req.query;
 
   try {
-    const offers = await getOffers({
+    const offers = await prisma.offer.findMany({
       where: {
         cryptocurrencyId,
         fiatId,
@@ -79,7 +80,7 @@ export const getCurrentVendorOffers = async (
   const { id } = req.params;
 
   try {
-    const offers = await getOffers({
+    const offers = await prisma.offer.findMany({
       where: {
         vendorId: id,
       },
@@ -155,8 +156,8 @@ export const getOffersPaginationController = async (
   const cursorObj = cursor ? { id: cursor } : undefined;
 
   try {
-    const offers = await getOffersPagination({
-      limit: take + 1,
+    const offers = await prisma.offer.findMany({
+      take: take + 1,
       cursor: cursorObj,
       orderBy: { id: 'desc' },
       where: {

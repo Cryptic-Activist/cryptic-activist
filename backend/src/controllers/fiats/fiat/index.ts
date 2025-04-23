@@ -1,13 +1,17 @@
 import { Request, Response } from 'express';
 
-import { getFiat } from 'base-ca';
+import { prisma } from '@/services/db/prisma';
 
 export const getFiatController = async (req: Request, res: Response) => {
   try {
     const { query } = req;
     const { fiatSymbol } = query;
-    // @ts-ignore
-    const fiat = await getFiat({ symbol: fiatSymbol });
+    const fiat = await prisma.fiat.findFirst({
+      where: {
+        // @ts-ignore
+        symbol: fiatSymbol,
+      },
+    });
 
     res.status(200).send({
       id: fiat?.id,

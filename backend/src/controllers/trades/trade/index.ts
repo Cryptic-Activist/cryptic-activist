@@ -1,18 +1,8 @@
 import { Request, Response } from 'express';
-import {
-  createChat,
-  createTrade,
-  getChat,
-  getCryptocurrency,
-  getFiat,
-  getTier,
-  getTrade,
-  getUser,
-  updateTrade,
-} from 'base-ca';
 
 import { CalculateReceivingAmountQueries } from './types';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
+import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -27,10 +17,8 @@ export async function createTradeController(req: Request, res: Response) {
   try {
     const { body } = req;
 
-    const newTrade = await createTrade({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newTrade = await prisma.trade.create({
+      data: {
         traderId: body.traderId,
         vendorId: body.vendorId,
         offerId: body.offerId,
@@ -45,10 +33,8 @@ export async function createTradeController(req: Request, res: Response) {
       },
     });
 
-    const newChat = await createChat({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newChat = await prisma.chat.create({
+      data: {
         tradeId: newTrade.id,
       },
     });
@@ -66,9 +52,9 @@ export async function cancelTrade(req: Request, res: Response) {
   try {
     const { id } = req.body;
 
-    const trade = await updateTrade({
+    const trade = await prisma.trade.update({
       where: { id: id },
-      toUpdate: { status: 'CANCELLED', endedAt: new Date() },
+      data: { status: 'CANCELLED', endedAt: new Date() },
     });
 
     res.status(200).send(trade);
@@ -83,7 +69,7 @@ export async function checkTradePaid(req: Request, res: Response) {
   try {
     const { id } = req.params;
 
-    const trade = await getTrade({
+    const trade = await prisma.trade.findFirst({
       where: { id },
     });
 
@@ -108,9 +94,9 @@ export async function setPaidTrade(req: Request, res: Response) {
   try {
     const { id } = req.body;
 
-    const trade = await updateTrade({
+    const trade = await prisma.trade.update({
       where: { id },
-      toUpdate: { status: 'CANCELLED', endedAt: new Date() },
+      data: { status: 'CANCELLED', endedAt: new Date() },
     });
 
     res.status(200).send(trade);
@@ -126,7 +112,7 @@ export async function getTradeController(req: Request, res: Response) {
     const { params } = req;
     const { id } = params;
 
-    const trade = await getTrade({
+    const trade = await prisma.trade.findFirst({
       where: { id },
       select: {
         id: true,
@@ -201,7 +187,7 @@ export async function getTradeController(req: Request, res: Response) {
       return;
     }
 
-    const chat = await getChat({
+    const chat = await prisma.chat.findFirst({
       where: { tradeId: trade.id },
       select: {
         id: true,
@@ -233,7 +219,7 @@ export const calculateReceivingAmount = async (
     const parsedFiatAmount = parseFloat(fiatAmount);
     const parsedCurrentPrice = parseFloat(currentPrice);
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: { id: userId as string },
       select: {
         isPremium: true,
@@ -246,7 +232,7 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    const fiat = await getFiat({
+    const fiat = await prisma.fiat.findFirst({
       where: { id: fiatId as string },
       select: { symbol: true },
     });
@@ -256,7 +242,7 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    const cryptocurrency = await getCryptocurrency({
+    const cryptocurrency = await prisma.cryptocurrency.findFirst({
       where: { id: cryptocurrencyId as string },
       select: {
         coingeckoId: true,
@@ -268,7 +254,9 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    const tier = await getTier({ where: { id: user?.tierId as string } });
+    const tier = await prisma.tier.findFirst({
+      where: { id: user?.tierId as string },
+    });
 
     if (!tier) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });

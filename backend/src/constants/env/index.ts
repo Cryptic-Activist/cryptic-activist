@@ -2,6 +2,10 @@ export const NODE_ENV = process.env.NODE_ENV as string;
 export const PORT = parseInt(process.env.PORT as string);
 export const APP_NAME = process.env.APP_NAME as string;
 
+export const MONGODB_URL = process.env.MONGODB_URL as string;
+export const REDIS_HOST = process.env.REDIS_HOST as string;
+export const REDIS_PORT = parseInt(process.env.REDIS_PORT as string);
+
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 export const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string;
 
