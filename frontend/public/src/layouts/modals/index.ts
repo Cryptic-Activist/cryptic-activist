@@ -11,3 +11,5 @@ export { default as PrivateKeys } from './PrivateKeys';
 export { default as WalletModal } from './Wallet';
 export { default as ResetPasswordRequest } from './ResetPasswordRequest';
 export { default as ResetPassword } from './ResetPassword';
+export { default as TwoFactorAuthentication } from './TwoFactorAuthentication';
+export { default as EnableTwoFactorAuthnetication } from './EnableTwoFactorAuthnetication';

@@ -2,6 +2,7 @@
 
 import {
   Cryptocurrencies,
+  EnableTwoFactorAuthnetication,
   Fiats,
   Login,
   PaymentMethods,
@@ -9,6 +10,7 @@ import {
   Register,
   ResetPassword,
   ResetPasswordRequest,
+  TwoFactorAuthentication,
   WalletModal,
 } from '@/layouts/modals';
 
@@ -20,6 +22,12 @@ const AllModals = () => {
   return (
     <>
       {navigationBar.modals.login ? <Login /> : <></>}
+      {navigationBar.modals.twoFactor ? <TwoFactorAuthentication /> : <></>}
+      {navigationBar.modals.enableTwoFactor ? (
+        <EnableTwoFactorAuthnetication />
+      ) : (
+        <></>
+      )}
       {navigationBar.modals.register ? <Register /> : <></>}
       {/* {navigationBar.modals.verifyAccount ? <VerifyAccount /> : <></>} */}
       {navigationBar.modals.resetPasswordRequest ? (

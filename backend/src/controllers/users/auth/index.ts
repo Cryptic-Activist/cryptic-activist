@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
   buildResetPasswordEmail,
+  buildTwoFactorAuthentication,
   buildVerifyAccountEmail,
   sendEmail,
 } from '@/services/email';
@@ -61,6 +62,14 @@ export const login = async (req: Request, res: Response) => {
           return;
         }
 
+        if (user?.twoFactorEnabled) {
+          res.status(200).send({
+            userId: user.id,
+            twoFactorEnabled: user.twoFactorEnabled,
+          });
+          return;
+        }
+
         const accessToken: string = generateToken({
           objectToTokenize: { userId: user!.id },
           expiresIn: '1d',
@@ -79,6 +88,57 @@ export const login = async (req: Request, res: Response) => {
       });
       return;
     });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const login2FAVerify = async (req: Request, res: Response) => {
+  const { userId, token2FA } = req.body;
+
+  try {
+    const user = await prisma.user.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      res.status(400).send({
+        errors: ['User not found'],
+      });
+      return;
+    }
+
+    if (!user.twoFactorSecret) {
+      res.status(400).send({
+        errors: ['Unable to verify 2fa'],
+      });
+      return;
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user?.twoFactorSecret,
+      encoding: 'base32',
+      token: token2FA,
+      window: 1,
+    });
+
+    if (!verified) {
+      res.status(400).json({ error: 'Invalid token' });
+      return;
+    }
+
+    const accessToken: string = generateToken({
+      objectToTokenize: { userId: user!.id },
+      expiresIn: '1d',
+    });
+    const refreshToken: string = generateRefreshToken(user!.id);
+
+    res.status(200).send({
+      accessToken,
+      refreshToken,
+    });
+    return;
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
@@ -118,6 +178,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         email: true,
         createdAt: true,
         lastLoginAt: true,
+        twoFactorEnabled: true,
         tier: {
           select: {
             id: true,
@@ -660,9 +721,8 @@ export const generate2FA = async (req: Request, res: Response) => {
   try {
     const { userId, email } = req.body;
     const secret = speakeasy.generateSecret({
-      name: 'CrypticActivist (' + email + ')',
+      name: 'Cryptic Activist Catalog (' + email + ')',
     });
-    console.log({ secret });
     if (!secret.otpauth_url) {
       res.status(400).send({
         errors: ['Unable to get otpauth_url'],
@@ -679,7 +739,7 @@ export const generate2FA = async (req: Request, res: Response) => {
       },
     });
 
-    const qrDataUrl = QRCode.toDataURL(secret.otpauth_url);
+    const qrDataUrl = await QRCode.toDataURL(secret.otpauth_url);
     res.status(200).json({ qr: qrDataUrl });
     return;
   } catch (err) {
@@ -692,7 +752,8 @@ export const generate2FA = async (req: Request, res: Response) => {
 
 export const verify2FA = async (req: Request, res: Response) => {
   try {
-    const { token, userId } = req.body;
+    const { token } = req.params;
+    const { userId } = req.body;
     const user = await prisma.user.findFirst({ where: { id: userId } });
 
     if (!user) {
@@ -715,6 +776,7 @@ export const verify2FA = async (req: Request, res: Response) => {
       token,
       window: 1,
     });
+
     if (!verified) {
       res.status(400).json({ error: 'Invalid token' });
       return;
@@ -728,7 +790,19 @@ export const verify2FA = async (req: Request, res: Response) => {
         twoFactorEnabled: true,
       },
     });
-    res.json({ success: true });
+
+    const twoFactorActivatedEmailBody = buildTwoFactorAuthentication(user);
+    const emailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: '2FA Activatived - Cryptic Activist',
+      html: twoFactorActivatedEmailBody,
+      text: '2FA Activated',
+    });
+
+    console.log({ emailId });
+
+    res.status(200).json({ success: true });
     return;
   } catch (err) {
     res.status(500).send({

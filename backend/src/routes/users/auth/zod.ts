@@ -6,6 +6,23 @@ export const Login = z.object({
   username: z.string().min(5),
 });
 
+const regexOnlyNumbers = /^\d+$/;
+
+export const Login2FA = z
+  .object({
+    userId: z.string().min(6),
+    token2FA: z.string().min(6).max(6),
+  })
+  .superRefine(({ token2FA }, ctx) => {
+    if (!regexOnlyNumbers.test(token2FA)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['token2FA'],
+        message: 'Only numbers are allowed',
+      });
+    }
+  });
+
 export const Register = z
   .object({
     names: z.object({

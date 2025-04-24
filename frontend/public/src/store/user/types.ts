@@ -1,4 +1,8 @@
-import { GetUserInfoReturn, LoginParams } from '@/services/user/types';
+import {
+  GetUserInfoReturn,
+  Login2FAParams,
+  LoginParams,
+} from '@/services/user/types';
 
 type Language = {
   id: string;
@@ -40,11 +44,15 @@ export type User = {
   updatedAt?: string;
   languages?: Language[];
   _count?: Count;
+  twoFactorEnabled?: boolean;
   setUserValue: (value: Value, actionName: `user/${string}`) => void;
   setUser: (user: Value) => void;
   resetUser: () => void;
   decodeAccessToken: () => Promise<GetUserInfoReturn | null>;
-  login: (params: LoginParams) => Promise<void>;
+  login: (
+    params: LoginParams
+  ) => Promise<{ twoFactorEnabled: boolean } | undefined>;
+  login2FA: (params: Login2FAParams) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -64,6 +72,7 @@ export type UserSetter = {
   languages?: Language[];
   userLanguage?: UserLanguage;
   _count?: Count;
+  twoFactorEnabled?: boolean;
 };
 
 export type Value = UserSetter;
