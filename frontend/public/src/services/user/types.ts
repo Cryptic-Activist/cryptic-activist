@@ -8,10 +8,20 @@ export type LoginParams = {
   password: string;
 };
 
-export type GetUserTokenResponse = {
-  accessToken: string;
-  refreshToken: string;
+export type Login2FAParams = {
+  userId: string;
+  token2FA: string;
 };
+
+export type GetUserTokenResponse =
+  | {
+      accessToken: string;
+      refreshToken: string;
+    }
+  | {
+      userId: string;
+      twoFactorEnabled: boolean;
+    };
 
 export type GetUserInfoReturn = {
   id: string;

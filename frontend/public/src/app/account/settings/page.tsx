@@ -1,11 +1,14 @@
 'use client';
 
 import React, { FormEvent, useState } from 'react';
+import { useNavigationBar, useUser } from '@/hooks';
 
+import { Button } from '@/components';
 import styles from './page.module.scss';
 
 const AccountSettings = () => {
-  const [enable2FA, setEnable2FA] = useState(false);
+  const { toggleModal } = useNavigationBar();
+  const { user } = useUser();
   const [languages, setLanguages] = useState(['English']);
   const [newLanguage, setNewLanguage] = useState('');
 
@@ -32,14 +35,26 @@ const AccountSettings = () => {
       <form onSubmit={handleSubmit} className={styles.form}>
         <section className={styles.section}>
           <h2>Security Settings</h2>
-          <label className={styles.checkboxLabel}>
+          <h3>Two Factor Authentication</h3>
+          {user.id && (
+            <>
+              {user.twoFactorEnabled ? (
+                <Button>Disable 2FA</Button>
+              ) : (
+                <Button onClick={() => toggleModal('enableTwoFactor')}>
+                  Enable 2FA
+                </Button>
+              )}
+            </>
+          )}
+          {/* <label className={styles.checkboxLabel}>
             <input
               type="checkbox"
               checked={enable2FA}
               onChange={(e) => setEnable2FA(e.target.checked)}
             />
             Enable Two-Factor Authentication
-          </label>
+          </label> */}
         </section>
 
         <section className={styles.section}>

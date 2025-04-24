@@ -1,6 +1,7 @@
 import {
   AccountVerification,
   Login,
+  Login2FA,
   PassswordReset,
   PasswordReset,
   PrivateKeys,
@@ -18,6 +19,26 @@ export const validateLogin = (
   const { body } = req;
 
   const validated = Login.safeParse(body);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+  }
+
+  next();
+};
+
+export const validateLogin2FA = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { body } = req;
+
+  const validated = Login2FA.safeParse(body);
+
+  console.log({ validated });
 
   if (!validated.success) {
     res.status(400).send({

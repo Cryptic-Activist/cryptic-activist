@@ -1,16 +1,24 @@
-import { GetUserInfoReturn, GetUserTokenResponse, LoginParams } from './types';
+import { GetUserInfoReturn, Login2FAParams, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
 import { getCookie, removeLocalStorage } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
-export const getUserToken = async ({
-  password,
-  username,
-}: LoginParams): Promise<GetUserTokenResponse | null> => {
+export const getUserToken = async ({ password, username }: LoginParams) => {
   const response = await fetchPost(BACKEND + '/users/auth/login', {
     password,
     username,
+  });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+export const getUserToken2FA = async ({ userId, token2FA }: Login2FAParams) => {
+  const response = await fetchPost(BACKEND + '/users/auth/2fa/login', {
+    userId,
+    token2FA,
   });
 
   if (response.status !== 200) return null;

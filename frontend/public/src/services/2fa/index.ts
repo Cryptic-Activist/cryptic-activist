@@ -1,7 +1,7 @@
-import { fetchGet, fetchPost } from '@/services/axios';
+import { Generate2FAParams, Verify2FAParams } from './types';
 
 import { BACKEND } from '@/constants';
-import { Generate2FAParams } from './types';
+import { fetchPost } from '@/services/axios';
 import { getCookie } from '@/utils';
 
 export const generate2FA = async (params: Generate2FAParams) => {
@@ -26,11 +26,12 @@ export const generate2FA = async (params: Generate2FAParams) => {
   }
 };
 
-export const verify2FA = async (token: string) => {
+export const verify2FA = async (params: Verify2FAParams) => {
   try {
     const accessToken = getCookie('accessToken');
-    const response = await fetchGet(
-      `${BACKEND}/users/auth/2fa/verify/` + token,
+    const response = await fetchPost(
+      `${BACKEND}/users/auth/2fa/verify/` + params.token,
+      { userId: params.userId },
       { Authorization: `Bearer ${accessToken}` }
     );
 
