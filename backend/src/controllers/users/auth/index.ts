@@ -1,43 +1,27 @@
 import { Request, Response } from 'express';
 import {
-  associateUserToLanguage,
-  countFeedbacks,
-  countTrades,
-  countUsers,
-  createLanguage,
-  createTier,
-  createToken,
-  createUser,
-  getToken,
-  getTrades,
-  getUser,
-  getUsers,
-  updateToken,
-  updateUser,
-} from 'base-ca';
-import {
   buildResetPasswordEmail,
+  buildTwoFactorAuthentication,
   buildVerifyAccountEmail,
   sendEmail,
 } from '@/services/email';
 import {
   decodeToken,
-  generatePrivateKeysBip39,
   generateRefreshToken,
   generateToken,
-  generateUniqueUsername,
-  sanitize,
-} from 'cryptic-utils';
+} from '@/utils/generators/jwt';
 
-import { AccountVerification } from '@/routes/users/auth/zod';
 import { JWT_SECRET } from '@/constants/env';
+import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
 import buildAccountCreatedEmail from '@/services/email/templates/account-created';
 import { debug } from '@/utils/logger/logger';
-import { generateAccessToken } from '@/utils/generators/jwt';
+import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { generateRandomHash } from '@/utils/string';
 import { getExpiresAt } from '@/utils/date';
 import { getRandomHighContrastColor } from '@/utils/color';
+import { prisma } from '@/services/db';
+import speakeasy from 'speakeasy';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -45,7 +29,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const errors: string[] = [];
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: {
         username,
       },
@@ -78,15 +62,19 @@ export const login = async (req: Request, res: Response) => {
           return;
         }
 
-        const accessToken: string = generateToken(
-          { userId: user!.id },
-          JWT_SECRET,
-          '1d',
-        );
-        const refreshToken: string = generateRefreshToken(
-          { userId: user!.id },
-          JWT_SECRET,
-        );
+        if (user?.twoFactorEnabled) {
+          res.status(200).send({
+            userId: user.id,
+            twoFactorEnabled: user.twoFactorEnabled,
+          });
+          return;
+        }
+
+        const accessToken: string = generateToken({
+          objectToTokenize: { userId: user!.id },
+          expiresIn: '1d',
+        });
+        const refreshToken: string = generateRefreshToken(user!.id);
 
         res.status(200).send({
           accessToken,
@@ -108,11 +96,62 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const login2FAVerify = async (req: Request, res: Response) => {
+  const { userId, token2FA } = req.body;
+
+  try {
+    const user = await prisma.user.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      res.status(400).send({
+        errors: ['User not found'],
+      });
+      return;
+    }
+
+    if (!user.twoFactorSecret) {
+      res.status(400).send({
+        errors: ['Unable to verify 2fa'],
+      });
+      return;
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user?.twoFactorSecret,
+      encoding: 'base32',
+      token: token2FA,
+      window: 1,
+    });
+
+    if (!verified) {
+      res.status(400).json({ error: 'Invalid token' });
+      return;
+    }
+
+    const accessToken: string = generateToken({
+      objectToTokenize: { userId: user!.id },
+      expiresIn: '1d',
+    });
+    const refreshToken: string = generateRefreshToken(user!.id);
+
+    res.status(200).send({
+      accessToken,
+      refreshToken,
+    });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
 export const loginDecodeToken = async (req: Request, res: Response) => {
   const { accessToken } = req.params;
 
   try {
-    const decoded = decodeToken(accessToken, JWT_SECRET);
+    const decoded = decodeToken(accessToken);
 
     if (!decoded) {
       res.status(401).send({
@@ -121,7 +160,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: { id: decoded.userId as string },
       select: {
         _count: {
@@ -136,7 +175,10 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         firstName: true,
         lastName: true,
         username: true,
+        email: true,
         createdAt: true,
+        lastLoginAt: true,
+        twoFactorEnabled: true,
         tier: {
           select: {
             id: true,
@@ -167,18 +209,14 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
 
     const lastLoginAt = new Date();
 
-    await updateUser({
+    await prisma.user.update({
       where: {
         id: user.id,
       },
-      toUpdate: {
+      data: {
         lastLoginAt,
       },
     });
-
-    // const _count = {
-    //   user
-    // }
 
     const {
       firstName: _firstName,
@@ -189,18 +227,20 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       ...rest
     } = user;
 
-    const userTradesCount = await countTrades({ where: { vendorId: user.id } });
-    const userPositiveFeedbacksCount = await countFeedbacks({
+    const userTradesCount = await prisma.trade.count({
+      where: { vendorId: user.id },
+    });
+    const userPositiveFeedbacksCount = await prisma.feedback.count({
       where: {
         type: 'POSITIVE',
       },
     });
-    const userNeutralFeedbacksCount = await countFeedbacks({
+    const userNeutralFeedbacksCount = await prisma.feedback.count({
       where: {
         type: 'NEUTRAL',
       },
     });
-    const userNegativeFeedbacksCount = await countFeedbacks({
+    const userNegativeFeedbacksCount = await prisma.feedback.count({
       where: {
         type: 'NEGATIVE',
       },
@@ -241,7 +281,7 @@ export const register = async (req: Request, res: Response) => {
     const hash = await bcrypt.hash(password, generatedSalt);
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
-    const tier = await createTier({
+    const tier = await prisma.tier.upsert({
       where: {
         name: 'Bronze',
       },
@@ -256,7 +296,7 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    const existingEmail = await getUser({
+    const existingEmail = await prisma.user.findFirst({
       where: {
         email,
       },
@@ -270,7 +310,7 @@ export const register = async (req: Request, res: Response) => {
 
     let newUsername = username;
 
-    const existingUsername = await getUser({
+    const existingUsername = await prisma.user.findFirst({
       where: {
         username,
       },
@@ -280,10 +320,8 @@ export const register = async (req: Request, res: Response) => {
       newUsername = `${username}-${hashUsername}`;
     }
 
-    const user = await createUser({
-      where: { id: '' },
-      update: {},
-      create: {
+    const user = await prisma.user.create({
+      data: {
         firstName: names.firstName,
         lastName: names.lastName,
         username: newUsername,
@@ -295,21 +333,32 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    const language = await createLanguage({
+    const language = await prisma.language.upsert({
       where: { name: 'English' },
       update: {},
       create: { name: 'English' },
     });
 
-    await associateUserToLanguage({ userId: user.id, languageId: language.id });
+    // await prisma.userLanguage.upsert({
+    //   where: { userId: user.id, languageId: language.id },
+    //   create: {
+    //     userId: user.id,
+    //     languageId: language.id,
+    //   },
+    // });
+
+    const newUserLanguage = await prisma.userLanguage.create({
+      data: { languageId: language.id, userId: user.id },
+    });
 
     const expires = '30d';
-    const token = generateAccessToken(user.id, expires);
+    const token = generateToken({
+      objectToTokenize: { userId: user.id },
+      expiresIn: expires,
+    });
     const expiresAt = getExpiresAt(expires);
-    const newToken = await createToken({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newToken = await prisma.token.create({
+      data: {
         token,
         expiresAt,
         isUsed: false,
@@ -369,7 +418,7 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
   const { username, privateKeys } = req.body;
 
   try {
-    const user = await getUser({ where: { username } });
+    const user = await prisma.user.findFirst({ where: { username } });
 
     if (!user) {
       res.status(400).send({
@@ -394,9 +443,9 @@ export const verifyPrivateKeys = async (req: Request, res: Response) => {
       }
     });
 
-    await updateUser({
+    await prisma.user.update({
       where: { id: user?.id },
-      toUpdate: {
+      data: {
         isVerified: true,
       },
     });
@@ -415,7 +464,7 @@ export const verifyAccount = async (req: Request, res: Response) => {
   const { token } = req.params;
 
   try {
-    const decoded = decodeToken(token, JWT_SECRET);
+    const decoded = decodeToken(token);
     if (!decoded) {
       res.status(401).send({
         errors: ['Unable to decode the token'],
@@ -423,26 +472,26 @@ export const verifyAccount = async (req: Request, res: Response) => {
       return;
     }
 
-    await updateUser({
+    await prisma.user.update({
       where: {
         id: decoded.userId as string,
       },
-      toUpdate: {
+      data: {
         isVerified: true,
       },
     });
 
-    const verificationToken = await getToken({
+    const verificationToken = await prisma.token.findFirst({
       where: {
         token,
       },
     });
 
-    await updateToken({
+    await prisma.token.update({
       where: {
         id: verificationToken?.id,
       },
-      toUpdate: {
+      data: {
         isUsed: true,
       },
     });
@@ -463,7 +512,7 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
   const { unique } = req.body;
 
   try {
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: {
         OR: [
           {
@@ -490,12 +539,13 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
     }
 
     const expires = '20m';
-    const token = generateAccessToken(user.id, expires);
+    const token = generateToken({
+      objectToTokenize: { userId: user.id },
+      expiresIn: expires,
+    });
     const expiresAt = getExpiresAt(expires);
-    const newToken = await createToken({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newToken = await prisma.token.create({
+      data: {
         token,
         expiresAt,
         isUsed: false,
@@ -536,7 +586,7 @@ export const resetPasswordVerifyToken = async (req: Request, res: Response) => {
   const { token } = req.params;
 
   try {
-    const decoded = decodeToken(token, JWT_SECRET);
+    const decoded = decodeToken(token);
     if (!decoded) {
       res.status(401).send({
         errors: ['Unable to decode the token'],
@@ -544,7 +594,7 @@ export const resetPasswordVerifyToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: {
         id: decoded.userId as string,
       },
@@ -574,7 +624,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   const { password } = req.body;
 
   try {
-    const decoded = decodeToken(token, JWT_SECRET);
+    const decoded = decodeToken(token);
     if (!decoded) {
       res.status(401).send({
         errors: ['Unable to decode the token'],
@@ -582,7 +632,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: {
         id: decoded.userId as string,
       },
@@ -598,9 +648,9 @@ export const resetPassword = async (req: Request, res: Response) => {
     const generatedSalt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, generatedSalt);
 
-    const updatedPassword = await updateUser({
+    const updatedPassword = await prisma.user.update({
       where: { id: user.id },
-      toUpdate: { password: hash },
+      data: { password: hash },
     });
 
     if (!updatedPassword) {
@@ -610,7 +660,7 @@ export const resetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const existingToken = await getToken({
+    const existingToken = await prisma.token.findFirst({
       where: {
         token,
       },
@@ -626,11 +676,11 @@ export const resetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const invalidatedToken = await updateToken({
+    const invalidatedToken = await prisma.token.update({
       where: {
         id: existingToken?.id,
       },
-      toUpdate: {
+      data: {
         isUsed: true,
       },
     });
@@ -658,6 +708,101 @@ export const resetPassword = async (req: Request, res: Response) => {
 export const authenticate = async (_req: Request, res: Response) => {
   try {
     res.status(200).send({ ok: true });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const generate2FA = async (req: Request, res: Response) => {
+  try {
+    const { userId, email } = req.body;
+    const secret = speakeasy.generateSecret({
+      name: 'Cryptic Activist Catalog (' + email + ')',
+    });
+    if (!secret.otpauth_url) {
+      res.status(400).send({
+        errors: ['Unable to get otpauth_url'],
+      });
+      return;
+    }
+    // Save secret.base32 to user record, encrypted
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        twoFactorSecret: secret.base32,
+      },
+    });
+
+    const qrDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+    res.status(200).json({ qr: qrDataUrl });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const verify2FA = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+    const { userId } = req.body;
+    const user = await prisma.user.findFirst({ where: { id: userId } });
+
+    if (!user) {
+      res.status(400).send({
+        errors: ['User not found'],
+      });
+      return;
+    }
+
+    if (!user.twoFactorSecret) {
+      res.status(400).send({
+        errors: ['Unable to verify 2fa'],
+      });
+      return;
+    }
+
+    const verified = speakeasy.totp.verify({
+      secret: user?.twoFactorSecret,
+      encoding: 'base32',
+      token,
+      window: 1,
+    });
+
+    if (!verified) {
+      res.status(400).json({ error: 'Invalid token' });
+      return;
+    }
+
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        twoFactorEnabled: true,
+      },
+    });
+
+    const twoFactorActivatedEmailBody = buildTwoFactorAuthentication(user);
+    const emailId = await sendEmail({
+      from: 'accounts@crypticactivist.com',
+      to: user.email,
+      subject: '2FA Activatived - Cryptic Activist',
+      html: twoFactorActivatedEmailBody,
+      text: '2FA Activated',
+    });
+
+    console.log({ emailId });
+
+    res.status(200).json({ success: true });
     return;
   } catch (err) {
     res.status(500).send({

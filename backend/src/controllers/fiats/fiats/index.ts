@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { createFiat, getFiats } from 'base-ca';
 
 import fiatsJson from '../../../../fiats.json';
+import { prisma } from '@/services/db/prisma';
 
 export const index = async (_req: Request, res: Response) => {
   try {
-    const fiats = await getFiats({
+    const fiats = await prisma.fiat.findMany({
       orderBy: {
         name: 'asc',
       },
@@ -24,10 +24,8 @@ export const createFiatController = async (req: Request, res: Response) => {
   try {
     const { name, symbol, country } = req.body;
 
-    const newFiat = await createFiat({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newFiat = await prisma.fiat.create({
+      data: {
         name,
         symbol,
         country,
@@ -45,17 +43,7 @@ export const createFiatController = async (req: Request, res: Response) => {
 
 export const createFiatsJSON = async (_req: Request, res: Response) => {
   try {
-    fiatsJson.forEach(async (fiat) => {
-      await createFiat({
-        where: { id: '' },
-        update: {},
-        create: {
-          name: fiat.name,
-          symbol: fiat.symbol,
-          country: fiat.country,
-        },
-      });
-    });
+    await prisma.fiat.createMany({ data: fiatsJson });
 
     res.status(200).send({ ok: true });
   } catch (err) {

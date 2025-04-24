@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
-import {
-  convertWhere,
-  generateRandomNames,
-  sanitize,
-  slugifyStringLowerCase,
-} from 'cryptic-utils';
-import { getAdmin, getAdmins } from 'base-ca';
+import { generateRandomNames, slugifyStringLowerCase } from '@/utils/string';
 
+import { convertWhere } from '@/utils/object';
 import { mapAdmins } from '@/utils/map/admins';
+import { prisma } from '@/services/db/prisma';
+import { sanitize } from '@/utils/sanitizer';
 
 const validateCredentials = async (username: string) => {
-  const user = await getAdmin({ where: { username } });
+  const user = await prisma.admin.findFirst({
+    where: {
+      username,
+    },
+  });
 
   if (!user) {
     return true;
@@ -42,7 +43,7 @@ export const getRandomCredentials = async (_req: Request, res: Response) => {
 
 export const getAllAdmins = async (_req: Request, res: Response) => {
   try {
-    const admins = await getAdmins({});
+    const admins = await prisma.admin.findMany();
 
     const mapped = mapAdmins(admins);
 
@@ -73,7 +74,9 @@ export const getAdminController = async (req: Request, res: Response) => {
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    const user = await getAdmin({ where });
+    const user = await prisma.admin.findFirst({
+      where,
+    });
 
     if (!user) {
       res.status(400).send({
@@ -107,7 +110,9 @@ export const getAdminVerify = async (req: Request, res: Response) => {
 
     const cleanQuery = sanitize(queryObj, []);
 
-    const user = await getAdmin(cleanQuery);
+    const user = await prisma.admin.findFirst({
+      where: cleanQuery,
+    });
 
     if (!user) {
       res.status(400).send({
@@ -131,7 +136,7 @@ export const getAdminById = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const admin = await getAdmin({ where: { id: userId } });
+    const admin = await prisma.admin.findFirst({ where: { id: userId } });
 
     if (!admin) {
       res.status(404).send({
@@ -154,7 +159,7 @@ export const getAdminByAdminname = async (req: Request, res: Response) => {
     const { params } = req;
     const { username } = params;
 
-    const admin = await getAdmin({ where: { username } });
+    const admin = await prisma.admin.findFirst({ where: { username } });
 
     if (!admin) {
       res.status(404).send({

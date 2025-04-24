@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
-import { countBlocks } from 'base-ca';
-import { sanitize } from 'cryptic-utils';
+import { prisma } from '@/services/db';
+import { sanitize } from '@/utils/sanitizer';
 
 // import { sanitizeInputCountBlocks } from '@utils/sanitizer/block';
 
@@ -11,8 +11,8 @@ export async function countBlocked(req: Request, res: Response) {
 
     const cleanQuery = sanitize({ userId }, []);
 
-    const count = await countBlocks({
-      blockedId: cleanQuery.userId,
+    const count = await prisma.block.count({
+      where: { blockedId: cleanQuery.userId },
     });
 
     res.status(200).send({
@@ -31,9 +31,11 @@ export async function countBlocker(req: Request, res: Response) {
 
     const cleanQuery = sanitize({ userId }, []);
 
-    const count = await countBlocks({
-      // @ts-ignore
-      blockerId: cleanQuery.userId,
+    const count = await prisma.block.count({
+      where: {
+        // @ts-ignore
+        blockerId: cleanQuery.userId,
+      },
     });
 
     res.status(200).send({

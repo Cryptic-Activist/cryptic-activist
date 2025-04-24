@@ -5,7 +5,11 @@ import {
   setCookie,
   setLocalStorage,
 } from '@/utils';
-import { getUserFromToken, getUserToken } from '@/services/user';
+import {
+  getUserFromToken,
+  getUserToken,
+  getUserToken2FA,
+} from '@/services/user';
 
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
@@ -20,11 +24,13 @@ export const useUserSlice: StateCreator<
   user: {
     id: undefined,
     names: undefined,
+    email: undefined,
     languages: undefined,
     profileColor: undefined,
     username: undefined,
     createdAt: undefined,
     updatedAt: undefined,
+    twoFactorEnabled: undefined,
     setUserValue: (params, actionName = 'user/setValue') => {
       set(
         ({ user }) => {
@@ -40,10 +46,13 @@ export const useUserSlice: StateCreator<
               names: params.names ?? user.names,
               profileColor: params.profileColor ?? user.profileColor,
               username: params.username ?? user.username,
+              email: params.email ?? user.email,
               lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
               createdAt: params.createdAt ?? user.createdAt,
               updatedAt: params.updatedAt ?? user.updatedAt,
               _count: params._count ?? user._count,
+              twoFactorEnabled:
+                params.twoFactorEnabled ?? user.twoFactorEnabled,
             },
           };
         },
@@ -62,12 +71,14 @@ export const useUserSlice: StateCreator<
             ...user,
             id: undefined,
             languages: undefined,
+            email: undefined,
             names: undefined,
             profileColor: undefined,
             username: undefined,
             lastLoginAt: undefined,
             createdAt: undefined,
             updatedAt: undefined,
+            twoFactorEnabled: undefined,
           },
         }),
         false,
@@ -115,11 +126,24 @@ export const useUserSlice: StateCreator<
     },
     login: async (params) => {
       try {
+        const setValue = get().user.setUserValue;
         const tokens = await getUserToken(params);
 
         if (!tokens) {
           throw Error('Unable to login');
         }
+
+        if (tokens.twoFactorEnabled) {
+          setValue(
+            {
+              twoFactorEnabled: tokens.twoFactorEnabled,
+              id: tokens.userId,
+            },
+            'user/setTwoFactorEnabled'
+          );
+          return { twoFactorEnabled: tokens.twoFactorEnabled };
+        }
+
         setCookie({
           name: 'accessToken',
           value: tokens.accessToken,
@@ -141,8 +165,6 @@ export const useUserSlice: StateCreator<
           throw Error('Unable to login');
         }
 
-        const setValue = get().user.setUserValue;
-
         setValue(
           {
             id: user.id,
@@ -163,6 +185,63 @@ export const useUserSlice: StateCreator<
         removeLocalStorage('accessToken');
         removeLocalStorage('refreshToken');
         throw Error('Unable to login');
+      }
+    },
+    login2FA: async (params) => {
+      try {
+        const setValue = get().user.setUserValue;
+        const tokens = await getUserToken2FA(params);
+
+        if (!tokens) {
+          // throw Error('Unable to login');
+          return false;
+        }
+
+        setCookie({
+          name: 'accessToken',
+          value: tokens.accessToken,
+          expiresInHours: 1,
+        });
+        setCookie({
+          name: 'refreshToken',
+          value: tokens.refreshToken,
+          expiresInHours: 2,
+        });
+        setLocalStorage('accessToken', tokens.accessToken);
+        setLocalStorage('refreshToken', tokens.refreshToken);
+
+        const user = await getUserFromToken(tokens.accessToken);
+
+        if (!user) {
+          removeLocalStorage('accessToken');
+          removeLocalStorage('refreshToken');
+          // throw Error('Unable to login');
+          return false;
+        }
+
+        setValue(
+          {
+            id: user.id,
+            names: {
+              firstName: user.names.firstName,
+              lastName: user.names.lastName,
+            },
+            languages: user.languages,
+            profileColor: user.profileColor,
+            username: user.username,
+            lastLoginAt: user.lastLoginAt,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+          'user/login2FA'
+        );
+
+        return true;
+      } catch (_err) {
+        removeLocalStorage('accessToken');
+        removeLocalStorage('refreshToken');
+        return false;
+        // throw Error('Unable to login');
       }
     },
     logout: () => {

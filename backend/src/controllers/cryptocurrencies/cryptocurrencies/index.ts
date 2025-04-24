@@ -1,20 +1,14 @@
 import { Request, Response } from 'express';
-import {
-  createAcceptedCryptocurrency,
-  createCryptocurrency,
-  createManyCryptocurrencies,
-  getAcceptedCryptocurrencies,
-  getCryptocurrencies,
-} from 'base-ca';
 import { getCoin, getCoins } from '@/services/coinGecko';
 
 import { fetchGet } from '@/services/axios';
 import { filterLongShort } from '@/utils/filters';
 import { getQueries } from '@/utils/axios';
+import { prisma } from '@/services/db/prisma';
 
 export const index = async (_req: Request, res: Response) => {
   try {
-    const cryptocurrencies = await getCryptocurrencies({});
+    const cryptocurrencies = await prisma.cryptocurrency.findMany();
 
     res.status(200).send([...cryptocurrencies]);
   } catch (err) {
@@ -33,10 +27,8 @@ export async function indexCoinGecko(_req: Request, res: Response) {
     const filtered = filterLongShort(response.data);
 
     const createdCryptocurrencyMapped = filtered.map(async (cryptocurrency) => {
-      const createdCryptocurrency = await createCryptocurrency({
-        where: { id: '' },
-        update: {},
-        create: {
+      const createdCryptocurrency = await prisma.cryptocurrency.create({
+        data: {
           coingeckoId: cryptocurrency.id,
           name: cryptocurrency.name,
           symbol: cryptocurrency.symbol,
@@ -64,7 +56,8 @@ export const createCryptocurrenciesCoinGecko = async (
   res: Response,
 ) => {
   try {
-    const acceptedCryptocurrencies = await getAcceptedCryptocurrencies({});
+    const acceptedCryptocurrencies =
+      await prisma.acceptedCryptocurrency.findMany();
     const ids = acceptedCryptocurrencies
       .map((accepted) => {
         return accepted.coingeckoId;
@@ -83,7 +76,9 @@ export const createCryptocurrenciesCoinGecko = async (
       }),
     );
 
-    const created = await createManyCryptocurrencies(mapped);
+    const created = await prisma.cryptocurrency.createMany({
+      data: mapped,
+    });
 
     res.status(200).send({
       ...created,
@@ -104,15 +99,14 @@ export const createAcceptedCryptocurrencyCoinGecko = async (
 
     const coin = await getCoin(coingeckoId);
 
-    const createdAcceptedCryptocurrency = await createAcceptedCryptocurrency({
-      where: { id: '' },
-      update: {},
-      create: {
-        coingeckoId: coin.id,
-        name: coin.name,
-        symbol: coin.symbol,
-      },
-    });
+    const createdAcceptedCryptocurrency =
+      await prisma.acceptedCryptocurrency.create({
+        data: {
+          coingeckoId: coin.id,
+          name: coin.name,
+          symbol: coin.symbol,
+        },
+      });
 
     res.status(200).send(createdAcceptedCryptocurrency);
   } catch (err) {

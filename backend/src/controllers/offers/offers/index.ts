@@ -4,7 +4,8 @@ import {
   GetOffersRequest,
 } from './types';
 import { Request, Response } from 'express';
-import { getOffers, getOffersPagination } from 'base-ca';
+
+import { prisma } from '@/services/db/prisma';
 
 export const getOffersController = async (
   req: Request<{}, {}, {}, GetOffersRequest>,
@@ -13,7 +14,7 @@ export const getOffersController = async (
   const { cryptocurrencyId, fiatId, offerType, paymentMethodId } = req.query;
 
   try {
-    const offers = await getOffers({
+    const offers = await prisma.offer.findMany({
       where: {
         cryptocurrencyId,
         fiatId,
@@ -79,7 +80,7 @@ export const getCurrentVendorOffers = async (
   const { id } = req.params;
 
   try {
-    const offers = await getOffers({
+    const offers = await prisma.offer.findMany({
       where: {
         vendorId: id,
       },
@@ -149,14 +150,16 @@ export const getOffersPaginationController = async (
     limit,
     excludedVendorId,
     cursor,
+    amount,
   } = req.query as unknown as GetOffersPaginationRequest;
 
   const take = parseInt(limit, 10) || 20;
   const cursorObj = cursor ? { id: cursor } : undefined;
+  const amountNum = typeof amount === 'string' ? parseFloat(amount) : amount;
 
   try {
-    const offers = await getOffersPagination({
-      limit: take + 1,
+    const offers = await prisma.offer.findMany({
+      take: take + 1,
       cursor: cursorObj,
       orderBy: { id: 'desc' },
       where: {
@@ -165,8 +168,14 @@ export const getOffersPaginationController = async (
         offerType,
         paymentMethodId,
         vendorId: {
-          notIn: excludedVendorId,
+          ...(excludedVendorId && { notIn: [excludedVendorId] }),
         },
+        ...(amount && {
+          AND: [
+            { limitMin: { lte: amountNum } },
+            { limitMax: { gte: amountNum } },
+          ],
+        }),
       },
       select: {
         id: true,

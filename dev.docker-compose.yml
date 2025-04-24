@@ -113,15 +113,12 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-      - ./libraries/base-ca:/app/libraries/base-ca
-      - ./libraries/cryptic-utils:/app/libraries/cryptic-utils
     env_file:
       - envs/dev.backend.env
     environment:
       - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - app-network
-    entrypoint: ["sh", "-c", "npm run bootstrap && npm run migrate:dev && npm run dev"]
     deploy:
       resources:
         limits:

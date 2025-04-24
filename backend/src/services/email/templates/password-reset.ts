@@ -1,7 +1,6 @@
 import { FRONTEND_PUBLIC } from '@/constants/env';
-import { User } from 'base-ca';
 
-const buildPasswordResetEmail = (user: User, token: string) => {
+const buildPasswordResetEmail = (user: any, token: string) => {
   const resetPasswordUrl = `${FRONTEND_PUBLIC}/account/password/reset/${token}`;
   return `<body style="margin: 0; padding: 50px 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%"
@@ -71,7 +70,7 @@ const buildPasswordResetEmail = (user: User, token: string) => {
         
         <p style="margin-top: 0; margin-bottom: 30px;
                   color: #666666; font-size: 14px; line-height: 21px;">
-          If the button above doesn’t work, copy and paste this link into your browser:
+          If the button above doesn't work, copy and paste this link into your browser:
         </p>
         
         <p style="margin-top: 0; margin-bottom: 30px;

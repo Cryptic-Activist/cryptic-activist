@@ -1,16 +1,20 @@
 import {
   authenticate,
+  generate2FA,
   login,
+  login2FAVerify,
   loginDecodeToken,
   register,
   resetPassword,
   resetPasswordRequest,
   resetPasswordVerifyToken,
+  verify2FA,
   verifyAccount,
   verifyPrivateKeys,
 } from '@/controllers/users/auth';
 import {
   validateLogin,
+  validateLogin2FA,
   validatePasswordReset,
   validatePrivateKeysRequest,
   validateRegister,
@@ -23,6 +27,8 @@ import { authenticateUser } from '@/middlewares/authorization';
 const router = Router();
 
 router.post('/login', validateLogin, login);
+
+router.post('/2fa/login', validateLogin2FA, login2FAVerify);
 
 router.get(
   '/login/decode/token/:accessToken',
@@ -56,5 +62,9 @@ router.post(
 );
 
 router.get('/authenticate', authenticateUser, authenticate);
+
+router.post('/2fa/generate', authenticateUser, generate2FA);
+
+router.post('/2fa/verify/:token', authenticateUser, verify2FA);
 
 export default router;
