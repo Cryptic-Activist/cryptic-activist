@@ -51,6 +51,7 @@ export const fetchPut = async (
   headers?: AxiosRequestHeaders | any,
   timeout = 5000
 ) => {
+  console.log({ headers });
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
