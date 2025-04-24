@@ -1,6 +1,7 @@
 import {
   AccountVerification,
   Login,
+  Login2FA,
   PassswordReset,
   PasswordReset,
   PrivateKeys,
@@ -8,7 +9,7 @@ import {
 } from './zod';
 import { NextFunction, Request, Response } from 'express';
 
-import { getToken } from 'base-ca';
+import { prisma } from '@/services/db';
 
 export const validateLogin = (
   req: Request,
@@ -18,6 +19,26 @@ export const validateLogin = (
   const { body } = req;
 
   const validated = Login.safeParse(body);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+  }
+
+  next();
+};
+
+export const validateLogin2FA = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { body } = req;
+
+  const validated = Login2FA.safeParse(body);
+
+  console.log({ validated });
 
   if (!validated.success) {
     res.status(400).send({
@@ -98,7 +119,7 @@ export const validateToken = async (
     return;
   }
 
-  const verificationToken = await getToken({
+  const verificationToken = await prisma.token.findFirst({
     where: {
       token,
       isUsed: false,

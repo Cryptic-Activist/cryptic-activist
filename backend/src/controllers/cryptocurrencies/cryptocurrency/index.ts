@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import { createCryptocurrency, getCryptocurrency, redisClient } from 'base-ca';
 
 import { GetPriceQuery } from './types';
 import { fetchGet } from '@/services/axios';
 import { getCoinPrice } from '@/services/coinGecko';
+import { prisma } from '@/services/db/prisma';
+import { redisClient } from '@/services/db/redis';
 
 export const getPrice = async (
   req: Request<{}, {}, {}, GetPriceQuery>,
@@ -52,9 +53,11 @@ export const getCryptocurrencyController = async (
   try {
     const { cryptocurrencySymbol } = req.query;
 
-    const crypto = await getCryptocurrency({
-      // @ts-ignore
-      coingeckoId: cryptocurrencySymbol,
+    const crypto = await prisma.cryptocurrency.findFirst({
+      where: {
+        // @ts-ignore
+        coingeckoId: cryptocurrencySymbol,
+      },
     });
 
     if (!crypto) {
@@ -93,10 +96,8 @@ export const createCryptocurrencyCoinGecko = async (
       });
     }
 
-    const newCrypto = await createCryptocurrency({
-      where: { id: '' },
-      update: {},
-      create: {
+    const newCrypto = await prisma.cryptocurrency.create({
+      data: {
         name: response.data.name,
         symbol: response.data.symbol.toUpperCase(),
         coingeckoId: response.data.id,

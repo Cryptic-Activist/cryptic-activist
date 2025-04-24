@@ -1,16 +1,8 @@
 import { Request, Response } from 'express';
-// import jwt from 'jsonwebtoken';
-import { createAdmin, getAdmin } from 'base-ca';
-import {
-  decodeToken,
-  generateRefreshToken,
-  generateToken,
-  generateUniqueUsername,
-  sanitize,
-} from 'cryptic-utils';
 
 import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
+import { prisma } from '@/services/db/prisma';
 
 // import { validateAdminUsername } from '@/utils/validators';
 
@@ -20,7 +12,11 @@ export const login = async (req: Request, res: Response) => {
   try {
     const errors: string[] = [];
 
-    const admin = await getAdmin({ where: { username } });
+    const admin = await prisma.admin.findFirst({
+      where: {
+        username,
+      },
+    });
 
     if (!admin) {
       errors.push('User not found');
@@ -83,7 +79,11 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(401).send({});
     }
 
-    const admin = await getAdmin({ where: { id: decoded.id } });
+    const admin = await prisma.admin.findFirst({
+      where: {
+        id: decoded.id,
+      },
+    });
 
     if (!admin) {
       res.status(404).send({
@@ -123,16 +123,13 @@ export async function register(req: Request, res: Response) {
 
     const hash = await bcrypt.hash(password, generatedSalt);
 
-    const admin = await createAdmin({
-      where: {
-        id: '',
-      },
-      update: {},
-      create: {
+    const admin = await prisma.admin.create({
+      data: {
         firstName: cleanBody.firstName,
         lastName: cleanBody.lastName,
         username: cleanBody.username,
         password: hash,
+        email: '',
       },
     });
 

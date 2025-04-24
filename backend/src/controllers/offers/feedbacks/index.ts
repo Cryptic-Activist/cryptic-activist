@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { countFeedbacks, getFeedbacks, getFeedbacksPagination } from 'base-ca';
 
-import { sanitize } from 'cryptic-utils';
+import { prisma } from '@/services/db/prisma';
+import { sanitize } from '@/utils/sanitizer';
 
 export async function countFeedbacksController(req: Request, res: Response) {
   const { id, vendor_id, user_id, offer_id, message, type } = req.body;
@@ -19,8 +19,7 @@ export async function countFeedbacksController(req: Request, res: Response) {
       [],
     );
 
-    // @ts-ignore
-    const counts = await countFeedbacks(cleanReqBody);
+    const counts = await prisma.feedback.count({ where: cleanReqBody });
 
     res.status(200).send(counts);
   } catch (err) {
@@ -30,10 +29,9 @@ export async function countFeedbacksController(req: Request, res: Response) {
   }
 }
 
-export async function indexFeedbacks(req: Request, res: Response) {
+export async function indexFeedbacks(_req: Request, res: Response) {
   try {
-    // @ts-ignore
-    const feedbacks = await getFeedbacks(null, []);
+    const feedbacks = await prisma.feedback.findMany();
 
     res.status(200).send(feedbacks);
   } catch (err) {
@@ -59,10 +57,13 @@ export async function indexFeedbacksPagination(req: Request, res: Response) {
       [],
     );
 
-    const feedbacks = await getFeedbacksPagination({
-      limit: cleanReqBody.limit,
-      offset: cleanReqBody.skip,
-      select: { offer: true, vendor: true },
+    const feedbacks = await prisma.feedback.findMany({
+      skip: cleanReqBody.skip,
+      take: cleanReqBody.limit,
+      select: {
+        offer: true,
+        vendor: true,
+      },
     });
 
     res.status(200).send(feedbacks);
@@ -78,7 +79,9 @@ export const getFeedbacksByUser = async (req: Request, res: Response) => {
     const { params } = req;
     const { userId } = params;
 
-    const feedbacks = await getFeedbacks({ where: { vendorId: userId } });
+    const feedbacks = await prisma.feedback.findMany({
+      where: { vendorId: userId },
+    });
 
     res.status(200).send(feedbacks);
   } catch (error) {

@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import { convertWhere, sanitize, sanitizeQueryArray } from 'cryptic-utils';
-import { createSystemMessage, getSystemMessages } from 'base-ca';
+import { sanitize, sanitizeQueryArray } from '@/utils/sanitizer';
+
+import { convertWhere } from '@/utils/object';
+import { prisma } from '@/services/db/prisma';
 
 export async function getSystemMessagesController(req: Request, res: Response) {
   try {
@@ -12,7 +14,7 @@ export async function getSystemMessagesController(req: Request, res: Response) {
 
     const where = convertWhere({ ...cleanReqQuery }, ['associations']);
 
-    const systemMessages = await getSystemMessages({ where });
+    const systemMessages = await prisma.systemMessage.findMany({ where });
 
     res.status(200).send(systemMessages);
   } catch (err) {
@@ -29,10 +31,8 @@ export const createSystemMessageController = async (
   try {
     const { body } = req;
 
-    const createdSystemMessage = await createSystemMessage({
-      where: { id: '' },
-      update: {},
-      create: body,
+    const createdSystemMessage = await prisma.systemMessage.create({
+      data: body,
     });
 
     res.status(200).send(createdSystemMessage);

@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
-import {
-  createPaymentMethodCategory,
-  getPaymentMethodCategories as getPaymentMethodCategoriesBaseCa,
-} from 'base-ca';
 
-import { sanitize } from 'cryptic-utils';
+import { prisma } from '@/services/db/prisma';
+import { sanitize } from '@/utils/sanitizer';
 
 export const createPaymentMethodCategoryController = async (
   req: Request,
@@ -15,10 +12,8 @@ export const createPaymentMethodCategoryController = async (
 
     const cleanName = sanitize({ name }, []);
 
-    const newPaymentMethodCategory = await createPaymentMethodCategory({
-      where: { id: '' },
-      update: {},
-      create: cleanName,
+    const newPaymentMethodCategory = await prisma.paymentMethodCategory.create({
+      data: cleanName,
     });
 
     res.status(200).send(newPaymentMethodCategory);
@@ -38,7 +33,8 @@ export const getPaymentMethodCategories = async (
   try {
     const { id } = req.params;
 
-    const paymentMethodCategories = await getPaymentMethodCategoriesBaseCa({});
+    const paymentMethodCategories =
+      await prisma.paymentMethodCategory.findMany();
 
     res.status(200).send(paymentMethodCategories);
   } catch (err) {

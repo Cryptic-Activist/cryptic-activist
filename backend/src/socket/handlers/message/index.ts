@@ -1,6 +1,7 @@
 import { IO, Socket } from '../types';
-import { createChatMessage, getChat, redisClient } from 'base-ca';
+import { prisma, redisClient } from '@/services/db';
 
+import ChatMessage from '@/models/ChatMessage';
 import { SendMessageParams } from './types';
 
 export default class Message {
@@ -16,14 +17,14 @@ export default class Message {
     this.socket.on(
       'send_message',
       async ({ content: { from, message, to }, chatId }: SendMessageParams) => {
-        const chat = await getChat({
+        const chat = await prisma.chat.findFirst({
           where: {
             id: chatId,
           },
         });
 
         if (chat?.id) {
-          const newMessage = await createChatMessage({
+          const newMessage = await ChatMessage.create({
             chatId: chat.id,
             from: from,
             message,

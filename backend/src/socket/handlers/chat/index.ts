@@ -1,19 +1,13 @@
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
-  createChatMessage,
-  getChat,
-  getChatMessages,
-  getTrade,
-  redisClient,
-  updateTrade,
-  updateUser,
-} from 'base-ca';
-import {
   createTrade,
   fundTrade,
   getCreateTradeDetails,
 } from '@/services/blockchains/ethereum';
+import { prisma, redisClient } from '@/services/db';
+
+import ChatMessage from '@/models/ChatMessage';
 
 export default class Chat {
   private socket: Socket;
@@ -42,14 +36,14 @@ export default class Chat {
           status: 'online',
         });
 
-        const chat = await getChat({
+        const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
             tradeId: true,
           },
         });
 
-        const trade = await getTrade({
+        const trade = await prisma.trade.findFirst({
           where: { id: chat?.tradeId },
           select: {
             id: true,
@@ -93,15 +87,15 @@ export default class Chat {
 
         if (vendorWalletAddress) {
           if (!trade?.vendorWalletAddress) {
-            const updatedTrade = await updateTrade({
+            const updatedTrade = await prisma.trade.update({
               where: {
                 id: trade?.id,
               },
-              toUpdate: {
+              data: {
                 vendorWalletAddress,
               },
             });
-            await createChatMessage({
+            await ChatMessage.create({
               chatId,
               from: 'none',
               to: 'none',
@@ -118,8 +112,6 @@ export default class Chat {
               });
               return;
             }
-
-            console.log({ createTradeDetails });
 
             const tradeCreated = await createTrade({
               arbitrator: createTradeDetails.arbitrator,
@@ -141,7 +133,7 @@ export default class Chat {
               return;
             }
 
-            await createChatMessage({
+            await ChatMessage.create({
               chatId,
               from: 'none',
               to: 'none',
@@ -149,9 +141,9 @@ export default class Chat {
               message: tradeCreated.message,
             });
 
-            await updateTrade({
+            await prisma.trade.update({
               where: { id: trade.id },
-              toUpdate: {
+              data: {
                 blockchainTradeId: tradeCreated.data?.tradeId,
                 blockchainTransactionHash: tradeCreated.txHash,
               },
@@ -163,7 +155,7 @@ export default class Chat {
             );
 
             if (tradeFunded.data) {
-              await createChatMessage({
+              await ChatMessage.create({
                 chatId,
                 from: 'none',
                 to: 'none',
@@ -172,11 +164,11 @@ export default class Chat {
               });
             }
 
-            await updateTrade({
+            await prisma.trade.update({
               where: {
                 id: trade?.id,
               },
-              toUpdate: {
+              data: {
                 startedAt: new Date(),
                 status: 'IN_PROGRESS',
               },
@@ -189,10 +181,12 @@ export default class Chat {
         }
 
         // Send existing room messages
-        const chatMessages = await getChatMessages({
-          where: { chatId },
-          orderBy: 'desc',
-        });
+        let query = ChatMessage.find(
+          { chatId },
+          'createdAt from message type to',
+        );
+        query = query.sort('desc');
+        const chatMessages = await query.exec();
 
         this.io.to(chatId).emit('room_messages', chatMessages);
         // Notify room about new user
@@ -218,9 +212,9 @@ export default class Chat {
       for (const [userId, sockId] of Object.entries(onlineTradingUsers)) {
         if (sockId === this.socket.id) {
           await redisClient.hDel('onlineTradingUsers', userId);
-          await updateUser({
+          await prisma.user.update({
             where: { id: userId },
-            toUpdate: {
+            data: {
               lastLoginAt: new Date(),
             },
           });
@@ -233,9 +227,9 @@ export default class Chat {
       for (const [userId, sockId] of Object.entries(onlineUsers)) {
         if (sockId === this.socket.id) {
           await redisClient.hDel('onlineUsers', userId);
-          await updateUser({
+          await prisma.user.update({
             where: { id: userId },
-            toUpdate: {
+            data: {
               lastLoginAt: new Date(),
             },
           });

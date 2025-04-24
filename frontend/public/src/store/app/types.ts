@@ -21,6 +21,7 @@ type Defaults = {
   fiat?: Fiat;
   cryptocurrency?: Cryptocurrency;
   paymentMethod?: PaymentMethod;
+  amount?: number;
 };
 
 export type CurrentPrice = number;
@@ -54,6 +55,7 @@ export type AppStoreSetter = {
     fiat?: Fiat | null;
     cryptocurrency?: Cryptocurrency | null;
     paymentMethod?: PaymentMethod | null;
+    amount?: number;
   };
   currentPrice?: CurrentPrice;
 };

@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 
 import { AuthenticationUser } from './zod';
 import { JWT_SECRET } from '@/constants/env';
-import { decodeToken } from 'cryptic-utils';
-import { getUser } from 'base-ca';
+import { decodeToken } from '@/utils/generators/jwt';
+import { prisma } from '@/services/db';
 
 export const authenticateUser = async (
   req: Request,
@@ -21,7 +21,7 @@ export const authenticateUser = async (
     }
 
     const token = validated.data.authorization.split('Bearer ')[1];
-    const decoded = decodeToken(token, JWT_SECRET);
+    const decoded = decodeToken(token);
 
     if (!decoded) {
       res.status(401).send({
@@ -30,7 +30,7 @@ export const authenticateUser = async (
       return;
     }
 
-    const user = await getUser({
+    const user = await prisma.user.findFirst({
       where: { id: decoded.userId },
       select: { id: true },
     });
