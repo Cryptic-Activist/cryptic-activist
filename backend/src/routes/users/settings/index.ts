@@ -8,8 +8,8 @@ import { authenticateUser } from '@/middlewares/authorization';
 
 const router = Router();
 
-router.put('/language/add', authenticateUser, addSpokenLanguage);
+router.put('/:id/language/add', authenticateUser, addSpokenLanguage);
 
-router.put('/language/remove', authenticateUser, removeSpokenLanguage);
+router.put('/:id/language/remove', authenticateUser, removeSpokenLanguage);
 
 export default router;

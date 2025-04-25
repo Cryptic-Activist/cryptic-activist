@@ -9,19 +9,25 @@ export const addSpokenLanguage = async ({
   userId,
 }: AddSpokenLanguagesParams) => {
   const accessToken = getCookie('accessToken');
-  const response = await fetchPut(
-    BACKEND + '/users/' + userId + '/settings/language/add',
-    {
-      language,
-    },
-    {
-      Authorization: `Bearer ${accessToken}`,
+  try {
+    const response = await fetchPut(
+      BACKEND + '/users/settings/' + userId + '/language/add',
+      {
+        language,
+      },
+      {
+        Authorization: `Bearer ${accessToken}`,
+      }
+    );
+    if (response.status !== 200) return null;
+
+    return response.data;
+  } catch (error: any) {
+    console.log({ error });
+    if (error.status === (400 as number)) {
+      return error.response.data;
     }
-  );
-
-  if (response.status !== 200) return null;
-
-  return response.data;
+  }
 };
 
 export const removeSpokenLanguage = async ({
@@ -30,7 +36,7 @@ export const removeSpokenLanguage = async ({
 }: RemoveSpokenLanguagesParams) => {
   const accessToken = getCookie('accessToken');
   const response = await fetchPut(
-    BACKEND + '/users/' + userId + '/settings/language/add',
+    BACKEND + '/users/settings/' + userId + '/language/remove',
     {
       languageId,
     },

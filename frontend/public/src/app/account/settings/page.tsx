@@ -1,41 +1,55 @@
 'use client';
 
 import React, { FormEvent, useEffect, useState } from 'react';
-import { useNavigationBar, useUser } from '@/hooks';
+import {
+  addSpokenLanguage,
+  removeSpokenLanguage,
+} from '@/services/user/settings';
+import { useApp, useNavigationBar, useUser } from '@/hooks';
 
 import { Button } from '@/components';
 import { FaPlus } from 'react-icons/fa6';
 import { Input } from '@/components/forms';
-import { addSpokenLanguage } from '@/services/user/settings';
 import styles from './page.module.scss';
 
 const AccountSettings = () => {
   const { toggleModal } = useNavigationBar();
+  const { addToast } = useApp();
   const { user } = useUser();
   const [languages, setLanguages] = useState(user.languages);
   const [newLanguage, setNewLanguage] = useState('');
 
-  console.log({ languages });
-
-  const addLanguage = (newLang: any) => {
+  const addLanguage = (newLang: { id: string; name: string }) => {
     const filtered = languages?.filter((lang) =>
       lang.name.toLowerCase().trim().includes(newLanguage.toLowerCase().trim())
     );
-    console.log({ filtered });
     if (filtered?.length === 0) {
-      console.log();
-      setLanguages((prev) => [...prev, newLang]);
+      setLanguages((prev) => [
+        ...(prev || []),
+        {
+          name: newLang.name,
+          id: newLang.id,
+        },
+      ]);
     }
   };
 
-  const removeLanguage = async (_langId: string) => {
+  const removeLanguage = async (languageId: string) => {
     if (user.id) {
-      // const removedLang = await removeSpokenLanguage({
-      //   languageId: langId,
-      //   userId: user.id,
-      // });
+      const removedLang = await removeSpokenLanguage({
+        languageId,
+        userId: user.id,
+      });
+
+      if (removedLang.ok) {
+        setLanguages((prevLangs) => {
+          const filtered = prevLangs?.filter(
+            (prevLang) => languageId !== prevLang.id
+          );
+          return filtered;
+        });
+      }
     }
-    // setLanguages(languages.filter((l) => l !== lang));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -46,10 +60,14 @@ const AccountSettings = () => {
         userId: user.id,
       });
 
-      console.log({ addedLanguage });
+      if (addedLanguage.errors) {
+        addToast('error', addedLanguage.errors[0], 5000);
+        return;
+      }
 
       if (addedLanguage) {
-        addLanguage(addedLanguage);
+        addLanguage({ id: addedLanguage.languageId, name: newLanguage });
+        setNewLanguage('');
       }
     }
   };

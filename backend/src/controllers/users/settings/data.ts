@@ -1,0 +1,36 @@
+// languages.js
+
+const availableLanguages = [
+  'English',
+  'Mandarin Chinese',
+  'Spanish',
+  'Hindi',
+  'Arabic',
+  'Bengali',
+  'Portuguese',
+  'Russian',
+  'Japanese',
+  'Punjabi',
+  'German',
+  'Javanese',
+  'Wu Chinese',
+  'Malay',
+  'Telugu',
+  'Vietnamese',
+  'Korean',
+  'French',
+  'Marathi',
+  'Tamil',
+  'Urdu',
+  'Turkish',
+  'Italian',
+  'Cantonese',
+  'Thai',
+  'Gujarati',
+  'Jin Chinese',
+  'Southern Min',
+  'Polish',
+  'Ukrainian',
+];
+
+export default availableLanguages;
