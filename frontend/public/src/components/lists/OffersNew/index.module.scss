@@ -344,9 +344,10 @@
     grid-template-columns: 16.25rem 1fr 13.75rem 13.75rem;
     padding: 1rem;
     border-bottom: 0.0625rem solid #eaeaea;
+    transition: 0.2s background-color ease-out;
 
     &:hover {
-      background-color: #f2f2ed;
+      background-color: #f8f8f3;
     }
 
     .traderInfo {
