@@ -1,8 +1,3 @@
-.container {
-  // height: fit-content;
-  // width: fit-content;
-}
-
 .inputContainer {
   display: flex;
   flex-direction: column;
@@ -42,4 +37,8 @@
   display: flex;
   gap: 0.5rem;
   align-items: flex-end;
+}
+
+.loggedInSeeRate {
+  font-size: 1.1rem;
 }
