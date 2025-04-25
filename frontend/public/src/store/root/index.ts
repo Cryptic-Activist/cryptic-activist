@@ -19,6 +19,7 @@ import { usePaymentMethodsSlice } from '@/store/paymentMethods';
 import { useRegisterSlice } from '@/store/register';
 import { useResetPasswordSlice } from '@/store/resetPassword';
 import { useTradeSlice } from '@/store/trade';
+import { useTradesSlice } from '@/store/trades';
 import { useUserSlice } from '@/store/user';
 import { useVerifyAccountSlice } from '@/store/verifyAccount';
 
@@ -43,6 +44,7 @@ export const useRootStore = create<RootStore>()(
       ...useOffersSlice(set, get, store),
       ...useOfferSlice(set, get, store),
       ...useTradeSlice(set, get, store),
+      ...useTradesSlice(set, get, store),
       ...useNotificationsSlice(set, get, store),
     }),
     {
