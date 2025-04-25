@@ -5,7 +5,7 @@ import type { ProfileImageProps } from './types';
 import { getInitials } from '@/utils';
 import styles from './index.module.scss';
 
-const ProfileImage: FC<ProfileImageProps> = ({ size, user }) => {
+const ProfileImage: FC<ProfileImageProps> = ({ size, user, height, width }) => {
   const s =
     size === 'xSmall'
       ? {
@@ -43,12 +43,21 @@ const ProfileImage: FC<ProfileImageProps> = ({ size, user }) => {
     <div
       className={styles.container}
       style={{
-        ...(size && {
-          height: s.height,
-          width: s.width,
-          fontSize: s.fontSize,
-          backgroundColor: user?.profileColor,
-        }),
+        ...(size &&
+          !height &&
+          !width && {
+            height: s.height,
+            width: s.width,
+            fontSize: s.fontSize,
+            backgroundColor: user?.profileColor ?? '',
+          }),
+        ...(height &&
+          width && {
+            width: `${width}rem`,
+            height: `${height}rem`,
+            fontSize: s.fontSize,
+            backgroundColor: user?.profileColor ?? '',
+          }),
       }}
     >
       {getInitials(user?.names?.firstName ?? '', user?.names?.lastName ?? '')}

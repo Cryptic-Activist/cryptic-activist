@@ -32,7 +32,7 @@ export const toUpperCase = (text?: string) => {
   return text ? text?.toUpperCase() : '';
 };
 
-const removeSpecialCharsAndNumbers = (string: string) => {
+export const removeSpecialCharsAndNumbers = (string: string) => {
   const regex = /[^a-zA-Z]/g;
   return string.replace(regex, '');
 };
@@ -93,3 +93,10 @@ export function generateUniqueUsername(username: string): string {
   const hex: string = crypto.randomBytes(2).toString('hex');
   return `${username}-${hex}`;
 }
+
+export const toCapitalize = (string: string): string => {
+  return `${string.substring(0, 1).toUpperCase()}${string.substring(
+    1,
+    string.length,
+  )}`;
+};

@@ -7,7 +7,7 @@ import styles from './index.module.scss';
 const ProfileImageInfo: FC<ProfileSection> = ({ user }) => {
   return (
     <div className={styles.container}>
-      <ProfileImage size="large" user={user} />
+      <ProfileImage height={18} width={18} size="large" user={user} />
       <ProfileInfo user={user} />
     </div>
   );

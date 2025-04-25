@@ -38,6 +38,7 @@ export const useUserSlice: StateCreator<
             id: language.language.id,
             name: language.language.name,
           }));
+
           return {
             user: {
               ...user,
