@@ -61,7 +61,7 @@ const Altcha = forwardRef<{ value: string | null }, AltchaProps>(
         debug={IS_DEVELOPMENT}
         test={IS_DEVELOPMENT}
         floating
-        floatingoffset={100}
+        floatingoffset={20}
         challengeurl={`${BACKEND}/altcha/challenge`}
       ></altcha-widget>
     );

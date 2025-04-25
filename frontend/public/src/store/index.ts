@@ -17,3 +17,4 @@ export * from './offers';
 export * from './offer';
 export * from './trade';
 export * from './notifications';
+export * from './trades';
