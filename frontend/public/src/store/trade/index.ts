@@ -9,6 +9,7 @@ export const useTradeSlice: StateCreator<
   TradeStore
 > = (set, get) => ({
   trade: {
+    id: undefined,
     cryptocurrency: undefined,
     cryptocurrencyAmount: undefined,
     endedAt: undefined,
@@ -16,7 +17,6 @@ export const useTradeSlice: StateCreator<
     expiredAt: undefined,
     fiat: undefined,
     fiatAmount: undefined,
-    id: undefined,
     offer: undefined,
     paid: undefined,
     paymentMethod: undefined,
