@@ -42,4 +42,6 @@ router.get(
   calculateReceivingAmount,
 );
 
+router.get('/:id/details', authenticateUser, index);
+
 export default router;

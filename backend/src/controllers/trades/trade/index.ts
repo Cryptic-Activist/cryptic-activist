@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
+import { Chat } from '@/socket/handlers';
+import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { prisma } from '@/services/db';
 
@@ -288,3 +290,80 @@ export const calculateReceivingAmount = async (
     });
   }
 };
+
+export async function getTradeDetails(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const tradeDetails = await prisma.trade.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        blockchainTransactionHash: true,
+        createdAt: true,
+        cryptocurrency: true,
+        cryptocurrencyAmount: true,
+        endedAt: true,
+        escrowReleaseDate: true,
+        expiredAt: true,
+        fiat: true,
+        fiatAmount: true,
+        paymentMethod: true,
+        paymentReceipt: true,
+        startedAt: true,
+        status: true,
+        paymentConfirmed: true,
+        paid: true,
+        trader: {
+          select: {
+            firstName: true,
+            lastName: true,
+            username: true,
+            profileColor: true,
+          },
+        },
+        vendor: {
+          select: {
+            firstName: true,
+            lastName: true,
+            username: true,
+            profileColor: true,
+          },
+        },
+
+        chat: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!tradeDetails) {
+      res.status(400).send({
+        errors: ['Trade not found'],
+      });
+      return;
+    }
+
+    let query = ChatMessage.find(
+      { chatId: id },
+      'createdAt from message type to',
+    );
+
+    query = query.sort('desc');
+
+    const chatMessages = await query.exec();
+
+    res.status(200).send({
+      tradeDetails,
+      chatMessages,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
