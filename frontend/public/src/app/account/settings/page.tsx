@@ -1,41 +1,91 @@
 'use client';
 
-import React, { FormEvent, useState } from 'react';
-import { useNavigationBar, useUser } from '@/hooks';
+import React, { FormEvent, useEffect, useState } from 'react';
+import {
+  addSpokenLanguage,
+  removeSpokenLanguage,
+} from '@/services/user/settings';
+import { useApp, useNavigationBar, useUser } from '@/hooks';
 
 import { Button } from '@/components';
+import { FaPlus } from 'react-icons/fa6';
+import { Input } from '@/components/forms';
 import styles from './page.module.scss';
 
 const AccountSettings = () => {
   const { toggleModal } = useNavigationBar();
+  const { addToast } = useApp();
   const { user } = useUser();
-  const [languages, setLanguages] = useState(['English']);
+  const [languages, setLanguages] = useState(user.languages);
   const [newLanguage, setNewLanguage] = useState('');
 
-  const addLanguage = () => {
-    if (newLanguage.trim() && !languages.includes(newLanguage.trim())) {
-      setLanguages([...languages, newLanguage.trim()]);
-      setNewLanguage('');
+  const addLanguage = (newLang: { id: string; name: string }) => {
+    const filtered = languages?.filter((lang) =>
+      lang.name.toLowerCase().trim().includes(newLanguage.toLowerCase().trim())
+    );
+    if (filtered?.length === 0) {
+      setLanguages((prev) => [
+        ...(prev || []),
+        {
+          name: newLang.name,
+          id: newLang.id,
+        },
+      ]);
     }
   };
 
-  const removeLanguage = (lang: string) => {
-    setLanguages(languages.filter((l) => l !== lang));
+  const removeLanguage = async (languageId: string) => {
+    if (user.id) {
+      const removedLang = await removeSpokenLanguage({
+        languageId,
+        userId: user.id,
+      });
+
+      if (removedLang.ok) {
+        setLanguages((prevLangs) => {
+          const filtered = prevLangs?.filter(
+            (prevLang) => languageId !== prevLang.id
+          );
+          return filtered;
+        });
+      }
+    }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Submit the updated account settings to API
-    alert('Your settings have been saved!');
+    if (user.id) {
+      const addedLanguage = await addSpokenLanguage({
+        language: newLanguage,
+        userId: user.id,
+      });
+
+      if (addedLanguage.errors) {
+        addToast('error', addedLanguage.errors[0], 5000);
+        return;
+      }
+
+      if (addedLanguage) {
+        addLanguage({ id: addedLanguage.languageId, name: newLanguage });
+        setNewLanguage('');
+      }
+    }
   };
+
+  const handleNewLanguage = (value: string) => {
+    setNewLanguage(value);
+  };
+
+  useEffect(() => {
+    setLanguages(user.languages);
+  }, [user.languages]);
 
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>Account Settings</h1>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.content}>
         <section className={styles.section}>
-          <h2>Security Settings</h2>
-          <h3>Two Factor Authentication</h3>
+          <h2 className={styles.subHeading}>Security Settings</h2>
           {user.id && (
             <>
               {user.twoFactorEnabled ? (
@@ -47,59 +97,44 @@ const AccountSettings = () => {
               )}
             </>
           )}
-          {/* <label className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={enable2FA}
-              onChange={(e) => setEnable2FA(e.target.checked)}
-            />
-            Enable Two-Factor Authentication
-          </label> */}
         </section>
 
         <section className={styles.section}>
-          <h2>Languages Spoken</h2>
-          <div className={styles.languages}>
-            {languages.map((lang, index) => (
-              <div key={index} className={styles.languageItem}>
-                <span>{lang}</span>
-                <button
-                  type="button"
-                  onClick={() => removeLanguage(lang)}
-                  className={styles.removeButton}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className={styles.addLanguage}>
-            <input
+          <h2 className={styles.subHeading}>Languages Spoken</h2>
+          <form className={styles.addLanguage} onSubmit={handleSubmit}>
+            <Input
               type="text"
               placeholder="Add a language..."
               value={newLanguage}
-              onChange={(e) => setNewLanguage(e.target.value)}
-              className={styles.input}
+              onChange={handleNewLanguage}
             />
-            <button
-              type="button"
-              onClick={addLanguage}
-              className={styles.addButton}
-            >
+            <Button type="submit" padding="1rem">
               Add Language
-            </button>
-          </div>
+            </Button>
+          </form>
+          <ul className={styles.languages}>
+            {languages?.map((lang) => {
+              const isOnlyElement = languages.length === 1;
+              return (
+                <li key={lang.id} className={styles.languageItem}>
+                  <span>{lang.name}</span>
+                  {!isOnlyElement && (
+                    <button
+                      type="button"
+                      onClick={() => removeLanguage(lang.id)}
+                      className={styles.removeButton}
+                    >
+                      <FaPlus size={12} />
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         {/* Additional Account Settings can be added here */}
-
-        {/* Form Submission */}
-        <section className={styles.section}>
-          <button type="submit" className={styles.submitButton}>
-            Save Changes
-          </button>
-        </section>
-      </form>
+      </div>
     </div>
   );
 };
