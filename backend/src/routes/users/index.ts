@@ -14,6 +14,6 @@ router.use('/auth', auth);
 router.use('/language', language);
 router.use('/blocks', blocks);
 router.use('/trusts', trusts);
-router.use('/:id/settings', settings);
+router.use('/settings', settings);
 
 export default router;

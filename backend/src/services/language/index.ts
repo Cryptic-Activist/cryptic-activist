@@ -5,13 +5,15 @@ import { prisma } from '../db';
 export const associateLanguage = async (
   userId: string,
   languageName: string,
-): Promise<boolean> => {
+) => {
   const user = await prisma.user.findFirst({
     where: { id: userId },
   });
 
+  console.log({ user });
+
   if (!user) {
-    return false;
+    return null;
   }
 
   const sanitized = removeSpecialCharsAndNumbers(languageName.trim());
@@ -34,21 +36,26 @@ export const associateLanguage = async (
     },
   });
 
+  console.log({ userLanguage });
+
   if (userLanguage) {
-    return true;
+    return userLanguage;
   }
 
-  await prisma.userLanguage.create({
+  const newUserLanguage = await prisma.userLanguage.create({
     data: { languageId: language?.id, userId: user?.id },
   });
 
-  return true;
+  console.log({ newUserLanguage });
+
+  return newUserLanguage;
 };
 
 export const diassociateLanguage = async (
   userId: string,
   languageId: string,
-): Promise<boolean> => {
+) => {
+  console.log({ userId, languageId });
   const deleted = await prisma.userLanguage.delete({
     where: {
       userId_languageId: {
@@ -59,8 +66,8 @@ export const diassociateLanguage = async (
   });
 
   if (!deleted) {
-    return false;
+    return null;
   }
 
-  return true;
+  return deleted;
 };

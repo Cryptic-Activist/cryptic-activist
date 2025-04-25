@@ -12,9 +12,15 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
       <ul className={styles.list}>
         <li>
           Languages:{' '}
-          {user?.languages?.map((language, index) => (
-            <span key={index}>{language.name}</span>
-          ))}
+          {user?.languages?.map((language, index) => {
+            const isLast = index === (user.languages?.length ?? 0) - 1;
+            return (
+              <span key={index}>
+                {language.name}
+                {!isLast ? ', ' : ''}
+              </span>
+            );
+          })}
         </li>
         <li>
           Number of trades: <span>{user?._count?.trades}</span>
