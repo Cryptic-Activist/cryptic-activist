@@ -16,11 +16,7 @@ const HowMuch: FC<HowMuchProps> = ({
   onSubmit,
   blockchain,
   mutationStartTrade,
-  createTrade: {
-    cryptocurrencyAmount,
-    receivingFiatAmount,
-    isTradingAvailable,
-  },
+  createTrade: { cryptocurrencyAmount, isTradingAvailable },
   isLoggedIn,
 }) => {
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
@@ -81,33 +77,28 @@ const HowMuch: FC<HowMuchProps> = ({
                   />
                 )}
               </div>
-              {!user?.id && <p>You must logged in to see the rates</p>}
-              {user?.id && receivingFiatAmount && (
-                <p>
-                  You will receive{' '}
-                  <strong>
-                    {queryOffer.isPending
-                      ? '...'
-                      : `${receivingFiatAmount} ${offer.fiat?.symbol}`}
-                  </strong>{' '}
-                  in{' '}
-                  <strong>
-                    {queryOffer.isPending ? '...' : offer.cryptocurrency?.name}
-                  </strong>
-                </p>
-              )}
             </div>
             <div className={styles.willReceiveContainer}>
               <label className={coreStyles.label}>Will receive</label>
-              {queryOffer.isPending ? (
-                <p>......</p>
+              {!user?.id ? (
+                <p className={styles.loggedInSeeRate}>
+                  You must logged in to see the rates
+                </p>
               ) : (
-                offer.cryptocurrency?.symbol && (
-                  <div className={styles.willReceive}>
-                    <span>{cryptocurrencyAmount}</span>
-                    <strong>{toUpperCase(offer.cryptocurrency?.symbol)}</strong>
-                  </div>
-                )
+                <>
+                  {queryOffer.isPending ? (
+                    <p>......</p>
+                  ) : (
+                    offer.cryptocurrency?.symbol && (
+                      <div className={styles.willReceive}>
+                        <span>{cryptocurrencyAmount}</span>
+                        <strong>
+                          {toUpperCase(offer.cryptocurrency?.symbol)}
+                        </strong>
+                      </div>
+                    )
+                  )}
+                </>
               )}
             </div>
           </div>

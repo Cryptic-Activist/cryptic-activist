@@ -82,7 +82,7 @@ const useOffer = () => {
 
   const handleFiatAmount = useDebounce((amount: number): void => {
     setFiatAmount(amount);
-  }, 1500);
+  }, 400);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

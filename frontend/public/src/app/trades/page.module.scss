@@ -1,0 +1,147 @@
+@use "../../styles//globals.module.scss" as globals;
+
+.container {
+  width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  flex-direction: column;
+}
+
+.btns {
+  display: flex;
+  li {
+    list-style: none;
+    button {
+      padding: 0.8rem;
+      font-size: 1rem;
+      background-color: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .selected {
+      border-bottom: 1px solid #000;
+      background-color: globals.$primary-hover-background-color;
+    }
+  }
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.item {
+  display: flex;
+  border-radius: 0.5rem;
+  background-color: globals.$white;
+  padding: 0.8rem;
+  border: 1px solid globals.$black;
+  box-shadow: 0 0px 2px globals.$box-shadow-default-color;
+  color: globals.$black;
+
+  .txHash {
+    font-size: 0.8rem;
+    span {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.pageTitle {
+  font-size: 2rem;
+  margin-bottom: 24px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.tradeId {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.badge.pending {
+  background: #ffeb3b;
+  color: #000;
+}
+.badge.in_progress {
+  background: #03a9f4;
+  color: #fff;
+}
+.badge.completed {
+  background: #4caf50;
+  color: #fff;
+}
+.badge.cancelled {
+  background: #f44336;
+  color: #fff;
+}
+.badge.disputed {
+  background: #ff9800;
+  color: #fff;
+}
+
+.cardBody {
+  padding: 16px;
+  display: grid;
+  row-gap: 12px;
+}
+
+.row {
+  display: flex;
+}
+
+.label {
+  flex: 1;
+  font-weight: 500;
+}
+
+.value {
+  flex: 2;
+}
+
+.link {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1500px) {
+  .container {
+    width: 90%;
+  }
+}
