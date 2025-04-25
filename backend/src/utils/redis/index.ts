@@ -1,8 +1,8 @@
-import { redisClient } from '@/services/redis';
+import { redisClient } from '@/services/db';
 
 export const findEntriesWithFieldX = async (
   hashKey: string,
-  fieldX: string
+  fieldX: string,
 ) => {
   let cursor = 0;
   const matchingEntries: { field: string; value: string }[] = [];
