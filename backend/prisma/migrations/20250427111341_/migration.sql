@@ -81,7 +81,7 @@ CREATE TABLE "cryptocurrencies" (
 CREATE TABLE "feedbacks" (
     "id" TEXT NOT NULL,
     "traderId" TEXT NOT NULL,
-    "offerId" TEXT NOT NULL,
+    "tradeId" TEXT NOT NULL,
     "message" VARCHAR(256) NOT NULL,
     "type" "FeedbackType" NOT NULL,
     "deletedAt" DATE,
@@ -384,6 +384,12 @@ CREATE UNIQUE INDEX "chats_tradeId_key" ON "chats"("tradeId");
 CREATE UNIQUE INDEX "cryptocurrencies_coingeckoId_key" ON "cryptocurrencies"("coingeckoId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "feedbacks_traderId_key" ON "feedbacks"("traderId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "feedbacks_tradeId_key" ON "feedbacks"("tradeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "kyc_userId_key" ON "kyc"("userId");
 
 -- CreateIndex
@@ -435,7 +441,7 @@ ALTER TABLE "chats" ADD CONSTRAINT "chats_tradeId_fkey" FOREIGN KEY ("tradeId") 
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_offerId_fkey" FOREIGN KEY ("offerId") REFERENCES "offers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "kyc" ADD CONSTRAINT "kyc_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

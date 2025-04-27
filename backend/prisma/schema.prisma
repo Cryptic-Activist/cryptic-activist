@@ -87,9 +87,9 @@ enum FeedbackType {
 model Feedback {
   id        String       @id @default(uuid())
   trader    User         @relation("feedbackTrader", fields: [traderId], references: [id], onUpdate: Cascade)
-  traderId  String
-  offer     Offer        @relation("feedbackOffer", fields: [offerId], references: [id], onUpdate: Cascade)
-  offerId   String
+  traderId  String       @unique
+  trade     Trade        @relation("tradeFeedback", fields: [tradeId], references: [id], onDelete: Cascade)
+  tradeId   String       @unique
   message   String       @db.VarChar(256)
   type      FeedbackType
   deletedAt DateTime?    @db.Date
@@ -175,7 +175,6 @@ model Offer {
   paymentMethodId     String
   fiat                Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fiatId              String
-  feedbacks           Feedback[]     @relation("feedbackOffer")
   trades              Trade[]        @relation("tradeOffer")
 
   @@map("offers")
@@ -319,6 +318,7 @@ model Trade {
   updatedAt                 DateTime?       @updatedAt @db.Date
   paymentDetails            PaymentDetails? @relation(fields: [paymentDetailsId], references: [id])
   paymentDetailsId          String?
+  feedback                  Feedback?       @relation("tradeFeedback")
 
   @@map("trades")
 }
