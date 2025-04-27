@@ -1,6 +1,6 @@
 'use client';
 
-import { Altcha, Button, FeedbackSelector } from '@/components';
+import { Button, FeedbackSelector } from '@/components';
 
 import { Template } from '@/layouts/modals';
 import { TextArea } from '@/components/forms';
@@ -29,8 +29,6 @@ const Feedback = () => {
             errorMessage={errors['message']?.message}
             // value={values.message}
           />
-
-          <Altcha />
 
           <Button type="submit" padding="1rem" fullWidth>
             Submit Feedback
