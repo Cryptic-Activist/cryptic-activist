@@ -42,6 +42,8 @@ export const authenticateUser = async (
       return;
     }
 
+    console.log({ user });
+
     next();
   } catch (errors) {
     console.log(errors);

@@ -86,8 +86,6 @@ enum FeedbackType {
 
 model Feedback {
   id        String       @id @default(uuid())
-  vendor    User         @relation("feedbackVendor", fields: [vendorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  vendorId  String
   trader    User         @relation("feedbackTrader", fields: [traderId], references: [id], onUpdate: Cascade)
   traderId  String
   offer     Offer        @relation("feedbackOffer", fields: [offerId], references: [id], onUpdate: Cascade)
@@ -193,6 +191,7 @@ model PaymentMethod {
   paymentMethodCategoryId String
   offers                  Offer[]               @relation("offer")
   Trade                   Trade[]
+  paymentDetails          PaymentDetails[]
 
   @@map("payment_methods")
 }
@@ -219,6 +218,19 @@ model PaymentReceipt {
   trade     Trade[]
 
   @@map("payment_receipts")
+}
+
+model PaymentDetails {
+  id              String        @id @default(uuid())
+  instructions    String
+  deletedAt       DateTime?     @db.Date
+  createdAt       DateTime?     @default(now()) @db.Date
+  updatedAt       DateTime?     @updatedAt @db.Date
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id], onUpdate: Cascade)
+  paymentMethodId String
+  trade           Trade[]
+
+  @@map("payment_details")
 }
 
 model PremiumPurchase {
@@ -305,6 +317,8 @@ model Trade {
   deletedAt                 DateTime?       @db.Date
   createdAt                 DateTime?       @default(now()) @db.Date
   updatedAt                 DateTime?       @updatedAt @db.Date
+  paymentDetails            PaymentDetails? @relation(fields: [paymentDetailsId], references: [id])
+  paymentDetailsId          String?
 
   @@map("trades")
 }
@@ -384,6 +398,7 @@ model User {
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean
   isPremium                Boolean?
+  xp                       Int                        @default(0)
   twoFactorSecret          String?
   twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
   lastLoginAt              DateTime?                  @db.Timestamptz
@@ -401,7 +416,6 @@ model User {
   blockers                 Block[]                    @relation("blockers")
   blocked                  Block[]                    @relation("blocked")
   offers                   Offer[]                    @relation("offer")
-  feedbacksVendor          Feedback[]                 @relation("feedbackVendor")
   feedbackTrader           Feedback[]                 @relation("feedbackTrader")
   tradeVendor              Trade[]                    @relation("vendorTrade")
   tradeTrader              Trade[]                    @relation("traderTrade")

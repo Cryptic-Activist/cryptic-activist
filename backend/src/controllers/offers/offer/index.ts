@@ -66,7 +66,7 @@ export const getOfferController = async (req: Request, res: Response) => {
             profileColor: true,
             lastLoginAt: true,
             kyc: true,
-            feedbacksVendor: {
+            feedbackTrader: {
               orderBy: {
                 createdAt: 'desc',
               },

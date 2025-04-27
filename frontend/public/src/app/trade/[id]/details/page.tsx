@@ -1,38 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useApp, useTrade } from '@/hooks';
-
+import React from 'react';
 import TradeDetailsPage from '.';
 import TradeDetailsPageSkeleton from './skeleton';
+import { useFeedback } from '@/hooks';
 
 const TradeDetails = () => {
-  const { trade, queryTrade } = useTrade();
-  const { app, setValue } = useApp();
-
-  useEffect(() => {
-    if (trade.cryptocurrency) {
-      setValue({
-        defaults: {
-          cryptocurrency: trade.cryptocurrency,
-        },
-      });
-    }
-    if (trade.fiat) {
-      setValue({
-        defaults: {
-          fiat: trade.fiat,
-        },
-      });
-    }
-  }, [trade.cryptocurrency, trade.fiat]);
-
+  const { query, app } = useFeedback(true);
   return (
     <>
-      {queryTrade.isPending ? (
-        <TradeDetailsPageSkeleton />
-      ) : (
-        <TradeDetailsPage trade={trade} app={app} />
+      {query.isPending && <TradeDetailsPageSkeleton />}
+      {query.data && query.isSuccess && (
+        <TradeDetailsPage trade={query.data} app={app} />
       )}
     </>
   );

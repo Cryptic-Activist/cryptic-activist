@@ -4,6 +4,7 @@ import {
   checkTradePaid,
   createTradeController,
   getTradeController,
+  getTradeDetails,
   index,
 } from '@/controllers/trades';
 import {
@@ -42,6 +43,8 @@ router.get(
   calculateReceivingAmount,
 );
 
-router.get('/:id/details', authenticateUser, index);
+router.get('/:id/details', authenticateUser, getTradeDetails);
+
+router.post('/:id/feedback', authenticateUser, getTradeController);
 
 export default router;

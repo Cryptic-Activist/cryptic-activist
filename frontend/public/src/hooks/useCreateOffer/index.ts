@@ -74,6 +74,7 @@ const useCreateOffer = () => {
       cryptocurrency: createOffer?.cryptocurrency,
       offerType: createOffer?.offerType,
       paymentMethodId: createOffer?.paymentMethodId,
+      paymentDetails: createOffer?.paymentDetails,
     });
 
     createOffer.setCreateOfferValue(
@@ -85,6 +86,7 @@ const useCreateOffer = () => {
     createOffer?.cryptocurrency,
     createOffer?.offerType,
     createOffer?.paymentMethodId,
+    createOffer?.paymentDetails,
   ]);
 
   useEffect(() => {
@@ -146,6 +148,7 @@ const useCreateOffer = () => {
       vendorId: createOffer.vendorId,
       offerType: createOffer.offerType,
       paymentMethodId: createOffer.paymentMethodId,
+      paymentDetails: createOffer.paymentDetails,
       isPaymentMethodCompleted: createOffer.isPaymentMethodCompleted,
       pricingType: createOffer.pricingType,
       listAt: createOffer.listAt,

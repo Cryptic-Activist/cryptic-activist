@@ -23,7 +23,7 @@ export type UserLanguage = {
 export type Count = {
   blockers?: number;
   trusters?: number;
-  feedbackTrader?: number;
+  feedbackTradeDetailsr?: number;
   tradeVendor?: number;
 };
 
@@ -73,8 +73,8 @@ export enum Status {
   EXPIRED,
 }
 
-export type Trade = {
-  trade: {
+export type TradeDetails = {
+  tradeDetails: {
     id?: string;
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
@@ -98,8 +98,8 @@ export type Trade = {
   };
 };
 
-export type TradeStore = {
-  trade: {
+export type TradeDetailsStore = {
+  tradeDetails: {
     id?: string;
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
@@ -120,13 +120,16 @@ export type TradeStore = {
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
     chat?: Chat;
-    setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
-    setTrade: (trade: Value) => void;
-    resetTrade: () => void;
+    setTradeDetailsValue: (
+      params: Value,
+      actionName?: `tradeDetails/${string}`
+    ) => void;
+    setTradeDetails: (trade: Value) => void;
+    resetTradeDetails: () => void;
   };
 };
 
-export type TradeSetter = {
+export type TradeDetailsSetter = {
   id?: string;
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
@@ -149,4 +152,4 @@ export type TradeSetter = {
   chat?: Chat;
 };
 
-export type Value = TradeSetter;
+export type Value = TradeDetailsSetter;
