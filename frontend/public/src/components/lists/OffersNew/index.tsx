@@ -5,7 +5,6 @@ import {
   FaArrowUp,
   FaCircle,
   FaEllipsis,
-  FaHeart,
 } from 'react-icons/fa6';
 import type {
   FilterSectionProps,
@@ -49,9 +48,9 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
             <div className={styles.traderUsername}>{offer.vendor.username}</div>
           </Link>
           <div className={styles.traderMetrics}>
-            <span className={styles.heartIcon}>
+            {/* <span className={styles.heartIcon}>
               <FaHeart size={10} /> {offer._count?.feedbacks}
-            </span>
+            </span> */}
             <span>
               <FaArrowRightArrowLeft size={10} /> {offer._count?.trades}
             </span>

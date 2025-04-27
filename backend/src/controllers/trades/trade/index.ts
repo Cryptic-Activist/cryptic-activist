@@ -117,10 +117,97 @@ export async function setPaidTrade(req: Request, res: Response) {
 
 export async function getTradeController(req: Request, res: Response) {
   try {
-    const { id } = req.params;
-    const { type, message } = req.body;
+    const { params } = req;
+    const { id } = params;
 
-    res.status(200).send({});
+    const trade = await prisma.trade.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        fiatAmount: true,
+        cryptocurrencyAmount: true,
+        paymentReceipt: true,
+        status: true,
+        escrowReleaseDate: true,
+        paid: true,
+        paymentMethod: {
+          select: {
+            name: true,
+          },
+        },
+        chat: {
+          select: {
+            id: true,
+          },
+        },
+        cryptocurrency: {
+          select: {
+            coingeckoId: true,
+            name: true,
+            symbol: true,
+            image: true,
+          },
+        },
+        fiat: {
+          select: {
+            name: true,
+            symbol: true,
+            country: true,
+          },
+        },
+        offer: {
+          select: {
+            id: true,
+            tags: true,
+            instructions: true,
+            terms: true,
+            offerType: true,
+            timeLimit: true,
+          },
+        },
+        trader: {
+          select: {
+            id: true,
+            profileColor: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            isPremium: true,
+            lastLoginAt: true,
+          },
+        },
+        vendor: {
+          select: {
+            id: true,
+            profileColor: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            isPremium: true,
+            lastLoginAt: true,
+          },
+        },
+      },
+    });
+
+    if (!trade) {
+      res.status(204).send({ errors: ['Unable to retrieve trade'] });
+      return;
+    }
+
+    const chat = await prisma.chat.findFirst({
+      where: { tradeId: trade.id },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!chat) {
+      res.status(204).send({ errors: ['Unable to retrieve chat'] });
+      return;
+    }
+
+    res.status(200).send({ ...trade, chat });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -247,6 +334,7 @@ export async function getTradeDetails(req: Request, res: Response) {
         status: true,
         paymentConfirmed: true,
         paid: true,
+        feedback: true,
         // paymentDetails: {
         //   select: {
         //     instructions: true,
@@ -298,6 +386,68 @@ export async function getTradeDetails(req: Request, res: Response) {
       tradeDetails,
       chatMessages,
     });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function leaveFeedback(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { type, message } = req.body;
+
+    const trade = await prisma.trade.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        offer: true,
+        id: true,
+        trader: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!trade) {
+      res.status(400).send({
+        errors: ['Trade not found'],
+      });
+      return;
+    }
+
+    console.log(
+      JSON.stringify({
+        data: {
+          // either connect by relation…
+          trader: {
+            connect: { id: trade.trader.id },
+          },
+          trade: {
+            connect: { id: trade.id },
+          },
+          message,
+          type: type,
+        },
+      }),
+      2,
+    );
+
+    const newFeedback = await prisma.feedback.create({
+      data: {
+        tradeId: trade.id,
+        traderId: trade.trader.id,
+        message,
+        type: type,
+      },
+    });
+
+    res.status(200).send({ ok: true });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

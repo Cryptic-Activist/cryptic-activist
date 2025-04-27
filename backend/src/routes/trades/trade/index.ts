@@ -6,6 +6,7 @@ import {
   getTradeController,
   getTradeDetails,
   index,
+  leaveFeedback,
 } from '@/controllers/trades';
 import {
   validateCalculateReceivingAmount,
@@ -37,7 +38,7 @@ router.put('/paid', authenticateUser, validateSetPaidTrade);
 router.get('/:id', authenticateUser, getTradeController);
 
 router.get(
-  '/calculate-receiving',
+  '/calculate/receiving',
   authenticateUser,
   validateCalculateReceivingAmount,
   calculateReceivingAmount,
@@ -45,6 +46,6 @@ router.get(
 
 router.get('/:id/details', authenticateUser, getTradeDetails);
 
-router.post('/:id/feedback', authenticateUser, getTradeController);
+router.post('/:id/feedback', authenticateUser, leaveFeedback);
 
 export default router;

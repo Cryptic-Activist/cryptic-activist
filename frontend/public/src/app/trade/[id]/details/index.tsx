@@ -9,7 +9,7 @@ import { TradeDetailsProps } from './types';
 import styles from './index.module.scss';
 import { useNavigationBar } from '@/hooks';
 
-const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
+const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
   const { tradeDetails, chatMessages } = trade;
   const { toggleModal } = useNavigationBar();
 
@@ -18,6 +18,11 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
   const toggleChatView = () => {
     setIsChatOpen((prev) => !prev);
   };
+
+  const isUserTrader = user.id === tradeDetails.trader.id;
+  const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
+
+  console.log({ user, trade });
 
   return (
     <div className={styles.container}>
@@ -276,15 +281,19 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
           </button>
         </div>
 
-        <div className={styles.divider}></div>
+        {(canLeaveFeedback || tradeDetails.paymentReceipt) && (
+          <div className={styles.divider}></div>
+        )}
 
         <div className={styles.actionButtons}>
-          <Button
-            padding="0.65rem 1rem"
-            onClick={() => toggleModal('feedback')}
-          >
-            Leave Feedback
-          </Button>
+          {canLeaveFeedback && (
+            <Button
+              padding="0.65rem 1rem"
+              onClick={() => toggleModal('feedback')}
+            >
+              Leave Feedback
+            </Button>
+          )}
           {/* <button className={`${styles.btn} ${styles.btnOutline}`}>
             Report an Issue
           </button> */}

@@ -10,6 +10,7 @@
     "build": "tsup src",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
+    "migrate:dev": "npx prisma migrate dev && npx prisma generate",
     "lint": "eslint --fix"
   },
   "lint-staged": {

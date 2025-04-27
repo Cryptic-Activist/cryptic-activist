@@ -21,7 +21,7 @@ export const getCurrentTradingFee = async (
   const queries = getQueries(params);
   const bearerToken = getBearerToken();
   const response = await fetchGet(
-    `${BACKEND}/trades/trade/calculate-receiving` + queries,
+    `${BACKEND}/trades/trade/calculate/receiving` + queries,
     { Authorization: bearerToken }
   );
 

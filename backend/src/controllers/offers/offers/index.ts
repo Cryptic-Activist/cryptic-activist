@@ -23,7 +23,7 @@ export const getOffersController = async (
       },
       select: {
         _count: {
-          select: { trades: true, feedbacks: true },
+          select: { trades: true },
         },
         id: true,
         label: true,
@@ -86,7 +86,7 @@ export const getCurrentVendorOffers = async (
       },
       select: {
         _count: {
-          select: { trades: true, feedbacks: true },
+          select: { trades: true },
         },
         id: true,
         label: true,
@@ -186,7 +186,6 @@ export const getOffersPaginationController = async (
                 status: 'COMPLETED',
               },
             },
-            feedbacks: true,
           },
         },
         label: true,
