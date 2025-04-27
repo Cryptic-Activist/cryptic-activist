@@ -33,7 +33,10 @@ const useFeedback = (enabled: boolean) => {
     mutationKey: ['leaveFeedback'],
     mutationFn: onSubmitFeedback,
     onSuccess(data) {
-      console.log({ dataSuccess: data });
+      if (data.ok) {
+        query.refetch();
+        toggleModal('feedback');
+      }
     },
     retry: 3,
   });
@@ -65,12 +68,7 @@ const useFeedback = (enabled: boolean) => {
   }, [query.data?.cryptocurrency, query.data?.fiat]);
 
   const onSubmit = async (data: any) => {
-    console.log({ data });
-    const feedbackSubmit = await mutation.mutateAsync(data);
-
-    if (feedbackSubmit.ok) {
-      toggleModal('feedback');
-    }
+    mutation.mutate(data);
   };
 
   useEffect(() => {
