@@ -9,12 +9,14 @@ import { leaveAFeedbackResolver } from './zod';
 import { onSubmitFeedback } from '@/services/feedback';
 import useApp from '../useApp';
 import { useForm } from 'react-hook-form';
+import useNavigationBar from '../useNavigationBar';
 import { useParams } from 'next/navigation';
 
 const useFeedback = (enabled: boolean) => {
   const params = useParams();
   const id = params.id?.toString();
   const { setValue: setValueApp, app } = useApp();
+  const { toggleModal } = useNavigationBar();
 
   const query = useQuery({
     queryKey: ['tradeDetails'],
@@ -30,6 +32,9 @@ const useFeedback = (enabled: boolean) => {
   const mutation = useMutation({
     mutationKey: ['leaveFeedback'],
     mutationFn: onSubmitFeedback,
+    onSuccess(data) {
+      console.log({ dataSuccess: data });
+    },
     retry: 3,
   });
   const {
@@ -61,7 +66,11 @@ const useFeedback = (enabled: boolean) => {
 
   const onSubmit = async (data: any) => {
     console.log({ data });
-    mutation.mutateAsync(data);
+    const feedbackSubmit = await mutation.mutateAsync(data);
+
+    if (feedbackSubmit.ok) {
+      toggleModal('feedback');
+    }
   };
 
   useEffect(() => {
@@ -71,6 +80,7 @@ const useFeedback = (enabled: boolean) => {
   }, [mutation.data]);
 
   const handleFeedbackType = (type: Type) => {
+    console.log({ type });
     setValue('type', type);
   };
 

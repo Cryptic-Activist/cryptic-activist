@@ -334,7 +334,22 @@ export async function getTradeDetails(req: Request, res: Response) {
         status: true,
         paymentConfirmed: true,
         paid: true,
-        feedback: true,
+        feedback: {
+          select: {
+            id: true,
+            type: true,
+            message: true,
+            trader: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                profileColor: true,
+              },
+            },
+          },
+        },
         // paymentDetails: {
         //   select: {
         //     instructions: true,

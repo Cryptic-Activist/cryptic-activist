@@ -1,13 +1,44 @@
 'use client';
 
+import { FeedbackProps, TradeDetailsProps } from './types';
 import React, { FC, useState } from 'react';
 import { formatTimestamp, getInitials, toUpperCase } from '@/utils';
 
 import { Button } from '@/components';
 import Image from 'next/image';
-import { TradeDetailsProps } from './types';
 import styles from './index.module.scss';
 import { useNavigationBar } from '@/hooks';
+
+const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
+  const negativeStyle = feedback.type === 'NEGATIVE' ? styles.negative : '';
+  const neutralStyle = feedback.type === 'NEUTRAL' ? styles.neutral : '';
+  const positiveStyle = feedback.type === 'POSITIVE' ? styles.positive : '';
+
+  return (
+    <div className={styles.feedback}>
+      <div className={styles.userInfoTypeContainer}>
+        <div className={styles.userInfo}>
+          <div
+            className={styles.avatar}
+            style={{ backgroundColor: feedback.trader.profileColor }}
+          >
+            {getInitials(feedback.trader.firstName, feedback.trader.lastName)}
+          </div>
+          <div className={styles.userDetails}>
+            <div className={styles.usernames}>{`${feedback.trader.firstName} ${
+              feedback.trader.lastName
+            } ${user.id === feedback.trader.id ? '(you)' : ''}`}</div>
+            <span className={styles.username}>{feedback.trader.username}</span>
+          </div>
+        </div>
+        <span className={`${negativeStyle} ${neutralStyle} ${positiveStyle}`}>
+          {feedback.type}
+        </span>
+      </div>
+      <p>{feedback.message}</p>
+    </div>
+  );
+};
 
 const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
   const { tradeDetails, chatMessages } = trade;
@@ -21,8 +52,6 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
 
   const isUserTrader = user.id === tradeDetails.trader.id;
   const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
-
-  console.log({ user, trade });
 
   return (
     <div className={styles.container}>
@@ -282,7 +311,15 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
         </div>
 
         {(canLeaveFeedback || tradeDetails.paymentReceipt) && (
-          <div className={styles.divider}></div>
+          <div className={styles.divider} />
+        )}
+
+        {tradeDetails.feedback && (
+          <section>
+            <div className={styles.divider} />
+            <h3 className={styles.sectionTitle}>Feedback</h3>
+            <Feedback feedback={tradeDetails.feedback} user={user} />
+          </section>
         )}
 
         <div className={styles.actionButtons}>

@@ -5,8 +5,13 @@ $primary-color: #111;
 $secondary-color: #f8f9fa;
 $accent-color: #2d7af1;
 $success-color: #28a745;
+$success-background-color: rgba(40, 167, 69, 0.1);
 $danger-color: #dc3545;
+$danger-background-color: rgba(220, 53, 69, 0.1);
 $warning-color: #ffc107;
+$warning-background-color: rgba(255, 193, 7, 0.1);
+$neutral-color: #8d8d8d;
+$neutral-background-color: rgb(238, 238, 238);
 $gray-light: #f1f1f1;
 $gray-dark: #333;
 $border-radius: 0.5rem;
@@ -364,6 +369,45 @@ $border-radius: 0.5rem;
   &:hover {
     text-decoration: underline;
   }
+}
+
+.feedback {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  border: 1px solid globals.$black;
+  padding: 0.5rem;
+  box-shadow: 0 0 4px globals.$box-shadow-default-color;
+}
+
+.userInfoTypeContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.neutral,
+.negative,
+.positive {
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  height: fit-content;
+  width: fit-content;
+}
+
+.neutral {
+  color: $neutral-color;
+  background-color: $neutral-background-color;
+}
+
+.positive {
+  color: $success-color;
+  background-color: $success-background-color;
+}
+
+.negative {
+  color: $danger-color;
+  background-color: $danger-background-color;
 }
 
 @media (max-width: 715px) {
