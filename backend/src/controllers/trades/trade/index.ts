@@ -35,6 +35,12 @@ export async function createTradeController(req: Request, res: Response) {
       },
     });
 
+    // const newPaymentDetails = await prisma.paymentDetails.create({
+    //   data: {
+    //     instructions: body.paymentDetails,
+    //   },
+    // });
+
     const newChat = await prisma.chat.create({
       data: {
         tradeId: newTrade.id,
@@ -111,97 +117,10 @@ export async function setPaidTrade(req: Request, res: Response) {
 
 export async function getTradeController(req: Request, res: Response) {
   try {
-    const { params } = req;
-    const { id } = params;
+    const { id } = req.params;
+    const { type, message } = req.body;
 
-    const trade = await prisma.trade.findFirst({
-      where: { id },
-      select: {
-        id: true,
-        fiatAmount: true,
-        cryptocurrencyAmount: true,
-        paymentReceipt: true,
-        status: true,
-        escrowReleaseDate: true,
-        paid: true,
-        paymentMethod: {
-          select: {
-            name: true,
-          },
-        },
-        chat: {
-          select: {
-            id: true,
-          },
-        },
-        cryptocurrency: {
-          select: {
-            coingeckoId: true,
-            name: true,
-            symbol: true,
-            image: true,
-          },
-        },
-        fiat: {
-          select: {
-            name: true,
-            symbol: true,
-            country: true,
-          },
-        },
-        offer: {
-          select: {
-            id: true,
-            tags: true,
-            instructions: true,
-            terms: true,
-            offerType: true,
-            timeLimit: true,
-          },
-        },
-        trader: {
-          select: {
-            id: true,
-            profileColor: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            isPremium: true,
-            lastLoginAt: true,
-          },
-        },
-        vendor: {
-          select: {
-            id: true,
-            profileColor: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            isPremium: true,
-            lastLoginAt: true,
-          },
-        },
-      },
-    });
-
-    if (!trade) {
-      res.status(204).send({ errors: ['Unable to retrieve trade'] });
-      return;
-    }
-
-    const chat = await prisma.chat.findFirst({
-      where: { tradeId: trade.id },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!chat) {
-      res.status(204).send({ errors: ['Unable to retrieve chat'] });
-      return;
-    }
-
-    res.status(200).send({ ...trade, chat });
+    res.status(200).send({});
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -276,6 +195,8 @@ export const calculateReceivingAmount = async (
 
     const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
 
+    console.log({ finalCryptoAmount });
+
     res.status(200).send({
       fiatAmount,
       tradingFee,
@@ -283,6 +204,7 @@ export const calculateReceivingAmount = async (
       currentPrice,
       finalCryptoAmount: parseFloat(finalCryptoAmount),
     });
+    return;
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -310,14 +232,29 @@ export async function getTradeDetails(req: Request, res: Response) {
         expiredAt: true,
         fiat: true,
         fiatAmount: true,
-        paymentMethod: true,
+        paymentMethod: {
+          select: {
+            name: true,
+            paymentMethodCategory: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
         paymentReceipt: true,
         startedAt: true,
         status: true,
         paymentConfirmed: true,
         paid: true,
+        // paymentDetails: {
+        //   select: {
+        //     instructions: true,
+        //   },
+        // },
         trader: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             username: true,
@@ -326,13 +263,13 @@ export async function getTradeDetails(req: Request, res: Response) {
         },
         vendor: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
             username: true,
             profileColor: true,
           },
         },
-
         chat: {
           select: {
             id: true,
@@ -349,7 +286,7 @@ export async function getTradeDetails(req: Request, res: Response) {
     }
 
     let query = ChatMessage.find(
-      { chatId: id },
+      { chatId: tradeDetails.chat?.id },
       'createdAt from message type to',
     );
 
@@ -362,6 +299,7 @@ export async function getTradeDetails(req: Request, res: Response) {
       chatMessages,
     });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

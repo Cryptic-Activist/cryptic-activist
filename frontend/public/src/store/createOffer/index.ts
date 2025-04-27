@@ -14,6 +14,7 @@ export const useCreateOfferSlice: StateCreator<
     vendorId: undefined,
     offerType: undefined,
     paymentMethodId: undefined,
+    paymentDetails: undefined,
     isPaymentMethodCompleted: undefined,
     pricingType: undefined,
     listAt: undefined,
@@ -54,6 +55,7 @@ export const useCreateOfferSlice: StateCreator<
             offerType: params.offerType ?? createOffer.offerType,
             paymentMethodId:
               params.paymentMethodId ?? createOffer.paymentMethodId,
+            paymentDetails: params.paymentDetails ?? createOffer.paymentDetails,
             pricingType: params.pricingType ?? createOffer.pricingType,
             tags: params.tags ?? createOffer.tags,
             terms: params.terms ?? createOffer.terms,
@@ -79,6 +81,7 @@ export const useCreateOfferSlice: StateCreator<
             vendorId: undefined,
             offerType: undefined,
             paymentMethodId: undefined,
+            paymentDetails: undefined,
             isPaymentMethodCompleted: undefined,
             pricingType: undefined,
             listAt: undefined,

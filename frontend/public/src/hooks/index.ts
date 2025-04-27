@@ -23,3 +23,4 @@ export { default as useNotificationSocket } from './useNotificationSocket';
 export { default as useResetPassword } from './useResetPassword';
 export { default as useURL } from './useURL';
 export { default as useParams } from './useParams';
+export { default as useFeedback } from './useFeedback';

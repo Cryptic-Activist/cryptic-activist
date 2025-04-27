@@ -1,0 +1,40 @@
+@use "../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  border-radius: 0.6rem;
+  background-color: globals.$black;
+  width: fit-content;
+  overflow: hidden;
+  align-items: center;
+  padding: 0.2rem;
+  gap: 0.2rem;
+}
+
+.btn {
+  background-color: globals.$black;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  svg {
+    color: globals.$primary;
+  }
+}
+
+.selected {
+  background-color: globals.$primary;
+  svg {
+    color: globals.$black;
+  }
+}
+
+.separator {
+  width: 1px;
+  height: 1rem;
+  background-color: globals.$primary;
+}
+
+.errorMessage {
+  font-size: 0.95rem;
+}

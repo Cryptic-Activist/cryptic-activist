@@ -7,6 +7,7 @@ import {
   ZodLimitMin,
   ZodListAt,
   ZodOfferType,
+  ZodPaymentDetails,
   ZodPaymentMethodId,
   ZodPricingType,
   ZodTags,
@@ -24,6 +25,7 @@ export const CreateOfferPaymentMethod = z
     cryptocurrency: ZodCryptocurrency,
     offerType: ZodOfferType,
     paymentMethodId: ZodPaymentMethodId,
+    paymentDetails: ZodPaymentDetails,
   })
   .superRefine(({ offerType }, ctx) => {
     if (offerType !== 'sell' && offerType !== 'buy') {

@@ -80,7 +80,6 @@ CREATE TABLE "cryptocurrencies" (
 -- CreateTable
 CREATE TABLE "feedbacks" (
     "id" TEXT NOT NULL,
-    "vendorId" TEXT NOT NULL,
     "traderId" TEXT NOT NULL,
     "offerId" TEXT NOT NULL,
     "message" VARCHAR(256) NOT NULL,
@@ -198,6 +197,18 @@ CREATE TABLE "payment_receipts" (
 );
 
 -- CreateTable
+CREATE TABLE "payment_details" (
+    "id" TEXT NOT NULL,
+    "instructions" TEXT NOT NULL,
+    "deletedAt" DATE,
+    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATE,
+    "paymentMethodId" TEXT NOT NULL,
+
+    CONSTRAINT "payment_details_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "premium_purchases" (
     "id" TEXT NOT NULL,
     "depositAddress" TEXT NOT NULL,
@@ -265,6 +276,7 @@ CREATE TABLE "trades" (
     "deletedAt" DATE,
     "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATE,
+    "paymentDetailsId" TEXT,
 
     CONSTRAINT "trades_pkey" PRIMARY KEY ("id")
 );
@@ -328,6 +340,7 @@ CREATE TABLE "users" (
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
     "isPremium" BOOLEAN,
+    "xp" INTEGER NOT NULL DEFAULT 0,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN DEFAULT false,
     "lastLoginAt" TIMESTAMPTZ,
@@ -419,9 +432,6 @@ ALTER TABLE "blocks" ADD CONSTRAINT "blocks_blockedId_fkey" FOREIGN KEY ("blocke
 ALTER TABLE "chats" ADD CONSTRAINT "chats_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -449,6 +459,9 @@ ALTER TABLE "offers" ADD CONSTRAINT "offers_fiatId_fkey" FOREIGN KEY ("fiatId") 
 ALTER TABLE "payment_methods" ADD CONSTRAINT "payment_methods_paymentMethodCategoryId_fkey" FOREIGN KEY ("paymentMethodCategoryId") REFERENCES "payment_method_categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "payment_details" ADD CONSTRAINT "payment_details_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "premium_purchases" ADD CONSTRAINT "premium_purchases_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -474,6 +487,9 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") 
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentDetailsId_fkey" FOREIGN KEY ("paymentDetailsId") REFERENCES "payment_details"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

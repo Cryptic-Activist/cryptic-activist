@@ -53,6 +53,7 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
         endedAt: true,
         escrowReleaseDate: true,
         status: true,
+        blockchainTransactionHash: true,
       },
     });
 

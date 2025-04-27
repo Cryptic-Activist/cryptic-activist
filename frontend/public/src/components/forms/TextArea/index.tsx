@@ -12,11 +12,17 @@ const TextArea: FC<TextAreaProps> = ({
   label,
   required,
   errorMessage,
+  placeholder,
+  name,
+  register,
+  disabled,
 }) => {
   const handleWTextArea = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = event.currentTarget.value;
 
-    onChange(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -29,8 +35,16 @@ const TextArea: FC<TextAreaProps> = ({
       <textarea
         id={id}
         className={styles.textarea}
-        onChange={handleWTextArea}
+        onChange={onChange ? handleWTextArea : undefined}
+        // {...(onChange ? { onChange: handleWTextArea } : {})}
         value={value}
+        placeholder={placeholder}
+        {...(register && {
+          ...register(name, {
+            required: required,
+            disabled: disabled,
+          }),
+        })}
       />
       {info && <p className={styles.info}>{info}</p>}
       {errorMessage && (
