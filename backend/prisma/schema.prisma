@@ -87,7 +87,7 @@ enum FeedbackType {
 model Feedback {
   id        String       @id @default(uuid())
   trader    User         @relation("feedbackTrader", fields: [traderId], references: [id], onUpdate: Cascade)
-  traderId  String       @unique
+  traderId  String
   trade     Trade        @relation("tradeFeedback", fields: [tradeId], references: [id], onDelete: Cascade)
   tradeId   String       @unique
   message   String       @db.VarChar(256)

@@ -36,7 +36,7 @@ const FeedbackSelector: FC<FeedbackSelectorProps> = ({
   };
 
   useEffect(() => {
-    if (selectedNum) {
+    if (typeof selectedNum !== 'undefined') {
       const selectedFeedback = (
         typeof selectedNum !== 'undefined'
           ? feedbackList[selectedNum].value
