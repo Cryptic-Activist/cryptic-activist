@@ -26,6 +26,10 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 
+# Copy Prisma schema from base-ca library
+COPY backend/prisma ./prisma
+COPY backend/prisma/schema.prisma ./prisma/schema.prisma
+
 # Set environment to production
 ENV NODE_ENV=production
 
@@ -33,10 +37,13 @@ ENV NODE_ENV=production
 COPY backend/prod.entrypoint.sh /entrypoint.sh
 COPY envs/prod.backend.env dist/.env
 
-RUN chmod +x /prod.entrypoint.sh
+# RUN chmod +x backend/prod.entrypoint.sh
+
+RUN npx prisma generate
 
 # Expose the application port
 EXPOSE 5000
 
 # Use entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT ["./prod.entrypoint.sh"]
+CMD ["npm", "run", "start"]

@@ -73,6 +73,7 @@ services:
       - "5000:5000"
     env_file:
       - envs/prod.backend.env
+    # entrypoint: ["sh", "-c", "ls -la && cd dist && ls -la"] 
     environment:
       - NODE_ENV=production
       - NODE_OPTIONS=--max-old-space-size=8192
