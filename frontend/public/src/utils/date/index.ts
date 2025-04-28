@@ -63,3 +63,75 @@ export const formatTimestamp = (timestamp: number | string) => {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
 };
+
+export const getDuration = (startedAt: Date, endedAt: Date) => {
+  const diffMs = endedAt.getTime() - startedAt.getTime();
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSeconds / (24 * 3600));
+  const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const milliseconds = diffMs % 1000;
+
+  // Build formatted string
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (seconds > 0) parts.push(`${seconds}s`);
+  if (milliseconds > 0) parts.push(`${milliseconds}ms`);
+
+  let formatted = '';
+  if (parts.length > 0) {
+    if (parts.length === 1) {
+      formatted = parts[0];
+    } else {
+      formatted =
+        parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+    }
+  } else {
+    formatted = '0s';
+  }
+
+  return {
+    days,
+    hours,
+    minutes,
+    seconds,
+    milliseconds,
+    formatted,
+  };
+};
+
+const getOrdinalSuffix = (day: number) => {
+  if (day > 3 && day < 21) return 'th';
+  switch (day % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+};
+
+export const getLocaleFullDateString = (date: Date) => {
+  const day = date.getDate();
+  const suffix = getOrdinalSuffix(day);
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZoneName: 'short',
+  });
+  const parts = formatter.formatToParts(date);
+  const timeZone =
+    parts.find((part) => part.type === 'timeZoneName')?.value || '';
+
+  return `${month} ${day}${suffix}, ${year} - ${hours}:${minutes} ${timeZone}`;
+};

@@ -30,7 +30,6 @@ export const getOfferController = async (req: Request, res: Response) => {
       select: {
         _count: {
           select: {
-            // feedbacks: true,
             trades: true,
           },
         },
@@ -48,6 +47,34 @@ export const getOfferController = async (req: Request, res: Response) => {
         createdAt: true,
         updatedAt: true,
         averageTradeSpeed: true,
+        trades: {
+          where: {
+            feedback: {
+              isNot: null,
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 2,
+          select: {
+            feedback: {
+              select: {
+                id: true,
+                type: true,
+                trader: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    username: true,
+                    profileColor: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         vendor: {
           select: {
             _count: {
@@ -55,6 +82,7 @@ export const getOfferController = async (req: Request, res: Response) => {
                 blockers: true,
                 trusters: true,
                 tradeVendor: true,
+                feedbackTrader: true,
               },
             },
             id: true,
@@ -124,6 +152,7 @@ export const getOfferController = async (req: Request, res: Response) => {
         },
       },
     });
+
     res.status(200).send(offer);
   } catch (err: any) {
     console.log({ err });

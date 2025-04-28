@@ -46,6 +46,7 @@ export const useOfferSlice: StateCreator<
             label: params.label ?? offer.label,
             terms: params.terms ?? offer.terms,
             instructions: params.instructions ?? offer.instructions,
+            trades: params.trades ?? offer.trades,
           },
         }),
         false,

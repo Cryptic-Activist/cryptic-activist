@@ -26,7 +26,7 @@ jobs:
           echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> envs/prod.backend.env
           echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> envs/prod.backend.env
           echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
-          echo "APP_NAME=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
+          echo "APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> envs/prod.backend.env
           echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> envs/prod.backend.env
@@ -59,13 +59,13 @@ jobs:
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
 
           # prod.frontend-admin.env
-          echo "NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" > envs/prod.frontend-admin.env
+          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" > envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
 
           # prod.frontend-public.env
-          echo "NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME_PUBLIC }}" > envs/prod.frontend-public.env
+          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" > envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
