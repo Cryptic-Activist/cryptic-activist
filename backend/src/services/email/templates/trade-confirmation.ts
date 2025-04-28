@@ -1,11 +1,9 @@
-import { Trade, User } from 'base-ca';
-
 import { FRONTEND_PUBLIC } from '@/constants/env';
 import { getCoinPrice } from '@/services/coinGecko';
 import { getDuration } from '@/utils/date';
 import { toUpperCase } from '@/utils/string';
 
-const buildTradeConfirmationEmail = async (user: User, trade: Trade) => {
+const buildTradeConfirmationEmail = async (user: any, trade: any) => {
   const tradeDetailsUrl = `${FRONTEND_PUBLIC}/trade/${trade.id}/details`;
   const pricePerUnit = await getCoinPrice(
     trade.cryptocurrency?.coingeckoId,

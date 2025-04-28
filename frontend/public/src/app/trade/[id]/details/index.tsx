@@ -2,7 +2,13 @@
 
 import { FeedbackProps, TradeDetailsProps } from './types';
 import React, { FC, useState } from 'react';
-import { formatTimestamp, getInitials, toUpperCase } from '@/utils';
+import {
+  formatTimestamp,
+  getDuration,
+  getInitials,
+  getLocaleFullDateString,
+  toUpperCase,
+} from '@/utils';
 
 import { Button } from '@/components';
 import Image from 'next/image';
@@ -49,6 +55,8 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
   const toggleChatView = () => {
     setIsChatOpen((prev) => !prev);
   };
+
+  console.log({ tradeDetails });
 
   const isUserTrader = user.id === tradeDetails.trader.id;
   const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
@@ -114,17 +122,28 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
           <div className={styles.tradeInfoGroup}>
             <div>
               <div className={styles.infoLabel}>Trade Started</div>
-              <div className={styles.infoValue}>April 25, 2025 - 14:32 UTC</div>
+              <div className={styles.infoValue}>
+                {getLocaleFullDateString(new Date(tradeDetails.startedAt))}
+              </div>
             </div>
 
             <div>
               <div className={styles.infoLabel}>Trade Completed</div>
-              <div className={styles.infoValue}>April 25, 2025 - 14:58 UTC</div>
+              <div className={styles.infoValue}>
+                {getLocaleFullDateString(new Date(tradeDetails.startedAt))}
+              </div>
             </div>
 
             <div>
               <div className={styles.infoLabel}>Trade Speed</div>
-              <div className={styles.infoValue}>26 minutes</div>
+              <div className={styles.infoValue}>
+                {tradeDetails.startedAt && tradeDetails.endedAt
+                  ? getDuration(
+                      new Date(tradeDetails.startedAt),
+                      new Date(tradeDetails.endedAt)
+                    ).formatted
+                  : ''}
+              </div>
             </div>
 
             <div>
