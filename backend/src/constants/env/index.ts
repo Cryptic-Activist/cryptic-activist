@@ -1,6 +1,6 @@
 export const NODE_ENV = process.env.NODE_ENV as string;
 export const PORT = parseInt(process.env.PORT as string);
-export const APP_NAME = process.env.APP_NAME as string;
+export const APP_NAME = process.env.APP_NAME_BACKEND as string;
 
 export const MONGODB_URL = process.env.MONGODB_URL as string;
 export const REDIS_HOST = process.env.REDIS_HOST as string;
