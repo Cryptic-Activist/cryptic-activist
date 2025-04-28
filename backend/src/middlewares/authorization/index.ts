@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { AuthenticationUser } from './zod';
-import { JWT_SECRET } from '@/constants/env';
 import { decodeToken } from '@/utils/generators/jwt';
 import { prisma } from '@/services/db';
 
@@ -41,6 +40,8 @@ export const authenticateUser = async (
       });
       return;
     }
+
+    console.log({ user });
 
     next();
   } catch (errors) {

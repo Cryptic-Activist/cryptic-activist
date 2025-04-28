@@ -21,7 +21,7 @@ export const getCurrentTradingFee = async (
   const queries = getQueries(params);
   const bearerToken = getBearerToken();
   const response = await fetchGet(
-    `${BACKEND}/trades/trade/calculate-receiving` + queries,
+    `${BACKEND}/trades/trade/calculate/receiving` + queries,
     { Authorization: bearerToken }
   );
 
@@ -38,6 +38,20 @@ export const getTrade = async (id: string) => {
   const response = await fetchGet(`${BACKEND}/trades/trade/` + id + queries, {
     Authorization: bearerToken,
   });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+export const getTradeDetails = async (id: string) => {
+  const bearerToken = getBearerToken();
+  const response = await fetchGet(
+    `${BACKEND}/trades/trade/` + id + '/details',
+    {
+      Authorization: bearerToken,
+    }
+  );
 
   if (response.status !== 200) return null;
 

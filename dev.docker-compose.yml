@@ -119,6 +119,7 @@ services:
       - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - app-network
+    entrypoint: ["sh", "-c", "npm run migrate:dev && npm run dev"] 
     deploy:
       resources:
         limits:

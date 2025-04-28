@@ -30,6 +30,7 @@ export const useNavigationBarSlice: StateCreator<
       resetPassword: false,
       blockchain: false,
       verifyAccount: false,
+      feedback: false,
     },
     status: 'idle',
     setNavigationBarValue: (params, actionName = 'navigationBar/setValue') => {
@@ -117,6 +118,7 @@ export const useNavigationBarSlice: StateCreator<
             resetPasswordRequest: false,
             resetPassword: false,
             verifyAccount: false,
+            feedback: false,
           },
           status: 'idle',
           tooltips: {

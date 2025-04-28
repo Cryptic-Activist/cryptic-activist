@@ -20,6 +20,7 @@ export const useTradeSlice: StateCreator<
     offer: undefined,
     paid: undefined,
     paymentMethod: undefined,
+    paymentDetails: undefined,
     paymentReceipt: undefined,
     status: undefined,
     trader: undefined,

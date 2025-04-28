@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
+import { Chat } from '@/socket/handlers';
+import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { prisma } from '@/services/db';
 
@@ -32,6 +34,12 @@ export async function createTradeController(req: Request, res: Response) {
         traderWalletAddress: body.traderWalletAddress,
       },
     });
+
+    // const newPaymentDetails = await prisma.paymentDetails.create({
+    //   data: {
+    //     instructions: body.paymentDetails,
+    //   },
+    // });
 
     const newChat = await prisma.chat.create({
       data: {
@@ -274,6 +282,8 @@ export const calculateReceivingAmount = async (
 
     const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
 
+    console.log({ finalCryptoAmount });
+
     res.status(200).send({
       fiatAmount,
       tradingFee,
@@ -281,6 +291,7 @@ export const calculateReceivingAmount = async (
       currentPrice,
       finalCryptoAmount: parseFloat(finalCryptoAmount),
     });
+    return;
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -288,3 +299,174 @@ export const calculateReceivingAmount = async (
     });
   }
 };
+
+export async function getTradeDetails(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const tradeDetails = await prisma.trade.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        blockchainTransactionHash: true,
+        createdAt: true,
+        cryptocurrency: true,
+        cryptocurrencyAmount: true,
+        endedAt: true,
+        escrowReleaseDate: true,
+        expiredAt: true,
+        fiat: true,
+        fiatAmount: true,
+        paymentMethod: {
+          select: {
+            name: true,
+            paymentMethodCategory: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        paymentReceipt: true,
+        startedAt: true,
+        status: true,
+        paymentConfirmed: true,
+        paid: true,
+        feedback: {
+          select: {
+            id: true,
+            type: true,
+            message: true,
+            trader: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                profileColor: true,
+              },
+            },
+          },
+        },
+        // paymentDetails: {
+        //   select: {
+        //     instructions: true,
+        //   },
+        // },
+        trader: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            profileColor: true,
+          },
+        },
+        vendor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            profileColor: true,
+          },
+        },
+        chat: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!tradeDetails) {
+      res.status(400).send({
+        errors: ['Trade not found'],
+      });
+      return;
+    }
+
+    let query = ChatMessage.find(
+      { chatId: tradeDetails.chat?.id },
+      'createdAt from message type to',
+    );
+
+    query = query.sort('desc');
+
+    const chatMessages = await query.exec();
+
+    res.status(200).send({
+      tradeDetails,
+      chatMessages,
+    });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function leaveFeedback(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { type, message } = req.body;
+
+    const trade = await prisma.trade.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        offer: true,
+        id: true,
+        trader: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!trade) {
+      res.status(400).send({
+        errors: ['Trade not found'],
+      });
+      return;
+    }
+
+    console.log(
+      JSON.stringify({
+        data: {
+          // either connect by relation…
+          trader: {
+            connect: { id: trade.trader.id },
+          },
+          trade: {
+            connect: { id: trade.id },
+          },
+          message,
+          type: type,
+        },
+      }),
+      2,
+    );
+
+    const newFeedback = await prisma.feedback.create({
+      data: {
+        tradeId: trade.id,
+        traderId: trade.trader.id,
+        message,
+        type: type,
+      },
+    });
+
+    res.status(200).send({ ok: true });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}

@@ -3,6 +3,7 @@
 import {
   Cryptocurrencies,
   EnableTwoFactorAuthnetication,
+  Feedback,
   Fiats,
   Login,
   PaymentMethods,
@@ -41,6 +42,7 @@ const AllModals = () => {
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : <></>}
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : <></>}
       {navigationBar.modals.blockchain ? <WalletModal /> : <></>}
+      {navigationBar.modals.feedback ? <Feedback /> : <></>}
     </>
   );
 };

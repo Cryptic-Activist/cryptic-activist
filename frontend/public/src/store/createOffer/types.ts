@@ -17,6 +17,7 @@ export type CreateOffer = {
     vendorId?: string;
     offerType?: OfferType;
     paymentMethodId?: string;
+    paymentDetails?: string;
     isPaymentMethodCompleted?: boolean;
     pricingType?: TradePricingType;
     listAt?: number;
@@ -43,6 +44,7 @@ export type CreateOfferSetter = {
   vendorId?: string;
   offerType?: OfferType;
   paymentMethodId?: string;
+  paymentDetails?: string;
   isPaymentMethodCompleted?: boolean;
   pricingType?: TradePricingType;
   listAt?: number;

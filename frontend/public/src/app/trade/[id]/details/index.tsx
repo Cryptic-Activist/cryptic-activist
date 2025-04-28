@@ -1,97 +1,136 @@
 'use client';
 
-import React, { FC } from 'react';
+import { FeedbackProps, TradeDetailsProps } from './types';
+import React, { FC, useState } from 'react';
+import { formatTimestamp, getInitials, toUpperCase } from '@/utils';
 
+import { Button } from '@/components';
 import Image from 'next/image';
-import { TradeDetailsProps } from './types';
-import styles from './page.module.scss';
-import { toUpperCase } from '@/utils';
+import styles from './index.module.scss';
+import { useNavigationBar } from '@/hooks';
 
-const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
+const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
+  const negativeStyle = feedback.type === 'NEGATIVE' ? styles.negative : '';
+  const neutralStyle = feedback.type === 'NEUTRAL' ? styles.neutral : '';
+  const positiveStyle = feedback.type === 'POSITIVE' ? styles.positive : '';
+
+  return (
+    <div className={styles.feedback}>
+      <div className={styles.userInfoTypeContainer}>
+        <div className={styles.userInfo}>
+          <div
+            className={styles.avatar}
+            style={{ backgroundColor: feedback.trader.profileColor }}
+          >
+            {getInitials(feedback.trader.firstName, feedback.trader.lastName)}
+          </div>
+          <div className={styles.userDetails}>
+            <div className={styles.usernames}>{`${feedback.trader.firstName} ${
+              feedback.trader.lastName
+            } ${user.id === feedback.trader.id ? '(you)' : ''}`}</div>
+            <span className={styles.username}>{feedback.trader.username}</span>
+          </div>
+        </div>
+        <span className={`${negativeStyle} ${neutralStyle} ${positiveStyle}`}>
+          {feedback.type}
+        </span>
+      </div>
+      <p>{feedback.message}</p>
+    </div>
+  );
+};
+
+const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
+  const { tradeDetails, chatMessages } = trade;
+  const { toggleModal } = useNavigationBar();
+
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const toggleChatView = () => {
+    setIsChatOpen((prev) => !prev);
+  };
+
+  const isUserTrader = user.id === tradeDetails.trader.id;
+  const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h1 className={styles.cardTitle}>Trade Details</h1>
           <span className={`${styles.badge} ${styles.badgeSuccess}`}>
-            {trade.status}
+            {tradeDetails.status}
           </span>
         </div>
 
         <div className={styles.tradeInfo}>
-          <div>
-            <div className={styles.infoGroup}>
+          <div className={styles.tradeInfoGroup}>
+            <div>
               <div className={styles.infoLabel}>Transaction ID</div>
-              <div className={styles.infoValue}>{trade.id}</div>
+              <div className={styles.infoValue}>{tradeDetails.id}</div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Cryptocurrency</div>
               <div
                 className={`${styles.infoValue} ${styles.large} ${styles.infoValueCrypto}`}
               >
-                {trade.cryptocurrency?.image && (
+                {tradeDetails.cryptocurrency?.image && (
                   <Image
-                    src={trade.cryptocurrency?.image}
-                    alt={trade.cryptocurrency?.name}
+                    src={tradeDetails.cryptocurrency?.image}
+                    alt={tradeDetails.cryptocurrency?.name}
                     style={{ verticalAlign: 'middle', marginRight: '4px' }}
                     width={30}
                     height={30}
                   />
                 )}
                 <span>
-                  {`${trade.cryptocurrencyAmount} ${toUpperCase(
-                    trade.cryptocurrency?.symbol
+                  {`${tradeDetails.cryptocurrencyAmount} ${toUpperCase(
+                    tradeDetails.cryptocurrency?.symbol
                   )}`}
                 </span>
               </div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Fiat Amount</div>
               <div className={`${styles.infoValue} ${styles.large}`}>
-                {trade.fiatAmount} {toUpperCase(trade.fiat?.symbol)}
+                {tradeDetails.fiatAmount}{' '}
+                {toUpperCase(tradeDetails.fiat?.symbol)}
               </div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Exchange Rate</div>
               <div className={styles.infoValue}>
-                {`1 ${toUpperCase(trade.cryptocurrency?.symbol)} = ${
+                {`1 ${toUpperCase(tradeDetails.cryptocurrency?.symbol)} = ${
                   app.currentPrice
-                } ${toUpperCase(trade.fiat?.symbol)}`}
+                } ${toUpperCase(tradeDetails.fiat?.symbol)}`}
                 <span className={styles.priceIndicator}>+2.35%</span>
               </div>
             </div>
           </div>
 
-          <div>
-            <div className={styles.infoGroup}>
+          <div className={styles.tradeInfoGroup}>
+            <div>
               <div className={styles.infoLabel}>Trade Started</div>
               <div className={styles.infoValue}>April 25, 2025 - 14:32 UTC</div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Trade Completed</div>
               <div className={styles.infoValue}>April 25, 2025 - 14:58 UTC</div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Trade Speed</div>
               <div className={styles.infoValue}>26 minutes</div>
             </div>
 
-            <div className={styles.infoGroup}>
+            <div>
               <div className={styles.infoLabel}>Transaction Hash</div>
-              <div
-                className={styles.infoValue}
-                style={{
-                  fontFamily: 'monospace',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                0x7a69c2d3f54c8e5c8618d856b0237bdf53c39c32ae57deefed28c...
+              <div className={`${styles.infoValue} ${styles.txHash}`}>
+                {tradeDetails.blockchainTransactionHash}
               </div>
             </div>
           </div>
@@ -100,84 +139,42 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
         <div className={styles.divider}></div>
 
         <div className={styles.userInfo}>
-          <div className={styles.avatar} style={{ backgroundColor: '#9c27b0' }}>
-            CM
+          <div
+            className={styles.avatar}
+            style={{ backgroundColor: tradeDetails.vendor.profileColor }}
+          >
+            {getInitials(
+              tradeDetails.vendor.firstName,
+              tradeDetails.vendor.lastName
+            )}
           </div>
           <div className={styles.userDetails}>
-            <div className={styles.username}>Compatible Malay (Vendor)</div>
-            <div className={styles.userStats}>
-              <div className={styles.stat}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                </svg>
-                0 positive
-              </div>
-              <div className={styles.stat}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                3 trades
-              </div>
-            </div>
+            <div
+              className={styles.usernames}
+            >{`${tradeDetails.vendor.firstName} ${tradeDetails.vendor.lastName} (Vendor)`}</div>
+            <span className={styles.username}>
+              {tradeDetails.vendor.username}
+            </span>
           </div>
         </div>
 
         <div className={styles.userInfo}>
-          <div className={styles.avatar} style={{ backgroundColor: '#2196f3' }}>
-            YU
+          <div
+            className={styles.avatar}
+            style={{ backgroundColor: tradeDetails.trader.profileColor }}
+          >
+            {getInitials(
+              tradeDetails.trader.firstName,
+              tradeDetails.trader.lastName
+            )}
           </div>
           <div className={styles.userDetails}>
-            <div className={styles.username}>Your Username (Trader)</div>
-            <div className={styles.userStats}>
-              <div className={styles.stat}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                </svg>
-                2 positive
-              </div>
-              <div className={styles.stat}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-                8 trades
-              </div>
-            </div>
+            <p
+              className={styles.usernames}
+            >{`${tradeDetails.trader.firstName} ${tradeDetails.trader.lastName} (Trader)`}</p>
+            <span className={styles.username}>
+              {tradeDetails.trader.username}
+            </span>
           </div>
         </div>
 
@@ -185,12 +182,14 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
 
         <h3 className={styles.sectionTitle}>Payment Details</h3>
         <div className={styles.paymentDetails}>
-          <div className={styles.infoGroup}>
+          <div>
             <div className={styles.infoLabel}>Payment Method</div>
-            <div className={styles.infoValue}>SEPA Bank Transfer</div>
+            <div
+              className={styles.infoValue}
+            >{`${tradeDetails.paymentMethod.name} - ${tradeDetails.paymentMethod.paymentMethodCategory.name}`}</div>
           </div>
 
-          <div className={styles.infoGroup}>
+          {/* <div>
             <div className={styles.infoLabel}>Payment Instructions</div>
             <div className={styles.infoValue}>
               Please make the payment to the following bank account:
@@ -203,20 +202,21 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
               <br />
               Reference: TRD-97854632
             </div>
-          </div>
-
-          <div className={styles.infoGroup}>
-            <div className={styles.infoLabel}>Payment Receipt</div>
-            <div className={styles.infoValue}>
-              <a href="#" className={styles.link}>
-                View Receipt
-              </a>
+          </div> */}
+          {tradeDetails.paymentReceipt && (
+            <div>
+              <div className={styles.infoLabel}>Payment Receipt</div>
+              <div className={styles.infoValue}>
+                <a href="#" className={styles.link}>
+                  View Receipt
+                </a>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className={styles.divider}></div>
-
+        {/* 
         <h3 className={styles.sectionTitle}>Trade Progress</h3>
         <div className={styles.tradeProgress}>
           <div className={styles.milestone}>
@@ -260,30 +260,85 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app }) => {
               Trade completed successfully - April 25, 2025 14:58 UTC
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.chatSection}>
           <h3 className={styles.sectionTitle}>Trade Chat</h3>
+          {isChatOpen && chatMessages.length > 0 && (
+            <ul className={styles.list}>
+              {chatMessages.map((message: any, index: number) => {
+                const messageStyle =
+                  tradeDetails.trader?.id === message.from
+                    ? styles.sender
+                    : styles.receiver;
+                const isInfoMessage = message.type === 'info';
+
+                if (isInfoMessage) {
+                  return (
+                    <li key={index} className={styles.listItemChatInfo}>
+                      <p className={styles.infoMessage}>{message.message}</p>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li
+                    key={index}
+                    className={`${styles.listItem} ${messageStyle}`}
+                  >
+                    <div className={styles.message}>
+                      <p>{message.message}</p>
+                      <span className={styles.time}>
+                        {formatTimestamp(message.createdAt)}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <button
+            type="button"
             className={`${styles.btn} ${styles.btnOutline}`}
-            style={{ width: '100%' }}
+            style={{
+              width: '100%',
+              ...(isChatOpen && { borderRadius: '0 0 0.5rem 0.5rem' }),
+            }}
+            onClick={toggleChatView}
           >
-            View Chat History
+            {isChatOpen ? 'Close' : 'View'} Chat History
           </button>
         </div>
 
-        <div className={styles.divider}></div>
+        {(canLeaveFeedback || tradeDetails.paymentReceipt) && (
+          <div className={styles.divider} />
+        )}
+
+        {tradeDetails.feedback && (
+          <section>
+            <div className={styles.divider} />
+            <h3 className={styles.sectionTitle}>Feedback</h3>
+            <Feedback feedback={tradeDetails.feedback} user={user} />
+          </section>
+        )}
 
         <div className={styles.actionButtons}>
-          <button className={`${styles.btn} ${styles.btnPrimary}`}>
-            Leave Feedback
-          </button>
-          <button className={`${styles.btn} ${styles.btnOutline}`}>
+          {canLeaveFeedback && (
+            <Button
+              padding="0.65rem 1rem"
+              onClick={() => toggleModal('feedback')}
+            >
+              Leave Feedback
+            </Button>
+          )}
+          {/* <button className={`${styles.btn} ${styles.btnOutline}`}>
             Report an Issue
-          </button>
-          <button className={`${styles.btn} ${styles.btnOutline}`}>
-            Download Receipt
-          </button>
+          </button> */}
+          {tradeDetails.paymentReceipt && (
+            <button className={`${styles.btn} ${styles.btnOutline}`}>
+              Download Receipt
+            </button>
+          )}
         </div>
       </div>
     </div>

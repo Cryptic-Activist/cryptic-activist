@@ -106,6 +106,7 @@ export function validateCalculateReceivingAmount(
   next: NextFunction,
 ) {
   const { query } = req;
+
   const validated = CalculateReceivingAmount.safeParse(query);
 
   if (validated.success) {

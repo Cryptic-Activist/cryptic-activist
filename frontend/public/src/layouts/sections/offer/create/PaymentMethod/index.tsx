@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 import { CreateOfferPaymentMethodProps } from './types';
 import Head from 'next/head';
 import type { Item } from '@/components/Radio/types';
+import { TextArea } from '@/components/forms';
 import stylesCore from '../index.module.scss';
 
 const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
@@ -28,6 +29,13 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
     setCreateOfferValue(
       { paymentMethodId: id },
       'createOffer/setPaymentMethodId'
+    );
+  };
+
+  const inputPaymentDetails = (value: string) => {
+    setCreateOfferValue(
+      { paymentDetails: value },
+      'createOffer/setPaymentDetails'
     );
   };
 
@@ -83,6 +91,17 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
               paymentMethodId={createOffer.paymentMethodId}
             />
           </section>
+          {createOffer.paymentMethodId && (
+            <section className={stylesCore.horizontalGroup}>
+              <TextArea
+                id="paymentDetails"
+                value={createOffer.paymentDetails ?? ''}
+                onChange={inputPaymentDetails}
+                label="Payment Details"
+                info="Describe the payment details such as bank account details"
+              />
+            </section>
+          )}
         </div>
         <aside className={stylesCore.aside}>
           <h3 className={stylesCore.asideHeading}>About the Payment Method</h3>

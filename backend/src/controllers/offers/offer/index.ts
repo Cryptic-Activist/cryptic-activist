@@ -30,7 +30,7 @@ export const getOfferController = async (req: Request, res: Response) => {
       select: {
         _count: {
           select: {
-            feedbacks: true,
+            // feedbacks: true,
             trades: true,
           },
         },
@@ -54,7 +54,6 @@ export const getOfferController = async (req: Request, res: Response) => {
               select: {
                 blockers: true,
                 trusters: true,
-                feedbackTrader: true,
                 tradeVendor: true,
               },
             },
@@ -66,7 +65,7 @@ export const getOfferController = async (req: Request, res: Response) => {
             profileColor: true,
             lastLoginAt: true,
             kyc: true,
-            feedbacksVendor: {
+            feedbackTrader: {
               orderBy: {
                 createdAt: 'desc',
               },
