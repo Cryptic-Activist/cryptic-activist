@@ -1,7 +1,7 @@
 import { UseQueryResult } from '@tanstack/react-query';
-import { Vendor } from '@/store/offer/types';
 
 export type ThisVendorProps = {
-  vendor?: Vendor;
+  vendor?: any;
   queryOffer: UseQueryResult<any, Error>;
+  trades?: any;
 };

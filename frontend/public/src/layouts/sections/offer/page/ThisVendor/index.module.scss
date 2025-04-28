@@ -70,29 +70,51 @@
       border: 1px solid globals.$black;
       list-style: none;
       box-shadow: 0 0 3px 1px globals.$box-shadow-default-color;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: globals.$white;
       .iconNames {
         display: flex;
         gap: 0.4rem;
         align-items: center;
         .icon {
-          height: 1.2rem;
-          min-height: 1.2rem;
-          width: 1.2rem;
-          min-width: 1.2rem;
+          height: 1.5rem;
+          min-height: 1.5rem;
+          width: 1.5rem;
+          min-width: 1.5rem;
           border-radius: 100%;
         }
         .namesUsername {
           display: flex;
           flex-direction: column;
-          line-height: 0.7rem;
+          line-height: 0.8rem;
         }
         .names {
           font-size: 0.9rem;
+          color: globals.$black;
         }
         .username {
           font-size: 0.8rem;
           color: globals.$text-description-color;
         }
+      }
+      .badge {
+        padding: 0.5rem;
+        border-radius: 0.3rem;
+        font-size: 0.9rem;
+      }
+      .positive {
+        background-color: globals.$success-background-color;
+        color: globals.$success-color;
+      }
+      .neutral {
+        background-color: globals.$warning-background-color;
+        color: globals.$warning-color;
+      }
+      .negative {
+        background-color: globals.$danger-background-color;
+        color: globals.$danger-color;
       }
     }
   }

@@ -4,14 +4,6 @@
 $primary-color: #111;
 $secondary-color: #f8f9fa;
 $accent-color: #2d7af1;
-$success-color: #28a745;
-$success-background-color: rgba(40, 167, 69, 0.1);
-$danger-color: #dc3545;
-$danger-background-color: rgba(220, 53, 69, 0.1);
-$warning-color: #ffc107;
-$warning-background-color: rgba(255, 193, 7, 0.1);
-$neutral-color: #8d8d8d;
-$neutral-background-color: rgb(238, 238, 238);
 $gray-light: #f1f1f1;
 $gray-dark: #333;
 $border-radius: 0.5rem;
@@ -56,17 +48,17 @@ $border-radius: 0.5rem;
 
 .badgeSuccess {
   background-color: rgba(40, 167, 69, 0.1);
-  color: $success-color;
+  color: globals.$success-color;
 }
 
 .badgeWarning {
   background-color: rgba(255, 193, 7, 0.1);
-  color: $warning-color;
+  color: globals.$warning-color;
 }
 
 .badgeDanger {
   background-color: rgba(220, 53, 69, 0.1);
-  color: $danger-color;
+  color: globals.$danger-color;
 }
 
 .badgeInfo {
@@ -223,7 +215,7 @@ $border-radius: 0.5rem;
 }
 
 .btnSuccess {
-  background-color: $success-color;
+  background-color: globals.$success-color;
   color: white;
 }
 
@@ -234,7 +226,7 @@ $border-radius: 0.5rem;
 }
 
 .priceIndicator {
-  color: $success-color;
+  color: globals.$success-color;
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -341,7 +333,7 @@ $border-radius: 0.5rem;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
-  background-color: $success-color;
+  background-color: globals.$success-color;
   color: white;
   display: flex;
   align-items: center;
@@ -396,18 +388,18 @@ $border-radius: 0.5rem;
 }
 
 .neutral {
-  color: $neutral-color;
-  background-color: $neutral-background-color;
+  color: globals.$neutral-color;
+  background-color: globals.$neutral-background-color;
 }
 
 .positive {
-  color: $success-color;
-  background-color: $success-background-color;
+  color: globals.$success-color;
+  background-color: globals.$success-background-color;
 }
 
 .negative {
-  color: $danger-color;
-  background-color: $danger-background-color;
+  color: globals.$danger-color;
+  background-color: globals.$danger-background-color;
 }
 
 @media (max-width: 715px) {

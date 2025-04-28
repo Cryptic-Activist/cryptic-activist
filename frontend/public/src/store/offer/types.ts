@@ -69,6 +69,7 @@ export type Offer = {
     label?: string;
     terms?: string;
     instructions?: string;
+    trades?: any;
   };
 };
 
@@ -90,6 +91,7 @@ export type OfferStore = {
     label?: string;
     terms?: string;
     instructions?: string;
+    trades?: any;
     setOfferValue: (params: Value, actionName?: `offer/${string}`) => void;
     setOffer: (offer: Value) => void;
     resetOffer: () => void;
@@ -113,6 +115,7 @@ export type OfferSetter = {
   label?: string;
   terms?: string;
   instructions?: string;
+  trades?: any;
 };
 
 export type Value = OfferSetter;

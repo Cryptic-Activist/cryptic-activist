@@ -35,7 +35,11 @@ export default function OfferPage() {
         blockchain={blockchain}
       />
       <ThisOffer offer={offer} currentPrice={localCurrentPrice} />
-      <ThisVendor vendor={offer.vendor} queryOffer={queryOffer} />
+      <ThisVendor
+        vendor={offer.vendor}
+        queryOffer={queryOffer}
+        trades={offer.trades}
+      />
     </div>
   );
 }
