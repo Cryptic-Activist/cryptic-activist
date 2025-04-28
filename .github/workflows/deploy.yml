@@ -9,6 +9,88 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+    - name: Create .env files on Droplet
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+        command_timeout: 60m
+        script: |
+          cd app
+          mkdir -p envs  # Make sure the 'envs' directory exists
+
+          # prod.backend.env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" > envs/prod.backend.env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> envs/prod.backend.env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> envs/prod.backend.env
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> envs/prod.backend.env
+          echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
+          echo "APP_NAME=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> envs/prod.backend.env
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> envs/prod.backend.env
+          echo "APP_SESSION_SECRET=${{ secrets.APP_SESSION_SECRET }}" >> envs/prod.backend.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> envs/prod.backend.env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> envs/prod.backend.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> envs/prod.backend.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> envs/prod.backend.env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.backend.env
+          echo "FRONTEND_PUBLIC=${{ secrets.FRONTEND_PUBLIC }}" >> envs/prod.backend.env
+          echo "FRONTEND_ADMIN=${{ secrets.FRONTEND_ADMIN }}" >> envs/prod.backend.env
+          echo "BACKEND=${{ secrets.BACKEND }}" >> envs/prod.backend.env
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.backend.env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.backend.env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.backend.env
+          echo "ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}" >> envs/prod.backend.env
+          echo "ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}" >> envs/prod.backend.env
+          echo "ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}" >> envs/prod.backend.env
+          echo "ETHEREUM_ESCROW_CONTRACT_ADDRESS=${{ secrets.ETHEREUM_ESCROW_CONTRACT_ADDRESS }}" >> envs/prod.backend.env
+          echo "ETHEREUM_ESCROW_ARBITRATOR_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ARBITRATOR_ADDRESS }}" >> envs/prod.backend.env
+          echo "ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}" >> envs/prod.backend.env
+          echo "ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}" >> envs/prod.backend.env
+          echo "ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}" >> envs/prod.backend.env
+
+          # prod.base-ca.env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > envs/prod.base-ca.env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.base-ca.env
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.base-ca.env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.base-ca.env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
+
+          # prod.frontend-admin.env
+          echo "NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" > envs/prod.frontend-admin.env
+          echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
+          echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
+          echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
+
+          # prod.frontend-public.env
+          echo "NEXT_PUBLIC_APP_NAME=${{ secrets.NEXT_PUBLIC_APP_NAME_PUBLIC }}" > envs/prod.frontend-public.env
+          echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
+          echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
+          echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
+
+          # prod.mongodb.env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" > envs/prod.mongodb.env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> envs/prod.mongodb.env
+
+          # prod.nginx.env
+          echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" > envs/prod.nginx.env
+          echo "FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}" >> envs/prod.nginx.env
+          echo "FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}" >> envs/prod.nginx.env
+          echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
+          echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
+
+          # prod.postgres.env
+          echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" > envs/prod.postgres.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
+
+          # prod.redis.env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" > envs/prod.redis.env
+
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
