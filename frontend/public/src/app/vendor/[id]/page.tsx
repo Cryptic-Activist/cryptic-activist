@@ -10,8 +10,6 @@ export default function VendorPage() {
     vendor,
   } = useVendor();
 
-  console.log({ vendor });
-
   return (
     <>
       {isPending && <h1>Loading...</h1>}

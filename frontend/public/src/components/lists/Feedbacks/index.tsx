@@ -1,6 +1,7 @@
 import React, { FC } from 'react';
 
 import { FeedbacksProps } from './types';
+import Link from 'next/link';
 import { getFeedbacks } from '@/services/feedbacks';
 import { getInitials } from '@/utils';
 import styles from './index.module.scss';
@@ -8,13 +9,11 @@ import { useQuery } from '@tanstack/react-query';
 
 const Feedbacks: FC<FeedbacksProps> = ({ vendorId }) => {
   const { data, isPending } = useQuery({
-    queryKey: ['feedbacks'],
+    queryKey: ['feedbacks', `feedbacks-${vendorId}`],
     queryFn: async () => {
       const response = await getFeedbacks(vendorId);
       return response;
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
     refetchOnMount: true,
     retry: 3,
     enabled: !!vendorId,
@@ -53,14 +52,17 @@ const Feedbacks: FC<FeedbacksProps> = ({ vendorId }) => {
               </div>
               <div className={styles.traderInfo}>
                 <div className={styles.namesUsernameType}>
-                  <div className={styles.traderNamesUsername}>
+                  <Link
+                    href={`/vendor/${feedback.trader.id}`}
+                    className={styles.traderNamesUsername}
+                  >
                     <div className={styles.traderName}>
                       {feedback.trader.firstName} {feedback.trader.lastName}
                     </div>
                     <div className={styles.traderUsername}>
                       {feedback.trader.username}
                     </div>
-                  </div>
+                  </Link>
                   <div
                     className={`${styles.feedbackType} ${getFeedbackTypeClass(
                       feedback.type

@@ -20,12 +20,12 @@ const useVendor = () => {
       }
     },
     enabled: !!id,
+    refetchOnMount: true,
     retry: 3,
   });
 
   useEffect(() => {
     if (query.data) {
-      console.log({ data: query.data });
       vendor.setVendor(query.data);
     }
   }, [query.data]);
