@@ -27,7 +27,7 @@ const Vendor: FC<VendorPageProps> = ({ vendor }) => {
           isUser={isSameUser}
         />
         <Status status="offline" />
-        <FeedbackCount feedbacksCount={user._count?.feedbacks} />
+        <FeedbackCount feedbacksCount={vendor._count?.feedbacks} />
         {vendor.id && <CurrentOffers vendorId={vendor.id} />}
         {vendor.id && <Feedbacks vendorId={vendor.id} />}
       </div>
