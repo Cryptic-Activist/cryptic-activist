@@ -10,8 +10,6 @@ export const associateLanguage = async (
     where: { id: userId },
   });
 
-  console.log({ user });
-
   if (!user) {
     return null;
   }
@@ -36,8 +34,6 @@ export const associateLanguage = async (
     },
   });
 
-  console.log({ userLanguage });
-
   if (userLanguage) {
     return userLanguage;
   }
@@ -55,7 +51,6 @@ export const diassociateLanguage = async (
   userId: string,
   languageId: string,
 ) => {
-  console.log({ userId, languageId });
   const deleted = await prisma.userLanguage.delete({
     where: {
       userId_languageId: {
