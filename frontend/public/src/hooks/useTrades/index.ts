@@ -28,7 +28,6 @@ const useTrades = () => {
 
   useEffect(() => {
     if (user.id) {
-      console.log({ as });
       mutation.mutate();
     }
   }, [user.id, as]);

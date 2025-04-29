@@ -78,7 +78,6 @@ const useUser = () => {
         token2FA: data.token2FA,
         userId: user?.id,
       });
-      console.log({ loggedIn });
       return loggedIn;
     }
   };

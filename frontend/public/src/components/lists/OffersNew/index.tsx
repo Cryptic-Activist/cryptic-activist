@@ -167,7 +167,6 @@ export const FilterSection: FC<FilterSectionProps> = ({
 
   const handleAmount = useDebounce((e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log({ value });
     setValue({
       defaults: {
         amount: value,

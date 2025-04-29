@@ -4,4 +4,5 @@ export type ProfileNameUsernameProps = {
     lastName?: string;
   };
   username?: string;
+  isUser: boolean;
 };

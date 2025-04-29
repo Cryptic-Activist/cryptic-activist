@@ -26,7 +26,7 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
           Number of trades: <span>{user?._count?.trades}</span>
         </li>
         <li>
-          Trusted by <span>{user?._count?.trades} people</span>
+          Trusted by <span>{user?._count?.trusters} people</span>
         </li>
         <li>
           Blocked by <span>{user?._count?.blockers} people</span>

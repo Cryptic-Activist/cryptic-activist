@@ -23,7 +23,6 @@ export const addSpokenLanguage = async ({
 
     return response.data;
   } catch (error: any) {
-    console.log({ error });
     if (error.status === (400 as number)) {
       return error.response.data;
     }
