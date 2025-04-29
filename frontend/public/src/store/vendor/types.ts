@@ -1,9 +1,3 @@
-import {
-  GetUserInfoReturn,
-  Login2FAParams,
-  LoginParams,
-} from '@/services/user/types';
-
 type Language = {
   id: string;
   name: string;
@@ -33,38 +27,29 @@ type Names = {
   lastName?: string;
 };
 
-export type User = {
+export type Vendor = {
   id?: string;
   names?: Names;
   username?: string;
-  email?: string;
   profileColor?: string;
   lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];
   _count?: Count;
-  twoFactorEnabled?: boolean;
-  setUserValue: (value: Value, actionName: `user/${string}`) => void;
-  setUser: (user: Value) => void;
-  resetUser: () => void;
-  decodeAccessToken: () => Promise<GetUserInfoReturn | null>;
-  login: (
-    params: LoginParams
-  ) => Promise<{ twoFactorEnabled: boolean } | undefined>;
-  login2FA: (params: Login2FAParams) => Promise<boolean>;
-  logout: () => void;
+  setVendorValue: (value: Value, actionName: `vendor/${string}`) => void;
+  setVendor: (user: Value) => void;
+  resetVendor: () => void;
 };
 
-export type UserStore = {
-  user: User;
+export type VendorStore = {
+  vendor: Vendor;
 };
 
-export type UserSetter = {
+export type VendorSetter = {
   id?: string;
   names?: Names;
   username?: string;
-  email?: string;
   profileColor?: string;
   lastLoginAt?: string;
   createdAt?: string;
@@ -72,7 +57,6 @@ export type UserSetter = {
   languages?: Language[];
   userLanguage?: UserLanguage;
   _count?: Count;
-  twoFactorEnabled?: boolean;
 };
 
-export type Value = UserSetter;
+export type Value = VendorSetter;

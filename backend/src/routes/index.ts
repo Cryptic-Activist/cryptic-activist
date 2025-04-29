@@ -3,11 +3,13 @@ import altcha from './altcha';
 import blockchains from './blockchains';
 import chats from './chats';
 import cryptocurrencies from './cryptocurrencies';
+import feedbacks from './feedbacks';
 import fiats from './fiats';
 import offers from './offers';
 import systemMessages from './systemMessages';
 import trades from './trades';
 import users from './users';
+import vendors from './vendors';
 
 export default (app: Application): void => {
   app.use('/chats', chats);
@@ -17,6 +19,8 @@ export default (app: Application): void => {
   app.use('/trades', trades);
   app.use('/users', users);
   app.use('/system-messages', systemMessages);
+  app.use('/feedbacks', feedbacks);
   app.use('/blockchains', blockchains);
   app.use('/altcha', altcha);
+  app.use('/vendors', vendors);
 };

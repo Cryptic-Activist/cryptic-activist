@@ -20,8 +20,7 @@ export const generate2FA = async (params: Generate2FAParams) => {
     }
 
     return response.data;
-  } catch (error) {
-    console.log({ error });
+  } catch (_error) {
     return null;
   }
 };

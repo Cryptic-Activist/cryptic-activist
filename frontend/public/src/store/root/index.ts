@@ -22,6 +22,7 @@ import { useTradeDetailsSlice } from '@/store/tradeDetails';
 import { useTradeSlice } from '@/store/trade';
 import { useTradesSlice } from '@/store/trades';
 import { useUserSlice } from '@/store/user';
+import { useVendorSlice } from '@/store/vendor';
 import { useVerifyAccountSlice } from '@/store/verifyAccount';
 
 export const useRootStore = create<RootStore>()(
@@ -48,6 +49,7 @@ export const useRootStore = create<RootStore>()(
       ...useTradeDetailsSlice(set, get, store),
       ...useTradesSlice(set, get, store),
       ...useNotificationsSlice(set, get, store),
+      ...useVendorSlice(set, get, store),
     }),
     {
       name: 'RootStore',

@@ -18,6 +18,7 @@ import type { TradeDetailsStore } from '../tradeDetails/types';
 import type { TradeStore } from '../trade/types';
 import type { TradesStore } from '../trades/types';
 import type { UserStore } from '../user/types';
+import { VendorStore } from '../vendor/types';
 import type { VerifyAccountStore } from '../verifyAccount/types';
 
 export type RootStore = AppStore &
@@ -40,4 +41,5 @@ export type RootStore = AppStore &
   NotificationsStore &
   ResetPasswordStore &
   TradesStore &
-  TradeDetailsStore;
+  TradeDetailsStore &
+  VendorStore;

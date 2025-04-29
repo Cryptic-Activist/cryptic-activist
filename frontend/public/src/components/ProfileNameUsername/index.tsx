@@ -7,6 +7,7 @@ import styles from './index.module.scss';
 const ProfileNameUsername: FC<ProfileNameUsernameProps> = ({
   names,
   username,
+  isUser,
 }) => {
   const fullname = [names?.firstName ?? '', names?.lastName ?? ''].join(' ');
   return (
@@ -15,14 +16,16 @@ const ProfileNameUsername: FC<ProfileNameUsernameProps> = ({
         <h1 className={styles.name}>{fullname}</h1>
         <h2 className={styles.username}>{username}</h2>
       </div>
-      <div className={styles.btns}>
-        <Button href="/account/settings" theme="primary" padding="1em">
-          <FaGear size={20} />
-        </Button>
-        <Button href="/offer/create" theme="primary" padding="1em">
-          <p>Create Offer</p>
-        </Button>
-      </div>
+      {isUser && (
+        <div className={styles.btns}>
+          <Button href="/account/settings" theme="primary" padding="1em">
+            <FaGear size={20} />
+          </Button>
+          <Button href="/offer/create" theme="primary" padding="1em">
+            <p>Create Offer</p>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

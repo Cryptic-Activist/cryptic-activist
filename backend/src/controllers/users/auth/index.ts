@@ -231,23 +231,35 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
     const userTradesCount = await prisma.trade.count({
       where: { vendorId: user.id },
     });
+
+    console.log({ countUserId: user });
     const userPositiveFeedbacksCount = await prisma.feedback.count({
       where: {
+        trade: {
+          vendorId: user.id,
+        },
         type: 'POSITIVE',
       },
     });
     const userNeutralFeedbacksCount = await prisma.feedback.count({
       where: {
+        trade: {
+          vendorId: user.id,
+        },
         type: 'NEUTRAL',
       },
     });
     const userNegativeFeedbacksCount = await prisma.feedback.count({
       where: {
+        trade: {
+          vendorId: user.id,
+        },
         type: 'NEGATIVE',
       },
     });
 
     res.status(200).send({
+      ...rest,
       names: {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -262,7 +274,6 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
           positive: userPositiveFeedbacksCount,
         },
       },
-      ...rest,
     });
     return;
   } catch (err) {

@@ -78,7 +78,6 @@ const useFeedback = (enabled: boolean) => {
   }, [mutation.data]);
 
   const handleFeedbackType = (type: Type) => {
-    console.log({ type });
     setValue('type', type);
   };
 

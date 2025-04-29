@@ -3,6 +3,7 @@
 import {
   CurrentOffers,
   FeedbackCount,
+  Feedbacks,
   ProfileNameUsername,
   Status,
 } from '@/components';
@@ -19,11 +20,15 @@ export default function Account() {
     <div className={styles.container}>
       <ProfileImageInfo user={user} />
       <div className={styles.mainInfo}>
-        <ProfileNameUsername names={user?.names} username={user?.username} />
+        <ProfileNameUsername
+          names={user?.names}
+          username={user?.username}
+          isUser={true}
+        />
         <Status status="offline" />
-        <FeedbackCount feedbacksCount={user._count?.feedbackCount} />
+        <FeedbackCount feedbacksCount={user._count?.feedbacks} />
         {user.id && <CurrentOffers vendorId={user.id} />}
-        {/* <Feedbacks /> */}
+        {user.id && <Feedbacks vendorId={user.id} />}
       </div>
     </div>
   );

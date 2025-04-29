@@ -16,8 +16,6 @@ export const onSubmitFeedback = async (params: OnSubmitFeedback) => {
     }
   );
 
-  console.log({ response });
-
   if (response.status !== 200) {
     return false;
   }

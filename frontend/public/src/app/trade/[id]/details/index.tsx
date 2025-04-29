@@ -56,8 +56,6 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
     setIsChatOpen((prev) => !prev);
   };
 
-  console.log({ tradeDetails });
-
   const isUserTrader = user.id === tradeDetails.trader.id;
   const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
 

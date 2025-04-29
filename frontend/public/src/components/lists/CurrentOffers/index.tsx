@@ -71,13 +71,11 @@ const CurrentOffers: FC<CurrentOffersProps> = ({ vendorId }) => {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
 
   const { data, isPending } = useQuery({
-    queryKey: ['currentOffers'],
+    queryKey: ['currentOffers', `currentOffers-${vendorId}`],
     queryFn: async () => {
       const response = await fetchCurrentVendorOffers(vendorId);
       return response;
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
     refetchOnMount: true,
     retry: 3,
     enabled: !!vendorId,

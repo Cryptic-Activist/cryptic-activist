@@ -7,7 +7,6 @@ import coreStyles from '../index.module.scss';
 import styles from './index.module.scss';
 
 const ThisVendor: FC<ThisVendorProps> = ({ vendor, queryOffer, trades }) => {
-  console.log({ trades });
   return (
     <div className={`${coreStyles.container} ${coreStyles.vendor}`}>
       <h2 className={coreStyles.heading}>About this vendor</h2>
