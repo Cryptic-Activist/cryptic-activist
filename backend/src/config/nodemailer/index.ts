@@ -14,6 +14,7 @@ console.log({
     user: SMTP_USER,
     pass: SMTP_PASS,
   },
+  test: 'trest',
 });
 
 export const transporter = nodemailer.createTransport({
