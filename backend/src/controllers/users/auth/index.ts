@@ -1,10 +1,11 @@
-import { Request, Response } from 'express';
 import {
+  EMAIL_FROM,
   buildResetPasswordEmail,
   buildTwoFactorAuthentication,
   buildVerifyAccountEmail,
   sendEmail,
 } from '@/services/email';
+import { Request, Response } from 'express';
 import {
   decodeToken,
   generateRefreshToken,
@@ -374,7 +375,7 @@ export const register = async (req: Request, res: Response) => {
 
     const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
     const accountVerifyEmailId = await sendEmail({
-      from: 'accounts@crypticactivist.com',
+      from: EMAIL_FROM.MAIN,
       to: user.email,
       subject: 'Verify your account - Cryptic Activist',
       html: verifyAccountEmailBody,
@@ -382,7 +383,7 @@ export const register = async (req: Request, res: Response) => {
     });
     const accountCreatedEmailBody = buildAccountCreatedEmail(user);
     const accountCreatedEmailId = await sendEmail({
-      from: 'accounts@crypticactivist.com',
+      from: EMAIL_FROM.MAIN,
       to: user.email,
       subject: 'Account creation - Cryptic Activist',
       html: accountCreatedEmailBody,
@@ -561,7 +562,7 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
 
     const resetPasswordEmailBody = buildResetPasswordEmail(user, token);
     const emailId = await sendEmail({
-      from: 'accounts@crypticactivist.com',
+      from: EMAIL_FROM.MAIN,
       to: user.email,
       subject: 'Password reset - Cryptic Activist',
       html: resetPasswordEmailBody,
@@ -793,7 +794,7 @@ export const verify2FA = async (req: Request, res: Response) => {
 
     const twoFactorActivatedEmailBody = buildTwoFactorAuthentication(user);
     const emailId = await sendEmail({
-      from: 'accounts@crypticactivist.com',
+      from: EMAIL_FROM.MAIN,
       to: user.email,
       subject: '2FA Activatived - Cryptic Activist',
       html: twoFactorActivatedEmailBody,

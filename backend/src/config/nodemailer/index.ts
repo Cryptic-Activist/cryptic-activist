@@ -1,12 +1,17 @@
+import { SMTP_HOST, SMTP_PASS, SMTP_USER } from '@/constants/env';
+
+import { IS_DEVELOPMENT } from '@/constants';
 import nodemailer from 'nodemailer';
 
-// Create reusable transporter object using SMTP transport
+const port = IS_DEVELOPMENT ? 587 : 465;
+const secure = IS_DEVELOPMENT ? false : true;
+
 export const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email', // Gmail SMTP server
-  port: 587, // 465 for SSL
-  secure: false, // true for 465, false for other ports
+  host: SMTP_HOST,
+  port, // 465 for SSL
+  secure, // true for 465, false for other ports
   auth: {
-    user: 'reta12@ethereal.email', // your Gmail address
-    pass: 'MnA3ME35GZabAHBeSk', // your Gmail app password or OAuth2 token
+    user: SMTP_USER,
+    pass: SMTP_PASS,
   },
 });

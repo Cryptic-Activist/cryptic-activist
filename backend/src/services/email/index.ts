@@ -1,7 +1,15 @@
+import { SMTP_USER } from '@/constants/env';
 import { SendEmailParams } from './types';
 import { transporter } from '@/config/nodemailer';
 
 export * from './templates';
+
+export const EMAIL_FROM = {
+  MAIN: SMTP_USER,
+  ACCOUNT: 'accounts@crypticactivist.com',
+} as const;
+
+export type EMAIL_FROM = (typeof EMAIL_FROM)[keyof typeof EMAIL_FROM];
 
 export const sendEmail = async (params: SendEmailParams) => {
   try {

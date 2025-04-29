@@ -1,3 +1,4 @@
+import { EMAIL_FROM, sendEmail } from '@/services/email';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -10,7 +11,6 @@ import { prisma, redisClient } from '@/services/db';
 import ChatMessage from '@/models/ChatMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
-import { sendEmail } from '@/services/email';
 
 export default class Trade {
   private socket: Socket;
@@ -195,7 +195,7 @@ export default class Trade {
           emailTrade!,
         );
         const accountCreatedEmailId = await sendEmail({
-          from: 'accounts@crypticactivist.com',
+          from: EMAIL_FROM.MAIN,
           to: emailTrade?.trader!.email!,
           subject: 'Trade Confirmation - Cryptic Activist',
           html: accountCreatedEmailBody,

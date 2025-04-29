@@ -50,3 +50,7 @@ export const ETHEREUM_DEPLOYER_PRIVATE_KEY = process.env
 
 export const ALTCHA_HMAC_SECRET_KEY = process.env
   .ALTCHA_HMAC_SECRET_KEY as string;
+
+export const SMTP_HOST = process.env.SMTP_HOST as string;
+export const SMTP_USER = process.env.SMTP_USER as string;
+export const SMTP_PASS = process.env.SMTP_PASS as string;
