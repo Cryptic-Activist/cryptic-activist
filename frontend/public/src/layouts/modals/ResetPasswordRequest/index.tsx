@@ -37,7 +37,11 @@ const ResetPasswordRequest = () => {
   ];
 
   return (
-    <Template width="25rem" heading="Reset Password">
+    <Template
+      width="25rem"
+      heading="Reset Password"
+      name="resetPasswordRequest"
+    >
       <div className={styles.container}>
         {passwordResetRequestSent && (
           <div className={styles.success}>

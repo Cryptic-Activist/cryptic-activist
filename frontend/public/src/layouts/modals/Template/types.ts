@@ -6,5 +6,9 @@ export type TemplateProps = {
   heading?: string;
   successMessage?: string;
   allowClose?: boolean;
-  name?: 'privateKeys' | 'verifyAccount';
+  name?:
+    | 'privateKeys'
+    | 'verifyAccount'
+    | 'resetPasswordRequest'
+    | 'resetPassword';
 };

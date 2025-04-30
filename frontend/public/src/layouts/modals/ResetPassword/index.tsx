@@ -23,7 +23,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <Template width="20rem" heading="Reset Password">
+    <Template width="20rem" heading="Reset Password" name="resetPassword">
       <div className={styles.container}>
         {passwordResetSuccess ? (
           <>

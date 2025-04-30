@@ -26,7 +26,7 @@ export const useNavigationBarSlice: StateCreator<
       paymentMethods: false,
       privateKeys: false,
       register: false,
-      resetPasswordRequest: false,
+      resetPasswordRequest: true,
       resetPassword: false,
       blockchain: false,
       verifyAccount: false,

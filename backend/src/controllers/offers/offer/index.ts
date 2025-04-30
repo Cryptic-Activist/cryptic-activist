@@ -161,3 +161,24 @@ export const getOfferController = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const editOffer = async (req: Request, res: Response) => {
+  try {
+    const id = req.params;
+    const body = req.body;
+
+    const updateOffer = await prisma.offer.update({
+      where: {
+        id: id as unknown as string,
+      },
+      data: body,
+    });
+
+    res.status(200).send(updateOffer);
+  } catch (err: any) {
+    res.status(500).send({
+      status_code: 500,
+      errors: [err.message],
+    });
+  }
+};

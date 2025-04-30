@@ -27,11 +27,17 @@ const Template: FC<TemplateProps> = ({
   const verifyAccountStyle =
     name === 'verifyAccount' ? styles.verifyAccountContainer : '';
 
+  const resetPasswordStyle =
+    name === 'resetPassword' ? styles.resetPasswordContainer : '';
+
+  const resetPasswordRequestStyle =
+    name === 'resetPasswordRequest' ? styles.resetPasswordRequestContainer : '';
+
   return (
     <>
       <div className={styles.bg} onClick={closeModal} />
       <div
-        className={`${styles.container} ${privateKeysStyle} ${verifyAccountStyle}`}
+        className={`${styles.container} ${privateKeysStyle} ${verifyAccountStyle} ${resetPasswordStyle} ${resetPasswordRequestStyle}`}
         style={{ width }}
       >
         {heading && <h1 className={styles.heading}>{heading}</h1>}
