@@ -34,7 +34,7 @@ COPY backend/prisma/schema.prisma ./prisma/schema.prisma
 ENV NODE_ENV=production
 
 # Add entrypoint script
-COPY backend/prod.entrypoint.sh /entrypoint.sh
+COPY backend/prod.entrypoint.sh entrypoint.sh
 COPY envs/prod.backend.env dist/.env
 
 RUN chmod +x ./entrypoint.sh
