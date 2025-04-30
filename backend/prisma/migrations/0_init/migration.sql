@@ -384,9 +384,6 @@ CREATE UNIQUE INDEX "chats_tradeId_key" ON "chats"("tradeId");
 CREATE UNIQUE INDEX "cryptocurrencies_coingeckoId_key" ON "cryptocurrencies"("coingeckoId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "feedbacks_traderId_key" ON "feedbacks"("traderId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "feedbacks_tradeId_key" ON "feedbacks"("tradeId");
 
 -- CreateIndex
@@ -526,3 +523,4 @@ ALTER TABLE "users" ADD CONSTRAINT "users_lastUpdatedById_fkey" FOREIGN KEY ("la
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_tierId_fkey" FOREIGN KEY ("tierId") REFERENCES "tiers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+

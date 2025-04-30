@@ -45,5 +45,5 @@ RUN npx prisma generate
 EXPOSE 5000
 
 # Use entrypoint script
-# ENTRYPOINT ["./prod.entrypoint.sh"]
-CMD ["npm", "run", "start"]
+ENTRYPOINT ["./prod.entrypoint.sh"]
+# CMD ["npm", "run", "start"]
