@@ -21,10 +21,9 @@ jobs:
           mkdir -p envs  # Make sure the 'envs' directory exists
 
           # prod.backend.env
-          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" > envs/prod.backend.env
-          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> envs/prod.backend.env
-          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> envs/prod.backend.env
-          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> envs/prod.backend.env
+          echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" > envs/prod.backend.env
+          echo "MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}" >> envs/prod.backend.env
+          echo "MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}" >> envs/prod.backend.env
           echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
           echo "APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
