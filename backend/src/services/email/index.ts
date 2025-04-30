@@ -1,27 +1,52 @@
-import { SMTP_USER } from '@/constants/env';
+import {
+  MAILTRAP_SEND_EMAIL_API,
+  MAILTRAP_TESTINBOX_ID,
+  MAILTRAP_TOKEN,
+} from '@/constants/env';
+
 import { SendEmailParams } from './types';
-import { transporter } from '@/config/nodemailer';
+import { fetchPost } from '../axios';
 
 export * from './templates';
 
 export const EMAIL_FROM = {
-  MAIN: SMTP_USER,
-  ACCOUNT: 'accounts@crypticactivist.com',
+  MAIN: {
+    name: 'Cryptic Activist',
+    email: 'company@crypticactivist.com',
+  },
+  ACCOUNT: {
+    name: 'Cryptic Activist Account',
+    email: 'account@crypticactivist.com',
+  },
+  TRADE: {
+    name: 'Cryptic Activist Trade',
+    email: 'trade@crypticactivist.com',
+  },
+  SUPPORT: {
+    name: 'Cryptic Activist Support',
+    email: 'support@crypticactivist.com',
+  },
 } as const;
 
 export type EMAIL_FROM = (typeof EMAIL_FROM)[keyof typeof EMAIL_FROM];
 
 export const sendEmail = async (params: SendEmailParams) => {
   try {
-    const info = await transporter.sendMail({
-      from: params.from,
-      to: params.to,
-      subject: params.subject,
-      text: params.text,
-      html: params.html,
-    });
+    const response = await fetchPost(
+      MAILTRAP_SEND_EMAIL_API + MAILTRAP_TESTINBOX_ID,
+      {
+        ...params,
+      },
+      {
+        Authorization: `Bearer ${MAILTRAP_TOKEN}`,
+      },
+    );
 
-    return info.messageId;
+    if (response.status !== 200) {
+      return null;
+    }
+
+    return response.data;
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Failed to send email');

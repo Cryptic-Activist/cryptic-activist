@@ -386,16 +386,26 @@ export const register = async (req: Request, res: Response) => {
 
     const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
     const accountVerifyEmailId = await sendEmail({
-      from: EMAIL_FROM.MAIN,
-      to: user.email,
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
       subject: 'Verify your account - Cryptic Activist',
       html: verifyAccountEmailBody,
       text: 'Verify your account',
     });
     const accountCreatedEmailBody = buildAccountCreatedEmail(user);
     const accountCreatedEmailId = await sendEmail({
-      from: EMAIL_FROM.MAIN,
-      to: user.email,
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
       subject: 'Account creation - Cryptic Activist',
       html: accountCreatedEmailBody,
       text: 'Account creation',
@@ -573,8 +583,13 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
 
     const resetPasswordEmailBody = buildResetPasswordEmail(user, token);
     const emailId = await sendEmail({
-      from: EMAIL_FROM.MAIN,
-      to: user.email,
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
       subject: 'Password reset - Cryptic Activist',
       html: resetPasswordEmailBody,
       text: 'Reset your password',
@@ -805,8 +820,13 @@ export const verify2FA = async (req: Request, res: Response) => {
 
     const twoFactorActivatedEmailBody = buildTwoFactorAuthentication(user);
     const emailId = await sendEmail({
-      from: EMAIL_FROM.MAIN,
-      to: user.email,
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
       subject: '2FA Activatived - Cryptic Activist',
       html: twoFactorActivatedEmailBody,
       text: '2FA Activated',

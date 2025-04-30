@@ -51,6 +51,9 @@ export const ETHEREUM_DEPLOYER_PRIVATE_KEY = process.env
 export const ALTCHA_HMAC_SECRET_KEY = process.env
   .ALTCHA_HMAC_SECRET_KEY as string;
 
-export const SMTP_HOST = process.env.SMTP_HOST as string;
-export const SMTP_USER = process.env.SMTP_USER as string;
-export const SMTP_PASS = process.env.SMTP_PASS as string;
+export const MAILTRAP_TOKEN = process.env.MAILTRAP_TOKEN as string;
+export const MAILTRAP_TESTINBOX_ID = parseInt(
+  process.env.MAILTRAP_TESTINBOX_ID as string,
+);
+export const MAILTRAP_SEND_EMAIL_API = process.env
+  .MAILTRAP_SEND_EMAIL_API as string;

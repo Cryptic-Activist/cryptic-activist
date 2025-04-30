@@ -188,15 +188,18 @@ export default class Trade {
           },
         });
 
-        console.log({ emailTrade });
-
         const accountCreatedEmailBody = await buildTradeConfirmationEmail(
           emailTrade?.trader,
           emailTrade!,
         );
         const accountCreatedEmailId = await sendEmail({
-          from: EMAIL_FROM.MAIN,
-          to: emailTrade?.trader!.email!,
+          from: EMAIL_FROM.TRADE,
+          to: [
+            {
+              email: emailTrade?.trader.email!,
+              name: `${emailTrade?.trader.firstName} ${emailTrade?.trader.lastName}`,
+            },
+          ],
           subject: 'Trade Confirmation - Cryptic Activist',
           html: accountCreatedEmailBody,
           text: 'Trade Confirmation',

@@ -1,6 +1,12 @@
 export type SendEmailParams = {
-  from: string;
-  to: string;
+  from: {
+    email: string;
+    name: string;
+  };
+  to: {
+    email: string;
+    name: string;
+  }[];
   subject: string;
   html?: string;
   text?: string;
