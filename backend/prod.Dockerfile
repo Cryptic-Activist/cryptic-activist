@@ -37,7 +37,7 @@ ENV NODE_ENV=production
 COPY backend/prod.entrypoint.sh /entrypoint.sh
 COPY envs/prod.backend.env dist/.env
 
-RUN chmod +x backend/entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 RUN npx prisma generate
 
