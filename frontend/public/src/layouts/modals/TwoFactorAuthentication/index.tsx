@@ -24,6 +24,7 @@ const TwoFactorAuthentication = () => {
             placeholder="2FA Code"
             register={login2FAFormRegister}
             errorMessage={errors2FA['token2FA']?.message}
+            autoComplete={false}
           />
           <Altcha />
 

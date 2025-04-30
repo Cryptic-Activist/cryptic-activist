@@ -24,4 +24,5 @@ export type InputProps = {
   width?: string;
   focus?: boolean;
   style?: string;
+  autoComplete?: boolean;
 };

@@ -93,6 +93,7 @@ const EnableTwoFactorAuthentication = () => {
               label="2FA Code"
               placeholder="2FA Code"
               onChange={handleInput}
+              autoComplete={false}
             />
             <Altcha />
 
