@@ -37,7 +37,7 @@ ENV NODE_ENV=production
 COPY backend/prod.entrypoint.sh /entrypoint.sh
 COPY envs/prod.backend.env dist/.env
 
-# RUN chmod +x backend/prod.entrypoint.sh
+RUN chmod +x backend/entrypoint.sh
 
 RUN npx prisma generate
 
@@ -45,5 +45,5 @@ RUN npx prisma generate
 EXPOSE 5000
 
 # Use entrypoint script
-ENTRYPOINT ["./prod.entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 # CMD ["npm", "run", "start"]
