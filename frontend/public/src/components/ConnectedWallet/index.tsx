@@ -40,7 +40,7 @@ const ConnectedWallet = () => {
       >
         {isEthereum || isLocalhost ? (
           <Image
-            src={EthereumLogo.src}
+            src={EthereumLogo.src ?? null}
             alt="Ethereum Logo"
             width={18}
             height={18}
@@ -50,7 +50,7 @@ const ConnectedWallet = () => {
         )}
         {isPolygon ? (
           <Image
-            src={PolygonLogo.src}
+            src={PolygonLogo.src ?? null}
             alt="Polygon Logo"
             width={18}
             height={18}

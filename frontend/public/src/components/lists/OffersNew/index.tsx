@@ -222,7 +222,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
             <>
               {app.defaults.cryptocurrency.image && (
                 <Image
-                  src={app.defaults?.cryptocurrency?.image}
+                  src={app.defaults?.cryptocurrency?.image ?? null}
                   alt={app.defaults?.cryptocurrency?.name}
                   width={30}
                   height={30}

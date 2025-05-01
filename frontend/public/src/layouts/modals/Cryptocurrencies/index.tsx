@@ -39,7 +39,7 @@ const Cryptocurrencies = () => {
               >
                 {cryptocurrency.image && (
                   <Image
-                    src={cryptocurrency.image}
+                    src={cryptocurrency.image ?? null}
                     alt={`${cryptocurrency.name} icon`}
                     width={40}
                     height={40}
