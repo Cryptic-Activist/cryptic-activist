@@ -46,7 +46,7 @@ const Tags: FC<TagsProps> = ({ createOffer, onChange }) => {
       </p>
       {createOffer.tags && createOffer.tags.length > 0 && (
         <ul className={styles.tagsList}>
-          {createOffer.tags.map((tag, index) => (
+          {createOffer.tags.map((tag: string, index: number) => (
             <li key={index} className={styles.tagItem}>
               {tag}
             </li>

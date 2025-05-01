@@ -30,6 +30,7 @@ const useEditOffer = () => {
   const query = useQuery({
     queryKey: ['editOffer', offerId, user.id ?? ''],
     queryFn: async () => {
+      console.log({ offerId, userId: user.id });
       if (offerId && user.id) {
         const data = await getEditOffer(user.id, offerId);
         return data;
@@ -46,8 +47,8 @@ const useEditOffer = () => {
     setValueForm('paymentMethodId', id);
   };
 
-  const inputPaymentDetails = (value: string) => {
-    setValueForm('paymentDetails', value);
+  const inputPaymentDetails = (_value: string) => {
+    // setValueForm('paymentDetails', value);
   };
 
   const selectRateType = (pricingType: PricingItem) => {
@@ -71,6 +72,22 @@ const useEditOffer = () => {
 
   const inputTradeTimeLimit = (value: number) => {
     setValueForm('timeLimit', value);
+  };
+
+  const inputTags = (value: string[]) => {
+    setValueForm('tags', value);
+  };
+
+  const inputLabel = (value: string) => {
+    setValueForm('label', value);
+  };
+
+  const inputTerms = (value: string) => {
+    setValueForm('terms', value);
+  };
+
+  const inputInstructions = (value: string) => {
+    setValueForm('instructions', value);
   };
 
   const onSubmit = (data: any) => {
@@ -100,7 +117,7 @@ const useEditOffer = () => {
       setValueForm('fiat', fiat);
       setValueForm('cryptocurrency', cryptocurrency);
       setValueForm('paymentMethodId', query.data.paymentMethodId);
-      setValueForm('paymentDetails', query.data.paymentDetails);
+      // setValueForm('paymentDetails', query.data.paymentDetails);
       selectOfferType({
         label: query.data.offerType,
         value: query.data.offerType,
@@ -113,7 +130,11 @@ const useEditOffer = () => {
       setValueForm('limitMin', query.data.limitMin);
       setValueForm('limitMax', query.data.limitMax);
       setValueForm('timeLimit', query.data.timeLimit);
+      setValueForm('tags', query.data.tags);
       setValueForm('label', query.data.label);
+      setValueForm('terms', query.data.terms);
+      setValueForm('instructions', query.data.instructions);
+      setValueForm('vendorWalletAddress', query.data.vendorWalletAddress);
     }
   }, [query.data]);
 
@@ -129,6 +150,8 @@ const useEditOffer = () => {
     }
   }, [defaults.fiat]);
 
+  console.log({});
+
   return {
     query,
     formVaules: {
@@ -136,7 +159,7 @@ const useEditOffer = () => {
       cryptocurrency: getValues('cryptocurrency'),
       offerType: getValues('offerType'),
       paymentMethodId: getValues('paymentMethodId'),
-      paymentDetails: getValues('paymentDetails'),
+      // paymentDetails: getValues('paymentDetails'),
       pricingType: getValues('pricingType'),
       listAt: getValues('listAt'),
       limitMin: getValues('limitMin'),
@@ -159,6 +182,10 @@ const useEditOffer = () => {
     inputMinTradeAmount,
     inputMaxTradeAmount,
     inputTradeTimeLimit,
+    inputTags,
+    inputLabel,
+    inputTerms,
+    inputInstructions,
   };
 };
 

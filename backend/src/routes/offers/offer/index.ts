@@ -1,5 +1,6 @@
 import {
   createOfferController,
+  deleteOffer,
   editOffer,
   getEditOffer,
   getOfferController,
@@ -28,5 +29,7 @@ router.get(
   validateEditOffer,
   editOffer,
 );
+
+router.delete('/:userId/:offerId', authenticateUser, deleteOffer);
 
 export default router;

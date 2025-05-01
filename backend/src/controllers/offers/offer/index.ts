@@ -223,3 +223,23 @@ export const editOffer = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const deleteOffer = async (req: Request, res: Response) => {
+  try {
+    const { userId, offerId } = req.params;
+
+    const offer = await prisma.offer.delete({
+      where: {
+        id: offerId as unknown as string,
+        vendorId: userId,
+      },
+    });
+
+    res.status(200).send(offer);
+  } catch (err: any) {
+    res.status(500).send({
+      status_code: 500,
+      errors: [err.message],
+    });
+  }
+};
