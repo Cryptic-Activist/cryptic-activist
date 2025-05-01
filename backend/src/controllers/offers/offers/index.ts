@@ -1,5 +1,6 @@
 import {
   GetCurrentVendorOffersRequest,
+  GetMyOffersPaginationRequest,
   GetOffersPaginationRequest,
   GetOffersRequest,
 } from './types';
@@ -206,6 +207,70 @@ export const getOffersPaginationController = async (
             id: true,
           },
         },
+        cryptocurrency: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+          },
+        },
+        fiat: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+          },
+        },
+      },
+    });
+
+    let nextCursor: string | null = null;
+
+    if (offers.length > take) {
+      const nextItem = offers.pop();
+      nextCursor = nextItem?.id || null;
+    }
+
+    res.status(200).send({ offers, nextCursor });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: err,
+    });
+  }
+};
+
+export const getMyOffersPaginationController = async (
+  req: Request,
+  res: Response,
+) => {
+  const { userId } = req.params;
+  const { offerType, limit, cursor } =
+    req.query as unknown as GetMyOffersPaginationRequest;
+
+  const take = parseInt(limit, 10) || 20;
+  const cursorObj = cursor ? { id: cursor } : undefined;
+
+  try {
+    const offers = await prisma.offer.findMany({
+      take: take + 1,
+      cursor: cursorObj,
+      orderBy: { id: 'desc' },
+      where: {
+        offerType,
+        vendorId: userId,
+      },
+      select: {
+        id: true,
+        label: true,
+        terms: true,
+        tags: true,
+        timeLimit: true,
+        pricingType: true,
+        listAt: true,
+        limitMin: true,
+        limitMax: true,
+        instructions: true,
         cryptocurrency: {
           select: {
             id: true,

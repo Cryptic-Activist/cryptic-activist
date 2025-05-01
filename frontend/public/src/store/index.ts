@@ -19,3 +19,4 @@ export * from './trade';
 export * from './notifications';
 export * from './trades';
 export * from './vendor';
+export * from './myOffers';

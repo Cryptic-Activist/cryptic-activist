@@ -9,6 +9,7 @@ import { useCryptocurrenciesSlice } from '@/store/cryptocurrencies';
 import { useCryptocurrencySlice } from '@/store/cryptocurrency';
 import { useFiatSlice } from '@/store/fiat';
 import { useFiatsSlice } from '@/store/fiats';
+import { useMyOffersSlice } from '../myOffers';
 import { useNavigationBarSlice } from '@/store/navigationBar';
 import { useNotificationsSlice } from '@/store/notifications';
 import { useOfferSlice } from '@/store/offer';
@@ -50,6 +51,7 @@ export const useRootStore = create<RootStore>()(
       ...useTradesSlice(set, get, store),
       ...useNotificationsSlice(set, get, store),
       ...useVendorSlice(set, get, store),
+      ...useMyOffersSlice(set, get, store),
     }),
     {
       name: 'RootStore',

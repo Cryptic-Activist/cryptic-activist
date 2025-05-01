@@ -178,6 +178,18 @@ export const FilterSection: FC<FilterSectionProps> = ({
     updateHeight(isMoreFiltersOpen);
   }, [isMoreFiltersOpen]);
 
+  // useEffect(() => {
+  //   if (app.defaults?.fiat?.symbol) {
+  //     addSearchParam({ fiat: app.defaults.fiat.symbol });
+  //   }
+  // }, [app.defaults?.fiat?.symbol]);
+
+  // useEffect(() => {
+  //   if (app.defaults?.cryptocurrency?.symbol) {
+  //     addSearchParam({ cryptocurrency: app.defaults.cryptocurrency.symbol });
+  //   }
+  // }, [app.defaults?.cryptocurrency?.symbol]);
+
   const _ref = useOutsideClick(togglePaymentMethod);
 
   return (
@@ -206,15 +218,17 @@ export const FilterSection: FC<FilterSectionProps> = ({
           className={styles.cryptoSelector}
           onClick={openCryptocurrenciesModal}
         >
-          {app.defaults?.cryptocurrency?.image ? (
+          {app.defaults?.cryptocurrency?.name ? (
             <>
-              <Image
-                src={app.defaults?.cryptocurrency?.image}
-                alt={app.defaults?.cryptocurrency?.name}
-                width={30}
-                height={30}
-                className={styles.cryptoIcon}
-              />
+              {app.defaults.cryptocurrency.image && (
+                <Image
+                  src={app.defaults?.cryptocurrency?.image}
+                  alt={app.defaults?.cryptocurrency?.name}
+                  width={30}
+                  height={30}
+                  className={styles.cryptoIcon}
+                />
+              )}
               <span>{app.defaults?.cryptocurrency?.name}</span>
             </>
           ) : (
@@ -222,11 +236,17 @@ export const FilterSection: FC<FilterSectionProps> = ({
           )}
         </button>
 
-        <div className={styles.exchangeRate}>{`1 ${toUpperCase(
-          app.defaults?.cryptocurrency?.symbol
-        )} = ${app.currentPrice} ${toUpperCase(
-          app.defaults?.fiat?.symbol
-        )}`}</div>
+        {app.currentPrice ? (
+          <div className={styles.exchangeRate}>{`1 ${toUpperCase(
+            app.defaults?.cryptocurrency?.symbol
+          )} = ${app.currentPrice} ${toUpperCase(
+            app.defaults?.fiat?.symbol
+          )}`}</div>
+        ) : (
+          <div className={styles.exchangeRate}>
+            Exchange rate is unavailable
+          </div>
+        )}
       </div>
 
       <div className={styles.secondaryFilters}>

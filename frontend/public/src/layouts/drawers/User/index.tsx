@@ -105,6 +105,16 @@ const User: FC = () => {
                     </Link>
                   </li>
                   <li className={styles.subMenuItem}>
+                    <Link href="/my-offers" onClick={navigate}>
+                      My Offers
+                    </Link>
+                  </li>
+                  <li className={styles.subMenuItem}>
+                    <Link href="/trades" onClick={navigate}>
+                      Trades
+                    </Link>
+                  </li>
+                  <li className={styles.subMenuItem}>
                     <Link href="/account/settings" onClick={navigate}>
                       Account Settings
                     </Link>

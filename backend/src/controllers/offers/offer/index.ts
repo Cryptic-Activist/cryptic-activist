@@ -162,19 +162,60 @@ export const getOfferController = async (req: Request, res: Response) => {
   }
 };
 
-export const editOffer = async (req: Request, res: Response) => {
+export const getEditOffer = async (req: Request, res: Response) => {
   try {
-    const id = req.params;
-    const body = req.body;
+    const { userId, offerId } = req.params;
 
-    const updateOffer = await prisma.offer.update({
+    const offer = await prisma.offer.findFirst({
       where: {
-        id: id as unknown as string,
+        id: offerId as unknown as string,
+        vendorId: userId,
       },
-      data: body,
+      select: {
+        id: true,
+        averageTradeSpeed: true,
+        createdAt: true,
+        cryptocurrency: true,
+        fiat: true,
+        label: true,
+        instructions: true,
+        limitMax: true,
+        limitMin: true,
+        listAt: true,
+        offerType: true,
+        paymentMethodId: true,
+        pricingType: true,
+        tags: true,
+        terms: true,
+        timeLimit: true,
+        vendorWalletAddress: true,
+      },
     });
 
-    res.status(200).send(updateOffer);
+    res.status(200).send(offer);
+  } catch (err: any) {
+    res.status(500).send({
+      status_code: 500,
+      errors: [err.message],
+    });
+  }
+};
+
+export const editOffer = async (req: Request, res: Response) => {
+  try {
+    const ids = req.params;
+    const body = req.body;
+
+    console.log({ ids, body });
+
+    // const updateOffer = await prisma.offer.update({
+    //   where: {
+    //     id: id as unknown as string,
+    //   },
+    //   data: body,
+    // });
+
+    res.status(200).send();
   } catch (err: any) {
     res.status(500).send({
       status_code: 500,

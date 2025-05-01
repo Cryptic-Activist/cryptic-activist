@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-export const FeaveAFeedback = z
+export const LeaveAFeedback = z
   .object({
     tradeId: z.string().min(2),
     type: z.string().min(2),
@@ -17,4 +17,4 @@ export const FeaveAFeedback = z
     }
   });
 
-export const leaveAFeedbackResolver = zodResolver(FeaveAFeedback);
+export const leaveAFeedbackResolver = zodResolver(LeaveAFeedback);

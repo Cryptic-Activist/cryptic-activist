@@ -20,3 +20,10 @@ export type GetOffersPaginationRequest = {
   excludedVendorId?: string;
   cursor?: string;
 };
+
+export type GetMyOffersPaginationRequest = {
+  limit: string;
+  offerType?: string;
+  fiatId?: string;
+  cursor?: string;
+};

@@ -25,3 +25,5 @@ export { default as useURL } from './useURL';
 export { default as useParams } from './useParams';
 export { default as useFeedback } from './useFeedback';
 export { default as useVendor } from './useVendor';
+export { default as useMyOffers } from './useMyOffers';
+export { default as useEditOffer } from './useEditOffer';

@@ -1,5 +1,6 @@
 import {
   createCryptocurrencyCoinGecko,
+  createCryptocurrencyLocal,
   getCryptocurrencyController,
   getPrice,
 } from '@/controllers/cryptocurrencies';
@@ -18,5 +19,7 @@ router.post(
   authenticateUser,
   createCryptocurrencyCoinGecko,
 );
+
+router.post('/local/create', createCryptocurrencyLocal);
 
 export default router;
