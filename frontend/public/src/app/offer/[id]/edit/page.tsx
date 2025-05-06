@@ -37,13 +37,11 @@ const EditOffer = () => {
     inputLabel,
   } = useEditOffer();
 
-  console.log({ formVaules });
-
   return (
-    <div className={styles.container}>
+    <form className={styles.container} onSubmit={handleSubmit(onSubmit)}>
       <div className={styles.mainContent}>
         <h1 className={styles.heading}>Edit your Offer: {query.data?.id}</h1>
-        <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+        <div className={styles.form}>
           <Selector type="fiat" hasLabel={true} />
           <Selector type="cryptocurrency" hasLabel={true} />
           <Radio
@@ -110,7 +108,7 @@ const EditOffer = () => {
             <label>Connect Wallet</label>
             <span>{formVaules.vendorWalletAddress}</span>
           </div>
-        </form>
+        </div>
       </div>
       <aside className={styles.aside}>
         <h2>Finish editing your offer</h2>
@@ -122,7 +120,7 @@ const EditOffer = () => {
           Update Offer
         </Button>
       </aside>
-    </div>
+    </form>
   );
 };
 

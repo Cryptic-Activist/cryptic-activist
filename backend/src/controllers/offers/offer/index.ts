@@ -26,6 +26,7 @@ export const getOfferController = async (req: Request, res: Response) => {
     const offer = await prisma.offer.findFirst({
       where: {
         id: id as string,
+        deletedAt: null,
       },
       select: {
         _count: {
@@ -170,6 +171,7 @@ export const getEditOffer = async (req: Request, res: Response) => {
       where: {
         id: offerId as unknown as string,
         vendorId: userId,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -228,10 +230,13 @@ export const deleteOffer = async (req: Request, res: Response) => {
   try {
     const { userId, offerId } = req.params;
 
-    const offer = await prisma.offer.delete({
+    const offer = await prisma.offer.update({
       where: {
         id: offerId as unknown as string,
         vendorId: userId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     });
 

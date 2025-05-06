@@ -25,12 +25,12 @@ const useEditOffer = () => {
     handleSubmit,
     getValues,
     setValue: setValueForm,
+    formState: { errors },
   } = useForm({ resolver: editOfferResolver });
 
   const query = useQuery({
     queryKey: ['editOffer', offerId, user.id ?? ''],
     queryFn: async () => {
-      console.log({ offerId, userId: user.id });
       if (offerId && user.id) {
         const data = await getEditOffer(user.id, offerId);
         return data;
@@ -94,6 +94,8 @@ const useEditOffer = () => {
     console.log({ data });
   };
 
+  console.log({ errors });
+
   useEffect(() => {
     if (query.data) {
       const { fiat, cryptocurrency } = query.data;
@@ -118,14 +120,16 @@ const useEditOffer = () => {
       setValueForm('cryptocurrency', cryptocurrency);
       setValueForm('paymentMethodId', query.data.paymentMethodId);
       // setValueForm('paymentDetails', query.data.paymentDetails);
-      selectOfferType({
-        label: query.data.offerType,
-        value: query.data.offerType,
-      });
-      selectRateType({
-        label: query.data.pricingType,
-        value: query.data.pricingType,
-      });
+      // selectOfferType({
+      //   label: query.data.offerType,
+      //   value: query.data.offerType,
+      // });
+      // selectRateType({
+      //   label: query.data.pricingType,
+      //   value: query.data.pricingType,
+      // });
+      setValueForm('pricingType', query.data.pricingType);
+      setValueForm('offerType', query.data.offerType);
       setValueForm('listAt', query.data.listAt);
       setValueForm('limitMin', query.data.limitMin);
       setValueForm('limitMax', query.data.limitMax);
@@ -149,8 +153,6 @@ const useEditOffer = () => {
       setValueForm('fiat', defaults.fiat);
     }
   }, [defaults.fiat]);
-
-  console.log({});
 
   return {
     query,

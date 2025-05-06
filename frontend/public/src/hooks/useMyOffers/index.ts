@@ -2,6 +2,7 @@
 
 import { useApp, useUser } from '@/hooks';
 
+import { deleteOffer } from '@/services/offer';
 import { fetchMyOffersPagination } from '@/services/myOffers';
 import { useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -77,6 +78,27 @@ const useMyOffers = () => {
     retry: 3,
   });
 
+  const mutationDeleteOffer = useMutation({
+    mutationKey: ['deleteMyOffer'],
+    mutationFn: async ({
+      userId,
+      offerId,
+    }: {
+      userId: string;
+      offerId: string;
+    }) => {
+      if (userId && offerId) {
+        const data = await deleteOffer(userId, offerId);
+        // return data;
+
+        if (data) {
+          await initialFetch(userId);
+        }
+      }
+    },
+    retry: 3,
+  });
+
   const getOffer = (id: string) => {
     if (!myOffers.data) return null;
 
@@ -104,6 +126,7 @@ const useMyOffers = () => {
     getOffer,
     loadMore: mutationLoadMore.mutate,
     initialFetch: mutationInitialFetch.mutate,
+    deleteOffer: mutationDeleteOffer.mutateAsync,
   };
 };
 

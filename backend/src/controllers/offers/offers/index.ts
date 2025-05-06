@@ -21,6 +21,7 @@ export const getOffersController = async (
         fiatId,
         offerType,
         paymentMethodId,
+        deletedAt: null,
       },
       select: {
         _count: {
@@ -84,6 +85,7 @@ export const getCurrentVendorOffers = async (
     const offers = await prisma.offer.findMany({
       where: {
         vendorId: id,
+        deletedAt: null,
       },
       select: {
         _count: {
@@ -168,6 +170,7 @@ export const getOffersPaginationController = async (
         fiatId,
         offerType,
         paymentMethodId,
+        deletedAt: null,
         vendorId: {
           ...(excludedVendorId && { notIn: [excludedVendorId] }),
         },
@@ -259,6 +262,7 @@ export const getMyOffersPaginationController = async (
       where: {
         offerType,
         vendorId: userId,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -289,6 +293,8 @@ export const getMyOffersPaginationController = async (
     });
 
     let nextCursor: string | null = null;
+
+    console.log({ offers });
 
     if (offers.length > take) {
       const nextItem = offers.pop();

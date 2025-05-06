@@ -30,6 +30,6 @@ router.get(
   editOffer,
 );
 
-router.delete('/:userId/:offerId', authenticateUser, deleteOffer);
+router.put('/:userId/:offerId', authenticateUser, deleteOffer);
 
 export default router;

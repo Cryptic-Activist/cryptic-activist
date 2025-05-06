@@ -188,6 +188,26 @@ export default class Trade {
           },
         });
 
+        if (emailTrade) {
+          const updatedVendorXp = await prisma.user.update({
+            where: {
+              id: emailTrade?.vendor?.id,
+            },
+            data: {
+              xp: emailTrade?.vendor?.xp + 100,
+            },
+          });
+          const updatedTraderXp = await prisma.user.update({
+            where: {
+              id: emailTrade?.trader?.id,
+            },
+            data: {
+              xp: emailTrade?.trader?.xp + 100,
+            },
+          });
+          console.log({ updatedVendorXp, updatedTraderXp });
+        }
+
         const accountCreatedEmailBody = await buildTradeConfirmationEmail(
           emailTrade?.trader,
           emailTrade!,

@@ -1,25 +1,21 @@
 'use client';
 
-import { FaPen, FaTrash } from 'react-icons/fa6';
 import React, { FC } from 'react';
-import { useApp, useMyOffers } from '@/hooks';
+import { useApp, useMyOffers, useUser } from '@/hooks';
 
 import Link from 'next/link';
 import { MyOfferItemProps } from './types';
 import styles from './page.module.scss';
 
-const MyOfferItem: FC<MyOfferItemProps> = ({ offer }) => {
+const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemHeader}>
-        <span className={styles.offerId}>{offer.id}</span>
+        <Link href={`/offer/${offer.id}`} className={styles.offerId}>
+          {offer.id}
+        </Link>
         <div className={styles.edits}>
-          <Link href={`/offer/${offer.id}/edit`}>
-            <FaPen size={16} />
-          </Link>
-          <button>
-            <FaTrash size={16} />
-          </button>
+          <button onClick={() => onDeleteOffer(offer.id)}>DELETE</button>
         </div>
       </div>
       <div className={styles.listItemContent}>
@@ -52,11 +48,21 @@ const MyOfferItem: FC<MyOfferItemProps> = ({ offer }) => {
 };
 
 const MyOffers = () => {
-  const { myOffers } = useMyOffers();
+  const { myOffers, deleteOffer } = useMyOffers();
   const { app, setValue } = useApp();
+  const {
+    user: { id },
+  } = useUser();
 
   const handleOffersType = (type: 'buy' | 'sell') => {
     setValue({ type });
+  };
+
+  const onDeleteOffer = async (offerId: string) => {
+    if (id) {
+      const deleted = await deleteOffer({ userId: id, offerId });
+      return deleted;
+    }
   };
 
   return (
@@ -78,7 +84,11 @@ const MyOffers = () => {
 
       <ul className={styles.list}>
         {myOffers.data?.map((myOffer) => (
-          <MyOfferItem key={myOffer.id} offer={myOffer} />
+          <MyOfferItem
+            key={myOffer.id}
+            offer={myOffer}
+            onDeleteOffer={onDeleteOffer}
+          />
         ))}
       </ul>
     </div>

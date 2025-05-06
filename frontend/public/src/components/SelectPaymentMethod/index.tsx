@@ -20,8 +20,6 @@ const SelectPaymentMethod: FC<SelectPaymentMethodProps> = ({
     getPaymentMethodsByCategory,
   } = usePaymentMethods(true);
 
-  console.log({ paymentMethodId });
-
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<
     null | number
   >(null);

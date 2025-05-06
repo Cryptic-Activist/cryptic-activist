@@ -45,19 +45,23 @@
 }
 
 .offerId {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  color: #000;
 }
 
 .edits {
   display: flex;
   gap: 0.8rem;
-  a,
   button {
     color: #646464;
-  }
-  button {
+    cursor: pointer;
     background-color: transparent;
     border: none;
+    font-weight: 700;
+    transition: 0.2s color ease-out;
+    &:hover {
+      color: globals.$feedback-negative;
+    }
   }
 }
 
