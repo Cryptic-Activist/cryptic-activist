@@ -1,18 +1,17 @@
 'use client';
 
+import { useApp, useFiats, useNavigationBar } from '@/hooks';
+
 import { Fiat } from '@/store/fiat/types';
 import Flag from './Flag';
 import { ListTemplate } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { toCapitalize } from '@/utils';
-import { useFiats } from '@/hooks';
-import { useRootStore } from '@/store';
 
 const Fiats = () => {
   const { fiatsList, setFiat, filterFiats } = useFiats();
-  const {
-    navigationBar: { toggleModal },
-  } = useRootStore();
+  const { toggleModal } = useNavigationBar();
+  const { app } = useApp();
 
   const selectFiat = (fiat: Fiat) => {
     setFiat(fiat);
@@ -27,14 +26,21 @@ const Fiats = () => {
       onFilter={filterFiats}
     >
       <ul className={styles.list}>
-        {fiatsList?.map((fiat, index) => (
-          <li key={index}>
-            <button onClick={() => selectFiat(fiat)}>
-              <Flag country={fiat.country} flag={fiat.flag} />
-              {toCapitalize(fiat.name)}
-            </button>
-          </li>
-        ))}
+        {fiatsList?.map((fiat, index) => {
+          const isSelected = app.defaults?.fiat?.id === fiat.id;
+          const selectedStyle = isSelected ? styles.selected : '';
+          return (
+            <li key={index}>
+              <button
+                onClick={() => selectFiat(fiat)}
+                className={selectedStyle}
+              >
+                <Flag country={fiat.country} flag={fiat.flag} />
+                {toCapitalize(fiat.name)}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </ListTemplate>
   );

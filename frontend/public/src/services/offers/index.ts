@@ -1,9 +1,9 @@
 import { fetchGet, fetchPost } from '@/services/axios';
+import { getBearerToken, getQueries } from '@/utils';
 
 import { BACKEND } from '@/constants';
 import { CreateOfferSetter } from '@/store/createOffer/types';
 import { FetchOffersParams } from './types';
-import { getQueries } from '@/utils';
 
 export const fetchOffersPagination = async ({
   cursor,
@@ -34,6 +34,7 @@ export const fetchCurrentVendorOffers = async (vendorId: string) => {
 export const submitOfferCreate = async (
   data: CreateOfferSetter & { vendorWalletAddress: string }
 ) => {
+  const bearerToken = getBearerToken();
   const payload = {
     vendorId: data.vendorId,
     cryptocurrencyId: data.cryptocurrency?.id,
@@ -51,7 +52,9 @@ export const submitOfferCreate = async (
     instructions: data.instructions,
     vendorWalletAddress: data.vendorWalletAddress,
   };
-  const response = await fetchPost(BACKEND + '/offers/offer/create', payload);
+  const response = await fetchPost(BACKEND + '/offers/offer/create', payload, {
+    Authorization: bearerToken,
+  });
 
   if (response.status !== 200) return null;
 

@@ -28,7 +28,7 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
     return (
       <div className={styles.labelContent}>
         <Image
-          src={image}
+          src={image ?? null}
           alt={`${name} icon`}
           width={24}
           height={24}

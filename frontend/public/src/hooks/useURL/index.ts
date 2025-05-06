@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 
+import { AddParams } from './types';
 import { getQueries } from '@/utils';
 import { useRouter } from '@/hooks';
 
@@ -26,6 +27,11 @@ const useURL = () => {
     }
   }, []);
 
+  const addSearchParam: AddParams = (_newParams) => {
+    // const queries = getQueries({ ...searchParams, ...newParams });
+    // const newUr = pathname + queries;
+  };
+
   const getSearchParams = (searchParam?: string) => {
     return searchParam ? searchParams[searchParam] : searchParams;
   };
@@ -47,6 +53,7 @@ const useURL = () => {
     params,
     pathname,
     searchParams,
+    addSearchParam,
     getSearchParams,
     removeSearchParam,
     clearSearchParams,

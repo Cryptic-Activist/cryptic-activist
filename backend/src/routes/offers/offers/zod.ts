@@ -31,3 +31,20 @@ export const GetOffersPagination = z
       });
     }
   });
+
+export const GetMyOffersPagination = z
+  .object({
+    limit: z.string(),
+    cursor: z.string().optional(),
+    offerType: z.string().min(2).optional(),
+  })
+  .superRefine(({ limit }, ctx) => {
+    const regex = /^\d+$/;
+    if (!regex.test(limit)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['limit'],
+        message: 'limit must be number',
+      });
+    }
+  });

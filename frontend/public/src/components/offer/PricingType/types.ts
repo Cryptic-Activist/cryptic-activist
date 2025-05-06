@@ -1,5 +1,3 @@
-import { CreateOfferProp } from '@/store/createOffer/types';
-
 export type PricingItem = {
   label: 'Market' | 'Fixed';
   value: 'market' | 'fixed';
@@ -7,5 +5,5 @@ export type PricingItem = {
 
 export type PricingTypeProps = {
   onChange: (item: PricingItem) => void;
-  createOffer: CreateOfferProp;
+  createOffer: any;
 };

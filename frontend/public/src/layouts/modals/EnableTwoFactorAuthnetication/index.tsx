@@ -78,7 +78,7 @@ const EnableTwoFactorAuthentication = () => {
           <form onSubmit={onSubmit} className={styles.form}>
             {qr && (
               <Image
-                src={qr}
+                src={qr ?? null}
                 alt="Scan this QR code"
                 width={200}
                 height={200}
