@@ -23,7 +23,7 @@ const useRegister = () => {
   const mutation = useMutation({
     mutationKey: ['register'],
     mutationFn: onSubmitUserRegistration,
-    retry: 3,
+    retry: 0,
   });
   const query = useQuery({
     queryKey: ['register'],

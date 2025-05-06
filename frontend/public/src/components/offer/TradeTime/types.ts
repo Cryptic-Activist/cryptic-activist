@@ -1,6 +1,4 @@
-import { CreateOfferProp } from '@/store/createOffer/types';
-
 export type TradeTimeProps = {
-  createOffer: CreateOfferProp;
+  createOffer: any;
   inputTradeTimeLimit: (value: number) => void;
 };

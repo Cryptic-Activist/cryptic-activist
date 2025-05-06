@@ -1,5 +1,6 @@
 import {
   GetCurrentVendorOffersRequest,
+  GetMyOffersPaginationRequest,
   GetOffersPaginationRequest,
   GetOffersRequest,
 } from './types';
@@ -20,6 +21,7 @@ export const getOffersController = async (
         fiatId,
         offerType,
         paymentMethodId,
+        deletedAt: null,
       },
       select: {
         _count: {
@@ -83,6 +85,7 @@ export const getCurrentVendorOffers = async (
     const offers = await prisma.offer.findMany({
       where: {
         vendorId: id,
+        deletedAt: null,
       },
       select: {
         _count: {
@@ -167,6 +170,7 @@ export const getOffersPaginationController = async (
         fiatId,
         offerType,
         paymentMethodId,
+        deletedAt: null,
         vendorId: {
           ...(excludedVendorId && { notIn: [excludedVendorId] }),
         },
@@ -224,6 +228,73 @@ export const getOffersPaginationController = async (
     });
 
     let nextCursor: string | null = null;
+
+    if (offers.length > take) {
+      const nextItem = offers.pop();
+      nextCursor = nextItem?.id || null;
+    }
+
+    res.status(200).send({ offers, nextCursor });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: err,
+    });
+  }
+};
+
+export const getMyOffersPaginationController = async (
+  req: Request,
+  res: Response,
+) => {
+  const { userId } = req.params;
+  const { offerType, limit, cursor } =
+    req.query as unknown as GetMyOffersPaginationRequest;
+
+  const take = parseInt(limit, 10) || 20;
+  const cursorObj = cursor ? { id: cursor } : undefined;
+
+  try {
+    const offers = await prisma.offer.findMany({
+      take: take + 1,
+      cursor: cursorObj,
+      orderBy: { id: 'desc' },
+      where: {
+        offerType,
+        vendorId: userId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        label: true,
+        terms: true,
+        tags: true,
+        timeLimit: true,
+        pricingType: true,
+        listAt: true,
+        limitMin: true,
+        limitMax: true,
+        instructions: true,
+        cryptocurrency: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+          },
+        },
+        fiat: {
+          select: {
+            id: true,
+            name: true,
+            symbol: true,
+          },
+        },
+      },
+    });
+
+    let nextCursor: string | null = null;
+
+    console.log({ offers });
 
     if (offers.length > take) {
       const nextItem = offers.pop();

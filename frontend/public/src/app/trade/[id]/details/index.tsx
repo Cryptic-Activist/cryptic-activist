@@ -83,7 +83,7 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
               >
                 {tradeDetails.cryptocurrency?.image && (
                   <Image
-                    src={tradeDetails.cryptocurrency?.image}
+                    src={tradeDetails.cryptocurrency?.image ?? null}
                     alt={tradeDetails.cryptocurrency?.name}
                     style={{ verticalAlign: 'middle', marginRight: '4px' }}
                     width={30}

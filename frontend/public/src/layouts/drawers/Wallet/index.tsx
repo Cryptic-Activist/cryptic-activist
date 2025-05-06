@@ -104,7 +104,7 @@ const Wallet = () => {
                 >
                   {isEthereum || isLocalhost ? (
                     <Image
-                      src={EthereumLogo.src}
+                      src={EthereumLogo.src ?? null}
                       alt="Ethereum Logo"
                       width={30}
                       height={30}
@@ -114,7 +114,7 @@ const Wallet = () => {
                   )}
                   {isPolygon ? (
                     <Image
-                      src={PolygonLogo.src}
+                      src={PolygonLogo.src ?? null}
                       alt="Polygon Logo"
                       width={30}
                       height={30}

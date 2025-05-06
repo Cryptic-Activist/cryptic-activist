@@ -14,7 +14,7 @@ const Hero = () => {
   return (
     <section className={styles.hero}>
       {/* <Image
-        src={HeroBackground.src}
+        src={HeroBackground.src ?? null}
         alt="Hero background"
         height={200}
         width={240}

@@ -120,3 +120,32 @@ export const createCryptocurrencyCoinGecko = async (
     });
   }
 };
+
+export const createCryptocurrencyLocal = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { coingeckoId, symbol, name } = req.body;
+
+    const newCrypto = await prisma.cryptocurrency.create({
+      data: {
+        coingeckoId,
+        symbol,
+        name,
+        image: '',
+      },
+    });
+
+    res.status(200).send({
+      coingeckoId: newCrypto?.coingeckoId,
+      id: newCrypto?.id,
+      name: newCrypto?.name,
+      symbol: newCrypto?.symbol,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};

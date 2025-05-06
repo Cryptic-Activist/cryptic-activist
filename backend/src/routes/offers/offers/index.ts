@@ -1,10 +1,12 @@
 import {
   getCurrentVendorOffers,
+  getMyOffersPaginationController,
   getOffersController,
   getOffersPaginationController,
 } from '@/controllers/offers';
 import {
   validateGetCurrentVendorOffers,
+  validateGetMyOffersPagination,
   validateGetOffers,
   validateGetOffersPagination,
 } from './middleware';
@@ -25,6 +27,12 @@ router.get(
   '/pagination',
   validateGetOffersPagination,
   getOffersPaginationController,
+);
+
+router.get(
+  '/:userId/pagination',
+  validateGetMyOffersPagination,
+  getMyOffersPaginationController,
 );
 
 export default router;

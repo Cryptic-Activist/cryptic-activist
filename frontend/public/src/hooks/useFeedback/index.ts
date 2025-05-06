@@ -19,7 +19,7 @@ const useFeedback = (enabled: boolean) => {
   const { toggleModal } = useNavigationBar();
 
   const query = useQuery({
-    queryKey: ['tradeDetails'],
+    queryKey: ['tradeDetails', id],
     queryFn: async () => {
       if (id) {
         const details = await getTradeDetails(id);
