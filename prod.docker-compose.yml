@@ -137,7 +137,7 @@ services:
     entrypoint: ["sh", "-c", "nginx -s reload"]
     networks:
       - app-network
-    depends_on:
-      - backend
-      - frontend-public
-      - frontend-admin
+    # depends_on:
+    #   - backend
+    #   - frontend-public
+    #   - frontend-admin
