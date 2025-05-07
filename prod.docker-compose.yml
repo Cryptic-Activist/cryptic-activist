@@ -136,7 +136,7 @@ services:
       - envs/prod.nginx.env
     networks:
       - app-network
-    # depends_on:
-    #   - backend
-    #   - frontend-public
-    #   - frontend-admin
+    depends_on:
+      - backend
+      - frontend-public
+      - frontend-admin
