@@ -138,5 +138,5 @@ services:
       - app-network
     depends_on:
       - backend
-      - public
-      - admin
+      - frontend-public
+      - frontend-admin
