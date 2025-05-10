@@ -1,6 +1,7 @@
 import 'dotenv/config';
+import '@/sentry/instrument';
 
-import { ETHEREUM_ESCROW_CONTRACT_ADDRESS } from './constants/env';
+import Sentry from '@sentry/node';
 import { Server } from 'socket.io';
 import { connectDB } from '@/services/db';
 import { createServer } from 'node:http';
@@ -12,6 +13,8 @@ import socketHandler from '@/socket';
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+
+Sentry.setupExpressErrorHandler(app);
 
 socketHandler(io);
 
