@@ -7,11 +7,12 @@
     "node": "^22"
   },
   "scripts": {
-    "build": "tsup src",
+    "build": "tsup src && npm run sentry:sourcemaps",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "migrate:dev": "npx prisma migrate dev && npx prisma generate",
-    "lint": "eslint --fix"
+    "lint": "eslint --fix",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cryptic-activist --project cryptic-activist-backend ./dist && sentry-cli sourcemaps upload --org cryptic-activist --project cryptic-activist-backend ./dist"
   },
   "lint-staged": {
     "**/*.{json,js,ts,jsx,tsx,html}": [
@@ -47,6 +48,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
+    "@sentry/cli": "^2.45.0",
     "@sentry/node": "^9.17.0",
     "axios": "^1.8.1",
     "bcryptjs": "^3.0.2",
