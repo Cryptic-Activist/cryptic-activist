@@ -12,3 +12,6 @@
 
 /libraries
 
+
+# Sentry Config File
+.sentryclirc

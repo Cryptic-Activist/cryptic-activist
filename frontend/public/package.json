@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
-    "@sentry/nextjs": "^9.16.1",
+    "@sentry/nextjs": "^9.17.0",
     "@tanstack/react-form": "^1.1.2",
     "@tanstack/react-query": "^5.67.1",
     "@tanstack/react-query-devtools": "^5.67.1",

@@ -49,6 +49,7 @@ jobs:
           echo "ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}" >> envs/prod.backend.env
           echo "ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}" >> envs/prod.backend.env
           echo "ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}" >> envs/prod.backend.env
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}" >> envs/prod.backend.env
 
           # prod.base-ca.env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > envs/prod.base-ca.env
@@ -68,6 +69,7 @@ jobs:
           echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
 
           # prod.mongodb.env
           echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" > envs/prod.mongodb.env
