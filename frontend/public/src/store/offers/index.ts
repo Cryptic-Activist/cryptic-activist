@@ -10,6 +10,8 @@ export const useOffersSlice: StateCreator<
 > = (set, get) => ({
   offers: {
     data: [],
+    paymentMethods: [],
+    selectedPaymentMethodIds: [],
     cursor: null,
     hasMore: true,
     hasError: false,
@@ -40,6 +42,22 @@ export const useOffersSlice: StateCreator<
         actionName: 'offers/setOffers',
         cursor,
       });
+    },
+    setPaymentMethods: async ({ paymentMethods }) => {
+      set(({ offers }) => ({
+        offers: {
+          ...offers,
+          paymentMethods,
+        },
+      }));
+    },
+    setPaymentMethodIds: async ({ selectedPaymentMethodIds }) => {
+      set(({ offers }) => ({
+        offers: {
+          ...offers,
+          selectedPaymentMethodIds,
+        },
+      }));
     },
     setHasMore: (hasMore: boolean) => {
       set(

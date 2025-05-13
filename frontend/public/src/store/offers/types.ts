@@ -39,11 +39,18 @@ export type Offer = {
   instructions: string;
 };
 
+export type PaymentMethod = {
+  id: string;
+  name: string;
+};
+
 type Cursor = string;
 
 export type OffersStore = {
   offers: {
     data: Offer[];
+    paymentMethods: PaymentMethod[];
+    selectedPaymentMethodIds: string[];
     cursor: string | null;
     hasMore: boolean;
     hasError: boolean;
@@ -56,6 +63,12 @@ export type OffersStore = {
     setOffers: (params: {
       offers: Offer[];
       cursor: Cursor | null;
+    }) => Promise<void>;
+    setPaymentMethods: (params: {
+      paymentMethods: PaymentMethod[];
+    }) => Promise<void>;
+    setPaymentMethodIds: (params: {
+      selectedPaymentMethodIds: string[];
     }) => Promise<void>;
     setHasMore: (hasMore: boolean) => void;
     setHasError: (hasError: boolean) => void;

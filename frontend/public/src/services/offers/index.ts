@@ -23,6 +23,14 @@ export const fetchOffersPagination = async ({
   return response.data;
 };
 
+export const fetchOffersPaymentMethods = async () => {
+  const response = await fetchGet(`${BACKEND}/offers/payment-methods`);
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
 export const fetchCurrentVendorOffers = async (vendorId: string) => {
   const response = await fetchGet(`${BACKEND}/offers/vendor/${vendorId}`);
 

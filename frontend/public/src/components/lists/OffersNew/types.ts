@@ -1,5 +1,6 @@
+import { Offer, OffersStore } from '@/store/offers/types';
+
 import { AppStoreSetter } from '@/store/app/types';
-import { Offer } from '@/store/offers/types';
 
 export type OfferItemProps = {
   offer: Offer;
@@ -8,7 +9,9 @@ export type OfferItemProps = {
 
 export type FilterSectionProps = {
   app: AppStoreSetter;
+  offers: any;
   setValue: any;
+  paymentMethods: any;
   updateHeight: (isMoreFiltersOpen: boolean) => void;
 };
 
