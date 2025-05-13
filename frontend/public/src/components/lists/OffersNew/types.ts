@@ -8,7 +8,9 @@ export type OfferItemProps = {
 
 export type FilterSectionProps = {
   app: AppStoreSetter;
+  offers: any;
   setValue: any;
+  paymentMethods: any;
   updateHeight: (isMoreFiltersOpen: boolean) => void;
 };
 

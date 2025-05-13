@@ -1,10 +1,13 @@
 'use client';
 
+import {
+  fetchOffersPagination,
+  fetchOffersPaymentMethods,
+} from '@/services/offers';
 import { useApp, useUser } from '@/hooks';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { fetchOffersPagination } from '@/services/offers';
 import { useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
 
 const useOffers = () => {
@@ -17,7 +20,7 @@ const useOffers = () => {
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
-      // paymentMethodId: app.defaults.paymentMethod?.id,
+      paymentMethodIds: offers.selectedPaymentMethodIds.join(','),
       amount: app.defaults.amount,
       offerType: app.type,
       excludedVendorId: user.id,
@@ -74,6 +77,11 @@ const useOffers = () => {
     retry: 3,
   });
 
+  const offerPaymentMethodsQuery = useQuery({
+    queryKey: ['offersPaymentMethods'],
+    queryFn: fetchOffersPaymentMethods,
+  });
+
   const getOffer = (id: string) => {
     if (!offers.data) return null;
 
@@ -86,22 +94,25 @@ const useOffers = () => {
   };
 
   useEffect(() => {
-    if (
-      app.defaults.cryptocurrency?.id &&
-      app.defaults.fiat?.id &&
-      // app.defaults.paymentMethod?.id &&
-      app.type
-    ) {
+    if (app.defaults.cryptocurrency?.id && app.defaults.fiat?.id && app.type) {
       mutationInitialFetch.mutate();
     }
   }, [
     app.defaults.cryptocurrency?.id,
     app.defaults.fiat?.id,
-    app.defaults.paymentMethod?.id,
+    offers.selectedPaymentMethodIds,
     app.defaults.amount,
     app.type,
     user.id,
   ]);
+
+  useEffect(() => {
+    if (offerPaymentMethodsQuery.data) {
+      offers.setPaymentMethods({
+        paymentMethods: offerPaymentMethodsQuery.data,
+      });
+    }
+  }, [offerPaymentMethodsQuery.data]);
 
   return {
     offers,

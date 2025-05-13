@@ -1,7 +1,7 @@
 export type FetchOffersParams = {
   offerType?: string;
   cryptocurrencyId?: string;
-  paymentMethodId?: string;
+  paymentMethodIds?: string;
   fiatId?: string;
   excludedVendorId?: string;
   amount?: number;

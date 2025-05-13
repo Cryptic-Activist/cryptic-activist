@@ -17,7 +17,7 @@ export const GetOffersPagination = z
     cursor: z.string().optional(),
     offerType: z.string().min(2).optional(),
     cryptocurrencyId: z.string().min(2).optional(),
-    paymentMethodId: z.string().min(2).optional(),
+    paymentMethodIds: z.string().optional(),
     fiatId: z.string().min(2).optional(),
     excludedVendorId: z.string().min(2).optional(),
   })

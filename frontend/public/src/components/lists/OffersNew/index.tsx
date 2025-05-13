@@ -135,13 +135,16 @@ export const OffersHeader = () => (
 
 export const FilterSection: FC<FilterSectionProps> = ({
   app,
+  offers,
   setValue,
   updateHeight,
+  paymentMethods,
 }) => {
   const { toggleModal } = useNavigationBar();
 
   const [isMoreFiltersOpen, _setIsMoreFiltersOpen] = useState(false);
-  const [_isPaymentMethodOpen, setisPaymentMethoOpen] = useState(false);
+  const [isPaymentMethodOpen, setisPaymentMethoOpen] = useState(false);
+  const [paymentMethodIds, setPaymentMethodIds] = useState<string[]>([]);
 
   // const toggleMoreFilters = () => {
   //   setIsMoreFiltersOpen((prev) => !prev);
@@ -178,6 +181,17 @@ export const FilterSection: FC<FilterSectionProps> = ({
     updateHeight(isMoreFiltersOpen);
   }, [isMoreFiltersOpen]);
 
+  const appendPaymentMethod = (id: string) => {
+    setPaymentMethodIds((prev) => {
+      if (paymentMethodIds.indexOf(id) === -1) {
+        return [...prev, id];
+      } else {
+        const filteredOut = prev.filter((pm) => pm !== id);
+        return filteredOut;
+      }
+    });
+  };
+
   // useEffect(() => {
   //   if (app.defaults?.fiat?.symbol) {
   //     addSearchParam({ fiat: app.defaults.fiat.symbol });
@@ -190,7 +204,15 @@ export const FilterSection: FC<FilterSectionProps> = ({
   //   }
   // }, [app.defaults?.cryptocurrency?.symbol]);
 
-  const _ref = useOutsideClick(togglePaymentMethod);
+  useEffect(() => {
+    offers.setPaymentMethodIds({ selectedPaymentMethodIds: paymentMethodIds });
+  }, [paymentMethodIds]);
+
+  const setAllPaymentMethods = () => {
+    setPaymentMethodIds([]);
+  };
+
+  const ref = useOutsideClick(togglePaymentMethod);
 
   return (
     <div className={styles.filterSection}>
@@ -262,7 +284,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
           </button>
         </div>
 
-        {/* <div className={styles.paymentMethodFilter}>
+        <div className={styles.paymentMethodFilter}>
           <button
             className={styles.paymentMethodBtn}
             onClick={togglePaymentMethod}
@@ -271,45 +293,43 @@ export const FilterSection: FC<FilterSectionProps> = ({
           </button>
           {isPaymentMethodOpen && (
             <div className={styles.paymentMethodDropdown} ref={ref}>
-              <div className={`${styles.paymentOption} ${styles.selected}`}>
-                <input
-                  type="checkbox"
-                  className={styles.paymentOptionCheckbox}
-                  checked
-                />
+              <button
+                className={`${styles.paymentOption}`}
+                onClick={setAllPaymentMethods}
+              >
+                <div
+                  className={`${styles.paymentOptionCheckbox} ${
+                    paymentMethodIds.length === 0
+                      ? styles.paymentOptionCheckboxChecked
+                      : ''
+                  }`}
+                >
+                  <div />
+                </div>
                 All Payment Methods
-              </div>
-              <div className={styles.paymentOption}>
-                <input
-                  type="checkbox"
-                  className={styles.paymentOptionCheckbox}
-                />
-                BTC Swap
-              </div>
-              <div className={styles.paymentOption}>
-                <input
-                  type="checkbox"
-                  className={styles.paymentOptionCheckbox}
-                />
-                Wire Transfer
-              </div>
-              <div className={styles.paymentOption}>
-                <input
-                  type="checkbox"
-                  className={styles.paymentOptionCheckbox}
-                />
-                Bank Transfer
-              </div>
-              <div className={styles.paymentOption}>
-                <input
-                  type="checkbox"
-                  className={styles.paymentOptionCheckbox}
-                />
-                Cash Deposit
-              </div>
+              </button>
+              {paymentMethods.map((paymentMethod: any, index: number) => {
+                const isChecked = paymentMethodIds.includes(paymentMethod.id);
+                return (
+                  <button
+                    key={index}
+                    className={`${styles.paymentOption}`}
+                    onClick={() => appendPaymentMethod(paymentMethod.id)}
+                  >
+                    <div
+                      className={`${styles.paymentOptionCheckbox} ${
+                        isChecked ? styles.paymentOptionCheckboxChecked : ''
+                      }`}
+                    >
+                      <div />
+                    </div>
+                    {paymentMethod.name}
+                  </button>
+                );
+              })}
             </div>
           )}
-        </div> */}
+        </div>
 
         {/* <button
           className={`${styles.advancedFiltersBtn} ${styles.expanded}`}
@@ -455,6 +475,8 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
         app={app}
         setValue={setValue}
         updateHeight={updateHeight}
+        paymentMethods={offers.paymentMethods}
+        offers={offers}
       />
 
       <div className={styles.offersList}>
