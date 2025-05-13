@@ -1,6 +1,5 @@
-import { Offer, OffersStore } from '@/store/offers/types';
-
 import { AppStoreSetter } from '@/store/app/types';
+import { Offer } from '@/store/offers/types';
 
 export type OfferItemProps = {
   offer: Offer;
