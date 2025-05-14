@@ -21,8 +21,8 @@ jobs:
           mkdir -p envs  # Make sure the 'envs' directory exists
 
           # prod.backend.env
-          echo "CI=${{ secrets.CI }}" > envs/prod.backend.env
-          echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" > envs/prod.backend.env
+          echo "CI=${{ secrets.CI }}" >> envs/prod.backend.env
+          echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" >> envs/prod.backend.env
           echo "MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}" >> envs/prod.backend.env
           echo "MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}" >> envs/prod.backend.env
           echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
@@ -53,35 +53,35 @@ jobs:
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}" >> envs/prod.backend.env
 
           # prod.base-ca.env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > envs/prod.base-ca.env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.base-ca.env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.base-ca.env
           echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.base-ca.env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.base-ca.env
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
 
           # prod.frontend-admin.env
-          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" > envs/prod.frontend-admin.env
+          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
-          echo "CI=${{ secrets.CI }}" > envs/prod.frontend-admin.env
+          echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-admin.env
 
           # prod.frontend-public.env
-          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" > envs/prod.frontend-public.env
+          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-          echo "CI=${{ secrets.CI }}" > envs/prod.frontend-public.env
+          echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-public.env
           ls -la envs/
           cat envs/prod.frontend-public.env
 
           # prod.mongodb.env
-          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" > envs/prod.mongodb.env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> envs/prod.mongodb.env
           echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> envs/prod.mongodb.env
 
           # prod.nginx.env
-          echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" > envs/prod.nginx.env
+          echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" >> envs/prod.nginx.env
           echo "FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}" >> envs/prod.nginx.env
           echo "FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}" >> envs/prod.nginx.env
           echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
@@ -89,13 +89,13 @@ jobs:
           echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
 
           # prod.postgres.env
-          echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" > envs/prod.postgres.env
+          echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres.env
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
 
           # prod.redis.env
-          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" > envs/prod.redis.env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
