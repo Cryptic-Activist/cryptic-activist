@@ -232,7 +232,6 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       where: { vendorId: user.id },
     });
 
-    console.log({ countUserId: user });
     const userPositiveFeedbacksCount = await prisma.feedback.count({
       where: {
         trade: {
