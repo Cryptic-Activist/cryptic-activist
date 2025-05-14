@@ -64,7 +64,11 @@ const useOffer = () => {
     },
   });
   const mutationCurrentPrice = useMutation({
-    mutationKey: ['currentPrice'],
+    mutationKey: [
+      'currentPrice',
+      offer.fiat?.symbol,
+      offer.cryptocurrency?.coingeckoId,
+    ],
     mutationFn: ({ id, fiatSymbol }: { id: string; fiatSymbol: string }) =>
       fetchCurrentPrice(id, fiatSymbol),
     onSuccess: (data) => {
@@ -144,6 +148,12 @@ const useOffer = () => {
   }, [fiatAmount, localCurrentPrice]);
 
   useEffect(() => {
+    console.log({
+      offerCrypto: offer.cryptocurrency?.coingeckoId,
+      offerFiat: offer.fiat?.symbol,
+      fiatAmount,
+      localCurrentPrice,
+    });
     if (
       user.id &&
       offer.cryptocurrency?.id &&
@@ -182,13 +192,17 @@ const useOffer = () => {
   }, [user.id, offer.vendor?.id, isLoggedIn, blockchain]);
 
   useEffect(() => {
+    console.log({
+      offerFiat: offer.fiat?.symbol,
+      offerCrypto: offer.cryptocurrency?.coingeckoId,
+    });
     if (offer.fiat?.symbol && offer.cryptocurrency?.coingeckoId) {
       mutationCurrentPrice.mutate({
         fiatSymbol: offer.fiat.symbol,
         id: offer.cryptocurrency.coingeckoId,
       });
     }
-  }, [offer.fiat?.symbol, offer.cryptocurrency?.coingeckoId]);
+  }, [offer.fiat?.symbol, offer.cryptocurrency?.coingeckoId, fiatAmount]);
 
   return {
     offer,

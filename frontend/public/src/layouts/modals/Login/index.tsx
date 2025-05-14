@@ -1,8 +1,8 @@
 'use client';
 
-import { Altcha, Button } from '@/components';
 import { Input, Links } from '@/components/forms';
 
+import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
 import { useRootStore } from '@/store';
@@ -54,8 +54,6 @@ const Login = () => {
             register={loginFormRegister}
             errorMessage={errors['password']?.message}
           />
-
-          <Altcha />
 
           <Button type="submit" padding="1rem" fullWidth>
             Login

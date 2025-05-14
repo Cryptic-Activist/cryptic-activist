@@ -46,11 +46,11 @@ const InputNumber: FC<InputNumberProps> = ({
     setLocalValue(sanitazed);
   };
 
-  // useEffect(() => {
-  //   if (value) {
-  //     setLocalValue(value.toString());
-  //   }
-  // }, [localValue]);
+  useEffect(() => {
+    if (value) {
+      setLocalValue(value.toString());
+    }
+  }, [value]);
 
   useEffect(() => {
     const finalValue = parseFloat(localValue);
