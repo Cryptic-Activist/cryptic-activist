@@ -22,8 +22,8 @@ const nextConfig: NextConfig = {
 console.log({
   org: 'cryptic-activist',
   project: 'cryptic-activist-frontend',
-  silent: process.env.CI === 'true',
-  dryRun: process.env.CI === 'true',
+  silent: true,
+  dryRun: true,
   widenClientFileUpload: true,
   disableLogger: true,
   automaticVercelMonitors: true,
@@ -34,8 +34,8 @@ console.log({
 const sentryWebpackPluginOptions = {
   org: 'cryptic-activist',
   project: 'cryptic-activist-frontend',
-  silent: process.env.CI === 'true',
-  dryRun: process.env.CI === 'true',
+  silent: true,
+  dryRun: true,
   widenClientFileUpload: true,
   disableLogger: true,
   automaticVercelMonitors: true,
