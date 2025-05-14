@@ -3,7 +3,6 @@ import {
   Hero,
   HowItWorks,
   KeyFeatures,
-  OfferList,
   SecurityAndCompliance,
   SocialProof,
 } from '@/layouts';
@@ -14,7 +13,7 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Hero />
-      <OfferList />
+      {/* <OfferList /> */}
       <HowItWorks />
       <KeyFeatures />
       <SocialProof />

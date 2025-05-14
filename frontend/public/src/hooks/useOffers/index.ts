@@ -27,6 +27,7 @@ const useOffers = () => {
       limit: 5,
       cursor: null,
     });
+    console.log({ newOffers });
     if (newOffers.offers.length > 0) {
       const newOffersList = [...newOffers.offers];
 
@@ -44,12 +45,13 @@ const useOffers = () => {
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
-      // paymentMethodId: app.defaults.paymentMethod?.id,
+      paymentMethodIds: offers.selectedPaymentMethodIds.join(','),
       offerType: app.type,
       excludedVendorId: user.id,
       limit: 5,
       cursor: offers.cursor,
     });
+    console.log({ newOfferLoadMore: newOffers });
     if (newOffers.offers.length > 0) {
       const newOffersList = [...offers.data, ...newOffers.offers];
       offers.setOffers({

@@ -162,23 +162,24 @@ export const getOffersPaginationController = async (
   const paymentMethodIdsArray = paymentMethodIds
     ? paymentMethodIds.split(',')
     : undefined;
+  const skip = cursor ? 1 : 0;
 
   try {
     const offers = await prisma.offer.findMany({
       take: take + 1,
-      cursor: cursorObj,
-      orderBy: { id: 'desc' },
+      ...(cursorObj && { cursor: cursorObj, skip }),
+      orderBy: { createdAt: 'asc' },
       where: {
         cryptocurrencyId,
         fiatId,
         offerType,
+        ...(paymentMethodIdsArray && {
+          paymentMethodId: { in: paymentMethodIdsArray },
+        }),
         deletedAt: null,
         vendorId: {
           ...(excludedVendorId && { notIn: [excludedVendorId] }),
         },
-        ...(paymentMethodIdsArray && {
-          paymentMethodId: { in: paymentMethodIdsArray },
-        }),
         ...(amount && {
           AND: [
             { limitMin: { lte: amountNum } },
@@ -233,10 +234,8 @@ export const getOffersPaginationController = async (
     });
 
     let nextCursor: string | null = null;
-
     if (offers.length > take) {
-      const nextItem = offers.pop();
-      nextCursor = nextItem?.id || null;
+      nextCursor = offers[offers.length - 1].id || null;
     }
 
     res.status(200).send({ offers, nextCursor });
@@ -258,12 +257,13 @@ export const getMyOffersPaginationController = async (
 
   const take = parseInt(limit, 10) || 20;
   const cursorObj = cursor ? { id: cursor } : undefined;
+  const skip = cursor ? 1 : 0;
 
   try {
     const offers = await prisma.offer.findMany({
       take: take + 1,
-      cursor: cursorObj,
-      orderBy: { id: 'desc' },
+      ...(cursorObj && { cursor: cursorObj, skip }),
+      orderBy: { createdAt: 'asc' },
       where: {
         offerType,
         vendorId: userId,
@@ -298,12 +298,8 @@ export const getMyOffersPaginationController = async (
     });
 
     let nextCursor: string | null = null;
-
-    console.log({ offers });
-
     if (offers.length > take) {
-      const nextItem = offers.pop();
-      nextCursor = nextItem?.id || null;
+      nextCursor = offers[offers.length - 1].id || null;
     }
 
     res.status(200).send({ offers, nextCursor });

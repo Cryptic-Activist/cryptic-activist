@@ -460,14 +460,19 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
   const { offers, loadMore, initialFetch } = useOffers();
   const { app, setValue } = useApp();
 
-  const [isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
+  const [_isMoreFiltersOpen, setIsMoreFiltersOpen] = useState(false);
 
   const updateHeight = (_isMoreFiltersOpen: boolean) => {
     setIsMoreFiltersOpen(_isMoreFiltersOpen);
   };
 
-  const newHeight =
-    id === 'home' && isMoreFiltersOpen ? { height: '5.45rem' } : { height };
+  // const newHeight =
+  //   id === 'home' && isMoreFiltersOpen ? { height: '5.45rem' } : { height };
+
+  console.log({
+    offersHasMore: offers.hasMore,
+    offersHasError: !offers.hasError,
+  });
 
   return (
     <div className={styles.tradingContainer}>
@@ -487,9 +492,9 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
             dataLength={offers.data?.length}
             hasMore={offers.hasMore && !offers.hasError}
             next={loadMore}
-            style={{
-              ...(newHeight && { ...newHeight }),
-            }}
+            // style={{
+            //   ...(newHeight && { ...newHeight }),
+            // }}
             loader={
               <div
                 className={styles.spinner}
