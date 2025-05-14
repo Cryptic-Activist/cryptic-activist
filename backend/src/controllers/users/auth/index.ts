@@ -428,7 +428,6 @@ export const register = async (req: Request, res: Response) => {
 
     return;
   } catch (err) {
-    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
