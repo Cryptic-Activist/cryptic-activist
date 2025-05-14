@@ -73,6 +73,7 @@ jobs:
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "CI=${{ secrets.CI }}" > envs/prod.frontend-public.env
+          cat envs/prod.frontend-public.env
 
           # prod.mongodb.env
           echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" > envs/prod.mongodb.env
