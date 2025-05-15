@@ -4,8 +4,8 @@ set -e
 
 echo "⏳ Waiting for DB to be ready..."
 
-until nc -z "$DB_HOST" "$DB_PORT"; do
-  echo "Waiting for $DB_HOST:$DB_PORT..."
+until nc -z "$DB_HOST" "5432"; do
+  echo "Waiting for $DB_HOST:5432..."
   sleep 1
 done
 
