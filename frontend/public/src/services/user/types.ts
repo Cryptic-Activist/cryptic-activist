@@ -30,10 +30,12 @@ export type GetUserInfoReturn = {
     lastName: string;
   };
   username: string;
+  email: string;
   profileColor: string;
   createdAt: string;
   updatedAt: string;
   languages: Language[];
   userLanguage?: any[];
   lastLoginAt: string;
+  _count: any;
 };

@@ -21,6 +21,7 @@ import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { generateRandomHash } from '@/utils/string';
 import { getExpiresAt } from '@/utils/date';
 import { getRandomHighContrastColor } from '@/utils/color';
+import { languages } from 'unique-names-generator';
 import { prisma } from '@/services/db';
 import speakeasy from 'speakeasy';
 
@@ -264,6 +265,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         lastName: user.lastName,
       },
       lastLoginAt,
+      userLanguage: user.userLanguage,
       _count: {
         ..._count,
         trades: userTradesCount,
@@ -383,39 +385,39 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    // const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
-    // const accountVerifyEmailId = await sendEmail({
-    //   from: EMAIL_FROM.ACCOUNT,
-    //   to: [
-    //     {
-    //       email: user.email,
-    //       name: `${user.firstName} ${user.lastName}`,
-    //     },
-    //   ],
-    //   subject: 'Verify your account - Cryptic Activist',
-    //   html: verifyAccountEmailBody,
-    //   text: 'Verify your account',
-    // });
-    // const accountCreatedEmailBody = buildAccountCreatedEmail(user);
-    // const accountCreatedEmailId = await sendEmail({
-    //   from: EMAIL_FROM.ACCOUNT,
-    //   to: [
-    //     {
-    //       email: user.email,
-    //       name: `${user.firstName} ${user.lastName}`,
-    //     },
-    //   ],
-    //   subject: 'Account creation - Cryptic Activist',
-    //   html: accountCreatedEmailBody,
-    //   text: 'Account creation',
-    // });
+    const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
+    const accountVerifyEmailId = await sendEmail({
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
+      subject: 'Verify your account - Cryptic Activist',
+      html: verifyAccountEmailBody,
+      text: 'Verify your account',
+    });
+    const accountCreatedEmailBody = buildAccountCreatedEmail(user);
+    const accountCreatedEmailId = await sendEmail({
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
+      subject: 'Account creation - Cryptic Activist',
+      html: accountCreatedEmailBody,
+      text: 'Account creation',
+    });
 
-    // const promised = await Promise.all([
-    //   accountVerifyEmailId,
-    //   accountCreatedEmailId,
-    // ]);
+    const promised = await Promise.all([
+      accountVerifyEmailId,
+      accountCreatedEmailId,
+    ]);
 
-    // console.log({ promised });
+    console.log({ promised });
 
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,

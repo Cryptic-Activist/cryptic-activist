@@ -25,7 +25,6 @@ const useEditOffer = () => {
     handleSubmit,
     getValues,
     setValue: setValueForm,
-    formState: { errors },
   } = useForm({ resolver: editOfferResolver });
 
   const query = useQuery({
@@ -93,8 +92,6 @@ const useEditOffer = () => {
   const onSubmit = (data: any) => {
     console.log({ data });
   };
-
-  console.log({ errors });
 
   useEffect(() => {
     if (query.data) {

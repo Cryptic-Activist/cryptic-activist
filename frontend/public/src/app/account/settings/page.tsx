@@ -4,6 +4,7 @@ import React, { FormEvent, useEffect, useState } from 'react';
 import {
   addSpokenLanguage,
   removeSpokenLanguage,
+  updateEmailRequest,
 } from '@/services/user/settings';
 import { useApp, useNavigationBar, useUser } from '@/hooks';
 
@@ -18,6 +19,7 @@ const AccountSettings = () => {
   const { user } = useUser();
   const [languages, setLanguages] = useState(user.languages);
   const [newLanguage, setNewLanguage] = useState('');
+  const [newEmail, setNewEmail] = useState('');
 
   const addLanguage = (newLang: { id: string; name: string }) => {
     const filtered = languages?.filter((lang) =>
@@ -72,8 +74,26 @@ const AccountSettings = () => {
     }
   };
 
+  const handleChangeEmailRequestSubmit = async (
+    e: FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault();
+    if (user.id) {
+      const requested = await updateEmailRequest({
+        userId: user.id,
+        email: newEmail,
+      });
+
+      console.log({ requested });
+    }
+  };
+
   const handleNewLanguage = (value: string) => {
     setNewLanguage(value);
+  };
+
+  const handleNewEmail = (value: string) => {
+    setNewEmail(value);
   };
 
   useEffect(() => {
@@ -133,6 +153,28 @@ const AccountSettings = () => {
           </ul>
         </section>
 
+        <section className={styles.section}>
+          <h2 className={styles.subHeading}>Change Email</h2>
+          <form
+            className={styles.addLanguage}
+            onSubmit={handleChangeEmailRequestSubmit}
+          >
+            <Input
+              type="email"
+              placeholder="New Email Address"
+              value={newEmail}
+              onChange={handleNewEmail}
+            />
+            <Button type="submit" padding="1rem">
+              Update Email
+            </Button>
+          </form>
+          {user.email && (
+            <p>
+              <strong>Current email:</strong> {user.email}
+            </p>
+          )}
+        </section>
         {/* Additional Account Settings can be added here */}
       </div>
     </div>

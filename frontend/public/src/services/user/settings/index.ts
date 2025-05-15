@@ -1,7 +1,11 @@
-import { AddSpokenLanguagesParams, RemoveSpokenLanguagesParams } from './types';
+import {
+  AddSpokenLanguagesParams,
+  RemoveSpokenLanguagesParams,
+  UpdateEmailParams,
+} from './types';
+import { fetchGet, fetchPost, fetchPut } from '@/services/axios';
 
 import { BACKEND } from '@/constants';
-import { fetchPut } from '@/services/axios';
 import { getCookie } from '@/utils';
 
 export const addSpokenLanguage = async ({
@@ -39,6 +43,40 @@ export const removeSpokenLanguage = async ({
     {
       languageId,
     },
+    {
+      Authorization: `Bearer ${accessToken}`,
+    }
+  );
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+export const updateEmailRequest = async ({
+  userId,
+  email,
+}: UpdateEmailParams) => {
+  const accessToken = getCookie('accessToken');
+  const response = await fetchPost(
+    BACKEND + '/users/settings/' + userId + '/email/request',
+    {
+      email,
+    },
+    {
+      Authorization: `Bearer ${accessToken}`,
+    }
+  );
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+export const updateEmail = async (token: string) => {
+  const accessToken = getCookie('accessToken');
+  const response = await fetchGet(
+    BACKEND + '/users/settings/email/change/' + token,
     {
       Authorization: `Bearer ${accessToken}`,
     }
