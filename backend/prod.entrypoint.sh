@@ -17,3 +17,4 @@ npx prisma migrate deploy
 
 # Start your app
 echo "▶️ Starting app..."
+npm run start
