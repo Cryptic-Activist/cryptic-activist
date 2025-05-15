@@ -4,8 +4,8 @@ set -e
 
 echo "⏳ Waiting for DB to be ready..."
 
-# Optional: wait for DB (Postgres example)
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
+until nc -z "$DB_HOST" "$DB_PORT"; do
+  echo "Waiting for $DB_HOST:$DB_PORT..."
   sleep 1
 done
 
