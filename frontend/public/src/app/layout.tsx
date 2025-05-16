@@ -9,6 +9,7 @@ import {
 } from '@/layouts';
 
 import AllDrawers from '@/layouts/drawers/AllDrawers';
+import { Analytics } from '@/components';
 import { QueryProvider } from '@/components';
 import { Roboto } from 'next/font/google';
 import styles from './layout.module.scss';
@@ -45,6 +46,7 @@ export default function RootLayout({
           <Footer />
         </QueryProvider>
       </body>
+      <Analytics />
     </html>
   );
 }
