@@ -27,17 +27,13 @@ const EnableTwoFactorAuthentication = () => {
     mutationFn: verify2FA,
   });
 
-  console.log({ userTwo: user.twoFactorEnabled });
-
   const queryQR = useQuery({
     queryFn: async () => {
-      console.log({ userQRCode: user });
       if (user.email && user.id) {
         const qrCode = await generate2FA({
           email: user.email,
           userId: user.id,
         });
-        console.log({ qrCode });
         return qrCode;
       }
     },

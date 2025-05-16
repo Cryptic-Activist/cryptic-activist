@@ -68,7 +68,6 @@ const useUser = () => {
 
   const onSubmit: OnSubmit = async (data) => {
     const { password, usernameOrEmail } = data;
-    console.log({ usernameOrEmail });
     const loggedIn = await mutation.mutateAsync({ password, usernameOrEmail });
     return loggedIn;
   };
