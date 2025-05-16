@@ -1,7 +1,7 @@
 import { FieldValues, SubmitHandler } from 'react-hook-form';
 
 export type OnSubmitPayload = {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 };
 

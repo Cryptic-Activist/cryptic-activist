@@ -67,8 +67,9 @@ const useUser = () => {
   } = useForm({ resolver: login2FAResolver });
 
   const onSubmit: OnSubmit = async (data) => {
-    const { password, username } = data;
-    const loggedIn = await mutation.mutateAsync({ password, username });
+    const { password, usernameOrEmail } = data;
+    console.log({ usernameOrEmail });
+    const loggedIn = await mutation.mutateAsync({ password, usernameOrEmail });
     return loggedIn;
   };
 
@@ -85,7 +86,7 @@ const useUser = () => {
   useEffect(() => {
     if (mutation.error || query.error) {
       addToast('error', 'Unable to login', 10000);
-      setValue('username', '');
+      setValue('usernameOrEmail', '');
       setValue('password', '');
     }
   }, [mutation.error, query.error]);
@@ -116,7 +117,7 @@ const useUser = () => {
     mutation,
     query,
     formValues: {
-      username: getValues('username'),
+      usernameOrEmail: getValues('usernameOrEmail'),
       password: getValues('password'),
     },
   };

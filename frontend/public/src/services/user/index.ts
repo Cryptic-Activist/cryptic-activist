@@ -4,10 +4,13 @@ import { getCookie, removeLocalStorage } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
-export const getUserToken = async ({ password, username }: LoginParams) => {
+export const getUserToken = async ({
+  password,
+  usernameOrEmail,
+}: LoginParams) => {
   const response = await fetchPost(BACKEND + '/users/auth/login', {
     password,
-    username,
+    usernameOrEmail,
   });
 
   if (response.status !== 200) return null;
