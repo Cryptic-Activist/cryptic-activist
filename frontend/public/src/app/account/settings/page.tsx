@@ -20,6 +20,8 @@ const AccountSettings = () => {
   const [languages, setLanguages] = useState(user.languages);
   const [newLanguage, setNewLanguage] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newEmailRequestButtonLabel, setNewEmailRequestButtonLabel] =
+    useState('Update Email');
 
   const addLanguage = (newLang: { id: string; name: string }) => {
     const filtered = languages?.filter((lang) =>
@@ -84,7 +86,21 @@ const AccountSettings = () => {
         email: newEmail,
       });
 
-      console.log({ requested });
+      if (!requested) {
+        addToast('error', 'Unable to send email change request.', 5000);
+        return;
+      }
+
+      setNewEmail('');
+      setNewEmailRequestButtonLabel('Request Sent');
+      addToast(
+        'info',
+        'Email change request sent to your current email.',
+        5000
+      );
+      setTimeout(() => {
+        setNewEmailRequestButtonLabel('Update Email');
+      }, 5000);
     }
   };
 
@@ -166,8 +182,10 @@ const AccountSettings = () => {
               onChange={handleNewEmail}
             />
             <Button type="submit" padding="1rem">
-              Update Email
+              {newEmailRequestButtonLabel}
             </Button>
+
+            {/* <Altcha /> */}
           </form>
           {user.email && (
             <p>

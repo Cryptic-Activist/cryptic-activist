@@ -1,11 +1,7 @@
 import { FRONTEND_PUBLIC } from '@/constants/env';
 
-const buildChangeEmailRequestEmail = (
-  user: any,
-  newEmail: string,
-  token: string,
-) => {
-  const verifyEmailUrl = `${FRONTEND_PUBLIC}/account/settings/email/verify/${token}`;
+const buildChangeEmailSuccessEmail = (user: any) => {
+  const verifyEmailUrl = `${FRONTEND_PUBLIC}?login=1`;
   return `<body style="margin: 0; padding: 50px 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%"
          style="max-width: 600px; margin: 0 auto;
@@ -30,7 +26,7 @@ const buildChangeEmailRequestEmail = (
           <tr>
             <td align="center">
               <h1 style="margin: 0; color: #000000; font-size: 24px; font-weight: bold;">
-                Your Email Change Request
+                Confirm Your Email Change
               </h1>
             </td>
           </tr>
@@ -48,17 +44,7 @@ const buildChangeEmailRequestEmail = (
         
         <p style="margin-top: 0; margin-bottom: 30px;
         color: #333333; font-size: 16px; line-height: 24px;">
-          We received a request to change the email address associated with your account.
-        </p>
-
-        <p style="margin-top: 0; margin-bottom: 30px;
-          color: #333333; font-size: 16px; line-height: 24px;">
-          By clicking on the link below you accept the email change request, and doing so you will lose access to your account through this current email, giving access to <strong>${newEmail}</strong> instead.
-        </p>
-
-        <p style="margin-top: 0; margin-bottom: 30px;
-          color: #333333; font-size: 16px; line-height: 24px;">
-          To confirm this change, please click the button below:
+          Your email was successfully changed.
         </p>
         
         <!-- CTA Button -->
@@ -73,7 +59,7 @@ const buildChangeEmailRequestEmail = (
                               font-size: 16px; color: #000000;
                               text-decoration: none; border-radius: 4px;
                               font-weight: bold;">
-                      Confirm Email Change
+                      Go to Login
                     </a>
                   </td>
                 </tr>
@@ -110,4 +96,4 @@ const buildChangeEmailRequestEmail = (
 </body>`;
 };
 
-export default buildChangeEmailRequestEmail;
+export default buildChangeEmailSuccessEmail;

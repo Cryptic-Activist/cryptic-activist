@@ -7,4 +7,5 @@ export { default as buildAccountStatement } from './account-statement';
 export { default as buildNewLoginDetected } from './security-alert-new-login-device';
 export { default as buildReferralReward } from './referral-reward';
 export { default as buildTwoFactorAuthentication } from './two-factor-authentication';
-export {} from './email-change-request';
+export { default as buildChangeEmailRequestEmail } from './email-change-request';
+export { default as buildChangeEmailSuccessEmail } from './email-change-success';

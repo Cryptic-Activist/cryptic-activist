@@ -55,11 +55,30 @@ const useParams = () => {
     }
   };
 
+  const handleEmailChangeParam = () => {
+    const hasEmailBeenChanged = getSearchParams('email-change-verified');
+
+    const hasEmailBeenChangedNumber = Number(hasEmailBeenChanged);
+    if (hasEmailBeenChangedNumber === 1) {
+      toggleModal('login');
+      addToast(
+        'info',
+        'Email has been successfully changed. You can login now with new email.',
+        10000
+      );
+      clearSearchParams();
+    } else if (hasEmailBeenChangedNumber === 0) {
+      addToast('error', 'Unable to change your email.', 5000);
+      clearSearchParams();
+    }
+  };
+
   useEffect(() => {
     if (Object.keys(searchParams).length > 0) {
       handleAccountVerifedParam();
       handlePasswordResetVerifiedParam();
       handleLoginParam();
+      handleEmailChangeParam();
     }
   }, [searchParams]);
 

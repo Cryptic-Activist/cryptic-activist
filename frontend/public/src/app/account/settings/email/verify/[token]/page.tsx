@@ -22,14 +22,15 @@ const AccountSettingsEmailVerify = () => {
   });
 
   useEffect(() => {
-    // if (failureReason) {
-    //   window.location.href = '/?email-change-verified=0';
-    //   return;
-    // }
-    // if (data) {
-    //   window.location.href = '/?email-change-verified=1';
-    //   return;
-    // }
+    console.log({ failureReason, data });
+    if (failureReason) {
+      window.location.href = '/?email-change-verified=0';
+      return;
+    }
+    if (data) {
+      window.location.href = '/?email-change-verified=1';
+      return;
+    }
   }, [failureReason, data]);
   return <div>Verifying email change request...</div>;
 };
