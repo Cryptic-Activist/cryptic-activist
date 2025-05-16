@@ -1,4 +1,3 @@
-import { EMAIL_FROM, sendEmail } from '@/services/email';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -9,8 +8,10 @@ import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import { EMAIL_FROM } from '@/services/email';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
+import { publishToQueue } from '@/services/rabbitmq';
 
 export default class Trade {
   private socket: Socket;
@@ -212,7 +213,8 @@ export default class Trade {
           emailTrade?.trader,
           emailTrade!,
         );
-        const accountCreatedEmailId = await sendEmail({
+
+        const publishedAccountCreated = await publishToQueue('emails', {
           from: EMAIL_FROM.TRADE,
           to: [
             {
@@ -225,7 +227,7 @@ export default class Trade {
           text: 'Trade Confirmation',
         });
 
-        console.log('Email id:', accountCreatedEmailId);
+        console.log('Email id:', publishedAccountCreated);
       },
     );
   }

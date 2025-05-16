@@ -93,6 +93,18 @@ services:
     networks:
       - app-network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - envs/dev.rabbitmq.env
+    networks:
+      - app-network
+    restart: always
+
   hardhat-node:
     container_name: hardhat-node
     build: 
