@@ -97,9 +97,15 @@ jobs:
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
     - name: Clean up Docker
-      run: |
-        docker container prune -f
-        docker image prune -f
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+        command_timeout: 60m
+        script: |
+          cd app
+          docker system prune -a -f
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
