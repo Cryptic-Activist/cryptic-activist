@@ -22,7 +22,6 @@ const AccountSettingsEmailVerify = () => {
   });
 
   useEffect(() => {
-    console.log({ failureReason, data });
     if (failureReason) {
       window.location.href = '/?email-change-verified=0';
       return;
