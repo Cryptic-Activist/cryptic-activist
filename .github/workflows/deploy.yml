@@ -73,8 +73,7 @@ jobs:
           echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
           echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
           echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-public.env
-          ls -la envs/
-          cat envs/prod.frontend-public.env
+          echo "GA_ID=${{ secrets.GA_ID }}" >> envs/prod.frontend-public.env
 
           # prod.mongodb.env
           echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> envs/prod.mongodb.env
@@ -97,6 +96,11 @@ jobs:
           # prod.redis.env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
+    - name: Clean up Docker
+      run: |
+        docker container prune -f
+        docker image prune -f
+
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
@@ -110,7 +114,3 @@ jobs:
           docker compose pull
           docker compose -f prod.docker-compose.yml --profile prod up -d --build
 
-    - name: Clean up Docker
-      run: |
-        docker container prune -f
-        docker image prune -f
