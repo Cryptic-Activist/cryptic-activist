@@ -96,6 +96,11 @@ jobs:
           # prod.redis.env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
+    - name: Clean up Docker
+      run: |
+        docker container prune -f
+        docker image prune -f
+
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
       with:
@@ -109,7 +114,3 @@ jobs:
           docker compose pull
           docker compose -f prod.docker-compose.yml --profile prod up -d --build
 
-    - name: Clean up Docker
-      run: |
-        docker container prune -f
-        docker image prune -f
