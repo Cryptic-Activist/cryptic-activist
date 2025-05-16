@@ -1,7 +1,6 @@
 import { FRONTEND_PUBLIC } from '@/constants/env';
-import { User } from 'base-ca';
 
-const buildReferralRewardEmail = (user: User, period: any, stats: any) => {
+const buildReferralRewardEmail = (user: any, period: any, stats: any) => {
   const dashboardLink = FRONTEND_PUBLIC + 'account/stats';
   return `<body style="margin:0; padding:50px 0; font-family:Arial,sans-serif; background:#f5f5f5;">
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:0 auto; background:#fff; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">

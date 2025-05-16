@@ -469,11 +469,6 @@ const OffersNew: FC<OffersNewProps> = ({ id, height }) => {
   // const newHeight =
   //   id === 'home' && isMoreFiltersOpen ? { height: '5.45rem' } : { height };
 
-  console.log({
-    offersHasMore: offers.hasMore,
-    offersHasError: !offers.hasError,
-  });
-
   return (
     <div className={styles.tradingContainer}>
       <FilterSection

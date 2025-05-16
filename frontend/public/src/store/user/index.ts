@@ -1,15 +1,14 @@
 import {
-  getLocalStorage,
+  getUserFromToken,
+  getUserToken,
+  getUserToken2FA,
+} from '@/services/user';
+import {
   removeCookie,
   removeLocalStorage,
   setCookie,
   setLocalStorage,
 } from '@/utils';
-import {
-  getUserFromToken,
-  getUserToken,
-  getUserToken2FA,
-} from '@/services/user';
 
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
@@ -80,50 +79,12 @@ export const useUserSlice: StateCreator<
             createdAt: undefined,
             updatedAt: undefined,
             twoFactorEnabled: undefined,
+            _count: undefined,
           },
         }),
         false,
         'user/resetUser'
       );
-    },
-    decodeAccessToken: async () => {
-      try {
-        const accessToken = getLocalStorage('accessToken');
-
-        if (!accessToken) return null;
-
-        const user = await getUserFromToken(accessToken);
-
-        if (!user) {
-          removeLocalStorage('accessToken');
-          removeLocalStorage('refreshToken');
-          return null;
-        }
-
-        const setValue = get().user.setUserValue;
-
-        setValue(
-          {
-            id: user.id,
-            names: {
-              firstName: user.names.firstName,
-              lastName: user.names.lastName,
-            },
-            languages: user.languages,
-            profileColor: user.profileColor,
-            username: user.username,
-            lastLoginAt: user.lastLoginAt,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-          },
-          'user/decodeAccessToken'
-        );
-        return user;
-      } catch (_err) {
-        removeLocalStorage('accessToken');
-        removeLocalStorage('refreshToken');
-        return null;
-      }
     },
     login: async (params) => {
       try {
@@ -173,12 +134,14 @@ export const useUserSlice: StateCreator<
               firstName: user.names.firstName,
               lastName: user.names.lastName,
             },
-            languages: user.languages,
+            userLanguage: user.userLanguage,
             profileColor: user.profileColor,
             username: user.username,
+            email: user.email,
             lastLoginAt: user.lastLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            _count: user._count,
           },
           'user/login'
         );
@@ -227,12 +190,14 @@ export const useUserSlice: StateCreator<
               firstName: user.names.firstName,
               lastName: user.names.lastName,
             },
-            languages: user.languages,
+            userLanguage: user.userLanguage,
             profileColor: user.profileColor,
             username: user.username,
+            email: user.email,
             lastLoginAt: user.lastLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            _count: user._count,
           },
           'user/login2FA'
         );

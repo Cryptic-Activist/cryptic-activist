@@ -7,3 +7,8 @@ export type RemoveSpokenLanguagesParams = {
   userId: string;
   languageId: string;
 };
+
+export type UpdateEmailParams = {
+  userId: string;
+  email: string;
+};
