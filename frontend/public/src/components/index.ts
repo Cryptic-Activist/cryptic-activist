@@ -23,5 +23,6 @@ export { default as Chat } from './Chat';
 export { default as FeedbackCount } from './FeedbackCount';
 export { default as Altcha } from './Altcha';
 export { default as FeedbackSelector } from './FeedbackSelector';
+export { default as Analytics } from './Analytics';
 export * from './lists';
 export * from './offer';
