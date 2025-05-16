@@ -36,13 +36,13 @@ const Login = () => {
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <Input
             type="text"
-            name="username"
-            id="username"
+            name="usernameOrEmail"
+            id="usernameOrEmail"
             required
-            label="Username"
-            placeholder="Username"
+            label="Username or Email"
+            placeholder="Username or Email"
             register={loginFormRegister}
-            errorMessage={errors['username']?.message}
+            errorMessage={errors['usernameOrEmail']?.message}
           />
           <Input
             type="password"

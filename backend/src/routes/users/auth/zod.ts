@@ -1,9 +1,8 @@
-import { token } from 'morgan';
 import { z } from 'zod';
 
 export const Login = z.object({
+  usernameOrEmail: z.string().min(6).max(100),
   password: z.string().min(6).max(20),
-  username: z.string().min(5),
 });
 
 const regexOnlyNumbers = /^\d+$/;

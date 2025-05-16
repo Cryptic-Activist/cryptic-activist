@@ -26,14 +26,21 @@ import { prisma } from '@/services/db';
 import speakeasy from 'speakeasy';
 
 export const login = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { usernameOrEmail, password } = req.body;
 
   try {
     const errors: string[] = [];
 
     const user = await prisma.user.findFirst({
       where: {
-        username,
+        OR: [
+          {
+            username: usernameOrEmail,
+          },
+          {
+            email: usernameOrEmail,
+          },
+        ],
       },
     });
 

@@ -4,7 +4,7 @@ type Language = {
 };
 
 export type LoginParams = {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 };
 
