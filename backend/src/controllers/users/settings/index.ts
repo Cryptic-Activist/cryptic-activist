@@ -1,4 +1,3 @@
-import { EMAIL_FROM, sendEmail } from '@/services/email';
 import { Request, Response } from 'express';
 import { associateLanguage, diassociateLanguage } from '@/services/language';
 import {
@@ -7,8 +6,10 @@ import {
 } from '@/services/email/templates';
 import { decodeToken, generateToken } from '@/utils/generators/jwt';
 
+import { EMAIL_FROM } from '@/services/email';
 import availableLanguages from './data';
 import { prisma } from '@/services/db';
+import { publishToQueue } from '@/services/rabbitmq';
 
 export async function addSpokenLanguage(req: Request, res: Response) {
   try {
@@ -99,7 +100,7 @@ export async function requestEmailChange(req: Request, res: Response) {
       expiresIn: '5m',
     });
 
-    const emailChangeRequestEmail = await sendEmail({
+    const publishedEmailChangeRequest = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
@@ -111,7 +112,7 @@ export async function requestEmailChange(req: Request, res: Response) {
       html: buildChangeEmailRequestEmail(user, email, emailChangeToken),
     });
 
-    console.log({ emailChangeRequestEmail });
+    console.log({ publishedEmailChangeRequest });
 
     res.status(200).send({
       ok: true,
@@ -162,7 +163,7 @@ export async function emailChange(req: Request, res: Response) {
       },
     });
 
-    const emailChangeEmail = await sendEmail({
+    const publishedEmailChange = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {

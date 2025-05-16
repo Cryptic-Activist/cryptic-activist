@@ -3,7 +3,6 @@ import {
   buildResetPasswordEmail,
   buildTwoFactorAuthentication,
   buildVerifyAccountEmail,
-  sendEmail,
 } from '@/services/email';
 import { Request, Response } from 'express';
 import {
@@ -23,6 +22,7 @@ import { getExpiresAt } from '@/utils/date';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { languages } from 'unique-names-generator';
 import { prisma } from '@/services/db';
+import { publishToQueue } from '@/services/rabbitmq';
 import speakeasy from 'speakeasy';
 
 export const login = async (req: Request, res: Response) => {
@@ -393,7 +393,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const verifyAccountEmailBody = buildVerifyAccountEmail(user, token);
-    const accountVerifyEmailId = await sendEmail({
+    const publishedVerifyAccount = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
@@ -405,8 +405,9 @@ export const register = async (req: Request, res: Response) => {
       html: verifyAccountEmailBody,
       text: 'Verify your account',
     });
+
     const accountCreatedEmailBody = buildAccountCreatedEmail(user);
-    const accountCreatedEmailId = await sendEmail({
+    const publishedAccountCreated = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
@@ -420,8 +421,8 @@ export const register = async (req: Request, res: Response) => {
     });
 
     const promised = await Promise.all([
-      accountVerifyEmailId,
-      accountCreatedEmailId,
+      publishedVerifyAccount,
+      publishedAccountCreated,
     ]);
 
     console.log({ promised });
@@ -589,7 +590,7 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
     }
 
     const resetPasswordEmailBody = buildResetPasswordEmail(user, token);
-    const emailId = await sendEmail({
+    const publishedResetPassword = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
@@ -602,7 +603,7 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
       text: 'Reset your password',
     });
 
-    console.log('Email sent:', emailId);
+    console.log('Email sent:', publishedResetPassword);
 
     res.status(200).send({
       ok: true,
@@ -826,7 +827,7 @@ export const verify2FA = async (req: Request, res: Response) => {
     });
 
     const twoFactorActivatedEmailBody = buildTwoFactorAuthentication(user);
-    const emailId = await sendEmail({
+    const publishedTwoFactorActivated = await publishToQueue('emails', {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
@@ -839,7 +840,7 @@ export const verify2FA = async (req: Request, res: Response) => {
       text: '2FA Activated',
     });
 
-    console.log({ emailId });
+    console.log({ publishedTwoFactorActivated });
 
     res.status(200).json({ success: true });
     return;

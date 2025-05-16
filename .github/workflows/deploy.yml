@@ -42,6 +42,8 @@ jobs:
           echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.backend.env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.backend.env
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.backend.env
+          echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
+          echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
           echo "ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}" >> envs/prod.backend.env
           echo "ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}" >> envs/prod.backend.env
           echo "ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}" >> envs/prod.backend.env
