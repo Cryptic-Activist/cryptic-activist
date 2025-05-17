@@ -29,6 +29,7 @@ export const Register = z
       lastName: z.string().min(2),
     }),
     username: z.string().min(5),
+    referralCode: z.string().optional(),
     email: z.string().email('Invalid email'),
     password: z.string().min(8),
     confirmPassword: z.string().min(8),

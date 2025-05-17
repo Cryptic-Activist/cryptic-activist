@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // output   = "node_modules/@prisma/client"
 }
 
 datasource db {
@@ -251,10 +252,11 @@ model Referral {
   id         String   @id @default(cuid())
   referrer   User     @relation("referrer", fields: [referrerId], references: [id], onDelete: Cascade)
   referrerId String
-  referee    User     @relation("referre", fields: [refereeId], references: [id], onDelete: Cascade)
+  referee    User     @relation("referee", fields: [refereeId], references: [id], onDelete: Cascade)
   refereeId  String   @unique
   createdAt  DateTime @default(now())
 
+  @@index([referrerId])
   @@map("referrals")
 }
 
@@ -437,9 +439,9 @@ model User {
   kycId                    String?
   transactionPaymentMethod TransactionPaymentMethod[]
   transactions             Transaction[]
-  referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 8)")) @db.VarChar(20)
+  referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
   referrer                 Referral[]                 @relation("referrer")
-  referre                  Referral?                  @relation("referre")
+  referre                  Referral?                  @relation("referee")
 
   @@index([username])
   @@map("users")

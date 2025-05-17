@@ -4,6 +4,7 @@ export type UserRegistrationParams = {
     lastName?: string;
   };
   username?: string;
+  referralCode?: string;
   email: string;
   password: string;
   confirmPassword: string;

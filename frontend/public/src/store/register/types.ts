@@ -5,6 +5,7 @@ export type RegisterStore = {
     lastName?: string;
     username?: string;
     email?: string;
+    referralCode?: string;
     setRegisterValue: (value: Value, actionName: `register/${string}`) => void;
     setPrivateKeys: (privateKeys: string[]) => void;
     resetPrivateKeys: () => void;
@@ -17,5 +18,6 @@ export type RegisterSetter = {
   lastName?: string;
   username?: string;
   email?: string;
+  referralCode?: string;
 };
 export type Value = RegisterSetter;
