@@ -294,9 +294,21 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { names, username, email, password } = req.body;
+  const { names, username, email, password, referralCode } = req.body;
 
   try {
+    let referrerId: string | null = null;
+
+    if (referralCode) {
+      const referringUser = await prisma.user.findUnique({
+        where: { referralCode },
+      });
+      if (!referringUser) {
+        return res.status(400).json({ error: 'Invalid referral code.' });
+      }
+      referrerId = referringUser.id;
+    }
+
     const generatedSalt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, generatedSalt);
     const privateKeysArrObj = await generatePrivateKeysBip39();
@@ -350,8 +362,25 @@ export const register = async (req: Request, res: Response) => {
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,
         tierId: tier.id,
+        // ...(referrerId && { xp: 20 }),
       },
     });
+
+    if (referrerId) {
+      await prisma.referral.create({
+        data: {
+          referrerId,
+          refereeId: user.id,
+        },
+      });
+
+      // await prisma.user.update({
+      //   where: {
+      //     id: referrerId,
+      //   },
+      //   data: { xp: { increment: 50 } },
+      // });
+    }
 
     const language = await prisma.language.upsert({
       where: { name: 'English' },
@@ -502,6 +531,20 @@ export const verifyAccount = async (req: Request, res: Response) => {
       return;
     }
 
+    const userToVerify = await prisma.user.findFirst({
+      where: {
+        id: decoded.userId,
+        isVerified: false,
+      },
+    });
+
+    if (!userToVerify) {
+      res.status(400).send({
+        error: 'Verification token is invalid',
+      });
+      return;
+    }
+
     await prisma.user.update({
       where: {
         id: decoded.userId as string,
@@ -517,6 +560,13 @@ export const verifyAccount = async (req: Request, res: Response) => {
       },
     });
 
+    if (!verificationToken) {
+      res.status(400).send({
+        error: 'Verification token is invalid',
+      });
+      return;
+    }
+
     await prisma.token.update({
       where: {
         id: verificationToken?.id,
@@ -525,6 +575,63 @@ export const verifyAccount = async (req: Request, res: Response) => {
         isUsed: true,
       },
     });
+
+    const referral = await prisma.referral.findFirst({
+      where: {
+        refereeId: userToVerify.id,
+      },
+    });
+
+    // Gives 50xp to the new user
+    await prisma.user.update({
+      where: {
+        id: referral?.refereeId,
+      },
+      data: {
+        xp: {
+          increment: 20,
+        },
+      },
+    });
+    // Gives 50xp to the user with the referral code
+    await prisma.user.update({
+      where: {
+        id: referral?.referrerId,
+      },
+      data: {
+        xp: {
+          increment: 50,
+        },
+      },
+    });
+
+    const referrer = await prisma.user.findFirst({
+      where: {
+        id: referral?.referrerId,
+      },
+      select: {
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    if (referrer) {
+      const accountCreateWithReferralReferrerEmailBody =
+        buildAccountCreatedEmail(user);
+      await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: referrer.email,
+            name: `${referrer.firstName} ${referrer.lastName}`,
+          },
+        ],
+        subject: 'Account creation - Cryptic Activist',
+        html: accountCreateWithReferralReferrerEmailBody,
+        text: 'Account creation',
+      });
+    }
 
     res.status(200).send({
       ok: true,

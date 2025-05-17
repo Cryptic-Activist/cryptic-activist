@@ -20,7 +20,7 @@ const Register = () => {
     errors,
     mutation,
     query,
-    timeLeftInSeconds,
+    timeLeftInSeconds: _timeLeftInSeconds,
     successfulRegistration,
   } = useRegister();
   const {
@@ -123,7 +123,15 @@ const Register = () => {
               id="email"
               required
               label="Email"
-              placeholder={query.isPending ? '...' : 'john@doe.com'}
+              placeholder="john@doe.com"
+              register={registerForm}
+            />
+            <Input
+              type="text"
+              name="referralCode"
+              id="referralCode"
+              label="Referral Code"
+              placeholder="Referral Code"
               register={registerForm}
             />
             <Input
@@ -150,10 +158,9 @@ const Register = () => {
             <Button type="submit" padding="1rem" fullWidth>
               <>
                 {mutation.isPending && 'Registering...'}
-                {mutation.error && 'Error'}
+                {mutation.error && 'Try Again'}
                 {mutation.isIdle && 'Register'}
-                {mutation.isSuccess &&
-                  `Registered. Next step in ${timeLeftInSeconds}`}
+                {mutation.isSuccess && `Registered`}
               </>
             </Button>
           </form>
