@@ -37,5 +37,6 @@ export type GetUserInfoReturn = {
   languages: Language[];
   userLanguage?: any[];
   lastLoginAt: string;
+  referralCode: string;
   _count: any;
 };

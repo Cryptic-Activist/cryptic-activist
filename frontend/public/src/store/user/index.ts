@@ -30,6 +30,7 @@ export const useUserSlice: StateCreator<
     createdAt: undefined,
     updatedAt: undefined,
     twoFactorEnabled: undefined,
+    referralCode: undefined,
     setUserValue: (params, actionName = 'user/setValue') => {
       set(
         ({ user }) => {
@@ -50,9 +51,10 @@ export const useUserSlice: StateCreator<
               lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
               createdAt: params.createdAt ?? user.createdAt,
               updatedAt: params.updatedAt ?? user.updatedAt,
-              _count: params._count ?? user._count,
               twoFactorEnabled:
                 params.twoFactorEnabled ?? user.twoFactorEnabled,
+              referralCode: params.referralCode ?? user.referralCode,
+              _count: params._count ?? user._count,
             },
           };
         },
@@ -79,6 +81,7 @@ export const useUserSlice: StateCreator<
             createdAt: undefined,
             updatedAt: undefined,
             twoFactorEnabled: undefined,
+            referralCode: undefined,
             _count: undefined,
           },
         }),
@@ -141,6 +144,7 @@ export const useUserSlice: StateCreator<
             lastLoginAt: user.lastLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            referralCode: user.referralCode,
             _count: user._count,
           },
           'user/login'

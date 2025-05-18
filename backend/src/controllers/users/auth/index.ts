@@ -188,6 +188,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         createdAt: true,
         lastLoginAt: true,
         twoFactorEnabled: true,
+        referralCode: true,
         tier: {
           select: {
             id: true,
@@ -362,7 +363,6 @@ export const register = async (req: Request, res: Response) => {
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,
         tierId: tier.id,
-        // ...(referrerId && { xp: 20 }),
       },
     });
 
@@ -373,13 +373,6 @@ export const register = async (req: Request, res: Response) => {
           refereeId: user.id,
         },
       });
-
-      // await prisma.user.update({
-      //   where: {
-      //     id: referrerId,
-      //   },
-      //   data: { xp: { increment: 50 } },
-      // });
     }
 
     const language = await prisma.language.upsert({
@@ -387,16 +380,7 @@ export const register = async (req: Request, res: Response) => {
       update: {},
       create: { name: 'English' },
     });
-
-    // await prisma.userLanguage.upsert({
-    //   where: { userId: user.id, languageId: language.id },
-    //   create: {
-    //     userId: user.id,
-    //     languageId: language.id,
-    //   },
-    // });
-
-    const newUserLanguage = await prisma.userLanguage.create({
+    await prisma.userLanguage.create({
       data: { languageId: language.id, userId: user.id },
     });
 
@@ -575,63 +559,6 @@ export const verifyAccount = async (req: Request, res: Response) => {
         isUsed: true,
       },
     });
-
-    const referral = await prisma.referral.findFirst({
-      where: {
-        refereeId: userToVerify.id,
-      },
-    });
-
-    // Gives 50xp to the new user
-    await prisma.user.update({
-      where: {
-        id: referral?.refereeId,
-      },
-      data: {
-        xp: {
-          increment: 20,
-        },
-      },
-    });
-    // Gives 50xp to the user with the referral code
-    await prisma.user.update({
-      where: {
-        id: referral?.referrerId,
-      },
-      data: {
-        xp: {
-          increment: 50,
-        },
-      },
-    });
-
-    const referrer = await prisma.user.findFirst({
-      where: {
-        id: referral?.referrerId,
-      },
-      select: {
-        email: true,
-        firstName: true,
-        lastName: true,
-      },
-    });
-
-    if (referrer) {
-      const accountCreateWithReferralReferrerEmailBody =
-        buildAccountCreatedEmail(user);
-      await publishToQueue('emails', {
-        from: EMAIL_FROM.ACCOUNT,
-        to: [
-          {
-            email: referrer.email,
-            name: `${referrer.firstName} ${referrer.lastName}`,
-          },
-        ],
-        subject: 'Account creation - Cryptic Activist',
-        html: accountCreateWithReferralReferrerEmailBody,
-        text: 'Account creation',
-      });
-    }
 
     res.status(200).send({
       ok: true,
