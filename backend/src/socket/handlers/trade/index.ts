@@ -11,12 +11,12 @@ import {
 } from './types';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
+import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
-import { sendEmailsTrade } from './utils';
 
 export default class Trade {
   private socket: Socket;
@@ -197,26 +197,7 @@ export default class Trade {
         if (emailTrade) {
           const emailSents = await sendEmailsTrade(emailTrade);
 
-          await prisma.user.update({
-            where: {
-              id: emailTrade?.vendor?.id,
-            },
-            data: {
-              xp: {
-                increment: 100,
-              },
-            },
-          });
-          await prisma.user.update({
-            where: {
-              id: emailTrade?.trader?.id,
-            },
-            data: {
-              xp: {
-                increment: 100 + emailSents.firstTradeRewardReferee,
-              },
-            },
-          });
+          await updateAddXPTier(emailTrade, emailSents.firstTradeRewardReferee);
         }
 
         const accountCreatedEmailBody = await buildTradeConfirmationEmail(

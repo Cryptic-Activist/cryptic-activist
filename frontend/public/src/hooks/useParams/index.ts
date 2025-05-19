@@ -9,7 +9,7 @@ import useURL from '../useURL';
 const useParams = () => {
   const { getSearchParams, clearSearchParams, searchParams } = useURL();
   const { toggleModal } = useNavigationBar();
-  const { addToast } = useApp();
+  const { addToast, setReferralCode } = useApp();
   const { resetPassword } = useResetPassword();
 
   const handleAccountVerifedParam = () => {
@@ -73,12 +73,30 @@ const useParams = () => {
     }
   };
 
+  const handleRegisterReferralParam = () => {
+    const referralCodeParam = getSearchParams('referral') as string;
+    const isReferralCodeValid =
+      referralCodeParam && referralCodeParam.length > 0;
+
+    console.log({ referralCodeParam, isReferralCodeValid });
+
+    if (isReferralCodeValid) {
+      setReferralCode(referralCodeParam);
+      toggleModal('register');
+      clearSearchParams();
+    } else {
+      addToast('error', 'Referral code is invalid', 5000);
+      clearSearchParams();
+    }
+  };
+
   useEffect(() => {
     if (Object.keys(searchParams).length > 0) {
       handleAccountVerifedParam();
       handlePasswordResetVerifiedParam();
       handleLoginParam();
       handleEmailChangeParam();
+      handleRegisterReferralParam();
     }
   }, [searchParams]);
 

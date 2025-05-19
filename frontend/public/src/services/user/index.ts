@@ -1,6 +1,6 @@
 import { GetUserInfoReturn, Login2FAParams, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import { getCookie, removeLocalStorage } from '@/utils';
+import { getCookie, removeCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
@@ -53,15 +53,16 @@ export const decodeAccessToken = async () => {
     const userInfo = await getUserFromToken(accessToken);
 
     if (!userInfo) {
-      removeLocalStorage('accessToken');
-      removeLocalStorage('refreshToken');
+      removeCookie('accessToken');
+      removeCookie('refreshToken');
+
       return null;
     }
 
     return userInfo;
   } catch (_err) {
-    removeLocalStorage('accessToken');
-    removeLocalStorage('refreshToken');
+    removeCookie('accessToken');
+    removeCookie('refreshToken');
 
     return null;
   }

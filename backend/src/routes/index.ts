@@ -7,6 +7,7 @@ import feedbacks from './feedbacks';
 import fiats from './fiats';
 import offers from './offers';
 import systemMessages from './systemMessages';
+import tiers from './tiers';
 import trades from './trades';
 import users from './users';
 import vendors from './vendors';
@@ -23,4 +24,5 @@ export default (app: Application): void => {
   app.use('/blockchains', blockchains);
   app.use('/altcha', altcha);
   app.use('/vendors', vendors);
+  app.use('/tiers', tiers);
 };

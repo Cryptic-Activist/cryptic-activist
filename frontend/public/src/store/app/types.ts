@@ -38,11 +38,13 @@ export type AppStore = {
     type: Type;
     defaults: Defaults;
     currentPrice?: CurrentPrice;
+    referralCode?: string;
     setAppValue: (value: Partial<Value>, actionName?: `app/${string}`) => void;
     setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
     removeToast: (id: string) => void;
     addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
     checkIsMobile: (params: IsCheckIsMobileParams) => void;
+    setReferralCode: (referralCode: string) => void;
   };
 };
 
@@ -58,6 +60,7 @@ export type AppStoreSetter = {
     amount?: number;
   };
   currentPrice?: CurrentPrice;
+  referralCode?: string;
 };
 
 export type Value = AppStoreSetter;

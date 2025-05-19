@@ -16,6 +16,7 @@ export const useAppSlice: StateCreator<
     type: 'buy',
     toasts: [],
     defaults: {},
+    referralCode: undefined,
     setAppValue: (params, actionName = 'app/setValue') => {
       set(
         ({ app }) => ({
@@ -26,6 +27,7 @@ export const useAppSlice: StateCreator<
             toasts: params.toasts ?? app.toasts,
             type: params.type ?? app.type,
             currentPrice: params.currentPrice ?? app.currentPrice,
+            referralCode: params.referralCode ?? app.referralCode,
             defaults: {
               cryptocurrency:
                 params.defaults?.cryptocurrency ?? app.defaults.cryptocurrency,
@@ -92,6 +94,15 @@ export const useAppSlice: StateCreator<
       const isMobile = width < 768;
 
       set({ app: { ...app, isMobile } }, false, 'app/checkIsMobile');
+    },
+    setReferralCode: (referralCode) => {
+      const {
+        app: { setAppValue },
+      } = get();
+
+      console.log({ tested: referralCode });
+
+      setAppValue({ referralCode }, 'app/setReferralCode');
     },
   },
 });

@@ -95,3 +95,72 @@ export const sendEmailsTrade = async (emailTrade: any) => {
 
   return { firstTradeRewardReferee };
 };
+
+export const updateAddXPTier = async (
+  emailTrade: any,
+  firstTradeRewardReferee: number,
+) => {
+  const vendorUpdated = await prisma.user.update({
+    where: {
+      id: emailTrade?.vendor?.id,
+    },
+    data: {
+      xp: {
+        increment: 100,
+      },
+    },
+  });
+  const traderUpdated = await prisma.user.update({
+    where: {
+      id: emailTrade?.trader?.id,
+    },
+    data: {
+      xp: {
+        increment: 100 + firstTradeRewardReferee,
+      },
+    },
+  });
+  const nextVendorTier = await prisma.tier.findFirst({
+    where: {
+      requiredXP: {
+        gte: vendorUpdated.xp,
+      },
+    },
+    select: {
+      id: true,
+      requiredXP: true,
+    },
+  });
+  const nextTraderTier = await prisma.tier.findFirst({
+    where: {
+      requiredXP: {
+        gte: traderUpdated.xp,
+      },
+    },
+    select: {
+      id: true,
+      requiredXP: true,
+    },
+  });
+  console.log({ nextVendorTier, vendorUpdated });
+  if (nextVendorTier && vendorUpdated.xp >= nextVendorTier?.requiredXP) {
+    await prisma.user.update({
+      where: {
+        id: emailTrade?.vendor?.id,
+      },
+      data: {
+        tierId: nextVendorTier.id,
+      },
+    });
+  }
+  if (nextTraderTier && vendorUpdated.xp >= nextTraderTier?.requiredXP) {
+    await prisma.user.update({
+      where: {
+        id: emailTrade?.vendor?.id,
+      },
+      data: {
+        tierId: nextTraderTier.id,
+      },
+    });
+  }
+};

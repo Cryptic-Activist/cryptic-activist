@@ -5,7 +5,9 @@ export const menuList = [
 
 export const menuUserList = [
   { label: 'Account', href: '/account' },
-  { label: 'Messages', href: '/account/messages' },
   { label: 'My Offers', href: '/my-offers' },
+  { label: 'Settings', href: '/account/settings' },
   { label: 'Trades', href: '/trades' },
+  { label: 'Rewards', href: '/account/rewards' },
+  { label: 'Messages', href: '/account/messages' },
 ];

@@ -18,6 +18,7 @@ const useRegister = () => {
   const {
     navigationBar: { resetNavigationBar, toggleModal },
     register,
+    app,
   } = useRootStore();
   const { addToast } = useApp();
   const { startCountDown: _startCountDown, timeLeftInSeconds } = useCountDown();
@@ -59,11 +60,16 @@ const useRegister = () => {
     });
   };
 
+  console.log({ referral: app.referralCode });
+
   useEffect(() => {
     if (query.data) {
       setValue('names.firstName', query.data?.names[0]);
       setValue('names.lastName', query.data?.names[1]);
       setValue('username', query.data?.username);
+      if (app.referralCode) {
+        setValue('referralCode', app.referralCode);
+      }
     }
   }, [query.data]);
 
@@ -107,6 +113,7 @@ const useRegister = () => {
       },
       username: getValues('username'),
       email: getValues('email'),
+      referralCode: getValues('referralCode'),
       password: getValues('password'),
       confirmPassword: getValues('confirmPassword'),
     },

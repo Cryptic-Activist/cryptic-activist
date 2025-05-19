@@ -189,11 +189,16 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         lastLoginAt: true,
         twoFactorEnabled: true,
         referralCode: true,
+        xp: true,
         tier: {
           select: {
             id: true,
             name: true,
             level: true,
+            requiredXP: true,
+            discount: true,
+            tradingFee: true,
+            minVolume: true,
           },
         },
         profileColor: true,
@@ -314,6 +319,7 @@ export const register = async (req: Request, res: Response) => {
     const hash = await bcrypt.hash(password, generatedSalt);
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
+
     const tier = await prisma.tier.upsert({
       where: {
         name: 'Bronze',
@@ -321,11 +327,13 @@ export const register = async (req: Request, res: Response) => {
       update: {},
       create: {
         name: 'Bronze',
-        description: 'Bronze tier description',
-        discount: 0.01,
+        description:
+          'Your starting tier. Earn XP by trading to unlock discounts',
         level: 0,
-        minVolume: 100,
         tradingFee: 0.05,
+        discount: 0,
+        minVolume: 0,
+        requiredXP: 0,
       },
     });
 
