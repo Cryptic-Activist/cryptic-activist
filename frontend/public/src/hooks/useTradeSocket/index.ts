@@ -22,6 +22,7 @@ const useTradeSocket = ({
   onSetPaid,
   onSetCanceled,
   onSetPaymentConfirmed,
+  onSetTradeCreated,
 }: UseSocketParams) => {
   const { addToast } = useApp();
   const { replace } = useRouter();
@@ -169,6 +170,7 @@ const useTradeSocket = ({
       });
 
       newSocket.on('blockchain_trade_created', (_payload) => {
+        onSetTradeCreated();
         // setMessages((prevMessages) => [...prevMessages, message]);
       });
 

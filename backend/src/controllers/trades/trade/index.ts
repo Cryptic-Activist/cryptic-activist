@@ -129,6 +129,7 @@ export async function getTradeController(req: Request, res: Response) {
         paymentReceipt: true,
         status: true,
         escrowReleaseDate: true,
+        paymentConfirmed: true,
         paid: true,
         paymentMethod: {
           select: {

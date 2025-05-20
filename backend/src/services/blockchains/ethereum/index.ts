@@ -31,7 +31,6 @@ export const getToken = (token: Token) => {
   const address = addresses.chainlink;
   const abi = abis.chainlink;
   const signer = getSigner();
-  console.log({ address, abi, signer });
   return new ethers.Contract(address, abi, signer);
 };
 
@@ -61,7 +60,6 @@ export const decodeFunctionData = (receipt: any) => {
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
-      console.log({ 'parsedLog.name': log });
       if (parsedLog) {
         switch (parsedLog.name) {
           case 'TradeCreated': {
@@ -88,7 +86,6 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (error) {
-      console.log({ error });
       continue;
     }
   }
@@ -114,9 +111,11 @@ export const createTrade = async (params: InitTradeParams) => {
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
-    console.log({ receipt, decoded });
-
-    return { data: decoded, txHash: tx.hash, message: 'Trade created' };
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Trade created successfully',
+    };
   } catch (error) {
     return {
       message: 'Error creating trade',
@@ -135,7 +134,11 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
-    return { data: decoded, txHash: tx.hash, message: 'Trade funded' };
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Trade funded successfully',
+    };
   } catch (error) {
     return {
       message: 'Error funding trade',

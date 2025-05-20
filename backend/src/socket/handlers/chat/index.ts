@@ -123,6 +123,16 @@ export default class Chat {
               return;
             }
 
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Initiating trade...',
+              },
+            ]);
+
             const tradeCreated = await createTrade({
               arbitrator: createTradeDetails.arbitrator,
               buyer: createTradeDetails.buyer,
@@ -165,7 +175,7 @@ export default class Chat {
                 from: 'none',
                 to: 'none',
                 type: 'info',
-                message: 'Trade created successfully',
+                message: 'Funding trade...',
               },
             ]);
 
@@ -194,15 +204,7 @@ export default class Chat {
               },
             });
 
-            this.io.to(chatId).emit('room_messages', [
-              {
-                _id: 'none',
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: 'Trade funded successfully',
-              },
-            ]);
+            console.log('Trade funded:', tradeFunded);
 
             this.io.to(chatId).emit('blockchain_trade_created', {
               blockchainTradeId: tradeCreated.data?.tradeId.toString(),

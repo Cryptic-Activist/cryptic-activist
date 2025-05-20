@@ -30,7 +30,6 @@ export const validateGetCurrentVendorOffers = (
   next: NextFunction,
 ) => {
   const { params } = req;
-  console.log({ params });
 
   const validated = GetCurrentVendorOffers.safeParse(params);
 

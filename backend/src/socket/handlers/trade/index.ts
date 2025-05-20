@@ -137,12 +137,13 @@ export default class Trade {
         if (!updatedTrade) {
           this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
             error: 'Unable to update trade data',
+            hasReceived: false,
           });
           return;
         }
 
         this.io.to(chatId).emit('trade_set_payment_confirmed_success', {
-          isPaid: true,
+          hasReceived: true,
         });
         this.io.to(chatId).emit('chat_info_message', {
           from,

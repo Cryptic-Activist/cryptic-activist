@@ -64,14 +64,13 @@ export type PaymentReceipt = {
   url: string;
 };
 
-export enum Status {
-  PENDING,
-  IN_PROGRESS,
-  COMPLETED,
-  CANCELLED,
-  DISPUTED,
-  EXPIRED,
-}
+export type Status =
+  | 'PENDING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'DISPUTED'
+  | 'EXPIRED';
 
 export type TradeDetails = {
   tradeDetails: {
