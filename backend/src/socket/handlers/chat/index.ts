@@ -103,6 +103,16 @@ export default class Chat {
               message: 'Vendor has entered the chat',
             });
 
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Vendor has entered the chat',
+              },
+            ]);
+
             const createTradeDetails =
               await getCreateTradeDetails(updatedTrade);
 
@@ -149,6 +159,16 @@ export default class Chat {
               },
             });
 
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Trade created successfully',
+              },
+            ]);
+
             const tradeFunded = await fundTrade(
               tradeCreated.data?.tradeId,
               createTradeDetails.sellerFundAmountWei,
@@ -174,6 +194,16 @@ export default class Chat {
               },
             });
 
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Trade funded successfully',
+              },
+            ]);
+
             this.io.to(chatId).emit('blockchain_trade_created', {
               blockchainTradeId: tradeCreated.data?.tradeId.toString(),
             });
@@ -187,6 +217,8 @@ export default class Chat {
         );
         query = query.sort('desc');
         const chatMessages = await query.exec();
+
+        console.log('Chat messages:', chatMessages);
 
         this.io.to(chatId).emit('room_messages', chatMessages);
         // Notify room about new user
