@@ -39,6 +39,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "redux-devtools-extension": "^2.13.9",
     "sass": "^1.85.1",
+    "sharp": "^0.34.1",
     "socket.io-client": "^4.8.1",
     "uuid": "^11.1.0",
     "wagmi": "^2.14.12",

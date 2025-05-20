@@ -22,6 +22,7 @@ export const useTradeSlice: StateCreator<
     paymentMethod: undefined,
     paymentDetails: undefined,
     paymentReceipt: undefined,
+    paymentConfirmed: undefined,
     status: undefined,
     trader: undefined,
     vendor: undefined,

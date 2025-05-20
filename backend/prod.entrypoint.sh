@@ -12,8 +12,10 @@ done
 echo "✅ Database is ready"
 
 # Run Prisma migration deployment
-echo "🚀 Running prisma migrate deploy..."
-npx prisma migrate deploy
+# echo "🚀 Running prisma migrate deploy..."
+# npx prisma migrate deploy
+echo "🚀 Running prisma db push..."
+npx prisma db push
 
 # Start your app
 echo "▶️ Starting app..."

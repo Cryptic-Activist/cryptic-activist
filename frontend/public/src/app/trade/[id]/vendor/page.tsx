@@ -19,6 +19,7 @@ const TradeVendor = () => {
     setCanceled,
     setPaymentConfirmed,
     setVendorWalletAddress,
+    setTradeCreated,
   } = useTrade();
   const { user, query } = useUser();
   // const { addToast } = useApp();
@@ -43,6 +44,7 @@ const TradeVendor = () => {
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
+    onSetTradeCreated: setTradeCreated,
   });
 
   useEffect(() => {
@@ -71,6 +73,8 @@ const TradeVendor = () => {
     //   back();
     // }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
+
+  console.log({ trade });
 
   return (
     <div className={styles.container}>

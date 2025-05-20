@@ -37,10 +37,6 @@ const buildFirstTradeWithreferralReferrer = (
 
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:30px;">
           <tr>
-            <td style="padding:8px 0;font-size:15px;color:#333;"><strong>Trade Amount:</strong></td>
-            <td style="padding:8px 0;font-size:15px;color:#333;">${trade.cryptoAmount} ${trade.crypto} (~${trade.fiatAmount} ${trade.fiat})</td>
-          </tr>
-          <tr>
             <td style="padding:8px 0;font-size:15px;color:#333;"><strong>Your Reward:</strong></td>
             <td style="padding:8px 0;font-size:15px;color:#333;">${xpAmount} XP</td>
           </tr>

@@ -1,6 +1,5 @@
 'use client';
 
-import { Status } from '@/store/trade/types';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -30,6 +29,12 @@ const useTrade = () => {
     }
   }, [queryTrade.data]);
 
+  const setTradeCreated = () => {
+    trade.setTradeValue({
+      status: 'IN_PROGRESS',
+    });
+  };
+
   const setPaid = (isPaid: boolean) => {
     trade.setTradeValue({
       paid: isPaid,
@@ -38,12 +43,13 @@ const useTrade = () => {
 
   const setCanceled = () => {
     trade.setTradeValue({
-      status: Status.CANCELLED,
+      status: 'CANCELLED',
     });
   };
 
   const setPaymentConfirmed = (hasReceived: boolean) => {
     trade.setTradeValue({
+      status: hasReceived ? 'COMPLETED' : 'IN_PROGRESS',
       paymentConfirmed: hasReceived,
     });
   };
@@ -61,6 +67,7 @@ const useTrade = () => {
     setCanceled,
     setPaymentConfirmed,
     setVendorWalletAddress,
+    setTradeCreated,
   };
 };
 

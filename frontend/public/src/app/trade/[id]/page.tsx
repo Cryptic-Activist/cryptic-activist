@@ -65,13 +65,14 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
   trade,
   timeLeft,
   escrowReleased,
+  status,
   onSetAsPaid,
   onSetAsCanceled,
 }) => {
   const { replace } = useRouter();
   return (
     <section className={styles.section}>
-      {!escrowReleased && !trade.paid && (
+      {status === 'IN_PROGRESS' && !trade.paid && (
         <Button
           onClick={() =>
             onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
@@ -149,7 +150,8 @@ const TradeInstructions: FC<TradeInstructionsProps> = ({ trade }) => {
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled, setPaymentConfirmed } = useTrade();
+  const { trade, setPaid, setCanceled, setPaymentConfirmed, setTradeCreated } =
+    useTrade();
   const { user, query } = useUser();
   const { timeLeftInMinutes, startCountDown: _startCountDown } = useCountDown();
 
@@ -169,6 +171,7 @@ export default function TradePage() {
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
+    onSetTradeCreated: setTradeCreated,
   });
 
   // useEffect(() => {
@@ -204,6 +207,7 @@ export default function TradePage() {
           onSetAsPaid={setAsPaid}
           onSetAsCanceled={setAsCanceled}
           escrowReleased={escrowReleased}
+          status={trade.status}
         />
         <TradeInstructions trade={trade} />
       </div>

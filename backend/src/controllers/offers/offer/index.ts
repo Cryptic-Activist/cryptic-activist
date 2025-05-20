@@ -156,7 +156,6 @@ export const getOfferController = async (req: Request, res: Response) => {
 
     res.status(200).send(offer);
   } catch (err: any) {
-    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -207,8 +206,6 @@ export const editOffer = async (req: Request, res: Response) => {
   try {
     const ids = req.params;
     const body = req.body;
-
-    console.log({ ids, body });
 
     // const updateOffer = await prisma.offer.update({
     //   where: {
