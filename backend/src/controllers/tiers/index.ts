@@ -46,7 +46,11 @@ export const createTier = async (req: Request, res: Response) => {
 
 export const getTiers = async (_req: Request, res: Response) => {
   try {
-    const tiers = await prisma.tier.findMany();
+    const tiers = await prisma.tier.findMany({
+      orderBy: {
+        level: 'asc',
+      },
+    });
 
     res.status(200).send(tiers);
   } catch (err) {

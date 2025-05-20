@@ -79,7 +79,7 @@ export default function RewardsPage() {
               XP
             </strong>
           </div>
-          <h2>Progress</h2>
+          <h2>{`Progress: ${user.xp} XP`}</h2>
           <div className={`${styles.tier} ${styles.nextTier}`}>
             <span>{data?.name}</span>
             <strong>

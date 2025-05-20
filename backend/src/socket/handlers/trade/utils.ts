@@ -109,6 +109,9 @@ export const updateAddXPTier = async (
         increment: 100,
       },
     },
+    select: {
+      xp: true,
+    },
   });
   const traderUpdated = await prisma.user.update({
     where: {

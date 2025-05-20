@@ -139,6 +139,11 @@
       font-size: 1rem;
       background-color: transparent;
       border: none;
+      display: flex;
+
+      span {
+        white-space: nowrap;
+      }
 
       &:hover {
         background-color: #f5f5f5;
