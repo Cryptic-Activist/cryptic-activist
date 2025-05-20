@@ -29,6 +29,17 @@ type Names = {
   lastName?: string;
 };
 
+type Tier = {
+  id: string;
+  name: string;
+  description: string;
+  level: number;
+  tradingFee: number;
+  discount: number;
+  minVolume: number;
+  requiredXP: number;
+};
+
 export type User = {
   id?: string;
   names?: Names;
@@ -39,8 +50,11 @@ export type User = {
   createdAt?: string;
   updatedAt?: string;
   languages?: Language[];
-  _count?: Count;
   twoFactorEnabled?: boolean;
+  referralCode?: string;
+  xp?: number;
+  tier?: Tier;
+  _count?: Count;
   setUserValue: (value: Value, actionName: `user/${string}`) => void;
   setUser: (user: Value) => void;
   resetUser: () => void;
@@ -66,8 +80,11 @@ export type UserSetter = {
   updatedAt?: string;
   languages?: Language[];
   userLanguage?: UserLanguage;
-  _count?: Count;
   twoFactorEnabled?: boolean;
+  referralCode?: string;
+  xp?: number;
+  tier?: Tier;
+  _count?: Count;
 };
 
 export type Value = UserSetter;

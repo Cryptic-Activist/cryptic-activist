@@ -140,6 +140,7 @@ services:
       - postgres
       - redis
       - mongodb
+      - rabbitmq
 
 
   frontend-public:

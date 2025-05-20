@@ -3,12 +3,7 @@ import {
   getUserToken,
   getUserToken2FA,
 } from '@/services/user';
-import {
-  removeCookie,
-  removeLocalStorage,
-  setCookie,
-  setLocalStorage,
-} from '@/utils';
+import { removeCookie, setCookie } from '@/utils';
 
 import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
@@ -30,6 +25,9 @@ export const useUserSlice: StateCreator<
     createdAt: undefined,
     updatedAt: undefined,
     twoFactorEnabled: undefined,
+    referralCode: undefined,
+    xp: undefined,
+    tier: undefined,
     setUserValue: (params, actionName = 'user/setValue') => {
       set(
         ({ user }) => {
@@ -50,9 +48,12 @@ export const useUserSlice: StateCreator<
               lastLoginAt: params.lastLoginAt ?? user.lastLoginAt,
               createdAt: params.createdAt ?? user.createdAt,
               updatedAt: params.updatedAt ?? user.updatedAt,
-              _count: params._count ?? user._count,
               twoFactorEnabled:
                 params.twoFactorEnabled ?? user.twoFactorEnabled,
+              referralCode: params.referralCode ?? user.referralCode,
+              xp: params.xp ?? user.xp,
+              tier: params.tier ?? user.tier,
+              _count: params._count ?? user._count,
             },
           };
         },
@@ -79,6 +80,9 @@ export const useUserSlice: StateCreator<
             createdAt: undefined,
             updatedAt: undefined,
             twoFactorEnabled: undefined,
+            referralCode: undefined,
+            xp: undefined,
+            tier: undefined,
             _count: undefined,
           },
         }),
@@ -116,14 +120,12 @@ export const useUserSlice: StateCreator<
           value: tokens.refreshToken,
           expiresInHours: 2,
         });
-        setLocalStorage('accessToken', tokens.accessToken);
-        setLocalStorage('refreshToken', tokens.refreshToken);
 
         const user = await getUserFromToken(tokens.accessToken);
 
         if (!user) {
-          removeLocalStorage('accessToken');
-          removeLocalStorage('refreshToken');
+          removeCookie('accessToken');
+          removeCookie('refreshToken');
           throw Error('Unable to login');
         }
 
@@ -141,13 +143,14 @@ export const useUserSlice: StateCreator<
             lastLoginAt: user.lastLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            referralCode: user.referralCode,
             _count: user._count,
           },
           'user/login'
         );
       } catch (_err) {
-        removeLocalStorage('accessToken');
-        removeLocalStorage('refreshToken');
+        removeCookie('accessToken');
+        removeCookie('refreshToken');
         throw Error('Unable to login');
       }
     },
@@ -171,14 +174,12 @@ export const useUserSlice: StateCreator<
           value: tokens.refreshToken,
           expiresInHours: 2,
         });
-        setLocalStorage('accessToken', tokens.accessToken);
-        setLocalStorage('refreshToken', tokens.refreshToken);
 
         const user = await getUserFromToken(tokens.accessToken);
 
         if (!user) {
-          removeLocalStorage('accessToken');
-          removeLocalStorage('refreshToken');
+          removeCookie('accessToken');
+          removeCookie('refreshToken');
           // throw Error('Unable to login');
           return false;
         }
@@ -204,15 +205,13 @@ export const useUserSlice: StateCreator<
 
         return true;
       } catch (_err) {
-        removeLocalStorage('accessToken');
-        removeLocalStorage('refreshToken');
+        removeCookie('accessToken');
+        removeCookie('refreshToken');
         return false;
         // throw Error('Unable to login');
       }
     },
     logout: () => {
-      removeLocalStorage('accessToken');
-      removeLocalStorage('refreshToken');
       removeCookie('accessToken');
       removeCookie('refreshToken');
 

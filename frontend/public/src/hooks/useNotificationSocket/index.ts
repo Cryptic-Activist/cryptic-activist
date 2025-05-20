@@ -24,6 +24,10 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
       newSocket.on('notification_system', () => {
         addToast('info', 'New message received', 10000);
         notifications.setHasNewNotification(true);
+        const notificationSound = new Audio('/sounds/notification-default.mp3');
+        notificationSound.play().catch((error) => {
+          console.error('Error playing notification sound:', error);
+        });
       });
 
       notifications.setSocket(newSocket);

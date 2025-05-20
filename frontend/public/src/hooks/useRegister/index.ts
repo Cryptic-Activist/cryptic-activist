@@ -4,12 +4,12 @@ import {
   getRandomCredentials,
   onSubmitUserRegistration,
 } from '@/services/register';
+import { useApp, useCountDown } from '..';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { OnSubmit } from './types';
 import { registerResolver } from './zod';
-import { useCountDown } from '..';
 import { useForm } from 'react-hook-form';
 import { useRootStore } from '@/store';
 
@@ -18,12 +18,17 @@ const useRegister = () => {
   const {
     navigationBar: { resetNavigationBar, toggleModal },
     register,
+    app,
   } = useRootStore();
-  const { startCountDown, timeLeftInSeconds } = useCountDown();
+  const { addToast } = useApp();
+  const { startCountDown: _startCountDown, timeLeftInSeconds } = useCountDown();
   const mutation = useMutation({
     mutationKey: ['register'],
     mutationFn: onSubmitUserRegistration,
     retry: 0,
+    onError: (err: any) => {
+      addToast('error', err.response.data.errors[0], 5000);
+    },
   });
   const query = useQuery({
     queryKey: ['register'],
@@ -42,21 +47,29 @@ const useRegister = () => {
   } = useForm({ resolver: registerResolver });
 
   const onSubmit: OnSubmit = async (data) => {
-    const { confirmPassword, names, password, username, email } = data;
+    const { confirmPassword, names, password, username, email, referralCode } =
+      data;
+    console.log({ data });
     mutation.mutateAsync({
       confirmPassword,
       password,
       username,
+      referralCode,
       email,
       names,
     });
   };
+
+  console.log({ referral: app.referralCode });
 
   useEffect(() => {
     if (query.data) {
       setValue('names.firstName', query.data?.names[0]);
       setValue('names.lastName', query.data?.names[1]);
       setValue('username', query.data?.username);
+      if (app.referralCode) {
+        setValue('referralCode', app.referralCode);
+      }
     }
   }, [query.data]);
 
@@ -68,17 +81,12 @@ const useRegister = () => {
           lastName: mutation.data.lastName,
           username: mutation.data.username,
           email: mutation.data.email,
+          referralCode: mutation.data.referralCode,
         },
         'register/setRegister'
       );
       register.setPrivateKeys(mutation.data.privateKeys);
-      const countdownMs = 5000;
-      startCountDown(countdownMs);
-      setTimeout(() => {
-        setSuccessfulRegistration(true);
-        // resetNavigationBar();
-        // toggleModal('privateKeys');
-      }, countdownMs);
+      setSuccessfulRegistration(true);
     }
   }, [mutation.data]);
 
@@ -105,6 +113,7 @@ const useRegister = () => {
       },
       username: getValues('username'),
       email: getValues('email'),
+      referralCode: getValues('referralCode'),
       password: getValues('password'),
       confirmPassword: getValues('confirmPassword'),
     },

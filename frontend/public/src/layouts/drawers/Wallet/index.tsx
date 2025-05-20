@@ -147,7 +147,7 @@ const Wallet = () => {
               value={
                 blockchain.balance?.formatted
                   ? `${parseFloat(blockchain.balance?.formatted)} ${
-                      blockchain.chain.nativeCurrency.symbol
+                      blockchain?.chain?.nativeCurrency?.symbol
                     }`
                   : ''
               }

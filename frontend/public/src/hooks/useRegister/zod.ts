@@ -1,8 +1,10 @@
 import {
   ZodConfirmPassword,
+  ZodEmail,
   ZodFirstName,
   ZodLastName,
   ZodPassword,
+  ZodReferralCode,
   ZodUsername,
 } from '@/layouts/modals/zod';
 
@@ -16,7 +18,8 @@ export const RegisterCredrentials = z
       lastName: ZodLastName,
     }),
     username: ZodUsername,
-    email: z.string().email('Invalid email address'),
+    email: ZodEmail,
+    referralCode: ZodReferralCode,
     password: ZodPassword,
     confirmPassword: ZodConfirmPassword,
   })

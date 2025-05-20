@@ -1,3 +1,8 @@
+import {
+  EMAIL_FROM,
+  buildFirstTradeWithReferralReferee,
+  buildFirstTradeWithreferralReferrer,
+} from '@/services/email';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -6,9 +11,9 @@ import {
 } from './types';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
+import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
-import { EMAIL_FROM } from '@/services/email';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
@@ -190,23 +195,9 @@ export default class Trade {
         });
 
         if (emailTrade) {
-          const updatedVendorXp = await prisma.user.update({
-            where: {
-              id: emailTrade?.vendor?.id,
-            },
-            data: {
-              xp: emailTrade?.vendor?.xp + 100,
-            },
-          });
-          const updatedTraderXp = await prisma.user.update({
-            where: {
-              id: emailTrade?.trader?.id,
-            },
-            data: {
-              xp: emailTrade?.trader?.xp + 100,
-            },
-          });
-          console.log({ updatedVendorXp, updatedTraderXp });
+          const emailSents = await sendEmailsTrade(emailTrade);
+
+          await updateAddXPTier(emailTrade, emailSents.firstTradeRewardReferee);
         }
 
         const accountCreatedEmailBody = await buildTradeConfirmationEmail(

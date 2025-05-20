@@ -188,11 +188,17 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         createdAt: true,
         lastLoginAt: true,
         twoFactorEnabled: true,
+        referralCode: true,
+        xp: true,
         tier: {
           select: {
             id: true,
             name: true,
             level: true,
+            requiredXP: true,
+            discount: true,
+            tradingFee: true,
+            minVolume: true,
           },
         },
         profileColor: true,
@@ -294,13 +300,26 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { names, username, email, password } = req.body;
+  const { names, username, email, password, referralCode } = req.body;
 
   try {
+    let referrerId: string | null = null;
+
+    if (referralCode) {
+      const referringUser = await prisma.user.findUnique({
+        where: { referralCode },
+      });
+      if (!referringUser) {
+        return res.status(400).json({ error: 'Invalid referral code.' });
+      }
+      referrerId = referringUser.id;
+    }
+
     const generatedSalt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, generatedSalt);
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
+
     const tier = await prisma.tier.upsert({
       where: {
         name: 'Bronze',
@@ -308,11 +327,13 @@ export const register = async (req: Request, res: Response) => {
       update: {},
       create: {
         name: 'Bronze',
-        description: 'Bronze tier description',
-        discount: 0.01,
+        description:
+          'Your starting tier. Earn XP by trading to unlock discounts',
         level: 0,
-        minVolume: 100,
         tradingFee: 0.05,
+        discount: 0,
+        minVolume: 0,
+        requiredXP: 0,
       },
     });
 
@@ -353,21 +374,21 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
+    if (referrerId) {
+      await prisma.referral.create({
+        data: {
+          referrerId,
+          refereeId: user.id,
+        },
+      });
+    }
+
     const language = await prisma.language.upsert({
       where: { name: 'English' },
       update: {},
       create: { name: 'English' },
     });
-
-    // await prisma.userLanguage.upsert({
-    //   where: { userId: user.id, languageId: language.id },
-    //   create: {
-    //     userId: user.id,
-    //     languageId: language.id,
-    //   },
-    // });
-
-    const newUserLanguage = await prisma.userLanguage.create({
+    await prisma.userLanguage.create({
       data: { languageId: language.id, userId: user.id },
     });
 
@@ -502,6 +523,20 @@ export const verifyAccount = async (req: Request, res: Response) => {
       return;
     }
 
+    const userToVerify = await prisma.user.findFirst({
+      where: {
+        id: decoded.userId,
+        isVerified: false,
+      },
+    });
+
+    if (!userToVerify) {
+      res.status(400).send({
+        error: 'Verification token is invalid',
+      });
+      return;
+    }
+
     await prisma.user.update({
       where: {
         id: decoded.userId as string,
@@ -516,6 +551,13 @@ export const verifyAccount = async (req: Request, res: Response) => {
         token,
       },
     });
+
+    if (!verificationToken) {
+      res.status(400).send({
+        error: 'Verification token is invalid',
+      });
+      return;
+    }
 
     await prisma.token.update({
       where: {

@@ -56,7 +56,7 @@ async function main() {
 
   // Return deployment info
   return {
-    escrowAddress: escrowAddress,
+    escrowContractAddress: escrowAddress,
     deployerAddress: deployer.address,
     params: params,
   };

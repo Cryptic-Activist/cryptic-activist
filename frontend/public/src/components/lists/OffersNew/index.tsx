@@ -306,7 +306,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
                 >
                   <div />
                 </div>
-                All Payment Methods
+                <span>All Payment Methods</span>
               </button>
               {paymentMethods.map((paymentMethod: any, index: number) => {
                 const isChecked = paymentMethodIds.includes(paymentMethod.id);
@@ -323,7 +323,7 @@ export const FilterSection: FC<FilterSectionProps> = ({
                     >
                       <div />
                     </div>
-                    {paymentMethod.name}
+                    <span>{paymentMethod.name}</span>
                   </button>
                 );
               })}
