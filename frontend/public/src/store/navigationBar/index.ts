@@ -31,6 +31,7 @@ export const useNavigationBarSlice: StateCreator<
       blockchain: false,
       verifyAccount: false,
       feedback: false,
+      startTradeConfirmation: false,
     },
     status: 'idle',
     setNavigationBarValue: (params, actionName = 'navigationBar/setValue') => {
@@ -119,6 +120,7 @@ export const useNavigationBarSlice: StateCreator<
             resetPassword: false,
             verifyAccount: false,
             feedback: false,
+            startTradeConfirmation: false,
           },
           status: 'idle',
           tooltips: {

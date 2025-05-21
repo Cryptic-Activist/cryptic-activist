@@ -1,8 +1,10 @@
+import { EMAIL_FROM, buildTradeStartedEmail } from '@/services/email';
 import { IO, Socket } from '../types';
 import { prisma, redisClient } from '@/services/db';
 
 import { FRONTEND_PUBLIC } from '@/constants/env';
 import { TradeStartSentParams } from './types';
+import { publishToQueue } from '@/services/rabbitmq';
 
 export default class Notification {
   private socket: Socket;
@@ -24,7 +26,9 @@ export default class Notification {
           select: {
             id: true,
             traderId: true,
+            trader: true,
             vendorId: true,
+            vendor: true,
           },
         });
 
@@ -59,6 +63,20 @@ export default class Notification {
             // Deliver message in real time
             this.io.to(recipientSocketId).emit('notification_system', {
               message: newSystemMessage.message,
+            });
+          } else {
+            const tradeHasStratedEmailBody = buildTradeStartedEmail(trade);
+            await publishToQueue('emails', {
+              from: EMAIL_FROM.ACCOUNT,
+              to: [
+                {
+                  email: trade.vendor.email,
+                  name: `${trade.vendor.firstName} ${trade.vendor.lastName}`,
+                },
+              ],
+              subject: 'Trade has started - Cryptic Activist',
+              html: tradeHasStratedEmailBody,
+              text: 'Trade has started',
             });
           }
         }
