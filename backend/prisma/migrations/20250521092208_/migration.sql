@@ -224,6 +224,16 @@ CREATE TABLE "premium_purchases" (
 );
 
 -- CreateTable
+CREATE TABLE "referrals" (
+    "id" TEXT NOT NULL,
+    "referrerId" TEXT NOT NULL,
+    "refereeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "referrals_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "system_messages" (
     "id" TEXT NOT NULL,
     "message" VARCHAR(256) NOT NULL,
@@ -246,6 +256,7 @@ CREATE TABLE "tiers" (
     "tradingFee" DOUBLE PRECISION NOT NULL,
     "discount" DOUBLE PRECISION NOT NULL,
     "minVolume" DOUBLE PRECISION NOT NULL,
+    "requiredXP" INTEGER NOT NULL,
 
     CONSTRAINT "tiers_pkey" PRIMARY KEY ("id")
 );
@@ -351,6 +362,7 @@ CREATE TABLE "users" (
     "updatedAt" DATE,
     "tierId" TEXT,
     "kycId" TEXT,
+    "referralCode" VARCHAR(20) NOT NULL DEFAULT substring(md5(gen_random_uuid()::text), 1, 16),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -399,6 +411,12 @@ CREATE UNIQUE INDEX "premium_purchases_depositAddress_key" ON "premium_purchases
 CREATE UNIQUE INDEX "premium_purchases_userId_key" ON "premium_purchases"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "referrals_refereeId_key" ON "referrals"("refereeId");
+
+-- CreateIndex
+CREATE INDEX "referrals_referrerId_idx" ON "referrals"("referrerId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 
 -- CreateIndex
@@ -418,6 +436,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_privateKeys_key" ON "users"("privateKeys");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_referralCode_key" ON "users"("referralCode");
 
 -- CreateIndex
 CREATE INDEX "users_username_idx" ON "users"("username");
@@ -466,6 +487,12 @@ ALTER TABLE "payment_details" ADD CONSTRAINT "payment_details_paymentMethodId_fk
 
 -- AddForeignKey
 ALTER TABLE "premium_purchases" ADD CONSTRAINT "premium_purchases_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "referrals" ADD CONSTRAINT "referrals_referrerId_fkey" FOREIGN KEY ("referrerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "referrals" ADD CONSTRAINT "referrals_refereeId_fkey" FOREIGN KEY ("refereeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "system_messages" ADD CONSTRAINT "system_messages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -523,4 +550,3 @@ ALTER TABLE "users" ADD CONSTRAINT "users_lastUpdatedById_fkey" FOREIGN KEY ("la
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_tierId_fkey" FOREIGN KEY ("tierId") REFERENCES "tiers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
