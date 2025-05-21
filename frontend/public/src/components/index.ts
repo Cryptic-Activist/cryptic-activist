@@ -24,5 +24,6 @@ export { default as FeedbackCount } from './FeedbackCount';
 export { default as Altcha } from './Altcha';
 export { default as FeedbackSelector } from './FeedbackSelector';
 export { default as Analytics } from './Analytics';
+export { default as Checkbox } from './Checkbox';
 export * from './lists';
 export * from './offer';

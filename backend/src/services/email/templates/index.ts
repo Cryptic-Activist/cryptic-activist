@@ -11,3 +11,4 @@ export { default as buildChangeEmailRequestEmail } from './email-change-request'
 export { default as buildChangeEmailSuccessEmail } from './email-change-success';
 export { default as buildFirstTradeWithreferralReferrer } from './first-trade-with-referral-referrer';
 export { default as buildFirstTradeWithReferralReferee } from './first-trade-with-referral-referee';
+export { default as buildTradeStartedEmail } from './trade-has-started';

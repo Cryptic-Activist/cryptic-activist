@@ -11,6 +11,7 @@ import {
   Register,
   ResetPassword,
   ResetPasswordRequest,
+  StartTradeConfirmation,
   TwoFactorAuthentication,
   WalletModal,
 } from '@/layouts/modals';
@@ -22,27 +23,26 @@ const AllModals = () => {
 
   return (
     <>
-      {navigationBar.modals.login ? <Login /> : <></>}
-      {navigationBar.modals.twoFactor ? <TwoFactorAuthentication /> : <></>}
+      {navigationBar.modals.login ? <Login /> : null}
+      {navigationBar.modals.twoFactor ? <TwoFactorAuthentication /> : null}
       {navigationBar.modals.enableTwoFactor ? (
         <EnableTwoFactorAuthnetication />
-      ) : (
-        <></>
-      )}
-      {navigationBar.modals.register ? <Register /> : <></>}
-      {/* {navigationBar.modals.verifyAccount ? <VerifyAccount /> : <></>} */}
+      ) : null}
+      {navigationBar.modals.register ? <Register /> : null}
+      {/* {navigationBar.modals.verifyAccount ? <VerifyAccount /> : null} */}
       {navigationBar.modals.resetPasswordRequest ? (
         <ResetPasswordRequest />
-      ) : (
-        <></>
-      )}
-      {navigationBar.modals.resetPassword ? <ResetPassword /> : <></>}
-      {navigationBar.modals.fiats ? <Fiats /> : <></>}
-      {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : <></>}
-      {navigationBar.modals.paymentMethods ? <PaymentMethods /> : <></>}
-      {navigationBar.modals.privateKeys ? <PrivateKeys /> : <></>}
-      {navigationBar.modals.blockchain ? <WalletModal /> : <></>}
-      {navigationBar.modals.feedback ? <Feedback /> : <></>}
+      ) : null}
+      {navigationBar.modals.resetPassword ? <ResetPassword /> : null}
+      {navigationBar.modals.fiats ? <Fiats /> : null}
+      {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : null}
+      {navigationBar.modals.paymentMethods ? <PaymentMethods /> : null}
+      {navigationBar.modals.privateKeys ? <PrivateKeys /> : null}
+      {navigationBar.modals.blockchain ? <WalletModal /> : null}
+      {navigationBar.modals.feedback ? <Feedback /> : null}
+      {navigationBar.modals.startTradeConfirmation ? (
+        <StartTradeConfirmation />
+      ) : null}
     </>
   );
 };
