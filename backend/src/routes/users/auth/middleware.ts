@@ -38,8 +38,6 @@ export const validateLogin2FA = (
 
   const validated = Login2FA.safeParse(body);
 
-  console.log({ validated });
-
   if (!validated.success) {
     res.status(400).send({
       errors: validated.error,

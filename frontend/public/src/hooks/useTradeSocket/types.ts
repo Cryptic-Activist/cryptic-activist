@@ -11,6 +11,7 @@ export type UseSocketParams = {
   walletAddress?: string;
   onStatusChange?: (status: Status) => void;
   onSetPaid: (isPaid: boolean) => void;
+  onSetTradeCreated: () => void;
   onSetCanceled: () => void;
   onSetPaymentConfirmed: (hasReceived: boolean) => void;
   onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;

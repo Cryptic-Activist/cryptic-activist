@@ -110,7 +110,6 @@ export const createAcceptedCryptocurrencyCoinGecko = async (
 
     res.status(200).send(createdAcceptedCryptocurrency);
   } catch (err) {
-    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
