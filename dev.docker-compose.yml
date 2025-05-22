@@ -81,6 +81,25 @@ services:
     networks:
       - app-network
 
+  # postgres-backup:
+  #   image: postgres:latest
+  #   container_name: postgres-backup
+  #   entrypoint: /bin/sh -c "apt-get update && \
+  #                           apt-get install -y apt-utils cron && \
+  #                           chmod +x /entrypoint.sh && \
+  #                           ./entrypoint.sh && \
+  #                           ls -la && \
+  #                           cron -f"
+  #   volumes:
+  #     - ./backups:/backups
+  #     - ./dev.postgres-backup.sh:/entrypoint.sh
+  #   env_file:
+  #     - envs/dev.postgres.env
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
+
   pgadmin4:
     image: dpage/pgadmin4
     container_name: pgAdmin4
