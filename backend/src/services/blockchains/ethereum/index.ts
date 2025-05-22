@@ -229,7 +229,7 @@ export const getCreateTradeDetails = async (trade: any) => {
   const seller = isBuyOffer
     ? trade.vendorWalletAddress
     : trade.traderWalletAddress;
-  const tradeDuration = offer?.timeLimit * 60; // minutes -> seconds
+  const tradeDuration = offer?.timeLimit?.times(60); // minutes -> seconds
   const cryptoAmount = trade.cryptocurrencyAmount;
   const collateral = cryptoAmount * 0.25;
   const sellerFundAmount = cryptoAmount + collateral;

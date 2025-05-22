@@ -155,14 +155,14 @@ model Offer {
   id                  String         @id @default(uuid())
   offerType           String
   pricingType         String
-  listAt              Float
-  limitMin            Float
-  limitMax            Float
-  timeLimit           Float
+  listAt              Decimal        @db.Decimal(30, 10)
+  limitMin            Decimal        @db.Decimal(30, 10)
+  limitMax            Decimal        @db.Decimal(30, 10)
+  timeLimit           Decimal?       @db.Decimal(30, 10) // if decimal needed
   tags                String[]
   label               String
   terms               String
-  averageTradeSpeed   Float?
+  averageTradeSpeed   Decimal?       @db.Decimal(30, 10) // if decimal needed
   instructions        String
   deletedAt           DateTime?      @db.Date
   createdAt           DateTime?      @default(now()) @db.Date
@@ -238,7 +238,7 @@ model PremiumPurchase {
   depositAddress String    @unique
   userId         String    @unique
   user           User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  expectedAmount Float
+  expectedAmount Decimal   @db.Decimal(30, 10)
   status         String // e.g., "pending", "completed", "failed"
   transactionId  String?
   deletedAt      DateTime? @db.Date
@@ -275,13 +275,13 @@ model SystemMessage {
 }
 
 model Tier {
-  id          String @id @default(uuid())
-  name        String @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String
-  level       Int    @unique
-  tradingFee  Float
-  discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
-  minVolume   Float // Minimum trading volume to qualify for this tier
+  level       Int     @unique
+  tradingFee  Decimal @db.Decimal(30, 10) // Base trading fee for this tier
+  discount    Decimal @db.Decimal(30, 10) // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
+  minVolume   Decimal @db.Decimal(30, 10) // Minimum trading volume to qualify for this tier
   requiredXP  Int
   users       User[]
 
@@ -316,8 +316,8 @@ model Trade {
   paymentMethodId           String
   paymentMethod             PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
   chat                      Chat?
-  cryptocurrencyAmount      Float
-  fiatAmount                Float
+  cryptocurrencyAmount      Decimal         @db.Decimal(30, 10)
+  fiatAmount                Decimal         @db.Decimal(30, 10)
   startedAt                 DateTime        @default(now())
   endedAt                   DateTime?
   expiredAt                 DateTime? // Time when the trade should be considered expired
@@ -364,7 +364,7 @@ model Transaction {
   user                       User                     @relation(fields: [userId], references: [id])
   transactionPaymentMethodId String
   transactionPaymentMethod   TransactionPaymentMethod @relation(fields: [transactionPaymentMethodId], references: [id])
-  amount                     Float
+  amount                     Decimal                  @db.Decimal(30, 10)
   currency                   String
   status                     TransactionStatus // e.g., 'pending', 'completed', 'failed'
   gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)

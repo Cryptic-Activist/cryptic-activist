@@ -1,10 +1,11 @@
+import { Prisma, prisma } from '@/services/db';
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
 import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
-import { prisma } from '@/services/db';
+import { toPrismaDecimal } from '@/utils/numbers';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -26,8 +27,8 @@ export async function createTradeController(req: Request, res: Response) {
         offerId: body.offerId,
         cryptocurrencyId: body.cryptocurrencyId,
         fiatId: body.fiatId,
-        cryptocurrencyAmount: body.cryptocurrencyAmount,
-        fiatAmount: body.fiatAmount,
+        cryptocurrencyAmount: toPrismaDecimal(body.cryptocurrencyAmount),
+        fiatAmount: toPrismaDecimal(body.fiatAmount),
         status: 'PENDING',
         startedAt: new Date(),
         paymentMethodId: body.paymentMethodId,
@@ -225,8 +226,8 @@ export const calculateReceivingAmount = async (
     const { userId, cryptocurrencyId, fiatId, fiatAmount, currentPrice } =
       req.query;
 
-    const parsedFiatAmount = parseFloat(fiatAmount);
-    const parsedCurrentPrice = parseFloat(currentPrice);
+    const parsedFiatAmount = toPrismaDecimal(fiatAmount);
+    const parsedCurrentPrice = toPrismaDecimal(currentPrice);
 
     const user = await prisma.user.findFirst({
       where: { id: userId as string },
@@ -272,25 +273,25 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    let feeRate = tier?.tradingFee! - tier?.discount!;
+    let feeRate = tier?.tradingFee!.minus(tier?.discount!);
 
     if (user?.isPremium) {
-      feeRate -= DEFAULT_PREMIUM_DISCOUNT;
+      feeRate = feeRate.minus(toPrismaDecimal(DEFAULT_PREMIUM_DISCOUNT));
     }
 
-    const tradingFee = parsedFiatAmount * feeRate;
-    const finalFiatAmount = parsedFiatAmount - tradingFee;
+    const tradingFee = parsedFiatAmount.times(feeRate);
+    const finalFiatAmount = parsedFiatAmount.minus(tradingFee);
 
-    const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
-
-    console.log({ finalCryptoAmount });
+    const finalCryptoAmount = toPrismaDecimal(
+      finalFiatAmount.div(parsedCurrentPrice).toFixed(8),
+    );
 
     res.status(200).send({
       fiatAmount,
       tradingFee,
       finalFiatAmount,
       currentPrice,
-      finalCryptoAmount: parseFloat(finalCryptoAmount),
+      finalCryptoAmount,
     });
     return;
   } catch (err) {
