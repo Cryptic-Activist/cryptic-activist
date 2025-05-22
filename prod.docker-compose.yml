@@ -60,22 +60,22 @@ services:
     networks:
       - app-network
 
-  postgres-backup:
-    image: postgres:latest
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      "mkdir -p /backups &&
-       pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} > /backups/backup_$(date +%F).sql"
-    volumes:
-      - ./backups:/backups
-    env_file:
-      - envs/prod.postgres.env
-    depends_on:
-      - postgres
-    networks:
-      - app-network
-    profiles:
-      - backup
+  # postgres-backup:
+  #   image: postgres:latest
+  #   entrypoint: ["/bin/sh", "-c"]
+  #   command: >
+  #     "mkdir -p /backups &&
+  #      pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} > /backups/backup_$(date +%F).sql"
+  #   volumes:
+  #     - ./backups:/backups
+  #   env_file:
+  #     - envs/prod.postgres.env
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
+  #   profiles:
+  #     - backup
 
 
   rabbitmq:
