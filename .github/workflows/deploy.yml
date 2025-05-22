@@ -97,12 +97,28 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
 
+          # prod.postgres-backup.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres-backup.env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres-backup.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres-backup.env
+
           # prod.redis.env
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
           # prod.rabbitmq.env
           echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
           echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
+
+    - name: Back up PostgreSQL database
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+        command_timeout: 60m
+        script: |
+          cd app
+          docker compose --profile backup run --rm postgres-backup
 
     - name: Clean up Docker
       uses: appleboy/ssh-action@v1.2.2
@@ -113,7 +129,9 @@ jobs:
         command_timeout: 60m
         script: |
           cd app
-          docker system prune -a -f
+          docker container prune -f
+          docker image prune -a -f
+
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
