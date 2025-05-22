@@ -59,6 +59,12 @@ services:
       - "5432:5432"
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   # postgres-backup:
   #   image: postgres:latest
@@ -109,7 +115,14 @@ services:
       - app-network
     depends_on:
       - postgres
-
+      - redis
+      - mongodb
+      - rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend-public:
     container_name: public

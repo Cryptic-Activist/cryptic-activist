@@ -5,6 +5,7 @@ import chats from './chats';
 import cryptocurrencies from './cryptocurrencies';
 import feedbacks from './feedbacks';
 import fiats from './fiats';
+import health from './health';
 import offers from './offers';
 import systemMessages from './systemMessages';
 import tiers from './tiers';
@@ -25,4 +26,5 @@ export default (app: Application): void => {
   app.use('/altcha', altcha);
   app.use('/vendors', vendors);
   app.use('/tiers', tiers);
+  app.use('/health', health);
 };
