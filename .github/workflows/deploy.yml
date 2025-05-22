@@ -104,16 +104,16 @@ jobs:
           echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
           echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
 
-    - name: Back up PostgreSQL database
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 60m
-        script: |
-          cd app
-          docker compose --profile backup run --rm postgres-backup
+    # - name: Back up PostgreSQL database
+    #   uses: appleboy/ssh-action@v1.2.2
+    #   with:
+    #     host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+    #     username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+    #     key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+    #     command_timeout: 60m
+    #     script: |
+    #       cd app
+    #       docker compose --profile backup run --rm postgres-backup
 
     - name: Clean up Docker
       uses: appleboy/ssh-action@v1.2.2
