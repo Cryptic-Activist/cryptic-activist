@@ -210,6 +210,102 @@ export default function TradePage() {
           status={trade.status}
         />
         <TradeInstructions trade={trade} />
+
+        <h1>Trade #ABC456</h1>
+        <div className="section">
+          <div className="row">
+            <div>
+              <strong>Status:</strong> Waiting for your payment
+            </div>
+            <div>
+              <strong>Time Left:</strong> 14:35
+            </div>
+          </div>
+        </div>
+
+        <div className="section">
+          <h2>Trade Details</h2>
+          <p>
+            <span className="label">Crypto Amount:</span> 0.003 BTC
+          </p>
+          <p>
+            <span className="label">Fiat Total:</span> $90 USD
+          </p>
+          <p>
+            <span className="label">Exchange Rate:</span> $30,000 / BTC
+          </p>
+          <p>
+            <span className="label">Payment Method:</span> Bank Transfer
+          </p>
+        </div>
+
+        <div className="section">
+          <h2>Vendor Info</h2>
+          <p>
+            <span className="label">Username:</span> trustSeller
+          </p>
+          <p>
+            <span className="label">Reputation:</span> 300 trades, 98% success
+          </p>
+          <p>
+            <span className="label">KYC:</span> Verified ✅
+          </p>
+        </div>
+
+        <div className="section">
+          <h2>Payment Instructions</h2>
+          <p>
+            <span className="label">Bank Name:</span> Example Bank
+          </p>
+          <p>
+            <span className="label">Account Number:</span> ****1234
+          </p>
+          <p>
+            <span className="label">Reference:</span> ABC456
+          </p>
+          <p>
+            <strong>
+              ⚠️ Do not mention crypto in the payment description!
+            </strong>
+          </p>
+        </div>
+
+        <div className="section">
+          <h2>Payment Action</h2>
+          <p>
+            After sending the payment, mark the trade as paid and upload your
+            proof.
+          </p>
+          <button className="btn btn-primary">Mark as Paid</button>
+          <button className="btn btn-warning">Upload Payment Proof</button>
+          <button className="btn btn-danger">Cancel Trade</button>
+        </div>
+
+        <div className="section">
+          <h2>Escrow Status</h2>
+          <p>
+            <span className="label">Status:</span> Crypto is locked in escrow ✅
+          </p>
+          <p>Vendor will release the crypto once your payment is confirmed.</p>
+        </div>
+
+        <div className="section">
+          <h2>Dispute</h2>
+          <p>
+            If you have paid but the vendor hasn&apos;t released the crypto, you
+            can open a dispute.
+          </p>
+          <button className="btn btn-danger">Open Dispute</button>
+        </div>
+
+        <div className="section">
+          <h2>Activity Log</h2>
+          <ul>
+            <li>Trade opened</li>
+            <li>Escrow funded</li>
+            <li>Awaiting your payment</li>
+          </ul>
+        </div>
       </div>
       <div>
         {trade.id && trade.vendor && trade.trader && (

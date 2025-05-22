@@ -295,6 +295,7 @@ enum TradeStatus {
   CANCELLED // Trade was cancelled by one of the parties  
   DISPUTED // Trade is under review due to a dispute  
   EXPIRED // Trade expired due to inactivity  
+  FAILED // Trade failed due to an error or issue
 }
 
 model Trade {
@@ -323,6 +324,7 @@ model Trade {
   expiredAt                 DateTime? // Time when the trade should be considered expired
   status                    TradeStatus
   paid                      Boolean?        @default(false) @db.Boolean
+  funded                    Boolean?        @default(false) @db.Boolean
   paymentConfirmed          Boolean?        @default(false) @db.Boolean
   escrowReleaseDate         DateTime?       @db.Date
   blockchainTradeId         BigInt? // Trade ID on the blockchain

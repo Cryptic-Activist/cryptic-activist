@@ -85,7 +85,7 @@ const useParams = () => {
       toggleModal('register');
       clearSearchParams();
     } else {
-      addToast('error', 'Referral code is invalid', 5000);
+      // addToast('error', 'Referral code is invalid', 5000);
       clearSearchParams();
     }
   };
