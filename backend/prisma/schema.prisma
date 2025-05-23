@@ -152,7 +152,7 @@ model Language {
 }
 
 model Offer {
-  id                  String         @id @default(uuid())
+  id                  String          @id @default(uuid())
   offerType           String
   pricingType         String
   listAt              Float
@@ -164,19 +164,21 @@ model Offer {
   terms               String
   averageTradeSpeed   Float?
   instructions        String
-  deletedAt           DateTime?      @db.Date
-  createdAt           DateTime?      @default(now()) @db.Date
-  updatedAt           DateTime?      @updatedAt @db.Date
-  vendor              User           @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
+  deletedAt           DateTime?       @db.Date
+  createdAt           DateTime?       @default(now()) @db.Date
+  updatedAt           DateTime?       @updatedAt @db.Date
+  vendor              User            @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
   vendorId            String
   vendorWalletAddress String
-  cryptocurrency      Cryptocurrency @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cryptocurrency      Cryptocurrency  @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cryptocurrencyId    String
-  paymentMethod       PaymentMethod  @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethod       PaymentMethod   @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   paymentMethodId     String
-  fiat                Fiat           @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  paymentDetails      PaymentDetails? @relation("offer", fields: [paymentDetailsId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentDetailsId    String
+  fiat                Fiat            @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fiatId              String
-  trades              Trade[]        @relation("tradeOffer")
+  trades              Trade[]         @relation("tradeOffer")
 
   @@map("offers")
 }
@@ -190,7 +192,7 @@ model PaymentMethod {
   paymentMethodCategory   PaymentMethodCategory @relation(fields: [paymentMethodCategoryId], references: [id], onUpdate: Cascade)
   paymentMethodCategoryId String
   offers                  Offer[]               @relation("offer")
-  Trade                   Trade[]
+  trades                  Trade[]
   paymentDetails          PaymentDetails[]
 
   @@map("payment_methods")
@@ -228,7 +230,9 @@ model PaymentDetails {
   updatedAt       DateTime?     @updatedAt @db.Date
   paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id], onUpdate: Cascade)
   paymentMethodId String
-  trade           Trade[]
+  offers          Offer[]       @relation("offer")
+  user            User          @relation(fields: [userId], references: [id], onUpdate: Cascade)
+  userId          String
 
   @@map("payment_details")
 }
@@ -319,6 +323,7 @@ model Trade {
   chat                      Chat?
   cryptocurrencyAmount      Float
   fiatAmount                Float
+  exchangeRate              Decimal         @db.Decimal(30, 10)
   startedAt                 DateTime        @default(now())
   endedAt                   DateTime?
   expiredAt                 DateTime? // Time when the trade should be considered expired
@@ -332,8 +337,6 @@ model Trade {
   deletedAt                 DateTime?       @db.Date
   createdAt                 DateTime?       @default(now()) @db.Date
   updatedAt                 DateTime?       @updatedAt @db.Date
-  paymentDetails            PaymentDetails? @relation(fields: [paymentDetailsId], references: [id])
-  paymentDetailsId          String?
   feedback                  Feedback?       @relation("tradeFeedback")
 
   @@map("trades")
@@ -445,6 +448,7 @@ model User {
   referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
   referrer                 Referral[]                 @relation("referrer")
   referre                  Referral?                  @relation("referee")
+  PaymentDetails           PaymentDetails[]
 
   @@index([username])
   @@map("users")

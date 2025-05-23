@@ -53,3 +53,6 @@ export const generateRandomHash = (length = 4) => {
   }
   return hash;
 };
+
+export const convertNewlinesToBr = (input: string) =>
+  input.replace(/\n/g, '<br />');

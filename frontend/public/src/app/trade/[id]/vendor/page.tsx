@@ -12,6 +12,7 @@ import {
 
 import { TradeProps } from './types';
 import styles from './page.module.scss';
+import { toUpperCase } from '@/utils';
 
 const Trade: FC<TradeProps> = ({
   trade,
@@ -30,45 +31,37 @@ const Trade: FC<TradeProps> = ({
 
       <section>
         <h2>Trade Summary</h2>
-        <p>Trade ID: {trade.id}</p>
-        <p>
-          Trade Status:{' '}
-          {trade.status === 'IN_PROGRESS' ? 'In Progress' : trade.status}
-        </p>
-        <p>
-          Trade Created At:{' '}
-          {trade.createdAt
-            ? new Date(trade.createdAt).toLocaleString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-              })
-            : 'N/A'}
-        </p>
+        <p>Trade ID: {trade?.id}</p>
+        <p>Trade Status: {trade?.status}</p>
+        <p>Trade Created At: {trade?.createdAt}</p>
         <p>IMPORTANT: Timer HERE</p>
       </section>
       <section>
         <h2>Trade Details</h2>
         <p>
-          Trade Type: {trade.offer.offerType === 'buy' ? 'Buying' : 'Selling'}{' '}
-          {trade.cryptocurrency.symbol}
+          {`Trade Type: ${
+            trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
+          } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
         </p>
         <p>
-          Amount: {trade.cryptoAmount} {trade.cryptocurrency.symbol}
+          {`Amount: ${trade?.cryptocurrencyAmount} ${toUpperCase(
+            trade?.cryptocurrency?.symbol
+          )}`}
         </p>
-        <p>Fiat Amount:</p>
-        <p>Exchange Rate: </p>
-        <p>Payment Method:</p>
+        <p>{`Fiat Amount: ${trade?.fiatAmount} ${trade?.fiat?.symbol}`}</p>
+        <p>{`Exchange Rate: `}</p>
+        <p>{`Payment Method: ${trade?.paymentMethod?.name}`}</p>
       </section>
       <section>
         <h2>Trader Information</h2>
-        <p>Name: {`${trade.trader?.firstName} ${trade.trader?.lastName}`}</p>
-        <p>Username: {trade.trader.username}</p>
-        <p>Trade History / Rating</p>
-        <p>KYC Status:</p>
+        <p>{`Name: ${trade?.trader?.firstName} ${trade?.trader?.lastName}`}</p>
+        <p>{`Username: ${trade?.trader?.username}`}</p>
+        <p>{`Trade History / Rating: ${trade?.trader?._count?.tradeTrader} trades`}</p>
+        <p>
+          {`KYC Status: ${
+            trade?.trader?.kyc !== null ? 'Verified' : 'Not Verified'
+          }`}
+        </p>
         <p>Communication history</p>
       </section>
       <section>
@@ -80,8 +73,8 @@ const Trade: FC<TradeProps> = ({
         <h2>Escrow Status</h2>
         <p>Indicate that crypto is locked in escrow</p>
         <p>
-          <strong>Warning:</strong> Only release once you’ve confirmed receiving
-          funds in your bank!
+          <strong>Warning:</strong> Only release once you&apos;ve confirmed
+          receiving funds in your bank!
         </p>
       </section>
       <section>
