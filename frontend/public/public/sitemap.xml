@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Home Page -->
+  <url>
+    <loc>https://crypticactivist.com/</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Static Pages -->
+  <url>
+    <loc>https://crypticactivist.com/about-us</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/become-a-vendor</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/fees</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/help</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/tier</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://crypticactivist.com/privacy-policy</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/terms-and-conditions</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/cookies-policy</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/imprint</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Public Trading Pages -->
+  <url>
+    <loc>https://crypticactivist.com/vendors</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/trades</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- User Account Pages (Protected - Lower Priority) -->
+  <url>
+    <loc>https://crypticactivist.com/account</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/account/messages</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/account/payment-methods</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/account/rewards</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/account/settings</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/kyc</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/my-offers</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://crypticactivist.com/offer/create</loc>
+    <lastmod>2025-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Note: Dynamic routes with [id] parameters are not included in sitemap -->
+  <!-- These would need to be generated dynamically based on actual data: -->
+  <!-- /offer/[id] - Individual offer pages -->
+  <!-- /offer/[id]/edit - Edit offer pages -->
+  <!-- /trade/[id] - Individual trade pages -->
+  <!-- /trade/[id]/details - Trade details pages -->
+  <!-- /trade/[id]/vendor - Trade vendor pages -->
+  <!-- /vendor/[id] - Individual vendor pages -->
+  <!-- /account/password/reset/[token] - Password reset pages -->
+  <!-- /account/settings/email/verify/[token] - Email verification pages -->
+  <!-- /account/verify/[token] - Account verification pages -->
+
+</urlset>
