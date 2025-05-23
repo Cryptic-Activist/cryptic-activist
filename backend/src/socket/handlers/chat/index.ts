@@ -85,6 +85,7 @@ export default class Chat {
           return;
         }
 
+        // Start trade if vendor wallet address is provided
         if (vendorWalletAddress) {
           if (!trade?.vendorWalletAddress) {
             const updatedTrade = await prisma.trade.update({
@@ -147,8 +148,14 @@ export default class Chat {
             });
 
             if (tradeCreated.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                },
+              });
               this.io.to(chatId).emit('trade_error', {
-                error: tradeCreated.error,
+                error: 'Trade creation error',
               });
               return;
             }
@@ -184,6 +191,20 @@ export default class Chat {
               createTradeDetails.sellerFundAmountWei,
             );
 
+            console.log('Trade funded:', tradeFunded);
+            if (tradeFunded.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                },
+              });
+              this.io.to(chatId).emit('trade_error', {
+                error: 'Trade funding error',
+              });
+              return;
+            }
+
             if (tradeFunded.data) {
               await ChatMessage.create({
                 chatId,
@@ -199,12 +220,10 @@ export default class Chat {
                 id: trade?.id,
               },
               data: {
-                startedAt: new Date(),
                 status: 'IN_PROGRESS',
+                fundedAt: new Date(),
               },
             });
-
-            console.log('Trade funded:', tradeFunded);
 
             this.io.to(chatId).emit('blockchain_trade_created', {
               blockchainTradeId: tradeCreated.data?.tradeId.toString(),

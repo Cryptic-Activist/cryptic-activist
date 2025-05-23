@@ -14,8 +14,13 @@ const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
         <Link href={`/offer/${offer.id}`} className={styles.offerId}>
           {offer.id}
         </Link>
-        <div className={styles.edits}>
-          <button onClick={() => onDeleteOffer(offer.id)}>DELETE</button>
+        <div className={styles.listItemHeaderActions}>
+          <div className={styles.edit}>
+            <Link href={`/offer/${offer.id}/edit`}>EDIT</Link>
+          </div>
+          <div className={styles.delete}>
+            <button onClick={() => onDeleteOffer(offer.id)}>DELETE</button>
+          </div>
         </div>
       </div>
       <div className={styles.listItemContent}>

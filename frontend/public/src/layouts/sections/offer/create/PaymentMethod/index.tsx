@@ -11,6 +11,8 @@ import { CreateOfferPaymentMethodProps } from './types';
 import Head from 'next/head';
 import type { Item } from '@/components/Radio/types';
 import { TextArea } from '@/components/forms';
+import { convertNewlinesToBr } from '@/utils';
+import styles from './index.module.scss';
 import stylesCore from '../index.module.scss';
 
 const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
@@ -20,6 +22,7 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
   createOffer,
   step,
   onClickEvents,
+  paymentDetailsQuery,
 }) => {
   const selectOfferType = (value: Item) => {
     setCreateOfferValue({ offerType: value.value }, 'createOffer/setOfferType');
@@ -44,6 +47,17 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
       saveCreateOfferLocally();
       toStep(1);
     }
+  };
+
+  const onClickPaymentDetails = (id: string) => {
+    setCreateOfferValue(
+      {
+        paymentDetails: {
+          id,
+        },
+      },
+      'createOffer/setPaymentDetails'
+    );
   };
 
   return (
@@ -95,11 +109,39 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             <section className={stylesCore.horizontalGroup}>
               <TextArea
                 id="paymentDetails"
-                value={createOffer.paymentDetails ?? ''}
+                value={
+                  typeof createOffer.paymentDetails === 'string'
+                    ? createOffer.paymentDetails
+                    : ''
+                }
                 onChange={inputPaymentDetails}
-                label="Payment Details"
+                label="New Payment Details"
                 info="Describe the payment details such as bank account details"
               />
+              {paymentDetailsQuery.data?.length > 0 && (
+                <ul className={styles.paymentDetails}>
+                  {paymentDetailsQuery.data.map((pd: any) => {
+                    const isSelected =
+                      typeof createOffer.paymentDetails === 'object' &&
+                      createOffer.paymentDetails !== null &&
+                      'id' in createOffer.paymentDetails &&
+                      (createOffer.paymentDetails as { id: string }).id ===
+                        pd.id;
+                    return (
+                      <li key={pd.id}>
+                        <button
+                          type="button"
+                          className={`${isSelected ? styles.selected : ''}`}
+                          dangerouslySetInnerHTML={{
+                            __html: convertNewlinesToBr(pd.instructions),
+                          }}
+                          onClick={() => onClickPaymentDetails(pd.id)}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </section>
           )}
         </div>

@@ -15,7 +15,7 @@ jobs:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
         username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 60m
+        command_timeout: 120m
         script: |
           cd app
           mkdir -p envs  # Make sure the 'envs' directory exists
@@ -110,7 +110,7 @@ jobs:
     #     host: ${{ secrets.DIGITAL_OCEAN_HOST }}
     #     username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
     #     key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-    #     command_timeout: 60m
+    #     command_timeout: 120m
     #     script: |
     #       cd app
     #       docker compose --profile backup run --rm postgres-backup
@@ -121,7 +121,7 @@ jobs:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
         username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 60m
+        command_timeout: 120m
         script: |
           cd app
           docker container prune -f
@@ -134,7 +134,7 @@ jobs:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
         username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
         key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 60m
+        command_timeout: 120m
         script: |
           cd app
           git restore .

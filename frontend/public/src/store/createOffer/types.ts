@@ -5,6 +5,8 @@ type OfferType = 'sell' | 'buy';
 
 type TradePricingType = 'market' | 'fixed';
 
+type PaymentDetails = string | { id: string };
+
 export type SetCreateOfferValue = (
   value: Value,
   actionname: `createOffer/${string}`
@@ -17,7 +19,7 @@ export type CreateOffer = {
     vendorId?: string;
     offerType?: OfferType;
     paymentMethodId?: string;
-    paymentDetails?: string;
+    paymentDetails?: PaymentDetails;
     isPaymentMethodCompleted?: boolean;
     pricingType?: TradePricingType;
     listAt?: number;
@@ -44,7 +46,7 @@ export type CreateOfferSetter = {
   vendorId?: string;
   offerType?: OfferType;
   paymentMethodId?: string;
-  paymentDetails?: string;
+  paymentDetails?: PaymentDetails;
   isPaymentMethodCompleted?: boolean;
   pricingType?: TradePricingType;
   listAt?: number;

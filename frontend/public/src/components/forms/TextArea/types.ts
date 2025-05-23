@@ -3,7 +3,7 @@ export type TextAreaProps = {
   label?: string;
   info?: string;
   onChange?: (value: string) => void;
-  value?: string;
+  value?: any;
   required?: boolean;
   errorMessage?: string;
   placeholder?: string;

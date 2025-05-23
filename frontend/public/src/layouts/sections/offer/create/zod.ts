@@ -13,7 +13,12 @@ export const ZodCryptocurrency = z.object({
 });
 export const ZodOfferType = z.string().min(3);
 export const ZodPaymentMethodId = z.string().min(2);
-export const ZodPaymentDetails = z.string().min(5);
+export const ZodPaymentDetails = z.union([
+  z.string().min(5),
+  z.object({
+    id: z.string().min(5),
+  }),
+]);
 export const ZodPricingType = z.string().min(1);
 export const ZodListAt = z.number().min(1);
 export const ZodLimitMax = z.number().min(1);

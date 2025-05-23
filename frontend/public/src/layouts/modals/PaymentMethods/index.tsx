@@ -10,6 +10,7 @@ import { toCapitalize } from '@/utils';
 const PaymentMethods = () => {
   const { paymentMethodsList, setPaymentMethod, filterPaymentMethods } =
     usePaymentMethods();
+
   const { toggleModal } = useNavigationBar();
 
   const selectPaymentMethod = (paymentMethod: PaymentMethod) => {
@@ -19,8 +20,8 @@ const PaymentMethods = () => {
 
   return (
     <ListTemplate
-      width="20vw"
-      height="25vh"
+      width="30rem"
+      height="70vh"
       heading="Payment Methods"
       onFilter={filterPaymentMethods}
     >

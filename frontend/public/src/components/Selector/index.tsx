@@ -15,7 +15,11 @@ import countryFlags from '@/hooks/useFiats/countryFlags';
 import styles from './index.module.scss';
 import { toCapitalize } from '@/utils';
 
-const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
+const Selector: FC<SelectorProps> = ({
+  type,
+  hasLabel = true,
+  overrideLabel,
+}) => {
   const [label, setLabel] = useState<
     string | ReactElement<unknown, string | JSXElementConstructor<any>>
   >('No data');
@@ -51,6 +55,11 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
           countryFlags[defaults.fiat.country],
           defaults.fiat.name
         );
+      } else if (type === 'paymentMethod' && defaults.paymentMethod) {
+        if (overrideLabel) {
+          return overrideLabel;
+        }
+        return defaults.paymentMethod.name;
       }
       return 'No data';
     };
@@ -64,6 +73,9 @@ const Selector: FC<SelectorProps> = ({ type, hasLabel = true }) => {
     }
     if (type === 'cryptocurrency') {
       toggleModal('cryptocurrencies');
+    }
+    if (type === 'paymentMethod') {
+      toggleModal('paymentMethods');
     }
   };
 

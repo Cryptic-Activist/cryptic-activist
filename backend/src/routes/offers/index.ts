@@ -3,6 +3,7 @@ import feedback from './feedback';
 import feedbacks from './feedbacks';
 import offer from './offer';
 import offers from './offers';
+import paymentDetails from './paymentDetails';
 import paymentMethod from './paymentMethod';
 import paymentMethodCategories from './paymentMethod/categories';
 import paymentMethods from './paymentMethods';
@@ -16,5 +17,6 @@ router.use('/feedbacks', feedbacks);
 router.use('/payment-method', paymentMethod);
 router.use('/payment-method/categories', paymentMethodCategories);
 router.use('/payment-methods', paymentMethods);
+router.use('/payment-details', paymentDetails);
 
 export default router;

@@ -6,12 +6,50 @@ export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
 
+    const { paymentDetails, ...restBody } = body;
+
+    let paymentDetailsId: string | null = null;
+
+    if (!paymentDetails?.id) {
+      const newPaymentDetails = await prisma.paymentDetails.create({
+        data: {
+          instructions: body.paymentDetails,
+          paymentMethodId: body.paymentMethodId, // Make sure body.paymentMethod is provided and valid
+          userId: body.vendorId, // Make sure body.vendorId is provided and valid
+        },
+        select: {
+          id: true,
+        },
+      });
+      paymentDetailsId = newPaymentDetails.id;
+    } else {
+      const existingPaymentDetails = await prisma.paymentDetails.findFirst({
+        where: {
+          id: paymentDetails.id,
+          userId: body.vendorId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!existingPaymentDetails) {
+        return res.status(404).send({
+          status_code: 404,
+          errors: ['Payment details not found'],
+        });
+      }
+
+      paymentDetailsId = existingPaymentDetails.id;
+    }
+
     const newOffer = await prisma.offer.create({
-      data: { ...body },
+      data: { paymentDetailsId, ...restBody },
     });
 
     res.status(200).send(newOffer);
   } catch (err: any) {
+    console.log(err);
     res.status(500).send({
       status_code: 500,
       errors: [err.message],

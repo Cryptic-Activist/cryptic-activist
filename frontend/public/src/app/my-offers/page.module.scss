@@ -46,15 +46,23 @@
   justify-content: space-between;
 }
 
+.listItemHeaderActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .offerId {
   font-size: 1rem;
   color: #000;
 }
 
-.edits {
+.delete,
+.edit {
   display: flex;
   gap: 0.8rem;
-  button {
+  button,
+  a {
+    font-size: 0.8rem;
     color: #646464;
     cursor: pointer;
     background-color: transparent;
@@ -63,6 +71,17 @@
     transition: 0.2s color ease-out;
     &:hover {
       color: globals.$feedback-negative;
+    }
+  }
+}
+
+.edit {
+  a {
+    display: flex;
+    align-items: center;
+    color: #646464;
+    &:hover {
+      color: globals.$blue-check;
     }
   }
 }
