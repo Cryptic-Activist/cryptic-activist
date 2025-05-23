@@ -2,7 +2,7 @@ FROM node:lts-alpine AS base
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache openssl curl
+RUN apk add --no-cache openssl postgresql-client
 
 # Copy backend package files
 COPY backend/package*.json ./

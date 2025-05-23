@@ -4,8 +4,8 @@ set -e
 
 echo "⏳ Waiting for DB to be ready..."
 
-until nc -z "postgres" "5432"; do
-  echo "Waiting for postgres:5432..."
+until pg_isready -h postgres -U postgres > /dev/null 2>&1; do
+  echo "Waiting for postgres..."
   sleep 1
 done
 
