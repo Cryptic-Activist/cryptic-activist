@@ -2,6 +2,7 @@
 
 import { Button, Chat } from '@/components';
 import React, { FC, useEffect } from 'react';
+import { convertNewlinesToBr, toUpperCase } from '@/utils';
 import {
   useBlockchain,
   useRouter,
@@ -12,7 +13,6 @@ import {
 
 import { TradeProps } from './types';
 import styles from './page.module.scss';
-import { toUpperCase } from '@/utils';
 
 const Trade: FC<TradeProps> = ({
   trade,
@@ -66,12 +66,30 @@ const Trade: FC<TradeProps> = ({
       </section>
       <section>
         <h2>Payment Instructions</h2>
-        <p>Bank details</p>
-        <p>Payment instruction text</p>
+        {trade?.offer?.paymentDetails?.instructions && (
+          <p
+            dangerouslySetInnerHTML={{
+              __html: convertNewlinesToBr(
+                trade?.offer?.paymentDetails?.instructions
+              ),
+            }}
+          />
+        )}
       </section>
       <section>
         <h2>Escrow Status</h2>
-        <p>Indicate that crypto is locked in escrow</p>
+        <p>
+          {`Funded: ${
+            trade?.funded && trade?.escrowReleaseDate === null ? 'Yes' : 'No'
+          }`}
+        </p>
+        <p>
+          {`Released on: ${
+            trade?.escrowReleaseDate
+              ? ` ${trade?.escrowReleaseDate}`
+              : 'Not release yet'
+          }`}
+        </p>
         <p>
           <strong>Warning:</strong> Only release once you&apos;ve confirmed
           receiving funds in your bank!
@@ -79,7 +97,7 @@ const Trade: FC<TradeProps> = ({
       </section>
       <section>
         <h2>Dispute Mechanism</h2>
-        <p>Button to initiate dispute</p>
+        <Button type="button">Dispute</Button>
         <p>Status if trade is already disputed</p>
         <p>Show if a moderator is assigned</p>
       </section>
@@ -88,10 +106,12 @@ const Trade: FC<TradeProps> = ({
       </section>
       <section>
         <h2>Activity Log</h2>
+        <p>{`Trade Started: ${trade?.startedAt}`}</p>
         <p>
           Timestamped actions (e.g., escrow locked, payment marked, released,
           disputed)
         </p>
+        <p>{`Escrow locked: ${trade?.startAt}`}</p>
       </section>
       <section>
         <h2>Security Reminders</h2>

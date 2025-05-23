@@ -85,6 +85,7 @@ export default class Chat {
           return;
         }
 
+        // Start trade if vendor wallet address is provided
         if (vendorWalletAddress) {
           if (!trade?.vendorWalletAddress) {
             const updatedTrade = await prisma.trade.update({
@@ -219,8 +220,8 @@ export default class Chat {
                 id: trade?.id,
               },
               data: {
-                startedAt: new Date(),
                 status: 'IN_PROGRESS',
+                fundedAt: new Date(),
               },
             });
 

@@ -1,8 +1,3 @@
-import {
-  EMAIL_FROM,
-  buildFirstTradeWithReferralReferee,
-  buildFirstTradeWithreferralReferrer,
-} from '@/services/email';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -14,6 +9,7 @@ import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
+import { EMAIL_FROM } from '@/services/email';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
@@ -51,7 +47,7 @@ export default class Trade {
             id: chat?.tradeId,
           },
           data: {
-            paid: true,
+            paidAt: new Date(),
           },
         });
 
@@ -127,7 +123,7 @@ export default class Trade {
             id: chat?.tradeId,
           },
           data: {
-            paymentConfirmed: true,
+            paymentConfirmedAt: new Date(),
             status: 'COMPLETED',
             endedAt: new Date(),
             escrowReleaseDate: new Date(),
@@ -257,7 +253,6 @@ export default class Trade {
             id: chat?.tradeId,
           },
           data: {
-            paid: false,
             status: 'CANCELLED',
           },
         });

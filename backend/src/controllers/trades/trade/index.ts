@@ -99,6 +99,9 @@ export async function checkTradePaid(req: Request, res: Response) {
 
     const trade = await prisma.trade.findFirst({
       where: { id },
+      select: {
+        paidAt: true,
+      },
     });
 
     if (!trade) {
@@ -109,7 +112,7 @@ export async function checkTradePaid(req: Request, res: Response) {
     }
 
     res.status(200).send({
-      isPaid: trade?.paid,
+      isPaid: trade?.paidAt,
     });
   } catch (err) {
     res.status(500).send({
@@ -149,13 +152,15 @@ export async function getTradeController(req: Request, res: Response) {
         paymentReceipt: true,
         status: true,
         escrowReleaseDate: true,
-        paymentConfirmed: true,
-        paid: true,
+        paymentConfirmedAt: true,
+        paidAt: true,
         expiredAt: true,
         startedAt: true,
         endedAt: true,
         blockchainTransactionHash: true,
-        funded: true,
+        fundedAt: true,
+        disputedAt: true,
+        exchangeRate: true,
         createdAt: true,
         paymentMethod: {
           select: {
@@ -380,8 +385,10 @@ export async function getTradeDetails(req: Request, res: Response) {
         paymentReceipt: true,
         startedAt: true,
         status: true,
-        paymentConfirmed: true,
-        paid: true,
+        paymentConfirmedAt: true,
+        paidAt: true,
+        disputedAt: true,
+        exchangeRate: true,
         feedback: {
           select: {
             id: true,
