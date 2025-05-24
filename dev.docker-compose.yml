@@ -92,7 +92,6 @@ services:
   #                           cron -f"
   #   volumes:
   #     - ./backups:/backups
-  #     - ./dev.postgres-backup.sh:/entrypoint.sh
   #   env_file:
   #     - envs/dev.postgres.env
   #   depends_on:
