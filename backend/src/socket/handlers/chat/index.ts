@@ -5,6 +5,7 @@ import {
   fundTrade,
   getCreateTradeDetails,
 } from '@/services/blockchains/ethereum';
+import { getRemainingTime, hasTimer, startTradeTimer } from '@/utils/timer';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
@@ -77,6 +78,27 @@ export default class Chat {
           });
           return;
         }
+
+        if (!hasTimer(trade.id)) {
+          const DURATION = 15 * 60; // e.g. 15 minutes
+          startTradeTimer(trade.id, DURATION, (expiredTradeId: string) => {
+            this.io.to(chatId).emit('timer:expired');
+            // Also cancel trade in DB or similar logic here
+          });
+        }
+
+        const remaining = getRemainingTime(trade.id);
+        this.io.to(chatId).emit('timer:update', { remaining });
+
+        // Start periodic sending updates to the frontend
+        const interval = setInterval(() => {
+          const time = getRemainingTime(trade.id);
+          if (time === 0) {
+            clearInterval(interval);
+          } else {
+            this.io.to(chatId).emit('timer:update', { remaining: time });
+          }
+        }, 1000);
 
         if (trade?.traderWalletAddress === vendorWalletAddress) {
           this.io.to(chatId).emit('trade_error', {
