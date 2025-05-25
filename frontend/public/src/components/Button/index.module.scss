@@ -29,6 +29,7 @@
 }
 
 .ghost {
+  cursor: default;
   background-color: globals.$white;
   color: globals.$secondary;
   border: 1px solid globals.$secondary;

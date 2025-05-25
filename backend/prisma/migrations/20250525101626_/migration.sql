@@ -286,7 +286,7 @@ CREATE TABLE "trades" (
     "paidAt" TIMESTAMP,
     "fundedAt" TIMESTAMP,
     "paymentConfirmedAt" TIMESTAMP,
-    "escrowReleaseDate" TIMESTAMP,
+    "escrowReleasedAt" TIMESTAMP,
     "blockchainTradeId" BIGINT,
     "blockchainTransactionHash" TEXT,
     "deletedAt" TIMESTAMP,
@@ -294,6 +294,20 @@ CREATE TABLE "trades" (
     "updatedAt" TIMESTAMP,
 
     CONSTRAINT "trades_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TradeDispute" (
+    "id" TEXT NOT NULL,
+    "tradeId" TEXT NOT NULL,
+    "raisedById" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "resolutionNote" TEXT,
+    "resolvedAt" TIMESTAMP(3),
+    "moderatorId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TradeDispute_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -427,6 +441,9 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "TradeDispute_tradeId_key" ON "TradeDispute"("tradeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "transactions_gatewayTransactionId_key" ON "transactions"("gatewayTransactionId");
 
 -- CreateIndex
@@ -527,6 +544,15 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") 
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_raisedById_fkey" FOREIGN KEY ("raisedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

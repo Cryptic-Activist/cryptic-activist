@@ -14,6 +14,23 @@ export type KYC = {
   id?: string;
 };
 
+export type Admin = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+};
+
+export type TradeDispute = {
+  id: string;
+  raisedBy: User;
+  reason: string;
+  resolutionNote?: string;
+  resolvedAt: string;
+  moderator: Admin;
+  createdAt: string;
+};
+
 export type UserLanguage = {
   language: {
     name: string;
@@ -78,22 +95,27 @@ export type Trade = {
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
     paymentMethod?: PaymentMethod;
-    paymentDetails?: PaymentDetails;
     paymentReceipt?: PaymentReceipt;
+    status?: Status;
     vendor?: Vendor;
     trader?: Trader;
     offer?: OfferSetter;
-    endedAt?: string;
-    escrowReleaseDate?: string;
-    expiredAt?: string;
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
-    paid?: boolean;
-    paymentConfirmed?: boolean;
-    status?: Status;
+    exchangeRate?: number;
+    escrowReleaseDate?: string;
+    paymentConfirmedAt?: string;
+    paidAt?: string;
+    expiredAt?: string;
+    startedAt?: string;
+    createdAt?: string;
+    endedAt?: string;
+    fundedAt?: string;
+    blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
     chat?: Chat;
+    tradeDispute?: TradeDispute;
   };
 };
 
@@ -103,22 +125,27 @@ export type TradeStore = {
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
     paymentMethod?: PaymentMethod;
-    paymentDetails?: PaymentDetails;
     paymentReceipt?: PaymentReceipt;
+    status?: Status;
     vendor?: Vendor;
     trader?: Trader;
     offer?: OfferSetter;
-    endedAt?: string;
-    escrowReleaseDate?: string;
-    expiredAt?: string;
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
-    paid?: boolean;
-    paymentConfirmed?: boolean;
-    status?: Status;
+    exchangeRate?: number;
+    escrowReleaseDate?: string;
+    paymentConfirmedAt?: string;
+    paidAt?: string;
+    expiredAt?: string;
+    startedAt?: string;
+    createdAt?: string;
+    endedAt?: string;
+    fundedAt?: string;
+    blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
     chat?: Chat;
+    tradeDispute?: TradeDispute;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
     resetTrade: () => void;
@@ -130,22 +157,27 @@ export type TradeSetter = {
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
   paymentMethod?: PaymentMethod;
-  paymentDetails?: PaymentDetails;
   paymentReceipt?: PaymentReceipt;
+  status?: Status;
   vendor?: Vendor;
   trader?: Trader;
   offer?: OfferSetter;
-  endedAt?: string;
-  escrowReleaseDate?: string;
-  expiredAt?: string;
   fiatAmount?: number;
   cryptocurrencyAmount?: number;
-  paid?: boolean;
-  paymentConfirmed?: boolean;
-  status?: Status;
+  exchangeRate?: number;
+  escrowReleaseDate?: string;
+  paymentConfirmedAt?: string;
+  paidAt?: string;
+  expiredAt?: string;
+  startedAt?: string;
+  createdAt?: string;
+  endedAt?: string;
+  fundedAt?: string;
+  blockchainTransactionHash?: string;
   traderWalletAddress?: string;
   vendorWalletAddress?: string;
   chat?: Chat;
+  tradeDispute?: TradeDispute;
 };
 
 export type Value = TradeSetter;

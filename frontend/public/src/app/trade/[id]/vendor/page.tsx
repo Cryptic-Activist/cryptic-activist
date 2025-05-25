@@ -2,7 +2,11 @@
 
 import { Button, Chat } from '@/components';
 import React, { FC, useEffect } from 'react';
-import { convertNewlinesToBr, toUpperCase } from '@/utils';
+import {
+  convertNewlinesToBr,
+  getLocaleFullDateString,
+  toUpperCase,
+} from '@/utils';
 import {
   useBlockchain,
   useRouter,
@@ -24,136 +28,242 @@ const Trade: FC<TradeProps> = ({
   return (
     <div className={styles.trade}>
       <h1 className={styles.heading}>Negatiation has started</h1>
-      <span className={styles.warning}>
-        If anyone ask you to trade outside of the Cryptic Activist Catalog
-        platform does not accept such request.
-      </span>
 
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Trade Summary</h2>
-        <p>Trade ID: {trade?.id}</p>
-        <p>Trade Status: {trade?.status}</p>
-        <p>Trade Created At: {trade?.createdAt}</p>
+        <ul>
+          <li>
+            <strong>Trade ID:</strong>
+            <span>{trade?.id}</span>
+          </li>
+          <li>
+            <strong>Trade Status:</strong>
+            <span>{trade?.status}</span>
+          </li>
+          <li>
+            <strong>Trade Created At:</strong>
+            <span>{trade?.createdAt}</span>
+          </li>
+        </ul>
         <p>IMPORTANT: Timer HERE</p>
       </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Trade Details</h2>
-        <p>
-          {`Trade Type: ${
-            trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
-          } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
-        </p>
-        <p>
-          {`Amount: ${trade?.cryptocurrencyAmount} ${toUpperCase(
-            trade?.cryptocurrency?.symbol
-          )}`}
-        </p>
-        <p>{`Fiat Amount: ${trade?.fiatAmount} ${trade?.fiat?.symbol}`}</p>
-        <p>{`Exchange Rate: `}</p>
-        <p>{`Payment Method: ${trade?.paymentMethod?.name}`}</p>
+        <ul>
+          <li>
+            <strong>Trade Type:</strong>
+            <span>
+              {`${
+                trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
+              } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
+            </span>
+          </li>
+          <li>
+            <strong>Cryptocurrency Amount:</strong>
+            <span>
+              {`${trade?.cryptocurrencyAmount} ${toUpperCase(
+                trade?.cryptocurrency?.symbol
+              )}`}
+            </span>
+          </li>
+          <li>
+            <strong>Fiat Amount:</strong>
+            <span>{`${trade?.fiatAmount} ${trade?.fiat?.symbol}`}</span>
+          </li>
+          <li>
+            <strong>Exchange Rate:</strong>
+            <span>{`${trade.exchangeRate} ${trade?.fiat?.symbol}`}</span>
+          </li>
+          <li>
+            <strong>Payment Method:</strong>
+            <span>{`${trade?.paymentMethod?.name}`}</span>
+          </li>
+        </ul>
       </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Trader Information</h2>
-        <p>{`Name: ${trade?.trader?.firstName} ${trade?.trader?.lastName}`}</p>
-        <p>{`Username: ${trade?.trader?.username}`}</p>
-        <p>{`Trade History / Rating: ${trade?.trader?._count?.tradeTrader} trades`}</p>
-        <p>
-          {`KYC Status: ${
-            trade?.trader?.kyc !== null ? 'Verified' : 'Not Verified'
-          }`}
-        </p>
-        <p>Communication history</p>
+        <ul>
+          <li>
+            <strong>Name:</strong>
+            <span>{`${trade?.trader?.firstName} ${trade?.trader?.lastName}`}</span>
+          </li>
+          <li>
+            <strong>Username:</strong>
+            <span>{trade?.trader?.username}</span>
+          </li>
+          <li>
+            <strong>Trade History / Rating:</strong>
+            <span>{`${trade?.trader?._count?.tradeTrader} trades`}</span>
+          </li>
+          <li>
+            <strong>KYC Status:</strong>
+            <span>{`${
+              trade?.trader?.kyc !== null ? 'Verified' : 'Not Verified'
+            }`}</span>
+          </li>
+        </ul>
+        {/* <p>Communication history</p> */}
       </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Payment Instructions</h2>
         {trade?.offer?.paymentDetails?.instructions && (
-          <p
+          <div
             dangerouslySetInnerHTML={{
               __html: convertNewlinesToBr(
                 trade?.offer?.paymentDetails?.instructions
               ),
             }}
+            className={styles.paymentDetails}
           />
         )}
       </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Escrow Status</h2>
-        <p>
-          {`Funded: ${
-            trade?.funded && trade?.escrowReleaseDate === null ? 'Yes' : 'No'
-          }`}
-        </p>
-        <p>
-          {`Released on: ${
-            trade?.escrowReleaseDate
-              ? ` ${trade?.escrowReleaseDate}`
-              : 'Not release yet'
-          }`}
-        </p>
-        <p>
+        <ul>
+          <li>
+            <strong>Funded:</strong>
+            <span>{`${
+              trade?.fundedAt && trade?.escrowReleasedAt === null ? 'Yes' : 'No'
+            }`}</span>
+          </li>
+          <li>
+            <strong>Released on:</strong>
+            <span>{`${
+              trade?.escrowReleaseDate
+                ? ` ${trade?.escrowReleaseDate}`
+                : 'Not yet released'
+            }`}</span>
+          </li>
+        </ul>
+        <p className={styles.warning}>
           <strong>Warning:</strong> Only release once you&apos;ve confirmed
           receiving funds in your bank!
         </p>
       </section>
-      <section>
-        <h2>Dispute Mechanism</h2>
-        <Button type="button">Dispute</Button>
-        <p>Status if trade is already disputed</p>
-        <p>Show if a moderator is assigned</p>
+      <section className={styles.tradeSection}>
+        <h2>Dispute</h2>
+        <ul>
+          <li>
+            <strong>Dispute Status:</strong>
+            <span>{`${
+              trade?.tradeDispute?.id ? trade?.tradeDispute?.id : 'No disputes'
+            }`}</span>
+          </li>
+          <li>
+            <strong>Moderator:</strong>
+            <span>
+              {trade?.tradeDispute?.id
+                ? `${trade?.tradeDispute?.moderator?.firstName} ${trade?.tradeDispute?.moderator?.lastName}`
+                : 'No moderator assigned'}
+            </span>
+          </li>
+        </ul>
       </section>
-      <section>
-        <Button type="button">Report User</Button>
-      </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Activity Log</h2>
-        <p>{`Trade Started: ${trade?.startedAt}`}</p>
-        <p>
-          Timestamped actions (e.g., escrow locked, payment marked, released,
-          disputed)
-        </p>
-        <p>{`Escrow locked: ${trade?.startAt}`}</p>
+        <ul>
+          <li>
+            <strong>Trade Started:</strong>
+            <span>{`${
+              trade?.startedAt
+                ? getLocaleFullDateString(new Date(trade?.startedAt))
+                : 'Has not yet start'
+            }`}</span>
+          </li>
+          <li>
+            <strong>Escrow Locked:</strong>
+            <span>
+              {trade?.startedAt
+                ? getLocaleFullDateString(new Date(trade?.startedAt))
+                : 'Not yet locked'}
+            </span>
+          </li>
+          <li>
+            <strong>Set as Paid:</strong>
+            <span>
+              {trade?.paidAt
+                ? getLocaleFullDateString(new Date(trade?.paidAt))
+                : 'Not paid yet'}
+            </span>
+          </li>
+          <li>
+            <strong>Escrow Release:</strong>
+            <span>
+              {trade?.escrowReleasedAt
+                ? getLocaleFullDateString(new Date(trade?.escrowReleasedAt))
+                : 'Not yet released'}
+            </span>
+          </li>
+          <li>
+            <strong>Dispute Raised:</strong>
+            <span>
+              {trade?.tradeDispute
+                ? getLocaleFullDateString(
+                    new Date(trade?.tradeDispute?.createdAt)
+                  )
+                : 'No dispute raised'}
+            </span>
+          </li>
+        </ul>
       </section>
-      <section>
+      <section className={styles.tradeSection}>
         <h2>Security Reminders</h2>
-        <p>Never release funds before verifying payment</p>
-        <p>Avoid off-platform communication</p>
-        <p>Watch for fake payment proofs</p>
+        <ul className={styles.warningList}>
+          <li>Never release funds before verifying payment</li>
+          <li>Avoid off-platform communication</li>
+          <li>Watch for fake payment proofs</li>
+        </ul>
       </section>
 
-      <section>
+      {/* <section>
         <h2>Advanced</h2>
         <p>Show multisig escrow participants</p>
         <p>Transaction hash (on-chain lock or release)</p>
         <p>Smart contract status (if applicable)</p>
+      </section> */}
+
+      <section className={styles.actionButtons}>
+        <Button type="button" fullWidth padding="1rem">
+          Report User
+        </Button>
+        <Button type="button" fullWidth padding="1rem">
+          Raise a Dispute
+        </Button>
+        {escrowReleased && (
+          <Button onClick={() => replace('/vendors')} fullWidth padding="1rem">
+            Leave trade
+          </Button>
+        )}
+        {trade.paidAt && !trade.paymentConfirmedAt && (
+          <Button
+            type="button"
+            onClick={() =>
+              setAsPaymentConfirmed({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+            fullWidth
+            padding="1rem"
+          >
+            <strong>Set as Payment Received</strong>
+          </Button>
+        )}
+        {!escrowReleased && (
+          <Button
+            onClick={() =>
+              setAsCanceled({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+            fullWidth
+            padding="1rem"
+          >
+            Cancel
+          </Button>
+        )}
       </section>
-      {trade.paid && !trade.paymentConfirmed && (
-        <Button
-          type="button"
-          onClick={() =>
-            setAsPaymentConfirmed({
-              from: trade.trader?.id,
-              to: trade.vendor?.id,
-            })
-          }
-        >
-          <strong>Set as Payment Received</strong>
-        </Button>
-      )}
-      {!escrowReleased && (
-        <Button
-          onClick={() =>
-            setAsCanceled({
-              from: trade.trader?.id,
-              to: trade.vendor?.id,
-            })
-          }
-        >
-          Cancel
-        </Button>
-      )}
-      {escrowReleased && (
-        <Button onClick={() => replace('/vendors')}>Leave trade</Button>
-      )}
     </div>
   );
 };
@@ -183,7 +293,7 @@ const TradeVendor = () => {
     chatId: trade.chat?.id,
     user: trade.vendor,
     timeLimit: trade.offer?.timeLimit,
-    tradePaid: trade.paid,
+    tradePaid: trade.paidAt,
     trade: trade,
     walletAddress: blockchain.account?.address,
     onSetPaid: setPaid,
@@ -231,7 +341,7 @@ const TradeVendor = () => {
         setAsPaymentConfirmed={setAsPaymentConfirmed}
         trade={trade}
       />
-      <div>
+      <div className={styles.chatContainer}>
         {trade.id && trade.vendor && trade.trader && (
           <Chat
             receiver={trade.trader}

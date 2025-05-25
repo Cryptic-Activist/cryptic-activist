@@ -151,17 +151,42 @@ export async function getTradeController(req: Request, res: Response) {
         cryptocurrencyAmount: true,
         paymentReceipt: true,
         status: true,
-        escrowReleaseDate: true,
+        escrowReleasedAt: true,
         paymentConfirmedAt: true,
         paidAt: true,
         expiredAt: true,
         startedAt: true,
         endedAt: true,
-        blockchainTransactionHash: true,
         fundedAt: true,
         disputedAt: true,
+        blockchainTransactionHash: true,
         exchangeRate: true,
         createdAt: true,
+        tradeDispute: {
+          select: {
+            createdAt: true,
+            id: true,
+            raisedBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+            reason: true,
+            resolutionNote: true,
+            resolvedAt: true,
+            moderator: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
         paymentMethod: {
           select: {
             name: true,
@@ -368,7 +393,7 @@ export async function getTradeDetails(req: Request, res: Response) {
         cryptocurrency: true,
         cryptocurrencyAmount: true,
         endedAt: true,
-        escrowReleaseDate: true,
+        escrowReleasedAt: true,
         expiredAt: true,
         fiat: true,
         fiatAmount: true,

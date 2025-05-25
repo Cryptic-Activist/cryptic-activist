@@ -21,19 +21,20 @@ model AcceptedCryptocurrency {
 }
 
 model Admin {
-  id           String    @id @default(uuid())
-  firstName    String    @db.VarChar(50)
-  lastName     String    @db.VarChar(50)
-  username     String    @unique @db.VarChar(120)
-  email        String    @unique @db.VarChar(120)
+  id           String         @id @default(uuid())
+  firstName    String         @db.VarChar(50)
+  lastName     String         @db.VarChar(50)
+  username     String         @unique @db.VarChar(120)
+  email        String         @unique @db.VarChar(120)
   password     String
-  isVerified   Boolean?  @default(false) @db.Boolean
-  deletedAt    DateTime? @db.Timestamp()
-  createdAt    DateTime? @default(now()) @db.Timestamp()
-  updatedAt    DateTime? @updatedAt @db.Timestamp()
+  isVerified   Boolean?       @default(false) @db.Boolean
+  deletedAt    DateTime?      @db.Timestamp()
+  createdAt    DateTime?      @default(now()) @db.Timestamp()
+  updatedAt    DateTime?      @updatedAt @db.Timestamp()
   kyc          KYC[]
-  createdUsers User[]    @relation("UserCreatedBy") // All users created by this admin
-  updatedUsers User[]    @relation("UserLastUpdatedBy") // All users updated by this admin
+  createdUsers User[]         @relation("userCreatedBy") // All users created by this admin
+  updatedUsers User[]         @relation("userLastUpdatedBy") // All users updated by this admin
+  tradeDispute TradeDispute[] @relation("moderatorTradeDispute")
 
   @@map("admins")
 }
@@ -332,15 +333,30 @@ model Trade {
   paidAt                    DateTime?       @db.Timestamp()
   fundedAt                  DateTime?       @db.Timestamp()
   paymentConfirmedAt        DateTime?       @db.Timestamp()
-  escrowReleaseDate         DateTime?       @db.Timestamp()
+  escrowReleasedAt          DateTime?       @db.Timestamp()
   blockchainTradeId         BigInt? // Trade ID on the blockchain
   blockchainTransactionHash String? // Hash of the transaction on the blockchain
   deletedAt                 DateTime?       @db.Timestamp()
   createdAt                 DateTime?       @default(now()) @db.Timestamp()
   updatedAt                 DateTime?       @updatedAt @db.Timestamp()
   feedback                  Feedback?       @relation("tradeFeedback")
+  tradeDispute              TradeDispute?
 
   @@map("trades")
+}
+
+model TradeDispute {
+  id             String    @id @default(uuid())
+  tradeId        String    @unique
+  trade          Trade     @relation(fields: [tradeId], references: [id])
+  raisedById     String
+  raisedBy       User      @relation(fields: [raisedById], references: [id])
+  reason         String
+  resolutionNote String?
+  resolvedAt     DateTime?
+  moderatorId    String?
+  moderator      Admin?    @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  createdAt      DateTime  @default(now())
 }
 
 enum TransactionPaymentMethodType {
@@ -423,9 +439,9 @@ model User {
   twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
   lastLoginAt              DateTime?                  @db.Timestamptz
   createdById              String? // Admin who created the account (Foreign key)
+  createdBy                Admin?                     @relation("userCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
   lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
-  createdBy                Admin?                     @relation("UserCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
-  lastUpdatedBy            Admin?                     @relation("UserLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
+  lastUpdatedBy            Admin?                     @relation("userLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
   deletedAt                DateTime?                  @db.Timestamp()
   createdAt                DateTime?                  @default(now()) @db.Timestamp()
   updatedAt                DateTime?                  @updatedAt @db.Timestamp()
@@ -450,6 +466,7 @@ model User {
   referrer                 Referral[]                 @relation("referrer")
   referre                  Referral?                  @relation("referee")
   PaymentDetails           PaymentDetails[]
+  tradeDispute             TradeDispute[]
 
   @@index([username])
   @@map("users")

@@ -42,12 +42,14 @@ export default class Trade {
             tradeId: true,
           },
         });
+
+        const paidAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
-            paidAt: new Date(),
+            paidAt,
           },
         });
 
@@ -57,7 +59,7 @@ export default class Trade {
         }
 
         this.io.to(chatId).emit('trade_set_paid_success', {
-          isPaid: true,
+          paidAt,
         });
         this.io.to(chatId).emit('chat_info_message', {
           from,
@@ -118,28 +120,33 @@ export default class Trade {
           return;
         }
 
+        const paymentConfirmedAt = new Date();
+        const endedAt = new Date();
+        const escrowReleasedAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
-            paymentConfirmedAt: new Date(),
+            paymentConfirmedAt,
             status: 'COMPLETED',
-            endedAt: new Date(),
-            escrowReleaseDate: new Date(),
+            endedAt,
+            escrowReleasedAt,
           },
         });
 
         if (!updatedTrade) {
           this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
             error: 'Unable to update trade data',
-            hasReceived: false,
           });
           return;
         }
 
         this.io.to(chatId).emit('trade_set_payment_confirmed_success', {
-          hasReceived: true,
+          paymentConfirmedAt,
+          status: 'COMPLETED',
+          endedAt,
+          escrowReleasedAt,
         });
         this.io.to(chatId).emit('chat_info_message', {
           from,
@@ -248,38 +255,27 @@ export default class Trade {
             tradeId: true,
           },
         });
+        const endedAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
             status: 'CANCELLED',
+            endedAt,
           },
         });
 
         if (!updatedTrade) {
-          if (recipientSocketId) {
-            this.io.to(recipientSocketId).emit('trade_set_canceled_error', {
-              error: true,
-            });
-          }
-          if (senderSocketId) {
-            this.io.to(senderSocketId).emit('trade_set_canceled_error', {
-              error: true,
-            });
-          }
+          this.io.to(chatId).emit('trade_set_canceled_error', {
+            error: true,
+          });
+          return;
         }
 
-        if (recipientSocketId) {
-          this.io.to(recipientSocketId).emit('trade_set_canceled_success', {
-            canceled: true,
-          });
-        }
-        if (senderSocketId) {
-          this.io.to(senderSocketId).emit('trade_set_canceled_success', {
-            canceled: true,
-          });
-        }
+        this.io.to(chatId).emit('trade_set_canceled_success', {
+          canceled: true,
+        });
       },
     );
   }

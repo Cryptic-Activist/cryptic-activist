@@ -1,5 +1,6 @@
 'use client';
 
+import { SetPaymentConfirmedParams } from './types';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -35,9 +36,9 @@ const useTrade = () => {
     });
   };
 
-  const setPaid = (isPaid: boolean) => {
+  const setPaid = (paidAt: string) => {
     trade.setTradeValue({
-      paid: isPaid,
+      paidAt,
     });
   };
 
@@ -47,10 +48,12 @@ const useTrade = () => {
     });
   };
 
-  const setPaymentConfirmed = (hasReceived: boolean) => {
+  const setPaymentConfirmed = (params: SetPaymentConfirmedParams) => {
     trade.setTradeValue({
-      status: hasReceived ? 'COMPLETED' : 'IN_PROGRESS',
-      paymentConfirmed: hasReceived,
+      status: params.paymentConfirmedAt ? 'COMPLETED' : 'IN_PROGRESS',
+      paymentConfirmedAt: params.paymentConfirmedAt,
+      endedAt: params.endedAt,
+      escrowReleaseDate: params.escrowReleasedAt,
     });
   };
 

@@ -72,7 +72,7 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
   const { replace } = useRouter();
   return (
     <section className={styles.section}>
-      {status === 'IN_PROGRESS' && !trade.paid && (
+      {status === 'IN_PROGRESS' && !trade.paidAt && (
         <Button
           onClick={() =>
             onSetAsPaid({ from: trade.trader?.id, to: trade.vendor?.id })
@@ -80,8 +80,8 @@ const TradeCancelation: FC<TradeCancelationProps> = ({
         >
           <div className={styles.paidButton}>
             <strong>
-              {trade.paid === false && 'Set as Paid'}
-              {trade.paid && 'Paid'}
+              {trade.paidAt === undefined && 'Set as Paid'}
+              {trade.paidAt && 'Paid'}
             </strong>
             <div className={styles.remainingTime}>
               <span>Remaining time: </span>
@@ -166,7 +166,7 @@ export default function TradePage() {
     chatId: trade.chat?.id,
     user: trade.trader,
     timeLimit: trade.offer?.timeLimit,
-    tradePaid: trade.paid,
+    tradePaid: trade.paidAt,
     trade,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,

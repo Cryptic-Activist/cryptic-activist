@@ -147,7 +147,7 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_paid_error', (data) => {
         if (data.error) {
-          onSetPaid(false);
+          // onSetPaid(false);
           addToast('error', 'Unable to set the trade as paid', 8000);
         }
       });
@@ -160,7 +160,7 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_payment_confirmed_error', (data) => {
         if (data.error) {
-          onSetPaymentConfirmed(false);
+          // onSetPaymentConfirmed(false);
           addToast('error', 'Unable to set the payment as received', 8000);
         }
       });

@@ -10,7 +10,7 @@ import {
   useUser,
 } from '@/hooks';
 
-export default function Page() {
+export default function OfferCreatePage() {
   const {
     createOffer,
     step,
