@@ -209,47 +209,52 @@ export const getTradeDetails = async (tradeId: bigint) => {
 };
 
 export const getCreateTradeDetails = async (trade: any) => {
-  const offer = await prisma.offer.findFirst({
-    where: { id: trade.offerId },
-    select: {
-      timeLimit: true,
-      offerType: true,
-    },
-  });
+  try {
+    const offer = await prisma.offer.findFirst({
+      where: { id: trade.offerId },
+      select: {
+        timeLimit: true,
+        offerType: true,
+      },
+    });
 
-  if (!offer) {
+    if (!offer) {
+      return null;
+    }
+
+    const isBuyOffer = offer?.offerType === 'buy';
+
+    const buyer = isBuyOffer
+      ? trade.traderWalletAddress
+      : trade.vendorWalletAddress;
+    const seller = isBuyOffer
+      ? trade.vendorWalletAddress
+      : trade.traderWalletAddress;
+    const tradeDuration = offer?.timeLimit * 60; // minutes -> seconds
+    const cryptoAmount = trade.cryptocurrencyAmount;
+    const collateral = cryptoAmount * 0.25;
+    const sellerFundAmount = cryptoAmount + collateral;
+
+    // Converting to Wei
+    const cryptoAmountWei = parseEther(cryptoAmount.toString());
+    const buyerCollateralWei = parseEther(collateral.toString());
+    const sellerCollateralWei = parseEther(collateral.toString());
+    const sellerFundAmountWei = parseEther(sellerFundAmount.toString());
+
+    return {
+      buyer: buyer as Address,
+      seller: seller as Address,
+      arbitrator: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+      cryptoAmountWei,
+      buyerCollateralWei,
+      sellerCollateralWei,
+      sellerFundAmountWei,
+      tradeDuration,
+      feeRate: 250,
+      profitMargin: 150,
+    };
+  } catch (error) {
+    console.error('Error in getCreateTradeDetails:', error);
     return null;
   }
-
-  const isBuyOffer = offer?.offerType === 'buy';
-
-  const buyer = isBuyOffer
-    ? trade.traderWalletAddress
-    : trade.vendorWalletAddress;
-  const seller = isBuyOffer
-    ? trade.vendorWalletAddress
-    : trade.traderWalletAddress;
-  const tradeDuration = offer?.timeLimit * 60; // minutes -> seconds
-  const cryptoAmount = trade.cryptocurrencyAmount;
-  const collateral = cryptoAmount * 0.25;
-  const sellerFundAmount = cryptoAmount + collateral;
-
-  // Converting to Wei
-  const cryptoAmountWei = parseEther(cryptoAmount.toString());
-  const buyerCollateralWei = parseEther(collateral.toString());
-  const sellerCollateralWei = parseEther(collateral.toString());
-  const sellerFundAmountWei = parseEther(sellerFundAmount.toString());
-
-  return {
-    buyer: buyer as Address,
-    seller: seller as Address,
-    arbitrator: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
-    cryptoAmountWei,
-    buyerCollateralWei,
-    sellerCollateralWei,
-    sellerFundAmountWei,
-    tradeDuration,
-    feeRate: 250,
-    profitMargin: 150,
-  };
 };

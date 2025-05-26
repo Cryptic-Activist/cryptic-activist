@@ -103,7 +103,7 @@ export type Trade = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     exchangeRate?: number;
-    escrowReleaseDate?: string;
+    escrowReleasedAt?: string;
     paymentConfirmedAt?: string;
     paidAt?: string;
     expiredAt?: string;
@@ -133,7 +133,7 @@ export type TradeStore = {
     fiatAmount?: number;
     cryptocurrencyAmount?: number;
     exchangeRate?: number;
-    escrowReleaseDate?: string;
+    escrowReleasedAt?: string;
     paymentConfirmedAt?: string;
     paidAt?: string;
     expiredAt?: string;
@@ -165,7 +165,7 @@ export type TradeSetter = {
   fiatAmount?: number;
   cryptocurrencyAmount?: number;
   exchangeRate?: number;
-  escrowReleaseDate?: string;
+  escrowReleasedAt?: string;
   paymentConfirmedAt?: string;
   paidAt?: string;
   expiredAt?: string;

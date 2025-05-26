@@ -5,10 +5,10 @@ import {
   fundTrade,
   getCreateTradeDetails,
 } from '@/services/blockchains/ethereum';
-import { getRemainingTime, hasTimer, startTradeTimer } from '@/utils/timer';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import { getRemainingTime } from '@/utils/timer';
 
 export default class Chat {
   private socket: Socket;
@@ -79,24 +79,31 @@ export default class Chat {
           return;
         }
 
-        if (!hasTimer(trade.id)) {
-          const DURATION = 15 * 60; // e.g. 15 minutes
-          startTradeTimer(trade.id, DURATION, (expiredTradeId: string) => {
-            this.io.to(chatId).emit('timer:expired');
-            // Also cancel trade in DB or similar logic here
+        const remaining = await getRemainingTime(trade.id);
+        if (remaining === null) {
+          const expiredAt = new Date();
+          await prisma.trade.update({
+            where: { id: trade.id },
+            data: { expiredAt, status: 'EXPIRED' },
           });
+          this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+          return;
         }
 
-        const remaining = getRemainingTime(trade.id);
-        this.io.to(chatId).emit('timer:update', { remaining });
+        this.io.to(chatId).emit('timer:update', { remaining, chatId });
 
-        // Start periodic sending updates to the frontend
-        const interval = setInterval(() => {
-          const time = getRemainingTime(trade.id);
-          if (time === 0) {
+        const interval = setInterval(async () => {
+          const remaining = await getRemainingTime(trade.id);
+          if (remaining === null || remaining <= 0) {
+            const expiredAt = new Date();
+            await prisma.trade.update({
+              where: { id: trade.id },
+              data: { expiredAt, status: 'EXPIRED' },
+            });
+            this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
             clearInterval(interval);
           } else {
-            this.io.to(chatId).emit('timer:update', { remaining: time });
+            this.io.to(chatId).emit('timer:update', { remaining, chatId });
           }
         }, 1000);
 
@@ -245,6 +252,10 @@ export default class Chat {
                 status: 'IN_PROGRESS',
                 fundedAt: new Date(),
               },
+            });
+
+            this.io.to(chatId).emit('trade_funded_success', {
+              fundedAt: new Date(),
             });
 
             this.io.to(chatId).emit('blockchain_trade_created', {

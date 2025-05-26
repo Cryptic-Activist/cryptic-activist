@@ -27,15 +27,6 @@ export default class Trade {
     this.socket.on(
       'trade_set_paid',
       async ({ chatId, from, to }: SetTradeAsPaidParams) => {
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
-
         const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
@@ -230,20 +221,13 @@ export default class Trade {
   setAsCanceled() {
     this.socket.on(
       'trade_set_canceled',
-      async ({ chatId, from, to }: SetTradeAsCanceledParams) => {
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
-
+      async ({ chatId }: SetTradeAsCanceledParams) => {
         const canceledTrade = await cancelTrade();
 
+        console.log({ canceledTrade });
+
         if (canceledTrade.message !== 'Trade cancelled') {
-          this.io.to(senderSocketId!).emit('trade_set_canceled_error', {
+          this.io.to(chatId).emit('trade_set_canceled_error', {
             error: true,
           });
           return;
@@ -274,7 +258,8 @@ export default class Trade {
         }
 
         this.io.to(chatId).emit('trade_set_canceled_success', {
-          canceled: true,
+          status: 'CANCELLED',
+          endedAt,
         });
       },
     );

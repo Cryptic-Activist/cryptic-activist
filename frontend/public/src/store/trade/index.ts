@@ -13,7 +13,7 @@ export const useTradeSlice: StateCreator<
     cryptocurrency: undefined,
     cryptocurrencyAmount: undefined,
     endedAt: undefined,
-    escrowReleaseDate: undefined,
+    escrowReleasedAt: undefined,
     expiredAt: undefined,
     fiat: undefined,
     fiatAmount: undefined,
@@ -42,14 +42,14 @@ export const useTradeSlice: StateCreator<
               cryptocurrencyAmount:
                 params.cryptocurrencyAmount ?? trade.cryptocurrencyAmount,
               endedAt: params.endedAt ?? trade.endedAt,
-              escrowReleaseDate:
-                params.escrowReleaseDate ?? trade.escrowReleaseDate,
+              escrowReleasedAt:
+                params.escrowReleasedAt ?? trade.escrowReleasedAt,
               expiredAt: params.expiredAt ?? trade.expiredAt,
               fiat: params.fiat ?? trade.fiat,
               fiatAmount: params.fiatAmount ?? trade.fiatAmount,
               id: params.id ?? trade.id,
               offer: params.offer ?? trade.offer,
-              paid: params.paidAt ?? trade.paidAt,
+              paidAt: params.paidAt ?? trade.paidAt,
               paymentConfirmedAt:
                 params.paymentConfirmedAt ?? trade.paymentConfirmedAt,
               paymentMethod: params.paymentMethod ?? trade.paymentMethod,

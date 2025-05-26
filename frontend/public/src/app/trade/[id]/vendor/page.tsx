@@ -4,6 +4,7 @@ import { Button, Chat } from '@/components';
 import React, { FC, useEffect } from 'react';
 import {
   convertNewlinesToBr,
+  formatRemainingTime,
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
@@ -22,13 +23,11 @@ const Trade: FC<TradeProps> = ({
   trade,
   setAsCanceled,
   setAsPaymentConfirmed,
-  escrowReleased,
   replace,
+  tradeRemaingTime,
 }) => {
   return (
     <div className={styles.trade}>
-      <h1 className={styles.heading}>Negatiation has started</h1>
-
       <section className={styles.tradeSection}>
         <h2>Trade Summary</h2>
         <ul>
@@ -36,16 +35,34 @@ const Trade: FC<TradeProps> = ({
             <strong>Trade ID:</strong>
             <span>{trade?.id}</span>
           </li>
-          <li>
+          <li className={styles.tradeStatus}>
             <strong>Trade Status:</strong>
-            <span>{trade?.status}</span>
+            <span className={styles[trade?.status]}>{trade?.status}</span>
           </li>
           <li>
             <strong>Trade Created At:</strong>
-            <span>{trade?.createdAt}</span>
+            <span>
+              {trade?.createdAt
+                ? getLocaleFullDateString(new Date(trade?.createdAt))
+                : null}
+            </span>
           </li>
+          {trade?.expiredAt ? (
+            <li>
+              <strong>Trade Expired At:</strong>
+              <span>{getLocaleFullDateString(new Date(trade?.expiredAt))}</span>
+            </li>
+          ) : (
+            <li>
+              <strong>Time Left:</strong>
+              <span className={styles.remainingTime}>
+                {formatRemainingTime(
+                  tradeRemaingTime !== null ? tradeRemaingTime : 0
+                )}
+              </span>
+            </li>
+          )}
         </ul>
-        <p>IMPORTANT: Timer HERE</p>
       </section>
       <section className={styles.tradeSection}>
         <h2>Trade Details</h2>
@@ -122,15 +139,13 @@ const Trade: FC<TradeProps> = ({
         <ul>
           <li>
             <strong>Funded:</strong>
-            <span>{`${
-              trade?.fundedAt && trade?.escrowReleasedAt === null ? 'Yes' : 'No'
-            }`}</span>
+            <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
           </li>
           <li>
             <strong>Released on:</strong>
             <span>{`${
-              trade?.escrowReleaseDate
-                ? ` ${trade?.escrowReleaseDate}`
+              trade?.escrowReleasedAt
+                ? ` ${trade?.escrowReleasedAt}`
                 : 'Not yet released'
             }`}</span>
           </li>
@@ -226,43 +241,54 @@ const Trade: FC<TradeProps> = ({
         <Button type="button" fullWidth padding="1rem">
           Report User
         </Button>
-        <Button type="button" fullWidth padding="1rem">
-          Raise a Dispute
-        </Button>
-        {escrowReleased && (
+        {!trade.dispitedAt &&
+          trade.status === 'IN_PROGRESS' &&
+          !trade.paymentConfirmedAt &&
+          trade.paidAt && (
+            <Button
+              type="button"
+              fullWidth
+              padding="1rem"
+              onClick={() =>
+                setAsPaymentConfirmed({
+                  from: trade.trader?.id,
+                  to: trade.vendor?.id,
+                })
+              }
+            >
+              <strong>Set as Payment Received</strong>
+            </Button>
+          )}
+        {!trade.dispitedAt &&
+          trade.status !== 'IN_PROGRESS' &&
+          !trade.expiredAt &&
+          !trade.escrowReleasedAt && (
+            <Button type="button" fullWidth padding="1rem">
+              Raise a Dispute
+            </Button>
+          )}
+        {trade.escrowReleasedAt && (
           <Button onClick={() => replace('/vendors')} fullWidth padding="1rem">
             Leave trade
           </Button>
         )}
-        {trade.paidAt && !trade.paymentConfirmedAt && (
-          <Button
-            type="button"
-            onClick={() =>
-              setAsPaymentConfirmed({
-                from: trade.trader?.id,
-                to: trade.vendor?.id,
-              })
-            }
-            fullWidth
-            padding="1rem"
-          >
-            <strong>Set as Payment Received</strong>
-          </Button>
-        )}
-        {!escrowReleased && (
-          <Button
-            onClick={() =>
-              setAsCanceled({
-                from: trade.trader?.id,
-                to: trade.vendor?.id,
-              })
-            }
-            fullWidth
-            padding="1rem"
-          >
-            Cancel
-          </Button>
-        )}
+        {!trade.escrowReleasedAt &&
+          !trade.expiredAt &&
+          trade.status !== 'CANCELLED' &&
+          !trade.disputedAt && (
+            <Button
+              onClick={() =>
+                setAsCanceled({
+                  from: trade.trader?.id,
+                  to: trade.vendor?.id,
+                })
+              }
+              fullWidth
+              padding="1rem"
+            >
+              Cancel
+            </Button>
+          )}
       </section>
     </div>
   );
@@ -288,7 +314,7 @@ const TradeVendor = () => {
     setAsPaymentConfirmed,
     messages,
     receiverStatus,
-    escrowReleased,
+    tradeRemaingTime,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.vendor,
@@ -335,11 +361,11 @@ const TradeVendor = () => {
   return (
     <div className={styles.container}>
       <Trade
-        escrowReleased={escrowReleased}
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaymentConfirmed={setAsPaymentConfirmed}
         trade={trade}
+        tradeRemaingTime={tradeRemaingTime}
       />
       <div className={styles.chatContainer}>
         {trade.id && trade.vendor && trade.trader && (

@@ -8,10 +8,10 @@ import {
   UseSocketParams,
 } from './types';
 import io, { Socket } from 'socket.io-client';
-import { useApp, useRouter } from '@/hooks';
 import { useEffect, useState } from 'react';
 
 import { BACKEND } from '@/constants';
+import { useApp } from '@/hooks';
 
 const useTradeSocket = ({
   chatId,
@@ -25,7 +25,6 @@ const useTradeSocket = ({
   onSetTradeCreated,
 }: UseSocketParams) => {
   const { addToast } = useApp();
-  const { replace } = useRouter();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,6 +32,9 @@ const useTradeSocket = ({
   const [receiverStatus, setReceiverStatus] =
     useState<ReceiverStatus>('online');
   const [escrowReleased, setEscrowRelease] = useState(false);
+  const [tradeRemaingTime, setTradeRemainingTime] = useState<number | null>(
+    null
+  );
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -117,8 +119,21 @@ const useTradeSocket = ({
       });
 
       newSocket.on('trade_set_paid_success', (data) => {
-        onSetPaid(data.isPaid);
+        onSetPaid(data.paidAt);
         addToast('info', 'Trade has been set as Paid', 8000);
+      });
+
+      newSocket.on('trade_funded_success', (data) => {
+        if (data.fundedAt) {
+          // @ts-ignore
+          trade.setTradeValue(
+            {
+              status: 'IN_PROGRESS',
+              fundedAt: data.fundedAt,
+            },
+            'trade/setFundedAt'
+          );
+        }
       });
 
       newSocket.on('trade_set_payment_confirmed_success', (data) => {
@@ -135,14 +150,14 @@ const useTradeSocket = ({
         );
       });
 
-      newSocket.on('trade_set_canceled_success', () => {
-        onSetCanceled();
+      newSocket.on('trade_set_canceled_success', ({ status, endedAt }) => {
+        onSetCanceled({ status, endedAt });
         addToast('info', 'Trade has been successfully canceled', 8000);
-        setTimeout(() => {
-          replace('/', {
-            scroll: true,
-          });
-        }, 2000);
+        // setTimeout(() => {
+        //   replace('/', {
+        //     scroll: true,
+        //   });
+        // }, 2000);
       });
 
       newSocket.on('trade_set_paid_error', (data) => {
@@ -174,6 +189,29 @@ const useTradeSocket = ({
         // setMessages((prevMessages) => [...prevMessages, message]);
       });
 
+      newSocket.on('timer:update', (data) => {
+        const { remaining } = data;
+
+        // if (remaining <= 0) {
+        //   addToast('error', 'Trade timer has expired', 8000);
+        //   replace(`/trade/${trade.id}/details`, {
+        //     scroll: true,
+        //   });
+        // }
+        setTradeRemainingTime(remaining);
+      });
+
+      newSocket.on('timer:expired', (data) => {
+        // @ts-ignore
+        trade.setTradeValue(
+          {
+            status: 'EXPIRED',
+            expiredAt: data.expiredAt,
+          },
+          'trade/setExpiredAt'
+        );
+      });
+
       setSocket(newSocket);
 
       // Cleanup on unmount
@@ -187,16 +225,17 @@ const useTradeSocket = ({
   }, [chatId, user]);
 
   useEffect(() => {
-    if (trade.escrowReleaseDate) {
+    if (trade.escrowReleasedAt) {
       setEscrowRelease(true);
     }
-  }, [trade.escrowReleaseDate]);
+  }, [trade.escrowReleasedAt]);
 
   return {
     messages,
     roomError,
     receiverStatus,
     escrowReleased,
+    tradeRemaingTime,
     sendMessage,
     appendMessage,
     setAsPaid,

@@ -1,6 +1,7 @@
 'use client';
 
-import { SetPaymentConfirmedParams } from './types';
+import { SetPaymentConfirmedParams, SetTradeCancelledParams } from './types';
+
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -16,12 +17,14 @@ const useTrade = () => {
     queryKey: ['trade', id],
     queryFn: async () => {
       if (id) {
+        trade.resetTrade();
         const data = await getTrade(id);
         return data;
       }
     },
     retry: 3,
     enabled: !!id,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
@@ -42,9 +45,10 @@ const useTrade = () => {
     });
   };
 
-  const setCanceled = () => {
+  const setCanceled = (params: SetTradeCancelledParams) => {
     trade.setTradeValue({
       status: 'CANCELLED',
+      endedAt: params.endedAt,
     });
   };
 
@@ -53,7 +57,7 @@ const useTrade = () => {
       status: params.paymentConfirmedAt ? 'COMPLETED' : 'IN_PROGRESS',
       paymentConfirmedAt: params.paymentConfirmedAt,
       endedAt: params.endedAt,
-      escrowReleaseDate: params.escrowReleasedAt,
+      escrowReleasedAt: params.escrowReleasedAt,
     });
   };
 

@@ -6,7 +6,7 @@ export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
 
-    const { paymentDetails, ...restBody } = body;
+    const { paymentDetails, timeLimit, ...restBody } = body;
 
     let paymentDetailsId: string | null = null;
 
@@ -14,8 +14,8 @@ export const createOfferController = async (req: Request, res: Response) => {
       const newPaymentDetails = await prisma.paymentDetails.create({
         data: {
           instructions: body.paymentDetails,
-          paymentMethodId: body.paymentMethodId, // Make sure body.paymentMethod is provided and valid
-          userId: body.vendorId, // Make sure body.vendorId is provided and valid
+          paymentMethodId: body.paymentMethodId,
+          userId: body.vendorId,
         },
         select: {
           id: true,
@@ -43,8 +43,9 @@ export const createOfferController = async (req: Request, res: Response) => {
       paymentDetailsId = existingPaymentDetails.id;
     }
 
+    const timeLimitInSeconds = parseInt(timeLimit, 10) * 60;
     const newOffer = await prisma.offer.create({
-      data: { paymentDetailsId, ...restBody },
+      data: { paymentDetailsId, timeLimit: timeLimitInSeconds, ...restBody },
     });
 
     res.status(200).send(newOffer);

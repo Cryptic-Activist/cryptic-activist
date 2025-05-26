@@ -142,7 +142,7 @@ CREATE TABLE "offers" (
     "listAt" DOUBLE PRECISION NOT NULL,
     "limitMin" DOUBLE PRECISION NOT NULL,
     "limitMax" DOUBLE PRECISION NOT NULL,
-    "timeLimit" DOUBLE PRECISION NOT NULL,
+    "timeLimit" INTEGER NOT NULL,
     "tags" TEXT[],
     "label" TEXT NOT NULL,
     "terms" TEXT NOT NULL,
