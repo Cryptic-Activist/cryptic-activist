@@ -261,6 +261,54 @@ const Trade: FC<TradeProps> = ({
       </section>
 
       <section className={styles.tradeSection}>
+        <h2>Activity Log</h2>
+        <ul>
+          <li>
+            <strong>Trade Started:</strong>
+            <span>{`${
+              trade?.startedAt
+                ? getLocaleFullDateString(new Date(trade?.startedAt))
+                : 'Has not yet start'
+            }`}</span>
+          </li>
+          <li>
+            <strong>Escrow Locked:</strong>
+            <span>
+              {trade?.startedAt
+                ? getLocaleFullDateString(new Date(trade?.startedAt))
+                : 'Not yet locked'}
+            </span>
+          </li>
+          <li>
+            <strong>Set as Paid:</strong>
+            <span>
+              {trade?.paidAt
+                ? getLocaleFullDateString(new Date(trade?.paidAt))
+                : 'Not paid yet'}
+            </span>
+          </li>
+          <li>
+            <strong>Escrow Release:</strong>
+            <span>
+              {trade?.escrowReleasedAt
+                ? getLocaleFullDateString(new Date(trade?.escrowReleasedAt))
+                : 'Not yet released'}
+            </span>
+          </li>
+          <li>
+            <strong>Dispute Raised:</strong>
+            <span>
+              {trade?.tradeDispute
+                ? getLocaleFullDateString(
+                    new Date(trade?.tradeDispute?.createdAt)
+                  )
+                : 'No dispute raised'}
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section className={styles.tradeSection}>
         <h2>Security Reminders</h2>
         <ul className={styles.warningList}>
           <li>
