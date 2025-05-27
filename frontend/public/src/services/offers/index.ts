@@ -59,6 +59,7 @@ export const submitOfferCreate = async (
     terms: data.terms,
     instructions: data.instructions,
     vendorWalletAddress: data.vendorWalletAddress,
+    paymentDetails: data.paymentDetails,
   };
   const response = await fetchPost(BACKEND + '/offers/offer/create', payload, {
     Authorization: bearerToken,

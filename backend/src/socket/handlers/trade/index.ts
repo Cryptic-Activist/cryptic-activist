@@ -1,8 +1,3 @@
-import {
-  EMAIL_FROM,
-  buildFirstTradeWithReferralReferee,
-  buildFirstTradeWithreferralReferrer,
-} from '@/services/email';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -14,6 +9,7 @@ import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
+import { EMAIL_FROM } from '@/services/email';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
@@ -31,27 +27,20 @@ export default class Trade {
     this.socket.on(
       'trade_set_paid',
       async ({ chatId, from, to }: SetTradeAsPaidParams) => {
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
-
         const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
             tradeId: true,
           },
         });
+
+        const paidAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
-            paid: true,
+            paidAt,
           },
         });
 
@@ -61,7 +50,7 @@ export default class Trade {
         }
 
         this.io.to(chatId).emit('trade_set_paid_success', {
-          isPaid: true,
+          paidAt,
         });
         this.io.to(chatId).emit('chat_info_message', {
           from,
@@ -122,28 +111,33 @@ export default class Trade {
           return;
         }
 
+        const paymentConfirmedAt = new Date();
+        const endedAt = new Date();
+        const escrowReleasedAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
-            paymentConfirmed: true,
+            paymentConfirmedAt,
             status: 'COMPLETED',
-            endedAt: new Date(),
-            escrowReleaseDate: new Date(),
+            endedAt,
+            escrowReleasedAt,
           },
         });
 
         if (!updatedTrade) {
           this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
             error: 'Unable to update trade data',
-            hasReceived: false,
           });
           return;
         }
 
         this.io.to(chatId).emit('trade_set_payment_confirmed_success', {
-          hasReceived: true,
+          paymentConfirmedAt,
+          status: 'COMPLETED',
+          endedAt,
+          escrowReleasedAt,
         });
         this.io.to(chatId).emit('chat_info_message', {
           from,
@@ -227,20 +221,13 @@ export default class Trade {
   setAsCanceled() {
     this.socket.on(
       'trade_set_canceled',
-      async ({ chatId, from, to }: SetTradeAsCanceledParams) => {
-        const senderSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          from,
-        );
-        const recipientSocketId = await redisClient.hGet(
-          'onlineTradingUsers',
-          to,
-        );
-
+      async ({ chatId }: SetTradeAsCanceledParams) => {
         const canceledTrade = await cancelTrade();
 
+        console.log({ canceledTrade });
+
         if (canceledTrade.message !== 'Trade cancelled') {
-          this.io.to(senderSocketId!).emit('trade_set_canceled_error', {
+          this.io.to(chatId).emit('trade_set_canceled_error', {
             error: true,
           });
           return;
@@ -252,39 +239,28 @@ export default class Trade {
             tradeId: true,
           },
         });
+        const endedAt = new Date();
         const updatedTrade = await prisma.trade.update({
           where: {
             id: chat?.tradeId,
           },
           data: {
-            paid: false,
             status: 'CANCELLED',
+            endedAt,
           },
         });
 
         if (!updatedTrade) {
-          if (recipientSocketId) {
-            this.io.to(recipientSocketId).emit('trade_set_canceled_error', {
-              error: true,
-            });
-          }
-          if (senderSocketId) {
-            this.io.to(senderSocketId).emit('trade_set_canceled_error', {
-              error: true,
-            });
-          }
+          this.io.to(chatId).emit('trade_set_canceled_error', {
+            error: true,
+          });
+          return;
         }
 
-        if (recipientSocketId) {
-          this.io.to(recipientSocketId).emit('trade_set_canceled_success', {
-            canceled: true,
-          });
-        }
-        if (senderSocketId) {
-          this.io.to(senderSocketId).emit('trade_set_canceled_success', {
-            canceled: true,
-          });
-        }
+        this.io.to(chatId).emit('trade_set_canceled_success', {
+          status: 'CANCELLED',
+          endedAt,
+        });
       },
     );
   }

@@ -30,14 +30,15 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
         <div className={styles.row}>
           <div className={styles.label}>Cryptocurrency:</div>
           <div className={styles.value}>
-            {trade.cryptocurrency?.symbol.toUpperCase()}{' '}
-            {trade.cryptocurrencyAmount}
+            {`${
+              trade?.cryptocurrencyAmount
+            } ${trade?.cryptocurrency?.symbol.toUpperCase()}`}
           </div>
         </div>
         <div className={styles.row}>
           <div className={styles.label}>FIAT:</div>
           <div className={styles.value}>
-            {trade.fiat?.symbol} {trade.fiatAmount}
+            {`${trade.fiatAmount} ${trade.fiat?.symbol.toUpperCase()}`}
           </div>
         </div>
         <div className={styles.row}>

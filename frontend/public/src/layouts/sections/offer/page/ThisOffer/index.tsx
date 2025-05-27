@@ -81,7 +81,7 @@ const ThisOffer: FC<ThisOfferProps> = ({ offer, currentPrice }) => {
           <h4 className={styles.subHeading}>Time Limit</h4>
           {offer.timeLimit && (
             <span className={styles.statement}>
-              {`${offer.timeLimit} minutes`}
+              {`${parseInt((offer.timeLimit / 60).toString())} minutes`}
             </span>
           )}
         </section>

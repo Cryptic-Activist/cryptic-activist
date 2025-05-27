@@ -8,8 +8,9 @@ import {
 import { getLocalStorage, setLocalStorage } from '@/utils';
 import { useApp, useBlockchain, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { useQuery } from '@tanstack/react-query';
+import { fetchPaymentDetails } from '@/services/paymentDetails';
 import { useRootStore } from '@/store';
 
 const useCreateOffer = () => {
@@ -23,6 +24,7 @@ const useCreateOffer = () => {
   } = useBlockchain();
 
   const [step, setStep] = useState(0);
+  // const [paymentDetailsList, setPaymentDetailsList] = useState([]);
   const onClickEvents = {
     0: () => toStep(0),
     1: () => toStep(1),
@@ -56,6 +58,11 @@ const useCreateOffer = () => {
     },
     queryKey: ['savedCreateOffer'],
     refetchOnMount: false,
+  });
+
+  const paymentDetailsQuery = useMutation({
+    mutationKey: ['paymentDetails', createOffer.paymentMethodId],
+    mutationFn: fetchPaymentDetails,
   });
 
   useEffect(() => {
@@ -133,6 +140,12 @@ const useCreateOffer = () => {
     account?.address,
   ]);
 
+  useEffect(() => {
+    if (createOffer?.paymentMethodId && user.id) {
+      paymentDetailsQuery.mutate(user.id);
+    }
+  }, [createOffer?.paymentMethodId, user?.id]);
+
   const toStep = (step: number) => {
     setStep(step);
   };
@@ -164,6 +177,7 @@ const useCreateOffer = () => {
     },
     step,
     onClickEvents,
+    paymentDetailsQuery,
     setCreateOfferValue: createOffer.setCreateOfferValue,
     resetCreateOffer: createOffer.resetCreateOffer,
     toStep,

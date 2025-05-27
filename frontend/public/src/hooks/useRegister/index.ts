@@ -49,7 +49,6 @@ const useRegister = () => {
   const onSubmit: OnSubmit = async (data) => {
     const { confirmPassword, names, password, username, email, referralCode } =
       data;
-    console.log({ data });
     mutation.mutateAsync({
       confirmPassword,
       password,
@@ -59,8 +58,6 @@ const useRegister = () => {
       names,
     });
   };
-
-  console.log({ referral: app.referralCode });
 
   useEffect(() => {
     if (query.data) {

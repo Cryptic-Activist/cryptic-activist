@@ -92,23 +92,31 @@
 }
 
 .badge.pending {
-  background: #ffeb3b;
+  background-color: globals.$trade-status-pending;
   color: #000;
 }
 .badge.in_progress {
-  background: #03a9f4;
+  background-color: globals.$trade-status-in-progress;
   color: #fff;
 }
 .badge.completed {
-  background: #4caf50;
+  background-color: globals.$trade-status-completed;
   color: #fff;
 }
 .badge.cancelled {
-  background: #f44336;
+  background-color: globals.$trade-status-cancelled;
   color: #fff;
 }
 .badge.disputed {
-  background: #ff9800;
+  background-color: globals.$trade-status-disputed;
+  color: #fff;
+}
+.badge.expired {
+  background-color: globals.$trade-status-expired;
+  color: #000;
+}
+.badge.failed {
+  background-color: globals.$trade-status-failed;
   color: #fff;
 }
 

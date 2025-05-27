@@ -177,7 +177,8 @@ const useOffer = () => {
       user.id &&
       offer.vendor?.id &&
       blockchain.account?.address &&
-      cryptocurrencyAmount
+      cryptocurrencyAmount &&
+      user.id !== offer.vendor?.id
     ) {
       setIsTradingAvailable(true);
     } else {

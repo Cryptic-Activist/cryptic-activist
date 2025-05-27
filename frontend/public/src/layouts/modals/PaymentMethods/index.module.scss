@@ -1,14 +1,13 @@
-@use '../../../styles/globals.module.scss';
+@use "../../../styles/globals.module.scss";
 
 .list {
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
   height: 100%;
   width: 100%;
-  overflow-x: scroll;
+  overflow-y: scroll;
   &::-webkit-scrollbar {
-    height: 6px;
+    width: 5px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
@@ -16,19 +15,31 @@
   &::-webkit-scrollbar-thumb {
     background: globals.$secondary;
   }
-
   li {
     list-style: none;
+    margin-right: 5px;
     button {
       cursor: pointer;
-      font-size: globals.$font-size-l;
+      font-size: globals.$font-size-m;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
       background-color: transparent;
       border: none;
-      padding: 0.4rem 0.6rem;
-      transition: background-color 0.2s ease-in-out;
+      border-radius: 0.4em;
+      width: 100%;
+      text-align: left;
+      padding: 1em;
+      transition: background-color 0.15s ease-out;
       &:hover {
-        background-color: #f2f2f2;
+        background-color: #e8e8e8;
+      }
+      &:active {
+        background-color: #d9d9d9;
       }
     }
+  }
+  .selected {
+    background-color: #f4f4f4;
   }
 }

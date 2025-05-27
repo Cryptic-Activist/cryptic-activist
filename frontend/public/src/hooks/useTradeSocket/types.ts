@@ -1,3 +1,8 @@
+import {
+  SetPaymentConfirmedParams,
+  SetTradeCancelledParams,
+} from '../useTrade/types';
+
 import { TradeSetter } from '@/store/trade/types';
 
 type Status = 'online' | 'offline';
@@ -6,14 +11,14 @@ export type UseSocketParams = {
   chatId?: string;
   user?: User;
   timeLimit?: number;
-  tradePaid?: boolean;
+  tradePaid?: string;
   trade: TradeSetter;
   walletAddress?: string;
   onStatusChange?: (status: Status) => void;
-  onSetPaid: (isPaid: boolean) => void;
+  onSetPaid: (paidAt: string) => void;
   onSetTradeCreated: () => void;
-  onSetCanceled: () => void;
-  onSetPaymentConfirmed: (hasReceived: boolean) => void;
+  onSetCanceled: (params: SetTradeCancelledParams) => void;
+  onSetPaymentConfirmed: (params: SetPaymentConfirmedParams) => void;
   onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
 };
 

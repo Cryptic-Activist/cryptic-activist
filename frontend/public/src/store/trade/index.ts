@@ -13,20 +13,25 @@ export const useTradeSlice: StateCreator<
     cryptocurrency: undefined,
     cryptocurrencyAmount: undefined,
     endedAt: undefined,
-    escrowReleaseDate: undefined,
+    escrowReleasedAt: undefined,
     expiredAt: undefined,
     fiat: undefined,
     fiatAmount: undefined,
     offer: undefined,
-    paid: undefined,
+    paidAt: undefined,
     paymentMethod: undefined,
-    paymentDetails: undefined,
+    fundedAt: undefined,
+    startedAt: undefined,
+    exchangeRate: undefined,
+    blockchainTransactionHash: undefined,
     paymentReceipt: undefined,
-    paymentConfirmed: undefined,
+    paymentConfirmedAt: undefined,
     status: undefined,
     trader: undefined,
     vendor: undefined,
     chat: undefined,
+    createdAt: undefined,
+    tradeDispute: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
@@ -37,16 +42,16 @@ export const useTradeSlice: StateCreator<
               cryptocurrencyAmount:
                 params.cryptocurrencyAmount ?? trade.cryptocurrencyAmount,
               endedAt: params.endedAt ?? trade.endedAt,
-              escrowReleaseDate:
-                params.escrowReleaseDate ?? trade.escrowReleaseDate,
+              escrowReleasedAt:
+                params.escrowReleasedAt ?? trade.escrowReleasedAt,
               expiredAt: params.expiredAt ?? trade.expiredAt,
               fiat: params.fiat ?? trade.fiat,
               fiatAmount: params.fiatAmount ?? trade.fiatAmount,
               id: params.id ?? trade.id,
               offer: params.offer ?? trade.offer,
-              paid: params.paid ?? trade.paid,
-              paymentConfirmed:
-                params.paymentConfirmed ?? trade.paymentConfirmed,
+              paidAt: params.paidAt ?? trade.paidAt,
+              paymentConfirmedAt:
+                params.paymentConfirmedAt ?? trade.paymentConfirmedAt,
               paymentMethod: params.paymentMethod ?? trade.paymentMethod,
               paymentReceipt: params.paymentReceipt ?? trade.paymentReceipt,
               status: params.status ?? trade.status,
@@ -57,6 +62,14 @@ export const useTradeSlice: StateCreator<
                 params.traderWalletAddress ?? trade.traderWalletAddress,
               vendorWalletAddress:
                 params.vendorWalletAddress ?? trade.vendorWalletAddress,
+              startedAt: params.startedAt ?? trade.startedAt,
+              fundedAt: params.fundedAt ?? trade.fundedAt,
+              exchangeRate: params.exchangeRate ?? trade.exchangeRate,
+              blockchainTransactionHash:
+                params.blockchainTransactionHash ??
+                trade.blockchainTransactionHash,
+              createdAt: params.createdAt ?? trade.createdAt,
+              tradeDispute: params.tradeDispute ?? trade.tradeDispute,
             },
           };
         },

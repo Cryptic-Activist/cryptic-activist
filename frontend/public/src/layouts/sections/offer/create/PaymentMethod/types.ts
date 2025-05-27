@@ -10,4 +10,5 @@ export type CreateOfferPaymentMethodProps = {
   step: number;
   onClickEvents: { [key: number]: () => void };
   saveCreateOfferLocally: () => void;
+  paymentDetailsQuery: any;
 };

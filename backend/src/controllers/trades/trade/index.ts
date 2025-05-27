@@ -4,6 +4,7 @@ import { CalculateReceivingAmountQueries } from './types';
 import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
+import { getCoinPrice } from '@/services/coinGecko';
 import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
@@ -19,6 +20,24 @@ export async function createTradeController(req: Request, res: Response) {
   try {
     const { body } = req;
 
+    const cryptocurrency = await prisma.cryptocurrency.findFirst({
+      where: { id: body.cryptocurrencyId },
+      select: {
+        coingeckoId: true,
+      },
+    });
+    const fiat = await prisma.fiat.findFirst({
+      where: { id: body.fiatId },
+      select: {
+        symbol: true,
+      },
+    });
+
+    const exchangeRate = await getCoinPrice(
+      cryptocurrency?.coingeckoId!,
+      fiat?.symbol!,
+    );
+
     const newTrade = await prisma.trade.create({
       data: {
         traderId: body.traderId,
@@ -32,6 +51,7 @@ export async function createTradeController(req: Request, res: Response) {
         startedAt: new Date(),
         paymentMethodId: body.paymentMethodId,
         traderWalletAddress: body.traderWalletAddress,
+        exchangeRate: exchangeRate,
       },
     });
 
@@ -79,6 +99,9 @@ export async function checkTradePaid(req: Request, res: Response) {
 
     const trade = await prisma.trade.findFirst({
       where: { id },
+      select: {
+        paidAt: true,
+      },
     });
 
     if (!trade) {
@@ -89,7 +112,7 @@ export async function checkTradePaid(req: Request, res: Response) {
     }
 
     res.status(200).send({
-      isPaid: trade?.paid,
+      isPaid: trade?.paidAt,
     });
   } catch (err) {
     res.status(500).send({
@@ -128,9 +151,42 @@ export async function getTradeController(req: Request, res: Response) {
         cryptocurrencyAmount: true,
         paymentReceipt: true,
         status: true,
-        escrowReleaseDate: true,
-        paymentConfirmed: true,
-        paid: true,
+        escrowReleasedAt: true,
+        paymentConfirmedAt: true,
+        paidAt: true,
+        expiredAt: true,
+        startedAt: true,
+        endedAt: true,
+        fundedAt: true,
+        disputedAt: true,
+        blockchainTransactionHash: true,
+        exchangeRate: true,
+        createdAt: true,
+        tradeDispute: {
+          select: {
+            createdAt: true,
+            id: true,
+            raisedBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+            reason: true,
+            resolutionNote: true,
+            resolvedAt: true,
+            moderator: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
         paymentMethod: {
           select: {
             name: true,
@@ -164,10 +220,30 @@ export async function getTradeController(req: Request, res: Response) {
             terms: true,
             offerType: true,
             timeLimit: true,
+            averageTradeSpeed: true,
+            paymentMethod: true,
+            paymentDetails: true,
+            pricingType: true,
+            createdAt: true,
+            cryptocurrency: true,
+            fiat: true,
+            label: true,
+            limitMax: true,
+            limitMin: true,
+            listAt: true,
           },
         },
         trader: {
           select: {
+            _count: {
+              select: {
+                tradeTrader: {
+                  where: {
+                    status: 'COMPLETED',
+                  },
+                },
+              },
+            },
             id: true,
             profileColor: true,
             firstName: true,
@@ -175,6 +251,7 @@ export async function getTradeController(req: Request, res: Response) {
             username: true,
             isPremium: true,
             lastLoginAt: true,
+            kyc: true,
           },
         },
         vendor: {
@@ -316,7 +393,7 @@ export async function getTradeDetails(req: Request, res: Response) {
         cryptocurrency: true,
         cryptocurrencyAmount: true,
         endedAt: true,
-        escrowReleaseDate: true,
+        escrowReleasedAt: true,
         expiredAt: true,
         fiat: true,
         fiatAmount: true,
@@ -333,8 +410,10 @@ export async function getTradeDetails(req: Request, res: Response) {
         paymentReceipt: true,
         startedAt: true,
         status: true,
-        paymentConfirmed: true,
-        paid: true,
+        paymentConfirmedAt: true,
+        paidAt: true,
+        disputedAt: true,
+        exchangeRate: true,
         feedback: {
           select: {
             id: true,

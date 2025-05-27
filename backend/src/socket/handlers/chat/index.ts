@@ -8,6 +8,7 @@ import {
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import { getRemainingTime } from '@/utils/timer';
 
 export default class Chat {
   private socket: Socket;
@@ -52,6 +53,7 @@ export default class Chat {
             traderWalletAddress: true,
             vendorWalletAddress: true,
             cryptocurrencyAmount: true,
+            status: true,
             trader: {
               select: {
                 tier: {
@@ -78,6 +80,53 @@ export default class Chat {
           return;
         }
 
+        const remaining = await getRemainingTime(trade.id);
+        if (remaining === null) {
+          if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
+            const expiredAt = new Date();
+            await prisma.trade.update({
+              where: { id: trade.id },
+              data: { expiredAt, status: 'EXPIRED' },
+            });
+            this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+            return;
+          }
+        }
+
+        this.io.to(chatId).emit('timer:update', { remaining, chatId });
+
+        const interval = setInterval(async () => {
+          const remaining = await getRemainingTime(trade.id);
+          if (remaining === null || remaining <= 0) {
+            const completedTrade = await prisma.trade.findUnique({
+              where: {
+                id: trade.id,
+                status: {
+                  equals: 'COMPLETED',
+                },
+              },
+              select: {
+                status: true,
+                id: true,
+              },
+            });
+            if (!completedTrade) {
+              console.log('time ended for trade:', trade.id);
+              const expiredAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: { expiredAt, status: 'EXPIRED' },
+              });
+              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+              clearInterval(interval);
+            }
+          } else {
+            // if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
+            this.io.to(chatId).emit('timer:update', { remaining, chatId });
+            // }
+          }
+        }, 1000);
+
         if (trade?.traderWalletAddress === vendorWalletAddress) {
           this.io.to(chatId).emit('trade_error', {
             error: "Vendor's wallet can not be the same as Trader's wallet",
@@ -85,6 +134,7 @@ export default class Chat {
           return;
         }
 
+        // Start trade if vendor wallet address is provided
         if (vendorWalletAddress) {
           if (!trade?.vendorWalletAddress) {
             const updatedTrade = await prisma.trade.update({
@@ -147,8 +197,14 @@ export default class Chat {
             });
 
             if (tradeCreated.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                },
+              });
               this.io.to(chatId).emit('trade_error', {
-                error: tradeCreated.error,
+                error: 'Trade creation error',
               });
               return;
             }
@@ -184,6 +240,20 @@ export default class Chat {
               createTradeDetails.sellerFundAmountWei,
             );
 
+            console.log('Trade funded:', tradeFunded);
+            if (tradeFunded.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                },
+              });
+              this.io.to(chatId).emit('trade_error', {
+                error: 'Trade funding error',
+              });
+              return;
+            }
+
             if (tradeFunded.data) {
               await ChatMessage.create({
                 chatId,
@@ -199,12 +269,14 @@ export default class Chat {
                 id: trade?.id,
               },
               data: {
-                startedAt: new Date(),
                 status: 'IN_PROGRESS',
+                fundedAt: new Date(),
               },
             });
 
-            console.log('Trade funded:', tradeFunded);
+            this.io.to(chatId).emit('trade_funded_success', {
+              fundedAt: new Date(),
+            });
 
             this.io.to(chatId).emit('blockchain_trade_created', {
               blockchainTradeId: tradeCreated.data?.tradeId.toString(),

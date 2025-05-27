@@ -1,4 +1,4 @@
-import { Chat, Message, Notification, Trade } from './handlers';
+import { Chat, Message, Notification, Timer, Trade } from './handlers';
 import { DefaultEventsMap, Server, Socket as SocketIO } from 'socket.io';
 
 const socketHandler = (
@@ -9,6 +9,7 @@ const socketHandler = (
     const notification = new Notification(socket, io);
     const message = new Message(socket, io);
     const trade = new Trade(socket, io);
+    const timer = new Timer(socket, io);
 
     // Join website
     chat.join();
@@ -36,6 +37,12 @@ const socketHandler = (
 
     // Disconnection handling
     chat.disconnect();
+
+    // Notify the user about the trade being updated
+    timer.update();
+
+    // Notify the user about the trade being expired
+    timer.expired();
   });
 };
 

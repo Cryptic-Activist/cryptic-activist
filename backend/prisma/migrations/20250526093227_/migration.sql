@@ -5,7 +5,7 @@ CREATE TYPE "FeedbackType" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
 CREATE TYPE "KYCStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED');
+CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
 
 -- CreateEnum
 CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
@@ -32,9 +32,9 @@ CREATE TABLE "admins" (
     "email" VARCHAR(120) NOT NULL,
     "password" TEXT NOT NULL,
     "isVerified" BOOLEAN DEFAULT false,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
 );
@@ -45,9 +45,9 @@ CREATE TABLE "blocks" (
     "blockerId" TEXT NOT NULL,
     "blockedId" TEXT NOT NULL,
     "reason" VARCHAR(255),
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "blocks_pkey" PRIMARY KEY ("id")
 );
@@ -55,9 +55,9 @@ CREATE TABLE "blocks" (
 -- CreateTable
 CREATE TABLE "chats" (
     "id" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "tradeId" TEXT NOT NULL,
 
     CONSTRAINT "chats_pkey" PRIMARY KEY ("id")
@@ -70,9 +70,9 @@ CREATE TABLE "cryptocurrencies" (
     "symbol" VARCHAR(200) NOT NULL,
     "name" VARCHAR(200) NOT NULL,
     "image" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "cryptocurrencies_pkey" PRIMARY KEY ("id")
 );
@@ -84,9 +84,9 @@ CREATE TABLE "feedbacks" (
     "tradeId" TEXT NOT NULL,
     "message" VARCHAR(256) NOT NULL,
     "type" "FeedbackType" NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "feedbacks_pkey" PRIMARY KEY ("id")
 );
@@ -97,9 +97,9 @@ CREATE TABLE "fiats" (
     "name" VARCHAR(30) NOT NULL,
     "symbol" VARCHAR(10) NOT NULL,
     "country" VARCHAR(100) NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "fiats_pkey" PRIMARY KEY ("id")
 );
@@ -115,10 +115,10 @@ CREATE TABLE "kyc" (
     "status" "KYCStatus" NOT NULL DEFAULT 'PENDING',
     "rejectionReason" TEXT,
     "reviewedBy" TEXT,
-    "reviewedAt" DATE,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "reviewedAt" TIMESTAMP,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "kyc_pkey" PRIMARY KEY ("id")
 );
@@ -127,9 +127,9 @@ CREATE TABLE "kyc" (
 CREATE TABLE "languages" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(50) NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "languages_pkey" PRIMARY KEY ("id")
 );
@@ -142,19 +142,20 @@ CREATE TABLE "offers" (
     "listAt" DOUBLE PRECISION NOT NULL,
     "limitMin" DOUBLE PRECISION NOT NULL,
     "limitMax" DOUBLE PRECISION NOT NULL,
-    "timeLimit" DOUBLE PRECISION NOT NULL,
+    "timeLimit" INTEGER NOT NULL,
     "tags" TEXT[],
     "label" TEXT NOT NULL,
     "terms" TEXT NOT NULL,
     "averageTradeSpeed" DOUBLE PRECISION,
     "instructions" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "vendorId" TEXT NOT NULL,
     "vendorWalletAddress" TEXT NOT NULL,
     "cryptocurrencyId" TEXT NOT NULL,
     "paymentMethodId" TEXT NOT NULL,
+    "paymentDetailsId" TEXT NOT NULL,
     "fiatId" TEXT NOT NULL,
 
     CONSTRAINT "offers_pkey" PRIMARY KEY ("id")
@@ -164,9 +165,9 @@ CREATE TABLE "offers" (
 CREATE TABLE "payment_methods" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(60) NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "paymentMethodCategoryId" TEXT NOT NULL,
 
     CONSTRAINT "payment_methods_pkey" PRIMARY KEY ("id")
@@ -176,9 +177,9 @@ CREATE TABLE "payment_methods" (
 CREATE TABLE "payment_method_categories" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(60) NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "payment_method_categories_pkey" PRIMARY KEY ("id")
 );
@@ -189,9 +190,9 @@ CREATE TABLE "payment_receipts" (
     "name" VARCHAR(60) NOT NULL,
     "key" TEXT NOT NULL,
     "url" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "payment_receipts_pkey" PRIMARY KEY ("id")
 );
@@ -200,10 +201,11 @@ CREATE TABLE "payment_receipts" (
 CREATE TABLE "payment_details" (
     "id" TEXT NOT NULL,
     "instructions" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "paymentMethodId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "payment_details_pkey" PRIMARY KEY ("id")
 );
@@ -216,9 +218,9 @@ CREATE TABLE "premium_purchases" (
     "expectedAmount" DOUBLE PRECISION NOT NULL,
     "status" TEXT NOT NULL,
     "transactionId" TEXT,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "premium_purchases_pkey" PRIMARY KEY ("id")
 );
@@ -228,7 +230,7 @@ CREATE TABLE "referrals" (
     "id" TEXT NOT NULL,
     "referrerId" TEXT NOT NULL,
     "refereeId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "referrals_pkey" PRIMARY KEY ("id")
 );
@@ -237,11 +239,11 @@ CREATE TABLE "referrals" (
 CREATE TABLE "system_messages" (
     "id" TEXT NOT NULL,
     "message" VARCHAR(256) NOT NULL,
-    "whenSeen" TIMESTAMP(3),
+    "whenSeen" TIMESTAMP,
     "url" TEXT NOT NULL,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "system_messages_pkey" PRIMARY KEY ("id")
@@ -275,21 +277,37 @@ CREATE TABLE "trades" (
     "paymentMethodId" TEXT NOT NULL,
     "cryptocurrencyAmount" DOUBLE PRECISION NOT NULL,
     "fiatAmount" DOUBLE PRECISION NOT NULL,
-    "startedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "endedAt" TIMESTAMP(3),
-    "expiredAt" TIMESTAMP(3),
+    "exchangeRate" DECIMAL(30,10) NOT NULL,
+    "startedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "endedAt" TIMESTAMP,
+    "expiredAt" TIMESTAMP,
+    "disputedAt" TIMESTAMP,
     "status" "TradeStatus" NOT NULL,
-    "paid" BOOLEAN DEFAULT false,
-    "paymentConfirmed" BOOLEAN DEFAULT false,
-    "escrowReleaseDate" DATE,
+    "paidAt" TIMESTAMP,
+    "fundedAt" TIMESTAMP,
+    "paymentConfirmedAt" TIMESTAMP,
+    "escrowReleasedAt" TIMESTAMP,
     "blockchainTradeId" BIGINT,
     "blockchainTransactionHash" TEXT,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
-    "paymentDetailsId" TEXT,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "trades_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TradeDispute" (
+    "id" TEXT NOT NULL,
+    "tradeId" TEXT NOT NULL,
+    "raisedById" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "resolutionNote" TEXT,
+    "resolvedAt" TIMESTAMP(3),
+    "moderatorId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "TradeDispute_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -311,9 +329,9 @@ CREATE TABLE "transactions" (
     "currency" TEXT NOT NULL,
     "status" "TransactionStatus" NOT NULL,
     "gatewayTransactionId" TEXT,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
@@ -324,9 +342,9 @@ CREATE TABLE "trusts" (
     "trusterId" TEXT NOT NULL,
     "trustedId" TEXT NOT NULL,
     "trustLabel" INTEGER,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "trusts_pkey" PRIMARY KEY ("id")
 );
@@ -357,9 +375,9 @@ CREATE TABLE "users" (
     "lastLoginAt" TIMESTAMPTZ,
     "createdById" TEXT,
     "lastUpdatedById" TEXT,
-    "deletedAt" DATE,
-    "createdAt" DATE DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATE,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
     "tierId" TEXT,
     "kycId" TEXT,
     "referralCode" VARCHAR(20) NOT NULL DEFAULT substring(md5(gen_random_uuid()::text), 1, 16),
@@ -423,6 +441,9 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "TradeDispute_tradeId_key" ON "TradeDispute"("tradeId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "transactions_gatewayTransactionId_key" ON "transactions"("gatewayTransactionId");
 
 -- CreateIndex
@@ -477,6 +498,9 @@ ALTER TABLE "offers" ADD CONSTRAINT "offers_cryptocurrencyId_fkey" FOREIGN KEY (
 ALTER TABLE "offers" ADD CONSTRAINT "offers_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "offers" ADD CONSTRAINT "offers_paymentDetailsId_fkey" FOREIGN KEY ("paymentDetailsId") REFERENCES "payment_details"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "offers" ADD CONSTRAINT "offers_fiatId_fkey" FOREIGN KEY ("fiatId") REFERENCES "fiats"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -484,6 +508,9 @@ ALTER TABLE "payment_methods" ADD CONSTRAINT "payment_methods_paymentMethodCateg
 
 -- AddForeignKey
 ALTER TABLE "payment_details" ADD CONSTRAINT "payment_details_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payment_details" ADD CONSTRAINT "payment_details_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "premium_purchases" ADD CONSTRAINT "premium_purchases_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -519,7 +546,13 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") 
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentDetailsId_fkey" FOREIGN KEY ("paymentDetailsId") REFERENCES "payment_details"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_raisedById_fkey" FOREIGN KEY ("raisedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

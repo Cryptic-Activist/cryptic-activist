@@ -64,6 +64,16 @@ export const formatTimestamp = (timestamp: number | string) => {
   return `${hours}:${minutes}`;
 };
 
+export const formatRemainingTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  const paddedMins = mins.toString().padStart(2, '0');
+  const paddedSecs = secs.toString().padStart(2, '0');
+
+  return `${paddedMins}:${paddedSecs}`;
+};
+
 export const getDuration = (startedAt: Date, endedAt: Date) => {
   const diffMs = endedAt.getTime() - startedAt.getTime();
 

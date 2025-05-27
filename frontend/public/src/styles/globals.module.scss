@@ -3,6 +3,7 @@ $primary-darken-10: #ffc70d;
 $primary-darken-15: #fdc300;
 $primary-darken-20: #eeb700;
 $primary-darken-25: #dfac00;
+$primary-transparent: rgba($primary, 0.2);
 $primary-hover-background-color: #f8f8f3;
 $secondary: #000;
 
@@ -22,6 +23,7 @@ $border-color-dark: #000;
 
 $white: #fff;
 $black: #000;
+$danger: #de2727;
 $input-border-color: #c0c0c0;
 $grey-background: #e2e2e2;
 $grey: #a2a2a2;
@@ -50,3 +52,11 @@ $font-size-xl: 1.4rem;
 
 $border-radius-100: 2rem;
 $border-radius-4: 0.4rem;
+
+$trade-status-pending: #facc15;
+$trade-status-in-progress: #b5cff9;
+$trade-status-completed: #4caf50;
+$trade-status-cancelled: #9ca3af;
+$trade-status-disputed: #f97316;
+$trade-status-expired: #e5e7eb;
+$trade-status-failed: #ef4444;

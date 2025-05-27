@@ -10,11 +10,12 @@ import {
   useUser,
 } from '@/hooks';
 
-export default function Page() {
+export default function OfferCreatePage() {
   const {
     createOffer,
     step,
     onClickEvents,
+    paymentDetailsQuery,
     setCreateOfferValue,
     toStep,
     saveCreateOfferLocally,
@@ -46,6 +47,7 @@ export default function Page() {
           step={step}
           onClickEvents={onClickEvents}
           saveCreateOfferLocally={saveCreateOfferLocally}
+          paymentDetailsQuery={paymentDetailsQuery}
         />
       )}
       {step == 1 && (

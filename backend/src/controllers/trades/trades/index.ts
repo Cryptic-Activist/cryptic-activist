@@ -12,6 +12,9 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           id: userId,
         },
       },
+      orderBy: {
+        startedAt: 'desc',
+      },
       select: {
         id: true,
         cryptocurrency: true,
@@ -19,7 +22,7 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
         fiat: true,
         fiatAmount: true,
         endedAt: true,
-        escrowReleaseDate: true,
+        escrowReleasedAt: true,
         status: true,
         blockchainTransactionHash: true,
       },
@@ -44,6 +47,9 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
           id: userId,
         },
       },
+      orderBy: {
+        startedAt: 'desc',
+      },
       select: {
         id: true,
         cryptocurrency: true,
@@ -51,7 +57,7 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
         fiat: true,
         fiatAmount: true,
         endedAt: true,
-        escrowReleaseDate: true,
+        escrowReleasedAt: true,
         status: true,
         blockchainTransactionHash: true,
       },

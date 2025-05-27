@@ -1,2 +1,43 @@
+@use "../../../../../styles/globals.module.scss";
+
 .container {
+}
+
+.paymentDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  li {
+    list-style: none;
+    button {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      padding: 0.6rem;
+      background-color: #f2f2f2;
+      border: none;
+      border-left: 3px solid #ccc;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 1px globals.$box-shadow-default-color;
+      width: 100%;
+      text-align: left;
+      font-size: 1rem;
+      height: 100%;
+      align-items: flex-start;
+      transition: all 0.1s ease;
+      &:hover {
+        background-color: #ebebeb;
+      }
+    }
+    .selected {
+      background-color: rgba(globals.$primary, 0.2);
+      border-left: 3px solid globals.$black;
+      box-shadow: 0 0 1px globals.$box-shadow-default-color;
+      &:hover {
+        background-color: rgba(globals.$primary, 0.25);
+      }
+    }
+  }
 }

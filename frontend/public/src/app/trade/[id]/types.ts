@@ -1,23 +1,14 @@
-import {
-  SetAsCanceledParams,
-  SetAsPaidParams,
-} from '@/hooks/useTradeSocket/types';
-import { Status, TradeSetter } from '@/store/trade/types';
+export type ActionButtonsProps = {
+  trade: any;
+  onSetAsPaid: any;
+  setAsCanceled: any;
+  replace: any;
+};
 
 export type TradeProps = {
-  trade: TradeSetter;
+  trade: any;
+  setAsPaid: any;
+  setAsCanceled: any;
+  replace: any;
+  tradeRemaingTime: number | null;
 };
-
-export type TradePaymentInstructionsProps = TradeProps;
-
-export type TradeStatementProps = TradeProps;
-
-export type TradeCancelationProps = TradeProps & {
-  timeLeft: string;
-  escrowReleased: boolean;
-  status?: Status;
-  onSetAsPaid: (params: SetAsPaidParams) => void;
-  onSetAsCanceled: (params: SetAsCanceledParams) => void;
-};
-
-export type TradeInstructionsProps = TradeProps;
