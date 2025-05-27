@@ -12,6 +12,9 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           id: userId,
         },
       },
+      orderBy: {
+        startedAt: 'desc',
+      },
       select: {
         id: true,
         cryptocurrency: true,
@@ -43,6 +46,9 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
         trader: {
           id: userId,
         },
+      },
+      orderBy: {
+        startedAt: 'desc',
       },
       select: {
         id: true,
