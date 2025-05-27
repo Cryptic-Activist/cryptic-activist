@@ -100,8 +100,6 @@ export const useAppSlice: StateCreator<
         app: { setAppValue },
       } = get();
 
-      console.log({ tested: referralCode });
-
       setAppValue({ referralCode }, 'app/setReferralCode');
     },
   },

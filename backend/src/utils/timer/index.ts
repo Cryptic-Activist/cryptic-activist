@@ -2,7 +2,12 @@ import { prisma } from '@/services/db';
 
 export const getRemainingTime = async (tradeId: string) => {
   const trade = await prisma.trade.findUnique({
-    where: { id: tradeId },
+    where: {
+      id: tradeId,
+      status: {
+        in: ['PENDING', 'IN_PROGRESS'],
+      },
+    },
     select: {
       startedAt: true,
       offer: {

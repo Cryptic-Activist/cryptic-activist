@@ -137,7 +137,8 @@ const useTradeSocket = ({
       });
 
       newSocket.on('trade_set_payment_confirmed_success', (data) => {
-        onSetPaymentConfirmed(data.hasReceived);
+        console.log('trade_set_payment_confirmed_success', data);
+        onSetPaymentConfirmed(data);
         addToast('info', 'Payment has been set as Received', 8000);
       });
 

@@ -53,6 +53,7 @@ const useTrade = () => {
   };
 
   const setPaymentConfirmed = (params: SetPaymentConfirmedParams) => {
+    console.log({ params });
     trade.setTradeValue({
       status: params.paymentConfirmedAt ? 'COMPLETED' : 'IN_PROGRESS',
       paymentConfirmedAt: params.paymentConfirmedAt,

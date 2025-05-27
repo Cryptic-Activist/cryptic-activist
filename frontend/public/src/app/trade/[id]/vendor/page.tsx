@@ -1,5 +1,6 @@
 'use client';
 
+import { ActionButtonsProps, TradeProps } from './types';
 import { Button, Chat } from '@/components';
 import React, { FC, useEffect } from 'react';
 import {
@@ -16,8 +17,80 @@ import {
   useUser,
 } from '@/hooks';
 
-import { TradeProps } from './types';
 import styles from './page.module.scss';
+
+const ActionButtons: FC<ActionButtonsProps> = ({
+  trade,
+  replace,
+  setAsCanceled,
+  setAsPaymentConfirmed,
+}) => {
+  const isSetPaymentReceivedVisible =
+    !trade.dispitedAt &&
+    trade.status === 'IN_PROGRESS' &&
+    !trade.paymentConfirmedAt &&
+    trade.paidAt;
+  const isRaiseADisputeVisible =
+    !trade.dispitedAt &&
+    trade.status === 'IN_PROGRESS' &&
+    trade.paidAt &&
+    !trade.paymentConfirmedAt &&
+    !trade.expiredAt &&
+    !trade.escrowReleasedAt;
+  const isLeaveTradeVisible = trade.escrowReleasedAt;
+  const isCancelVisible =
+    !trade.escrowReleasedAt &&
+    !trade.expiredAt &&
+    trade.status !== 'CANCELLED' &&
+    !trade.disputedAt;
+
+  return (
+    <section className={styles.actionButtons}>
+      <div className={styles.actionButtonsGrid}>
+        {isRaiseADisputeVisible && (
+          <Button type="button" fullWidth padding="1rem">
+            Raise a Dispute
+          </Button>
+        )}
+        {isLeaveTradeVisible && (
+          <Button onClick={() => replace('/vendors')} fullWidth padding="1rem">
+            Leave trade
+          </Button>
+        )}
+        {isCancelVisible && (
+          <Button
+            onClick={() =>
+              setAsCanceled({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+            fullWidth
+            padding="1rem"
+            theme="danger"
+          >
+            Cancel
+          </Button>
+        )}
+      </div>
+      {isSetPaymentReceivedVisible && (
+        <Button
+          type="button"
+          fullWidth
+          padding="1rem"
+          onClick={() =>
+            setAsPaymentConfirmed({
+              from: trade.trader?.id,
+              to: trade.vendor?.id,
+            })
+          }
+        >
+          <strong>Set as Payment Received</strong>
+        </Button>
+      )}
+    </section>
+  );
+};
 
 const Trade: FC<TradeProps> = ({
   trade,
@@ -26,6 +99,8 @@ const Trade: FC<TradeProps> = ({
   replace,
   tradeRemaingTime,
 }) => {
+  const hasTimer =
+    trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
   return (
     <div className={styles.trade}>
       <section className={styles.tradeSection}>
@@ -47,12 +122,13 @@ const Trade: FC<TradeProps> = ({
                 : null}
             </span>
           </li>
-          {trade?.expiredAt ? (
+          {trade?.expiredAt && (
             <li>
               <strong>Trade Expired At:</strong>
               <span>{getLocaleFullDateString(new Date(trade?.expiredAt))}</span>
             </li>
-          ) : (
+          )}
+          {hasTimer && (
             <li>
               <strong>Time Left:</strong>
               <span className={styles.remainingTime}>
@@ -64,62 +140,64 @@ const Trade: FC<TradeProps> = ({
           )}
         </ul>
       </section>
-      <section className={styles.tradeSection}>
-        <h2>Trade Details</h2>
-        <ul>
-          <li>
-            <strong>Trade Type:</strong>
-            <span>
-              {`${
-                trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
-              } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
-            </span>
-          </li>
-          <li>
-            <strong>Cryptocurrency Amount:</strong>
-            <span>
-              {`${trade?.cryptocurrencyAmount} ${toUpperCase(
-                trade?.cryptocurrency?.symbol
-              )}`}
-            </span>
-          </li>
-          <li>
-            <strong>Fiat Amount:</strong>
-            <span>{`${trade?.fiatAmount} ${trade?.fiat?.symbol}`}</span>
-          </li>
-          <li>
-            <strong>Exchange Rate:</strong>
-            <span>{`${trade.exchangeRate} ${trade?.fiat?.symbol}`}</span>
-          </li>
-          <li>
-            <strong>Payment Method:</strong>
-            <span>{`${trade?.paymentMethod?.name}`}</span>
-          </li>
-        </ul>
-      </section>
-      <section className={styles.tradeSection}>
-        <h2>Trader Information</h2>
-        <ul>
-          <li>
-            <strong>Name:</strong>
-            <span>{`${trade?.trader?.firstName} ${trade?.trader?.lastName}`}</span>
-          </li>
-          <li>
-            <strong>Username:</strong>
-            <span>{trade?.trader?.username}</span>
-          </li>
-          <li>
-            <strong>Trade History / Rating:</strong>
-            <span>{`${trade?.trader?._count?.tradeTrader} trades`}</span>
-          </li>
-          <li>
-            <strong>KYC Status:</strong>
-            <span>{`${
-              trade?.trader?.kyc !== null ? 'Verified' : 'Not Verified'
-            }`}</span>
-          </li>
-        </ul>
-        {/* <p>Communication history</p> */}
+      <section className={styles.tradeSectionRow}>
+        <div className={styles.tradeSection}>
+          <h2>Trade Details</h2>
+          <ul>
+            <li>
+              <strong>Trade Type:</strong>
+              <span>
+                {`${
+                  trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
+                } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
+              </span>
+            </li>
+            <li>
+              <strong>Cryptocurrency Amount:</strong>
+              <span>
+                {`${trade?.cryptocurrencyAmount} ${toUpperCase(
+                  trade?.cryptocurrency?.symbol
+                )}`}
+              </span>
+            </li>
+            <li>
+              <strong>Fiat Amount:</strong>
+              <span>{`${trade?.fiatAmount} ${trade?.fiat?.symbol}`}</span>
+            </li>
+            <li>
+              <strong>Exchange Rate:</strong>
+              <span>{`${trade.exchangeRate} ${trade?.fiat?.symbol}`}</span>
+            </li>
+            <li>
+              <strong>Payment Method:</strong>
+              <span>{`${trade?.paymentMethod?.name}`}</span>
+            </li>
+          </ul>
+        </div>
+        <div className={styles.tradeSection}>
+          <h2>Trader Information</h2>
+          <ul>
+            <li>
+              <strong>Name:</strong>
+              <span>{`${trade?.trader?.firstName} ${trade?.trader?.lastName}`}</span>
+            </li>
+            <li>
+              <strong>Username:</strong>
+              <span>{trade?.trader?.username}</span>
+            </li>
+            <li>
+              <strong>Trade History / Rating:</strong>
+              <span>{`${trade?.trader?._count?.tradeTrader} trades`}</span>
+            </li>
+            <li>
+              <strong>KYC Status:</strong>
+              <span>{`${
+                trade?.trader?.kyc !== null ? 'Verified' : 'Not Verified'
+              }`}</span>
+            </li>
+          </ul>
+          {/* <p>Communication history</p> */}
+        </div>
       </section>
       <section className={styles.tradeSection}>
         <h2>Payment Instructions</h2>
@@ -134,45 +212,45 @@ const Trade: FC<TradeProps> = ({
           />
         )}
       </section>
-      <section className={styles.tradeSection}>
-        <h2>Escrow Status</h2>
-        <ul>
-          <li>
-            <strong>Funded:</strong>
-            <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
-          </li>
-          <li>
-            <strong>Released on:</strong>
-            <span>{`${
-              trade?.escrowReleasedAt
-                ? ` ${trade?.escrowReleasedAt}`
-                : 'Not yet released'
-            }`}</span>
-          </li>
-        </ul>
-        <p className={styles.warning}>
-          <strong>Warning:</strong> Only release once you&apos;ve confirmed
-          receiving funds in your bank!
-        </p>
-      </section>
-      <section className={styles.tradeSection}>
-        <h2>Dispute</h2>
-        <ul>
-          <li>
-            <strong>Dispute Status:</strong>
-            <span>{`${
-              trade?.tradeDispute?.id ? trade?.tradeDispute?.id : 'No disputes'
-            }`}</span>
-          </li>
-          <li>
-            <strong>Moderator:</strong>
-            <span>
-              {trade?.tradeDispute?.id
-                ? `${trade?.tradeDispute?.moderator?.firstName} ${trade?.tradeDispute?.moderator?.lastName}`
-                : 'No moderator assigned'}
-            </span>
-          </li>
-        </ul>
+      <section className={styles.tradeSectionRow}>
+        <div className={styles.tradeSection}>
+          <h2>Escrow Status</h2>
+          <ul>
+            <li>
+              <strong>Funded:</strong>
+              <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
+            </li>
+            <li>
+              <strong>Released on:</strong>
+              <span>{`${
+                trade?.escrowReleasedAt
+                  ? ` ${trade?.escrowReleasedAt}`
+                  : 'Not yet released'
+              }`}</span>
+            </li>
+          </ul>
+        </div>
+        <div className={styles.tradeSection}>
+          <h2>Dispute</h2>
+          <ul>
+            <li>
+              <strong>Dispute Status:</strong>
+              <span>{`${
+                trade?.tradeDispute?.id
+                  ? trade?.tradeDispute?.id
+                  : 'No disputes'
+              }`}</span>
+            </li>
+            <li>
+              <strong>Moderator:</strong>
+              <span>
+                {trade?.tradeDispute?.id
+                  ? `${trade?.tradeDispute?.moderator?.firstName} ${trade?.tradeDispute?.moderator?.lastName}`
+                  : 'No moderator assigned'}
+              </span>
+            </li>
+          </ul>
+        </div>
       </section>
       <section className={styles.tradeSection}>
         <h2>Activity Log</h2>
@@ -224,7 +302,9 @@ const Trade: FC<TradeProps> = ({
       <section className={styles.tradeSection}>
         <h2>Security Reminders</h2>
         <ul className={styles.warningList}>
-          <li>Never release funds before verifying payment</li>
+          <li>
+            Never release funds before verifying that payment has been received
+          </li>
           <li>Avoid off-platform communication</li>
           <li>Watch for fake payment proofs</li>
         </ul>
@@ -237,59 +317,12 @@ const Trade: FC<TradeProps> = ({
         <p>Smart contract status (if applicable)</p>
       </section> */}
 
-      <section className={styles.actionButtons}>
-        <Button type="button" fullWidth padding="1rem">
-          Report User
-        </Button>
-        {!trade.dispitedAt &&
-          trade.status === 'IN_PROGRESS' &&
-          !trade.paymentConfirmedAt &&
-          trade.paidAt && (
-            <Button
-              type="button"
-              fullWidth
-              padding="1rem"
-              onClick={() =>
-                setAsPaymentConfirmed({
-                  from: trade.trader?.id,
-                  to: trade.vendor?.id,
-                })
-              }
-            >
-              <strong>Set as Payment Received</strong>
-            </Button>
-          )}
-        {!trade.dispitedAt &&
-          trade.status !== 'IN_PROGRESS' &&
-          !trade.expiredAt &&
-          !trade.escrowReleasedAt && (
-            <Button type="button" fullWidth padding="1rem">
-              Raise a Dispute
-            </Button>
-          )}
-        {trade.escrowReleasedAt && (
-          <Button onClick={() => replace('/vendors')} fullWidth padding="1rem">
-            Leave trade
-          </Button>
-        )}
-        {!trade.escrowReleasedAt &&
-          !trade.expiredAt &&
-          trade.status !== 'CANCELLED' &&
-          !trade.disputedAt && (
-            <Button
-              onClick={() =>
-                setAsCanceled({
-                  from: trade.trader?.id,
-                  to: trade.vendor?.id,
-                })
-              }
-              fullWidth
-              padding="1rem"
-            >
-              Cancel
-            </Button>
-          )}
-      </section>
+      <ActionButtons
+        trade={trade}
+        replace={replace}
+        setAsCanceled={setAsCanceled}
+        setAsPaymentConfirmed={setAsPaymentConfirmed}
+      />
     </div>
   );
 };

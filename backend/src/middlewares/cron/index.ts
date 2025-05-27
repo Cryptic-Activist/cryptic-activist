@@ -13,6 +13,9 @@ export const expireTimer = async () => {
         startedAt: {
           lte: new Date(now.getTime() - 1000 * 60), // 1 min ago or more
         },
+        status: {
+          in: ['PENDING', 'IN_PROGRESS'],
+        },
       },
       select: {
         id: true,

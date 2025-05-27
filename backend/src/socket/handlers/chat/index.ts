@@ -53,6 +53,7 @@ export default class Chat {
             traderWalletAddress: true,
             vendorWalletAddress: true,
             cryptocurrencyAmount: true,
+            status: true,
             trader: {
               select: {
                 tier: {
@@ -81,13 +82,15 @@ export default class Chat {
 
         const remaining = await getRemainingTime(trade.id);
         if (remaining === null) {
-          const expiredAt = new Date();
-          await prisma.trade.update({
-            where: { id: trade.id },
-            data: { expiredAt, status: 'EXPIRED' },
-          });
-          this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
-          return;
+          if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
+            const expiredAt = new Date();
+            await prisma.trade.update({
+              where: { id: trade.id },
+              data: { expiredAt, status: 'EXPIRED' },
+            });
+            this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+            return;
+          }
         }
 
         this.io.to(chatId).emit('timer:update', { remaining, chatId });
@@ -95,15 +98,32 @@ export default class Chat {
         const interval = setInterval(async () => {
           const remaining = await getRemainingTime(trade.id);
           if (remaining === null || remaining <= 0) {
-            const expiredAt = new Date();
-            await prisma.trade.update({
-              where: { id: trade.id },
-              data: { expiredAt, status: 'EXPIRED' },
+            const completedTrade = await prisma.trade.findUnique({
+              where: {
+                id: trade.id,
+                status: {
+                  equals: 'COMPLETED',
+                },
+              },
+              select: {
+                status: true,
+                id: true,
+              },
             });
-            this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
-            clearInterval(interval);
+            if (!completedTrade) {
+              console.log('time ended for trade:', trade.id);
+              const expiredAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: { expiredAt, status: 'EXPIRED' },
+              });
+              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+              clearInterval(interval);
+            }
           } else {
+            // if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
             this.io.to(chatId).emit('timer:update', { remaining, chatId });
+            // }
           }
         }, 1000);
 

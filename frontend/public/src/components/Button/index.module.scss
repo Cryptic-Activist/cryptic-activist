@@ -36,6 +36,14 @@
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
 }
 
+.danger {
+  background-color: globals.$danger;
+  color: globals.$white;
+  box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
+  border: 1px solid globals.$black;
+  font-weight: 600;
+}
+
 .transparent {
   background-color: transparent;
   color: globals.$secondary;

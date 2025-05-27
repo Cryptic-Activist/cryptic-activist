@@ -50,8 +50,6 @@ export default function RewardsPage() {
     setProgress(calculatedProgress);
   }, [user.xp, data?.requiredXP]);
 
-  console.log({ progress, xp: user.xp, requiredXP: user.tier?.requiredXP });
-
   return (
     <div className={styles.container}>
       <h1 className={styles.rewardTitle}>Your Referral Rewards</h1>

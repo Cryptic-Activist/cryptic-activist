@@ -12,8 +12,10 @@ import React, {
 } from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
+import Link from 'next/link';
 import { formatTimestamp } from '@/utils';
 import styles from './index.module.scss';
+import { useOutsideClick } from '@/hooks';
 
 const Header: FC<HeaderProps> = ({
   receiver,
@@ -22,6 +24,22 @@ const Header: FC<HeaderProps> = ({
 }) => {
   const indicatorStyle =
     receiverStatus === 'online' ? styles.online : styles.offline;
+
+  const [isChatHeaderMenuOpen, setIsChatHeaderMenuOpen] = useState(false);
+
+  const toggleChatHeaderMenu = () => {
+    setIsChatHeaderMenuOpen((prev) => !prev);
+  };
+
+  const handleBlockUser = () => {
+    toggleChatHeaderMenu();
+  };
+
+  const handleReportUser = () => {
+    toggleChatHeaderMenu();
+  };
+
+  const ref = useOutsideClick(toggleChatHeaderMenu);
 
   return (
     <header className={styles.header}>
@@ -49,9 +67,29 @@ const Header: FC<HeaderProps> = ({
         </div>
       </div>
       <div className={styles.menu}>
-        <button className={styles.menuButton}>
+        <button className={styles.menuButton} onClick={toggleChatHeaderMenu}>
           <FaEllipsisV size={18} />
         </button>
+        {isChatHeaderMenuOpen && (
+          <div className={styles.menuContent} ref={ref}>
+            <ul className={styles.menuList}>
+              <li className={styles.menuItem}>
+                <Link
+                  href={`/vendor/${receiver.id}`}
+                  onClick={toggleChatHeaderMenu}
+                >
+                  View Profile
+                </Link>
+              </li>
+              <li className={styles.menuItem}>
+                <button onClick={handleBlockUser}>Block User</button>
+              </li>
+              <li className={styles.menuItem}>
+                <button onClick={handleReportUser}>Report User</button>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -18,6 +18,7 @@ const Button: FC<ButtonProps> = ({
   const primary = theme === 'primary' ? styles.primary : null;
   const secondary = theme === 'secondary' ? styles.secondary : null;
   const ghost = theme === 'ghost' ? styles.ghost : null;
+  const danger = theme === 'danger' ? styles.danger : null;
   const transparent = theme === 'transparent' ? styles.transparent : null;
   const alignment =
     align === 'center' ? 'center' : align === 'left' ? 'start' : 'end';
@@ -27,7 +28,7 @@ const Button: FC<ButtonProps> = ({
       {href ? (
         <Link
           href={isDisabled ? '#' : href}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${transparent} `}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${transparent} `}
           style={{
             padding,
             textAlign: alignment,
@@ -41,7 +42,7 @@ const Button: FC<ButtonProps> = ({
       ) : (
         <button
           type={type}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${transparent} }`}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${transparent} }`}
           onClick={onClick}
           disabled={isDisabled}
           style={{
