@@ -195,7 +195,7 @@
     border-radius: 0.3rem;
     width: fit-content;
     height: fit-content;
-    font-weight: 600;
+    font-weight: 500;
   }
   .PENDING {
     background-color: globals.$trade-status-pending;
@@ -218,6 +218,19 @@
   }
   .FAILED {
     background-color: globals.$trade-status-failed;
+  }
+}
+
+.noChat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  p {
+    font-size: 1.2rem;
+    color: globals.$black;
   }
 }
 

@@ -101,6 +101,133 @@
   gap: 0.5rem;
 }
 
+.tradeSectionRow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: center;
+}
+
+.remainingTime {
+  font-size: 1.2rem;
+}
+
+.tradeStatus {
+  span {
+    display: flex;
+    font-size: 1rem;
+    color: globals.$black;
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.3rem;
+    width: fit-content;
+    height: fit-content;
+    font-weight: 500;
+  }
+  .PENDING {
+    background-color: globals.$trade-status-pending;
+  }
+  .IN_PROGRESS {
+    background-color: globals.$trade-status-in-progress;
+  }
+  .COMPLETED {
+    background-color: globals.$trade-status-completed;
+    color: globals.$white;
+  }
+  .CANCELLED {
+    background-color: globals.$trade-status-cancelled;
+  }
+  .DISPUTED {
+    background-color: globals.$trade-status-disputed;
+  }
+  .EXPIRED {
+    background-color: globals.$trade-status-expired;
+  }
+  .FAILED {
+    background-color: globals.$trade-status-failed;
+  }
+}
+
+.paymentDetails {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  padding: 0.6rem;
+  background-color: #f2f2f2;
+  border: none;
+  border-left: 3px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 1px globals.$box-shadow-default-color;
+  width: fit-content;
+  text-align: left;
+  font-size: 1rem;
+  height: 100%;
+  align-items: flex-start;
+  transition: all 0.1s ease;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-direction: column;
+}
+
+.actionButtonsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.tradeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  h2 {
+    font-size: 1.2rem;
+  }
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    li {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      span {
+        font-size: 1.1rem;
+      }
+    }
+  }
+  .warningList {
+    position: relative;
+    li {
+      margin-left: 1rem;
+      &::before {
+        content: "";
+        height: 5px;
+        width: 5px;
+        border-radius: 100%;
+        background-color: globals.$black;
+        position: absolute;
+        transform: translate(-10px, 8px);
+      }
+    }
+  }
+}
+
+.noChat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  p {
+    font-size: 1.2rem;
+    color: globals.$black;
+  }
+}
+
 @media (max-width: 1500px) {
   .container {
     width: 90%;

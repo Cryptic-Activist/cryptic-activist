@@ -166,7 +166,9 @@ const Trade: FC<TradeProps> = ({
             </li>
             <li>
               <strong>Exchange Rate:</strong>
-              <span>{`${trade.exchangeRate} ${trade?.fiat?.symbol}`}</span>
+              <span>{`${trade?.exchangeRate} ${
+                trade?.fiat?.symbol
+              } / ${toUpperCase(trade?.cryptocurrency?.symbol)}`}</span>
             </li>
             <li>
               <strong>Payment Method:</strong>
@@ -224,7 +226,9 @@ const Trade: FC<TradeProps> = ({
               <strong>Released on:</strong>
               <span>{`${
                 trade?.escrowReleasedAt
-                  ? ` ${trade?.escrowReleasedAt}`
+                  ? ` ${getLocaleFullDateString(
+                      new Date(trade?.escrowReleasedAt)
+                    )}`
                   : 'Not yet released'
               }`}</span>
             </li>
@@ -389,8 +393,6 @@ const TradeVendor = () => {
     // }
   }, [trade.vendor?.id, user.id, query.isSuccess]);
 
-  console.log({ trade });
-
   return (
     <div className={styles.container}>
       <Trade
@@ -400,17 +402,23 @@ const TradeVendor = () => {
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
       />
-      <div className={styles.chatContainer}>
-        {trade.id && trade.vendor && trade.trader && (
-          <Chat
-            receiver={trade.trader}
-            sender={trade.vendor}
-            receiverStatus={receiverStatus}
-            onSendMessage={sendMessage}
-            messages={messages}
-          />
-        )}
-      </div>
+
+      {trade?.id &&
+      trade?.vendor &&
+      trade?.trader &&
+      (trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING') ? (
+        <Chat
+          receiver={trade.trader}
+          sender={trade.vendor}
+          receiverStatus={receiverStatus}
+          onSendMessage={sendMessage}
+          messages={messages}
+        />
+      ) : (
+        <div className={styles.noChat}>
+          <p>Chat no longer available</p>
+        </div>
+      )}
     </div>
   );
 };
