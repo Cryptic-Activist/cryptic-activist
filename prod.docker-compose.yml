@@ -87,6 +87,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
+    profiles:
+      - prod
     ports:
       - "5672:5672"
     env_file:
