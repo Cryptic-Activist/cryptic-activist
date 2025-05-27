@@ -9,13 +9,7 @@ import {
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
-import {
-  useCountDown,
-  useRouter,
-  useTrade,
-  useTradeSocket,
-  useUser,
-} from '@/hooks';
+import { useRouter, useTrade, useTradeSocket, useUser } from '@/hooks';
 
 import styles from './page.module.scss';
 
