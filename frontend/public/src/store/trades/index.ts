@@ -10,24 +10,31 @@ export const useTradesSlice: StateCreator<
 > = (set, get) => ({
   trades: {
     data: [],
-    setTradeValue: (params, actionName = 'trade/setValue') => {
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
+    setTradeValue: (params, actionName = 'trades/setValue') => {
       set(
-        ({ trades }) => {
-          return {
-            trades: {
-              ...trades,
-              data: params ?? trades.data,
-            },
-          };
-        },
+        ({ trades }) => ({
+          trades: {
+            ...trades,
+            data: params.data ?? trades.data,
+            totalPages: params.totalPages ?? trades.totalPages,
+            currentPage: params.currentPage ?? trades.currentPage,
+            pageSize: params.pageSize ?? trades.pageSize,
+          },
+        }),
         false,
         actionName
       );
     },
     resetTrades: () => {
-      const setValue = get().trade.setTradeValue;
+      const setValue = get().trades.setTradeValue;
 
-      setValue({}, 'trade/resetTrade');
+      setValue(
+        { data: [], currentPage: 1, pageSize: 1, totalPages: 10 },
+        'trades/resetTrades'
+      );
     },
   },
 });

@@ -23,6 +23,9 @@ export const getOffersController = async (
         paymentMethodId,
         deletedAt: null,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
       select: {
         _count: {
           select: { trades: true },
@@ -86,6 +89,9 @@ export const getCurrentVendorOffers = async (
       where: {
         vendorId: id,
         deletedAt: null,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
       select: {
         _count: {
@@ -168,7 +174,7 @@ export const getOffersPaginationController = async (
     const offers = await prisma.offer.findMany({
       take: take + 1,
       ...(cursorObj && { cursor: cursorObj, skip }),
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       where: {
         cryptocurrencyId,
         fiatId,
@@ -252,57 +258,64 @@ export const getMyOffersPaginationController = async (
   res: Response,
 ) => {
   const { userId } = req.params;
-  const { offerType, limit, cursor } =
-    req.query as unknown as GetMyOffersPaginationRequest;
+  const { offerType } = req.query as unknown as GetMyOffersPaginationRequest;
 
-  const take = parseInt(limit, 10) || 20;
-  const cursorObj = cursor ? { id: cursor } : undefined;
-  const skip = cursor ? 1 : 0;
+  const page = parseInt(req.query.page as string) || 1;
+  const pageSize = parseInt(req.query.pageSize as string) || 10;
 
   try {
-    const offers = await prisma.offer.findMany({
-      take: take + 1,
-      ...(cursorObj && { cursor: cursorObj, skip }),
-      orderBy: { createdAt: 'asc' },
-      where: {
-        offerType,
-        vendorId: userId,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-        label: true,
-        terms: true,
-        tags: true,
-        timeLimit: true,
-        pricingType: true,
-        listAt: true,
-        limitMin: true,
-        limitMax: true,
-        instructions: true,
-        cryptocurrency: {
-          select: {
-            id: true,
-            name: true,
-            symbol: true,
+    const [offers, totalCount] = await Promise.all([
+      prisma.offer.findMany({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+        where: {
+          offerType,
+          vendorId: userId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          label: true,
+          terms: true,
+          tags: true,
+          timeLimit: true,
+          pricingType: true,
+          listAt: true,
+          limitMin: true,
+          limitMax: true,
+          instructions: true,
+          cryptocurrency: {
+            select: {
+              id: true,
+              name: true,
+              symbol: true,
+            },
+          },
+          fiat: {
+            select: {
+              id: true,
+              name: true,
+              symbol: true,
+            },
           },
         },
-        fiat: {
-          select: {
-            id: true,
-            name: true,
-            symbol: true,
-          },
+      }),
+      prisma.offer.count({
+        where: {
+          offerType,
+          vendorId: userId,
+          deletedAt: null,
         },
-      },
+      }),
+    ]);
+
+    res.status(200).send({
+      data: offers,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
     });
-
-    let nextCursor: string | null = null;
-    if (offers.length > take) {
-      nextCursor = offers[offers.length - 1].id || null;
-    }
-
-    res.status(200).send({ offers, nextCursor });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

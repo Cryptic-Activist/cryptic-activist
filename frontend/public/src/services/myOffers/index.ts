@@ -4,17 +4,10 @@ import { fetchGet } from '@/services/axios';
 import { getQueries } from '@/utils';
 
 export const fetchMyOffersPagination = async ({
-  cursor,
   userId,
   ...rest
 }: FetchOffersParams) => {
-  const queriesObj = {
-    ...rest,
-  } as unknown as FetchOffersParams;
-  if (cursor) {
-    queriesObj.cursor = cursor;
-  }
-  const queries = getQueries(queriesObj as any);
+  const queries = getQueries(rest);
   const response = await fetchGet(
     `${BACKEND}/offers/${userId}/pagination` + queries
   );

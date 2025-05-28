@@ -39,31 +39,21 @@ export type Offer = {
   instructions: string;
 };
 
-type Cursor = string;
-
 export type MyOffersStore = {
   myOffers: {
     data: Offer[];
-    cursor: string | null;
-    hasMore: boolean;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
     hasError: boolean;
-    setMyOffersValue: (params: {
-      value: Value;
-      actionName?: `myOffers/${string}`;
-      cursor?: Cursor | null;
-      hasMore?: boolean;
-    }) => void;
-    setMyOffers: (params: {
-      offers: Offer[];
-      cursor: Cursor | null;
-    }) => Promise<void>;
+    setMyOffersValue: (value: Value, actionName?: `myOffers/${string}`) => void;
     setHasMore: (hasMore: boolean) => void;
     setHasError: (hasError: boolean) => void;
   };
 };
 
 export type MyOffersSetter = {
-  data: {
+  data?: {
     _count?: {
       trades?: number;
       feedbacks?: number;
@@ -85,6 +75,9 @@ export type MyOffersSetter = {
     terms: string;
     instructions: string;
   }[];
+  totalPages?: number;
+  currentPage?: number;
+  pageSize?: number;
 };
 
 export type Value = MyOffersSetter;

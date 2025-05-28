@@ -34,17 +34,23 @@ export const GetOffersPagination = z
 
 export const GetMyOffersPagination = z
   .object({
-    limit: z.string(),
-    cursor: z.string().optional(),
-    offerType: z.string().min(2).optional(),
+    page: z.string().min(1),
+    pageSize: z.string().min(1),
   })
-  .superRefine(({ limit }, ctx) => {
+  .superRefine(({ page, pageSize }, ctx) => {
     const regex = /^\d+$/;
-    if (!regex.test(limit)) {
+    if (!regex.test(page)) {
       ctx.addIssue({
         code: 'custom',
-        path: ['limit'],
-        message: 'limit must be number',
+        path: ['page'],
+        message: 'page must be number',
+      });
+    }
+    if (!regex.test(pageSize)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['pageSize'],
+        message: 'pageSize must be number',
       });
     }
   });

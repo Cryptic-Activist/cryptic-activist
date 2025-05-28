@@ -1,5 +1,4 @@
-export type FetchOffersParams = {
-  offerType?: string;
+export type GetNotificationParams = {
   userId: string;
   page: number;
   pageSize: number;

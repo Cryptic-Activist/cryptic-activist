@@ -7,7 +7,7 @@ export const index = async (_req: Request, res: Response) => {
   try {
     const fiats = await prisma.fiat.findMany({
       orderBy: {
-        name: 'asc',
+        name: 'desc',
       },
     });
 

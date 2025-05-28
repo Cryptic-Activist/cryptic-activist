@@ -23,6 +23,7 @@
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
   display: flex;
   flex-direction: column;
+  max-height: calc(100vh - 27rem);
   gap: 1rem;
 
   overflow-y: scroll;
