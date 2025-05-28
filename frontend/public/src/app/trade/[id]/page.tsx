@@ -139,7 +139,15 @@ const Trade: FC<TradeProps> = ({
           <h2>Trade Details</h2>
           <ul>
             <li>
-              <strong>Crypto Amount:</strong>
+              <strong>Trade Type:</strong>
+              <span>
+                {`${
+                  trade?.offer?.offerType === 'buy' ? 'Buying' : 'Selling'
+                } ${toUpperCase(trade?.cryptocurrency?.symbol)}`}
+              </span>
+            </li>
+            <li>
+              <strong>Cryptocurrency Amount:</strong>
               <span>
                 {`${trade?.cryptocurrencyAmount} ${toUpperCase(
                   trade?.offer?.cryptocurrency?.symbol
