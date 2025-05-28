@@ -105,7 +105,7 @@ const EditOffer = () => {
             value={formVaules.instructions}
           />
           <div className={styles.connectedWallet}>
-            <label>Connect Wallet</label>
+            <label>Connected Wallet</label>
             <span>{formVaules.vendorWalletAddress}</span>
           </div>
         </div>

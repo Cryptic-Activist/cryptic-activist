@@ -7,39 +7,27 @@ export const useMyOffersSlice: StateCreator<
   [['zustand/devtools', never]],
   [],
   MyOffersStore
-> = (set, get) => ({
+> = (set, _get) => ({
   myOffers: {
     data: [],
-    cursor: null,
-    hasMore: true,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 5,
     hasError: false,
-    setMyOffersValue: ({
-      value,
-      actionName = 'myOffers/setValue',
-      cursor,
-      hasMore,
-    }) => {
+    setMyOffersValue: (value, actionName = 'myOffers/setValue') => {
       set(
         ({ myOffers }) => ({
           myOffers: {
             ...myOffers,
             data: value.data ?? myOffers.data,
-            cursor: cursor ?? myOffers.cursor,
-            hasMore: hasMore ?? myOffers.hasMore,
+            totalPages: value.totalPages ?? myOffers.totalPages,
+            currentPage: value.currentPage ?? myOffers.currentPage,
+            pageSize: value.pageSize ?? myOffers.pageSize,
           },
         }),
         false,
         actionName
       );
-    },
-    setMyOffers: async ({ offers, cursor }) => {
-      const setValue = get().myOffers.setMyOffersValue;
-
-      setValue({
-        value: { data: offers },
-        actionName: 'myOffers/setMyOffers',
-        cursor,
-      });
     },
     setHasMore: (hasMore: boolean) => {
       set(

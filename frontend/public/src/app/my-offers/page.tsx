@@ -5,6 +5,7 @@ import { useApp, useMyOffers, useUser } from '@/hooks';
 
 import Link from 'next/link';
 import { MyOfferItemProps } from './types';
+import Pagination from '@/components/Pagination';
 import styles from './page.module.scss';
 
 const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
@@ -53,7 +54,7 @@ const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
 };
 
 const MyOffers = () => {
-  const { myOffers, deleteOffer } = useMyOffers();
+  const { myOffers, mutationDeleteOffer, onChangePage } = useMyOffers();
   const { app, setValue } = useApp();
   const {
     user: { id },
@@ -65,8 +66,7 @@ const MyOffers = () => {
 
   const onDeleteOffer = async (offerId: string) => {
     if (id) {
-      const deleted = await deleteOffer({ userId: id, offerId });
-      return deleted;
+      mutationDeleteOffer.mutate({ userId: id, offerId });
     }
   };
 
@@ -87,15 +87,24 @@ const MyOffers = () => {
         </button>
       </div>
 
-      <ul className={styles.list}>
-        {myOffers.data?.map((myOffer) => (
-          <MyOfferItem
-            key={myOffer.id}
-            offer={myOffer}
-            onDeleteOffer={onDeleteOffer}
+      {myOffers.data?.length > 0 && (
+        <>
+          <ul className={styles.list}>
+            {myOffers.data?.map((myOffer) => (
+              <MyOfferItem
+                key={myOffer.id}
+                offer={myOffer}
+                onDeleteOffer={onDeleteOffer}
+              />
+            ))}
+          </ul>
+          <Pagination
+            currentPage={myOffers.currentPage}
+            totalPages={myOffers.totalPages}
+            onPageChange={onChangePage}
           />
-        ))}
-      </ul>
+        </>
+      )}
     </div>
   );
 };

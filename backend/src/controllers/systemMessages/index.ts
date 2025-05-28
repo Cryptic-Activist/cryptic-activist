@@ -22,7 +22,9 @@ export const getSystemMessagesController = async (
           createdAt: 'desc',
         },
       }),
-      prisma.systemMessage.count(),
+      prisma.systemMessage.count({
+        where: { userId },
+      }),
     ]);
 
     res.status(200).send({

@@ -10,72 +10,32 @@ import { useRootStore } from '@/store';
 
 const useMyOffers = () => {
   const { myOffers } = useRootStore();
-  const { app } = useApp();
   const { user } = useUser();
+  const {
+    app: { type },
+  } = useApp();
 
-  const initialFetch = async (userId: string) => {
-    myOffers.setHasError(false);
-    const newMyOffers = await fetchMyOffersPagination({
-      userId,
-      limit: 5,
-      cursor: null,
-      offerType: app.type,
-    });
-    if (newMyOffers.offers.length > 0) {
-      const newMyOffersList = [...newMyOffers.offers];
-
-      myOffers.setMyOffers({
-        offers: newMyOffersList,
-        cursor: newMyOffersList[newMyOffersList.length - 1].id,
-      });
-    } else {
-      myOffers.setMyOffers({ offers: [], cursor: null });
-    }
-    myOffers.setHasMore(newMyOffers.nextCursor !== null);
-  };
-
-  const loadMore = async (userId: string) => {
-    const newMyOffers = await fetchMyOffersPagination({
-      userId,
-      limit: 5,
-      cursor: myOffers.cursor,
-      offerType: app.type,
-    });
-    if (newMyOffers.myOffers.length > 0) {
-      const newMyOffersList = [...myOffers.data, ...newMyOffers.myOffers];
-      myOffers.setMyOffers({
-        offers: newMyOffersList,
-        cursor: newMyOffersList[newMyOffersList.length - 1].id,
-      });
-    } else {
-      myOffers.setMyOffers({ offers: [], cursor: null });
-    }
-    myOffers.setHasMore(newMyOffers.nextCursor !== null);
-  };
-
-  const mutationInitialFetch = useMutation({
-    mutationKey: ['initialFetch', 'myOffers'],
+  const mutation = useMutation({
+    mutationKey: ['myOffers'],
     mutationFn: async () => {
       if (user.id) {
-        const data = await initialFetch(user.id);
-        return data;
+        const myOfferList = await fetchMyOffersPagination({
+          userId: user.id,
+          page: myOffers.currentPage,
+          pageSize: myOffers.pageSize,
+          offerType: type,
+        });
+        return myOfferList;
       }
     },
-    retry: 3,
-    onError: () => {
-      myOffers.setHasError(true);
+    onSuccess: (response) => {
+      myOffers.setMyOffersValue({
+        data: response.data,
+        totalPages: response.totalPages,
+        currentPage: response.currentPage,
+        pageSize: response.pageSize,
+      });
     },
-  });
-
-  const mutationLoadMore = useMutation({
-    mutationKey: ['loadMore', 'myOffers'],
-    mutationFn: async () => {
-      if (user.id) {
-        const data = await loadMore(user.id);
-        return data;
-      }
-    },
-    retry: 3,
   });
 
   const mutationDeleteOffer = useMutation({
@@ -89,44 +49,35 @@ const useMyOffers = () => {
     }) => {
       if (userId && offerId) {
         const data = await deleteOffer(userId, offerId);
-        // return data;
-
-        if (data) {
-          await initialFetch(userId);
-        }
+        return data;
       }
+    },
+    onSuccess: () => {
+      mutation.mutate();
     },
     retry: 3,
   });
 
-  const getOffer = (id: string) => {
-    if (!myOffers.data) return null;
-
-    const offer = myOffers.data.filter((f) => f.id === id);
-    const hasFound = offer.length > 0;
-
-    if (!hasFound) return null;
-
-    return offer[0];
-  };
-
   useEffect(() => {
-    mutationInitialFetch.mutate();
-  }, [user.id]);
-
-  useEffect(() => {
-    if (user.id && app.type) {
-      mutationInitialFetch.mutate();
+    if (user.id) {
+      mutation.mutate();
     }
-  }, [app.type, user.id]);
+  }, [
+    user.id,
+    myOffers.pageSize,
+    myOffers.currentPage,
+    myOffers.totalPages,
+    type,
+  ]);
+
+  const onChangePage = (page: number) => {
+    myOffers.setMyOffersValue({ currentPage: page }, 'myOffers/setCurrentPage');
+  };
 
   return {
     myOffers,
-    setMyOffers: myOffers.setMyOffers,
-    getOffer,
-    loadMore: mutationLoadMore.mutate,
-    initialFetch: mutationInitialFetch.mutate,
-    deleteOffer: mutationDeleteOffer.mutateAsync,
+    onChangePage,
+    mutationDeleteOffer,
   };
 };
 

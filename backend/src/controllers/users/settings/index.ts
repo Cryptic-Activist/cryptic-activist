@@ -79,6 +79,19 @@ export async function requestEmailChange(req: Request, res: Response) {
     const { userId } = req.params;
     const { email } = req.body;
 
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingUser) {
+      res.status(400).send({
+        error: 'Unable to process request',
+      });
+      return;
+    }
+
     const user = await prisma.user.findUnique({
       where: {
         id: userId,

@@ -32,7 +32,13 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           blockchainTransactionHash: true,
         },
       }),
-      prisma.trade.count(),
+      prisma.trade.count({
+        where: {
+          vendor: {
+            id: userId,
+          },
+        },
+      }),
     ]);
 
     res.status(200).send({
@@ -79,7 +85,13 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
           blockchainTransactionHash: true,
         },
       }),
-      prisma.trade.count(),
+      prisma.trade.count({
+        where: {
+          trader: {
+            id: userId,
+          },
+        },
+      }),
     ]);
 
     res.status(200).send({
