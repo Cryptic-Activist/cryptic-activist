@@ -192,13 +192,6 @@ const useTradeSocket = ({
 
       newSocket.on('timer:update', (data) => {
         const { remaining } = data;
-
-        // if (remaining <= 0) {
-        //   addToast('error', 'Trade timer has expired', 8000);
-        //   replace(`/trade/${trade.id}/details`, {
-        //     scroll: true,
-        //   });
-        // }
         setTradeRemainingTime(remaining);
       });
 
@@ -210,6 +203,17 @@ const useTradeSocket = ({
             expiredAt: data.expiredAt,
           },
           'trade/setExpiredAt'
+        );
+      });
+
+      newSocket.on('trade_failed', (data) => {
+        // @ts-ignore
+        trade.setTradeValue(
+          {
+            status: 'FAILED',
+            endedAt: data.endedAt,
+          },
+          'trade/setEndedAt'
         );
       });
 
