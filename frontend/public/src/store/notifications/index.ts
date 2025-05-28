@@ -11,15 +11,21 @@ export const useNotificationsSlice: StateCreator<
   NotificationsStore
 > = (set, get) => ({
   notifications: {
-    notifications: [],
+    data: [],
     hasNewNotification: false,
     socket: undefined,
+    totalPages: 1,
+    currentPage: 1,
+    pageSize: 10,
     setNotificationValue: (params, actionName = 'notifications/setValue') => {
       set(
         ({ notifications }) => ({
           notifications: {
             ...notifications,
-            notifications: params.notifications ?? notifications.notifications,
+            data: params.data ?? notifications.data,
+            totalPages: params.totalPages ?? notifications.totalPages,
+            currentPage: params.currentPage ?? notifications.currentPage,
+            pageSize: params.pageSize ?? notifications.pageSize,
             hasNewNotification:
               params.hasNewNotification ?? notifications.hasNewNotification,
             socket: params.socket ?? notifications.socket,
@@ -34,11 +40,11 @@ export const useNotificationsSlice: StateCreator<
       setValue({ socket }, 'notifications/setSocket');
     },
     appendNotification: (notification: Notification) => {
-      const prevNotification = get().notifications.notifications;
+      const prevNotification = get().notifications.data;
       const setValue = get().notifications.setNotificationValue;
 
       setValue(
-        { notifications: [...prevNotification, notification] },
+        { data: [...prevNotification, notification] },
         'notifications/appendNotification'
       );
     },

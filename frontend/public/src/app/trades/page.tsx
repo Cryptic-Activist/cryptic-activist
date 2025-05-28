@@ -3,6 +3,7 @@
 import React, { FC } from 'react';
 
 import Link from 'next/link';
+import Pagination from '@/components/Pagination';
 import { TradeItemProps } from './types';
 import styles from './page.module.scss';
 import { useTrades } from '@/hooks';
@@ -72,7 +73,7 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
 };
 
 const TradesPage = () => {
-  const { trades, as, toggleAs } = useTrades();
+  const { trades, as, toggleAs, onChangePage } = useTrades();
 
   return (
     <div className={styles.container}>
@@ -95,11 +96,18 @@ const TradesPage = () => {
         </li>
       </ul>
       {trades?.data?.length > 0 ? (
-        <ul className={styles.list}>
-          {trades?.data?.map((trade) => (
-            <TradeItem key={trade.id} trade={trade} as={as} />
-          ))}
-        </ul>
+        <>
+          <ul className={styles.list}>
+            {trades?.data?.map((trade) => (
+              <TradeItem key={trade.id} trade={trade} as={as} />
+            ))}
+          </ul>
+          <Pagination
+            currentPage={trades.currentPage}
+            totalPages={trades.totalPages}
+            onPageChange={onChangePage}
+          />
+        </>
       ) : (
         <h3>No trades yet</h3>
       )}

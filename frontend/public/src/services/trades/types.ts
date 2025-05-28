@@ -19,3 +19,10 @@ export type getCurrentTradingFeeParams = {
 };
 
 export type GetTradesByUserAs = 'vendor' | 'trader';
+
+export type GetTradesByUserParams = {
+  userId: string;
+  as: GetTradesByUserAs;
+  page: number;
+  pageSize: number;
+};

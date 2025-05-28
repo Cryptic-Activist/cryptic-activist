@@ -17,12 +17,22 @@ const useTrades = () => {
     mutationKey: ['trades'],
     mutationFn: async () => {
       if (user.id) {
-        const trades = await getTradesByUser(user.id, as);
-        return trades;
+        const tradesList = await getTradesByUser({
+          as,
+          userId: user.id,
+          page: trades.currentPage,
+          pageSize: trades.pageSize,
+        });
+        return tradesList;
       }
     },
-    onSuccess: (data) => {
-      trades.setTradeValue(data);
+    onSuccess: (response) => {
+      trades.setTradeValue({
+        data: response.data,
+        totalPages: response.totalPages,
+        currentPage: response.currentPage,
+        pageSize: response.pageSize,
+      });
     },
   });
 
@@ -30,19 +40,25 @@ const useTrades = () => {
     if (user.id) {
       mutation.mutate();
     }
-  }, [user.id, as]);
+  }, [user.id, as, trades.pageSize, trades.currentPage, trades.totalPages]);
 
   const toggleAs = () => {
     setAs((prev) => {
       const newState = prev === 'trader' ? 'vendor' : 'trader';
       return newState;
     });
+    trades.setTradeValue({ currentPage: 1, pageSize: 10, totalPages: 1 });
+  };
+
+  const onChangePage = (page: number) => {
+    trades.setTradeValue({ currentPage: page }, 'trades/setCurrentPage');
   };
 
   return {
     trades,
     toggleAs,
     as,
+    onChangePage,
   };
 };
 

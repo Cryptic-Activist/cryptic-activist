@@ -23,6 +23,9 @@ export const getOffersController = async (
         paymentMethodId,
         deletedAt: null,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
       select: {
         _count: {
           select: { trades: true },
@@ -86,6 +89,9 @@ export const getCurrentVendorOffers = async (
       where: {
         vendorId: id,
         deletedAt: null,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
       select: {
         _count: {
@@ -168,7 +174,7 @@ export const getOffersPaginationController = async (
     const offers = await prisma.offer.findMany({
       take: take + 1,
       ...(cursorObj && { cursor: cursorObj, skip }),
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       where: {
         cryptocurrencyId,
         fiatId,
@@ -263,7 +269,7 @@ export const getMyOffersPaginationController = async (
     const offers = await prisma.offer.findMany({
       take: take + 1,
       ...(cursorObj && { cursor: cursorObj, skip }),
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       where: {
         offerType,
         vendorId: userId,

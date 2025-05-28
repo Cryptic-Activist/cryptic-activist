@@ -5,30 +5,42 @@ import { prisma } from '@/services/db';
 export async function getTradesByUserAsVendor(req: Request, res: Response) {
   try {
     const { userId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
 
-    const trades = await prisma.trade.findMany({
-      where: {
-        vendor: {
-          id: userId,
+    const [trades, totalCount] = await Promise.all([
+      prisma.trade.findMany({
+        where: {
+          vendor: {
+            id: userId,
+          },
         },
-      },
-      orderBy: {
-        startedAt: 'desc',
-      },
-      select: {
-        id: true,
-        cryptocurrency: true,
-        cryptocurrencyAmount: true,
-        fiat: true,
-        fiatAmount: true,
-        endedAt: true,
-        escrowReleasedAt: true,
-        status: true,
-        blockchainTransactionHash: true,
-      },
-    });
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          startedAt: 'desc',
+        },
+        select: {
+          id: true,
+          cryptocurrency: true,
+          cryptocurrencyAmount: true,
+          fiat: true,
+          fiatAmount: true,
+          endedAt: true,
+          escrowReleasedAt: true,
+          status: true,
+          blockchainTransactionHash: true,
+        },
+      }),
+      prisma.trade.count(),
+    ]);
 
-    res.status(200).send(trades);
+    res.status(200).send({
+      data: trades,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -40,30 +52,42 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
 export async function getTradesByUserAsTrader(req: Request, res: Response) {
   try {
     const { userId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
 
-    const trades = await prisma.trade.findMany({
-      where: {
-        trader: {
-          id: userId,
+    const [trades, totalCount] = await Promise.all([
+      prisma.trade.findMany({
+        where: {
+          trader: {
+            id: userId,
+          },
         },
-      },
-      orderBy: {
-        startedAt: 'desc',
-      },
-      select: {
-        id: true,
-        cryptocurrency: true,
-        cryptocurrencyAmount: true,
-        fiat: true,
-        fiatAmount: true,
-        endedAt: true,
-        escrowReleasedAt: true,
-        status: true,
-        blockchainTransactionHash: true,
-      },
-    });
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          startedAt: 'desc',
+        },
+        select: {
+          id: true,
+          cryptocurrency: true,
+          cryptocurrencyAmount: true,
+          fiat: true,
+          fiatAmount: true,
+          endedAt: true,
+          escrowReleasedAt: true,
+          status: true,
+          blockchainTransactionHash: true,
+        },
+      }),
+      prisma.trade.count(),
+    ]);
 
-    res.status(200).send(trades);
+    res.status(200).send({
+      data: trades,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

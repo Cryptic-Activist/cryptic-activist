@@ -66,21 +66,7 @@ export type Status =
   | 'DISPUTED'
   | 'EXPIRED';
 
-export type Trades = {
-  trades: {
-    data: TradesSetter[];
-  };
-};
-
-export type TradesStore = {
-  trades: {
-    data: TradesSetter[];
-    setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
-    resetTrades: () => void;
-  };
-};
-
-export type TradesSetter = {
+export type Trade = {
   id?: string;
   cryptocurrency?: Cryptocurrency;
   cryptocurrencyAmount?: number;
@@ -92,4 +78,22 @@ export type TradesSetter = {
   blockchainTransactionHash?: string;
 };
 
-export type Value = TradesSetter[];
+export type TradesStore = {
+  trades: {
+    data: Trade[];
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
+    setTradeValue: (params: Value, actionName?: `trades/${string}`) => void;
+    resetTrades: () => void;
+  };
+};
+
+export type TradesSetter = {
+  data?: Trade[];
+  totalPages?: number;
+  currentPage?: number;
+  pageSize?: number;
+};
+
+export type Value = TradesSetter;

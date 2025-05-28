@@ -9,18 +9,24 @@ export type Notification = {
 };
 
 export type NotificationsSetter = {
-  notifications?: Notification[];
+  data?: Notification[];
   hasNewNotification?: boolean;
   socket?: Socket;
+  totalPages?: number;
+  currentPage?: number;
+  pageSize?: number;
 };
 
 export type Value = NotificationsSetter;
 
 export type NotificationsStore = {
   notifications: {
-    notifications: Notification[];
+    data: Notification[];
     hasNewNotification: boolean;
     socket?: Socket;
+    totalPages: number;
+    currentPage: number;
+    pageSize: number;
     setNotificationValue: (
       value: Value,
       action?: `notifications/${string}`

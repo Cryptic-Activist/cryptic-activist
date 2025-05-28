@@ -1,16 +1,22 @@
-import { BACKEND } from '@/constants';
-import { GetTradesByUserAs } from './types';
-import { fetchGet } from '@/services/axios';
-import { getBearerToken } from '@/utils';
+import { getBearerToken, getQueries } from '@/utils';
 
-export const getTradesByUser = async (
-  userId: string,
-  as: GetTradesByUserAs
-) => {
+import { BACKEND } from '@/constants';
+import { GetTradesByUserParams } from './types';
+import { fetchGet } from '@/services/axios';
+
+export const getTradesByUser = async ({
+  as,
+  userId,
+  ...rest
+}: GetTradesByUserParams) => {
+  const queries = getQueries(rest);
   const bearerToken = getBearerToken();
-  const response = await fetchGet(`${BACKEND}/trades/user/${userId}/${as}`, {
-    Authorization: bearerToken,
-  });
+  const response = await fetchGet(
+    `${BACKEND}/trades/user/${userId}/${as}` + queries,
+    {
+      Authorization: bearerToken,
+    }
+  );
 
   if (response.status !== 200) return null;
 
