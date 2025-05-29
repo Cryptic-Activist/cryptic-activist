@@ -10,4 +10,5 @@ export type Icons = {
   backgroundColor: string;
   color: string;
   title: string;
+  mainActionButtonLabel?: string;
 }[];

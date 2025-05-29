@@ -20,16 +20,18 @@ const Message: FC<MessageProps> = ({ note }) => {
   const getActionButtons = () => {
     return (
       <>
-        <Link
-          href={note.url}
-          style={{
-            backgroundColor: notification?.backgroundColor,
-            color: notification?.color,
-          }}
-        >
-          Go to Trade
-        </Link>
-        <button>Mark as Read</button>
+        {notification?.mainActionButtonLabel && (
+          <Link
+            href={note.url}
+            style={{
+              backgroundColor: notification?.backgroundColor,
+              color: notification?.color,
+            }}
+          >
+            {notification?.mainActionButtonLabel}
+          </Link>
+        )}
+        <button>MARK AS READ</button>
       </>
     );
   };
@@ -79,6 +81,11 @@ const SystemMessages = () => {
         <p className={styles.noMessages}>No new notifications.</p>
       ) : (
         <div className={styles.notificationListContainer}>
+          <ul>
+            <li>
+              <button>All</button>
+            </li>
+          </ul>
           <ul className={styles.notificationList}>
             {notifications.data.map((note) => (
               <Message key={note.id} note={note} />

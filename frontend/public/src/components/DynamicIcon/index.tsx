@@ -1,7 +1,7 @@
 // Add more packs as needed
 import * as AiIcons from 'react-icons/ai';
 import * as BiIcons from 'react-icons/bi';
-import * as FaIcons from 'react-icons/fa';
+import * as FaIcons from 'react-icons/fa6';
 import * as IoIcons from 'react-icons/io';
 import * as MdIcons from 'react-icons/md';
 

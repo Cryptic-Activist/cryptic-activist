@@ -60,6 +60,9 @@
   padding: 1rem;
   border-radius: 100%;
   box-shadow: 0 2px 4px globals.$box-shadow-default-color;
+  height: 3.5rem;
+  width: 3.5rem;
+  align-self: flex-end;
 }
 
 .notificationTitleDescription {
@@ -81,14 +84,24 @@
     font-size: 1rem;
     padding: 0.8rem;
     border-radius: 0.4rem;
+    cursor: pointer;
   }
   a {
     box-shadow: 0 2px 4px globals.$box-shadow-default-color;
   }
   button {
     border: none;
-    background-color: #e6e6e6;
-    border: 1px solid #bbbbbb;
+    background-color: transparent;
+    font-size: 0.9rem;
+    color: #616161;
+    &:hover {
+      background-color: #e8e8e8;
+      transition: all 0.3s ease;
+    }
+    &:active {
+      background-color: #dfdfdf;
+      transition: all 0.1s ease;
+    }
   }
 }
 

@@ -7,6 +7,7 @@ export const icons: Icons = [
     backgroundColor: '#3B82F6',
     color: '#FFFFFF',
     title: 'Trade Started',
+    mainActionButtonLabel: 'Go to Trade',
   },
   {
     type: 'TRADE_COMPLETED',
@@ -14,6 +15,7 @@ export const icons: Icons = [
     backgroundColor: '#10B981',
     color: '#FFFFFF',
     title: 'Trade Completed Successfully',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'TRADE_CANCELLED',
@@ -21,6 +23,7 @@ export const icons: Icons = [
     backgroundColor: '#F59E0B',
     color: '#FFFFFF',
     title: 'Trade Cancelled',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'TRADE_DISPUTE_OPENED',
@@ -28,6 +31,7 @@ export const icons: Icons = [
     backgroundColor: '#EF4444',
     color: '#FFFFFF',
     title: 'Trade Dispute Opened',
+    mainActionButtonLabel: 'Go to Dispute Details',
   },
   {
     type: 'TRADE_DISPUTE_RESOLVED',
@@ -35,6 +39,7 @@ export const icons: Icons = [
     backgroundColor: '#10B981',
     color: '#FFFFFF',
     title: 'Trade Dispute Resolved',
+    mainActionButtonLabel: 'Go to Dispute Details',
   },
   {
     type: 'TRADE_EXPIRED',
@@ -42,6 +47,7 @@ export const icons: Icons = [
     backgroundColor: '#6B7280',
     color: '#FFFFFF',
     title: 'Trade Expired',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'TRADE_FAILED',
@@ -49,6 +55,7 @@ export const icons: Icons = [
     backgroundColor: '#EF4444',
     color: '#FFFFFF',
     title: 'Trade Failed',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'TRADE_NEW_MESSAGE',
@@ -56,6 +63,7 @@ export const icons: Icons = [
     backgroundColor: '#3B82F6',
     color: '#FFFFFF',
     title: 'New Message in Trade',
+    mainActionButtonLabel: 'Go to Trade',
   },
   {
     type: 'NEW_LOGIN',
@@ -63,6 +71,7 @@ export const icons: Icons = [
     backgroundColor: '#F59E0B',
     color: '#FFFFFF',
     title: 'New Login Detected',
+    mainActionButtonLabel: 'Go to Activisties',
   },
   {
     type: 'MAINTENANCE',
@@ -77,6 +86,7 @@ export const icons: Icons = [
     backgroundColor: '#EF4444',
     color: '#FFFFFF',
     title: 'Suspicious Activity Detected',
+    mainActionButtonLabel: 'Go to Activisties',
   },
   {
     type: 'PASSWORD_CHANGED',
@@ -119,6 +129,7 @@ export const icons: Icons = [
     backgroundColor: '#F59E0B',
     color: '#FFFFFF',
     title: 'You Received a Review',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'REVIEW_REMINDER',
@@ -126,6 +137,7 @@ export const icons: Icons = [
     backgroundColor: '#3B82F6',
     color: '#FFFFFF',
     title: 'Review Reminder',
+    mainActionButtonLabel: 'Go to Trade Details',
   },
   {
     type: 'POLICY_UPDATE',
@@ -133,6 +145,7 @@ export const icons: Icons = [
     backgroundColor: '#6366F1',
     color: '#FFFFFF',
     title: 'Policy Update',
+    mainActionButtonLabel: 'Go to Policy Update',
   },
   {
     type: 'FEATURE_ANNOUNCEMENT',

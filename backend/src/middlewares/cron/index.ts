@@ -1,3 +1,4 @@
+import SystemMessage from '@/services/systemMessage';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
 import { prisma } from '@/services/db';
@@ -5,6 +6,7 @@ import { prisma } from '@/services/db';
 export const expireTimer = async () => {
   cron.schedule('*/1 * * * *', async () => {
     const now = new Date();
+    const systemMessage = new SystemMessage();
     const tradesToExpire = await prisma.trade.findMany({
       where: {
         expiredAt: {
@@ -34,9 +36,6 @@ export const expireTimer = async () => {
     });
 
     for (const trade of tradesToExpire) {
-      console.log(
-        `Checking trade ${trade.id} for expiry at ${now.toISOString()}`,
-      );
       const expiryTime = new Date(
         trade.startedAt.getTime() + trade.offer.timeLimit * 1000,
       );
@@ -46,6 +45,7 @@ export const expireTimer = async () => {
           where: { id: trade.id },
           data: { expiredAt, status: 'EXPIRED' },
         });
+        await systemMessage.tradeStarted(trade.id);
 
         if (trade.chat?.id) {
           const io = getIO();

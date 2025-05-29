@@ -8,6 +8,7 @@ import {
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
 
 export default class Chat {
@@ -30,6 +31,7 @@ export default class Chat {
       'join_room',
       async ({ chatId, user, vendorWalletAddress }: JoinRoomParams) => {
         await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
+        const systemMessage = new SystemMessage();
 
         this.socket.join(chatId);
         this.socket.to(chatId).emit('room_users_update', {
@@ -123,6 +125,7 @@ export default class Chat {
                   where: { id: trade.id },
                   data: { expiredAt, status: 'EXPIRED' },
                 });
+                await systemMessage.tradeExpired(trade.id);
                 this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
               }
               clearInterval(interval);
@@ -186,6 +189,7 @@ export default class Chat {
                 error: 'Trade details not found',
                 endedAt,
               });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 
@@ -223,6 +227,7 @@ export default class Chat {
               this.io.to(chatId).emit('trade_error', {
                 error: 'Trade creation error',
               });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 
@@ -269,6 +274,7 @@ export default class Chat {
               this.io.to(chatId).emit('trade_error', {
                 error: 'Trade funding error',
               });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 
