@@ -265,15 +265,43 @@ model Referral {
   @@map("referrals")
 }
 
+enum SystemMessageType {
+  TRADE_STARTED
+  TRADE_COMPLETED
+  TRADE_CANCELLED
+  TRADE_DISPUTE_OPENED
+  TRADE_DISPUTE_RESOLVED
+  TRADE_EXPIRED
+  TRADE_FAILED
+  TRADE_NEW_MESSAGE
+  NEW_LOGIN
+  MAINTENANCE
+  SUSPICIOUS_ACTIVITY
+  PASSWORD_CHANGED
+  TWO_FA_ENABLED
+  TWO_FA_DISABLED
+  ACCOUNT_VERIFICATION_REQUIRED
+  ACCOUNT_SUSPENDED
+  REVIEW_RECEIVED
+  REVIEW_REMINDER
+  POLICY_UPDATE
+  FEATURE_ANNOUNCEMENT
+  PROMOTIONAL_OFFER
+  COMPLIANCE_NOTICE
+  SYSTEM_ERROR
+  API_DOWNTIME
+}
+
 model SystemMessage {
-  id        String    @id @default(uuid())
-  message   String    @db.VarChar(256)
-  whenSeen  DateTime? @db.Timestamp()
+  id        String            @id @default(uuid())
+  type      SystemMessageType
+  message   String            @db.VarChar(256)
+  whenSeen  DateTime?         @db.Timestamp()
   url       String
-  deletedAt DateTime? @db.Timestamp()
-  createdAt DateTime? @default(now()) @db.Timestamp()
-  updatedAt DateTime? @updatedAt @db.Timestamp()
-  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  deletedAt DateTime?         @db.Timestamp()
+  createdAt DateTime?         @default(now()) @db.Timestamp()
+  updatedAt DateTime?         @updatedAt @db.Timestamp()
+  User      User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId    String
 
   @@map("system_messages")

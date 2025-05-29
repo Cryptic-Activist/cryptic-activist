@@ -25,5 +25,6 @@ export { default as Altcha } from './Altcha';
 export { default as FeedbackSelector } from './FeedbackSelector';
 export { default as Analytics } from './Analytics';
 export { default as Checkbox } from './Checkbox';
+export { default as DynamicIcon } from './DynamicIcon';
 export * from './lists';
 export * from './offer';
