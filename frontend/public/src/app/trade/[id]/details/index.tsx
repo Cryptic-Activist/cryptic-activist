@@ -64,7 +64,7 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h1 className={styles.cardTitle}>Trade Details</h1>
-          <span className={`${styles.badge} ${styles.badgeSuccess}`}>
+          <span className={`${styles.badge} ${styles[tradeDetails.status]}`}>
             {tradeDetails.status}
           </span>
         </div>

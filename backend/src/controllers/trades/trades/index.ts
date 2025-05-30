@@ -30,6 +30,28 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           escrowReleasedAt: true,
           status: true,
           blockchainTransactionHash: true,
+          exchangeRate: true,
+          startedAt: true,
+          expiredAt: true,
+          offer: {
+            select: {
+              timeLimit: true,
+            },
+          },
+          trader: {
+            select: {
+              firstName: true,
+              lastName: true,
+              username: true,
+            },
+          },
+          vendor: {
+            select: {
+              firstName: true,
+              lastName: true,
+              username: true,
+            },
+          },
         },
       }),
       prisma.trade.count({
@@ -83,6 +105,28 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
           escrowReleasedAt: true,
           status: true,
           blockchainTransactionHash: true,
+          exchangeRate: true,
+          startedAt: true,
+          expiredAt: true,
+          offer: {
+            select: {
+              timeLimit: true,
+            },
+          },
+          trader: {
+            select: {
+              firstName: true,
+              lastName: true,
+              username: true,
+            },
+          },
+          vendor: {
+            select: {
+              firstName: true,
+              lastName: true,
+              username: true,
+            },
+          },
         },
       }),
       prisma.trade.count({

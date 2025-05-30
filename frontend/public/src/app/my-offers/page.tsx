@@ -6,6 +6,7 @@ import { useApp, useMyOffers, useUser } from '@/hooks';
 import Link from 'next/link';
 import { MyOfferItemProps } from './types';
 import Pagination from '@/components/Pagination';
+import { filters } from './data';
 import styles from './page.module.scss';
 
 const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
@@ -72,20 +73,22 @@ const MyOffers = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.btns}>
-        <button
-          onClick={() => handleOffersType('buy')}
-          className={app.type === 'buy' ? styles.selected : ''}
-        >
-          Buy
-        </button>
-        <button
-          onClick={() => handleOffersType('sell')}
-          className={app.type === 'sell' ? styles.selected : ''}
-        >
-          Sell
-        </button>
-      </div>
+      <ul className={styles.filtersList}>
+        {filters.map((filter) => {
+          const selectedStyle =
+            app.type === filter.filter ? styles.selected : '';
+          return (
+            <li key={filter.filter}>
+              <button
+                className={selectedStyle}
+                onClick={() => handleOffersType(filter.filter)}
+              >
+                {filter.label}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
 
       {myOffers.data?.length > 0 && (
         <>

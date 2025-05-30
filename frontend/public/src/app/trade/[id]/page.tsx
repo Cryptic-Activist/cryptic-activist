@@ -91,11 +91,12 @@ const Trade: FC<TradeProps> = ({
   setAsPaid,
   trade,
   tradeRemaingTime,
+  ref,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
   return (
-    <div className={styles.trade}>
+    <div className={styles.trade} ref={ref}>
       <section className={styles.tradeSection}>
         <h2>Trade Summary</h2>
         <ul>
@@ -349,6 +350,7 @@ export default function TradePage() {
     tradeRemaingTime,
     setAsPaid,
     setAsCanceled,
+    tradeContainerRef,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.trader,
@@ -386,6 +388,7 @@ export default function TradePage() {
         setAsPaid={setAsPaid}
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
+        ref={tradeContainerRef}
       />
       <div>
         {trade.id &&

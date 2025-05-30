@@ -1,3 +1,4 @@
+import { RefObject } from 'react';
 import { SetCookieParams } from './types';
 
 export const copyToClipboard = (text?: string | `0x${string}`) => {
@@ -69,3 +70,16 @@ export function urlBase64ToUint8Array(base64String: string) {
   }
   return outputArray;
 }
+
+export const scrollElement = (
+  ref: RefObject<HTMLElement | null> | null,
+  top: number,
+  delay: number
+) => {
+  setTimeout(() => {
+    ref?.current?.scrollBy({
+      top,
+      behavior: 'smooth',
+    });
+  }, delay);
+};

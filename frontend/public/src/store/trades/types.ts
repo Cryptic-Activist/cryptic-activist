@@ -73,9 +73,17 @@ export type Trade = {
   fiat?: Fiat;
   fiatAmount?: number;
   endedAt?: string;
-  escrowReleaseDate?: string;
+  escrowReleasedAt?: string;
   status?: Status;
   blockchainTransactionHash?: string;
+  exchangeRate?: number;
+  startedAt?: string;
+  expiredAt?: string;
+  offer?: {
+    timeLimit: number;
+  };
+  trader?: User;
+  vendor?: User;
 };
 
 export type TradesStore = {
