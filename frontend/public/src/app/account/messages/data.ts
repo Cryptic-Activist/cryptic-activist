@@ -1,4 +1,4 @@
-import { Icons } from './types';
+import { Filters, Icons } from './types';
 
 export const icons: Icons = [
   {
@@ -181,5 +181,24 @@ export const icons: Icons = [
     backgroundColor: '#EF4444',
     color: '#FFFFFF',
     title: 'API Downtime',
+  },
+];
+
+export const filters: Filters = [
+  {
+    label: 'All',
+    filter: 'all',
+  },
+  {
+    label: 'Trades',
+    filter: 'trades',
+  },
+  {
+    label: 'Security',
+    filter: 'security',
+  },
+  {
+    label: 'System',
+    filter: 'system',
   },
 ];

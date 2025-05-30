@@ -1,11 +1,12 @@
 'use client';
 
+import { filters, icons } from './data';
+
 import { DynamicIcon } from '@/components';
 import { FC } from 'react';
 import Link from 'next/link';
 import { MessageProps } from './types';
 import Pagination from '@/components/Pagination';
-import { icons } from './data';
 import styles from './page.module.scss';
 import { timeSince } from '@/utils';
 import { useNotification } from '@/hooks';
@@ -68,7 +69,13 @@ const Message: FC<MessageProps> = ({ note }) => {
 };
 
 const SystemMessages = () => {
-  const { notifications, mutation, onChangePage } = useNotification();
+  const {
+    notifications,
+    mutation,
+    onChangePage,
+    onChangeFilterType,
+    filterType,
+  } = useNotification();
 
   return (
     <div className={styles.container}>
@@ -76,34 +83,30 @@ const SystemMessages = () => {
       <p className={styles.intro}>
         Stay updated with the latest alerts and updates from our platform.
       </p>
+      <ul className={styles.filtersList}>
+        {filters.map((filter) => {
+          const selectedStyle =
+            filterType === filter.filter ? styles.selected : '';
+          return (
+            <li key={filter.filter}>
+              <button
+                className={selectedStyle}
+                onClick={() => onChangeFilterType(filter.filter)}
+              >
+                {filter.label}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
       {mutation.isPending && '...'}
       {notifications.data.length === 0 && mutation.isSuccess ? (
         <p className={styles.noMessages}>No new notifications.</p>
       ) : (
         <div className={styles.notificationListContainer}>
-          <ul>
-            <li>
-              <button>All</button>
-            </li>
-          </ul>
           <ul className={styles.notificationList}>
             {notifications.data.map((note) => (
               <Message key={note.id} note={note} />
-              // <Link
-              //   key={note.id}
-              //   className={`${styles.notificationCard} ${
-              //     note.whenSeen ? styles.read : styles.unread
-              //   }`}
-              //   href={note.url}
-              // >
-              //   <div className={styles.notificationHeader}>
-              //     <h2 className={styles.notificationTitle}>System Message</h2>
-              //     <span className={styles.notificationDate}>
-              //       {new Date(note.createdAt).toLocaleString()}
-              //     </span>
-              //   </div>
-              //   <p className={styles.notificationMessage}>{note.message}</p>
-              // </Link>
             ))}
           </ul>
           <Pagination
