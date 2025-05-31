@@ -17,7 +17,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-Sentry.setupExpressErrorHandler(app);
+// Sentry.setupExpressErrorHandler(app);
 
 setIO(io);
 socketHandler(io);

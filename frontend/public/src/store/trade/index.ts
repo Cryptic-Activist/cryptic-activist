@@ -85,7 +85,36 @@ export const useTradeSlice: StateCreator<
     resetTrade: () => {
       const setValue = get().trade.setTradeValue;
 
-      setValue({}, 'trade/resetTrade');
+      setValue(
+        {
+          blockchainTransactionHash: undefined,
+          chat: undefined,
+          createdAt: undefined,
+          cryptocurrency: undefined,
+          cryptocurrencyAmount: undefined,
+          endedAt: undefined,
+          escrowReleasedAt: undefined,
+          exchangeRate: undefined,
+          expiredAt: undefined,
+          fiat: undefined,
+          fiatAmount: undefined,
+          fundedAt: undefined,
+          id: undefined,
+          offer: undefined,
+          paidAt: undefined,
+          paymentConfirmedAt: undefined,
+          paymentMethod: undefined,
+          paymentReceipt: undefined,
+          startedAt: undefined,
+          status: undefined,
+          tradeDispute: undefined,
+          trader: undefined,
+          traderWalletAddress: undefined,
+          vendor: undefined,
+          vendorWalletAddress: undefined,
+        },
+        'trade/resetTrade'
+      );
     },
   },
 });

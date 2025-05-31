@@ -12,3 +12,7 @@ export { default as buildChangeEmailSuccessEmail } from './email-change-success'
 export { default as buildFirstTradeWithreferralReferrer } from './first-trade-with-referral-referrer';
 export { default as buildFirstTradeWithReferralReferee } from './first-trade-with-referral-referee';
 export { default as buildTradeStartedEmail } from './trade-has-started';
+export { default as buildTradeFailedEmail } from './trade-has-failed';
+export { default as buildTradeExpiredEmail } from './trade-has-expired';
+export { default as buildTradeSuccessfulEmail } from './trade-has-completed';
+export { default as buildTradeCancelledEmail } from './trade-has-cancelled';

@@ -8,9 +8,10 @@ import {
   UseSocketParams,
 } from './types';
 import io, { Socket } from 'socket.io-client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { BACKEND } from '@/constants';
+import { scrollElement } from '@/utils';
 import { useApp } from '@/hooks';
 
 const useTradeSocket = ({
@@ -35,6 +36,7 @@ const useTradeSocket = ({
   const [tradeRemaingTime, setTradeRemainingTime] = useState<number | null>(
     null
   );
+  const tradeContainerRef = useRef<HTMLDivElement | null>(null);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -121,6 +123,7 @@ const useTradeSocket = ({
       newSocket.on('trade_set_paid_success', (data) => {
         onSetPaid(data.paidAt);
         addToast('info', 'Trade has been set as Paid', 8000);
+        scrollElement(tradeContainerRef, 1000, 1000);
       });
 
       newSocket.on('trade_funded_success', (data) => {
@@ -133,6 +136,7 @@ const useTradeSocket = ({
             },
             'trade/setFundedAt'
           );
+          scrollElement(tradeContainerRef, 1000, 1000);
         }
       });
 
@@ -149,6 +153,7 @@ const useTradeSocket = ({
           'Trade has been successfully executed. Escrow was released.',
           8000
         );
+        scrollElement(tradeContainerRef, -1000, 1000);
       });
 
       newSocket.on('trade_set_canceled_success', ({ status, endedAt }) => {
@@ -192,13 +197,6 @@ const useTradeSocket = ({
 
       newSocket.on('timer:update', (data) => {
         const { remaining } = data;
-
-        // if (remaining <= 0) {
-        //   addToast('error', 'Trade timer has expired', 8000);
-        //   replace(`/trade/${trade.id}/details`, {
-        //     scroll: true,
-        //   });
-        // }
         setTradeRemainingTime(remaining);
       });
 
@@ -210,6 +208,17 @@ const useTradeSocket = ({
             expiredAt: data.expiredAt,
           },
           'trade/setExpiredAt'
+        );
+      });
+
+      newSocket.on('trade_failed', (data) => {
+        // @ts-ignore
+        trade.setTradeValue(
+          {
+            status: 'FAILED',
+            endedAt: data.endedAt,
+          },
+          'trade/setEndedAt'
         );
       });
 
@@ -237,6 +246,7 @@ const useTradeSocket = ({
     receiverStatus,
     escrowReleased,
     tradeRemaingTime,
+    tradeContainerRef,
     sendMessage,
     appendMessage,
     setAsPaid,

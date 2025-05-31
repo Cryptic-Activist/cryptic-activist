@@ -11,4 +11,5 @@ export type TradeProps = {
   setAsCanceled: any;
   replace: any;
   tradeRemaingTime: number | null;
+  ref: any;
 };

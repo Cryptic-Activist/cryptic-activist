@@ -66,6 +66,30 @@ $border-radius: 0.5rem;
   color: $accent-color;
 }
 
+.PENDING {
+  background-color: globals.$trade-status-pending;
+}
+.IN_PROGRESS {
+  background-color: globals.$trade-status-in-progress;
+}
+.COMPLETED {
+  background-color: globals.$trade-status-completed;
+  color: globals.$white;
+}
+.CANCELLED {
+  background-color: globals.$trade-status-cancelled;
+}
+.DISPUTED {
+  background-color: globals.$trade-status-disputed;
+}
+.EXPIRED {
+  background-color: globals.$trade-status-expired;
+}
+.FAILED {
+  background-color: globals.$trade-status-failed;
+  color: globals.$white;
+}
+
 // Trade information
 .tradeInfo {
   display: grid;

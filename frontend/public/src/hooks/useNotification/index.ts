@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
+import { Filter } from './types';
 import { getNotifications } from '@/services/notifications';
-import { useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
@@ -11,6 +13,7 @@ const useNotification = () => {
   const {
     user: { id },
   } = useUser();
+  const [filterType, setFilterType] = useState<Filter>('all');
 
   const mutation = useMutation({
     mutationKey: ['notifications'],
@@ -20,6 +23,9 @@ const useNotification = () => {
           userId: id,
           page: notifications.currentPage,
           pageSize: notifications.pageSize,
+          ...(filterType !== 'all' && {
+            type: filterType,
+          }),
         });
         return response;
       }
@@ -43,6 +49,7 @@ const useNotification = () => {
     notifications.pageSize,
     notifications.currentPage,
     notifications.totalPages,
+    filterType,
   ]);
 
   const onChangePage = (page: number) => {
@@ -59,7 +66,19 @@ const useNotification = () => {
     );
   }, [notifications.data]);
 
-  return { notifications, mutation, onChangePage };
+  const onChangeFilterType = (
+    filter: 'all' | 'trades' | 'security' | 'system'
+  ) => {
+    setFilterType(filter);
+  };
+
+  return {
+    notifications,
+    mutation,
+    filterType,
+    onChangePage,
+    onChangeFilterType,
+  };
 };
 
 export default useNotification;

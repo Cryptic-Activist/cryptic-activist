@@ -30,6 +30,48 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           escrowReleasedAt: true,
           status: true,
           blockchainTransactionHash: true,
+          exchangeRate: true,
+          startedAt: true,
+          expiredAt: true,
+          offer: {
+            select: {
+              timeLimit: true,
+            },
+          },
+          trader: {
+            select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
+              firstName: true,
+              lastName: true,
+              username: true,
+              profileColor: true,
+            },
+          },
+          vendor: {
+            select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
+              firstName: true,
+              lastName: true,
+              username: true,
+              profileColor: true,
+            },
+          },
         },
       }),
       prisma.trade.count({
@@ -83,6 +125,48 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
           escrowReleasedAt: true,
           status: true,
           blockchainTransactionHash: true,
+          exchangeRate: true,
+          startedAt: true,
+          expiredAt: true,
+          offer: {
+            select: {
+              timeLimit: true,
+            },
+          },
+          trader: {
+            select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
+              firstName: true,
+              lastName: true,
+              username: true,
+              profileColor: true,
+            },
+          },
+          vendor: {
+            select: {
+              _count: {
+                select: {
+                  tradeVendor: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
+              firstName: true,
+              lastName: true,
+              username: true,
+              profileColor: true,
+            },
+          },
         },
       }),
       prisma.trade.count({

@@ -8,6 +8,7 @@ import {
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
 
 export default class Chat {
@@ -30,6 +31,7 @@ export default class Chat {
       'join_room',
       async ({ chatId, user, vendorWalletAddress }: JoinRoomParams) => {
         await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
+        const systemMessage = new SystemMessage();
 
         this.socket.join(chatId);
         this.socket.to(chatId).emit('room_users_update', {
@@ -102,22 +104,30 @@ export default class Chat {
               where: {
                 id: trade.id,
                 status: {
-                  equals: 'COMPLETED',
+                  in: ['COMPLETED', 'FAILED'],
                 },
               },
               select: {
                 status: true,
                 id: true,
+                endedAt: true,
               },
             });
-            if (!completedTrade) {
-              console.log('time ended for trade:', trade.id);
-              const expiredAt = new Date();
-              await prisma.trade.update({
-                where: { id: trade.id },
-                data: { expiredAt, status: 'EXPIRED' },
-              });
-              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+            if (completedTrade?.status !== 'COMPLETED') {
+              if (completedTrade?.status === 'FAILED') {
+                this.io.to(chatId).emit('trade_failed', {
+                  chatId,
+                  endedAt: completedTrade.endedAt,
+                });
+              } else {
+                const expiredAt = new Date();
+                await prisma.trade.update({
+                  where: { id: trade.id },
+                  data: { expiredAt, status: 'EXPIRED' },
+                });
+                await systemMessage.tradeExpired(trade.id);
+                this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+              }
               clearInterval(interval);
             }
           } else {
@@ -167,9 +177,19 @@ export default class Chat {
               await getCreateTradeDetails(updatedTrade);
 
             if (!createTradeDetails) {
-              this.io.to(chatId).emit('trade_error', {
-                error: 'Trade details not found',
+              const endedAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                  endedAt,
+                },
               });
+              this.io.to(chatId).emit('trade_failed', {
+                error: 'Trade details not found',
+                endedAt,
+              });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 
@@ -201,11 +221,13 @@ export default class Chat {
                 where: { id: trade.id },
                 data: {
                   status: 'FAILED',
+                  endedAt: new Date(),
                 },
               });
               this.io.to(chatId).emit('trade_error', {
                 error: 'Trade creation error',
               });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 
@@ -246,11 +268,13 @@ export default class Chat {
                 where: { id: trade.id },
                 data: {
                   status: 'FAILED',
+                  endedAt: new Date(),
                 },
               });
               this.io.to(chatId).emit('trade_error', {
                 error: 'Trade funding error',
               });
+              await systemMessage.tradeFailed(trade.id);
               return;
             }
 

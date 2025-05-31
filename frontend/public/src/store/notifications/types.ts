@@ -1,7 +1,34 @@
 import { Socket } from 'socket.io-client';
 
+export type Type =
+  | 'TRADE_STARTED'
+  | 'TRADE_COMPLETED'
+  | 'TRADE_CANCELLED'
+  | 'TRADE_DISPUTE_OPENED'
+  | 'TRADE_DISPUTE_RESOLVED'
+  | 'TRADE_EXPIRED'
+  | 'TRADE_FAILED'
+  | 'TRADE_NEW_MESSAGE'
+  | 'NEW_LOGIN'
+  | 'MAINTENANCE'
+  | 'SUSPICIOUS_ACTIVITY'
+  | 'PASSWORD_CHANGED'
+  | 'TWO_FA_ENABLED'
+  | 'TWO_FA_DISABLED'
+  | 'ACCOUNT_VERIFICATION_REQUIRED'
+  | 'ACCOUNT_SUSPENDED'
+  | 'REVIEW_RECEIVED'
+  | 'REVIEW_REMINDER'
+  | 'POLICY_UPDATE'
+  | 'FEATURE_ANNOUNCEMENT'
+  | 'PROMOTIONAL_OFFER'
+  | 'COMPLIANCE_NOTICE'
+  | 'SYSTEM_ERROR'
+  | 'API_DOWNTIME';
+
 export type Notification = {
   id: string;
+  type: Type;
   message: string;
   whenSeen: string;
   url: string;

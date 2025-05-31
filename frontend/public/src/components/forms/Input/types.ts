@@ -25,4 +25,5 @@ export type InputProps = {
   focus?: boolean;
   style?: string;
   autoComplete?: boolean;
+  autoFocus?: boolean;
 };

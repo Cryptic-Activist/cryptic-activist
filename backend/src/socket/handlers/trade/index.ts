@@ -10,6 +10,7 @@ import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
 import { EMAIL_FROM } from '@/services/email';
+import SystemMessage from '@/services/systemMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
@@ -66,6 +67,7 @@ export default class Trade {
     this.socket.on(
       'trade_set_payment_confirmed',
       async ({ chatId, from, to }: SetTradeAsPaymentConfirmed) => {
+        const systemMessage = new SystemMessage();
         const chat = await prisma.chat.findFirst({
           where: { id: chatId },
           select: {
@@ -191,29 +193,9 @@ export default class Trade {
 
         if (emailTrade) {
           const emailSents = await sendEmailsTrade(emailTrade);
-
           await updateAddXPTier(emailTrade, emailSents.firstTradeRewardReferee);
+          await systemMessage.tradeSuccessful(emailTrade.id);
         }
-
-        const accountCreatedEmailBody = await buildTradeConfirmationEmail(
-          emailTrade?.trader,
-          emailTrade!,
-        );
-
-        const publishedAccountCreated = await publishToQueue('emails', {
-          from: EMAIL_FROM.TRADE,
-          to: [
-            {
-              email: emailTrade?.trader.email!,
-              name: `${emailTrade?.trader.firstName} ${emailTrade?.trader.lastName}`,
-            },
-          ],
-          subject: 'Trade Confirmation - Cryptic Activist',
-          html: accountCreatedEmailBody,
-          text: 'Trade Confirmation',
-        });
-
-        console.log('Email id:', publishedAccountCreated);
       },
     );
   }
@@ -222,6 +204,7 @@ export default class Trade {
     this.socket.on(
       'trade_set_canceled',
       async ({ chatId }: SetTradeAsCanceledParams) => {
+        const systemMessage = new SystemMessage();
         const canceledTrade = await cancelTrade();
 
         console.log({ canceledTrade });
@@ -249,6 +232,8 @@ export default class Trade {
             endedAt,
           },
         });
+
+        await systemMessage.tradeCancelled(updatedTrade.id);
 
         if (!updatedTrade) {
           this.io.to(chatId).emit('trade_set_canceled_error', {
