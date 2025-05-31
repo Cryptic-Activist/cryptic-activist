@@ -170,6 +170,7 @@ export type TradeSetter = {
   paidAt?: string;
   expiredAt?: string;
   startedAt?: string;
+  disputedAt?: string;
   createdAt?: string;
   endedAt?: string;
   fundedAt?: string;

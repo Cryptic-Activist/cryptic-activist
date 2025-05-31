@@ -316,8 +316,6 @@ export default class Chat {
         query = query.sort('desc');
         const chatMessages = await query.exec();
 
-        console.log('Chat messages:', chatMessages);
-
         this.io.to(chatId).emit('room_messages', chatMessages);
         // Notify room about new user
         this.io.emit('user_status', { user, status: 'online' });
