@@ -32,6 +32,9 @@ const socketHandler = (
     // Set trade as Canceled
     trade.setAsCanceled();
 
+    // Set trade as Disputed
+    trade.setAsDisputed();
+
     // Leave trade room
     chat.leave();
 

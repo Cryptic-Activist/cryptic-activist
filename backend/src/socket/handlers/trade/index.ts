@@ -1,6 +1,7 @@
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
+  SetTradeAsDisputedParams,
   SetTradeAsPaidParams,
   SetTradeAsPaymentConfirmed,
 } from './types';
@@ -12,6 +13,7 @@ import ChatMessage from '@/models/ChatMessage';
 import { EMAIL_FROM } from '@/services/email';
 import SystemMessage from '@/services/systemMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
+import { getRandomAdmin } from '@/services/admin';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
 
@@ -246,6 +248,90 @@ export default class Trade {
           status: 'CANCELLED',
           endedAt,
         });
+      },
+    );
+  }
+
+  setAsDisputed() {
+    this.socket.on(
+      'trade_set_disputed',
+      async ({ chatId, disputeReason, from }: SetTradeAsDisputedParams) => {
+        try {
+          const systemMessage = new SystemMessage();
+
+          const chat = await prisma.chat.findFirst({
+            where: { id: chatId },
+            select: {
+              tradeId: true,
+            },
+          });
+
+          console.log({ chat });
+
+          if (!chat) {
+            this.io.to(chatId).emit('trade_set_disputed_error', {
+              error: true,
+            });
+            return;
+          }
+
+          const disputeRaiser = await prisma.user.findFirst({
+            where: {
+              id: from,
+            },
+          });
+
+          console.log({ disputeRaiser });
+
+          if (!disputeRaiser) {
+            this.io.to(chatId).emit('trade_set_disputed_error', {
+              error: true,
+            });
+            return;
+          }
+
+          const admin = await getRandomAdmin(true);
+
+          console.log({ admin });
+
+          if (!admin) {
+            this.io.to(chatId).emit('trade_set_disputed_error', {
+              error: true,
+            });
+            return;
+          }
+
+          const disputedAt = new Date();
+          await prisma.tradeDispute.create({
+            data: {
+              reason: disputeReason,
+              tradeId: chat.tradeId,
+              moderatorId: admin.id,
+              raisedById: disputeRaiser.id,
+              createdAt: disputedAt,
+            },
+          });
+
+          await prisma.trade.update({
+            where: {
+              id: chat.tradeId,
+            },
+            data: {
+              status: 'DISPUTED',
+              disputedAt,
+            },
+          });
+
+          this.io.to(chatId).emit('trade_set_disputed_success', {
+            status: 'DISPUTED',
+            disputedAt,
+          });
+        } catch (error) {
+          this.io.to(chatId).emit('trade_set_disputed_error', {
+            error,
+          });
+          return;
+        }
       },
     );
   }

@@ -20,6 +20,26 @@ model AcceptedCryptocurrency {
   @@map("accepted_cryptocurrencies")
 }
 
+enum AdminRole {
+  SUPER_ADMIN
+  MODERATOR
+  KYC_REVIEWER
+  DISPUTE_MANAGER
+  SUPPORT_AGENT
+  AUDITOR
+  FINANCE_MANAGER
+}
+
+model AdminRoles {
+  id      String    @id @default(uuid())
+  role    AdminRole
+  admin   Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId String
+
+  @@unique([adminId, role]) // Prevent duplicate roles per admin
+  @@map("admin_roles")
+}
+
 model Admin {
   id           String         @id @default(uuid())
   firstName    String         @db.VarChar(50)
@@ -35,6 +55,7 @@ model Admin {
   createdUsers User[]         @relation("userCreatedBy") // All users created by this admin
   updatedUsers User[]         @relation("userLastUpdatedBy") // All users updated by this admin
   tradeDispute TradeDispute[] @relation("moderatorTradeDispute")
+  roles        AdminRoles[] // Many-to-many relation to roles
 
   @@map("admins")
 }

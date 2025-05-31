@@ -1,6 +1,10 @@
 'use client';
 
-import { SetPaymentConfirmedParams, SetTradeCancelledParams } from './types';
+import {
+  SetPaymentConfirmedParams,
+  SetPaymentDisputedParams,
+  SetTradeCancelledParams,
+} from './types';
 
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
@@ -53,12 +57,18 @@ const useTrade = () => {
   };
 
   const setPaymentConfirmed = (params: SetPaymentConfirmedParams) => {
-    console.log({ params });
     trade.setTradeValue({
       status: params.paymentConfirmedAt ? 'COMPLETED' : 'IN_PROGRESS',
       paymentConfirmedAt: params.paymentConfirmedAt,
       endedAt: params.endedAt,
       escrowReleasedAt: params.escrowReleasedAt,
+    });
+  };
+
+  const setDisputed = (params: SetPaymentDisputedParams) => {
+    trade.setTradeValue({
+      status: params.status,
+      disputedAt: params.disputedAt,
     });
   };
 
@@ -76,6 +86,7 @@ const useTrade = () => {
     setPaymentConfirmed,
     setVendorWalletAddress,
     setTradeCreated,
+    setDisputed,
   };
 };
 

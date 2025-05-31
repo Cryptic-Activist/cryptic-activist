@@ -18,6 +18,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   onSetAsPaid,
+  setAsDisputed,
 }) => {
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
@@ -41,7 +42,17 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     <section className={styles.actionButtons}>
       <div className={styles.actionButtonsGrid}>
         {isRaiseADisputeVisible && (
-          <Button type="button" fullWidth padding="1rem">
+          <Button
+            type="button"
+            fullWidth
+            padding="1rem"
+            onClick={() =>
+              setAsDisputed({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+          >
             Raise a Dispute
           </Button>
         )}
@@ -88,6 +99,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 const Trade: FC<TradeProps> = ({
   replace,
   setAsCanceled,
+  setAsDisputed,
   setAsPaid,
   trade,
   tradeRemaingTime,
@@ -332,14 +344,21 @@ const Trade: FC<TradeProps> = ({
         replace={replace}
         setAsCanceled={setAsCanceled}
         onSetAsPaid={setAsPaid}
+        setAsDisputed={setAsDisputed}
       />
     </div>
   );
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled, setPaymentConfirmed, setTradeCreated } =
-    useTrade();
+  const {
+    trade,
+    setPaid,
+    setCanceled,
+    setPaymentConfirmed,
+    setTradeCreated,
+    setDisputed,
+  } = useTrade();
   const { user, query } = useUser();
   const { replace } = useRouter();
 
@@ -350,6 +369,7 @@ export default function TradePage() {
     tradeRemaingTime,
     setAsPaid,
     setAsCanceled,
+    setAsDisputed,
     tradeContainerRef,
   } = useTradeSocket({
     chatId: trade.chat?.id,
@@ -361,6 +381,7 @@ export default function TradePage() {
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetTradeCreated: setTradeCreated,
+    onSetDisputed: setDisputed,
   });
 
   // useEffect(() => {
@@ -386,6 +407,7 @@ export default function TradePage() {
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaid={setAsPaid}
+        setAsDisputed={setAsDisputed}
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}

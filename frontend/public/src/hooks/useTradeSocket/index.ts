@@ -4,6 +4,7 @@ import {
   Message,
   ReceiverStatus,
   SendMessageParams,
+  SetAsDisputedParams,
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
@@ -24,6 +25,7 @@ const useTradeSocket = ({
   onSetCanceled,
   onSetPaymentConfirmed,
   onSetTradeCreated,
+  onSetDisputed,
 }: UseSocketParams) => {
   const { addToast } = useApp();
 
@@ -48,26 +50,33 @@ const useTradeSocket = ({
 
   const sendMessage = (params: SendMessageParams) => {
     if (socket) {
-      socket.emit('send_message', { chatId, ...params });
+      socket.emit('send_message', { ...params, chatId });
       appendMessage(params.content);
     }
   };
 
   const setAsPaid = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_paid', { chatId, ...params });
+      socket.emit('trade_set_paid', { ...params, chatId });
     }
   };
 
   const setAsCanceled = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_canceled', { chatId, ...params });
+      socket.emit('trade_set_canceled', { ...params, chatId });
     }
   };
 
   const setAsPaymentConfirmed = (params: SetAsPaidParams) => {
     if (socket) {
-      socket.emit('trade_set_payment_confirmed', { chatId, ...params });
+      socket.emit('trade_set_payment_confirmed', { ...params, chatId });
+    }
+  };
+
+  const setAsDisputed = (params: SetAsDisputedParams) => {
+    if (socket) {
+      console.log('disputed...');
+      socket.emit('trade_set_disputed', { ...params, chatId });
     }
   };
 
@@ -159,11 +168,13 @@ const useTradeSocket = ({
       newSocket.on('trade_set_canceled_success', ({ status, endedAt }) => {
         onSetCanceled({ status, endedAt });
         addToast('info', 'Trade has been successfully canceled', 8000);
-        // setTimeout(() => {
-        //   replace('/', {
-        //     scroll: true,
-        //   });
-        // }, 2000);
+      });
+
+      newSocket.on('trade_set_disputed_success', ({ status, disputedAt }) => {
+        onSetDisputed({
+          status,
+          disputedAt,
+        });
       });
 
       newSocket.on('trade_set_paid_error', (data) => {
@@ -181,8 +192,13 @@ const useTradeSocket = ({
 
       newSocket.on('trade_set_payment_confirmed_error', (data) => {
         if (data.error) {
-          // onSetPaymentConfirmed(false);
           addToast('error', 'Unable to set the payment as received', 8000);
+        }
+      });
+
+      newSocket.on('trade_set_disputed_error', (data) => {
+        if (data.error) {
+          addToast('error', 'Unable to set a dispute', 8000);
         }
       });
 
@@ -252,6 +268,7 @@ const useTradeSocket = ({
     setAsPaid,
     setAsCanceled,
     setAsPaymentConfirmed,
+    setAsDisputed,
   };
 };
 
