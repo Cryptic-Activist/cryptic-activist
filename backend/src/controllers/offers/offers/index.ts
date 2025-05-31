@@ -285,11 +285,24 @@ export const getMyOffersPaginationController = async (
           limitMin: true,
           limitMax: true,
           instructions: true,
+          offerType: true,
+          paymentDetails: {
+            select: {
+              instructions: true,
+            },
+          },
+          paymentMethod: {
+            select: {
+              name: true,
+            },
+          },
+          vendorWalletAddress: true,
           cryptocurrency: {
             select: {
               id: true,
               name: true,
               symbol: true,
+              image: true,
             },
           },
           fiat: {

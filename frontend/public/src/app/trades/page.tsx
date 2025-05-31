@@ -2,8 +2,9 @@
 
 import React, { FC } from 'react';
 import { filters, icons } from './data';
-import { getLocaleFullDateString, toUpperCase } from '@/utils';
+import { getInitials, getLocaleFullDateString, toUpperCase } from '@/utils';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import Pagination from '@/components/Pagination';
 import { TradeItemProps } from './types';
@@ -72,6 +73,14 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
               <li>
                 <strong className={styles.label}>Exchange Rate:</strong>
                 <div className={styles.value}>
+                  {trade?.cryptocurrency?.image && (
+                    <Image
+                      src={trade?.cryptocurrency?.image}
+                      alt="crypto icon"
+                      width={18}
+                      height={18}
+                    />
+                  )}
                   {`${
                     trade.exchangeRate
                   } ${trade.fiat?.symbol.toUpperCase()} / ${toUpperCase(
@@ -79,6 +88,64 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
                   )}`}
                 </div>
               </li>
+            </ul>
+          </section>
+          <section className={styles.tradeSection}>
+            <ul>
+              <li>
+                <strong className={styles.label}>
+                  {as === 'trader' ? 'Vendor' : 'Trader'} Name:
+                </strong>
+                <div className={styles.value}>
+                  <div
+                    className={styles.initials}
+                    style={{
+                      backgroundColor:
+                        as === 'trader'
+                          ? trade.vendor?.profileColor
+                          : trade.trader?.profileColor,
+                    }}
+                  >
+                    {as === 'trader'
+                      ? getInitials(
+                          trade.vendor?.firstName ?? '',
+                          trade.vendor?.lastName ?? ''
+                        )
+                      : getInitials(
+                          trade.trader?.firstName ?? '',
+                          trade.trader?.lastName ?? ''
+                        )}
+                  </div>
+                  {as === 'trader'
+                    ? `${trade.vendor?.firstName} ${trade.vendor?.lastName}`
+                    : `${trade.trader?.firstName} ${trade.trader?.lastName}`}
+                </div>
+              </li>
+              <li>
+                <strong className={styles.label}>
+                  {as === 'trader' ? 'Vendor' : 'Trader'} Username:
+                </strong>
+                <div className={styles.value}>
+                  {as === 'trader'
+                    ? trade.vendor?.username
+                    : trade.trader?.username}
+                </div>
+              </li>
+              <li>
+                <strong className={styles.label}>
+                  {as === 'trader' ? 'Vendor' : 'Trader'} Trades:
+                </strong>
+                <div className={styles.value}>
+                  {as === 'trader'
+                    ? trade.vendor?._count?.tradeVendor
+                    : trade.trader?._count?.tradeTrader}{' '}
+                  trades
+                </div>
+              </li>
+            </ul>
+          </section>
+          <section className={`${styles.tradeSection} ${styles.rightColumn}`}>
+            <ul>
               {trade.startedAt && (
                 <li>
                   <strong className={styles.label}>Started At:</strong>
@@ -120,38 +187,13 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
                 </li>
               )}
             </ul>
-          </section>
-          <section className={styles.tradeSection}>
-            <ul>
-              <li>
-                <strong className={styles.label}>
-                  {as === 'trader' ? 'Vendor' : 'Trader'} Name:
-                </strong>
-                <div className={styles.value}>
-                  {as === 'trader'
-                    ? `${trade.vendor?.firstName} ${trade.vendor?.lastName}`
-                    : `${trade.trader?.firstName} ${trade.trader?.lastName}`}
-                </div>
-              </li>
-              <li>
-                <strong className={styles.label}>
-                  {as === 'trader' ? 'Vendor' : 'Trader'} Username:
-                </strong>
-                <div className={styles.value}>
-                  {as === 'trader'
-                    ? trade.vendor?.username
-                    : trade.trader?.username}
-                </div>
-              </li>
-            </ul>
-          </section>
-          <section className={styles.actionBtn}>
             <Link
               href={getUrl()}
               style={{
                 backgroundColor: tradeObj?.backgroundColor,
                 color: tradeObj?.color,
               }}
+              className={styles.actionBtn}
             >
               {tradeObj?.mainActionButtonLabel}
             </Link>

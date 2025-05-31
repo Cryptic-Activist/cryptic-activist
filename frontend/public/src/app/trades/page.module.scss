@@ -144,6 +144,19 @@
 
 .value {
   flex: 2;
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.initials {
+  color: #fff;
+  padding: 0.3rem;
+  font-size: 0.7rem;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .link {
@@ -176,25 +189,47 @@
   }
 }
 
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .actionBtn {
   display: flex;
-  width: 100%;
+  align-self: flex-end;
+  font-size: 1rem;
+  padding: 0.8rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  width: fit-content;
+  height: fit-content;
   justify-content: flex-end;
-  align-items: flex-end;
-  a {
-    font-size: 1rem;
-    padding: 0.8rem;
-    border-radius: 0.4rem;
-    cursor: pointer;
-    width: fit-content;
-    height: fit-content;
-    justify-content: flex-end;
-    box-shadow: 0 2px 4px globals.$box-shadow-default-color;
-  }
+  box-shadow: 0 2px 4px globals.$box-shadow-default-color;
 }
 
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .cardContent {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  .actionBtn {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 620px) {
+  .cardContent {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .actionBtn {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

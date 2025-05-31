@@ -1,7 +1,6 @@
 'use client';
 
-import { Altcha, Button } from '@/components';
-
+import { Button } from '@/components';
 import { Input } from '@/components/forms';
 import { Template } from '@/layouts/modals';
 import styles from './index.module.scss';
@@ -25,8 +24,8 @@ const TwoFactorAuthentication = () => {
             register={login2FAFormRegister}
             errorMessage={errors2FA['token2FA']?.message}
             autoComplete={false}
+            autoFocus
           />
-          <Altcha />
 
           <Button type="submit" padding="1rem" fullWidth>
             Send Code

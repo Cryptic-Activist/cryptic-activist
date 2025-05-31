@@ -23,6 +23,7 @@ export type Count = {
   trusters?: number;
   feedbackTrader?: number;
   tradeVendor?: number;
+  tradeTrader?: number;
 };
 
 export type FeedbacksVendor = {

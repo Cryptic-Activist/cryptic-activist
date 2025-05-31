@@ -40,16 +40,36 @@ export async function getTradesByUserAsVendor(req: Request, res: Response) {
           },
           trader: {
             select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
               firstName: true,
               lastName: true,
               username: true,
+              profileColor: true,
             },
           },
           vendor: {
             select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
               firstName: true,
               lastName: true,
               username: true,
+              profileColor: true,
             },
           },
         },
@@ -115,16 +135,36 @@ export async function getTradesByUserAsTrader(req: Request, res: Response) {
           },
           trader: {
             select: {
+              _count: {
+                select: {
+                  tradeTrader: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
               firstName: true,
               lastName: true,
               username: true,
+              profileColor: true,
             },
           },
           vendor: {
             select: {
+              _count: {
+                select: {
+                  tradeVendor: {
+                    where: {
+                      status: 'COMPLETED',
+                    },
+                  },
+                },
+              },
               firstName: true,
               lastName: true,
               username: true,
+              profileColor: true,
             },
           },
         },

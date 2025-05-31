@@ -1,9 +1,11 @@
 'use client';
 
 import React, { FC } from 'react';
+import { toCapitalize, toUpperCase } from '@/utils';
 import { useApp, useMyOffers, useUser } from '@/hooks';
 
-import Link from 'next/link';
+import { Button } from '@/components';
+import Image from 'next/image';
 import { MyOfferItemProps } from './types';
 import Pagination from '@/components/Pagination';
 import { filters } from './data';
@@ -12,43 +14,88 @@ import styles from './page.module.scss';
 const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
   return (
     <li className={styles.listItem}>
-      <div className={styles.listItemHeader}>
-        <Link href={`/offer/${offer.id}`} className={styles.offerId}>
-          {offer.id}
-        </Link>
-        <div className={styles.listItemHeaderActions}>
-          <div className={styles.edit}>
-            <Link href={`/offer/${offer.id}/edit`}>EDIT</Link>
-          </div>
-          <div className={styles.delete}>
-            <button onClick={() => onDeleteOffer(offer.id)}>DELETE</button>
-          </div>
+      <h2 className={styles.title}>{offer.label}</h2>
+      <div className={styles.listItemContent}>
+        <section className={styles.tradeSection}>
+          <ul>
+            <li>
+              <strong className={styles.label}>Cryptocurrency:</strong>
+              <div className={styles.value}>
+                {offer?.cryptocurrency?.image && (
+                  <Image
+                    src={offer?.cryptocurrency?.image}
+                    alt="crypto icon"
+                    width={18}
+                    height={18}
+                  />
+                )}
+                {offer?.cryptocurrency?.name}
+              </div>
+            </li>
+            <li>
+              <strong className={styles.label}>Fiat:</strong>
+              <div className={styles.value}>{offer.fiat?.name}</div>
+            </li>
+            <li>
+              <strong className={styles.label}>Offer Type:</strong>
+              <div className={styles.value}>
+                {toCapitalize(offer.offerType)}
+              </div>
+            </li>
+          </ul>
+        </section>
+        <section className={styles.tradeSection}>
+          <ul>
+            <li>
+              <strong className={styles.label}>Pricing Type:</strong>
+              <div className={styles.value}>
+                {toCapitalize(offer?.pricingType)}
+              </div>
+            </li>
+            <li>
+              <strong className={styles.label}>Mininum Limit:</strong>
+              <div className={styles.value}>{`${offer.limitMin} ${toUpperCase(
+                offer?.fiat?.symbol
+              )}`}</div>
+            </li>
+            <li>
+              <strong className={styles.label}>Maximum Limit:</strong>
+              <div className={styles.value}>{`${offer.limitMax} ${toUpperCase(
+                offer?.fiat?.symbol
+              )}`}</div>
+            </li>
+          </ul>
+        </section>
+        <section className={styles.tradeSection}>
+          <ul>
+            <li>
+              <strong className={styles.label}>Payment Method:</strong>
+              <div className={styles.value}>{offer?.paymentMethod?.name}</div>
+            </li>
+            <li>
+              <strong className={styles.label}>Payment Details:</strong>
+              <div className={styles.paymentDetails}>
+                {offer?.paymentDetails?.instructions}
+              </div>
+            </li>
+          </ul>
+        </section>
+      </div>
+      <div className={styles.footer}>
+        <div>
+          <strong>Instructions</strong>
+          <p>{offer?.instructions}</p>
+        </div>
+        <div>
+          <strong>Terms</strong>
+          <p>{offer?.terms}</p>
         </div>
       </div>
-      <div className={styles.listItemContent}>
-        <h2 className={styles.label}>{offer.label}</h2>
-        <section className={styles.infoSection}>
-          <span className={styles.info}>
-            Cryptocurreny: {offer.cryptocurrency.name}
-          </span>
-          <span className={styles.info}>Fiat: {offer.fiat.symbol}</span>
-          <span className={styles.info}>
-            Time Limit: {offer.timeLimit} minutes
-          </span>
-          <span className={styles.info}>
-            Limits: {offer.limitMin} - {offer.limitMax} {offer.fiat.symbol}
-          </span>
-        </section>
-        <span className={styles.info}>Pricing type: {offer.pricingType}</span>
-        <p className={styles.info}>Terms: {offer.terms}</p>
-        <p className={styles.info}>Instructions: {offer.instructions}</p>
-        <ul className={styles.tags}>
-          {offer.tags.map((tag: any, index: number) => (
-            <li key={index} className={styles.tag}>
-              {tag}
-            </li>
-          ))}
-        </ul>
+      <div className={styles.actionBtns}>
+        <Button href={`/offer/${offer?.id}/edit`} padding="0.6rem 1.2rem">
+          Edit
+        </Button>
+        <button onClick={() => onDeleteOffer(offer.id)}>DELETE</button>
       </div>
     </li>
   );

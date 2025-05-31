@@ -21,6 +21,7 @@ const Input: FC<InputProps> = ({
   style,
   onChange,
   autoComplete = true,
+  autoFocus,
   ...rest
 }) => {
   const handleChange = (event: ChangeEvent<any>) => {
@@ -50,6 +51,7 @@ const Input: FC<InputProps> = ({
         })}
         type={type}
         id={id}
+        autoFocus={autoFocus}
         style={{
           width,
           ...(focus && { borderColor: '#000' }),
