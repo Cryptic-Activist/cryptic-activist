@@ -1,4 +1,4 @@
-npx hardhat run scripts/deploy.js --network localhost 
+npx hardhat run scripts/deploy.hardhat.js --network localhost 
 
 echo "Emptying contracts folder..."
 rm -rf ../../backend/src/contracts/ethereum/artifacts/*

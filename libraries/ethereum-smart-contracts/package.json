@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "npx hardhat node",
     "build:dev": "cd .. && cp -r ethereum-smart-contracts ../backend/libraries",
-    "deploy": "./deploy.sh"
+    "deploy:hardhat": "./deploy.hardhat.sh",
+    "deploy:amoy": "./deploy.amoy.sh"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
