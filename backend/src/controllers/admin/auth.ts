@@ -103,31 +103,14 @@ export async function register(req: Request, res: Response) {
   const { names, username, password } = req.body;
 
   try {
-    const errors: string[] = [];
-
-    const cleanBody = sanitize({ ...names, username }, []);
-
-    // const usernameValidation = await validateAdminUsername(cleanBody.username);
-
-    // if (!usernameValidation.valid) {
-    //   cleanBody.username = generateUniqueUsername(cleanBody.username);
-    // }
-
-    if (errors.length > 0) {
-      res.status(400).send({
-        errors,
-      });
-    }
-
     const generatedSalt = await bcrypt.genSalt(10);
-
     const hash = await bcrypt.hash(password, generatedSalt);
 
     const admin = await prisma.admin.create({
       data: {
-        firstName: cleanBody.firstName,
-        lastName: cleanBody.lastName,
-        username: cleanBody.username,
+        firstName: names.firstName,
+        lastName: names.lastName,
+        username: username,
         password: hash,
         email: '',
       },

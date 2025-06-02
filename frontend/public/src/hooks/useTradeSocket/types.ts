@@ -1,5 +1,6 @@
 import {
   SetPaymentConfirmedParams,
+  SetPaymentDisputedParams,
   SetTradeCancelledParams,
 } from '../useTrade/types';
 
@@ -19,6 +20,7 @@ export type UseSocketParams = {
   onSetTradeCreated: () => void;
   onSetCanceled: (params: SetTradeCancelledParams) => void;
   onSetPaymentConfirmed: (params: SetPaymentConfirmedParams) => void;
+  onSetDisputed: (params: SetPaymentDisputedParams) => void;
   onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
 };
 
@@ -68,3 +70,8 @@ export type SetAsParams = {
 export type SetAsPaidParams = SetAsParams;
 
 export type SetAsCanceledParams = SetAsParams;
+
+export type SetAsDisputedParams = SetAsParams & {
+  chatId: string;
+  disputeReason: string;
+};

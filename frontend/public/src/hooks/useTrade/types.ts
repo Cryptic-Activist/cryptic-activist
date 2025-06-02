@@ -5,6 +5,11 @@ export type SetPaymentConfirmedParams = {
   escrowReleasedAt: string;
 };
 
+export type SetPaymentDisputedParams = {
+  disputedAt: string;
+  status: 'DISPUTED';
+};
+
 export type SetTradeCancelledParams = {
   status: string;
   endedAt: string;

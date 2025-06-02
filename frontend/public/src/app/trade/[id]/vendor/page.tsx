@@ -24,6 +24,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   setAsPaymentConfirmed,
+  setAsDisputed,
 }) => {
   const isSetPaymentReceivedVisible =
     !trade.dispitedAt &&
@@ -48,7 +49,17 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     <section className={styles.actionButtons}>
       <div className={styles.actionButtonsGrid}>
         {isRaiseADisputeVisible && (
-          <Button type="button" fullWidth padding="1rem">
+          <Button
+            type="button"
+            fullWidth
+            padding="1rem"
+            onClick={() =>
+              setAsDisputed({
+                from: trade.trader?.id,
+                to: trade.vendor?.id,
+              })
+            }
+          >
             Raise a Dispute
           </Button>
         )}
@@ -95,6 +106,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 const Trade: FC<TradeProps> = ({
   trade,
   setAsCanceled,
+  setAsDisputed,
   setAsPaymentConfirmed,
   replace,
   tradeRemaingTime,
@@ -327,6 +339,7 @@ const Trade: FC<TradeProps> = ({
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaymentConfirmed={setAsPaymentConfirmed}
+        setAsDisputed={setAsDisputed}
       />
     </div>
   );
@@ -340,6 +353,7 @@ const TradeVendor = () => {
     setPaymentConfirmed,
     setVendorWalletAddress,
     setTradeCreated,
+    setDisputed,
   } = useTrade();
   const { user, query } = useUser();
   // const { addToast } = useApp();
@@ -350,6 +364,7 @@ const TradeVendor = () => {
     sendMessage,
     setAsCanceled,
     setAsPaymentConfirmed,
+    setAsDisputed,
     messages,
     receiverStatus,
     tradeRemaingTime,
@@ -366,6 +381,7 @@ const TradeVendor = () => {
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
     onSetTradeCreated: setTradeCreated,
+    onSetDisputed: setDisputed,
   });
 
   useEffect(() => {
@@ -404,6 +420,7 @@ const TradeVendor = () => {
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
+        setAsDisputed={setAsDisputed}
       />
 
       {trade?.id &&
