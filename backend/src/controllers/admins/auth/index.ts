@@ -82,6 +82,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
         id: decoded.id,
       },
       select: {
+        id: true,
         firstName: true,
         lastName: true,
         username: true,

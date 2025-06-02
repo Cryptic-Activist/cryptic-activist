@@ -1,4 +1,4 @@
-import { login, loginDecodeToken } from '@/controllers/admin/auth';
+import { login, loginDecodeToken } from '@/controllers/admins/auth';
 
 import { Router } from 'express';
 

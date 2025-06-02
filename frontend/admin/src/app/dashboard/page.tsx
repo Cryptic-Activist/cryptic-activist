@@ -1,6 +1,9 @@
+'use client';
+
 import { DynamicIcon } from '@/components';
 import React from 'react';
 import styles from './page.module.scss';
+import { useDashboard } from '@/hooks';
 
 const StatusCard = () => {
 	return (
@@ -20,6 +23,8 @@ const StatusCard = () => {
 };
 
 const Dashboard = () => {
+	const {} = useDashboard();
+
 	return (
 		<div className={styles.container}>
 			<div className={styles.statsGrid}>

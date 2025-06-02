@@ -17,7 +17,7 @@
 	"dependencies": {
 		"@hookform/resolvers": "^4.1.3",
 		"@nanostores/react": "^0.8.4",
-		"@tanstack/react-query": "^5.67.1",
+		"@tanstack/react-query": "^5.79.0",
 		"@tanstack/react-query-devtools": "^5.67.1",
 		"@tanstack/react-table": "^8.21.3",
 		"@types/node": "^22.13.9",

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 
-import { JWT_SECRET } from '@/constants/env';
 import { decodeToken } from '@/utils/generators/jwt';
 import { prisma } from '@/services/db/prisma';
 

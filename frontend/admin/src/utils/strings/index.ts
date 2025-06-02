@@ -38,3 +38,13 @@ export const toCapitalize = (string: string): string => {
 		string.length
 	)}`;
 };
+
+// export const getBearerToken = () => {
+// 	const accessToken = getCookie('accessToken');
+
+// 	if (accessToken === null) {
+// 		throw new Error('JWT not found');
+// 	}
+
+// 	return `Bearer ${accessToken}`;
+// };

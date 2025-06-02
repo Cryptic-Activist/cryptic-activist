@@ -9,3 +9,4 @@ export const TRADE_API = process.env.TRADE_API as string;
 export const WEB3_ETHEREUM_HTTP_PROVIDER = process.env
 	.WEB3_ETHEREUM_HTTP_PROVIDER as string;
 export const BACKEND = process.env.NEXT_PUBLIC_BACKEND as string;
+export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';

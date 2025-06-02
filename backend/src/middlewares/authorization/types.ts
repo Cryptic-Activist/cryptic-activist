@@ -1,0 +1,8 @@
+export type Role =
+  | 'SUPER_ADMIN'
+  | 'MODERATOR'
+  | 'KYC_REVIEWER'
+  | 'DISPUTE_MANAGER'
+  | 'SUPPORT_AGENT'
+  | 'AUDITOR'
+  | 'FINANCE_MANAGER';

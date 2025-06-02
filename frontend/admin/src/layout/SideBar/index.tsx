@@ -8,9 +8,7 @@ import { usePathname } from 'next/navigation';
 
 const Item: FC<SideBarProps> = ({ href, label, icon }) => {
 	const pathname = usePathname();
-	console.log({ pathname });
 	const assignedPath = href.split('/');
-	console.log({ assignedPath });
 	const isCurrentPage = pathname?.split('/')[1].includes(assignedPath[1]);
 
 	return (
