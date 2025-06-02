@@ -1,5 +1,6 @@
 import {
   authenticate,
+  disable2FA,
   generate2FA,
   login,
   login2FAVerify,
@@ -66,5 +67,7 @@ router.get('/authenticate', authenticateUser, authenticate);
 router.post('/2fa/generate', authenticateUser, generate2FA);
 
 router.post('/2fa/verify/:token', authenticateUser, verify2FA);
+
+router.put('/2fa/disable/:userId', authenticateUser, disable2FA);
 
 export default router;

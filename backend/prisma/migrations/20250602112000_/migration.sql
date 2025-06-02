@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "AdminRole" AS ENUM ('SUPER_ADMIN', 'MODERATOR', 'KYC_REVIEWER', 'DISPUTE_MANAGER', 'SUPPORT_AGENT', 'AUDITOR', 'FINANCE_MANAGER');
+
+-- CreateEnum
 CREATE TYPE "FeedbackType" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
 
 -- CreateEnum
@@ -27,6 +30,15 @@ CREATE TABLE "accepted_cryptocurrencies" (
 );
 
 -- CreateTable
+CREATE TABLE "admin_roles" (
+    "id" TEXT NOT NULL,
+    "role" "AdminRole" NOT NULL,
+    "adminId" TEXT NOT NULL,
+
+    CONSTRAINT "admin_roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "admins" (
     "id" TEXT NOT NULL,
     "firstName" VARCHAR(50) NOT NULL,
@@ -35,6 +47,8 @@ CREATE TABLE "admins" (
     "email" VARCHAR(120) NOT NULL,
     "password" TEXT NOT NULL,
     "isVerified" BOOLEAN DEFAULT false,
+    "twoFactorSecret" TEXT,
+    "twoFactorEnabled" BOOLEAN DEFAULT false,
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
@@ -403,6 +417,9 @@ CREATE TABLE "tokens" (
 CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cryptocurrencies"("coingeckoId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "admin_roles_adminId_role_key" ON "admin_roles"("adminId", "role");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "admins_username_key" ON "admins"("username");
 
 -- CreateIndex
@@ -470,6 +487,9 @@ CREATE INDEX "users_username_idx" ON "users"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
+
+-- AddForeignKey
+ALTER TABLE "admin_roles" ADD CONSTRAINT "admin_roles_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "blocks" ADD CONSTRAINT "blocks_blockerId_fkey" FOREIGN KEY ("blockerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

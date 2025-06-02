@@ -1,8 +1,7 @@
-import { Inter } from 'next/font/google';
-import Image from 'next/image';
+'use server';
 
-import styles from './page.module.css';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
-	return <></>;
+export default async function Home() {
+	redirect('/dashboard');
 }

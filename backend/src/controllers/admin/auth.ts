@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
+import {
+  decodeToken,
+  generateRefreshToken,
+  generateToken,
+} from '@/utils/generators/jwt';
 
-import { JWT_SECRET } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/services/db/prisma';
-
-// import { validateAdminUsername } from '@/utils/validators';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -19,13 +21,10 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!admin) {
-      errors.push('User not found');
-    }
-
-    if (errors.length > 0) {
       res.status(400).send({
-        errors,
+        error: ['Unable to login'],
       });
+      return;
     }
 
     bcrypt.compare(password, admin!.password, (compareError, isMatch) => {
@@ -35,31 +34,28 @@ export const login = async (req: Request, res: Response) => {
         });
       }
 
-      if (isMatch) {
-        if (!admin!.isVerified) {
-          res.status(401).send({
-            errors: ['Account is not verified'],
-          });
-        }
+      if (!isMatch) {
+        res.status(400).send({
+          errors: ['Invalid credentials'],
+        });
+        return;
+      }
 
-        const accessToken: string = generateToken(
-          { id: admin!.id },
-          JWT_SECRET,
-          '1d',
-        );
-        const refreshToken: string = generateRefreshToken(
-          { userId: admin!.id },
-          JWT_SECRET,
-        );
-
-        res.status(200).send({
-          accessToken,
-          refreshToken,
+      if (!admin.isVerified) {
+        res.status(401).send({
+          errors: ['Account is not verified'],
         });
       }
 
-      res.status(400).send({
-        errors: ['Invalid credentials'],
+      const accessToken: string = generateToken({
+        objectToTokenize: { userId: admin!.id },
+        expiresIn: '1d',
+      });
+      const refreshToken: string = generateRefreshToken(admin!.id);
+
+      res.status(200).send({
+        accessToken,
+        refreshToken,
       });
     });
   } catch (err) {
@@ -73,15 +69,28 @@ export async function loginDecodeToken(req: Request, res: Response) {
   const { accessToken } = req.params;
 
   try {
-    const decoded = decodeToken(accessToken, JWT_SECRET);
+    const decoded = decodeToken(accessToken);
 
     if (!decoded) {
-      res.status(401).send({});
+      res.status(401).send({
+        error: ['Unable to decode token'],
+      });
     }
 
     const admin = await prisma.admin.findFirst({
       where: {
         id: decoded.id,
+      },
+      select: {
+        firstName: true,
+        lastName: true,
+        username: true,
+        email: true,
+        roles: {
+          select: {
+            role: true,
+          },
+        },
       },
     });
 
@@ -89,38 +98,10 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(404).send({
         errors: ['User not found'],
       });
+      return;
     }
 
     res.status(200).send(admin);
-  } catch (err) {
-    res.status(500).send({
-      errors: [err.message],
-    });
-  }
-}
-
-export async function register(req: Request, res: Response) {
-  const { names, username, password } = req.body;
-
-  try {
-    const generatedSalt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, generatedSalt);
-
-    const admin = await prisma.admin.create({
-      data: {
-        firstName: names.firstName,
-        lastName: names.lastName,
-        username: username,
-        password: hash,
-        email: '',
-      },
-    });
-
-    if (!admin) {
-      res.status(400).send({});
-    }
-
-    res.status(201).send({});
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

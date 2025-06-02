@@ -1,4 +1,5 @@
 import { Application } from 'express';
+import admins from './admins';
 import altcha from './altcha';
 import blockchains from './blockchains';
 import chats from './chats';
@@ -14,6 +15,7 @@ import users from './users';
 import vendors from './vendors';
 
 export default (app: Application): void => {
+  app.use('/admins', admins);
   app.use('/chats', chats);
   app.use('/cryptocurrencies', cryptocurrencies);
   app.use('/fiats', fiats);
