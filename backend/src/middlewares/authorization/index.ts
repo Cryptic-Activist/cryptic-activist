@@ -126,17 +126,18 @@ export const authenticateAdmin = async (
   }
 };
 
-export const requireAdminRole = (requiredRole: Role) => {
+export const requireAdminRole = (requiredRole: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const admin = req.admin;
 
       if (!admin || !admin.roles || !Array.isArray(admin.roles)) {
-        return res.status(403).json({ error: 'Forbidden' });
+        res.status(403).json({ error: 'Forbidden' });
+        return;
       }
 
-      const allowedRole = admin.roles.filter(
-        (role) => role.role === requiredRole,
+      const allowedRole = admin.roles.filter((role) =>
+        requiredRole.includes(role.role),
       );
 
       if (allowedRole.length === 0) {

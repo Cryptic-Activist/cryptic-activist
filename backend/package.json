@@ -13,7 +13,8 @@
     "migrate:dev": "npx prisma db push && npx prisma generate",
     "lint": "eslint --fix",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cryptic-activist --project cryptic-activist-backend ./dist && sentry-cli sourcemaps upload --org cryptic-activist --project cryptic-activist-backend ./dist",
-    "seed:admin": "tsx src/scripts/create-initial-admin.ts"
+    "seed:admin": "tsx src/scripts/create-initial-admin.ts",
+    "seed:platform": "tsx src/scripts/seed-initial-platform-data.ts"
   },
   "lint-staged": {
     "**/*.{json,js,ts,jsx,tsx,html}": [

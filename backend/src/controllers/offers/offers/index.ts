@@ -336,3 +336,25 @@ export const getMyOffersPaginationController = async (
     });
   }
 };
+
+export const getTotalActiveOffers = async (
+  _req: Request<GetCurrentVendorOffersRequest, {}, {}, {}>,
+  res: Response,
+) => {
+  try {
+    const totalActiveOffers = await prisma.offer.count({
+      where: {
+        deletedAt: {
+          equals: null,
+        },
+      },
+    });
+
+    res.status(200).json({ total: totalActiveOffers });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).send({
+      errors: err,
+    });
+  }
+};

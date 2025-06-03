@@ -1,8 +1,7 @@
-import Link from 'next/link';
+import type { ButtonProps } from './types';
 import type { FC } from 'react';
-
+import Link from 'next/link';
 import styles from './index.module.scss';
-import { ButtonProps } from './types';
 
 const Button: FC<ButtonProps> = ({
   children,
@@ -11,11 +10,15 @@ const Button: FC<ButtonProps> = ({
   theme = 'primary',
   padding,
   align = 'center',
+  size = 16,
+  fullWidth = false,
+  isDisabled = false,
   onClick,
 }) => {
   const primary = theme === 'primary' ? styles.primary : null;
   const secondary = theme === 'secondary' ? styles.secondary : null;
   const ghost = theme === 'ghost' ? styles.ghost : null;
+  const danger = theme === 'danger' ? styles.danger : null;
   const transparent = theme === 'transparent' ? styles.transparent : null;
   const alignment =
     align === 'center' ? 'center' : align === 'left' ? 'start' : 'end';
@@ -24,11 +27,14 @@ const Button: FC<ButtonProps> = ({
     <>
       {href ? (
         <Link
-          href={href}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${transparent}`}
+          href={isDisabled ? '#' : href}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${transparent} `}
           style={{
             padding,
             textAlign: alignment,
+            fontSize: `${size}px`,
+            ...(fullWidth ? { width: '100%' } : {}),
+            ...(isDisabled ? { cursor: 'auto' } : {}),
           }}
         >
           {children}
@@ -36,11 +42,15 @@ const Button: FC<ButtonProps> = ({
       ) : (
         <button
           type={type}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${transparent}`}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${transparent} }`}
           onClick={onClick}
+          disabled={isDisabled}
           style={{
             padding,
             textAlign: alignment,
+            fontSize: `${size}px`,
+            ...(fullWidth ? { width: '100%' } : {}),
+            ...(isDisabled ? { cursor: 'auto' } : {}),
           }}
         >
           {children}

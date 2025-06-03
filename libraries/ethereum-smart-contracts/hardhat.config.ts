@@ -5,9 +5,9 @@ import { HardhatUserConfig } from "hardhat/config";
 
 const config: HardhatUserConfig = {
   networks: {
-    // hardhat: {
-    //   chainId: 1337,
-    // },
+    hardhat: {
+      chainId: 1337,
+    },
     amoy: {
       url: "https://rpc-amoy.polygon.technology",
       accounts: [process.env.PLATFORM_WALLET_PRIVATE_KEY as string], // use dotenv to load this safely

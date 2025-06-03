@@ -1,10 +1,9 @@
 export type RecentTrade = {
-	tradeId: string;
+	id: string;
 	vendor: string;
 	trader: string;
 	amount: string;
-	cryptocurrency: string;
+	cryptocurrencySymbol: string;
 	status: string;
-	date: string;
-	actions: any;
+	startedAt: string;
 };

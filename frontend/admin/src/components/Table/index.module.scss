@@ -1,0 +1,72 @@
+@use "../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  overflow-x: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.table {
+  background-color: #fff;
+  border: 1px solid #575757;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 4px globals.$box-shadow-default-color;
+}
+
+.tableHead {
+  tr {
+    th {
+      text-align: left;
+      width: fit-content;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+  }
+}
+
+.tableBody {
+  tr {
+    &:hover {
+      background-color: #f6f6f6;
+      // &:not(:first-child) {
+      //   border-left: 1px solid #f6f6f6;
+      // }
+    }
+    td {
+      text-align: left;
+      width: fit-content;
+      padding: 0.5rem;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+      &:first-child {
+        max-width: 4rem;
+      }
+    }
+  }
+}
+
+.view {
+  border: none;
+  background-color: transparent;
+  font-size: 0.9rem;
+  color: #3b3b3b;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  &:hover {
+    background-color: #e8e8e8;
+    transition: all 0.3s ease;
+  }
+  &:active {
+    background-color: #dfdfdf;
+    transition: all 0.1s ease;
+  }
+}

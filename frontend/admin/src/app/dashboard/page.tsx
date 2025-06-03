@@ -1,38 +1,107 @@
 'use client';
 
-import { DynamicIcon } from '@/components';
-import React from 'react';
+import { Button, StatusCard } from '@/components';
+import React, { FC } from 'react';
+
+import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
 
-const StatusCard = () => {
-	return (
-		<div className={styles.statusCard}>
-			<div className={styles.statusCardHeader}>
-				<span>Total Users</span>
-				<DynamicIcon iconName="FaUsers" />
-			</div>
-			<div className={styles.statusCardContent}>
-				<span className={styles.value}>1,234</span>
-				<span className={`${styles.statement} ${styles.statementGreen}`}>
-					+12% from last month
-				</span>
-			</div>
-		</div>
-	);
-};
-
 const Dashboard = () => {
-	const {} = useDashboard();
+	const {
+		recentTrades,
+		handleRowAction,
+		recentTradesColumns,
+		activeOffersQuery,
+		completedTradesQuery,
+		totalUsersQuery,
+		totalVolumeQuery
+	} = useDashboard();
 
 	return (
 		<div className={styles.container}>
 			<div className={styles.statsGrid}>
-				<StatusCard />
-				<StatusCard />
-				<StatusCard />
-				<StatusCard />
+				<StatusCard
+					title="Total Users"
+					iconName="FaUsers"
+					counter={totalUsersQuery.data?.total}
+					statement={totalUsersQuery.data?.percentageChange}
+				/>
+				<StatusCard
+					title="Active Offers"
+					iconName="FaTags"
+					counter={activeOffersQuery.data?.total}
+					statement="+12% from last month"
+				/>
+				<StatusCard
+					title="Completed Trades"
+					iconName="FaHandshakeSimple"
+					counter={completedTradesQuery.data?.total}
+					statement="+12% from last month"
+				/>
+				<StatusCard
+					title="Total Volume"
+					iconName="FaChartLine"
+					counter={totalVolumeQuery.data?.total}
+					statement="+12% from last month"
+				/>
 			</div>
+			<Table
+				data={recentTrades}
+				columns={recentTradesColumns}
+				onRowAction={handleRowAction}
+				titleComponent={
+					<div className={styles.recentTradesContainer}>
+						<h2>Recent Trades</h2>
+						<Button href="/trades">All Trades</Button>
+					</div>
+				}
+			/>
+			{/* <table>
+				<thead>
+					{table.getHeaderGroups().map((headerGroup) => (
+						<tr key={headerGroup.id}>
+							{headerGroup.headers.map((header) => (
+								<th key={header.id}>
+									{header.isPlaceholder
+										? null
+										: flexRender(
+												header.column.columnDef.header,
+												header.getContext()
+										  )}
+								</th>
+							))}
+						</tr>
+					))}
+				</thead>
+				<tbody>
+					{table.getRowModel().rows.map((row) => (
+						<tr key={row.id}>
+							{row.getVisibleCells().map((cell) => (
+								<td key={cell.id}>
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+				<tfoot>
+					{table.getFooterGroups().map((footerGroup) => (
+						<tr key={footerGroup.id}>
+							{footerGroup.headers.map((header) => (
+								<th key={header.id}>
+									{header.isPlaceholder
+										? null
+										: flexRender(
+												header.column.columnDef.footer,
+												header.getContext()
+										  )}
+								</th>
+							))}
+						</tr>
+					))}
+				</tfoot>
+			</table> */}
 		</div>
 	);
 };

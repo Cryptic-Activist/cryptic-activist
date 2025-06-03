@@ -4,3 +4,5 @@ export { default as DynamicIcon } from './DynamicIcon';
 export * from './Form';
 export * from './List';
 export { default as QueryProvider } from './QueryProvider';
+export { default as Table } from './Table';
+export { default as StatusCard } from './StatusCard';

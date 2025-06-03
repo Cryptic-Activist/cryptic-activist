@@ -8,8 +8,8 @@ export const capitalizePathname = (string: string, splitFactor: string) => {
 	return capitalized.join(' ');
 };
 
-export const toUpperCase = (text: string) => {
-	return text.toUpperCase();
+export const toUpperCase = (text?: string) => {
+	return text ? text?.toUpperCase() : '';
 };
 
 export const toLowerCase = (text: string) => {
@@ -37,6 +37,16 @@ export const toCapitalize = (string: string): string => {
 		1,
 		string.length
 	)}`;
+};
+
+export const humanizeCamelCase = (str: string) => {
+	return (
+		str
+			// Insert a space before all capital letters
+			.replace(/([A-Z])/g, ' $1')
+			// Capitalize the first character
+			.replace(/^./, (char) => char.toUpperCase())
+	);
 };
 
 // export const getBearerToken = () => {
