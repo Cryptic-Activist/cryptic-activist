@@ -3,6 +3,7 @@ import { generateRandomNames, slugifyStringLowerCase } from '@/utils/string';
 
 import { calculatePercentageChange } from '@/utils/number';
 import { convertWhere } from '@/utils/object';
+import { getMonthBoundaries } from '@/utils/date';
 import { mapUsers } from '@/utils/map/users';
 import { prisma } from '@/services/db';
 import { sanitize } from '@/utils/sanitizer';
@@ -215,9 +216,7 @@ export async function getTotalUsers(_req: Request, res: Response) {
   try {
     const totalUsers = await prisma.user.count();
 
-    const now = new Date();
-    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
 
     // Get counts
     const [thisMonthCount, lastMonthCount] = await Promise.all([

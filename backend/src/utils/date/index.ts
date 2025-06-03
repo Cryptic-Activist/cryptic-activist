@@ -59,3 +59,18 @@ export const getDuration = (startedAt: Date, endedAt: Date) => {
     formatted,
   };
 };
+
+export const getMonthBoundaries = () => {
+  const now = new Date();
+
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // day 0 of this month = last day of last month
+
+  return {
+    now,
+    startOfThisMonth,
+    startOfLastMonth,
+    endOfLastMonth,
+  };
+};

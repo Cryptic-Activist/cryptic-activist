@@ -6,3 +6,4 @@ export * from './List';
 export { default as QueryProvider } from './QueryProvider';
 export { default as Table } from './Table';
 export { default as StatusCard } from './StatusCard';
+export { default as Pagination } from './Pagination';

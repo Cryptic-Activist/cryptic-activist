@@ -31,19 +31,19 @@ const Dashboard = () => {
 					title="Active Offers"
 					iconName="FaTags"
 					counter={activeOffersQuery.data?.total}
-					statement="+12% from last month"
+					statement={activeOffersQuery.data?.percentageChange}
 				/>
 				<StatusCard
 					title="Completed Trades"
 					iconName="FaHandshakeSimple"
 					counter={completedTradesQuery.data?.total}
-					statement="+12% from last month"
+					statement={completedTradesQuery.data?.percentageChange}
 				/>
 				<StatusCard
 					title="Total Volume"
 					iconName="FaChartLine"
 					counter={totalVolumeQuery.data?.total}
-					statement="+12% from last month"
+					statement={totalVolumeQuery.data?.percentageChange}
 				/>
 			</div>
 			<Table

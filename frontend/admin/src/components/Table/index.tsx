@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table';
 
 import { GenericTableProps } from './types';
+import { Pagination } from '@/components';
 import styles from './index.module.scss';
 
 const Table = <T extends object>({
@@ -78,6 +79,7 @@ const Table = <T extends object>({
 				</tbody>
 			</table>
 			{data.length > 0 && (
+				// <Pagination />
 				<div>
 					<div>
 						<button

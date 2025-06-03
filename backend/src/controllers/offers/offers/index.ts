@@ -6,6 +6,8 @@ import {
 } from './types';
 import { Request, Response } from 'express';
 
+import { calculatePercentageChange } from '@/utils/number';
+import { getMonthBoundaries } from '@/utils/date';
 import { prisma } from '@/services/db/prisma';
 
 export const getOffersController = async (
@@ -350,7 +352,39 @@ export const getTotalActiveOffers = async (
       },
     });
 
-    res.status(200).json({ total: totalActiveOffers });
+    const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
+
+    // Get counts
+    const [thisMonthCount, lastMonthCount] = await Promise.all([
+      prisma.offer.count({
+        where: {
+          deletedAt: {
+            equals: null,
+          },
+          createdAt: {
+            gte: startOfThisMonth,
+          },
+        },
+      }),
+      prisma.offer.count({
+        where: {
+          deletedAt: {
+            equals: null,
+          },
+          createdAt: {
+            gte: startOfLastMonth,
+            lt: startOfThisMonth,
+          },
+        },
+      }),
+    ]);
+
+    const percentageChange = calculatePercentageChange(
+      thisMonthCount,
+      lastMonthCount,
+    );
+
+    res.status(200).json({ total: totalActiveOffers, percentageChange });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
