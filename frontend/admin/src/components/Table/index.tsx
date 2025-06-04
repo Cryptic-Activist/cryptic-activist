@@ -1,3 +1,4 @@
+import { DynamicIcon, Pagination } from '@/components';
 import React, { useState } from 'react';
 import {
 	SortingState,
@@ -9,14 +10,16 @@ import {
 } from '@tanstack/react-table';
 
 import { GenericTableProps } from './types';
-import { Pagination } from '@/components';
 import styles from './index.module.scss';
 
 const Table = <T extends object>({
 	data,
 	columns,
 	onRowAction,
-	titleComponent
+	titleComponent,
+	onChangePage,
+	currentPage,
+	totalPages
 }: GenericTableProps<T>) => {
 	const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -42,14 +45,26 @@ const Table = <T extends object>({
 									key={header.id}
 									onClick={header.column.getToggleSortingHandler()}
 								>
-									{flexRender(
-										header.column.columnDef.header,
-										header.getContext()
+									<span>
+										{flexRender(
+											header.column.columnDef.header,
+											header.getContext()
+										)}
+									</span>
+									{header.column.getIsSorted() === 'asc' && (
+										<DynamicIcon
+											iconName="FaSortUp"
+											size={16}
+											className={styles.sortUp}
+										/>
 									)}
-									{{
-										asc: ' 🔼',
-										desc: ' 🔽'
-									}[header.column.getIsSorted() as string] ?? null}
+									{header.column.getIsSorted() === 'desc' && (
+										<DynamicIcon
+											iconName="FaSortDown"
+											size={16}
+											className={styles.sortDown}
+										/>
+									)}
 								</th>
 							))}
 							{onRowAction && <th>Actions</th>}
@@ -78,28 +93,12 @@ const Table = <T extends object>({
 					))}
 				</tbody>
 			</table>
-			{data.length > 0 && (
-				// <Pagination />
-				<div>
-					<div>
-						<button
-							onClick={() => table.previousPage()}
-							disabled={!table.getCanPreviousPage()}
-						>
-							Previous
-						</button>
-						<button
-							onClick={() => table.nextPage()}
-							disabled={!table.getCanNextPage()}
-						>
-							Next
-						</button>
-					</div>
-					<span>
-						Page {table.getState().pagination.pageIndex + 1} of{' '}
-						{table.getPageCount()}
-					</span>
-				</div>
+			{data?.length > 0 && (
+				<Pagination
+					onPageChange={onChangePage}
+					currentPage={currentPage}
+					totalPages={totalPages}
+				/>
 			)}
 		</div>
 	);

@@ -25,6 +25,16 @@
       width: fit-content;
       padding: 0.5rem;
       font-size: 1rem;
+      cursor: pointer;
+      span {
+        margin-right: 0.5rem;
+      }
+      .sortUp {
+        transform: translateY(7px);
+      }
+      .sortDown {
+        transform: translateY(-1px);
+      }
     }
   }
 }

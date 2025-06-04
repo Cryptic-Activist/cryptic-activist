@@ -1,16 +1,20 @@
 import { BACKEND } from '@/constants/envs';
+import { GetRecentTradesParams } from './types';
 import { fetchGet } from '../axios';
 import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
+import { getQueries } from '@/utils/axios';
 
-export const getRecentTrades = async () => {
+export const getRecentTrades = async (params: GetRecentTradesParams) => {
+	const queries = getQueries(params);
+
 	const accessToken = getLocalStorage('accessToken');
 
 	if (!accessToken) {
 		return null;
 	}
 
-	const response = await fetchGet(`${BACKEND}/trades/recent`, {
+	const response = await fetchGet(`${BACKEND}/trades/recent` + queries, {
 		Authorization: getBearerToken(accessToken)
 	});
 

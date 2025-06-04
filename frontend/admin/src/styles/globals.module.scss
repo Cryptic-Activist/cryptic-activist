@@ -1,6 +1,29 @@
 $primary: #ffcd2b;
+$primary-darken-10: #ffc70d;
+$primary-darken-15: #fdc300;
+$primary-darken-20: #eeb700;
+$primary-darken-25: #dfac00;
+$primary-transparent: rgba($primary, 0.2);
+$primary-hover-background-color: #f8f8f3;
 $secondary: #000;
+
+$success-color: #28a745;
+$success-background-color: rgba(40, 167, 69, 0.1);
+$danger-color: #dc3545;
+$danger-background-color: rgba(220, 53, 69, 0.1);
+$warning-color: #ffc107;
+$warning-background-color: rgba(255, 193, 7, 0.1);
+$neutral-color: #8d8d8d;
+$neutral-background-color: rgb(238, 238, 238);
+
+$text-color-dark: #222;
+$text-description-color: #727272;
+
+$border-color-dark: #000;
+
 $white: #fff;
+$black: #000;
+$danger: #de2727;
 $input-border-color: #c0c0c0;
 $grey-background: #e2e2e2;
 $grey: #a2a2a2;
@@ -10,9 +33,12 @@ $status-offline: #ff3a3a;
 $status-away: #fed141;
 $feedback-positive: #1bbb2b;
 $feedback-negative: #ff3a3a;
+$feedback-neutral: #a6a6a6;
+$progress-bar-separator-color: #ddd;
+$blue-check: #0585ff;
 
-$navbigation-bar-height: calc(4rem + 1px);
-$footer-height: calc(23rem + 1px);
+$navbigation-bar-height: calc(4rem);
+$footer-height: calc(23rem);
 $main-content-height: calc(100vh - $navbigation-bar-height - $footer-height);
 
 $box-shadow-default-color: rgba(0, 0, 0, 0.3);
@@ -26,3 +52,11 @@ $font-size-xl: 1.4rem;
 
 $border-radius-100: 2rem;
 $border-radius-4: 0.4rem;
+
+$trade-status-pending: #facc15;
+$trade-status-in-progress: #b5cff9;
+$trade-status-completed: #4caf50;
+$trade-status-cancelled: #9ca3af;
+$trade-status-disputed: #f97316;
+$trade-status-expired: #e5e7eb;
+$trade-status-failed: #ff4f4f;

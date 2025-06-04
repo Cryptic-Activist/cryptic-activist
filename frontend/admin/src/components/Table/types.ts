@@ -7,4 +7,7 @@ export type GenericTableProps<T extends object> = {
 	columns: ColumnDef<T, any>[];
 	titleComponent?: ReactElement;
 	onRowAction?: (row: T) => void;
+	onChangePage: (page: number) => void;
+	currentPage: number;
+	totalPages: number;
 };
