@@ -15,11 +15,11 @@ import styles from './index.module.scss';
 const Table = <T extends object>({
 	data,
 	columns,
-	onRowAction,
 	titleComponent,
-	onChangePage,
 	currentPage,
-	totalPages
+	totalPages,
+	onChangePage,
+	actionButtons
 }: GenericTableProps<T>) => {
 	const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -67,7 +67,7 @@ const Table = <T extends object>({
 									)}
 								</th>
 							))}
-							{onRowAction && <th>Actions</th>}
+							{actionButtons && <th>Actions</th>}
 						</tr>
 					))}
 				</thead>
@@ -101,14 +101,23 @@ const Table = <T extends object>({
 									</td>
 								);
 							})}
-							{onRowAction && (
+							{actionButtons && (
 								<td>
-									<button
-										className={styles.view}
-										onClick={() => onRowAction(row.original)}
-									>
-										View
-									</button>
+									<div className={styles.actionsWrapper}>
+										{actionButtons(row.original).map((action) => (
+											<button
+												key={action.label}
+												className={
+													action.className
+														? styles[action.className]
+														: styles.defaultAction
+												}
+												onClick={action.onClick}
+											>
+												{action.label}
+											</button>
+										))}
+									</div>
 								</td>
 							)}
 						</tr>

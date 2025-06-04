@@ -71,6 +71,70 @@ export const getTotalTrades = async () => {
 	return response.data;
 };
 
+export const getTotalActiveTrades = async () => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(`${BACKEND}/trades/active/total`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) return null;
+
+	return response.data;
+};
+
+export const getTotalCompletedTradesToday = async () => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(`${BACKEND}/trades/completed/today/total`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) return null;
+
+	return response.data;
+};
+
+export const getTotalDisputedTrades = async () => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(`${BACKEND}/trades/disputed/total`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) return null;
+
+	return response.data;
+};
+
+export const getAverageTradeCompletionTime = async () => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(`${BACKEND}/trades/average/completion`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) return null;
+
+	return response.data;
+};
+
 export const getTotalCompletedTrades = async () => {
 	const accessToken = getLocalStorage('accessToken');
 

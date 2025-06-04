@@ -6,8 +6,12 @@ export type GenericTableProps<T extends object> = {
 	data: T[];
 	columns: ColumnDef<T, any>[];
 	titleComponent?: ReactElement;
-	onRowAction?: (row: T) => void;
-	onChangePage: (page: number) => void;
 	currentPage: number;
 	totalPages: number;
+	onChangePage: (page: number) => void;
+	actionButtons?: (row: T) => {
+		label: string;
+		onClick: () => void;
+		className?: string;
+	}[];
 };

@@ -52,7 +52,6 @@ const Dashboard = () => {
 			<Table
 				data={recentTrades}
 				columns={recentTradesColumns}
-				onRowAction={handleRowAction}
 				titleComponent={
 					<div className={styles.recentTradesContainer}>
 						<h2>Recent Trades</h2>

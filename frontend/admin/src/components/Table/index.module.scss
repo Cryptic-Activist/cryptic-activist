@@ -119,3 +119,33 @@
   background-color: globals.$trade-status-failed;
   color: globals.$white;
 }
+
+.actionsWrapper {
+  display: flex;
+  gap: 0.25rem;
+  button {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    width: fit-content;
+  }
+  .viewDetails {
+    color: globals.$primary;
+    background-color: globals.$black;
+    font-weight: 700;
+  }
+  .cancel {
+    background-color: globals.$danger;
+    color: globals.$white;
+  }
+  .dispute {
+    background-color: globals.$trade-status-disputed;
+    color: globals.$white;
+  }
+  .viewOngoing {
+    background-color: #4b90ff;
+    color: globals.$white;
+  }
+}

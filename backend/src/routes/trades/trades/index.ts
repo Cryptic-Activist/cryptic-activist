@@ -4,8 +4,12 @@ import {
   requireAdminRole,
 } from '@/middlewares/authorization';
 import {
+  getAverageTradeCompletionTime,
   getRecentTrades,
+  getTotalActiveTrades,
   getTotalCompletedTrades,
+  getTotalCompletedTradesToday,
+  getTotalDisputedTrades,
   getTotalTradeVolume,
   getTotalTrades,
   getTradesAdmin,
@@ -40,6 +44,34 @@ router.get(
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
   getTotalTrades,
+);
+
+router.get(
+  '/active/total',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getTotalActiveTrades,
+);
+
+router.get(
+  '/completed/today/total',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getTotalCompletedTradesToday,
+);
+
+router.get(
+  '/disputed/total',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getTotalDisputedTrades,
+);
+
+router.get(
+  '/average/completion',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getAverageTradeCompletionTime,
 );
 
 router.get(

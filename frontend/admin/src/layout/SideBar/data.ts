@@ -20,6 +20,11 @@ export const sidebarItems = [
 		icon: 'FaHandshakeSimple'
 	},
 	{
+		href: '/disputes',
+		label: 'Disputes',
+		icon: 'FaTriangleExclamation'
+	},
+	{
 		href: '/payment-methods',
 		label: 'Payment Method',
 		icon: 'FaCreditCard'
@@ -48,5 +53,10 @@ export const sidebarItems = [
 		href: '/admins',
 		label: 'Admins',
 		icon: 'FaUserShield'
+	},
+	{
+		href: '/analytics',
+		label: 'Analytics',
+		icon: 'FaChartLine'
 	}
 ];

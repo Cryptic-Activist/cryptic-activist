@@ -74,3 +74,57 @@ export const getMonthBoundaries = () => {
     endOfLastMonth,
   };
 };
+
+export function getTodayAndYesterdayBoundaries() {
+  const now = new Date();
+
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+  );
+  const todayEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  const yesterdayStart = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    0,
+    0,
+    0,
+  );
+  const yesterdayEnd = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  return {
+    todayStart,
+    todayEnd,
+    yesterdayStart,
+    yesterdayEnd,
+  };
+}
+
+export const formatMinutes = (avgMinutes: number) => {
+  return Math.round(avgMinutes) + 'm';
+};

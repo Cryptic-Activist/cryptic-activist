@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { calculatePercentageChange, formatNumberCompact } from '@/utils/number';
+import {
+  formatMinutes,
+  getMonthBoundaries,
+  getTodayAndYesterdayBoundaries,
+} from '@/utils/date';
 
-import { getMonthBoundaries } from '@/utils/date';
 import { prisma } from '@/services/db';
 
 export async function getTradesByUserAsVendor(req: Request, res: Response) {
@@ -353,7 +357,57 @@ export async function getTotalTrades(_req: Request, res: Response) {
   }
 }
 
-export async function getTotalCompletedTrades(_req: Request, res: Response) {
+export const getTotalActiveTrades = async (_req: Request, res: Response) => {
+  try {
+    const totalTrades = await prisma.trade.count({
+      where: {
+        status: {
+          in: ['PENDING', 'IN_PROGRESS'],
+        },
+      },
+    });
+
+    const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
+
+    // Get counts
+    const [thisMonthCount, lastMonthCount] = await Promise.all([
+      prisma.trade.count({
+        where: {
+          status: {
+            in: ['PENDING', 'IN_PROGRESS'],
+          },
+          createdAt: {
+            gte: startOfThisMonth,
+          },
+        },
+      }),
+      prisma.trade.count({
+        where: {
+          status: {
+            in: ['PENDING', 'IN_PROGRESS'],
+          },
+          createdAt: {
+            gte: startOfLastMonth,
+            lt: startOfThisMonth,
+          },
+        },
+      }),
+    ]);
+
+    const percentageChange = calculatePercentageChange(
+      thisMonthCount,
+      lastMonthCount,
+    );
+
+    res.status(200).json({ total: totalTrades, percentageChange });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const getTotalCompletedTrades = async (_req: Request, res: Response) => {
   try {
     const totalTrades = await prisma.trade.count({
       where: {
@@ -395,9 +449,132 @@ export async function getTotalCompletedTrades(_req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};
 
-export async function getTotalTradeVolume(_req: Request, res: Response) {
+export const getTotalCompletedTradesToday = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const { todayStart, todayEnd, yesterdayStart, yesterdayEnd } =
+      getTodayAndYesterdayBoundaries();
+
+    const [todayCount, yesterdayCount] = await Promise.all([
+      prisma.trade.count({
+        where: {
+          status: 'COMPLETED',
+          createdAt: {
+            gte: todayStart,
+            lte: todayEnd,
+          },
+        },
+      }),
+      prisma.trade.count({
+        where: {
+          status: 'COMPLETED',
+          createdAt: {
+            gte: yesterdayStart,
+            lte: yesterdayEnd,
+          },
+        },
+      }),
+    ]);
+
+    const percentageChange = calculatePercentageChange(
+      todayCount,
+      yesterdayCount,
+    );
+
+    res.status(200).json({
+      total: todayCount,
+      percentageChange,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const getTotalDisputedTrades = async (_req: Request, res: Response) => {
+  try {
+    const totalTrades = await prisma.trade.count({
+      where: {
+        status: 'DISPUTED',
+        tradeDispute: {
+          isNot: null,
+        },
+      },
+    });
+
+    const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
+
+    // Get counts
+    const [thisMonthCount, lastMonthCount] = await Promise.all([
+      prisma.trade.count({
+        where: {
+          status: 'DISPUTED',
+          tradeDispute: {
+            isNot: null,
+          },
+          createdAt: {
+            gte: startOfThisMonth,
+          },
+        },
+      }),
+      prisma.trade.count({
+        where: {
+          status: 'DISPUTED',
+          tradeDispute: {
+            isNot: null,
+          },
+          createdAt: {
+            gte: startOfLastMonth,
+            lt: startOfThisMonth,
+          },
+        },
+      }),
+    ]);
+
+    const percentageChange = calculatePercentageChange(
+      thisMonthCount,
+      lastMonthCount,
+    );
+
+    res.status(200).json({ total: totalTrades, percentageChange });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const getAverageTradeCompletionTime = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const result = await prisma.$queryRawUnsafe<{ avg_minutes: number }[]>(`
+      SELECT AVG(EXTRACT(EPOCH FROM "endedAt" - "createdAt") / 60) AS avg_minutes
+      FROM "trades"
+      WHERE status = 'COMPLETED'
+        AND "endedAt" IS NOT NULL
+        AND "createdAt" IS NOT NULL
+        AND "endedAt" > "createdAt";
+    `);
+
+    const averageMinutes = result[0]?.avg_minutes ?? 0;
+
+    res.status(200).json({ averageMinutes: formatMinutes(averageMinutes) });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const getTotalTradeVolume = async (_req: Request, res: Response) => {
   try {
     const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
 
@@ -442,4 +619,4 @@ export async function getTotalTradeVolume(_req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};

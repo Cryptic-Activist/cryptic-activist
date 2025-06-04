@@ -65,7 +65,6 @@ const useDashboard = () => {
 					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalUsers();
-
 						return recentTrades;
 					}
 				},
@@ -77,7 +76,6 @@ const useDashboard = () => {
 					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalActiveOffers();
-
 						return recentTrades;
 					}
 				},
@@ -89,7 +87,6 @@ const useDashboard = () => {
 					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalCompletedTrades();
-
 						return recentTrades;
 					}
 				},
@@ -101,7 +98,6 @@ const useDashboard = () => {
 					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalTradeVolume();
-
 						return recentTrades;
 					}
 				},

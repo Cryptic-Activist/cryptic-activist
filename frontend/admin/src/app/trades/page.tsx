@@ -7,40 +7,62 @@ import styles from './page.module.scss';
 import { useTrades } from '@/hooks';
 
 const Trades = () => {
-	const { $trades, onChangePage, handleRowAction, tradesColumns } = useTrades();
+	const {
+		onChangePage,
+		handleRowAction,
+		$trades,
+		tradesColumns,
+		totalTrades,
+		activeTrades,
+		completedTradesToday,
+		disputedTrades,
+		tradeVolume,
+		averageCompletion
+	} = useTrades();
 
 	return (
 		<div className={styles.container}>
-			{/* <div className={styles.statsGrid}>
+			<div className={styles.statsGrid}>
 				<StatusCard
-					title="Total Users"
-					iconName="FaUsers"
-					counter={totalUsersQuery.data?.total}
-					statement={totalUsersQuery.data?.percentageChange}
-				/>
-				<StatusCard
-					title="Active Offers"
-					iconName="FaTags"
-					counter={activeOffersQuery.data?.total}
-					statement={activeOffersQuery.data?.percentageChange}
-				/>
-				<StatusCard
-					title="Completed Trades"
+					title="Total Trades"
 					iconName="FaHandshakeSimple"
-					counter={completedTradesQuery.data?.total}
-					statement={completedTradesQuery.data?.percentageChange}
+					counter={totalTrades.data?.total}
+					statement={totalTrades.data?.percentageChange}
 				/>
 				<StatusCard
-					title="Total Volume"
-					iconName="FaChartLine"
-					counter={totalVolumeQuery.data?.total}
-					statement={totalVolumeQuery.data?.percentageChange}
+					title="Active Trades"
+					iconName="FaSpinner"
+					counter={activeTrades.data?.total}
+					statement={activeTrades.data?.percentageChange}
 				/>
-			</div> */}
+				<StatusCard
+					title="Completed Today"
+					iconName="FaCalendarCheck"
+					counter={completedTradesToday.data?.total}
+					statement={completedTradesToday.data?.percentageChange}
+				/>
+				<StatusCard
+					title="Disputed Trades"
+					iconName="FaTriangleExclamation"
+					counter={disputedTrades.data?.total}
+					statement={disputedTrades.data?.percentageChange}
+				/>
+				<StatusCard
+					title="Trade Voulme"
+					iconName="FaChartLine"
+					counter={tradeVolume.data?.total}
+					statement={tradeVolume.data?.percentageChange}
+				/>
+				<StatusCard
+					title="Average Completion"
+					iconName="FaClock"
+					counter={averageCompletion.data?.averageMinutes}
+					statement={averageCompletion.data?.percentageChange}
+				/>
+			</div>
 			<Table
 				data={$trades.data}
 				columns={tradesColumns}
-				onRowAction={handleRowAction}
 				titleComponent={
 					<div className={styles.recentTradesContainer}>
 						<h2>Trades</h2>
@@ -49,6 +71,39 @@ const Trades = () => {
 				currentPage={$trades.currentPage}
 				onChangePage={onChangePage}
 				totalPages={$trades.totalPages}
+				actionButtons={(row) => {
+					const actions = [];
+
+					if (row.status === 'EXPIRED' || row.status === 'COMPLETED') {
+						actions.push({
+							label: 'View Details',
+							onClick: () => console.log('Viewing trade details...'),
+							className: 'viewDetails'
+						});
+					}
+					if (row.status === 'IN_PROGRESS') {
+						actions.push({
+							label: 'View',
+							onClick: () => console.log('Viewing ongoing trade...'),
+							className: 'viewOngoing'
+						});
+						actions.push({
+							label: 'Dispute',
+							onClick: () => console.log('Opening a dispute'),
+							className: 'dispute'
+						});
+					}
+					if (row.status === 'PENDING' || row.status === 'IN_PROGRESS') {
+						actions.push({
+							label: 'Cancel',
+							onClick: () => console.log('Cancelling trade...'),
+							className: 'cancel'
+						});
+					}
+					// if (row.status === )
+
+					return actions;
+				}}
 			/>
 		</div>
 	);
