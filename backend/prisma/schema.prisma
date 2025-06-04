@@ -396,18 +396,27 @@ model Trade {
   @@map("trades")
 }
 
+enum DisputePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model TradeDispute {
-  id             String    @id @default(uuid())
-  tradeId        String    @unique
-  trade          Trade     @relation(fields: [tradeId], references: [id])
+  id             String          @id @default(uuid())
+  tradeId        String          @unique
+  trade          Trade           @relation(fields: [tradeId], references: [id])
   raisedById     String
-  raisedBy       User      @relation(fields: [raisedById], references: [id])
+  raisedBy       User            @relation(fields: [raisedById], references: [id])
   reason         String
   resolutionNote String?
   resolvedAt     DateTime?
   moderatorId    String?
-  moderator      Admin?    @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
-  createdAt      DateTime  @default(now())
+  moderator      Admin?          @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  priority       DisputePriority @default(MEDIUM)
+  createdAt      DateTime        @default(now()) @db.Timestamp()
+  updatedAt      DateTime        @updatedAt @db.Timestamp()
 }
 
 enum TransactionPaymentMethodType {

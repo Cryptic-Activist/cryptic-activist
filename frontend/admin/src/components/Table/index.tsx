@@ -74,11 +74,33 @@ const Table = <T extends object>({
 				<tbody className={styles.tableBody}>
 					{table.getRowModel().rows.map((row) => (
 						<tr key={row.id}>
-							{row.getVisibleCells().map((cell) => (
-								<td key={cell.id} title={cell.getValue() as string}>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
+							{row.getVisibleCells().map((cell) => {
+								console.log({ cell: cell.column.id });
+								const isStatusColumn = cell.column.id === 'status';
+								const statusCellStyle = isStatusColumn ? styles.statusCell : '';
+								return (
+									<td
+										key={cell.id}
+										title={cell.getValue() as string}
+										className={statusCellStyle}
+									>
+										{isStatusColumn ? (
+											<span
+												className={`${styles.badge} ${
+													styles[cell.getValue() as string]
+												}`}
+											>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext()
+												)}
+											</span>
+										) : (
+											flexRender(cell.column.columnDef.cell, cell.getContext())
+										)}
+									</td>
+								);
+							})}
 							{onRowAction && (
 								<td>
 									<button

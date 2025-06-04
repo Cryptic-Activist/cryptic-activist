@@ -7,3 +7,4 @@ export { default as usePaymentMethodCategories } from './usePaymentMethodCategor
 export { default as usePaymentMethods } from './usePaymentMethods';
 export { default as useUsers } from './useUsers';
 export { default as useDashboard } from './useDashboard';
+export { default as useTrades } from './useTrades';

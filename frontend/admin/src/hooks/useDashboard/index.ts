@@ -10,9 +10,9 @@ import {
 import { useEffect, useState } from 'react';
 import { useMutation, useQueries } from '@tanstack/react-query';
 
-import { ColumnDef } from '@tanstack/react-table';
 import { RecentTrade } from './types';
 import { getLocaleFullDateString } from '@/utils/date';
+import { recentTradesColumns } from './data';
 import { toUpperCase } from '@/utils';
 import { useAdmin } from '..';
 
@@ -22,16 +22,6 @@ const useDashboard = () => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
-
-	const recentTradesColumns: ColumnDef<RecentTrade>[] = [
-		{ header: 'ID', accessorKey: 'id' },
-		{ header: 'Vendor', accessorKey: 'vendor' },
-		{ header: 'Trader', accessorKey: 'trader' },
-		{ header: 'Amount', accessorKey: 'amount' },
-		{ header: 'Crypto', accessorKey: 'crypto' },
-		{ header: 'Status', accessorKey: 'status' },
-		{ header: 'Started At', accessorKey: 'startedAt' }
-	];
 
 	const recentTradesMutation = useMutation({
 		mutationKey: ['recentTrades'],
@@ -120,13 +110,13 @@ const useDashboard = () => {
 		]
 	});
 
-	const handleRowAction = () => {
-		console.log('tssted');
-	};
-
 	useEffect(() => {
 		recentTradesMutation.mutate();
 	}, [totalPages, currentPage, pageSize, admin.data?.id]);
+
+	const handleRowAction = () => {
+		console.log('tssted');
+	};
 
 	const onChangePage = (page: number) => {
 		setCurrentPage(page);

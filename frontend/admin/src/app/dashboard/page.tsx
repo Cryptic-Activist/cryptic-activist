@@ -18,7 +18,6 @@ const Dashboard = () => {
 		totalVolumeQuery,
 		currentPage,
 		onChangePage,
-		pageSize,
 		totalPages
 	} = useDashboard();
 

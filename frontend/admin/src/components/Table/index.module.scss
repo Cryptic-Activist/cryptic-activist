@@ -80,3 +80,42 @@
     transition: all 0.1s ease;
   }
 }
+
+.statusCell {
+  display: flex;
+  align-items: center;
+  // justify-content: center;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.badge {
+  padding: 0.4rem 0.4rem;
+  border-radius: 1.25rem;
+  font-size: 0.8rem !important;
+  font-weight: 500;
+}
+
+.PENDING {
+  background-color: globals.$trade-status-pending;
+}
+.IN_PROGRESS {
+  background-color: globals.$trade-status-in-progress;
+}
+.COMPLETED {
+  background-color: globals.$trade-status-completed;
+  color: globals.$white;
+}
+.CANCELLED {
+  background-color: globals.$trade-status-cancelled;
+}
+.DISPUTED {
+  background-color: globals.$trade-status-disputed;
+}
+.EXPIRED {
+  background-color: globals.$trade-status-expired;
+}
+.FAILED {
+  background-color: globals.$trade-status-failed;
+  color: globals.$white;
+}

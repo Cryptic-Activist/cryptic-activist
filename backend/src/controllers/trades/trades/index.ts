@@ -249,6 +249,72 @@ export async function getRecentTrades(req: Request, res: Response) {
   }
 }
 
+export async function getTradesAdmin(req: Request, res: Response) {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+
+    const [trades, totalCount] = await Promise.all([
+      prisma.trade.findMany({
+        orderBy: {
+          startedAt: 'desc',
+        },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          fiatAmount: true,
+          fiat: {
+            select: {
+              symbol: true,
+            },
+          },
+          cryptocurrencyAmount: true,
+          cryptocurrency: {
+            select: {
+              symbol: true,
+            },
+          },
+          startedAt: true,
+          status: true,
+          paymentMethod: {
+            select: {
+              name: true,
+            },
+          },
+          tradeDispute: {
+            select: {
+              priority: true,
+            },
+          },
+          vendor: {
+            select: {
+              username: true,
+            },
+          },
+          trader: {
+            select: {
+              username: true,
+            },
+          },
+        },
+      }),
+      prisma.trade.count(),
+    ]);
+
+    res.status(200).json({
+      data: trades,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
 export async function getTotalTrades(_req: Request, res: Response) {
   try {
     const totalTrades = await prisma.trade.count();

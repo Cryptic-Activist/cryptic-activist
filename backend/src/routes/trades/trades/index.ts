@@ -8,6 +8,7 @@ import {
   getTotalCompletedTrades,
   getTotalTradeVolume,
   getTotalTrades,
+  getTradesAdmin,
   getTradesByUserAsTrader,
   getTradesByUserAsVendor,
 } from '@/controllers/trades/trades';
@@ -25,6 +26,13 @@ router.get(
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
   getRecentTrades,
+);
+
+router.get(
+  '/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  getTradesAdmin,
 );
 
 router.get(
