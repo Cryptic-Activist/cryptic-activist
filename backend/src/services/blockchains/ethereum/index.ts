@@ -127,6 +127,13 @@ export const createTrade = async (params: InitTradeParams) => {
 export const fundTrade = async (tradeId: number, value: bigint) => {
   try {
     const contract = getEscrowContract();
+
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
+
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.fundTrade(tradeId, {
       value,

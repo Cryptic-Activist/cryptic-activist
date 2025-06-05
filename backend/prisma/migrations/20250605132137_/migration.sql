@@ -14,6 +14,18 @@ CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TR
 CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
 
 -- CreateEnum
+CREATE TYPE "DisputeType" AS ENUM ('PAYMENT_NOT_RECEIVED', 'PAYMENT_FRAUD', 'CRYPTO_NOT_RELEASED', 'INCORRECT_PAYMENT_AMOUNT', 'PAYMENT_TO_WRONG_ACCOUNT', 'FAKE_PAYMENT_PROOF', 'LATE_PAYMENT', 'COMMUNICATION_ISSUE', 'OFF_PLATFORM_TRANSACTION', 'TRADE_TIMEOUT', 'ABUSIVE_BEHAVIOR', 'IDENTITY_MISMATCH', 'PLATFORM_ERROR', 'SUSPICIOUS_ACTIVITY', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "DisputePriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
+
+-- CreateEnum
+CREATE TYPE "DisputeSeverity" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
+
+-- CreateEnum
+CREATE TYPE "DisputeStatus" AS ENUM ('PENDING_EVIDENCE', 'INVESTIGATING', 'ESCALATED', 'RESOLVED', 'CLOSED');
+
+-- CreateEnum
 CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
 
 -- CreateEnum
@@ -319,11 +331,16 @@ CREATE TABLE "TradeDispute" (
     "id" TEXT NOT NULL,
     "tradeId" TEXT NOT NULL,
     "raisedById" TEXT NOT NULL,
-    "reason" TEXT NOT NULL,
+    "type" "DisputeType" NOT NULL,
+    "severity" "DisputeSeverity" NOT NULL,
+    "status" "DisputeStatus" NOT NULL,
     "resolutionNote" TEXT,
     "resolvedAt" TIMESTAMP(3),
     "moderatorId" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "priority" "DisputePriority" NOT NULL DEFAULT 'MEDIUM',
+    "slaDueAt" TIMESTAMP NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "TradeDispute_pkey" PRIMARY KEY ("id")
 );
@@ -463,6 +480,9 @@ CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TradeDispute_tradeId_key" ON "TradeDispute"("tradeId");
+
+-- CreateIndex
+CREATE INDEX "TradeDispute_status_priority_idx" ON "TradeDispute"("status", "priority");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "transactions_gatewayTransactionId_key" ON "transactions"("gatewayTransactionId");

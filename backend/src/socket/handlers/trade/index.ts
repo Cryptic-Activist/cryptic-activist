@@ -255,7 +255,7 @@ export default class Trade {
   setAsDisputed() {
     this.socket.on(
       'trade_set_disputed',
-      async ({ chatId, disputeReason, from }: SetTradeAsDisputedParams) => {
+      async ({ chatId, type, from }: SetTradeAsDisputedParams) => {
         try {
           const systemMessage = new SystemMessage();
 
@@ -304,7 +304,10 @@ export default class Trade {
           const disputedAt = new Date();
           await prisma.tradeDispute.create({
             data: {
-              reason: disputeReason,
+              type,
+              severity: 'LOW',
+              slaDueAt: new Date(),
+              status: 'INVESTIGATING',
               tradeId: chat.tradeId,
               moderatorId: admin.id,
               raisedById: disputeRaiser.id,

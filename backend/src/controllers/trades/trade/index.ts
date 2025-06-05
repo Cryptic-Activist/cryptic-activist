@@ -174,7 +174,7 @@ export async function getTradeController(req: Request, res: Response) {
                 username: true,
               },
             },
-            reason: true,
+            type: true,
             resolutionNote: true,
             resolvedAt: true,
             moderator: {
