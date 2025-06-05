@@ -8,3 +8,4 @@ export { default as usePaymentMethods } from './usePaymentMethods';
 export { default as useUsers } from './useUsers';
 export { default as useDashboard } from './useDashboard';
 export { default as useTrades } from './useTrades';
+export { default as useOutsideClick } from './useOutsideClick';

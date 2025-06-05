@@ -5,8 +5,20 @@ import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 import { getQueries } from '@/utils/axios';
 
-export const getTrades = async (params: GetTradesParams) => {
-	const queries = getQueries(params);
+export const getTrades = async ({
+	dateRageEnd,
+	dateRageStart,
+	...rest
+}: GetTradesParams) => {
+	const dateStartISO = dateRageStart?.toISOString() ?? '';
+	const dateEndISO = dateRageEnd?.toISOString() ?? '';
+	const encodedDateStart = encodeURIComponent(dateStartISO);
+	const encodedDateEnd = encodeURIComponent(dateEndISO);
+	const queries = getQueries({
+		dateStart: encodedDateStart,
+		dateEnd: encodedDateEnd,
+		...rest
+	});
 	const accessToken = getLocalStorage('accessToken');
 
 	if (!accessToken) {

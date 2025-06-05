@@ -67,6 +67,15 @@ export type Status =
 	| 'DISPUTED'
 	| 'EXPIRED';
 
+export type Filters = {
+	status?: string;
+	cryptocurrencyId?: string;
+	dateRageStart?: Date;
+	dateRageEnd?: Date;
+	amount?: string;
+	username?: string;
+};
+
 export type Trade = {
 	id: string;
 	vendor: string;
@@ -84,6 +93,7 @@ export type TradesState = {
 	totalPages: number;
 	currentPage: number;
 	pageSize: number;
+	filters?: Filters;
 };
 
 export type SetterParams = {
@@ -91,4 +101,5 @@ export type SetterParams = {
 	totalPages?: number;
 	currentPage?: number;
 	pageSize?: number;
+	filters?: Filters;
 };

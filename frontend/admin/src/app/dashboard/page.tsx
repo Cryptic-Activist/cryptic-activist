@@ -1,8 +1,8 @@
 'use client';
 
 import { Button, StatusCard } from '@/components';
-import React, { FC } from 'react';
 
+import React from 'react';
 import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
@@ -10,7 +10,6 @@ import { useDashboard } from '@/hooks';
 const Dashboard = () => {
 	const {
 		recentTrades,
-		handleRowAction,
 		recentTradesColumns,
 		activeOffersQuery,
 		completedTradesQuery,

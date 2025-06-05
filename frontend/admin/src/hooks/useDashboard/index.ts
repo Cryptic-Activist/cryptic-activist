@@ -62,7 +62,6 @@ const useDashboard = () => {
 			{
 				queryKey: ['totalUsers'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalUsers();
 						return recentTrades;
@@ -73,7 +72,6 @@ const useDashboard = () => {
 			{
 				queryKey: ['activeOffers'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalActiveOffers();
 						return recentTrades;
@@ -84,7 +82,6 @@ const useDashboard = () => {
 			{
 				queryKey: ['completedTrades'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalCompletedTrades();
 						return recentTrades;
@@ -95,7 +92,6 @@ const useDashboard = () => {
 			{
 				queryKey: ['totalVolume'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalTradeVolume();
 						return recentTrades;
@@ -110,10 +106,6 @@ const useDashboard = () => {
 		recentTradesMutation.mutate();
 	}, [totalPages, currentPage, pageSize, admin.data?.id]);
 
-	const handleRowAction = () => {
-		console.log('tssted');
-	};
-
 	const onChangePage = (page: number) => {
 		setCurrentPage(page);
 	};
@@ -121,7 +113,6 @@ const useDashboard = () => {
 	return {
 		recentTrades,
 		recentTradesColumns,
-		handleRowAction,
 		totalUsersQuery,
 		activeOffersQuery,
 		completedTradesQuery,

@@ -253,13 +253,60 @@ export async function getRecentTrades(req: Request, res: Response) {
   }
 }
 
-export async function getTradesAdmin(req: Request, res: Response) {
+export const getTradesAdmin = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const { dateStart, dateEnd, amount, cryptocurrencyId, status, username } =
+      req.query;
+
+    // Construct where clause dynamically
+    const where: any = {};
+
+    // Filter by date range
+    if (dateStart || dateEnd) {
+      where.startedAt = {};
+      if (dateStart) where.startedAt.gte = new Date(dateStart as string);
+      if (dateEnd) where.startedAt.lte = new Date(dateEnd as string);
+    }
+
+    // Filter by amount (fiatAmount or cryptocurrencyAmount)
+    if (amount) {
+      where.OR = [
+        { fiatAmount: parseFloat(amount as string) },
+        { cryptocurrencyAmount: parseFloat(amount as string) },
+      ];
+    }
+
+    // Filter by cryptocurrency
+    if (cryptocurrencyId) {
+      where.cryptocurrencyId = cryptocurrencyId;
+    }
+
+    // Filter by status
+    if (status) {
+      where.status = status;
+    }
+
+    // Filter by user (username of vendor or trader)
+    if (username) {
+      where.OR = [
+        {
+          vendor: {
+            username: { contains: username as string, mode: 'insensitive' },
+          },
+        },
+        {
+          trader: {
+            username: { contains: username as string, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
 
     const [trades, totalCount] = await Promise.all([
       prisma.trade.findMany({
+        where,
         orderBy: {
           startedAt: 'desc',
         },
@@ -317,7 +364,7 @@ export async function getTradesAdmin(req: Request, res: Response) {
       errors: [err.message],
     });
   }
-}
+};
 
 export async function getTotalTrades(_req: Request, res: Response) {
   try {

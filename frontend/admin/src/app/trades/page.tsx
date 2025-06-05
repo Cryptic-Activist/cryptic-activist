@@ -9,7 +9,6 @@ import { useTrades } from '@/hooks';
 const Trades = () => {
 	const {
 		onChangePage,
-		handleRowAction,
 		$trades,
 		tradesColumns,
 		totalTrades,
@@ -101,7 +100,6 @@ const Trades = () => {
 							className: 'cancel'
 						});
 					}
-					// if (row.status === )
 
 					return actions;
 				}}

@@ -75,7 +75,6 @@ const Table = <T extends object>({
 					{table.getRowModel().rows.map((row) => (
 						<tr key={row.id}>
 							{row.getVisibleCells().map((cell) => {
-								console.log({ cell: cell.column.id });
 								const isStatusColumn = cell.column.id === 'status';
 								const statusCellStyle = isStatusColumn ? styles.statusCell : '';
 								return (

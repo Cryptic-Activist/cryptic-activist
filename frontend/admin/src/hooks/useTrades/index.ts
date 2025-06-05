@@ -7,27 +7,47 @@ import {
 	getTotalTrades
 } from '@/services/dashboard';
 import { setCurrentPage, setTrades, trades } from '@/stores';
-import { useMutation, useQueries } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
-import { ColumnDef } from '@tanstack/react-table';
+import { GetTradesParams } from '@/services/trades/types';
+import { getCryptocurenciesFilters } from '@/services/cryptocurrencies';
 import { getLocaleFullDateString } from '@/utils/date';
 import { getTrades } from '@/services/trades';
 import { toUpperCase } from '@/utils';
 import { tradesColumns } from './data';
+import { tradesFiltersResolver } from './zod';
 import { useAdmin } from '..';
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useStore } from '@nanostores/react';
 
 const useTrades = () => {
 	const { admin } = useAdmin();
 	const $trades = useStore(trades);
 
+	const { register, handleSubmit, setValue, getFieldState, getValues } =
+		useForm({
+			resolver: tradesFiltersResolver
+		});
+
+	const cryptocurrenciesQuery = useQuery({
+		queryKey: ['cryptocurrencies'],
+		queryFn: getCryptocurenciesFilters,
+		enabled: !!admin.data?.id
+	});
+
 	const tradesMutation = useMutation({
-		mutationFn: async () => {
+		mutationFn: async (params: GetTradesParams) => {
 			if (admin.data?.id) {
 				const recentTrades = await getTrades({
-					page: $trades.currentPage,
-					pageSize: $trades.pageSize
+					page: params.page,
+					pageSize: params.pageSize,
+					amount: params?.amount,
+					cryptocurrencyId: params.cryptocurrencyId,
+					dateRageEnd: params.dateRageEnd,
+					dateRageStart: params.dateRageStart,
+					status: params.status,
+					username: params.username
 				});
 
 				return recentTrades;
@@ -55,7 +75,18 @@ const useTrades = () => {
 	});
 
 	useEffect(() => {
-		tradesMutation.mutate();
+		if (admin.data?.id) {
+			tradesMutation.mutate({
+				page: $trades.currentPage,
+				pageSize: $trades.pageSize,
+				amount: $trades.filters?.amount,
+				cryptocurrencyId: $trades.filters?.cryptocurrencyId,
+				dateRageEnd: $trades.filters?.dateRageEnd,
+				dateRageStart: $trades.filters?.dateRageStart,
+				status: $trades.filters?.status,
+				username: $trades.filters?.username
+			});
+		}
 	}, [
 		$trades.totalPages,
 		$trades.currentPage,
@@ -75,7 +106,6 @@ const useTrades = () => {
 			{
 				queryKey: ['totalUsers'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const recentTrades = await getTotalTrades();
 						return recentTrades;
@@ -86,7 +116,6 @@ const useTrades = () => {
 			{
 				queryKey: ['activeTrades'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const totalActiveTrade = await getTotalActiveTrades();
 						return totalActiveTrade;
@@ -97,7 +126,6 @@ const useTrades = () => {
 			{
 				queryKey: ['completedTradesToday'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const totalCompletedTradesToday =
 							await getTotalCompletedTradesToday();
@@ -109,7 +137,6 @@ const useTrades = () => {
 			{
 				queryKey: ['disputedTrades'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const totalDisputedTrades = await getTotalDisputedTrades();
 						return totalDisputedTrades;
@@ -120,7 +147,6 @@ const useTrades = () => {
 			{
 				queryKey: ['tradeVolume'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const totalTradeVolume = await getTotalTradeVolume();
 						return totalTradeVolume;
@@ -131,7 +157,6 @@ const useTrades = () => {
 			{
 				queryKey: ['averageCompletion'],
 				queryFn: async () => {
-					console.log({ admin });
 					if (admin.data?.id) {
 						const averageTradeCompletion =
 							await getAverageTradeCompletionTime();
@@ -147,13 +172,67 @@ const useTrades = () => {
 		setCurrentPage(page);
 	};
 
-	const handleRowAction = () => {
-		console.log('tssted');
+	const onSubmitFilters = (data: any) => {
+		tradesMutation.mutate({
+			page: $trades.currentPage,
+			pageSize: $trades.pageSize,
+			amount: data?.amount,
+			cryptocurrencyId: data?.cryptocurrencyId,
+			dateRageEnd: data?.dateRangeEnd,
+			dateRageStart: data?.dateRangeStart,
+			status: data?.status,
+			username: data?.username
+		});
+	};
+
+	const onSelectDateStartFilter = (date?: Date) => {
+		setTrades({
+			filters: {
+				dateRageStart: date
+			}
+		});
+		setValue('dateRangeStart', date);
+	};
+
+	const onSelectDateEndFilter = (date?: Date) => {
+		setTrades({
+			filters: {
+				dateRageEnd: date
+			}
+		});
+		setValue('dateRangeEnd', date);
+	};
+
+	const onResetFilters = () => {
+		setTrades({
+			filters: undefined
+		});
+		setValue('amount', undefined);
+		setValue('cryptocurrencyId', undefined);
+		setValue('dateRangeEnd', undefined);
+		setValue('dateRangeStart', undefined);
+		setValue('status', undefined);
+		setValue('username', undefined);
+		tradesMutation.mutate({
+			page: $trades.currentPage,
+			pageSize: $trades.pageSize,
+			amount: undefined,
+			cryptocurrencyId: undefined,
+			dateRageEnd: undefined,
+			dateRageStart: undefined,
+			status: undefined,
+			username: undefined
+		});
 	};
 
 	return {
 		onChangePage,
-		handleRowAction,
+		register,
+		handleSubmit,
+		onSubmitFilters,
+		onSelectDateEndFilter,
+		onSelectDateStartFilter,
+		onResetFilters,
 		$trades,
 		tradesColumns,
 		totalTrades,
@@ -161,7 +240,8 @@ const useTrades = () => {
 		completedTradesToday,
 		disputedTrades,
 		tradeVolume,
-		averageCompletion
+		averageCompletion,
+		cryptocurrencyFilters: cryptocurrenciesQuery
 	};
 };
 
