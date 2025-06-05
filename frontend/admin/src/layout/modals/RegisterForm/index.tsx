@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { Input, Submit } from '@/components/Form';
+import { Input, Submit } from '@/components/form';
 
 import { ModalTemplate } from '@/layout/modals';
 import template from '@/layout/modals/ModalTemplate/styles.module.scss';

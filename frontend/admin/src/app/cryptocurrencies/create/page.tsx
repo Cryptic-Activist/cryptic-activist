@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Input, Submit } from '@/components/form';
 
 import Button from '@/components/Button';
-import { Input, Submit } from '@/components/Form';
-import useCryptocurrencies from '@/hooks/useCryptocurrencies';
-
+import React from 'react';
 import page from './page.module.scss';
+import useCryptocurrencies from '@/hooks/useCryptocurrencies';
+import { useForm } from 'react-hook-form';
 
 const CryptocurrenciesCreatePage = () => {
 	const { register, handleSubmit } = useForm();

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, StatusCard, Table } from '@/components';
+import { Button, StatusCard, Table, TradesFilters } from '@/components';
 
 import React from 'react';
 import styles from './page.module.scss';
@@ -60,11 +60,12 @@ const Trades = () => {
 					statement={averageCompletion.data?.percentageChange}
 				/>
 			</div>
+			<TradesFilters />
 			<Table
 				data={$trades.data}
 				columns={tradesColumns}
 				titleComponent={
-					<div className={styles.recentTradesContainer}>
+					<div className={styles.tradesContainer}>
 						<h2>Trades</h2>
 					</div>
 				}

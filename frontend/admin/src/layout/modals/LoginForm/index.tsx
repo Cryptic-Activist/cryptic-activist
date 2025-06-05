@@ -3,11 +3,11 @@ import { useForm } from 'react-hook-form';
 
 import ModalTemplate from '@/layout/modals/ModalTemplate';
 
-import { Input, Submit } from '@/components/Form';
+import { Input, Submit } from '@/components/form';
 import { useAdmin, useNavigationBar } from '@/hooks';
 
-import Errors from '@/components/Form/Errors';
-import FormButton from '@/components/Form/FormButton';
+import Errors from '@/components/form/Errors';
+import FormButton from '@/components/form/FormButton';
 
 import template from '@/layout/modals/ModalTemplate/styles.module.scss';
 

@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { Input, Submit } from '@/components/form';
 
 import Button from '@/components/Button';
-import { Input, Submit } from '@/components/Form';
-import useFiats from '@/hooks/useFiats';
-
+import React from 'react';
 import page from './page.module.scss';
+import useFiats from '@/hooks/useFiats';
+import { useForm } from 'react-hook-form';
 
 const UsersCreatePage = () => {
 	const { register, handleSubmit } = useForm();

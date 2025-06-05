@@ -1,13 +1,12 @@
-"use client";
+'use client';
 
-import { usePaymentMethodCategories } from "@/hooks";
-
-import { PaymentMethodCategoriesList as List } from "@/components/List";
+import { PaymentMethodCategoriesList as List } from '@/components/lists';
+import { usePaymentMethodCategories } from '@/hooks';
 
 const PaymentMethodCategories = () => {
-  const { paymentMethodCategories } = usePaymentMethodCategories(true);
+	const { paymentMethodCategories } = usePaymentMethodCategories(true);
 
-  return <List items={paymentMethodCategories.data} />;
+	return <List items={paymentMethodCategories.data} />;
 };
 
 export default PaymentMethodCategories;
