@@ -405,6 +405,7 @@ CREATE TABLE "users" (
     "isVerified" BOOLEAN DEFAULT false,
     "isPremium" BOOLEAN,
     "xp" INTEGER NOT NULL DEFAULT 0,
+    "trustScore" INTEGER NOT NULL DEFAULT 50,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN DEFAULT false,
     "lastLoginAt" TIMESTAMPTZ,

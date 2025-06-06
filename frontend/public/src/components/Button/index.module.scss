@@ -44,6 +44,14 @@
   font-weight: 600;
 }
 
+.alert {
+  background-color: globals.$trade-status-disputed;
+  color: globals.$white;
+  border: 1px solid globals.$secondary;
+  box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
+  font-weight: 600;
+}
+
 .transparent {
   background-color: transparent;
   color: globals.$secondary;

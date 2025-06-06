@@ -46,6 +46,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
             type="button"
             fullWidth
             padding="1rem"
+            theme="alert"
             onClick={() =>
               setAsDisputed({
                 from: trade.trader?.id,

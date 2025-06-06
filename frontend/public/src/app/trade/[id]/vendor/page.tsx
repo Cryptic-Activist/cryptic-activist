@@ -52,6 +52,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           <Button
             type="button"
             fullWidth
+            theme="alert"
             padding="1rem"
             onClick={() =>
               setAsDisputed({

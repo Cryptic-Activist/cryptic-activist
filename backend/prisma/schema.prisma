@@ -210,6 +210,7 @@ model Offer {
 model PaymentMethod {
   id                      String                @id @default(uuid())
   name                    String                @db.VarChar(60)
+  isRisky                 Boolean               @default(false) @db.Boolean
   deletedAt               DateTime?             @db.Timestamp()
   createdAt               DateTime?             @default(now()) @db.Timestamp()
   updatedAt               DateTime?             @updatedAt @db.Timestamp()
@@ -411,6 +412,7 @@ enum DisputeType {
   IDENTITY_MISMATCH // KYC or identity verification doesn't match account info
   PLATFORM_ERROR // Technical issue caused by the platform (e.g., UI bug)
   SUSPICIOUS_ACTIVITY // Suspicious behavior detected in trade flow
+  SCAM // Scamming activity
   OTHER // Miscellaneous disputes that don't fall under known types
 }
 
@@ -429,6 +431,7 @@ enum DisputeSeverity {
 }
 
 enum DisputeStatus {
+  OPEN
   PENDING_EVIDENCE
   INVESTIGATING
   ESCALATED
@@ -452,6 +455,10 @@ model TradeDispute {
   priority       DisputePriority @default(MEDIUM)
   slaDueAt       DateTime        @db.Timestamp() // SLA target datetime
   createdAt      DateTime        @default(now()) @db.Timestamp()
+  winnerId       String?
+  winner         User?           @relation("wonDisputes", fields: [winnerId], references: [id])
+  loserId        String?
+  loser          User?           @relation("lostDisputes", fields: [loserId], references: [id])
   updatedAt      DateTime        @updatedAt @db.Timestamp()
 
   @@index([status, priority])
@@ -533,6 +540,7 @@ model User {
   isVerified               Boolean?                   @default(false) @db.Boolean
   isPremium                Boolean?
   xp                       Int                        @default(0)
+  trustScore               Int                        @default(50)
   twoFactorSecret          String?
   twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
   lastLoginAt              DateTime?                  @db.Timestamptz
@@ -563,8 +571,10 @@ model User {
   referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
   referrer                 Referral[]                 @relation("referrer")
   referre                  Referral?                  @relation("referee")
-  PaymentDetails           PaymentDetails[]
+  paymentDetails           PaymentDetails[]
   tradeDispute             TradeDispute[]
+  disputeWinner            TradeDispute[]             @relation("wonDisputes")
+  disputeLoser             TradeDispute[]             @relation("lostDisputes")
 
   @@index([username])
   @@map("users")

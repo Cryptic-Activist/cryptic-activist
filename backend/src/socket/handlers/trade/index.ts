@@ -5,6 +5,11 @@ import {
   SetTradeAsPaidParams,
   SetTradeAsPaymentConfirmed,
 } from './types';
+import {
+  calculateSlaDueDate,
+  determinePriority,
+  determineSeverity,
+} from '@/utils/disputes';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
@@ -255,14 +260,31 @@ export default class Trade {
   setAsDisputed() {
     this.socket.on(
       'trade_set_disputed',
-      async ({ chatId, type, from }: SetTradeAsDisputedParams) => {
+      async ({ chatId, type, from, to }: SetTradeAsDisputedParams) => {
         try {
           const systemMessage = new SystemMessage();
 
           const chat = await prisma.chat.findFirst({
             where: { id: chatId },
             select: {
-              tradeId: true,
+              trade: {
+                select: {
+                  id: true,
+                  cryptocurrencyAmount: true,
+                  exchangeRate: true,
+                  fiatAmount: true,
+                  vendor: {
+                    select: {
+                      trustScore: true,
+                    },
+                  },
+                  paymentMethod: {
+                    select: {
+                      isRisky: true,
+                    },
+                  },
+                },
+              },
             },
           });
 
@@ -301,14 +323,36 @@ export default class Trade {
             return;
           }
 
+          const loserDisputesCount = await prisma.tradeDispute.count({
+            where: {
+              loserId: to,
+            },
+          });
+          const severity = determineSeverity({
+            fiatAmount: chat.trade.fiatAmount,
+            paymentMethod: chat.trade.paymentMethod,
+            type,
+            isRepeatedOffender: loserDisputesCount > 0,
+          });
+          const slaDueAt = calculateSlaDueDate({
+            fiatAmount: chat.trade.fiatAmount,
+            paymentMethod: chat.trade.paymentMethod,
+            vendorTrustScore: chat.trade.vendor.trustScore,
+          });
+          const priority = determinePriority(
+            severity,
+            chat.trade.vendor.trustScore,
+          );
+
           const disputedAt = new Date();
           await prisma.tradeDispute.create({
             data: {
               type,
-              severity: 'LOW',
-              slaDueAt: new Date(),
-              status: 'INVESTIGATING',
-              tradeId: chat.tradeId,
+              severity,
+              slaDueAt,
+              priority,
+              status: 'OPEN',
+              tradeId: chat.trade.id,
               moderatorId: admin.id,
               raisedById: disputeRaiser.id,
               createdAt: disputedAt,
