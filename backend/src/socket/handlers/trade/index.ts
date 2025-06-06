@@ -9,6 +9,7 @@ import {
   calculateSlaDueDate,
   determinePriority,
   determineSeverity,
+  mapPriorityScoreToLevel,
 } from '@/utils/disputes';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
@@ -260,9 +261,11 @@ export default class Trade {
   setAsDisputed() {
     this.socket.on(
       'trade_set_disputed',
-      async ({ chatId, type, from, to }: SetTradeAsDisputedParams) => {
+      async ({ chatId, type, reason, from, to }: SetTradeAsDisputedParams) => {
         try {
           const systemMessage = new SystemMessage();
+
+          console.log({ chatId, type, reason, from, to });
 
           const chat = await prisma.chat.findFirst({
             where: { id: chatId },
@@ -288,8 +291,6 @@ export default class Trade {
             },
           });
 
-          console.log({ chat });
-
           if (!chat) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
               error: true,
@@ -301,9 +302,10 @@ export default class Trade {
             where: {
               id: from,
             },
+            select: {
+              id: true,
+            },
           });
-
-          console.log({ disputeRaiser });
 
           if (!disputeRaiser) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
@@ -339,15 +341,16 @@ export default class Trade {
             paymentMethod: chat.trade.paymentMethod,
             vendorTrustScore: chat.trade.vendor.trustScore,
           });
-          const priority = determinePriority(
+          const priorityScore = determinePriority(
             severity,
             chat.trade.vendor.trustScore,
           );
-
+          const priority = mapPriorityScoreToLevel(priorityScore);
           const disputedAt = new Date();
-          await prisma.tradeDispute.create({
+          const dispute = await prisma.tradeDispute.create({
             data: {
               type,
+              reason,
               severity,
               slaDueAt,
               priority,
@@ -359,9 +362,11 @@ export default class Trade {
             },
           });
 
+          console.log({ dispute });
+
           await prisma.trade.update({
             where: {
-              id: chat.tradeId,
+              id: chat.trade.id,
             },
             data: {
               status: 'DISPUTED',
@@ -374,6 +379,7 @@ export default class Trade {
             disputedAt,
           });
         } catch (error) {
+          console.log({ error });
           this.io.to(chatId).emit('trade_set_disputed_error', {
             error,
           });

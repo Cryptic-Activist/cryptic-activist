@@ -4,6 +4,7 @@ import altcha from './altcha';
 import blockchains from './blockchains';
 import chats from './chats';
 import cryptocurrencies from './cryptocurrencies';
+import disputes from './disputes';
 import feedbacks from './feedbacks';
 import fiats from './fiats';
 import health from './health';
@@ -18,6 +19,7 @@ export default (app: Application): void => {
   app.use('/admins', admins);
   app.use('/chats', chats);
   app.use('/cryptocurrencies', cryptocurrencies);
+  app.use('/disputes', disputes);
   app.use('/fiats', fiats);
   app.use('/offers', offers);
   app.use('/trades', trades);

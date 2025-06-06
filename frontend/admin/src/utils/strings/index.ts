@@ -49,6 +49,13 @@ export const humanizeCamelCase = (str: string) => {
 	);
 };
 
+export const formatEnum = (input: string) => {
+	return input
+		.toLowerCase()
+		.replace(/_/g, ' ')
+		.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 // export const getBearerToken = () => {
 // 	const accessToken = getCookie('accessToken');
 

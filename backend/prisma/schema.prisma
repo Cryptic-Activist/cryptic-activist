@@ -446,6 +446,7 @@ model TradeDispute {
   raisedById     String
   raisedBy       User            @relation(fields: [raisedById], references: [id])
   type           DisputeType
+  reason         String          @default("") @db.Text()
   severity       DisputeSeverity
   status         DisputeStatus
   resolutionNote String?

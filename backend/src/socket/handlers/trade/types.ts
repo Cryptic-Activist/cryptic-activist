@@ -22,4 +22,5 @@ export type SetTradeAsPaymentConfirmed = SetTradeAs;
 export type SetTradeAsCanceledParams = SetTradeAs;
 export type SetTradeAsDisputedParams = SetTradeAs & {
   type: DisputeType;
+  reason: string;
 };

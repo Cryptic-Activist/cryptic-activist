@@ -11,6 +11,7 @@ import {
 } from '@/utils';
 import {
   useBlockchain,
+  useNavigationBar,
   useRouter,
   useTrade,
   useTradeSocket,
@@ -24,7 +25,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   setAsPaymentConfirmed,
-  setAsDisputed,
+  toggleModal,
 }) => {
   const isSetPaymentReceivedVisible =
     !trade.dispitedAt &&
@@ -54,11 +55,12 @@ const ActionButtons: FC<ActionButtonsProps> = ({
             fullWidth
             theme="alert"
             padding="1rem"
-            onClick={() =>
-              setAsDisputed({
-                from: trade.trader?.id,
-                to: trade.vendor?.id,
-              })
+            onClick={
+              () => toggleModal('disputeRequest')
+              // setAsDisputed({
+              //   from: trade.trader?.id,
+              //   to: trade.vendor?.id,
+              // })
             }
           >
             Raise a Dispute
@@ -112,6 +114,7 @@ const Trade: FC<TradeProps> = ({
   replace,
   tradeRemaingTime,
   ref,
+  toggleModal,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -341,6 +344,7 @@ const Trade: FC<TradeProps> = ({
         setAsCanceled={setAsCanceled}
         setAsPaymentConfirmed={setAsPaymentConfirmed}
         setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
     </div>
   );
@@ -357,7 +361,7 @@ const TradeVendor = () => {
     setDisputed,
   } = useTrade();
   const { user, query } = useUser();
-  // const { addToast } = useApp();
+  const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
   const { replace } = useRouter();
 
@@ -422,6 +426,7 @@ const TradeVendor = () => {
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
         setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
 
       {trade?.id &&

@@ -1,0 +1,26 @@
+@use "../../../styles/globals.module.scss";
+
+.container {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+
+.label {
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.select {
+	padding: 1rem 1.5rem 1rem 1rem;
+	border-radius: 0.4rem;
+	border: 1px solid #000;
+	background-color: globals.$white;
+	width: 100%;
+	font-size: 1rem;
+	// appearance: none;
+	cursor: pointer;
+	&:focus {
+		outline: none;
+	}
+}

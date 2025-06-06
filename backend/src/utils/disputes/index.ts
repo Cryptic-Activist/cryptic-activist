@@ -1,6 +1,5 @@
 import { CalculateSlaDueDate, DetermineSeverity } from './types';
-
-import { DisputeSeverity } from '@prisma/client';
+import { DisputePriority, DisputeSeverity } from '@prisma/client';
 
 const severityRank: Record<DisputeSeverity, number> = {
   LOW: 0,
@@ -81,6 +80,15 @@ export const determinePriority = (
   if (trustScore < 40) basePriority += 10;
 
   return basePriority;
+};
+
+export const mapPriorityScoreToLevel = (
+  priorityScore: number,
+): DisputePriority => {
+  if (priorityScore >= 90) return 'CRITICAL';
+  if (priorityScore >= 70) return 'HIGH';
+  if (priorityScore >= 40) return 'MEDIUM';
+  return 'LOW';
 };
 
 export const calculateSlaDueDate: CalculateSlaDueDate = (trade) => {
