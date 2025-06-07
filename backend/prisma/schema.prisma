@@ -41,23 +41,24 @@ model AdminRoles {
 }
 
 model Admin {
-  id               String         @id @default(uuid())
-  firstName        String         @db.VarChar(50)
-  lastName         String         @db.VarChar(50)
-  username         String         @unique @db.VarChar(120)
-  email            String         @unique @db.VarChar(120)
+  id               String            @id @default(uuid())
+  firstName        String            @db.VarChar(50)
+  lastName         String            @db.VarChar(50)
+  username         String            @unique @db.VarChar(120)
+  email            String            @unique @db.VarChar(120)
   password         String
-  isVerified       Boolean?       @default(false) @db.Boolean
+  isVerified       Boolean?          @default(false) @db.Boolean
   twoFactorSecret  String?
-  twoFactorEnabled Boolean?       @default(false) @db.Boolean
-  deletedAt        DateTime?      @db.Timestamp()
-  createdAt        DateTime?      @default(now()) @db.Timestamp()
-  updatedAt        DateTime?      @updatedAt @db.Timestamp()
+  twoFactorEnabled Boolean?          @default(false) @db.Boolean
+  deletedAt        DateTime?         @db.Timestamp()
+  createdAt        DateTime?         @default(now()) @db.Timestamp()
+  updatedAt        DateTime?         @updatedAt @db.Timestamp()
   kyc              KYC[]
-  createdUsers     User[]         @relation("userCreatedBy") // All users created by this admin
-  updatedUsers     User[]         @relation("userLastUpdatedBy") // All users updated by this admin
-  tradeDispute     TradeDispute[] @relation("moderatorTradeDispute")
+  createdUsers     User[]            @relation("userCreatedBy") // All users created by this admin
+  updatedUsers     User[]            @relation("userLastUpdatedBy") // All users updated by this admin
+  tradeDispute     TradeDispute[]    @relation("moderatorTradeDispute")
   roles            AdminRoles[] // Many-to-many relation to roles
+  DisputeAuditLog  DisputeAuditLog[]
 
   @@map("admins")
 }
@@ -397,6 +398,47 @@ model Trade {
   @@map("trades")
 }
 
+model DisputeAuditLog {
+  id          String        @id @default(uuid())
+  disputeId   String
+  dispute     TradeDispute  @relation("disputeAuditLog", fields: [disputeId], references: [id])
+  changedById String?
+  changedBy   Admin?        @relation(fields: [changedById], references: [id])
+  action      DisputeAction
+  note        String?       @db.Text()
+  createdAt   DateTime      @default(now())
+}
+
+enum DisputeAction {
+  STATUS_CHANGED
+  EVIDENCE_REQUESTED
+  MODERATOR_ASSIGNED
+  DECISION_MADE
+  USER_BANNED
+  SYSTEM_ESCALATION
+}
+
+model DisputeEvidence {
+  id            String       @id @default(uuid())
+  disputeId     String
+  dispute       TradeDispute @relation("disputeEvidence", fields: [disputeId], references: [id])
+  submittedById String
+  submittedBy   User         @relation(fields: [submittedById], references: [id])
+  type          EvidenceType
+  fileUrl       String? // If hosted on S3 or similar
+  textContent   String?      @db.Text()
+  createdAt     DateTime     @default(now())
+}
+
+enum EvidenceType {
+  SCREENSHOT
+  VIDEO
+  BANK_STATEMENT
+  CHAT_LOG
+  PAYMENT_RECEIPT
+  OTHER
+}
+
 enum DisputeType {
   PAYMENT_NOT_RECEIVED // Buyer claims payment was made, seller denies receipt
   PAYMENT_FRAUD // Payment originated from stolen or fraudulent sources
@@ -440,27 +482,29 @@ enum DisputeStatus {
 }
 
 model TradeDispute {
-  id             String          @id @default(uuid())
-  tradeId        String          @unique
-  trade          Trade           @relation(fields: [tradeId], references: [id])
-  raisedById     String
-  raisedBy       User            @relation(fields: [raisedById], references: [id])
-  type           DisputeType
-  reason         String          @default("") @db.Text()
-  severity       DisputeSeverity
-  status         DisputeStatus
-  resolutionNote String?
-  resolvedAt     DateTime?
-  moderatorId    String?
-  moderator      Admin?          @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
-  priority       DisputePriority @default(MEDIUM)
-  slaDueAt       DateTime        @db.Timestamp() // SLA target datetime
-  createdAt      DateTime        @default(now()) @db.Timestamp()
-  winnerId       String?
-  winner         User?           @relation("wonDisputes", fields: [winnerId], references: [id])
-  loserId        String?
-  loser          User?           @relation("lostDisputes", fields: [loserId], references: [id])
-  updatedAt      DateTime        @updatedAt @db.Timestamp()
+  id              String            @id @default(uuid())
+  tradeId         String            @unique
+  trade           Trade             @relation(fields: [tradeId], references: [id])
+  raisedById      String
+  raisedBy        User              @relation(fields: [raisedById], references: [id])
+  type            DisputeType
+  reason          String            @default("") @db.Text()
+  severity        DisputeSeverity
+  status          DisputeStatus
+  resolutionNote  String?
+  resolvedAt      DateTime?
+  moderatorId     String?
+  moderator       Admin?            @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  priority        DisputePriority   @default(MEDIUM)
+  slaDueAt        DateTime          @db.Timestamp() // SLA target datetime
+  createdAt       DateTime          @default(now()) @db.Timestamp()
+  winnerId        String?
+  winner          User?             @relation("wonDisputes", fields: [winnerId], references: [id])
+  loserId         String?
+  loser           User?             @relation("lostDisputes", fields: [loserId], references: [id])
+  evidence        DisputeEvidence[] @relation("disputeEvidence")
+  updatedAt       DateTime          @updatedAt @db.Timestamp()
+  disputeAuditLog DisputeAuditLog[] @relation("disputeAuditLog")
 
   @@index([status, priority])
 }
@@ -517,6 +561,16 @@ model Trust {
 
   @@unique([trusterId, trustedId]) // Prevent duplicate trust records
   @@map("trusts")
+}
+
+model UserStats {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation("userStats", fields: [userId], references: [id])
+  totalDisputes   Int       @default(0)
+  disputesLost    Int       @default(0)
+  fraudFlagged    Boolean   @default(false)
+  lastDisputeDate DateTime?
 }
 
 model UserLanguage {
@@ -576,6 +630,8 @@ model User {
   tradeDispute             TradeDispute[]
   disputeWinner            TradeDispute[]             @relation("wonDisputes")
   disputeLoser             TradeDispute[]             @relation("lostDisputes")
+  disputeEvidence          DisputeEvidence[]
+  userStats                UserStats?                 @relation("userStats")
 
   @@index([username])
   @@map("users")

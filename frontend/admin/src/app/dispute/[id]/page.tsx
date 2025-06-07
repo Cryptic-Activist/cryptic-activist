@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { formatEnum, toUpperCase } from '@/utils';
+import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
+import {
+	formatTimestamp,
+	getLocaleFullDateString,
+	timeSince
+} from '@/utils/date';
 
 import styles from './page.module.scss';
 import { useDispute } from '@/hooks';
@@ -9,7 +14,7 @@ import { useDispute } from '@/hooks';
 const DisputeDetailsPage = () => {
 	const { $dispute } = useDispute();
 
-	console.log({ $dispute });
+	// console.log({ $dispute });
 
 	const [adminNotes, setAdminNotes] = useState('');
 	const [resolutionType, setResolutionType] = useState('');
@@ -149,20 +154,29 @@ const DisputeDetailsPage = () => {
 			>
 				{toUpperCase($dispute.priority)} PRIORITY
 			</span>
-			<span className={styles.timeStamp}>Created {disputeData.createdAt}</span>
+			<span className={styles.timeStamp}>
+				Created {timeSince($dispute.createdAt)}
+			</span>
 		</div>
 	);
 
-	const UserCard = ({ user, role }) => (
-		<div className={styles.userCard}>
-			<div className={styles.userHeader}>
-				<div className={styles.userAvatar}>{user.avatar}</div>
-				<div className={styles.userInfo}>
-					<h4>{user.username}</h4>
-					<div className={styles.userRole}>{role}</div>
+	const UserCard = ({ user, role }) => {
+		console.log({ user });
+		return (
+			<div className={styles.userCard}>
+				<div className={styles.userHeader}>
+					<div
+						className={styles.userAvatar}
+						style={{ backgroundColor: user?.profileColor }}
+					>
+						{user && getInitials(user?.firstName, user?.lastName)}
+					</div>
+					<div className={styles.userInfo}>
+						<h4>{user.username}</h4>
+						<div className={styles.userRole}>{role}</div>
+					</div>
 				</div>
-			</div>
-			<div className={styles.userStats}>
+				{/* <div className={styles.userStats}>
 				<div className={styles.stat}>
 					<div className={styles.statValue}>{user.rating}</div>
 					<div className={styles.statLabel}>Rating</div>
@@ -175,9 +189,10 @@ const DisputeDetailsPage = () => {
 					<div className={styles.statValue}>{user.successRate}%</div>
 					<div className={styles.statLabel}>Success</div>
 				</div>
+			</div> */}
 			</div>
-		</div>
-	);
+		);
+	};
 
 	const TimelineItem = ({ time, event }) => (
 		<div className={styles.timelineItem}>
@@ -217,7 +232,7 @@ const DisputeDetailsPage = () => {
 				/>
 				<div className={styles.metaInfo}>
 					<div>
-						<strong>Trade ID:</strong> {$dispute.trade?.id}
+						<strong>Trade ID:</strong> <span>{$dispute.trade?.id}</span>
 					</div>
 					<div>
 						<strong>Type:</strong> {formatEnum($dispute.type)}
@@ -227,7 +242,7 @@ const DisputeDetailsPage = () => {
 						{`${$dispute.moderator?.firstName} ${$dispute.moderator?.lastName}`}
 					</div>
 					<div>
-						<strong>Last Updated:</strong> {disputeData.lastUpdated}
+						<strong>Last Updated:</strong> {timeSince($dispute.updatedAt)}
 					</div>
 				</div>
 			</div>
@@ -242,35 +257,48 @@ const DisputeDetailsPage = () => {
 								<div className={styles.tradeDetail}>
 									<label>Crypto Amount</label>
 									<div className={`${styles.value} ${styles.cryptoAmount}`}>
-										{disputeData.trade.cryptoAmount}
+										{`${$dispute.trade?.cryptocurrencyAmount} ${toUpperCase(
+											$dispute.trade?.cryptocurrency.symbol
+										)}`}
 									</div>
 								</div>
 								<div className={styles.tradeDetail}>
 									<label>Fiat Amount</label>
 									<div className={`${styles.value} ${styles.fiatAmount}`}>
-										{disputeData.trade.fiatAmount}
+										{`${$dispute.trade?.fiatAmount} ${toUpperCase(
+											$dispute.trade?.fiat.symbol
+										)}`}
 									</div>
 								</div>
 								<div className={styles.tradeDetail}>
 									<label>Exchange Rate</label>
 									<div className={styles.value}>
-										{disputeData.trade.exchangeRate}
+										{`${$dispute.trade?.exchangeRate} ${toUpperCase(
+											$dispute.trade?.fiat.symbol
+										)}`}
 									</div>
 								</div>
 								<div className={styles.tradeDetail}>
 									<label>Trade Type</label>
-									<div className={styles.value}>{disputeData.trade.type}</div>
+									<div className={styles.value}>
+										{`${toCapitalize(
+											$dispute.trade?.offer?.offerType ?? ''
+										)} ${toUpperCase($dispute.trade?.cryptocurrency?.symbol)}`}
+									</div>
 								</div>
 								<div className={styles.tradeDetail}>
 									<label>Payment Method</label>
 									<div className={styles.value}>
-										{disputeData.trade.paymentMethod}
+										{$dispute.trade?.offer?.paymentMethod?.name}
 									</div>
 								</div>
 								<div className={styles.tradeDetail}>
 									<label>Trade Started</label>
 									<div className={styles.value}>
-										{disputeData.trade.startedAt}
+										{$dispute.trade?.startedAt &&
+											getLocaleFullDateString(
+												new Date($dispute.trade?.startedAt)
+											)}
 									</div>
 								</div>
 							</div>
@@ -282,8 +310,8 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>Users Involved</div>
 						<div className={styles.cardContent}>
 							<div className={styles.userCards}>
-								<UserCard user={disputeData.buyer} role="Buyer" />
-								<UserCard user={disputeData.seller} role="Seller" />
+								<UserCard user={$dispute.trade?.trader} role="Trader" />
+								<UserCard user={$dispute.trade?.vendor} role="Vendor" />
 							</div>
 						</div>
 					</div>

@@ -54,6 +54,18 @@ export async function getDisputeAdmin(req: Request, res: Response) {
           select: {
             id: true,
             fiatAmount: true,
+            exchangeRate: true,
+            startedAt: true,
+            offer: {
+              select: {
+                offerType: true,
+                paymentMethod: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
             fiat: {
               select: {
                 symbol: true,
@@ -71,6 +83,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profileColor: true,
               },
             },
             trader: {
@@ -79,6 +92,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profileColor: true,
               },
             },
           },

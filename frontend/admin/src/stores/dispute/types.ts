@@ -1,5 +1,6 @@
 import { Admin } from '../admin/types';
-import { Trade } from '../trades/types';
+import { Cryptocurrency } from '../cryptocurrencies/types';
+import { Fiat } from '../fiats/types';
 
 type Moderator = {
 	id: string;
@@ -23,6 +24,28 @@ export type Filters = {
 	type?: DisputeType;
 	amount?: string;
 	moderator?: Moderator;
+};
+
+type PaymentMethod = {
+	name: string;
+};
+
+type Offer = {
+	offerType: 'buy' | 'sell';
+	paymentMethod: PaymentMethod;
+};
+
+type Trade = {
+	cryptocurrency: Cryptocurrency;
+	cryptocurrencyAmount: number;
+	fiat: Fiat;
+	fiatAmount: number;
+	id: string;
+	trader: User;
+	offer: Offer;
+	vendor: User;
+	exchangeRate: number;
+	startedAt: string;
 };
 
 export type DisputeType =
@@ -59,13 +82,19 @@ export type Dispute = {
 	id?: string;
 	trade?: Trade;
 	type?: string;
-	amount?: string;
 	severity?: DisputeSeverity;
 	status?: DisputeStatus;
 	priority?: DisputePriority;
 	moderator?: Moderator;
-	createdAt?: string;
 	slaDueAt?: string;
+	loser?: User;
+	winner?: User;
+	raisedBy?: User;
+	reason?: string;
+	resolutionNote?: string;
+	resolvedAt?: string;
+	createdAt?: string;
+	updatedAt?: string;
 };
 
 export type DisputeState = Dispute;
