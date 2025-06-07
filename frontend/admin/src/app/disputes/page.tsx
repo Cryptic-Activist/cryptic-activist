@@ -1,10 +1,10 @@
 'use client';
 
 import { DisputesFilters, StatusCard, Table } from '@/components';
+import { useDisputes, useRouter } from '@/hooks';
 
 import React from 'react';
 import styles from './page.module.scss';
-import { useDisputes } from '@/hooks';
 
 const Disputes = () => {
 	const {
@@ -18,6 +18,7 @@ const Disputes = () => {
 		escalatedCases,
 		successRate
 	} = useDisputes();
+	const { push } = useRouter();
 
 	return (
 		<div className={styles.container}>
@@ -76,7 +77,9 @@ const Disputes = () => {
 
 					actions.push({
 						label: 'View',
-						onClick: () => console.log('Viewing trade details...'),
+						onClick: () => {
+							push(`/dispute/${row.id}`);
+						},
 						className: 'viewDetails'
 					});
 					actions.push({

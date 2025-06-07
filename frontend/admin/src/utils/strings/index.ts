@@ -49,7 +49,9 @@ export const humanizeCamelCase = (str: string) => {
 	);
 };
 
-export const formatEnum = (input: string) => {
+export const formatEnum = (input?: string) => {
+	if (!input) return '';
+
 	return input
 		.toLowerCase()
 		.replace(/_/g, ' ')

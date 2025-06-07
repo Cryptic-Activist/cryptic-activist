@@ -10,3 +10,5 @@ export { default as useDashboard } from './useDashboard';
 export { default as useTrades } from './useTrades';
 export { default as useOutsideClick } from './useOutsideClick';
 export { default as useDisputes } from './useDisputes';
+export { default as useRouter } from './useRouter';
+export { default as useDispute } from './useDispute';
