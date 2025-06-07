@@ -72,7 +72,6 @@ const TradesFilters = () => {
 					register={register}
 					label="Amount"
 					type="number"
-					placeholder="200"
 				/>
 				<Input
 					id="username"

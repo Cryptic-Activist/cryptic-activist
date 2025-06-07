@@ -1,10 +1,17 @@
-export type GetTradesParams = {
+import {
+	DisputeSeverity,
+	DisputeStatus,
+	DisputeType
+} from '@/stores/disputes/types';
+
+export type GetDisputesParams = {
 	page: number;
 	pageSize: number;
-	status?: string;
-	cryptocurrencyId?: string;
-	dateRageStart?: Date;
-	dateRageEnd?: Date;
+	status?: DisputeStatus;
+	severity?: DisputeSeverity;
+	type?: DisputeType;
 	amount?: string;
-	username?: string;
+	moderatorId?: string;
 };
+
+export type Filter = 'status' | 'severity' | 'type' | 'moderator';

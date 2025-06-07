@@ -55,13 +55,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
             fullWidth
             theme="alert"
             padding="1rem"
-            onClick={
-              () => toggleModal('disputeRequest')
-              // setAsDisputed({
-              //   from: trade.trader?.id,
-              //   to: trade.vendor?.id,
-              // })
-            }
+            onClick={() => toggleModal('disputeRequest')}
           >
             Raise a Dispute
           </Button>

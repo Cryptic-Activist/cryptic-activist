@@ -32,6 +32,7 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).send({
           errors: [compareError.message],
         });
+        return;
       }
 
       if (!isMatch) {
@@ -45,6 +46,7 @@ export const login = async (req: Request, res: Response) => {
         res.status(401).send({
           errors: ['Account is not verified'],
         });
+        return;
       }
 
       const accessToken: string = generateToken({
@@ -75,6 +77,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
       res.status(401).send({
         error: ['Unable to decode token'],
       });
+      return;
     }
 
     const admin = await prisma.admin.findFirst({

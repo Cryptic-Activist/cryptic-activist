@@ -1,21 +1,22 @@
 import {
+	DisputeSeverity,
+	DisputeStatus,
+	DisputeType
+} from '@/stores/disputes/types';
+import { disputes, setDisputes, setDisputesCurrentPage } from '@/stores';
+import {
 	getAverageTradeCompletionTime,
 	getTotalActiveTrades,
 	getTotalCompletedTradesToday,
 	getTotalDisputedTrades,
-	getTotalTradeVolume,
-	getTotalTrades
+	getTotalTradeVolume
 } from '@/services/dashboard';
-import { setCurrentPage, setTrades, trades } from '@/stores';
+import { getDisputes, getFilter } from '@/services/disputes';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
-import { GetTradesParams } from '@/services/trades/types';
-import { getCryptocurenciesFilters } from '@/services/cryptocurrencies';
-import { getLocaleFullDateString } from '@/utils/date';
-import { getTrades } from '@/services/trades';
-import { toUpperCase } from '@/utils';
-import { tradesColumns } from './data';
-import { tradesFiltersResolver } from './zod';
+import { GetDisputesParams } from '@/services/disputes/types';
+import { disputesColumns } from './data';
+import { disputesFiltersResolver } from './zod';
 import { useAdmin } from '..';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -23,50 +24,80 @@ import { useStore } from '@nanostores/react';
 
 const useDisputes = () => {
 	const { admin } = useAdmin();
-	const $trades = useStore(trades);
+	const $disputes = useStore(disputes);
 
 	const { register, handleSubmit, setValue, getFieldState, getValues } =
 		useForm({
-			resolver: tradesFiltersResolver
+			resolver: disputesFiltersResolver
 		});
 
-	const cryptocurrenciesQuery = useQuery({
-		queryKey: ['cryptocurrencies'],
-		queryFn: getCryptocurenciesFilters,
-		enabled: !!admin.data?.id
-	});
+	const [statusesQuery, servertiesQuery, typesQuery, moderatorsQuery] =
+		useQueries({
+			queries: [
+				{
+					queryKey: ['statuses'],
+					queryFn: () => getFilter('status'),
+					enabled: !!admin.data?.id
+				},
+				{
+					queryKey: ['severities'],
+					queryFn: () => getFilter('severity'),
+					enabled: !!admin.data?.id
+				},
+				{
+					queryKey: ['types'],
+					queryFn: () => getFilter('type'),
+					enabled: !!admin.data?.id
+				},
+				{
+					queryKey: ['moderators'],
+					queryFn: () => getFilter('moderator'),
+					enabled: !!admin.data?.id
+				}
+			]
+		});
 
-	const tradesMutation = useMutation({
-		mutationFn: async (params: GetTradesParams) => {
+	console.log({ $disputes });
+
+	const disputesMutation = useMutation({
+		mutationFn: async (params: GetDisputesParams) => {
 			if (admin.data?.id) {
-				const recentTrades = await getTrades({
+				const disputesList = await getDisputes({
 					page: params.page,
 					pageSize: params.pageSize,
 					amount: params?.amount,
-					cryptocurrencyId: params.cryptocurrencyId,
-					dateRageEnd: params.dateRageEnd,
-					dateRageStart: params.dateRageStart,
-					status: params.status,
-					username: params.username
+					status: params?.status,
+					severity: params?.severity,
+					type: params?.type,
+					moderatorId: params?.moderatorId
 				});
 
-				return recentTrades;
+				return disputesList;
 			}
 		},
 		onSuccess: (response) => {
-			const mappedTrades = response?.data?.map((rt: any) => ({
-				id: rt.id,
-				vendor: rt.vendor.username,
-				trader: rt.trader.username,
-				crypto: toUpperCase(rt.cryptocurrency.symbol),
-				cryptoAmount: rt.cryptocurrencyAmount,
-				fiatAmount: `${rt.fiatAmount} ${toUpperCase(rt.fiat?.symbol)}`,
-				paymentMethod: rt.paymentMethod.name,
-				status: rt.status,
-				startedAt: getLocaleFullDateString(new Date(rt.startedAt))
-			}));
-			setTrades({
-				data: mappedTrades,
+			const mappedDisputes = response?.data?.map((d: any) => {
+				const complainant = d.raisedBy.username;
+				const respondent =
+					d.raisedBy.id === d.trade.trader.id
+						? d.trade.trader.username
+						: d.trade.vendor.username;
+				return {
+					id: d.id,
+					tradeId: d.trade.id,
+					complainant,
+					respondent,
+					type: d.type,
+					amount: d.trade.fiatAmount,
+					severity: d.severity,
+					status: d.status,
+					moderator: d.moderator.username,
+					createdAt: d.createdAt,
+					slaStatus: d.slaDueAt
+				};
+			});
+			setDisputes({
+				data: mappedDisputes,
 				currentPage: response.currentPage,
 				pageSize: response.pageSize,
 				totalPages: response.totalPages
@@ -76,45 +107,55 @@ const useDisputes = () => {
 
 	useEffect(() => {
 		if (admin.data?.id) {
-			tradesMutation.mutate({
-				page: $trades.currentPage,
-				pageSize: $trades.pageSize,
-				amount: $trades.filters?.amount,
-				cryptocurrencyId: $trades.filters?.cryptocurrencyId,
-				dateRageEnd: $trades.filters?.dateRageEnd,
-				dateRageStart: $trades.filters?.dateRageStart,
-				status: $trades.filters?.status,
-				username: $trades.filters?.username
+			disputesMutation.mutate({
+				page: $disputes.currentPage,
+				pageSize: $disputes.pageSize,
+				amount: $disputes.filters?.amount,
+				moderatorId: $disputes.filters?.moderator?.id,
+				severity: $disputes.filters?.severity,
+				status: $disputes.filters?.status,
+				type: $disputes.filters?.type
 			});
 		}
 	}, [
-		$trades.totalPages,
-		$trades.currentPage,
-		$trades.pageSize,
+		$disputes.totalPages,
+		$disputes.currentPage,
+		$disputes.pageSize,
 		admin.data?.id
 	]);
 
 	const [
-		totalTrades,
-		activeTrades,
-		completedTradesToday,
-		disputedTrades,
-		tradeVolume,
-		averageCompletion
+		totalDisputes,
+		openDisputes,
+		resolvedToday,
+		averageResolution,
+		escalatedCases,
+		successRate
 	] = useQueries({
 		queries: [
 			{
-				queryKey: ['totalUsers'],
+				queryKey: ['totalDisputes'],
 				queryFn: async () => {
 					if (admin.data?.id) {
-						const recentTrades = await getTotalTrades();
+						const recentTrades = await getTotalDisputedTrades();
 						return recentTrades;
 					}
 				},
 				enabled: !!admin.data?.id
 			},
 			{
-				queryKey: ['activeTrades'],
+				queryKey: ['openDisputes'],
+				queryFn: async () => {
+					if (admin.data?.id) {
+						const averageTradeCompletion =
+							await getAverageTradeCompletionTime();
+						return averageTradeCompletion;
+					}
+				},
+				enabled: !!admin.data?.id
+			},
+			{
+				queryKey: ['resolvedToday'],
 				queryFn: async () => {
 					if (admin.data?.id) {
 						const totalActiveTrade = await getTotalActiveTrades();
@@ -124,7 +165,7 @@ const useDisputes = () => {
 				enabled: !!admin.data?.id
 			},
 			{
-				queryKey: ['completedTradesToday'],
+				queryKey: ['averageResolution'],
 				queryFn: async () => {
 					if (admin.data?.id) {
 						const totalCompletedTradesToday =
@@ -135,7 +176,7 @@ const useDisputes = () => {
 				enabled: !!admin.data?.id
 			},
 			{
-				queryKey: ['disputedTrades'],
+				queryKey: ['escalatedCases'],
 				queryFn: async () => {
 					if (admin.data?.id) {
 						const totalDisputedTrades = await getTotalDisputedTrades();
@@ -145,22 +186,11 @@ const useDisputes = () => {
 				enabled: !!admin.data?.id
 			},
 			{
-				queryKey: ['tradeVolume'],
+				queryKey: ['successRate'],
 				queryFn: async () => {
 					if (admin.data?.id) {
 						const totalTradeVolume = await getTotalTradeVolume();
 						return totalTradeVolume;
-					}
-				},
-				enabled: !!admin.data?.id
-			},
-			{
-				queryKey: ['averageCompletion'],
-				queryFn: async () => {
-					if (admin.data?.id) {
-						const averageTradeCompletion =
-							await getAverageTradeCompletionTime();
-						return averageTradeCompletion;
 					}
 				},
 				enabled: !!admin.data?.id
@@ -169,59 +199,85 @@ const useDisputes = () => {
 	});
 
 	const onChangePage = (page: number) => {
-		setCurrentPage(page);
+		setDisputesCurrentPage(page);
 	};
 
 	const onSubmitFilters = (data: any) => {
-		tradesMutation.mutate({
-			page: $trades.currentPage,
-			pageSize: $trades.pageSize,
-			amount: data?.amount,
-			cryptocurrencyId: data?.cryptocurrencyId,
-			dateRageEnd: data?.dateRangeEnd,
-			dateRageStart: data?.dateRangeStart,
-			status: data?.status,
-			username: data?.username
+		console.log({
+			page: $disputes.currentPage,
+			pageSize: $disputes.pageSize,
+			amount: data.amount,
+			moderatorId: data.moderatorId,
+			severity: data.severity,
+			status: data.status,
+			type: data.type
+		});
+		disputesMutation.mutate({
+			page: $disputes.currentPage,
+			pageSize: $disputes.pageSize,
+			amount: data.amount,
+			moderatorId: data.moderatorId,
+			severity: data.severity,
+			status: data.status,
+			type: data.type
 		});
 	};
 
-	const onSelectDateStartFilter = (date?: Date) => {
-		setTrades({
+	const onSelectModeratorFilter = (moderatorId: string) => {
+		setDisputes({
 			filters: {
-				dateRageStart: date
+				moderator: {
+					id: moderatorId
+				}
 			}
 		});
-		setValue('dateRangeStart', date);
+		setValue('moderatorId', moderatorId);
 	};
 
-	const onSelectDateEndFilter = (date?: Date) => {
-		setTrades({
+	const onSelectStatusFilter = (status: DisputeStatus) => {
+		setDisputes({
 			filters: {
-				dateRageEnd: date
+				status
 			}
 		});
-		setValue('dateRangeEnd', date);
+		setValue('status', status);
+	};
+
+	const onSelectSeverityFilter = (severity: DisputeSeverity) => {
+		setDisputes({
+			filters: {
+				severity
+			}
+		});
+		setValue('severity', severity);
+	};
+
+	const onSelectTypeFilter = (type: DisputeType) => {
+		setDisputes({
+			filters: {
+				type
+			}
+		});
+		setValue('type', type);
 	};
 
 	const onResetFilters = () => {
-		setTrades({
+		setDisputes({
 			filters: undefined
 		});
 		setValue('amount', undefined);
-		setValue('cryptocurrencyId', undefined);
-		setValue('dateRangeEnd', undefined);
-		setValue('dateRangeStart', undefined);
+		setValue('moderatorId', undefined);
+		setValue('severity', undefined);
+		setValue('type', undefined);
 		setValue('status', undefined);
-		setValue('username', undefined);
-		tradesMutation.mutate({
-			page: $trades.currentPage,
-			pageSize: $trades.pageSize,
+		disputesMutation.mutate({
+			page: $disputes.currentPage,
+			pageSize: $disputes.pageSize,
 			amount: undefined,
-			cryptocurrencyId: undefined,
-			dateRageEnd: undefined,
-			dateRageStart: undefined,
+			moderatorId: undefined,
+			severity: undefined,
 			status: undefined,
-			username: undefined
+			type: undefined
 		});
 	};
 
@@ -230,18 +286,23 @@ const useDisputes = () => {
 		register,
 		handleSubmit,
 		onSubmitFilters,
-		onSelectDateEndFilter,
-		onSelectDateStartFilter,
+		onSelectModeratorFilter,
+		onSelectSeverityFilter,
+		onSelectStatusFilter,
+		onSelectTypeFilter,
 		onResetFilters,
-		$trades,
-		tradesColumns,
-		totalTrades,
-		activeTrades,
-		completedTradesToday,
-		disputedTrades,
-		tradeVolume,
-		averageCompletion,
-		cryptocurrencyFilters: cryptocurrenciesQuery
+		$disputes,
+		disputesColumns,
+		totalDisputes,
+		openDisputes,
+		resolvedToday,
+		averageResolution,
+		escalatedCases,
+		successRate,
+		statusesQuery,
+		servertiesQuery,
+		typesQuery,
+		moderatorsQuery
 	};
 };
 

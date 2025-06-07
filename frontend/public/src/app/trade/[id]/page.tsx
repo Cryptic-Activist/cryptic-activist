@@ -9,7 +9,13 @@ import {
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
-import { useRouter, useTrade, useTradeSocket, useUser } from '@/hooks';
+import {
+  useNavigationBar,
+  useRouter,
+  useTrade,
+  useTradeSocket,
+  useUser,
+} from '@/hooks';
 
 import styles from './page.module.scss';
 
@@ -18,7 +24,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   onSetAsPaid,
-  setAsDisputed,
+  toggleModal,
 }) => {
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
@@ -47,12 +53,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
             fullWidth
             padding="1rem"
             theme="alert"
-            onClick={() =>
-              setAsDisputed({
-                from: trade.trader?.id,
-                to: trade.vendor?.id,
-              })
-            }
+            onClick={() => toggleModal('disputeRequest')}
           >
             Raise a Dispute
           </Button>
@@ -105,6 +106,7 @@ const Trade: FC<TradeProps> = ({
   trade,
   tradeRemaingTime,
   ref,
+  toggleModal,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -346,6 +348,7 @@ const Trade: FC<TradeProps> = ({
         setAsCanceled={setAsCanceled}
         onSetAsPaid={setAsPaid}
         setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
     </div>
   );
@@ -362,6 +365,7 @@ export default function TradePage() {
   } = useTrade();
   const { user, query } = useUser();
   const { replace } = useRouter();
+  const { toggleModal } = useNavigationBar();
 
   const {
     sendMessage,
@@ -412,6 +416,7 @@ export default function TradePage() {
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
+        toggleModal={toggleModal}
       />
       <div>
         {trade.id &&

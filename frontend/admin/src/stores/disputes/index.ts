@@ -1,8 +1,8 @@
-import type { SetterParams, TradesState } from './types';
+import type { DisputesState, SetterParams } from './types';
 
 import { map } from 'nanostores';
 
-export const trades = map<TradesState>({
+export const disputes = map<DisputesState>({
 	data: [],
 	totalPages: 1,
 	currentPage: 1,
@@ -11,30 +11,27 @@ export const trades = map<TradesState>({
 });
 
 const setter = (params: SetterParams) => {
-	const aux = trades.get();
+	const aux = disputes.get();
 
-	trades.set({
+	disputes.set({
 		currentPage: params.currentPage ?? aux.currentPage,
 		data: params.data ?? aux.data,
 		pageSize: params.pageSize ?? aux.pageSize,
 		totalPages: params.totalPages ?? aux.totalPages,
 		filters: {
 			amount: params.filters?.amount ?? aux.filters?.amount,
-			cryptocurrencyId:
-				params.filters?.cryptocurrencyId ?? aux.filters?.cryptocurrencyId,
-			dateRageEnd: params.filters?.dateRageEnd ?? aux.filters?.dateRageEnd,
-			dateRageStart:
-				params.filters?.dateRageStart ?? aux.filters?.dateRageStart,
+			moderator: params.filters?.moderator ?? aux.filters?.moderator,
+			severity: params.filters?.severity ?? aux.filters?.severity,
 			status: params.filters?.status ?? aux.filters?.status,
-			username: params.filters?.username ?? aux.filters?.username
+			type: params.filters?.type ?? aux.filters?.type
 		}
 	});
 };
 
-export const setTrades = async (params: SetterParams) => {
+export const setDisputes = async (params: SetterParams) => {
 	setter(params);
 };
 
-export const setCurrentPage = (page: number) => {
+export const setDisputesCurrentPage = (page: number) => {
 	setter({ currentPage: page });
 };

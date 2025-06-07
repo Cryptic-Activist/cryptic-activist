@@ -119,6 +119,11 @@ export default class Chat {
                   chatId,
                   endedAt: completedTrade.endedAt,
                 });
+              } else if (completedTrade?.status === 'DISPUTED') {
+                this.io.to(chatId).emit('trade_set_disputed_success', {
+                  status: 'DISPUTED',
+                  disputedAt: new Date(),
+                });
               } else {
                 const expiredAt = new Date();
                 await prisma.trade.update({

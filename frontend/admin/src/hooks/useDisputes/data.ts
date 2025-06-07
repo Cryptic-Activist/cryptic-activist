@@ -1,14 +1,15 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Trade } from './types';
+import { Dispute } from '@/stores/disputes/types';
 
-export const tradesColumns: ColumnDef<Trade>[] = [
+export const disputesColumns: ColumnDef<Dispute>[] = [
 	{ header: 'ID', accessorKey: 'id' },
-	{ header: 'Vendor', accessorKey: 'vendor' },
-	{ header: 'Trader', accessorKey: 'trader' },
-	{ header: 'Crypto', accessorKey: 'crypto' },
-	{ header: 'Crypto Amount', accessorKey: 'cryptoAmount' },
-	{ header: 'Fiat Amount', accessorKey: 'fiatAmount' },
-	{ header: 'Payment Method', accessorKey: 'paymentMethod' },
+	{ header: 'Complainant', accessorKey: 'complainant' },
+	{ header: 'Respondent', accessorKey: 'respondent' },
+	{ header: 'Type', accessorKey: 'type' },
+	{ header: 'Amount', accessorKey: 'amount' },
+	{ header: 'Severity', accessorKey: 'severity' },
 	{ header: 'Status', accessorKey: 'status' },
-	{ header: 'Started At', accessorKey: 'startedAt' }
+	{ header: 'Moderator', accessorKey: 'moderator' },
+	{ header: 'Created At', accessorKey: 'createdAt' },
+	{ header: 'SLA Status', accessorKey: 'slaStatus' }
 ];

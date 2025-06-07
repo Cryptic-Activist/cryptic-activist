@@ -120,6 +120,86 @@
   color: globals.$white;
 }
 
+.PAYMENT_NOT_RECEIVED {
+  background-color: globals.$dispute-type-payment-not-received;
+  color: globals.$white;
+}
+
+.PAYMENT_FRAUD {
+  background-color: globals.$dispute-type-payment-fraud;
+  color: globals.$white;
+}
+
+.CRYPTO_NOT_RELEASED {
+  background-color: globals.$dispute-type-crypto-not-released;
+  color: globals.$black;
+}
+
+.INCORRECT_PAYMENT_AMOUNT {
+  background-color: globals.$dispute-type-incorrect-payment-amount;
+  color: globals.$black;
+}
+
+.PAYMENT_TO_WRONG_ACCOUNT {
+  background-color: globals.$dispute-type-payment-to-wrong-account;
+  color: globals.$black;
+}
+
+.FAKE_PAYMENT_PROOF {
+  background-color: globals.$dispute-type-fake-payment-proof;
+  color: globals.$white;
+}
+
+.LATE_PAYMENT {
+  background-color: globals.$dispute-type-late-payment;
+  color: globals.$black;
+}
+
+.COMMUNICATION_ISSUE {
+  background-color: globals.$dispute-type-communication-issue;
+  color: globals.$black;
+}
+
+.OFF_PLATFORM_TRANSACTION {
+  background-color: globals.$dispute-type-off-platform-transaction;
+  color: globals.$black;
+}
+
+.TRADE_TIMEOUT {
+  background-color: globals.$dispute-type-trade-timeout;
+  color: globals.$black;
+}
+
+.ABUSIVE_BEHAVIOR {
+  background-color: globals.$dispute-type-abusive-behavior;
+  color: globals.$white;
+}
+
+.IDENTITY_MISMATCH {
+  background-color: globals.$dispute-type-identity-mismatch;
+  color: globals.$black;
+}
+
+.PLATFORM_ERROR {
+  background-color: globals.$dispute-type-platform-error;
+  color: globals.$black;
+}
+
+.SUSPICIOUS_ACTIVITY {
+  background-color: globals.$dispute-type-suspicious-activity;
+  color: globals.$black;
+}
+
+.SCAM {
+  background-color: globals.$dispute-type-scam;
+  color: globals.$white;
+}
+
+.OTHER {
+  background-color: globals.$dispute-type-other;
+  color: globals.$black;
+}
+
 .actionsWrapper {
   display: flex;
   gap: 0.25rem;
