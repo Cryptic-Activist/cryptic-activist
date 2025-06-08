@@ -34,8 +34,9 @@ export const uploadFile = async (req: Request, res: Response) => {
     const results = await Promise.all(
       (req.files as Express.Multer.File[]).map(async (file) => {
         const isPdf = file.mimetype === 'application/pdf';
-        const hash = generateRandomHash(16);
-        const fileName = `${Date.now()}-${hash}-dispute-evidence`;
+        // const hash = generateRandomHash(16);
+        // const fileName = `${Date.now()}-${hash}-dispute-evidence`;
+        const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
         const finalBuffer = isPdf
           ? file.buffer // No processing for PDFs
           : await sharp(file.buffer)
