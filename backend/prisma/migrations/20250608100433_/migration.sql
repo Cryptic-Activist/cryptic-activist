@@ -14,7 +14,13 @@ CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TR
 CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "DisputeType" AS ENUM ('PAYMENT_NOT_RECEIVED', 'PAYMENT_FRAUD', 'CRYPTO_NOT_RELEASED', 'INCORRECT_PAYMENT_AMOUNT', 'PAYMENT_TO_WRONG_ACCOUNT', 'FAKE_PAYMENT_PROOF', 'LATE_PAYMENT', 'COMMUNICATION_ISSUE', 'OFF_PLATFORM_TRANSACTION', 'TRADE_TIMEOUT', 'ABUSIVE_BEHAVIOR', 'IDENTITY_MISMATCH', 'PLATFORM_ERROR', 'SUSPICIOUS_ACTIVITY', 'OTHER');
+CREATE TYPE "DisputeAction" AS ENUM ('STATUS_CHANGED', 'EVIDENCE_REQUESTED', 'MODERATOR_ASSIGNED', 'DECISION_MADE', 'USER_BANNED', 'SYSTEM_ESCALATION');
+
+-- CreateEnum
+CREATE TYPE "EvidenceType" AS ENUM ('SCREENSHOT', 'VIDEO', 'BANK_STATEMENT', 'CHAT_LOG', 'PAYMENT_RECEIPT', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "DisputeType" AS ENUM ('PAYMENT_NOT_RECEIVED', 'PAYMENT_FRAUD', 'CRYPTO_NOT_RELEASED', 'INCORRECT_PAYMENT_AMOUNT', 'PAYMENT_TO_WRONG_ACCOUNT', 'FAKE_PAYMENT_PROOF', 'LATE_PAYMENT', 'COMMUNICATION_ISSUE', 'OFF_PLATFORM_TRANSACTION', 'TRADE_TIMEOUT', 'ABUSIVE_BEHAVIOR', 'IDENTITY_MISMATCH', 'PLATFORM_ERROR', 'SUSPICIOUS_ACTIVITY', 'SCAM', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "DisputePriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
@@ -23,7 +29,7 @@ CREATE TYPE "DisputePriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 CREATE TYPE "DisputeSeverity" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 
 -- CreateEnum
-CREATE TYPE "DisputeStatus" AS ENUM ('PENDING_EVIDENCE', 'INVESTIGATING', 'ESCALATED', 'RESOLVED', 'CLOSED');
+CREATE TYPE "DisputeStatus" AS ENUM ('OPEN', 'PENDING_EVIDENCE', 'INVESTIGATING', 'ESCALATED', 'RESOLVED', 'CLOSED');
 
 -- CreateEnum
 CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
@@ -194,6 +200,7 @@ CREATE TABLE "offers" (
 CREATE TABLE "payment_methods" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(60) NOT NULL,
+    "isRisky" BOOLEAN NOT NULL DEFAULT false,
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
@@ -327,11 +334,50 @@ CREATE TABLE "trades" (
 );
 
 -- CreateTable
+CREATE TABLE "DisputePartyNote" (
+    "id" TEXT NOT NULL,
+    "disputeId" TEXT NOT NULL,
+    "targetUserId" TEXT NOT NULL,
+    "addedById" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DisputePartyNote_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DisputeAuditLog" (
+    "id" TEXT NOT NULL,
+    "disputeId" TEXT NOT NULL,
+    "changedById" TEXT,
+    "action" "DisputeAction" NOT NULL,
+    "note" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DisputeAuditLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DisputeEvidence" (
+    "id" TEXT NOT NULL,
+    "disputeId" TEXT NOT NULL,
+    "submittedById" TEXT NOT NULL,
+    "type" "EvidenceType" NOT NULL,
+    "fileUrl" TEXT,
+    "textContent" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DisputeEvidence_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "TradeDispute" (
     "id" TEXT NOT NULL,
     "tradeId" TEXT NOT NULL,
     "raisedById" TEXT NOT NULL,
     "type" "DisputeType" NOT NULL,
+    "vendorStatement" TEXT DEFAULT '',
+    "traderStatement" TEXT DEFAULT '',
     "severity" "DisputeSeverity" NOT NULL,
     "status" "DisputeStatus" NOT NULL,
     "resolutionNote" TEXT,
@@ -340,6 +386,8 @@ CREATE TABLE "TradeDispute" (
     "priority" "DisputePriority" NOT NULL DEFAULT 'MEDIUM',
     "slaDueAt" TIMESTAMP NOT NULL,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "winnerId" TEXT,
+    "loserId" TEXT,
     "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "TradeDispute_pkey" PRIMARY KEY ("id")
@@ -382,6 +430,18 @@ CREATE TABLE "trusts" (
     "updatedAt" TIMESTAMP,
 
     CONSTRAINT "trusts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserStats" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "totalDisputes" INTEGER NOT NULL DEFAULT 0,
+    "disputesLost" INTEGER NOT NULL DEFAULT 0,
+    "fraudFlagged" BOOLEAN NOT NULL DEFAULT false,
+    "lastDisputeDate" TIMESTAMP(3),
+
+    CONSTRAINT "UserStats_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -492,6 +552,9 @@ CREATE UNIQUE INDEX "transactions_gatewayTransactionId_key" ON "transactions"("g
 CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "trustedId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "UserStats_userId_key" ON "UserStats"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
 -- CreateIndex
@@ -591,6 +654,27 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") 
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "DisputePartyNote" ADD CONSTRAINT "DisputePartyNote_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "TradeDispute"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputePartyNote" ADD CONSTRAINT "DisputePartyNote_targetUserId_fkey" FOREIGN KEY ("targetUserId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputePartyNote" ADD CONSTRAINT "DisputePartyNote_addedById_fkey" FOREIGN KEY ("addedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeAuditLog" ADD CONSTRAINT "DisputeAuditLog_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "TradeDispute"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeAuditLog" ADD CONSTRAINT "DisputeAuditLog_changedById_fkey" FOREIGN KEY ("changedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidence" ADD CONSTRAINT "DisputeEvidence_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "TradeDispute"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidence" ADD CONSTRAINT "DisputeEvidence_submittedById_fkey" FOREIGN KEY ("submittedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -598,6 +682,12 @@ ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_raisedById_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_winnerId_fkey" FOREIGN KEY ("winnerId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TradeDispute" ADD CONSTRAINT "TradeDispute_loserId_fkey" FOREIGN KEY ("loserId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -613,6 +703,9 @@ ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trusterId_fkey" FOREIGN KEY ("truste
 
 -- AddForeignKey
 ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trustedId_fkey" FOREIGN KEY ("trustedId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserStats" ADD CONSTRAINT "UserStats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

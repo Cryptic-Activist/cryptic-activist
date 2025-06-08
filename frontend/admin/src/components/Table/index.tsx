@@ -72,7 +72,7 @@ const Table = <T extends object>({
 					))}
 				</thead>
 				<tbody className={styles.tableBody}>
-					{table.getRowModel().rows.map((row) => (
+					{table?.getRowModel()?.rows?.map((row) => (
 						<tr key={row.id}>
 							{row.getVisibleCells().map((cell) => {
 								const isStatusColumn =

@@ -99,3 +99,14 @@ export const getDisputeTypes = async () => {
 
   return response.data;
 };
+
+// export const submitDispute = async (formData: SubmitDisputeParams) => {
+//   const bearerToken = getBearerToken();
+//   const response = await fetchPost(`${BACKEND}/dispute`, {
+//     Authorization: bearerToken,
+//   });
+
+//   if (response.status !== 200) return null;
+
+//   return response.data;
+// };

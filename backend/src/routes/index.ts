@@ -1,4 +1,6 @@
-import { Application } from 'express';
+import { Application, static as static_ } from 'express';
+
+import { IS_DEVELOPMENT } from '@/constants';
 import admins from './admins';
 import altcha from './altcha';
 import blockchains from './blockchains';
@@ -9,9 +11,11 @@ import feedbacks from './feedbacks';
 import fiats from './fiats';
 import health from './health';
 import offers from './offers';
+import path from 'path';
 import systemMessages from './systemMessages';
 import tiers from './tiers';
 import trades from './trades';
+import upload from './upload';
 import users from './users';
 import vendors from './vendors';
 
@@ -31,4 +35,9 @@ export default (app: Application): void => {
   app.use('/vendors', vendors);
   app.use('/tiers', tiers);
   app.use('/health', health);
+  app.use('/upload', upload);
+
+  if (IS_DEVELOPMENT) {
+    app.use('/uploads', static_(path.join(__dirname, '../uploads')));
+  }
 };

@@ -41,24 +41,25 @@ model AdminRoles {
 }
 
 model Admin {
-  id               String            @id @default(uuid())
-  firstName        String            @db.VarChar(50)
-  lastName         String            @db.VarChar(50)
-  username         String            @unique @db.VarChar(120)
-  email            String            @unique @db.VarChar(120)
+  id               String             @id @default(uuid())
+  firstName        String             @db.VarChar(50)
+  lastName         String             @db.VarChar(50)
+  username         String             @unique @db.VarChar(120)
+  email            String             @unique @db.VarChar(120)
   password         String
-  isVerified       Boolean?          @default(false) @db.Boolean
+  isVerified       Boolean?           @default(false) @db.Boolean
   twoFactorSecret  String?
-  twoFactorEnabled Boolean?          @default(false) @db.Boolean
-  deletedAt        DateTime?         @db.Timestamp()
-  createdAt        DateTime?         @default(now()) @db.Timestamp()
-  updatedAt        DateTime?         @updatedAt @db.Timestamp()
+  twoFactorEnabled Boolean?           @default(false) @db.Boolean
+  deletedAt        DateTime?          @db.Timestamp()
+  createdAt        DateTime?          @default(now()) @db.Timestamp()
+  updatedAt        DateTime?          @updatedAt @db.Timestamp()
   kyc              KYC[]
-  createdUsers     User[]            @relation("userCreatedBy") // All users created by this admin
-  updatedUsers     User[]            @relation("userLastUpdatedBy") // All users updated by this admin
-  tradeDispute     TradeDispute[]    @relation("moderatorTradeDispute")
+  createdUsers     User[]             @relation("userCreatedBy") // All users created by this admin
+  updatedUsers     User[]             @relation("userLastUpdatedBy") // All users updated by this admin
+  tradeDispute     TradeDispute[]     @relation("moderatorTradeDispute")
   roles            AdminRoles[] // Many-to-many relation to roles
-  DisputeAuditLog  DisputeAuditLog[]
+  disputeAuditLog  DisputeAuditLog[]  @relation("disputeAuditLogChangedBy")
+  disputePartyNote DisputePartyNote[] @relation("disputePartyNoteAddedBy")
 
   @@map("admins")
 }
@@ -398,15 +399,16 @@ model Trade {
   @@map("trades")
 }
 
-model DisputeAuditLog {
-  id          String        @id @default(uuid())
-  disputeId   String
-  dispute     TradeDispute  @relation("disputeAuditLog", fields: [disputeId], references: [id])
-  changedById String?
-  changedBy   Admin?        @relation(fields: [changedById], references: [id])
-  action      DisputeAction
-  note        String?       @db.Text()
-  createdAt   DateTime      @default(now())
+model DisputePartyNote {
+  id           String       @id @default(uuid())
+  disputeId    String
+  dispute      TradeDispute @relation("disputePartyNote", fields: [disputeId], references: [id])
+  targetUserId String
+  targetUser   User         @relation("disputePartyNoteTarget", fields: [targetUserId], references: [id])
+  addedById    String
+  addedBy      Admin        @relation("disputePartyNoteAddedBy", fields: [addedById], references: [id])
+  content      String       @db.Text()
+  createdAt    DateTime     @default(now())
 }
 
 enum DisputeAction {
@@ -416,6 +418,26 @@ enum DisputeAction {
   DECISION_MADE
   USER_BANNED
   SYSTEM_ESCALATION
+}
+
+model DisputeAuditLog {
+  id          String        @id @default(uuid())
+  disputeId   String
+  dispute     TradeDispute  @relation("disputeAuditLog", fields: [disputeId], references: [id])
+  changedById String?
+  changedBy   Admin?        @relation("disputeAuditLogChangedBy", fields: [changedById], references: [id])
+  action      DisputeAction
+  note        String?       @db.Text()
+  createdAt   DateTime      @default(now())
+}
+
+enum EvidenceType {
+  SCREENSHOT
+  VIDEO
+  BANK_STATEMENT
+  CHAT_LOG
+  PAYMENT_RECEIPT
+  OTHER
 }
 
 model DisputeEvidence {
@@ -428,15 +450,6 @@ model DisputeEvidence {
   fileUrl       String? // If hosted on S3 or similar
   textContent   String?      @db.Text()
   createdAt     DateTime     @default(now())
-}
-
-enum EvidenceType {
-  SCREENSHOT
-  VIDEO
-  BANK_STATEMENT
-  CHAT_LOG
-  PAYMENT_RECEIPT
-  OTHER
 }
 
 enum DisputeType {
@@ -482,29 +495,31 @@ enum DisputeStatus {
 }
 
 model TradeDispute {
-  id              String            @id @default(uuid())
-  tradeId         String            @unique
-  trade           Trade             @relation(fields: [tradeId], references: [id])
-  raisedById      String
-  raisedBy        User              @relation(fields: [raisedById], references: [id])
-  type            DisputeType
-  reason          String            @default("") @db.Text()
-  severity        DisputeSeverity
-  status          DisputeStatus
-  resolutionNote  String?
-  resolvedAt      DateTime?
-  moderatorId     String?
-  moderator       Admin?            @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
-  priority        DisputePriority   @default(MEDIUM)
-  slaDueAt        DateTime          @db.Timestamp() // SLA target datetime
-  createdAt       DateTime          @default(now()) @db.Timestamp()
-  winnerId        String?
-  winner          User?             @relation("wonDisputes", fields: [winnerId], references: [id])
-  loserId         String?
-  loser           User?             @relation("lostDisputes", fields: [loserId], references: [id])
-  evidence        DisputeEvidence[] @relation("disputeEvidence")
-  updatedAt       DateTime          @updatedAt @db.Timestamp()
-  disputeAuditLog DisputeAuditLog[] @relation("disputeAuditLog")
+  id               String             @id @default(uuid())
+  tradeId          String             @unique
+  trade            Trade              @relation(fields: [tradeId], references: [id])
+  raisedById       String
+  raisedBy         User               @relation(fields: [raisedById], references: [id])
+  type             DisputeType
+  vendorStatement  String?            @default("") @db.Text()
+  traderStatement  String?            @default("") @db.Text()
+  severity         DisputeSeverity
+  status           DisputeStatus
+  resolutionNote   String?
+  resolvedAt       DateTime?
+  moderatorId      String?
+  moderator        Admin?             @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  priority         DisputePriority    @default(MEDIUM)
+  slaDueAt         DateTime           @db.Timestamp() // SLA target datetime
+  createdAt        DateTime           @default(now()) @db.Timestamp()
+  winnerId         String?
+  winner           User?              @relation("wonDisputes", fields: [winnerId], references: [id])
+  loserId          String?
+  loser            User?              @relation("lostDisputes", fields: [loserId], references: [id])
+  evidence         DisputeEvidence[]  @relation("disputeEvidence")
+  updatedAt        DateTime           @updatedAt @db.Timestamp()
+  disputeAuditLog  DisputeAuditLog[]  @relation("disputeAuditLog")
+  disputePartyNote DisputePartyNote[] @relation("disputePartyNote")
 
   @@index([status, priority])
 }
@@ -632,6 +647,7 @@ model User {
   disputeLoser             TradeDispute[]             @relation("lostDisputes")
   disputeEvidence          DisputeEvidence[]
   userStats                UserStats?                 @relation("userStats")
+  disputePartyNote         DisputePartyNote[]         @relation("disputePartyNoteTarget")
 
   @@index([username])
   @@map("users")

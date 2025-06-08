@@ -14,6 +14,21 @@ export async function getDisputeTypes(_req: Request, res: Response) {
   }
 }
 
+export async function createDispute(req: Request, res: Response) {
+  try {
+    const body = req.body;
+
+    console.log(body);
+
+    const disputeTypes = Object.keys(DisputeType).map((type) => type);
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
 export async function getDisputeAdmin(req: Request, res: Response) {
   try {
     const id = req.params.id as string;
@@ -38,7 +53,8 @@ export async function getDisputeAdmin(req: Request, res: Response) {
             username: true,
           },
         },
-        reason: true,
+        traderStatement: true,
+        vendorStatement: true,
         resolutionNote: true,
         resolvedAt: true,
         updatedAt: true,

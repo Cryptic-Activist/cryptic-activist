@@ -15,3 +15,6 @@
 
 # Sentry Config File
 .sentryclirc
+
+/src/uploads/*
+!/src/uploads/.gitkeep

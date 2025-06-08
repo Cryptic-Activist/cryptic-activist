@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, TextArea } from '@/components/forms';
+import { FileUploader, Select, TextArea } from '@/components/forms';
 
 import { Button } from '@/components';
 import { Template } from '@/layouts/modals';
@@ -9,40 +9,63 @@ import styles from './index.module.scss';
 import useDisputeRequest from '@/hooks/useDisputeRequest';
 
 const DisputeRequest = () => {
-  const { handleSubmit, submitDisputeRequest, register, disputeTypesQuery } =
-    useDisputeRequest();
+  const {
+    handleSubmit,
+    validateSubmitForm,
+    register,
+    onUploadEvidences,
+    disputeTypesQuery,
+    uploaderRef,
+  } = useDisputeRequest();
 
   return (
-    <Template width="20rem" heading="Dispute Request">
+    <Template width="45rem" heading="Dispute Request">
       <div className={styles.container}>
         <form
-          onSubmit={handleSubmit(submitDisputeRequest)}
+          onSubmit={handleSubmit(validateSubmitForm)}
           className={styles.form}
         >
-          <Select
-            id="type"
-            name="type"
-            register={register}
-            label="Dispute Type"
-            options={[
-              { label: '-----------------', value: '' },
-              ...(disputeTypesQuery.data
-                ? disputeTypesQuery.data?.map((filter: any) => ({
-                    label: formatEnum(filter),
-                    value: filter,
-                  }))
-                : []),
-            ]}
-          />
-          <TextArea
-            id="reason"
-            name="reason"
-            register={register}
-            placeholder="Reason for dispute"
-            required
-            label="Reason"
-          />
-
+          <div className={styles.columns}>
+            <div className={styles.column}>
+              <Select
+                id="type"
+                name="type"
+                register={register}
+                label="Dispute Type"
+                options={[
+                  { label: '-----------------', value: '' },
+                  ...(disputeTypesQuery.data
+                    ? disputeTypesQuery.data?.map((filter: any) => ({
+                        label: formatEnum(filter),
+                        value: filter,
+                      }))
+                    : []),
+                ]}
+              />
+              <TextArea
+                id="reason"
+                name="reason"
+                register={register}
+                placeholder="Reason for dispute"
+                required
+                label="Reason"
+              />
+            </div>
+            <div className={styles.column}>
+              <FileUploader
+                allowMultiple={false}
+                allowedFileTypes={[
+                  'image/jpeg',
+                  'image/png',
+                  'image/webp',
+                  'application/pdf',
+                ]}
+                label="Upload Evidence"
+                onUpload={onUploadEvidences}
+                ref={uploaderRef}
+              />
+            </div>
+          </div>
           <Button type="submit" padding="1rem" fullWidth>
             Request Dispute
           </Button>
