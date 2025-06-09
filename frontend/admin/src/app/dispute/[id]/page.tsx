@@ -8,11 +8,14 @@ import {
 	timeSince
 } from '@/utils/date';
 
+import { Message } from './types';
 import styles from './page.module.scss';
 import { useDispute } from '@/hooks';
 
 const DisputeDetailsPage = () => {
 	const { $dispute } = useDispute();
+
+	console.log({ $dispute });
 
 	// console.log({ $dispute });
 
@@ -62,41 +65,44 @@ const DisputeDetailsPage = () => {
 	};
 
 	const timeline = [
-		{ time: 'Dec 15, 2024 14:30', event: 'Trade initiated by john_crypto24' },
 		{
-			time: 'Dec 15, 2024 14:32',
-			event: 'Payment instructions provided by mike_trader'
+			time: $dispute?.trade?.createdAt
+				? getLocaleFullDateString(new Date($dispute?.trade?.createdAt))
+				: '',
+			event: `Trade initiated by ${$dispute.trade?.trader?.username}`
 		},
-		{ time: 'Dec 15, 2024 14:45', event: 'Buyer marked payment as sent' },
-		{ time: 'Dec 15, 2024 15:15', event: 'Buyer uploaded payment receipt' },
-		{ time: 'Dec 15, 2024 17:30', event: 'Dispute opened by john_crypto24' },
-		{ time: 'Dec 15, 2024 17:35', event: 'Dispute assigned to Sarah Chen' }
-	];
+		{
+			time: $dispute.trade?.fundedAt
+				? getLocaleFullDateString(new Date($dispute?.trade?.fundedAt))
+				: '',
+			event: 'Trade was funded'
+		},
+		{
+			time: $dispute.trade?.paidAt
+				? getLocaleFullDateString(new Date($dispute?.trade?.paidAt))
+				: '',
+			event: `${$dispute.trade?.trader?.username} marked payment as sent`
+		},
+		...($dispute.trade?.paymentReceipt?.createdAt
+			? [
+					{
+						time: $dispute.trade?.paymentReceipt?.createdAt,
+						event: `${$dispute.trade?.trader?.username} uploaded payment receipt`
+					}
+			  ]
+			: []),
 
-	const messages = [
 		{
-			user: 'john_crypto24',
-			role: 'buyer',
-			time: '14:46',
-			message: 'Payment sent! Reference: BT240456789'
+			time: $dispute?.createdAt
+				? getLocaleFullDateString(new Date($dispute?.createdAt))
+				: '',
+			event: `Dispute opened by ${$dispute.raisedBy?.username}`
 		},
 		{
-			user: 'mike_trader',
-			role: 'seller',
-			time: '15:20',
-			message: "Haven't received it yet. Can you send bank statement?"
-		},
-		{
-			user: 'john_crypto24',
-			role: 'buyer',
-			time: '15:22',
-			message: 'Statement uploaded. Please check!'
-		},
-		{
-			user: 'john_crypto24',
-			role: 'buyer',
-			time: '17:25',
-			message: "It's been 3 hours. Please release the BTC or I'll open dispute."
+			time: $dispute?.updatedAt
+				? getLocaleFullDateString(new Date($dispute?.updatedAt))
+				: '',
+			event: `Dispute assigned to ${$dispute.moderator?.firstName} ${$dispute.moderator?.lastName}`
 		}
 	];
 
@@ -172,7 +178,7 @@ const DisputeDetailsPage = () => {
 						{user && getInitials(user?.firstName, user?.lastName)}
 					</div>
 					<div className={styles.userInfo}>
-						<h4>{user.username}</h4>
+						<h4>{user?.username}</h4>
 						<div className={styles.userRole}>{role}</div>
 					</div>
 				</div>
@@ -201,17 +207,28 @@ const DisputeDetailsPage = () => {
 		</div>
 	);
 
-	const MessageItem = ({ user, role, time, message }) => (
-		<div className={`${styles.message} ${styles[role]}`}>
-			<div className={styles.messageHeader}>
-				<span>
-					{user} ({role.charAt(0).toUpperCase() + role.slice(1)})
-				</span>
-				<span>{time}</span>
+	const MessageItem = (message: Message) => {
+		if (message.type === 'info') return null;
+
+		const username =
+			message.from === $dispute.trade?.trader?.id
+				? $dispute.trade?.trader?.username
+				: $dispute.trade?.vendor?.username;
+
+		return (
+			<div className={`${styles.message}`}>
+				<div className={styles.messageHeader}>
+					<span>{username}</span>
+					<span>
+						{message.createdAt
+							? getLocaleFullDateString(new Date(message.createdAt))
+							: ''}
+					</span>
+				</div>
+				<div>{message.message}</div>
 			</div>
-			<div>{message}</div>
-		</div>
-	);
+		);
+	};
 
 	const EvidenceItem = ({ type, file, icon }) => (
 		<div className={styles.evidenceItem}>
@@ -320,29 +337,26 @@ const DisputeDetailsPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>Dispute Details</div>
 						<div className={styles.cardContent}>
-							<div className={styles.alertWarning}>
+							{/* <div className={styles.alertWarning}>
 								<strong>Reason:</strong> Buyer claims payment was sent but
 								seller hasn't released crypto after 3 hours.
-							</div>
+							</div> */}
 							<p>
-								<strong>Buyer's Statement:</strong>
+								<strong>Trader's Statement:</strong>
 							</p>
 							<p>
-								I sent the bank transfer at 2:30 PM today with reference number
-								BT240456789. I have provided the receipt and bank confirmation.
-								The seller is not responding to messages and hasn't released the
-								Bitcoin. This is taking too long and I'm concerned about my
-								payment.
+								{$dispute?.traderStatement
+									? $dispute?.traderStatement
+									: 'No statement found'}
 							</p>
 
 							<p style={{ marginTop: '16px' }}>
-								<strong>Seller's Statement:</strong>
+								<strong>Vendor's Statement:</strong>
 							</p>
 							<p>
-								I haven't received any payment in my account yet. The buyer
-								provided a screenshot but I need to see the actual money in my
-								account before releasing crypto. Bank transfers can take time
-								and I want to be sure.
+								{$dispute?.vendorStatement
+									? $dispute?.vendorStatement
+									: 'No statement found'}
 							</p>
 						</div>
 					</div>
@@ -380,7 +394,7 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>Recent Chat Messages</div>
 						<div className={styles.cardContent}>
 							<div className={styles.chatMessages}>
-								{messages.map((msg, index) => (
+								{$dispute.trade?.chat?.messages?.map((msg, index) => (
 									<MessageItem key={index} {...msg} />
 								))}
 							</div>

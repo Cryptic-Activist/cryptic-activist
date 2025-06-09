@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import ChatMessage from '@/models/ChatMessage';
 import { DisputeType } from '@prisma/client';
 import { prisma } from '@/services/db';
 
@@ -38,7 +39,6 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         id,
       },
       select: {
-        createdAt: true,
         id: true,
         priority: true,
         severity: true,
@@ -57,6 +57,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         vendorStatement: true,
         resolutionNote: true,
         resolvedAt: true,
+        createdAt: true,
         updatedAt: true,
         moderator: {
           select: {
@@ -72,6 +73,24 @@ export async function getDisputeAdmin(req: Request, res: Response) {
             fiatAmount: true,
             exchangeRate: true,
             startedAt: true,
+            paidAt: true,
+            endedAt: true,
+            fundedAt: true,
+            createdAt: true,
+            expiredAt: true,
+            disputedAt: true,
+            escrowReleasedAt: true,
+            paymentConfirmedAt: true,
+            chat: {
+              select: {
+                id: true,
+              },
+            },
+            paymentReceipt: {
+              select: {
+                createdAt: true,
+              },
+            },
             offer: {
               select: {
                 offerType: true,
@@ -132,7 +151,25 @@ export async function getDisputeAdmin(req: Request, res: Response) {
       },
     });
 
-    res.status(200).json(dispute);
+    let query = ChatMessage.find(
+      { chatId: dispute?.trade?.chat?.id },
+      'createdAt from message type to',
+    );
+
+    query = query.sort('desc');
+
+    const chatMessages = await query.exec();
+
+    res.status(200).json({
+      ...dispute,
+      trade: {
+        ...dispute?.trade,
+        chat: {
+          ...dispute?.trade?.chat,
+          messages: chatMessages,
+        },
+      },
+    });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

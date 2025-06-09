@@ -14,7 +14,7 @@ dotenv.config();
 // Multer setup: store files in memory
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 1 * 1024 * 1024 }, // 2MB limit
+  limits: { fileSize: 1 * 1024 * 1024 }, // 1MB limit
 });
 
 // AWS S3 config
@@ -34,9 +34,8 @@ export const uploadFile = async (req: Request, res: Response) => {
     const results = await Promise.all(
       (req.files as Express.Multer.File[]).map(async (file) => {
         const isPdf = file.mimetype === 'application/pdf';
-        // const hash = generateRandomHash(16);
-        // const fileName = `${Date.now()}-${hash}-dispute-evidence`;
-        const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+        const hash = generateRandomHash(16);
+        const fileName = `${Date.now()}-${hash}.webp`;
         const finalBuffer = isPdf
           ? file.buffer // No processing for PDFs
           : await sharp(file.buffer)

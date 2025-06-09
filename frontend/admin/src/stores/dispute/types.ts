@@ -35,7 +35,27 @@ type Offer = {
 	paymentMethod: PaymentMethod;
 };
 
+type PaymentReceipt = {
+	createdAt: string;
+	name: string;
+	url: string;
+};
+
+type ChatMessage = {
+	createdAt: string;
+	from: string;
+	to: string;
+	message: string;
+	type?: string;
+};
+
+type Chat = {
+	id: string;
+	messages: ChatMessage[];
+};
+
 type Trade = {
+	chat: Chat;
 	cryptocurrency: Cryptocurrency;
 	cryptocurrencyAmount: number;
 	fiat: Fiat;
@@ -45,7 +65,16 @@ type Trade = {
 	offer: Offer;
 	vendor: User;
 	exchangeRate: number;
+	paymentReceipt: PaymentReceipt;
 	startedAt: string;
+	paidAt: string;
+	endedAt: string;
+	fundedAt: string;
+	createdAt: string;
+	expiredAt: string;
+	disputedAt: string;
+	escrowReleasedAt: string;
+	paymentConfirmedAt: string;
 };
 
 export type DisputeType =
@@ -93,6 +122,8 @@ export type Dispute = {
 	reason?: string;
 	resolutionNote?: string;
 	resolvedAt?: string;
+	traderStatement?: string;
+	vendorStatement?: string;
 	createdAt?: string;
 	updatedAt?: string;
 };

@@ -1,3 +1,5 @@
+import { useNavigationBar, useTrade, useUser } from '@/hooks';
+
 import { FileUploaderHandle } from '@/components/forms/FileUploader/types';
 import { disputeRequestResolver } from './zod';
 import { getDisputeTypes } from '@/services/trade';
@@ -7,13 +9,12 @@ import { uploadFiles } from '@/services/uploads';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
-import useTrade from '../useTrade';
-import useUser from '../useUser';
 
 const useDisputeRequest = () => {
   const { trade } = useTrade();
   const { user } = useUser();
   const uploaderRef = useRef<FileUploaderHandle>(null);
+  const { toggleModal } = useNavigationBar();
 
   const { register, handleSubmit, getValues } = useForm({
     resolver: disputeRequestResolver,
@@ -51,6 +52,7 @@ const useDisputeRequest = () => {
         to,
       });
       console.log({ uploadedFiles });
+      toggleModal('disputeRequest');
     }
   };
 

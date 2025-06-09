@@ -8,12 +8,12 @@ import {
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
-import { useApp, useNavigationBar } from '@/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
+import { useApp } from '@/hooks';
 
 const useTradeSocket = ({
   chatId,
@@ -28,7 +28,6 @@ const useTradeSocket = ({
   onSetDisputed,
 }: UseSocketParams) => {
   const { addToast } = useApp();
-  const { toggleModal } = useNavigationBar();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -133,7 +132,7 @@ const useTradeSocket = ({
       socket.on('trade_set_paid_success', (data) => {
         onSetPaid(data.paidAt);
         addToast('info', 'Trade has been set as Paid', 8000);
-        scrollElement(tradeContainerRef, 1000, 1000);
+        scrollElement(tradeContainerRef, 1000, 0);
       });
 
       socket.on('trade_funded_success', (data) => {
@@ -163,7 +162,7 @@ const useTradeSocket = ({
           'Trade has been successfully executed. Escrow was released.',
           8000
         );
-        scrollElement(tradeContainerRef, -1000, 1000);
+        scrollElement(tradeContainerRef, -1000, 0);
       });
 
       socket.on('trade_set_canceled_success', ({ status, endedAt }) => {
@@ -237,7 +236,6 @@ const useTradeSocket = ({
           },
           'trade/setEndedAt'
         );
-        toggleModal('disputeRequest');
       });
 
       socket.on('trade_failed', (data) => {
