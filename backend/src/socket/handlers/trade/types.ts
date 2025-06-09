@@ -17,10 +17,16 @@ type DisputeType =
   | 'SUSPICIOUS_ACTIVITY'
   | 'OTHER';
 
+export type Evidence = {
+  fileName: string;
+  url: string;
+};
+
 export type SetTradeAsPaidParams = SetTradeAs;
 export type SetTradeAsPaymentConfirmed = SetTradeAs;
 export type SetTradeAsCanceledParams = SetTradeAs;
 export type SetTradeAsDisputedParams = SetTradeAs & {
   type: DisputeType;
   reason: string;
+  evidences: Evidence[];
 };

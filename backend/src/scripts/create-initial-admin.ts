@@ -7,7 +7,7 @@ const main = async () => {
   const adminCount = await prisma.admin.count();
   if (adminCount > 0) {
     console.log('Admin already exists. Skipping.');
-    return;
+    process.exit(0);
   }
 
   const email = process.env.SUPER_ADMIN_EMAIL as string;
@@ -35,6 +35,7 @@ const main = async () => {
   });
 
   console.log('Admin created:', admin);
+  process.exit(0);
 };
 
 main().catch(console.error);

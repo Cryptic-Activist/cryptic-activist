@@ -11,7 +11,11 @@ import {
   determineSeverity,
   mapPriorityScoreToLevel,
 } from '@/utils/disputes';
-import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
+import {
+  cancelTrade,
+  confirmTrade,
+  raiseDispute,
+} from '@/services/blockchains/ethereum';
 import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
@@ -261,7 +265,14 @@ export default class Trade {
   setAsDisputed() {
     this.socket.on(
       'trade_set_disputed',
-      async ({ chatId, type, reason, from, to }: SetTradeAsDisputedParams) => {
+      async ({
+        chatId,
+        type,
+        reason,
+        from,
+        to,
+        evidences,
+      }: SetTradeAsDisputedParams) => {
         try {
           const systemMessage = new SystemMessage();
 
@@ -278,7 +289,13 @@ export default class Trade {
                   fiatAmount: true,
                   vendor: {
                     select: {
+                      id: true,
                       trustScore: true,
+                    },
+                  },
+                  trader: {
+                    select: {
+                      id: true,
                     },
                   },
                   paymentMethod: {
@@ -293,7 +310,7 @@ export default class Trade {
 
           if (!chat) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
-              error: true,
+              error: 'Unable to find chat',
             });
             return;
           }
@@ -309,7 +326,7 @@ export default class Trade {
 
           if (!disputeRaiser) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
-              error: true,
+              error: 'Unable to find disputeRaiser',
             });
             return;
           }
@@ -320,7 +337,7 @@ export default class Trade {
 
           if (!admin) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
-              error: true,
+              error: 'Unable to find admin',
             });
             return;
           }
@@ -347,10 +364,15 @@ export default class Trade {
           );
           const priority = mapPriorityScoreToLevel(priorityScore);
           const disputedAt = new Date();
+          const traderStatement =
+            disputeRaiser.id === chat.trade.trader.id ? reason : null;
+          const vendorStatement =
+            disputeRaiser.id === chat.trade.vendor.id ? reason : null;
           const dispute = await prisma.tradeDispute.create({
             data: {
               type,
-              reason,
+              traderStatement,
+              vendorStatement,
               severity,
               slaDueAt,
               priority,
@@ -363,6 +385,20 @@ export default class Trade {
           });
 
           console.log({ dispute });
+
+          console.log({ evidences });
+
+          for (const evidence of evidences) {
+            const evidenceFile = await prisma.disputeEvidence.create({
+              data: {
+                type: 'BANK_STATEMENT',
+                disputeId: dispute.id,
+                submittedById: disputeRaiser.id,
+                fileUrl: evidence.url,
+              },
+            });
+            console.log({ evidenceFile });
+          }
 
           await prisma.trade.update({
             where: {

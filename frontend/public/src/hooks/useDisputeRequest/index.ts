@@ -46,7 +46,7 @@ const useDisputeRequest = () => {
         chatId: trade.chat.id,
         type: getValues('type'),
         reason: getValues('reason'),
-        evidence: uploadedFiles,
+        evidences: uploadedFiles,
         from,
         to,
       });

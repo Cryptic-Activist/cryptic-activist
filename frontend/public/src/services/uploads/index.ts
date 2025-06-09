@@ -19,7 +19,7 @@ export const uploadFiles = async (formData: FormData) => {
       };
     }
 
-    return response.data;
+    return response.data.files;
   } catch (err) {
     console.error('Upload error:', err);
     return {

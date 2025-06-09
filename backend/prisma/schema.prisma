@@ -409,6 +409,8 @@ model DisputePartyNote {
   addedBy      Admin        @relation("disputePartyNoteAddedBy", fields: [addedById], references: [id])
   content      String       @db.Text()
   createdAt    DateTime     @default(now())
+
+  @@map("dispute_party_notes")
 }
 
 enum DisputeAction {
@@ -429,6 +431,8 @@ model DisputeAuditLog {
   action      DisputeAction
   note        String?       @db.Text()
   createdAt   DateTime      @default(now())
+
+  @@map("dispute_audit_logs")
 }
 
 enum EvidenceType {
@@ -450,6 +454,8 @@ model DisputeEvidence {
   fileUrl       String? // If hosted on S3 or similar
   textContent   String?      @db.Text()
   createdAt     DateTime     @default(now())
+
+  @@map("dispute_evidences")
 }
 
 enum DisputeType {
@@ -522,6 +528,7 @@ model TradeDispute {
   disputePartyNote DisputePartyNote[] @relation("disputePartyNote")
 
   @@index([status, priority])
+  @@map("trade_disputes")
 }
 
 enum TransactionPaymentMethodType {
@@ -586,6 +593,8 @@ model UserStats {
   disputesLost    Int       @default(0)
   fraudFlagged    Boolean   @default(false)
   lastDisputeDate DateTime?
+
+  @@map("user_stats")
 }
 
 model UserLanguage {
