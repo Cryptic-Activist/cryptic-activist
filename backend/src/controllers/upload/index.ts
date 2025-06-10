@@ -50,7 +50,7 @@ export const uploadFile = async (req: Request, res: Response) => {
           ? file.buffer // No processing for PDFs
           : await sharp(file.buffer)
               .resize({ width: 720, withoutEnlargement: true })
-              .webp({ quality: 30 })
+              .webp({ quality: 20 })
               .toFormat('webp', {
                 progressive: true,
               })
