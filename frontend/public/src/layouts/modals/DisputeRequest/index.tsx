@@ -53,13 +53,15 @@ const DisputeRequest = () => {
             </div>
             <div className={styles.column}>
               <FileUploader
-                allowMultiple={false}
+                allowMultiple
                 allowedFileTypes={[
                   'image/jpeg',
                   'image/png',
                   'image/webp',
-                  'application/pdf',
+                  // 'application/pdf',
                 ]}
+                maxFileSize={2 * 1024 * 1024} // 1MB
+                maxFiles={4}
                 label="Upload Evidence"
                 onUpload={onUploadEvidences}
                 ref={uploaderRef}

@@ -5,6 +5,7 @@ import { getBearerToken } from '@/utils';
 export const uploadFiles = async (formData: FormData) => {
   try {
     const bearerToken = getBearerToken();
+    formData.append('folder', 'evidences');
 
     const response = await axios.post(`${BACKEND}/upload/public`, formData, {
       headers: {

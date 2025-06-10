@@ -107,6 +107,11 @@ export type DisputeStatus =
 	| 'RESOLVED'
 	| 'CLOSED';
 
+type Evidence = {
+	fileUrl: string;
+	submittedBy: User;
+};
+
 export type Dispute = {
 	id?: string;
 	trade?: Trade;
@@ -119,13 +124,13 @@ export type Dispute = {
 	loser?: User;
 	winner?: User;
 	raisedBy?: User;
-	reason?: string;
 	resolutionNote?: string;
 	resolvedAt?: string;
 	traderStatement?: string;
 	vendorStatement?: string;
 	createdAt?: string;
 	updatedAt?: string;
+	evidences?: Evidence[];
 };
 
 export type DisputeState = Dispute;

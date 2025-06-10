@@ -45,6 +45,17 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         status: true,
         type: true,
         slaDueAt: true,
+        evidences: {
+          select: {
+            fileUrl: true,
+            submittedBy: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
         raisedBy: {
           select: {
             id: true,
@@ -152,7 +163,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
     });
 
     let query = ChatMessage.find(
-      { chatId: dispute?.trade?.chat?.id },
+      { chatId: dispute?.trade?.chat?.id, type: { $ne: 'info' } },
       'createdAt from message type to',
     );
 

@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 
+import { BACKEND } from '@/constants/env';
 import { IS_DEVELOPMENT } from '@/constants';
 import { S3 } from 'aws-sdk';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import { generateRandomHash } from '@/utils/string';
 import multer from 'multer';
 import path from 'path';
 import sharp from 'sharp';
@@ -14,7 +15,7 @@ dotenv.config();
 // Multer setup: store files in memory
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 1 * 1024 * 1024 }, // 1MB limit
+  limits: { fileSize: 2 * 1024 * 1024 }, // 1MB limit
 });
 
 // AWS S3 config
@@ -25,22 +26,31 @@ const s3 = new S3({
 });
 
 export const uploadFile = async (req: Request, res: Response) => {
+  const { files, body } = req;
+  const { folder } = body;
   try {
-    if (!req.files) {
+    if (!files || !folder) {
       res.status(400).json({ message: 'No files uploaded.' });
       return;
     }
 
     const results = await Promise.all(
-      (req.files as Express.Multer.File[]).map(async (file) => {
+      (files as Express.Multer.File[]).map(async (file) => {
         const isPdf = file.mimetype === 'application/pdf';
-        const hash = generateRandomHash(16);
-        const fileName = `${Date.now()}-${hash}.webp`;
+        const hash = crypto
+          .createHash('sha256')
+          .update(file.buffer)
+          .digest('hex')
+          .slice(0, 12);
+
+        // Get correct file extension
+        const ext = isPdf ? 'pdf' : 'webp';
+        const fileName = `${Date.now()}-${hash}.${ext}`;
         const finalBuffer = isPdf
           ? file.buffer // No processing for PDFs
           : await sharp(file.buffer)
               .resize({ width: 720, withoutEnlargement: true })
-              .webp({ quality: 60 })
+              .webp({ quality: 30 })
               .toFormat('webp', {
                 progressive: true,
               })
@@ -51,7 +61,7 @@ export const uploadFile = async (req: Request, res: Response) => {
           // Upload to S3
           const uploadParams = {
             Bucket: process.env.AWS_S3_BUCKET_NAME!,
-            Key: `uploads/${fileName}`,
+            Key: `${folder}/${fileName}`,
             Body: finalBuffer,
             ContentType: file.mimetype,
             ACL: 'public-read',
@@ -65,7 +75,7 @@ export const uploadFile = async (req: Request, res: Response) => {
           };
         } else {
           // Save to local /uploads folder
-          const localPath = path.join(__dirname, '../../uploads');
+          const localPath = path.join(__dirname, `../../uploads/${folder}`);
           if (!fs.existsSync(localPath))
             fs.mkdirSync(localPath, { recursive: true });
 
@@ -74,7 +84,7 @@ export const uploadFile = async (req: Request, res: Response) => {
 
           return {
             fileName,
-            url: `http://localhost:5000/uploads/${fileName}`,
+            url: `${BACKEND}/uploads/${folder}/${fileName}`,
           };
         }
       }),

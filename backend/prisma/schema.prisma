@@ -447,7 +447,7 @@ enum EvidenceType {
 model DisputeEvidence {
   id            String       @id @default(uuid())
   disputeId     String
-  dispute       TradeDispute @relation("disputeEvidence", fields: [disputeId], references: [id])
+  dispute       TradeDispute @relation("disputeEvidences", fields: [disputeId], references: [id])
   submittedById String
   submittedBy   User         @relation(fields: [submittedById], references: [id])
   type          EvidenceType
@@ -522,7 +522,7 @@ model TradeDispute {
   winner           User?              @relation("wonDisputes", fields: [winnerId], references: [id])
   loserId          String?
   loser            User?              @relation("lostDisputes", fields: [loserId], references: [id])
-  evidence         DisputeEvidence[]  @relation("disputeEvidence")
+  evidences        DisputeEvidence[]  @relation("disputeEvidences")
   updatedAt        DateTime           @updatedAt @db.Timestamp()
   disputeAuditLog  DisputeAuditLog[]  @relation("disputeAuditLog")
   disputePartyNote DisputePartyNote[] @relation("disputePartyNote")

@@ -9,6 +9,59 @@ import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
 
 const main = async () => {
+  const tiers = await prisma.tier.createMany({
+    data: [
+      {
+        name: 'Bronze',
+        description:
+          'Your starting tier. Earn XP by trading to unlock discounts.',
+        level: 0,
+        tradingFee: 0.05,
+        discount: 0,
+        minVolume: 0,
+        requiredXP: 0,
+      },
+      {
+        name: 'Silver',
+        description:
+          'Reach 1,000 XP to move to Silver and enjoy a small discount.',
+        level: 1,
+        tradingFee: 0.05,
+        discount: 0.05,
+        minVolume: 0,
+        requiredXP: 1000,
+      },
+      {
+        name: 'Gold',
+        description:
+          'When you accumulate 5,000 XP, you qualify for Gold discounts.',
+        level: 2,
+        tradingFee: 0.05,
+        discount: 0.1,
+        minVolume: 0,
+        requiredXP: 2500,
+      },
+      {
+        name: 'Platinum',
+        description: 'Achieve 10,000 XPto join our exclusive Platinum tier.',
+        level: 3,
+        tradingFee: 0.05,
+        discount: 0.15,
+        minVolume: 0,
+        requiredXP: 5000,
+      },
+      {
+        name: 'Diamond',
+        description:
+          'Once you hit 20,000 XP you become a Diamond member and get the highest fee discounts.',
+        level: 4,
+        tradingFee: 0.05,
+        discount: 0.2,
+        minVolume: 0,
+        requiredXP: 10000,
+      },
+    ],
+  });
   const paymentMethodCategory = await prisma.paymentMethodCategory.create({
     data: {
       name: 'Bank Transfer',
@@ -80,19 +133,9 @@ const main = async () => {
   const privateKeysArrObj = await generatePrivateKeysBip39();
   const profileColor = getRandomHighContrastColor();
 
-  const tier = await prisma.tier.upsert({
+  const tierBronze = await prisma.tier.findFirst({
     where: {
-      name: 'Bronze',
-    },
-    update: {},
-    create: {
-      name: 'Bronze',
-      description: 'Your starting tier. Earn XP by trading to unlock discounts',
       level: 0,
-      tradingFee: 0.05,
-      discount: 0,
-      minVolume: 0,
-      requiredXP: 0,
     },
   });
 
@@ -105,7 +148,7 @@ const main = async () => {
       password: hash,
       privateKeys: privateKeysArrObj.encryptedPrivateKeys,
       profileColor,
-      tierId: tier.id,
+      tierId: tierBronze?.id,
       isVerified: true,
     },
   });

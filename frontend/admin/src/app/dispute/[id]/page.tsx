@@ -1,5 +1,7 @@
 'use client';
 
+import { DynamicIcon, Viewer } from '@/components';
+import { Evidence, FileViewer, Message } from './types';
 import React, { useEffect, useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
 import {
@@ -7,23 +9,32 @@ import {
 	getLocaleFullDateString,
 	timeSince
 } from '@/utils/date';
+import { useDispute, useOutsideClick } from '@/hooks';
 
-import { Message } from './types';
+import Image from 'next/image';
 import styles from './page.module.scss';
-import { useDispute } from '@/hooks';
 
 const DisputeDetailsPage = () => {
 	const { $dispute } = useDispute();
 
 	console.log({ $dispute });
 
-	// console.log({ $dispute });
-
 	const [adminNotes, setAdminNotes] = useState('');
 	const [resolutionType, setResolutionType] = useState('');
 	const [resolutionNotes, setResolutionNotes] = useState('');
 	const [buyerAction, setBuyerAction] = useState('No action');
 	const [sellerAction, setSellerAction] = useState('No action');
+	const [fileSrc, setFileSrc] = useState<string>();
+	const [fileOpen, setFileOpen] = useState(false);
+
+	const openFileViewer = (src: string) => {
+		setFileOpen(true);
+		setFileSrc(src);
+	};
+	const closeFileViewer = () => {
+		setFileOpen(false);
+		setFileSrc(undefined);
+	};
 
 	// Mock dispute data
 	const disputeData = {
@@ -167,7 +178,6 @@ const DisputeDetailsPage = () => {
 	);
 
 	const UserCard = ({ user, role }) => {
-		console.log({ user });
 		return (
 			<div className={styles.userCard}>
 				<div className={styles.userHeader}>
@@ -230,16 +240,38 @@ const DisputeDetailsPage = () => {
 		);
 	};
 
-	const EvidenceItem = ({ type, file, icon }) => (
-		<div className={styles.evidenceItem}>
-			<div className={styles.evidenceIcon}>{icon}</div>
-			<div>{type}</div>
-			<small>{file}</small>
-		</div>
-	);
+	const EvidenceItem = (evidence: Evidence) => {
+		const split = evidence.fileUrl.split('/');
+		const filename = split[split.length - 1];
+		const fileExt = filename.split('.')[1];
+		const fileType = fileExt === 'pdf' ? 'PDF' : 'Image';
+		return (
+			<button
+				className={styles.evidenceItem}
+				onClick={() => openFileViewer(evidence.fileUrl)}
+			>
+				{fileType === 'PDF' ? (
+					<DynamicIcon iconName="MdPictureAsPdf" size={45} color="#000" />
+				) : (
+					<div
+						className={styles.evidenceImage}
+						style={{
+							backgroundImage: `url(${evidence.fileUrl})`
+						}}
+					/>
+				)}
+				<div>{fileType}</div>
+			</button>
+		);
+	};
+
+	const viewerRef = useOutsideClick(closeFileViewer);
 
 	return (
 		<div className={styles.container}>
+			{fileOpen && (
+				<Viewer src={fileSrc} ref={viewerRef} onClose={closeFileViewer} />
+			)}
 			{/* Header */}
 			<div className={styles.header}>
 				<h1 className={styles.disputeId}>Dispute {$dispute.id}</h1>
@@ -366,9 +398,10 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>Evidence Submitted</div>
 						<div className={styles.cardContent}>
 							<div className={styles.evidenceGrid}>
-								{evidence.map((item, index) => (
-									<EvidenceItem key={index} {...item} />
-								))}
+								{$dispute.evidences &&
+									$dispute.evidences?.map((item, index) => (
+										<EvidenceItem key={index} {...item} />
+									))}
 							</div>
 						</div>
 					</div>
@@ -394,9 +427,16 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>Recent Chat Messages</div>
 						<div className={styles.cardContent}>
 							<div className={styles.chatMessages}>
-								{$dispute.trade?.chat?.messages?.map((msg, index) => (
-									<MessageItem key={index} {...msg} />
-								))}
+								{$dispute.trade?.chat?.messages &&
+								$dispute.trade?.chat?.messages?.length > 0 ? (
+									<>
+										{$dispute.trade?.chat?.messages?.map((msg, index) => (
+											<MessageItem key={index} {...msg} />
+										))}
+									</>
+								) : (
+									<span>No chat messages</span>
+								)}
 							</div>
 						</div>
 					</div>
@@ -442,6 +482,13 @@ const DisputeDetailsPage = () => {
 							>
 								Contact Both Users
 							</button>
+							<button
+								className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
+								style={{ marginTop: '12px' }}
+								onClick={handleContactUsers}
+							>
+								Cancel Trade
+							</button>
 						</div>
 					</div>
 
@@ -475,7 +522,7 @@ const DisputeDetailsPage = () => {
 					</div>
 
 					{/* Blockchain Info */}
-					<div className={styles.card}>
+					{/* <div className={styles.card}>
 						<div className={styles.cardHeader}>Blockchain Information</div>
 						<div className={styles.cardContent}>
 							<div className={styles.blockchainInfo}>
@@ -493,7 +540,7 @@ const DisputeDetailsPage = () => {
 								<div>{disputeData.blockchain.confirmations} Confirmed ✅</div>
 							</div>
 						</div>
-					</div>
+					</div> */}
 
 					{/* Resolution Form */}
 					<div className={styles.card}>
@@ -547,7 +594,7 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>User Management</div>
 						<div className={styles.cardContent}>
 							<div className={styles.formGroup}>
-								<label>Actions for {disputeData.buyer.username}:</label>
+								<label>Actions for {$dispute.trade?.vendor?.username}:</label>
 								<select
 									className={styles.formControl}
 									value={buyerAction}
@@ -560,7 +607,7 @@ const DisputeDetailsPage = () => {
 								</select>
 							</div>
 							<div className={styles.formGroup}>
-								<label>Actions for {disputeData.seller.username}:</label>
+								<label>Actions for {$dispute.trade?.trader?.username}:</label>
 								<select
 									className={styles.formControl}
 									value={sellerAction}
