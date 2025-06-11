@@ -1,26 +1,34 @@
 'use client';
 
 import { DynamicIcon, Viewer } from '@/components';
-import { Evidence, FileViewer, Message } from './types';
-import React, { useEffect, useState } from 'react';
+import { Evidence, Message } from './types';
+import React, { useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
-import {
-	formatTimestamp,
-	getLocaleFullDateString,
-	timeSince
-} from '@/utils/date';
+import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';
 
-import Image from 'next/image';
 import styles from './page.module.scss';
 
 const DisputeDetailsPage = () => {
-	const { $dispute } = useDispute();
-
-	console.log({ $dispute });
+	const {
+		$dispute,
+		previousDisputePartyNotes,
+		resolutionTypesQuery,
+		userManagementActionsQuery,
+		disputeNotesValues,
+		userManagementValues,
+		resolutionNotesValues,
+		registerDisputeNotes,
+		handleSubmitDisputeNotes,
+		onSubmitDisputeNotes,
+		registerResolution,
+		handleSubmitResolution,
+		onSubmitResolutionNotes,
+		registerUserManagement,
+		handleSubmitUserManagement
+	} = useDispute();
 
 	const [adminNotes, setAdminNotes] = useState('');
-	const [resolutionType, setResolutionType] = useState('');
 	const [resolutionNotes, setResolutionNotes] = useState('');
 	const [buyerAction, setBuyerAction] = useState('No action');
 	const [sellerAction, setSellerAction] = useState('No action');
@@ -116,14 +124,6 @@ const DisputeDetailsPage = () => {
 			event: `Dispute assigned to ${$dispute.moderator?.firstName} ${$dispute.moderator?.lastName}`
 		}
 	];
-
-	const evidence = [
-		{ type: 'Bank Receipt', file: 'buyer_receipt.pdf', icon: '📄' },
-		{ type: 'Bank Statement', file: 'statement_dec15.pdf', icon: '💳' },
-		{ type: 'Transfer Screenshot', file: 'transfer_proof.jpg', icon: '📸' },
-		{ type: 'Chat History', file: 'Exported automatically', icon: '💬' }
-	];
-
 	const handleQuickAction = (action) => {
 		const confirmMessage = `Are you sure you want to ${action.toLowerCase()}?`;
 		if (window.confirm(confirmMessage)) {
@@ -137,20 +137,6 @@ const DisputeDetailsPage = () => {
 
 	const handleContactUsers = () => {
 		alert('Messages sent to both users.');
-	};
-
-	const handleSaveNote = () => {
-		alert('Note saved successfully!');
-	};
-
-	const handleSubmitResolution = () => {
-		if (!resolutionType || !resolutionNotes) {
-			alert('Please select a resolution type and add notes.');
-			return;
-		}
-		if (window.confirm('Are you sure you want to submit this resolution?')) {
-			alert('Resolution submitted successfully!');
-		}
 	};
 
 	const StatusBadge = ({ status, priority }) => (
@@ -453,13 +439,13 @@ const DisputeDetailsPage = () => {
 									className={`${styles.btn} ${styles.btnSuccess}`}
 									onClick={() => handleQuickAction("Resolve in Buyer's Favor")}
 								>
-									Resolve in Buyer's Favor
+									Resolve in Trader's Favor
 								</button>
 								<button
 									className={`${styles.btn} ${styles.btnDanger}`}
 									onClick={() => handleQuickAction("Resolve in Seller's Favor")}
 								>
-									Resolve in Seller's Favor
+									Resolve in Vendor's Favor
 								</button>
 							</div>
 							<div className={styles.actionButtons}>
@@ -476,15 +462,15 @@ const DisputeDetailsPage = () => {
 									Escalate to Senior Admin
 								</button>
 							</div>
-							<button
+							{/* <button
 								className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
 								onClick={handleContactUsers}
 							>
 								Contact Both Users
-							</button>
+							</button> */}
 							<button
 								className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
-								style={{ marginTop: '12px' }}
+								// style={{ marginTop: '12px' }}
 								onClick={handleContactUsers}
 							>
 								Cancel Trade
@@ -496,28 +482,60 @@ const DisputeDetailsPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>Admin Notes</div>
 						<div className={styles.cardContent}>
+							<h4>Previous Notes:</h4>
 							<div className={styles.adminNotes}>
-								<h4>Previous Notes:</h4>
+								<h4>{$dispute.trade?.trader?.username} notes:</h4>
 								<p>
-									Buyer has good track record. Payment receipt looks legitimate.
-									Waiting for seller's bank to confirm receipt.
+									{previousDisputePartyNotes?.trader !== null
+										? previousDisputePartyNotes?.trader
+										: 'No previous notes found'}
 								</p>
 							</div>
-							<div className={styles.formGroup}>
-								<label>Add New Note:</label>
-								<textarea
-									className={styles.formControl}
-									placeholder="Enter your notes here..."
-									value={adminNotes}
-									onChange={(e) => setAdminNotes(e.target.value)}
-								/>
+							<div className={styles.adminNotes}>
+								<h4>{$dispute.trade?.vendor?.username} notes:</h4>
+								<p>
+									{previousDisputePartyNotes?.vendor !== null
+										? previousDisputePartyNotes?.vendor
+										: 'No previous notes found'}
+								</p>
 							</div>
-							<button
-								className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-								onClick={handleSaveNote}
-							>
-								Save Note
-							</button>
+							<form onSubmit={handleSubmitDisputeNotes(onSubmitDisputeNotes)}>
+								<div className={styles.formGroup}>
+									<label>New Note To:</label>
+									<select
+										className={styles.formControl}
+										value={disputeNotesValues.userId}
+										{...registerDisputeNotes('userId', {
+											required: true
+										})}
+									>
+										<option value="">Select user...</option>
+										<option value={$dispute.trade?.trader?.id}>
+											{$dispute.trade?.trader?.username}
+										</option>
+										<option value={$dispute.trade?.vendor?.id}>
+											{$dispute.trade?.vendor?.username}
+										</option>
+									</select>
+								</div>
+								<div className={styles.formGroup}>
+									<label>Add New Note:</label>
+									<textarea
+										className={styles.formControl}
+										placeholder="Enter your notes here..."
+										value={disputeNotesValues.content}
+										{...registerDisputeNotes('content', {
+											required: true
+										})}
+									/>
+								</div>
+								<button
+									className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
+									type="submit"
+								>
+									Save Note
+								</button>
+							</form>
 						</div>
 					</div>
 
@@ -546,46 +564,67 @@ const DisputeDetailsPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>Resolution Decision</div>
 						<div className={styles.cardContent}>
-							<div className={styles.formGroup}>
-								<label>Resolution Type:</label>
-								<select
-									className={styles.formControl}
-									value={resolutionType}
-									onChange={(e) => setResolutionType(e.target.value)}
+							<form onSubmit={handleSubmitResolution(onSubmitResolutionNotes)}>
+								<div className={styles.formGroup}>
+									<label>Resolution Type:</label>
+									<select
+										className={styles.formControl}
+										value={resolutionNotesValues.resolutionType}
+										{...registerResolution('resolutionNote', {
+											required: true
+										})}
+									>
+										<option value="">Select resolution...</option>
+										{resolutionTypesQuery?.data?.map(
+											(filter: any, index: number) => (
+												<option value={filter} key={index}>
+													{formatEnum(filter)}
+												</option>
+											)
+										)}
+									</select>
+								</div>
+								<div className={styles.formGroup}>
+									<label>Resolution Notes:</label>
+									<textarea
+										className={styles.formControl}
+										rows={4}
+										placeholder="Explain your decision..."
+										value={resolutionNotes}
+										{...registerResolution('resolutionNote', {
+											required: true
+										})}
+									/>
+								</div>
+								<div className={styles.formGroup}>
+									<label>
+										<input
+											type="checkbox"
+											{...registerResolution('notifyBothUsers', {
+												required: true
+											})}
+										/>{' '}
+										Notify both users
+									</label>
+								</div>
+								<div className={styles.formGroup}>
+									<label>
+										<input
+											type="checkbox"
+											{...registerResolution('logAdminAction', {
+												required: true
+											})}
+										/>{' '}
+										Log admin action
+									</label>
+								</div>
+								<button
+									className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
+									type="submit"
 								>
-									<option value="">Select resolution...</option>
-									<option value="release">Release crypto to buyer</option>
-									<option value="return">Return crypto to seller</option>
-									<option value="partial">Partial refund</option>
-									<option value="extend">Extend trade time</option>
-								</select>
-							</div>
-							<div className={styles.formGroup}>
-								<label>Resolution Notes:</label>
-								<textarea
-									className={styles.formControl}
-									rows={4}
-									placeholder="Explain your decision..."
-									value={resolutionNotes}
-									onChange={(e) => setResolutionNotes(e.target.value)}
-								/>
-							</div>
-							<div className={styles.formGroup}>
-								<label>
-									<input type="checkbox" /> Notify both users
-								</label>
-							</div>
-							<div className={styles.formGroup}>
-								<label>
-									<input type="checkbox" /> Log admin action
-								</label>
-							</div>
-							<button
-								className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-								onClick={handleSubmitResolution}
-							>
-								Submit Resolution
-							</button>
+									Submit Resolution
+								</button>
+							</form>
 						</div>
 					</div>
 
@@ -598,12 +637,17 @@ const DisputeDetailsPage = () => {
 								<select
 									className={styles.formControl}
 									value={buyerAction}
-									onChange={(e) => setBuyerAction(e.target.value)}
+									{...registerUserManagement('actionForVendor', {
+										required: true
+									})}
 								>
-									<option>No action</option>
-									<option>Send warning</option>
-									<option>Temporary suspension</option>
-									<option>Account review</option>
+									{userManagementActionsQuery?.data?.map(
+										(filter: any, index: number) => (
+											<option value={filter} key={index}>
+												{formatEnum(filter)}
+											</option>
+										)
+									)}
 								</select>
 							</div>
 							<div className={styles.formGroup}>
@@ -611,12 +655,17 @@ const DisputeDetailsPage = () => {
 								<select
 									className={styles.formControl}
 									value={sellerAction}
-									onChange={(e) => setSellerAction(e.target.value)}
+									{...registerUserManagement('actionForVendor', {
+										required: true
+									})}
 								>
-									<option>No action</option>
-									<option>Send warning</option>
-									<option>Temporary suspension</option>
-									<option>Account review</option>
+									{userManagementActionsQuery?.data?.map(
+										(filter: any, index: number) => (
+											<option value={filter} key={index}>
+												{formatEnum(filter)}
+											</option>
+										)
+									)}
 								</select>
 							</div>
 							<button

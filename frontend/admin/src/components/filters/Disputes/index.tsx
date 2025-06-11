@@ -31,7 +31,6 @@ const DisputesFilters = () => {
 					label="Status"
 					options={[
 						{ label: 'All Statuses', value: '' },
-
 						...(statusesQuery.data
 							? statusesQuery.data?.map((filter: any) => ({
 									label: formatEnum(filter),

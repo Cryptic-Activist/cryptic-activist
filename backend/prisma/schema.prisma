@@ -500,32 +500,44 @@ enum DisputeStatus {
   CLOSED
 }
 
+enum DisputeResolutionType {
+  RELEASE_CRYPTO // Crypto released to buyer
+  REFUND_PAYMENT // Payment refunded to sender
+  CANCEL_TRADE // Trade cancelled without settlement
+  PARTIAL_REFUND // Partial amount refunded or settled
+  SPLIT_RESOLUTION // Both parties share responsibility (e.g., 50/50)
+  NO_ACTION_TAKEN // Dispute closed with no action (e.g., invalid)
+  OFF_PLATFORM_DECISION // Handled outside the platform (e.g., legal process)
+  PLATFORM_COMPENSATION // Platform took responsibility and compensated
+}
+
 model TradeDispute {
-  id               String             @id @default(uuid())
-  tradeId          String             @unique
-  trade            Trade              @relation(fields: [tradeId], references: [id])
+  id               String                 @id @default(uuid())
+  tradeId          String                 @unique
+  trade            Trade                  @relation(fields: [tradeId], references: [id])
   raisedById       String
-  raisedBy         User               @relation(fields: [raisedById], references: [id])
+  raisedBy         User                   @relation(fields: [raisedById], references: [id])
   type             DisputeType
-  vendorStatement  String?            @default("") @db.Text()
-  traderStatement  String?            @default("") @db.Text()
+  vendorStatement  String?                @default("") @db.Text()
+  traderStatement  String?                @default("") @db.Text()
   severity         DisputeSeverity
   status           DisputeStatus
   resolutionNote   String?
+  resolutionType   DisputeResolutionType?
   resolvedAt       DateTime?
   moderatorId      String?
-  moderator        Admin?             @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
-  priority         DisputePriority    @default(MEDIUM)
-  slaDueAt         DateTime           @db.Timestamp() // SLA target datetime
-  createdAt        DateTime           @default(now()) @db.Timestamp()
+  moderator        Admin?                 @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  priority         DisputePriority        @default(MEDIUM)
+  slaDueAt         DateTime               @db.Timestamp() // SLA target datetime
+  createdAt        DateTime               @default(now()) @db.Timestamp()
   winnerId         String?
-  winner           User?              @relation("wonDisputes", fields: [winnerId], references: [id])
+  winner           User?                  @relation("wonDisputes", fields: [winnerId], references: [id])
   loserId          String?
-  loser            User?              @relation("lostDisputes", fields: [loserId], references: [id])
-  evidences        DisputeEvidence[]  @relation("disputeEvidences")
-  updatedAt        DateTime           @updatedAt @db.Timestamp()
-  disputeAuditLog  DisputeAuditLog[]  @relation("disputeAuditLog")
-  disputePartyNote DisputePartyNote[] @relation("disputePartyNote")
+  loser            User?                  @relation("lostDisputes", fields: [loserId], references: [id])
+  evidences        DisputeEvidence[]      @relation("disputeEvidences")
+  updatedAt        DateTime               @updatedAt @db.Timestamp()
+  disputeAuditLog  DisputeAuditLog[]      @relation("disputeAuditLog")
+  disputePartyNote DisputePartyNote[]     @relation("disputePartyNote")
 
   @@index([status, priority])
   @@map("trade_disputes")

@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { DisputeResolutionType, DisputeType } from '@prisma/client';
+import { Request, Response, response } from 'express';
 
 import ChatMessage from '@/models/ChatMessage';
-import { DisputeType } from '@prisma/client';
+import { UserManagementActions } from './data';
 import { prisma } from '@/services/db';
 
 export async function getDisputeTypes(_req: Request, res: Response) {
@@ -18,8 +19,6 @@ export async function getDisputeTypes(_req: Request, res: Response) {
 export async function createDispute(req: Request, res: Response) {
   try {
     const body = req.body;
-
-    console.log(body);
 
     const disputeTypes = Object.keys(DisputeType).map((type) => type);
     res.status(200).json(disputeTypes);
@@ -181,6 +180,326 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         },
       },
     });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export const addDisputePartyNote = async (req: Request, res: Response) => {
+  try {
+    const { disputeId, userId, adminId, content } = req.body;
+
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: {
+        id: disputeId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!dispute) {
+      res.status(404).json({
+        error: 'Dispute not found',
+      });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        error: 'User not found',
+      });
+      return;
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: {
+        id: adminId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!admin) {
+      res.status(404).json({
+        error: 'Admin not found',
+      });
+      return;
+    }
+
+    const newDisputePartyNote = await prisma.disputePartyNote.create({
+      data: {
+        content,
+        addedById: admin.id,
+        disputeId: dispute.id,
+        targetUserId: user.id,
+      },
+    });
+
+    res.status(200).json(newDisputePartyNote);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const getPreviousDisputePartyNote = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const traderId = req.query.traderId as string;
+    const vendorId = req.query.vendorId as string;
+
+    const disputePartyNoteTrader = await prisma.disputePartyNote.findFirst({
+      where: {
+        targetUserId: traderId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        dispute: {
+          select: {
+            id: true,
+            tradeId: true,
+            status: true,
+          },
+        },
+        addedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+    const disputePartyNoteVendor = await prisma.disputePartyNote.findFirst({
+      where: {
+        targetUserId: vendorId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        dispute: {
+          select: {
+            id: true,
+            tradeId: true,
+            status: true,
+          },
+        },
+        addedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    res
+      .status(200)
+      .json({ trader: disputePartyNoteTrader, vendor: disputePartyNoteVendor });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export async function getDisputeResolutionTypes(_req: Request, res: Response) {
+  try {
+    const disputeResolutionTypes = Object.keys(DisputeResolutionType).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeResolutionTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function getDisputeUserManagementActions(
+  _req: Request,
+  res: Response,
+) {
+  try {
+    console.log({ UserManagementActions });
+    const disputeTypes = Object.keys(UserManagementActions).map((type) => type);
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function triggerAction(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function resolveInTraderFavor(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function resolveInVendorFavor(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function requestMoreEvidences(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function escalateToSeniorAdmin(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function contractBothUsers(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
+export async function cancelTrade(req: Request, res: Response) {
+  try {
+    const { actionForTrader, actionForVendor } = req.body;
+
+    console.log({ actionForTrader, actionForVendor });
+
+    switch (actionForTrader) {
+      case UserManagementActions.NO_ACTION: {
+      }
+    }
+
+    const disputeTypes = Object.values(UserManagementActions).map(
+      (type) => type,
+    );
+    res.status(200).json(disputeTypes);
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

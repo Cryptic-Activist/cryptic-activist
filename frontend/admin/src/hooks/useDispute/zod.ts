@@ -12,9 +12,16 @@ export const disputeResolutionResolver = zodResolver(ZodDisputeResolution);
 
 export const ZodDisputeUserManagement = z.object({
 	actionForTrader: z.string(),
-	actionForBuyer: z.string()
+	actionForVendor: z.string()
 });
 
 export const disputeUserManagementResolver = zodResolver(
 	ZodDisputeUserManagement
 );
+
+export const ZodDisputeNotes = z.object({
+	userId: z.string(),
+	content: z.string()
+});
+
+export const disputeNotesResolver = zodResolver(ZodDisputeNotes);
