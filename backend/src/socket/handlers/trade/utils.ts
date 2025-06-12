@@ -145,7 +145,6 @@ export const updateAddXPTier = async (
       requiredXP: true,
     },
   });
-  console.log({ nextVendorTier, vendorUpdated });
   if (nextVendorTier && vendorUpdated.xp >= nextVendorTier?.requiredXP) {
     await prisma.user.update({
       where: {

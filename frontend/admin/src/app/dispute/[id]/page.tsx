@@ -465,15 +465,15 @@ const DisputeDetailsPage = () => {
 									Escalate to Senior Admin
 								</button>
 							</div>
-							{/* <button
+							<button
 								className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
 								onClick={handleContactUsers}
 							>
 								Contact Both Users
-							</button> */}
+							</button>
 							<button
 								className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
-								// style={{ marginTop: '12px' }}
+								style={{ marginTop: '12px' }}
 								onClick={() => cancelTradeByModeratorMutation.mutate()}
 							>
 								Cancel Trade

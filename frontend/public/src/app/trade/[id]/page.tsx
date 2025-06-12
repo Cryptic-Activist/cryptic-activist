@@ -43,6 +43,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
     !trade.disputedAt;
+  const isDisputed = trade.disputedAt && trade.status === 'DISPUTED';
 
   return (
     <section className={styles.actionButtons}>
@@ -92,6 +93,16 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           }
         >
           <strong>Set as Paid</strong>
+        </Button>
+      )}
+      {isDisputed && (
+        <Button
+          type="button"
+          fullWidth
+          padding="1rem"
+          href={`/trade/${trade.id}/details`}
+        >
+          <strong>See Trade Details</strong>
         </Button>
       )}
     </section>

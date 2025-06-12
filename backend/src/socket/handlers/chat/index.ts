@@ -100,7 +100,7 @@ export default class Chat {
         const interval = setInterval(async () => {
           const remaining = await getRemainingTime(trade.id);
           if (remaining === null || remaining <= 0) {
-            const completedTrade = await prisma.trade.findUnique({
+            const endedTrade = await prisma.trade.findUnique({
               where: {
                 id: trade.id,
                 status: {
@@ -111,35 +111,30 @@ export default class Chat {
                 status: true,
                 id: true,
                 endedAt: true,
+                disputedAt: true,
               },
             });
-            console.log({ completedTradeStatus: completedTrade?.status });
-            if (completedTrade?.status !== 'COMPLETED') {
-              if (completedTrade?.status === 'FAILED') {
-                this.io.to(chatId).emit('trade_failed', {
-                  chatId,
-                  endedAt: completedTrade.endedAt,
-                });
-              } else if (completedTrade?.status === 'DISPUTED') {
-                this.io.to(chatId).emit('trade_set_disputed_success', {
-                  status: 'DISPUTED',
-                  disputedAt: new Date(),
-                });
-              } else {
-                const expiredAt = new Date();
-                // await prisma.trade.update({
-                //   where: { id: trade.id },
-                //   data: { expiredAt, status: 'EXPIRED' },
-                // });
-                // await systemMessage.tradeExpired(trade.id);
-                this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
-              }
-              clearInterval(interval);
+            if (endedTrade?.status === 'COMPLETED') {
+              this.io.to(chatId).emit('trade_completed', {
+                chatId,
+                endedAt: endedTrade.endedAt,
+              });
             }
+            if (endedTrade?.status === 'FAILED') {
+              this.io.to(chatId).emit('trade_failed', {
+                chatId,
+                endedAt: endedTrade.endedAt,
+              });
+            }
+            if (endedTrade?.status === 'DISPUTED') {
+              this.io.to(chatId).emit('trade_set_disputed_success', {
+                status: 'DISPUTED',
+                disputedAt: endedTrade.disputedAt,
+              });
+            }
+            clearInterval(interval);
           } else {
-            // if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
             this.io.to(chatId).emit('timer:update', { remaining, chatId });
-            // }
           }
         }, 1000);
 
@@ -268,7 +263,6 @@ export default class Chat {
               createTradeDetails.sellerFundAmountWei,
             );
 
-            console.log('Trade funded:', tradeFunded);
             if (tradeFunded.error) {
               await prisma.trade.update({
                 where: { id: trade.id },

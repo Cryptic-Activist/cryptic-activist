@@ -9,8 +9,6 @@ export const validateUploadFiles = (
 ) => {
   const { body } = req;
 
-  console.log({ req });
-
   const validated = UploadFilesBody.safeParse(body);
 
   if (!validated.success) {

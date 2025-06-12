@@ -17,7 +17,6 @@ export default class Notification {
     this.socket.on(
       'notification_trade_start_sent',
       async ({ tradeId }: TradeStartSentParams) => {
-        console.log('system message sent');
         const systemMessage = new SystemMessage();
         systemMessage.tradeStarted(tradeId);
       },

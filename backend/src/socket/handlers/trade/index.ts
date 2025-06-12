@@ -110,8 +110,6 @@ export default class Trade {
             parseEther(trade?.cryptocurrencyAmount.toString()),
           );
 
-          console.log({ confirmedTrade });
-
           if (confirmedTrade.error) {
             this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
               error: 'Unable to confirm trade',
@@ -218,8 +216,6 @@ export default class Trade {
       async ({ chatId }: SetTradeAsCanceledParams) => {
         const systemMessage = new SystemMessage();
         const canceledTrade = await cancelTrade();
-
-        console.log({ canceledTrade });
 
         if (canceledTrade.message !== 'Trade cancelled') {
           this.io.to(chatId).emit('trade_set_canceled_error', {
@@ -331,8 +327,6 @@ export default class Trade {
 
           const admin = await getRandomAdmin(true);
 
-          console.log({ admin });
-
           if (!admin) {
             this.io.to(chatId).emit('trade_set_disputed_error', {
               error: 'Unable to find admin',
@@ -361,7 +355,7 @@ export default class Trade {
             chat.trade.vendor.trustScore,
           );
           const priority = mapPriorityScoreToLevel(priorityScore);
-          const disputedAt = new Date();
+          const disputedAtEndedAt = new Date();
           const traderStatement =
             disputeRaiser.id === chat.trade.trader.id ? reason : null;
           const vendorStatement =
@@ -378,13 +372,9 @@ export default class Trade {
               tradeId: chat.trade.id,
               moderatorId: admin.id,
               raisedById: disputeRaiser.id,
-              createdAt: disputedAt,
+              createdAt: disputedAtEndedAt,
             },
           });
-
-          console.log({ dispute });
-
-          console.log({ evidences });
 
           for (const evidence of evidences) {
             const evidenceFile = await prisma.disputeEvidence.create({
@@ -395,25 +385,24 @@ export default class Trade {
                 fileUrl: evidence.url,
               },
             });
-            console.log({ evidenceFile });
           }
 
-          // await prisma.trade.update({
-          //   where: {
-          //     id: chat.trade.id,
-          //   },
-          //   data: {
-          //     status: 'DISPUTED',
-          //     disputedAt,
-          //   },
-          // });
+          await prisma.trade.update({
+            where: {
+              id: chat.trade.id,
+            },
+            data: {
+              status: 'DISPUTED',
+              disputedAt: disputedAtEndedAt,
+              endedAt: disputedAtEndedAt,
+            },
+          });
 
           this.io.to(chatId).emit('trade_set_disputed_success', {
             status: 'DISPUTED',
-            disputedAt,
+            disputedAt: disputedAtEndedAt,
           });
         } catch (error) {
-          console.log({ error });
           this.io.to(chatId).emit('trade_set_disputed_error', {
             error,
           });

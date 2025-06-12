@@ -21,6 +21,7 @@ export const useTradeSlice: StateCreator<
     paidAt: undefined,
     paymentMethod: undefined,
     fundedAt: undefined,
+    disputedAt: undefined,
     startedAt: undefined,
     exchangeRate: undefined,
     blockchainTransactionHash: undefined,
@@ -64,6 +65,7 @@ export const useTradeSlice: StateCreator<
                 params.vendorWalletAddress ?? trade.vendorWalletAddress,
               startedAt: params.startedAt ?? trade.startedAt,
               fundedAt: params.fundedAt ?? trade.fundedAt,
+              disputedAt: params.disputedAt ?? trade.disputedAt,
               exchangeRate: params.exchangeRate ?? trade.exchangeRate,
               blockchainTransactionHash:
                 params.blockchainTransactionHash ??
