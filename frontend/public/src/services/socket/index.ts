@@ -12,13 +12,7 @@ export const getSocket = (): Socket => {
       autoConnect: false,
     });
 
-    // socket.on('connect', () => {
-    //   console.log('Socket connected:', socket?.id);
-    // });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
+    socket.on('disconnect', () => {});
   }
 
   return socket;

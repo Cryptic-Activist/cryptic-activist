@@ -1,12 +1,26 @@
 'use client';
 
-import { PreviousDisputePartyNotes, ResolutionType } from './types';
+import {
+	AddDisputePartyNoteBody,
+	CancelTradeByModeratorBody,
+	ResolveInTraderFavorBody,
+	ResolveInVendorFavorBody,
+	SubmitDisputeResolutionBody,
+	SubmitDisputeUserManagementActionsBody
+} from '@/services/dispute/types';
 import {
 	addDisputePartyNote,
 	getDispute,
 	getDisputeResolutionTypes,
 	getDisputeUserManagementActions,
-	getPreviousDisputePartyNote
+	getPreviousDisputePartyNote,
+	submitCancelTradeByModerator,
+	submitDisputeResolution,
+	submitDisputeUserManagementActions,
+	submitEscalateToSeniorAdmin,
+	submitRequestMoreEvidences,
+	submitResolveInTraderFavor,
+	submitResolveInVendorFavor
 } from '@/services/dispute';
 import { dispute, setDispute } from '@/stores';
 import {
@@ -14,19 +28,10 @@ import {
 	disputeResolutionResolver,
 	disputeUserManagementResolver
 } from './zod';
-import {
-	getAverageTradeCompletionTime,
-	getTotalActiveTrades,
-	getTotalCompletedTradesToday,
-	getTotalDisputedTrades,
-	getTotalTradeVolume
-} from '@/services/dashboard';
-import { getDisputes, getFilter } from '@/services/disputes';
 import { useEffect, useState } from 'react';
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { AddDisputePartyNoteBody } from '@/services/dispute/types';
-import { resolveViewport } from 'next/dist/lib/metadata/resolve-metadata';
+import { PreviousDisputePartyNotes } from './types';
 import { useAdmin } from '..';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'next/navigation';
@@ -39,7 +44,6 @@ const useDispute = () => {
 	const [previousDisputePartyNotes, setPreviousDisputePartyNotes] =
 		useState<PreviousDisputePartyNotes>();
 
-	// `params` is an object like: { id: 'abc123' }
 	const id = params?.id as string;
 
 	const {
@@ -75,6 +79,18 @@ const useDispute = () => {
 		enabled: !!admin.data?.id
 	});
 
+	const resolutionTypesQuery = useQuery({
+		queryKey: ['resolutionTypes'],
+		queryFn: getDisputeResolutionTypes,
+		enabled: !!$dispute.id
+	});
+
+	const userManagementActionsQuery = useQuery({
+		queryKey: ['userManagementActions'],
+		queryFn: getDisputeUserManagementActions,
+		enabled: !!$dispute.id
+	});
+
 	const previousDisputePartyNoteQuery = useQuery({
 		queryKey: [
 			'previousDisputePartyNote',
@@ -88,7 +104,6 @@ const useDispute = () => {
 				traderId,
 				vendorId
 			});
-			console.log({ response });
 			return response;
 		},
 		enabled:
@@ -105,24 +120,120 @@ const useDispute = () => {
 		}
 	});
 
-	const resolutionTypesQuery = useQuery({
-		queryKey: ['resolutionTypes'],
-		queryFn: getDisputeResolutionTypes,
-		enabled: !!$dispute.id
+	const resolutionMutation = useMutation({
+		mutationKey: ['resolution'],
+		mutationFn: async (params: SubmitDisputeResolutionBody) =>
+			submitDisputeResolution(params),
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
 	});
 
-	const userManagementActionsQuery = useQuery({
-		queryKey: ['userManagementActions'],
-		queryFn: getDisputeUserManagementActions,
-		enabled: !!$dispute.id
+	const userManagementActiosMutation = useMutation({
+		mutationKey: ['userManagementActions'],
+		mutationFn: async (params: SubmitDisputeUserManagementActionsBody) =>
+			submitDisputeUserManagementActions(params),
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
+	});
+
+	const resolveInTraderFavorMutation = useMutation({
+		mutationKey: ['resolveInTraderFavor'],
+		mutationFn: async () => {
+			if ($dispute.id && admin?.data?.id) {
+				submitResolveInTraderFavor({
+					disputeId: $dispute.id,
+					moderatorId: admin?.data?.id
+				});
+			}
+		},
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
+	});
+
+	const resolveInVendorFavorMutation = useMutation({
+		mutationKey: ['resolveInVendorFavor'],
+		mutationFn: async () => {
+			if ($dispute.id && admin?.data?.id) {
+				const submitted = await submitResolveInVendorFavor({
+					disputeId: $dispute.id,
+					moderatorId: admin?.data?.id
+				});
+				return submitted;
+			}
+		},
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
+	});
+
+	const cancelTradeByModeratorMutation = useMutation({
+		mutationKey: ['cancelTradeByModerator'],
+		mutationFn: async () => {
+			if ($dispute.id && admin?.data?.id) {
+				const submitted = await submitCancelTradeByModerator({
+					disputeId: $dispute.id,
+					moderatorId: admin?.data?.id
+				});
+				return submitted;
+			}
+		},
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
+	});
+
+	const requestMoreEvidencesMutation = useMutation({
+		mutationKey: ['requestMoreEvidences'],
+		mutationFn: async () => {
+			if ($dispute.id && admin?.data?.id) {
+				const submitted = await submitRequestMoreEvidences({
+					disputeId: $dispute.id,
+					moderatorId: admin?.data?.id
+				});
+				return submitted;
+			}
+		},
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
+	});
+
+	const escalateToSeniorAdminMutation = useMutation({
+		mutationKey: ['escalateToSeniorAdmin'],
+		mutationFn: async () => {
+			if ($dispute.id && admin?.data?.id) {
+				const submitted = await submitEscalateToSeniorAdmin({
+					disputeId: $dispute.id,
+					moderatorId: admin?.data?.id
+				});
+				return submitted;
+			}
+		},
+		onSuccess: (data: any) => {
+			console.log({ data });
+		}
 	});
 
 	const onSubmitDisputeNotes = async (data: any) => {
 		console.log({ data });
+		addDisputePartyNoteMutation.mutate({
+			...data,
+			disputeId: $dispute.id,
+			adminId: admin.data?.id
+		});
 	};
 
 	const onSubmitResolutionNotes = async (data: any) => {
 		console.log({ data });
+		resolutionMutation.mutate({ ...data, disputeId: $dispute.id });
+	};
+
+	const onSubmitUserManagement = async (data: any) => {
+		console.log({ data });
+		userManagementActiosMutation.mutate(data);
 	};
 
 	useEffect(() => {
@@ -137,14 +248,11 @@ const useDispute = () => {
 		}
 	}, [previousDisputePartyNoteQuery.data]);
 
-	console.log({ dataTest: resolutionTypesQuery.data });
-
 	return {
 		$dispute,
 		previousDisputePartyNotes,
 		resolutionTypesQuery,
 		userManagementActionsQuery,
-		addDisputePartyNoteMutation,
 		registerResolution,
 		registerUserManagement,
 		handleSubmitResolution,
@@ -153,6 +261,12 @@ const useDispute = () => {
 		handleSubmitDisputeNotes,
 		onSubmitDisputeNotes,
 		onSubmitResolutionNotes,
+		onSubmitUserManagement,
+		resolveInVendorFavorMutation,
+		resolveInTraderFavorMutation,
+		cancelTradeByModeratorMutation,
+		requestMoreEvidencesMutation,
+		escalateToSeniorAdminMutation,
 		disputeNotesValues: {
 			content: getValuesDisputeNotes('content'),
 			userId: getValuesDisputeNotes('userId')

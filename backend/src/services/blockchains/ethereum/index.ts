@@ -171,9 +171,9 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   }
 };
 
-export const cancelTrade = async () => {
+export const cancelTrade = async (tradeId: bigint) => {
   const contract = getEscrowContract();
-  const tx = await contract.cancelTrade();
+  const tx = await contract.cancelTrade(tradeId);
   await tx.wait();
   return { message: 'Trade cancelled', txHash: tx.hash };
 };

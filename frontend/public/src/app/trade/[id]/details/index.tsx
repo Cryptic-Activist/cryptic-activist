@@ -3,8 +3,10 @@
 import { FeedbackProps, TradeDetailsProps } from './types';
 import React, { FC, useState } from 'react';
 import {
+  formatEnum,
   formatTimestamp,
   getDuration,
+  getFutureDateByHours,
   getInitials,
   getLocaleFullDateString,
   toUpperCase,
@@ -326,6 +328,80 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
             {isChatOpen ? 'Close' : 'View'} Chat History
           </button>
         </div>
+
+        {tradeDetails.tradeDispute?.id && <div className={styles.divider} />}
+
+        {tradeDetails.tradeDispute?.id && (
+          <div className={styles.chatSection}>
+            <h3 className={styles.sectionTitle}>Dispute</h3>
+            <div className={styles.tradeInfo}>
+              <div className={styles.tradeInfoGroup}>
+                <div>
+                  <div className={styles.infoLabel}>Dispute ID</div>
+                  <div className={styles.infoValue}>
+                    {tradeDetails.tradeDispute?.id}
+                  </div>
+                </div>
+
+                <div>
+                  <div className={styles.infoLabel}>Initiated At</div>
+                  <div className={styles.infoValue}>
+                    {getLocaleFullDateString(
+                      new Date(tradeDetails.tradeDispute?.createdAt)
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className={styles.infoLabel}>Raised by</div>
+                  <div className={styles.infoValue}>
+                    {`${tradeDetails.tradeDispute?.raisedBy?.username} ${
+                      user.id === tradeDetails.tradeDispute?.raisedBy?.id
+                        ? '(You)'
+                        : ''
+                    }`}
+                  </div>
+                </div>
+              </div>
+              <div className={styles.tradeInfoGroup}>
+                <div>
+                  <div className={styles.infoLabel}>Dispute Type</div>
+                  <div className={styles.infoValue}>
+                    {formatEnum(tradeDetails.tradeDispute?.type)}
+                  </div>
+                </div>
+
+                {tradeDetails.tradeDispute?.resolvedAt ? (
+                  <div>
+                    <div className={styles.infoLabel}>Resolved At</div>
+                    <div className={styles.infoValue}>
+                      {getLocaleFullDateString(
+                        new Date(tradeDetails.tradeDispute?.resolvedAt)
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className={styles.infoLabel}>SLA Due At</div>
+                    <div
+                      className={`${styles.infoValue} ${styles.badge} ${
+                        getFutureDateByHours(
+                          new Date(tradeDetails.tradeDispute?.slaDueAt)
+                        ) === '0m'
+                          ? styles.overdue
+                          : styles.ontime
+                      }`}
+                    >
+                      {getFutureDateByHours(
+                        new Date(tradeDetails.tradeDispute?.slaDueAt)
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {(canLeaveFeedback || tradeDetails.paymentReceipt) && (
           <div className={styles.divider} />

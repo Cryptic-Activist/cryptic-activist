@@ -20,6 +20,9 @@ CREATE TYPE "DisputeAction" AS ENUM ('STATUS_CHANGED', 'EVIDENCE_REQUESTED', 'MO
 CREATE TYPE "EvidenceType" AS ENUM ('SCREENSHOT', 'VIDEO', 'BANK_STATEMENT', 'CHAT_LOG', 'PAYMENT_RECEIPT', 'OTHER');
 
 -- CreateEnum
+CREATE TYPE "EvidenceRequestStatus" AS ENUM ('PENDING', 'SUBMITTED', 'DECLINED', 'EXPIRED');
+
+-- CreateEnum
 CREATE TYPE "DisputeType" AS ENUM ('PAYMENT_NOT_RECEIVED', 'PAYMENT_FRAUD', 'CRYPTO_NOT_RELEASED', 'INCORRECT_PAYMENT_AMOUNT', 'PAYMENT_TO_WRONG_ACCOUNT', 'FAKE_PAYMENT_PROOF', 'LATE_PAYMENT', 'COMMUNICATION_ISSUE', 'OFF_PLATFORM_TRANSACTION', 'TRADE_TIMEOUT', 'ABUSIVE_BEHAVIOR', 'IDENTITY_MISMATCH', 'PLATFORM_ERROR', 'SUSPICIOUS_ACTIVITY', 'SCAM', 'OTHER');
 
 -- CreateEnum
@@ -30,6 +33,9 @@ CREATE TYPE "DisputeSeverity" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 
 -- CreateEnum
 CREATE TYPE "DisputeStatus" AS ENUM ('OPEN', 'PENDING_EVIDENCE', 'INVESTIGATING', 'ESCALATED', 'RESOLVED', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "DisputeResolutionType" AS ENUM ('RELEASE_CRYPTO', 'REFUND_PAYMENT', 'CANCEL_TRADE', 'PARTIAL_REFUND', 'SPLIT_RESOLUTION', 'NO_ACTION_TAKEN', 'OFF_PLATFORM_DECISION', 'PLATFORM_COMPENSATION');
 
 -- CreateEnum
 CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
@@ -371,6 +377,23 @@ CREATE TABLE "dispute_evidences" (
 );
 
 -- CreateTable
+CREATE TABLE "DisputeEvidenceRequest" (
+    "id" TEXT NOT NULL,
+    "disputeId" TEXT NOT NULL,
+    "requestedById" TEXT NOT NULL,
+    "requestedFromId" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "deadline" TIMESTAMP(3),
+    "submittedAt" TIMESTAMP(3),
+    "status" "EvidenceRequestStatus" NOT NULL DEFAULT 'PENDING',
+    "evidenceId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DisputeEvidenceRequest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "trade_disputes" (
     "id" TEXT NOT NULL,
     "tradeId" TEXT NOT NULL,
@@ -381,6 +404,7 @@ CREATE TABLE "trade_disputes" (
     "severity" "DisputeSeverity" NOT NULL,
     "status" "DisputeStatus" NOT NULL,
     "resolutionNote" TEXT,
+    "resolutionType" "DisputeResolutionType",
     "resolvedAt" TIMESTAMP(3),
     "moderatorId" TEXT,
     "priority" "DisputePriority" NOT NULL DEFAULT 'MEDIUM',
@@ -540,6 +564,9 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
 
 -- CreateIndex
+CREATE INDEX "DisputeEvidenceRequest_disputeId_requestedFromId_idx" ON "DisputeEvidenceRequest"("disputeId", "requestedFromId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "trade_disputes_tradeId_key" ON "trade_disputes"("tradeId");
 
 -- CreateIndex
@@ -673,6 +700,18 @@ ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_disputeId_fkey
 
 -- AddForeignKey
 ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_submittedById_fkey" FOREIGN KEY ("submittedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_requestedById_fkey" FOREIGN KEY ("requestedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_requestedFromId_fkey" FOREIGN KEY ("requestedFromId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_evidenceId_fkey" FOREIGN KEY ("evidenceId") REFERENCES "dispute_evidences"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trade_disputes" ADD CONSTRAINT "trade_disputes_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

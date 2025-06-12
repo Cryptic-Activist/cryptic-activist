@@ -1,6 +1,7 @@
 import {
   EMAIL_FROM,
   buildTradeCancelledEmail,
+  buildTradeDisputeResolvedEmail,
   buildTradeExpiredEmail,
   buildTradeFailedEmail,
   buildTradeStartedEmail,
@@ -486,7 +487,7 @@ export default class SystemMessage {
         text: 'Trade has been cancelled',
       });
 
-      const newSystemMessage = await prisma.systemMessage.create({
+      const newSystemMessageTrader = await prisma.systemMessage.create({
         data: {
           type: 'TRADE_CANCELLED',
           userId: trade.trader.id,
@@ -504,7 +505,7 @@ export default class SystemMessage {
 
         // Deliver message in real time
         io.to(traderSocketId).emit('notification_system', {
-          message: newSystemMessage.message,
+          message: newSystemMessageTrader.message,
         });
       }
 
@@ -522,6 +523,113 @@ export default class SystemMessage {
         ],
         subject: 'Trade has been cancelled - Cryptic Activist',
         html: tradeCancelledEmailBodyTrader,
+        text: 'Trade has been cancelled',
+      });
+    }
+  }
+
+  async tradeDisputeResolution(tradeId: string) {
+    const trade = await prisma.trade.findUnique({
+      where: { id: tradeId },
+      select: {
+        id: true,
+        vendor: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        trader: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (trade) {
+      const TradeDisputeResolvedUrl =
+        FRONTEND_PUBLIC + '/trade/' + trade.id + '/details';
+      const message = `The trade with ${trade.trader.firstName} ${trade.trader.lastName} (${trade.trader.username}) has its dispute resolved. Check the final decision.`;
+
+      const newSystemMessageVendor = await prisma.systemMessage.create({
+        data: {
+          type: 'TRADE_DISPUTE_RESOLVED',
+          userId: trade.vendor.id,
+          url: TradeDisputeResolvedUrl,
+          message,
+        },
+      });
+
+      // // Check if recipient is online via Redis
+      const vendorSocketId = await redisClient.hGet(
+        'onlineUsers',
+        trade.vendor.id,
+      );
+      if (vendorSocketId) {
+        const io = getIO();
+
+        // Deliver message in real time
+        io.to(vendorSocketId).emit('notification_system', {
+          message: newSystemMessageVendor.message,
+        });
+      }
+
+      const tradeDisputeResolutionEmailBodyVendor =
+        buildTradeDisputeResolvedEmail(trade, trade.vendor);
+      await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: trade.vendor.email,
+            name: `${trade.vendor.firstName} ${trade.vendor.lastName}`,
+          },
+        ],
+        subject: 'Trade dispute resolved - Cryptic Activist',
+        html: tradeDisputeResolutionEmailBodyVendor,
+        text: 'Trade dispute resolved',
+      });
+
+      const newSystemMessageTrader = await prisma.systemMessage.create({
+        data: {
+          type: 'TRADE_DISPUTE_RESOLVED',
+          userId: trade.trader.id,
+          url: TradeDisputeResolvedUrl,
+          message,
+        },
+      });
+
+      const traderSocketId = await redisClient.hGet(
+        'onlineUsers',
+        trade.trader.id,
+      );
+      if (traderSocketId) {
+        const io = getIO();
+
+        // Deliver message in real time
+        io.to(traderSocketId).emit('notification_system', {
+          message: newSystemMessageTrader.message,
+        });
+      }
+
+      const tradeDisputeResolvedEmailBodyTrader =
+        buildTradeDisputeResolvedEmail(trade, trade.trader);
+      await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: trade.trader.email,
+            name: `${trade.trader.firstName} ${trade.trader.lastName}`,
+          },
+        ],
+        subject: 'Trade has been cancelled - Cryptic Activist',
+        html: tradeDisputeResolvedEmailBodyTrader,
         text: 'Trade has been cancelled',
       });
     }

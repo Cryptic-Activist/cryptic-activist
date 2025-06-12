@@ -1,11 +1,15 @@
 import {
   addDisputePartyNote,
+  addResolutionDecision,
+  cancelTradeByModerator,
   createDispute,
   getDisputeAdmin,
   getDisputeResolutionTypes,
   getDisputeTypes,
   getDisputeUserManagementActions,
   getPreviousDisputePartyNote,
+  resolveInTraderFavor,
+  resolveInVendorFavor,
   triggerAction,
 } from '@/controllers/disputes/dispute';
 import {
@@ -15,7 +19,10 @@ import {
 } from '@/middlewares/authorization';
 import {
   validateAddDisputePartyNote,
+  validateAddResolutionDecision,
+  validateCancelTradeByModerator,
   validateGetPreviousPartyNote,
+  validateResolveInFavor,
 } from './middleware';
 
 import { Router } from 'express';
@@ -23,12 +30,6 @@ import { Router } from 'express';
 const router = Router();
 
 router.get('/types', authenticateUser, getDisputeTypes);
-
-router.get(
-  '/resolution/types/admin',
-  authenticateAdmin,
-  getDisputeResolutionTypes,
-);
 
 router.post('/create', authenticateUser, createDispute);
 
@@ -56,10 +57,55 @@ router.get(
 );
 
 router.get(
+  '/resolution/types/admin',
+  authenticateAdmin,
+  getDisputeResolutionTypes,
+);
+
+router.post(
+  '/resolution/add/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  validateAddResolutionDecision,
+  addResolutionDecision,
+);
+
+router.post(
+  '/resolution/favor/trader/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  validateResolveInFavor,
+  resolveInTraderFavor,
+);
+
+router.post(
+  '/resolution/favor/vendor/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  validateResolveInFavor,
+  resolveInVendorFavor,
+);
+
+router.post(
+  '/resolution/trade/cancel/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  validateCancelTradeByModerator,
+  cancelTradeByModerator,
+);
+
+router.get(
   '/user-management/actions/admin',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
   getDisputeUserManagementActions,
+);
+
+router.get(
+  '/user-management/trigger/action/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  triggerAction,
 );
 
 router.get(

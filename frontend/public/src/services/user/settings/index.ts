@@ -89,7 +89,6 @@ export const updateEmail = async (token: string) => {
 
 export const disable2FA = async (userId: string) => {
   const accessToken = getCookie('accessToken');
-  console.log({ accessToken });
   const response = await fetchPut(
     BACKEND + '/users/auth/2fa/disable/' + userId,
     {},

@@ -145,3 +145,25 @@ export const getLocaleFullDateString = (date: Date) => {
 
 	return `${month} ${day}${suffix}, ${year} - ${hours}:${minutes} ${timeZone}`;
 };
+
+export const getFutureDateByHours = (futureDate: Date): string => {
+	const now = new Date();
+	const diffMs = futureDate.getTime() - now.getTime();
+
+	if (diffMs <= 0) return '0m'; // past or now
+
+	const diffSeconds = Math.floor(diffMs / 1000);
+	const diffMinutes = Math.floor(diffSeconds / 60);
+	const diffHours = Math.floor(diffMinutes / 60);
+	const diffDays = Math.floor(diffHours / 24);
+
+	if (diffDays >= 1) {
+		return `${diffDays}d`;
+	} else if (diffHours >= 1) {
+		return `${diffHours}h`;
+	} else if (diffMinutes >= 1) {
+		return `${diffMinutes}m`;
+	} else {
+		return `${diffSeconds}s`;
+	}
+};

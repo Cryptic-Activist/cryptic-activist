@@ -13,3 +13,41 @@ export type AddDisputePartyNoteBody = {
 	adminId: string;
 	content: string;
 };
+
+export type SubmitDisputeResolutionBody = {
+	disputeId: string;
+	resolutionType: string;
+	resolutionNote: string;
+	notifyBothUsers: boolean;
+	logAdminAction: boolean;
+};
+
+export type SubmitDisputeUserManagementActionsBody = {
+	actionForTrader: string;
+	actionForVendor: string;
+};
+
+export type ResolveInTraderFavorBody = {
+	disputeId: string;
+	moderatorId: string;
+};
+
+export type ResolveInVendorFavorBody = {
+	disputeId: string;
+	moderatorId: string;
+};
+
+export type CancelTradeByModeratorBody = {
+	disputeId: string;
+	moderatorId: string;
+};
+
+export type EscalateToSeniorAdminBody = {
+	disputeId: string;
+	moderatorId: string;
+};
+
+export type RequestMoreEvidencesBody = {
+	disputeId: string;
+	moderatorId: string;
+};

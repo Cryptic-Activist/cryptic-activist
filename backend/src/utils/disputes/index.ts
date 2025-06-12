@@ -93,23 +93,31 @@ export const mapPriorityScoreToLevel = (
 
 export const calculateSlaDueDate: CalculateSlaDueDate = (trade) => {
   const now = new Date();
-  let slaHours = 6; // default
+  let slaHours = 24; // Base SLA for normal trades
 
-  if (trade.fiatAmount >= 1000) {
-    slaHours = 2; // urgent
+  // Urgency based on fiat amount
+  if (trade.fiatAmount >= 2000) {
+    slaHours = 12; // High-value → moderate urgency
+  } else if (trade.fiatAmount >= 1000) {
+    slaHours = 16;
   } else if (trade.fiatAmount >= 250) {
-    slaHours = 4;
+    slaHours = 20;
   }
 
-  // Risky payment methods
+  // Risky payment methods → tighter response time
   if (trade.paymentMethod.isRisky) {
-    slaHours = Math.min(slaHours, 3);
+    slaHours = Math.min(slaHours, 16);
   }
 
-  // Low trust vendor
-  if (trade.vendorTrustScore && trade.vendorTrustScore < 50) {
+  // Vendor trust adjustment
+  if (trade.vendorTrustScore && trade.vendorTrustScore < 40) {
+    slaHours -= 2;
+  } else if (trade.vendorTrustScore && trade.vendorTrustScore < 70) {
     slaHours -= 1;
   }
+
+  // Ensure minimum SLA of 12 hours
+  slaHours = Math.max(slaHours, 12);
 
   return new Date(now.getTime() + slaHours * 60 * 60 * 1000);
 };

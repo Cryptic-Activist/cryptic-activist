@@ -78,8 +78,6 @@ const useParams = () => {
     const isReferralCodeValid =
       referralCodeParam && referralCodeParam.length > 0;
 
-    console.log({ referralCodeParam, isReferralCodeValid });
-
     if (isReferralCodeValid) {
       setReferralCode(referralCodeParam);
       toggleModal('register');

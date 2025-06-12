@@ -51,7 +51,6 @@ const useDisputeRequest = () => {
         from,
         to,
       });
-      console.log({ uploadedFiles });
       toggleModal('disputeRequest');
     }
   };

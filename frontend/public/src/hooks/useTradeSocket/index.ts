@@ -75,7 +75,6 @@ const useTradeSocket = ({
 
   const setAsDisputed = (params: SetAsDisputedParams) => {
     if (socket) {
-      console.log('disputed...');
       socket.emit('trade_set_disputed', { ...params, chatId });
     }
   };
@@ -83,7 +82,6 @@ const useTradeSocket = ({
   useEffect(() => {
     if (chatId && user) {
       const socket = getSocket();
-      console.log({ socket: socket.connected });
 
       if (!socket.connected) {
         socket.connect();
@@ -150,7 +148,6 @@ const useTradeSocket = ({
       });
 
       socket.on('trade_set_payment_confirmed_success', (data) => {
-        console.log('trade_set_payment_confirmed_success', data);
         onSetPaymentConfirmed(data);
         addToast('info', 'Payment has been set as Received', 8000);
       });

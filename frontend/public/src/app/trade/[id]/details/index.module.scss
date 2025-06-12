@@ -44,6 +44,7 @@ $border-radius: 0.5rem;
   border-radius: 1.25rem;
   font-size: 0.875rem;
   font-weight: 500;
+  width: fit-content;
 }
 
 .badgeSuccess {
@@ -424,6 +425,21 @@ $border-radius: 0.5rem;
 .negative {
   color: globals.$danger-color;
   background-color: globals.$danger-background-color;
+}
+
+.overdue {
+  background-color: globals.$trade-status-failed;
+  color: globals.$white;
+}
+
+.overdue {
+  background-color: globals.$trade-status-failed;
+  color: globals.$white;
+}
+
+.ontime {
+  background-color: globals.$warning-color;
+  color: globals.$black;
 }
 
 @media (max-width: 715px) {

@@ -1,6 +1,13 @@
 import {
 	AddDisputePartyNoteBody,
-	GetPreviousDisputePartyNoteParams
+	CancelTradeByModeratorBody,
+	EscalateToSeniorAdminBody,
+	GetPreviousDisputePartyNoteParams,
+	RequestMoreEvidencesBody,
+	ResolveInTraderFavorBody,
+	ResolveInVendorFavorBody,
+	SubmitDisputeResolutionBody,
+	SubmitDisputeUserManagementActionsBody
 } from './types';
 import { fetchGet, fetchPost } from '../axios';
 
@@ -94,6 +101,30 @@ export const getDisputeResolutionTypes = async () => {
 	return response.data;
 };
 
+export const submitDisputeResolution = async (
+	params: SubmitDisputeResolutionBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resolution/add/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
 export const getDisputeUserManagementActions = async () => {
 	const accessToken = getLocalStorage('accessToken');
 
@@ -103,6 +134,150 @@ export const getDisputeUserManagementActions = async () => {
 
 	const response = await fetchGet(
 		`${BACKEND}/disputes/dispute/user-management/actions/admin`,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitDisputeUserManagementActions = async (
+	params: SubmitDisputeUserManagementActionsBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/user-management/actions/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitResolveInTraderFavor = async (
+	params: ResolveInTraderFavorBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resolution/favor/trader/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitResolveInVendorFavor = async (
+	params: ResolveInVendorFavorBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resolution/favor/vendor/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitCancelTradeByModerator = async (
+	params: CancelTradeByModeratorBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resolution/trade/cancel/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitEscalateToSeniorAdmin = async (
+	params: EscalateToSeniorAdminBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resolutancel/admin`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const submitRequestMoreEvidences = async (
+	params: RequestMoreEvidencesBody
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/disputes/dispute/resoancel/admin`,
+		params,
 		{
 			Authorization: getBearerToken(accessToken)
 		}

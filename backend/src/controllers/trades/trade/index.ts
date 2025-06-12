@@ -397,6 +397,30 @@ export async function getTradeDetails(req: Request, res: Response) {
         expiredAt: true,
         fiat: true,
         fiatAmount: true,
+        tradeDispute: {
+          select: {
+            id: true,
+            createdAt: true,
+            type: true,
+            resolvedAt: true,
+            slaDueAt: true,
+            raisedBy: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        offer: {
+          select: {
+            paymentDetails: {
+              select: {
+                instructions: true,
+              },
+            },
+          },
+        },
         paymentMethod: {
           select: {
             name: true,
@@ -430,11 +454,6 @@ export async function getTradeDetails(req: Request, res: Response) {
             },
           },
         },
-        // paymentDetails: {
-        //   select: {
-        //     instructions: true,
-        //   },
-        // },
         trader: {
           select: {
             id: true,

@@ -15,9 +15,11 @@ const DisputeDetailsPage = () => {
 		previousDisputePartyNotes,
 		resolutionTypesQuery,
 		userManagementActionsQuery,
-		disputeNotesValues,
-		userManagementValues,
-		resolutionNotesValues,
+		cancelTradeByModeratorMutation,
+		requestMoreEvidencesMutation,
+		resolveInTraderFavorMutation,
+		resolveInVendorFavorMutation,
+		escalateToSeniorAdminMutation,
 		registerDisputeNotes,
 		handleSubmitDisputeNotes,
 		onSubmitDisputeNotes,
@@ -25,7 +27,8 @@ const DisputeDetailsPage = () => {
 		handleSubmitResolution,
 		onSubmitResolutionNotes,
 		registerUserManagement,
-		handleSubmitUserManagement
+		handleSubmitUserManagement,
+		onSubmitUserManagement
 	} = useDispute();
 
 	const [adminNotes, setAdminNotes] = useState('');
@@ -437,13 +440,13 @@ const DisputeDetailsPage = () => {
 							<div className={styles.actionButtons}>
 								<button
 									className={`${styles.btn} ${styles.btnSuccess}`}
-									onClick={() => handleQuickAction("Resolve in Buyer's Favor")}
+									onClick={() => resolveInTraderFavorMutation.mutate()}
 								>
 									Resolve in Trader's Favor
 								</button>
 								<button
 									className={`${styles.btn} ${styles.btnDanger}`}
-									onClick={() => handleQuickAction("Resolve in Seller's Favor")}
+									onClick={() => resolveInVendorFavorMutation.mutate()}
 								>
 									Resolve in Vendor's Favor
 								</button>
@@ -451,13 +454,13 @@ const DisputeDetailsPage = () => {
 							<div className={styles.actionButtons}>
 								<button
 									className={`${styles.btn} ${styles.btnPrimary}`}
-									onClick={() => handleQuickAction('Request More Evidence')}
+									onClick={() => requestMoreEvidencesMutation.mutate()}
 								>
 									Request More Evidence
 								</button>
 								<button
 									className={`${styles.btn} ${styles.btnSecondary}`}
-									onClick={handleEscalate}
+									onClick={() => escalateToSeniorAdminMutation.mutate()}
 								>
 									Escalate to Senior Admin
 								</button>
@@ -471,7 +474,7 @@ const DisputeDetailsPage = () => {
 							<button
 								className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
 								// style={{ marginTop: '12px' }}
-								onClick={handleContactUsers}
+								onClick={() => cancelTradeByModeratorMutation.mutate()}
 							>
 								Cancel Trade
 							</button>
@@ -486,8 +489,9 @@ const DisputeDetailsPage = () => {
 							<div className={styles.adminNotes}>
 								<h4>{$dispute.trade?.trader?.username} notes:</h4>
 								<p>
+									{console.log(previousDisputePartyNotes)}
 									{previousDisputePartyNotes?.trader !== null
-										? previousDisputePartyNotes?.trader
+										? previousDisputePartyNotes?.trader?.content
 										: 'No previous notes found'}
 								</p>
 							</div>
@@ -495,7 +499,7 @@ const DisputeDetailsPage = () => {
 								<h4>{$dispute.trade?.vendor?.username} notes:</h4>
 								<p>
 									{previousDisputePartyNotes?.vendor !== null
-										? previousDisputePartyNotes?.vendor
+										? previousDisputePartyNotes?.vendor?.content
 										: 'No previous notes found'}
 								</p>
 							</div>
@@ -504,7 +508,6 @@ const DisputeDetailsPage = () => {
 									<label>New Note To:</label>
 									<select
 										className={styles.formControl}
-										value={disputeNotesValues.userId}
 										{...registerDisputeNotes('userId', {
 											required: true
 										})}
@@ -523,7 +526,6 @@ const DisputeDetailsPage = () => {
 									<textarea
 										className={styles.formControl}
 										placeholder="Enter your notes here..."
-										value={disputeNotesValues.content}
 										{...registerDisputeNotes('content', {
 											required: true
 										})}
@@ -569,8 +571,7 @@ const DisputeDetailsPage = () => {
 									<label>Resolution Type:</label>
 									<select
 										className={styles.formControl}
-										value={resolutionNotesValues.resolutionType}
-										{...registerResolution('resolutionNote', {
+										{...registerResolution('resolutionType', {
 											required: true
 										})}
 									>
@@ -590,7 +591,6 @@ const DisputeDetailsPage = () => {
 										className={styles.formControl}
 										rows={4}
 										placeholder="Explain your decision..."
-										value={resolutionNotes}
 										{...registerResolution('resolutionNote', {
 											required: true
 										})}
@@ -632,48 +632,50 @@ const DisputeDetailsPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>User Management</div>
 						<div className={styles.cardContent}>
-							<div className={styles.formGroup}>
-								<label>Actions for {$dispute.trade?.vendor?.username}:</label>
-								<select
-									className={styles.formControl}
-									value={buyerAction}
-									{...registerUserManagement('actionForVendor', {
-										required: true
-									})}
-								>
-									{userManagementActionsQuery?.data?.map(
-										(filter: any, index: number) => (
-											<option value={filter} key={index}>
-												{formatEnum(filter)}
-											</option>
-										)
-									)}
-								</select>
-							</div>
-							<div className={styles.formGroup}>
-								<label>Actions for {$dispute.trade?.trader?.username}:</label>
-								<select
-									className={styles.formControl}
-									value={sellerAction}
-									{...registerUserManagement('actionForVendor', {
-										required: true
-									})}
-								>
-									{userManagementActionsQuery?.data?.map(
-										(filter: any, index: number) => (
-											<option value={filter} key={index}>
-												{formatEnum(filter)}
-											</option>
-										)
-									)}
-								</select>
-							</div>
-							<button
-								className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
-								onClick={() => alert('User actions applied successfully!')}
+							<form
+								onSubmit={handleSubmitUserManagement(onSubmitUserManagement)}
 							>
-								Apply User Actions
-							</button>
+								<div className={styles.formGroup}>
+									<label>Actions for {$dispute.trade?.vendor?.username}:</label>
+									<select
+										className={styles.formControl}
+										{...registerUserManagement('actionForVendor', {
+											required: true
+										})}
+									>
+										{userManagementActionsQuery?.data?.map(
+											(filter: any, index: number) => (
+												<option value={filter} key={index}>
+													{formatEnum(filter)}
+												</option>
+											)
+										)}
+									</select>
+								</div>
+								<div className={styles.formGroup}>
+									<label>Actions for {$dispute.trade?.trader?.username}:</label>
+									<select
+										className={styles.formControl}
+										{...registerUserManagement('actionForTrader', {
+											required: true
+										})}
+									>
+										{userManagementActionsQuery?.data?.map(
+											(filter: any, index: number) => (
+												<option value={filter} key={index}>
+													{formatEnum(filter)}
+												</option>
+											)
+										)}
+									</select>
+								</div>
+								<button
+									className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
+									type="submit"
+								>
+									Apply User Actions
+								</button>
+							</form>
 						</div>
 					</div>
 				</div>

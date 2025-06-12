@@ -1,8 +1,18 @@
-import { DisputeResolutionType, DisputeType } from '@prisma/client';
+import {
+  DisputeAction,
+  DisputeResolutionType,
+  DisputeStatus,
+  DisputeType,
+  SystemMessageType,
+  TradeStatus,
+} from '@prisma/client';
 import { Request, Response, response } from 'express';
+import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 
 import ChatMessage from '@/models/ChatMessage';
+import SystemMessage from '@/services/systemMessage';
 import { UserManagementActions } from './data';
+import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
 
 export async function getDisputeTypes(_req: Request, res: Response) {
@@ -338,12 +348,95 @@ export async function getDisputeResolutionTypes(_req: Request, res: Response) {
   }
 }
 
+export async function addResolutionDecision(req: Request, res: Response) {
+  try {
+    const {
+      disputeId,
+      resolutionType,
+      resolutionNote,
+      notifyBothUsers,
+      logAdminAction,
+    } = req.body;
+
+    console.log(req.body);
+
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: {
+        id: disputeId,
+      },
+      select: {
+        id: true,
+        moderatorId: true,
+        trade: {
+          select: {
+            id: true,
+            vendor: {
+              select: {
+                id: true,
+              },
+            },
+            trader: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!dispute) {
+      res.status(404).json({
+        error: 'Dispute not found',
+      });
+      return;
+    }
+
+    const updatedTradeDispute = await prisma.tradeDispute.update({
+      where: {
+        id: disputeId,
+      },
+      data: {
+        resolutionNote,
+        resolutionType,
+      },
+    });
+
+    if (logAdminAction) {
+      console.log('logging admin activity');
+      const disputeAuditLog = await prisma.disputeAuditLog.create({
+        data: {
+          action: 'DECISION_MADE',
+          disputeId: disputeId,
+          changedById: dispute.moderatorId,
+        },
+      });
+    }
+
+    if (notifyBothUsers) {
+      const systemMessage = new SystemMessage();
+      await systemMessage.tradeDisputeResolution(dispute.trade.id);
+      console.log('notifying both users');
+    }
+
+    // const disputeResolutionTypes = Object.keys(DisputeResolutionType).map(
+    //   (type) => type,
+    // );
+    res.status(200).json({
+      ok: true,
+    });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
 export async function getDisputeUserManagementActions(
   _req: Request,
   res: Response,
 ) {
   try {
-    console.log({ UserManagementActions });
     const disputeTypes = Object.keys(UserManagementActions).map((type) => type);
     res.status(200).json(disputeTypes);
   } catch (err) {
@@ -377,20 +470,80 @@ export async function triggerAction(req: Request, res: Response) {
 
 export async function resolveInTraderFavor(req: Request, res: Response) {
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const { disputeId } = req.params;
 
-    console.log({ actionForTrader, actionForVendor });
+    // Fetch dispute with related trade
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: { id: disputeId },
+      include: {
+        trade: true,
+        moderator: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
 
-    switch (actionForTrader) {
-      case UserManagementActions.NO_ACTION: {
-      }
+    if (!dispute) {
+      res.status(404).json({ errors: ['Dispute not found.'] });
+      return;
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    const trade = dispute.trade;
+
+    if (!trade || trade.status !== TradeStatus.DISPUTED) {
+      res.status(400).json({ errors: ['Trade is not in a disputable state.'] });
+      return;
+    }
+
+    // Update dispute: resolved in trader's favor
+    await prisma.$transaction([
+      prisma.tradeDispute.update({
+        where: { id: disputeId },
+        data: {
+          status: DisputeStatus.RESOLVED,
+          resolutionType: DisputeResolutionType.RELEASE_CRYPTO,
+          winnerId: trade.traderId,
+          loserId: trade.vendorId,
+          resolvedAt: new Date(),
+        },
+      }),
+      prisma.trade.update({
+        where: { id: trade.id },
+        data: {
+          status: TradeStatus.COMPLETED,
+          escrowReleasedAt: new Date(),
+          endedAt: new Date(),
+        },
+      }),
+      prisma.systemMessage.create({
+        data: {
+          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          userId: dispute.trade.traderId,
+          message: `The dispute for trade #${dispute.tradeId} has been resolved in the trader's favor.`,
+          url: `/trades/${dispute.tradeId}`,
+        },
+      }),
+      prisma.disputeAuditLog.create({
+        data: {
+          disputeId,
+          changedById: dispute.moderator?.id,
+          action: DisputeAction.DECISION_MADE,
+          note: "Dispute resolved in trader's favor by admin.",
+        },
+      }),
+    ]);
+
+    if (dispute.trade?.blockchainTradeId?.toString()) {
+      const confirmedTrade = await confirmTrade(
+        dispute.trade.blockchainTradeId,
+        parseEther(dispute.trade?.cryptocurrencyAmount.toString()),
+      );
+    }
+    res.status(200).json({ message: "Dispute resolved in trader's favor." });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -398,23 +551,89 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
 }
 
 export async function resolveInVendorFavor(req: Request, res: Response) {
+  const { disputeId, moderatorId } = req.body;
+
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: { id: disputeId },
+      include: { trade: true },
+    });
 
-    console.log({ actionForTrader, actionForVendor });
-
-    switch (actionForTrader) {
-      case UserManagementActions.NO_ACTION: {
-      }
+    if (!dispute) {
+      res.status(404).json({ errors: ['Dispute not found'] });
+      return;
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    if (
+      dispute.status === DisputeStatus.RESOLVED ||
+      dispute.status === DisputeStatus.CLOSED
+    ) {
+      res.status(400).json({ errors: ['Dispute already resolved'] });
+      return;
+    }
+
+    const now = new Date();
+
+    await prisma.$transaction([
+      // Update the trade
+      prisma.trade.update({
+        where: { id: dispute.tradeId },
+        data: {
+          status: TradeStatus.COMPLETED,
+          escrowReleasedAt: now,
+        },
+      }),
+
+      // Update the dispute
+      prisma.tradeDispute.update({
+        where: { id: disputeId },
+        data: {
+          status: DisputeStatus.RESOLVED,
+          resolutionType: DisputeResolutionType.RELEASE_CRYPTO,
+          resolvedAt: now,
+          moderatorId,
+          winnerId: dispute.trade.vendorId,
+          loserId: dispute.trade.traderId,
+        },
+      }),
+
+      // System message to vendor (winner)
+      prisma.systemMessage.create({
+        data: {
+          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          userId: dispute.trade.vendorId,
+          message: `The dispute for trade #${dispute.tradeId} has been resolved in your favor.`,
+          url: `/trades/${dispute.tradeId}`,
+        },
+      }),
+
+      // System message to trader (loser)
+      prisma.systemMessage.create({
+        data: {
+          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          userId: dispute.trade.traderId,
+          message: `The dispute for trade #${dispute.tradeId} has been resolved in the vendor's favor.`,
+          url: `/trades/${dispute.tradeId}`,
+        },
+      }),
+
+      // Dispute audit log
+      prisma.disputeAuditLog.create({
+        data: {
+          disputeId,
+          changedById: moderatorId,
+          action: DisputeAction.DECISION_MADE,
+          note: `Moderator resolved the dispute in favor of the vendor.`,
+        },
+      }),
+    ]);
+
+    res.status(200).json({ message: "Dispute resolved in vendor's favor." });
+    return;
   } catch (err) {
-    res.status(500).send({
-      errors: [err.message],
+    console.error(err);
+    res.status(500).json({
+      errors: [err.message || 'An error occurred while resolving the dispute.'],
     });
   }
 }
@@ -485,24 +704,94 @@ export async function contractBothUsers(req: Request, res: Response) {
   }
 }
 
-export async function cancelTrade(req: Request, res: Response) {
+export async function cancelTradeByModerator(req: Request, res: Response) {
+  const { disputeId, adminId } = req.body;
+
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: { id: disputeId },
+      include: { trade: true },
+    });
 
-    console.log({ actionForTrader, actionForVendor });
-
-    switch (actionForTrader) {
-      case UserManagementActions.NO_ACTION: {
-      }
+    if (!dispute) {
+      res.status(404).json({ errors: ['Dispute not found'] });
+      return;
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    if (
+      dispute.status === DisputeStatus.RESOLVED ||
+      dispute.status === DisputeStatus.CLOSED
+    ) {
+      res.status(400).json({ errors: ['Dispute already resolved'] });
+      return;
+    }
+
+    const now = new Date();
+
+    await prisma.$transaction([
+      // Update the trade status
+      prisma.trade.update({
+        where: { id: dispute.tradeId },
+        data: {
+          status: TradeStatus.CANCELLED,
+          endedAt: now,
+        },
+      }),
+
+      // Update the dispute status
+      prisma.tradeDispute.update({
+        where: { id: disputeId },
+        data: {
+          status: DisputeStatus.RESOLVED,
+          resolutionType: DisputeResolutionType.CANCEL_TRADE,
+          resolvedAt: now,
+          moderatorId: dispute.moderatorId,
+        },
+      }),
+
+      // Send system message to trader
+      prisma.systemMessage.create({
+        data: {
+          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          userId: dispute.trade.traderId,
+          message: `The dispute for trade #${dispute.tradeId} was resolved by canceling the trade.`,
+          url: `/trades/${dispute.tradeId}`,
+        },
+      }),
+
+      // Send system message to vendor
+      prisma.systemMessage.create({
+        data: {
+          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          userId: dispute.trade.vendorId,
+          message: `The dispute for trade #${dispute.tradeId} was resolved by canceling the trade.`,
+          url: `/trades/${dispute.tradeId}`,
+        },
+      }),
+
+      // Audit log entry
+      prisma.disputeAuditLog.create({
+        data: {
+          disputeId,
+          changedById: dispute.moderatorId,
+          action: DisputeAction.DECISION_MADE,
+          note: `Moderator resolved the dispute by canceling the trade.`,
+        },
+      }),
+    ]);
+
+    if (dispute.trade?.blockchainTradeId?.toString()) {
+      const canceledTrade = await cancelTrade(dispute.trade.blockchainTradeId);
+    }
+
+    res
+      .status(200)
+      .json({ message: 'Trade canceled successfully by moderator.' });
+    return;
   } catch (err) {
-    res.status(500).send({
-      errors: [err.message],
+    console.error(err);
+    res.status(500).json({
+      errors: [err.message || 'An error occurred while canceling the trade.'],
     });
   }
 }
