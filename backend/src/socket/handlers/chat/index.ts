@@ -104,7 +104,7 @@ export default class Chat {
               where: {
                 id: trade.id,
                 status: {
-                  in: ['COMPLETED', 'FAILED'],
+                  in: ['COMPLETED', 'FAILED', 'DISPUTED'],
                 },
               },
               select: {
@@ -113,6 +113,7 @@ export default class Chat {
                 endedAt: true,
               },
             });
+            console.log({ completedTradeStatus: completedTrade?.status });
             if (completedTrade?.status !== 'COMPLETED') {
               if (completedTrade?.status === 'FAILED') {
                 this.io.to(chatId).emit('trade_failed', {
@@ -126,11 +127,11 @@ export default class Chat {
                 });
               } else {
                 const expiredAt = new Date();
-                await prisma.trade.update({
-                  where: { id: trade.id },
-                  data: { expiredAt, status: 'EXPIRED' },
-                });
-                await systemMessage.tradeExpired(trade.id);
+                // await prisma.trade.update({
+                //   where: { id: trade.id },
+                //   data: { expiredAt, status: 'EXPIRED' },
+                // });
+                // await systemMessage.tradeExpired(trade.id);
                 this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
               }
               clearInterval(interval);

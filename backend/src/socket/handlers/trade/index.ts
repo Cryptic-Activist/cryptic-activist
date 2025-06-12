@@ -276,8 +276,6 @@ export default class Trade {
         try {
           const systemMessage = new SystemMessage();
 
-          console.log({ chatId, type, reason, from, to });
-
           const chat = await prisma.chat.findFirst({
             where: { id: chatId },
             select: {
@@ -400,15 +398,15 @@ export default class Trade {
             console.log({ evidenceFile });
           }
 
-          await prisma.trade.update({
-            where: {
-              id: chat.trade.id,
-            },
-            data: {
-              status: 'DISPUTED',
-              disputedAt,
-            },
-          });
+          // await prisma.trade.update({
+          //   where: {
+          //     id: chat.trade.id,
+          //   },
+          //   data: {
+          //     status: 'DISPUTED',
+          //     disputedAt,
+          //   },
+          // });
 
           this.io.to(chatId).emit('trade_set_disputed_success', {
             status: 'DISPUTED',

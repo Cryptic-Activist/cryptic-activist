@@ -470,7 +470,7 @@ export async function triggerAction(req: Request, res: Response) {
 
 export async function resolveInTraderFavor(req: Request, res: Response) {
   try {
-    const { disputeId } = req.params;
+    const { disputeId } = req.body;
 
     // Fetch dispute with related trade
     const dispute = await prisma.tradeDispute.findUnique({
