@@ -26,7 +26,6 @@ const useTrade = () => {
         return data;
       }
     },
-    retry: 3,
     enabled: !!id,
     refetchOnMount: 'always',
     staleTime: 0,

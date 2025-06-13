@@ -72,14 +72,17 @@ const useDispute = () => {
 	});
 
 	const disputeQuery = useQuery({
-		queryKey: ['dispute'],
+		queryKey: ['dispute', id],
 		queryFn: async () => {
 			if (id) {
 				const response = await getDispute(id);
 				return response;
 			}
 		},
-		enabled: !!admin.data?.id
+		enabled: !!admin.data?.id,
+		refetchOnMount: 'always',
+		staleTime: 0,
+		refetchOnWindowFocus: true
 	});
 
 	const resolutionTypesQuery = useQuery({
