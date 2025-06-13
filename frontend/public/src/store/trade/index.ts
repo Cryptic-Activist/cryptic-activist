@@ -89,6 +89,7 @@ export const useTradeSlice: StateCreator<
 
       setValue(
         {
+          disputedAt: undefined,
           blockchainTransactionHash: undefined,
           chat: undefined,
           createdAt: undefined,

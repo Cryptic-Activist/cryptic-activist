@@ -78,6 +78,12 @@ const useTrade = () => {
     });
   };
 
+  useEffect(() => {
+    return () => {
+      trade.resetTrade();
+    };
+  }, []);
+
   return {
     queryTrade,
     trade,

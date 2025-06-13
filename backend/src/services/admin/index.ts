@@ -5,9 +5,6 @@ export const getRandomAdmin = async (basicInfo = false) => {
   if (count === 0) return null;
 
   const randomIndex = Math.floor(Math.random() * count);
-
-  console.log({ randomIndex });
-
   const [randomAdmin] = await prisma.admin.findMany({
     take: 1,
     skip: randomIndex,
@@ -21,8 +18,6 @@ export const getRandomAdmin = async (basicInfo = false) => {
       },
     }),
   });
-
-  console.log({ randomAdmin });
 
   return randomAdmin;
 };

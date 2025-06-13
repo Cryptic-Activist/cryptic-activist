@@ -76,6 +76,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         traderStatement: true,
         vendorStatement: true,
         resolutionNote: true,
+        resolutionType: true,
         resolvedAt: true,
         createdAt: true,
         updatedAt: true,
@@ -423,7 +424,8 @@ export async function addResolutionDecision(req: Request, res: Response) {
     //   (type) => type,
     // );
     res.status(200).json({
-      ok: true,
+      resolutionNote,
+      resolutionType,
     });
   } catch (err) {
     res.status(500).send({
@@ -497,8 +499,9 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
       return;
     }
 
+    const now = new Date();
     // Update dispute: resolved in trader's favor
-    await prisma.$transaction([
+    const transaction = await prisma.$transaction([
       prisma.tradeDispute.update({
         where: { id: disputeId },
         data: {
@@ -506,15 +509,15 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
           resolutionType: DisputeResolutionType.RELEASE_CRYPTO,
           winnerId: trade.traderId,
           loserId: trade.vendorId,
-          resolvedAt: new Date(),
+          resolvedAt: now,
         },
       }),
       prisma.trade.update({
         where: { id: trade.id },
         data: {
           status: TradeStatus.COMPLETED,
-          escrowReleasedAt: new Date(),
-          endedAt: new Date(),
+          escrowReleasedAt: now,
+          endedAt: now,
         },
       }),
       prisma.systemMessage.create({
@@ -541,7 +544,10 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
         parseEther(dispute.trade?.cryptocurrencyAmount.toString()),
       );
     }
-    res.status(200).json({ message: "Dispute resolved in trader's favor." });
+
+    res.status(200).json({
+      resolvedAt: now,
+    });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -573,7 +579,6 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
     }
 
     const now = new Date();
-
     await prisma.$transaction([
       // Update the trade
       prisma.trade.update({
@@ -583,7 +588,6 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
           escrowReleasedAt: now,
         },
       }),
-
       // Update the dispute
       prisma.tradeDispute.update({
         where: { id: disputeId },
@@ -596,7 +600,6 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
           loserId: dispute.trade.traderId,
         },
       }),
-
       // System message to vendor (winner)
       prisma.systemMessage.create({
         data: {
@@ -606,7 +609,6 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
           url: `/trades/${dispute.tradeId}`,
         },
       }),
-
       // System message to trader (loser)
       prisma.systemMessage.create({
         data: {
@@ -628,7 +630,14 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
       }),
     ]);
 
-    res.status(200).json({ message: "Dispute resolved in vendor's favor." });
+    // if (dispute.trade?.blockchainTradeId?.toString()) {
+    //   const canceledTrade = await cancelTrade(dispute.trade.blockchainTradeId);
+    // }
+
+    res.status(200).json({
+      resolvedAt: now,
+    });
+
     return;
   } catch (err) {
     console.error(err);

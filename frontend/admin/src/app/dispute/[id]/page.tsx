@@ -1,8 +1,14 @@
 'use client';
 
 import { DynamicIcon, Viewer } from '@/components';
-import { Evidence, Message } from './types';
-import React, { useState } from 'react';
+import {
+	Evidence,
+	Message,
+	StatusBadgeProps,
+	TimelineItemProps,
+	UserCardProps
+} from './types';
+import React, { FC, useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
 import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';
@@ -31,10 +37,6 @@ const DisputeDetailsPage = () => {
 		onSubmitUserManagement
 	} = useDispute();
 
-	const [adminNotes, setAdminNotes] = useState('');
-	const [resolutionNotes, setResolutionNotes] = useState('');
-	const [buyerAction, setBuyerAction] = useState('No action');
-	const [sellerAction, setSellerAction] = useState('No action');
 	const [fileSrc, setFileSrc] = useState<string>();
 	const [fileOpen, setFileOpen] = useState(false);
 
@@ -46,6 +48,12 @@ const DisputeDetailsPage = () => {
 		setFileOpen(false);
 		setFileSrc(undefined);
 	};
+
+	const hasResolutionNote =
+		$dispute?.resolutionType &&
+		$dispute?.resolutionType?.length > 0 &&
+		$dispute?.resolutionNote &&
+		$dispute.resolutionNote?.length > 0;
 
 	// Mock dispute data
 	const disputeData = {
@@ -127,22 +135,12 @@ const DisputeDetailsPage = () => {
 			event: `Dispute assigned to ${$dispute.moderator?.firstName} ${$dispute.moderator?.lastName}`
 		}
 	];
-	const handleQuickAction = (action) => {
-		const confirmMessage = `Are you sure you want to ${action.toLowerCase()}?`;
-		if (window.confirm(confirmMessage)) {
-			alert(`${action} submitted successfully!`);
-		}
-	};
-
-	const handleEscalate = () => {
-		alert('Dispute escalated to senior admin.');
-	};
 
 	const handleContactUsers = () => {
 		alert('Messages sent to both users.');
 	};
 
-	const StatusBadge = ({ status, priority }) => (
+	const StatusBadge: FC<StatusBadgeProps> = ({ status, priority }) => (
 		<div className={styles.statusRow}>
 			<span
 				className={`${styles.statusBadge} ${
@@ -166,7 +164,7 @@ const DisputeDetailsPage = () => {
 		</div>
 	);
 
-	const UserCard = ({ user, role }) => {
+	const UserCard: FC<UserCardProps> = ({ user, role, winner, loser }) => {
 		return (
 			<div className={styles.userCard}>
 				<div className={styles.userHeader}>
@@ -177,8 +175,22 @@ const DisputeDetailsPage = () => {
 						{user && getInitials(user?.firstName, user?.lastName)}
 					</div>
 					<div className={styles.userInfo}>
-						<h4>{user?.username}</h4>
-						<div className={styles.userRole}>{role}</div>
+						<div className={styles.usernameRole}>
+							<h4>{user?.username}</h4>
+							<div className={styles.userRole}>{role}</div>
+						</div>
+						{winner?.id && winner?.id === user?.id && (
+							<span
+								className={`${styles.statusBadge} ${styles.statusResolved}`}
+							>
+								Winner
+							</span>
+						)}
+						{loser?.id && loser?.id === user?.id && (
+							<span className={`${styles.statusBadge} ${styles.priorityHigh}`}>
+								Loser
+							</span>
+						)}
 					</div>
 				</div>
 				{/* <div className={styles.userStats}>
@@ -199,7 +211,7 @@ const DisputeDetailsPage = () => {
 		);
 	};
 
-	const TimelineItem = ({ time, event }) => (
+	const TimelineItem: FC<TimelineItemProps> = ({ time, event }) => (
 		<div className={styles.timelineItem}>
 			<div className={styles.timelineTime}>{time}</div>
 			<div className={styles.timelineContent}>{event}</div>
@@ -348,8 +360,18 @@ const DisputeDetailsPage = () => {
 						<div className={styles.cardHeader}>Users Involved</div>
 						<div className={styles.cardContent}>
 							<div className={styles.userCards}>
-								<UserCard user={$dispute.trade?.trader} role="Trader" />
-								<UserCard user={$dispute.trade?.vendor} role="Vendor" />
+								<UserCard
+									user={$dispute.trade?.trader}
+									role="Trader"
+									winner={$dispute.winner}
+									loser={$dispute.loser}
+								/>
+								<UserCard
+									user={$dispute.trade?.vendor}
+									role="Vendor"
+									winner={$dispute.winner}
+									loser={$dispute.loser}
+								/>
 							</div>
 						</div>
 					</div>
@@ -434,52 +456,54 @@ const DisputeDetailsPage = () => {
 				{/* Right Column */}
 				<div className={styles.rightColumn}>
 					{/* Quick Actions */}
-					<div className={styles.card}>
-						<div className={styles.cardHeader}>Quick Actions</div>
-						<div className={styles.cardContent}>
-							<div className={styles.actionButtons}>
+					{!$dispute.resolvedAt && (
+						<div className={styles.card}>
+							<div className={styles.cardHeader}>Quick Actions</div>
+							<div className={styles.cardContent}>
+								<div className={styles.actionButtons}>
+									<button
+										className={`${styles.btn} ${styles.btnSuccess}`}
+										onClick={() => resolveInTraderFavorMutation.mutate()}
+									>
+										Resolve in Trader's Favor
+									</button>
+									<button
+										className={`${styles.btn} ${styles.btnDanger}`}
+										onClick={() => resolveInVendorFavorMutation.mutate()}
+									>
+										Resolve in Vendor's Favor
+									</button>
+								</div>
+								<div className={styles.actionButtons}>
+									<button
+										className={`${styles.btn} ${styles.btnPrimary}`}
+										onClick={() => requestMoreEvidencesMutation.mutate()}
+									>
+										Request More Evidence
+									</button>
+									<button
+										className={`${styles.btn} ${styles.btnSecondary}`}
+										onClick={() => escalateToSeniorAdminMutation.mutate()}
+									>
+										Escalate to Senior Admin
+									</button>
+								</div>
 								<button
-									className={`${styles.btn} ${styles.btnSuccess}`}
-									onClick={() => resolveInTraderFavorMutation.mutate()}
+									className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
+									onClick={handleContactUsers}
 								>
-									Resolve in Trader's Favor
+									Contact Both Users
 								</button>
 								<button
-									className={`${styles.btn} ${styles.btnDanger}`}
-									onClick={() => resolveInVendorFavorMutation.mutate()}
+									className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
+									style={{ marginTop: '12px' }}
+									onClick={() => cancelTradeByModeratorMutation.mutate()}
 								>
-									Resolve in Vendor's Favor
+									Cancel Trade
 								</button>
 							</div>
-							<div className={styles.actionButtons}>
-								<button
-									className={`${styles.btn} ${styles.btnPrimary}`}
-									onClick={() => requestMoreEvidencesMutation.mutate()}
-								>
-									Request More Evidence
-								</button>
-								<button
-									className={`${styles.btn} ${styles.btnSecondary}`}
-									onClick={() => escalateToSeniorAdminMutation.mutate()}
-								>
-									Escalate to Senior Admin
-								</button>
-							</div>
-							<button
-								className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
-								onClick={handleContactUsers}
-							>
-								Contact Both Users
-							</button>
-							<button
-								className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
-								style={{ marginTop: '12px' }}
-								onClick={() => cancelTradeByModeratorMutation.mutate()}
-							>
-								Cancel Trade
-							</button>
 						</div>
-					</div>
+					)}
 
 					{/* Admin Notes */}
 					<div className={styles.card}>
@@ -489,7 +513,6 @@ const DisputeDetailsPage = () => {
 							<div className={styles.adminNotes}>
 								<h4>{$dispute.trade?.trader?.username} notes:</h4>
 								<p>
-									{console.log(previousDisputePartyNotes)}
 									{previousDisputePartyNotes?.trader !== null
 										? previousDisputePartyNotes?.trader?.content
 										: 'No previous notes found'}
@@ -563,70 +586,74 @@ const DisputeDetailsPage = () => {
 					</div> */}
 
 					{/* Resolution Form */}
-					<div className={styles.card}>
-						<div className={styles.cardHeader}>Resolution Decision</div>
-						<div className={styles.cardContent}>
-							<form onSubmit={handleSubmitResolution(onSubmitResolutionNotes)}>
-								<div className={styles.formGroup}>
-									<label>Resolution Type:</label>
-									<select
-										className={styles.formControl}
-										{...registerResolution('resolutionType', {
-											required: true
-										})}
-									>
-										<option value="">Select resolution...</option>
-										{resolutionTypesQuery?.data?.map(
-											(filter: any, index: number) => (
-												<option value={filter} key={index}>
-													{formatEnum(filter)}
-												</option>
-											)
-										)}
-									</select>
-								</div>
-								<div className={styles.formGroup}>
-									<label>Resolution Notes:</label>
-									<textarea
-										className={styles.formControl}
-										rows={4}
-										placeholder="Explain your decision..."
-										{...registerResolution('resolutionNote', {
-											required: true
-										})}
-									/>
-								</div>
-								<div className={styles.formGroup}>
-									<label>
-										<input
-											type="checkbox"
-											{...registerResolution('notifyBothUsers', {
-												required: true
-											})}
-										/>{' '}
-										Notify both users
-									</label>
-								</div>
-								<div className={styles.formGroup}>
-									<label>
-										<input
-											type="checkbox"
-											{...registerResolution('logAdminAction', {
-												required: true
-											})}
-										/>{' '}
-										Log admin action
-									</label>
-								</div>
-								<button
-									className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-									type="submit"
+					{!hasResolutionNote && (
+						<div className={styles.card}>
+							<div className={styles.cardHeader}>Resolution Decision</div>
+							<div className={styles.cardContent}>
+								<form
+									onSubmit={handleSubmitResolution(onSubmitResolutionNotes)}
 								>
-									Submit Resolution
-								</button>
-							</form>
+									<div className={styles.formGroup}>
+										<label>Resolution Type:</label>
+										<select
+											className={styles.formControl}
+											{...registerResolution('resolutionType', {
+												required: true
+											})}
+										>
+											<option value="">Select resolution...</option>
+											{resolutionTypesQuery?.data?.map(
+												(filter: any, index: number) => (
+													<option value={filter} key={index}>
+														{formatEnum(filter)}
+													</option>
+												)
+											)}
+										</select>
+									</div>
+									<div className={styles.formGroup}>
+										<label>Resolution Notes:</label>
+										<textarea
+											className={styles.formControl}
+											rows={4}
+											placeholder="Explain your decision..."
+											{...registerResolution('resolutionNote', {
+												required: true
+											})}
+										/>
+									</div>
+									<div className={styles.formGroup}>
+										<label>
+											<input
+												type="checkbox"
+												{...registerResolution('notifyBothUsers', {
+													required: true
+												})}
+											/>{' '}
+											Notify both users
+										</label>
+									</div>
+									<div className={styles.formGroup}>
+										<label>
+											<input
+												type="checkbox"
+												{...registerResolution('logAdminAction', {
+													required: true
+												})}
+											/>{' '}
+											Log admin action
+										</label>
+									</div>
+									<button
+										className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
+										type="submit"
+									>
+										Submit Resolution
+									</button>
+								</form>
+							</div>
 						</div>
-					</div>
+					)}
 
 					{/* User Actions */}
 					<div className={styles.card}>

@@ -60,7 +60,9 @@ model Admin {
   roles                  AdminRoles[] // Many-to-many relation to roles
   disputeAuditLog        DisputeAuditLog[]        @relation("disputeAuditLogChangedBy")
   disputePartyNote       DisputePartyNote[]       @relation("disputePartyNoteAddedBy")
-  DisputeEvidenceRequest DisputeEvidenceRequest[]
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+  userSuspensionLifted   UserSuspension[]         @relation("liftedSuspensionModerator")
+  userSuspension         UserSuspension[]         @relation("suspendedModerator")
 
   @@map("admins")
 }
@@ -486,6 +488,7 @@ model DisputeEvidenceRequest {
   updatedAt DateTime @updatedAt
 
   @@index([disputeId, requestedFromId])
+  @@map("dispute_evidence_requests")
 }
 
 enum DisputeType {
@@ -568,7 +571,8 @@ model TradeDispute {
   updatedAt              DateTime                 @updatedAt @db.Timestamp()
   disputeAuditLog        DisputeAuditLog[]        @relation("disputeAuditLog")
   disputePartyNote       DisputePartyNote[]       @relation("disputePartyNote")
-  DisputeEvidenceRequest DisputeEvidenceRequest[]
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+  userSuspension         UserSuspension[]
 
   @@index([status, priority])
   @@map("trade_disputes")
@@ -650,6 +654,25 @@ model UserLanguage {
   @@map("user_languages")
 }
 
+model UserSuspension {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  user           User          @relation("userSuspension", fields: [userId], references: [id])
+  reason         String        @db.Text()
+  initiatedAt    DateTime      @default(now()) @db.Timestamp()
+  suspendedUntil DateTime?     @db.Timestamp() // null = permanent suspension
+  moderatorId    String?
+  moderator      Admin?        @relation("suspendedModerator", fields: [moderatorId], references: [id])
+  disputeId      String?
+  dispute        TradeDispute? @relation(fields: [disputeId], references: [id])
+  liftedAt       DateTime?     @db.Timestamp()
+  liftedById     String?
+  liftedBy       Admin?        @relation("liftedSuspensionModerator", fields: [liftedById], references: [id])
+  liftReason     String?
+
+  @@map("user_suspensions")
+}
+
 model User {
   id                       String                     @id @default(uuid())
   profileColor             String                     @db.VarChar(10)
@@ -700,7 +723,8 @@ model User {
   disputeEvidence          DisputeEvidence[]
   userStats                UserStats?                 @relation("userStats")
   disputePartyNote         DisputePartyNote[]         @relation("disputePartyNoteTarget")
-  DisputeEvidenceRequest   DisputeEvidenceRequest[]
+  disputeEvidenceRequest   DisputeEvidenceRequest[]
+  userSuspension           UserSuspension?            @relation("userSuspension")
 
   @@index([username])
   @@map("users")

@@ -22,7 +22,7 @@ import {
 	submitResolveInTraderFavor,
 	submitResolveInVendorFavor
 } from '@/services/dispute';
-import { dispute, setDispute } from '@/stores';
+import { dispute, resetDispute, setDispute } from '@/stores';
 import {
 	disputeNotesResolver,
 	disputeResolutionResolver,
@@ -49,21 +49,24 @@ const useDispute = () => {
 	const {
 		register: registerDisputeNotes,
 		handleSubmit: handleSubmitDisputeNotes,
-		getValues: getValuesDisputeNotes
+		getValues: getValuesDisputeNotes,
+		setValue: setValuesDisputeNotes
 	} = useForm({
 		resolver: disputeNotesResolver
 	});
 	const {
 		register: registerResolution,
 		handleSubmit: handleSubmitResolution,
-		getValues: getValuesResolution
+		getValues: getValuesResolution,
+		setValue: setValuesResolution
 	} = useForm({
 		resolver: disputeResolutionResolver
 	});
 	const {
 		register: registerUserManagement,
 		handleSubmit: handleSubmitUserManagement,
-		getValues: getValuesUserManagement
+		getValues: getValuesUserManagement,
+		setValue: setValuesUserManagement
 	} = useForm({
 		resolver: disputeUserManagementResolver
 	});
@@ -117,6 +120,29 @@ const useDispute = () => {
 			addDisputePartyNote(params),
 		onSuccess: (data: any) => {
 			console.log({ data });
+			setValuesDisputeNotes('content', '');
+			setValuesDisputeNotes('userId', '');
+			setPreviousDisputePartyNotes((prev) => {
+				if ($dispute.trade?.vendor?.id === data.targetUserId) {
+					return {
+						vendor: {
+							username: $dispute.trade?.vendor?.username,
+							content: data.content
+						},
+						trader: prev?.trader
+					};
+				}
+				if ($dispute.trade?.trader?.id === data.targetUserId) {
+					return {
+						trader: {
+							username: $dispute.trade?.trader?.username,
+							content: data.content
+						},
+						vendor: prev?.vendor
+					};
+				}
+				return prev;
+			});
 		}
 	});
 
@@ -125,14 +151,25 @@ const useDispute = () => {
 		mutationFn: async (params: SubmitDisputeResolutionBody) =>
 			submitDisputeResolution(params),
 		onSuccess: (data: any) => {
-			console.log({ data });
+			setValuesResolution('logAdminAction', false);
+			setValuesResolution('notifyBothUsers', false);
+			setValuesResolution('resolutionNote', '');
+			setValuesResolution('resolutionType', '');
+			setDispute({
+				resolutionNote: data.resolutionNote,
+				resolutionType: data.resolutionType
+			});
 		}
 	});
 
 	const userManagementActiosMutation = useMutation({
 		mutationKey: ['userManagementActions'],
-		mutationFn: async (params: SubmitDisputeUserManagementActionsBody) =>
-			submitDisputeUserManagementActions(params),
+		mutationFn: async (params: SubmitDisputeUserManagementActionsBody) => {
+			if ($dispute.id && admin?.data?.id) {
+				const response = await submitDisputeUserManagementActions(params);
+				return response;
+			}
+		},
 		onSuccess: (data: any) => {
 			console.log({ data });
 		}
@@ -142,14 +179,17 @@ const useDispute = () => {
 		mutationKey: ['resolveInTraderFavor'],
 		mutationFn: async () => {
 			if ($dispute.id && admin?.data?.id) {
-				submitResolveInTraderFavor({
+				const response = await submitResolveInTraderFavor({
 					disputeId: $dispute.id,
 					moderatorId: admin?.data?.id
 				});
+				return response;
 			}
 		},
 		onSuccess: (data: any) => {
-			console.log({ data });
+			setDispute({
+				resolvedAt: data.resolvedAt
+			});
 		}
 	});
 
@@ -165,7 +205,9 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			console.log({ data });
+			setDispute({
+				resolvedAt: data.resolvedAt
+			});
 		}
 	});
 
@@ -247,6 +289,12 @@ const useDispute = () => {
 			setPreviousDisputePartyNotes(previousDisputePartyNoteQuery.data);
 		}
 	}, [previousDisputePartyNoteQuery.data]);
+
+	useEffect(() => {
+		return () => {
+			resetDispute();
+		};
+	}, []);
 
 	return {
 		$dispute,

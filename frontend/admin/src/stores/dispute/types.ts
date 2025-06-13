@@ -124,6 +124,7 @@ export type Dispute = {
 	loser?: User;
 	winner?: User;
 	raisedBy?: User;
+	resolutionType?: string;
 	resolutionNote?: string;
 	resolvedAt?: string;
 	traderStatement?: string;

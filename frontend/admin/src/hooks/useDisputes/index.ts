@@ -57,8 +57,6 @@ const useDisputes = () => {
 			]
 		});
 
-	console.log({ $disputes });
-
 	const disputesMutation = useMutation({
 		mutationFn: async (params: GetDisputesParams) => {
 			if (admin.data?.id) {

@@ -15,6 +15,8 @@ export const dispute = map<DisputeState>({
 	loser: undefined,
 	raisedBy: undefined,
 	resolutionNote: undefined,
+	resolutionType: undefined,
+	evidences: undefined,
 	resolvedAt: undefined,
 	updatedAt: undefined,
 	winner: undefined,
@@ -24,6 +26,8 @@ export const dispute = map<DisputeState>({
 
 const setter = (params: SetterParams) => {
 	const aux = dispute.get();
+
+	console.log({ params });
 
 	dispute.set({
 		createdAt: params.createdAt ?? aux.createdAt,
@@ -38,6 +42,7 @@ const setter = (params: SetterParams) => {
 		type: params.type ?? aux.type,
 		loser: params.loser ?? aux.loser,
 		raisedBy: params.raisedBy ?? aux.raisedBy,
+		resolutionType: params.resolutionType ?? aux.resolutionType,
 		resolutionNote: params.resolutionNote ?? aux.resolutionNote,
 		resolvedAt: params.resolvedAt ?? aux.resolvedAt,
 		updatedAt: params.updatedAt ?? aux.updatedAt,
@@ -64,11 +69,13 @@ export const resetDispute = async () => {
 		type: undefined,
 		loser: undefined,
 		raisedBy: undefined,
+		resolutionType: undefined,
 		resolutionNote: undefined,
 		resolvedAt: undefined,
 		updatedAt: undefined,
 		winner: undefined,
 		traderStatement: undefined,
-		vendorStatement: undefined
+		vendorStatement: undefined,
+		evidences: undefined
 	});
 };

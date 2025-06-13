@@ -362,6 +362,15 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
                     }`}
                   </div>
                 </div>
+
+                {tradeDetails.tradeDispute?.winner?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>Status</div>
+                    <div className={styles.infoValue}>
+                      {formatEnum(tradeDetails.tradeDispute?.status)}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className={styles.tradeInfoGroup}>
                 <div>
@@ -395,6 +404,32 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
                       {getFutureDateByHours(
                         new Date(tradeDetails.tradeDispute?.slaDueAt)
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {tradeDetails.tradeDispute?.winner?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>Winner</div>
+                    <div className={styles.infoValue}>
+                      {`${tradeDetails.tradeDispute?.winner?.username} ${
+                        tradeDetails.tradeDispute?.winner?.id === user.id
+                          ? '(You)'
+                          : ''
+                      }`}
+                    </div>
+                  </div>
+                )}
+
+                {tradeDetails.tradeDispute?.loser?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>loser</div>
+                    <div className={styles.infoValue}>
+                      {`${tradeDetails.tradeDispute?.loser?.username} ${
+                        tradeDetails.tradeDispute?.loser?.id === user.id
+                          ? '(You)'
+                          : ''
+                      }`}
                     </div>
                   </div>
                 )}

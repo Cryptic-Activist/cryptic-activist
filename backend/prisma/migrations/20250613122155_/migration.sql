@@ -377,7 +377,7 @@ CREATE TABLE "dispute_evidences" (
 );
 
 -- CreateTable
-CREATE TABLE "DisputeEvidenceRequest" (
+CREATE TABLE "dispute_evidence_requests" (
     "id" TEXT NOT NULL,
     "disputeId" TEXT NOT NULL,
     "requestedById" TEXT NOT NULL,
@@ -390,7 +390,7 @@ CREATE TABLE "DisputeEvidenceRequest" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "DisputeEvidenceRequest_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "dispute_evidence_requests_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -474,6 +474,22 @@ CREATE TABLE "user_languages" (
     "languageId" TEXT NOT NULL,
 
     CONSTRAINT "user_languages_pkey" PRIMARY KEY ("userId","languageId")
+);
+
+-- CreateTable
+CREATE TABLE "user_suspensions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "initiatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "suspendedUntil" TIMESTAMP,
+    "moderatorId" TEXT,
+    "disputeId" TEXT,
+    "liftedAt" TIMESTAMP,
+    "liftedById" TEXT,
+    "liftReason" TEXT,
+
+    CONSTRAINT "user_suspensions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -564,7 +580,7 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
 
 -- CreateIndex
-CREATE INDEX "DisputeEvidenceRequest_disputeId_requestedFromId_idx" ON "DisputeEvidenceRequest"("disputeId", "requestedFromId");
+CREATE INDEX "dispute_evidence_requests_disputeId_requestedFromId_idx" ON "dispute_evidence_requests"("disputeId", "requestedFromId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "trade_disputes_tradeId_key" ON "trade_disputes"("tradeId");
@@ -580,6 +596,9 @@ CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "t
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_stats_userId_key" ON "user_stats"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_suspensions_userId_key" ON "user_suspensions"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
@@ -702,16 +721,16 @@ ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_disputeId_fkey
 ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_submittedById_fkey" FOREIGN KEY ("submittedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_requestedById_fkey" FOREIGN KEY ("requestedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_requestedById_fkey" FOREIGN KEY ("requestedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_requestedFromId_fkey" FOREIGN KEY ("requestedFromId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_requestedFromId_fkey" FOREIGN KEY ("requestedFromId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DisputeEvidenceRequest" ADD CONSTRAINT "DisputeEvidenceRequest_evidenceId_fkey" FOREIGN KEY ("evidenceId") REFERENCES "dispute_evidences"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_evidenceId_fkey" FOREIGN KEY ("evidenceId") REFERENCES "dispute_evidences"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trade_disputes" ADD CONSTRAINT "trade_disputes_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -751,6 +770,18 @@ ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_userId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_languageId_fkey" FOREIGN KEY ("languageId") REFERENCES "languages"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_liftedById_fkey" FOREIGN KEY ("liftedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
