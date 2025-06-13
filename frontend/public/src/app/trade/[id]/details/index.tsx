@@ -423,7 +423,7 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
 
                 {tradeDetails.tradeDispute?.loser?.id && (
                   <div>
-                    <div className={styles.infoLabel}>loser</div>
+                    <div className={styles.infoLabel}>Loser</div>
                     <div className={styles.infoValue}>
                       {`${tradeDetails.tradeDispute?.loser?.username} ${
                         tradeDetails.tradeDispute?.loser?.id === user.id

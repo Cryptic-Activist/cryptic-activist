@@ -584,7 +584,7 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
       prisma.trade.update({
         where: { id: dispute.tradeId },
         data: {
-          status: TradeStatus.COMPLETED,
+          status: TradeStatus.CANCELLED,
           escrowReleasedAt: now,
         },
       }),
@@ -593,7 +593,7 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
         where: { id: disputeId },
         data: {
           status: DisputeStatus.RESOLVED,
-          resolutionType: DisputeResolutionType.RELEASE_CRYPTO,
+          resolutionType: DisputeResolutionType.CANCEL_TRADE,
           resolvedAt: now,
           moderatorId,
           winnerId: dispute.trade.vendorId,
@@ -603,19 +603,19 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
       // System message to vendor (winner)
       prisma.systemMessage.create({
         data: {
-          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          type: SystemMessageType.TRADE_CANCELLED_BY_MODERATOR,
           userId: dispute.trade.vendorId,
           message: `The dispute for trade #${dispute.tradeId} has been resolved in your favor.`,
-          url: `/trades/${dispute.tradeId}`,
+          url: `/trade/${dispute.tradeId}/details`,
         },
       }),
       // System message to trader (loser)
       prisma.systemMessage.create({
         data: {
-          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          type: SystemMessageType.TRADE_CANCELLED_BY_MODERATOR,
           userId: dispute.trade.traderId,
           message: `The dispute for trade #${dispute.tradeId} has been resolved in the vendor's favor.`,
-          url: `/trades/${dispute.tradeId}`,
+          url: `/trade/${dispute.tradeId}/details`,
         },
       }),
 
@@ -630,9 +630,13 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
       }),
     ]);
 
-    // if (dispute.trade?.blockchainTradeId?.toString()) {
-    //   const canceledTrade = await cancelTrade(dispute.trade.blockchainTradeId);
-    // }
+    if (dispute.trade?.blockchainTradeId?.toString()) {
+      const canceledTrade = await cancelTrade(
+        dispute.trade.blockchainTradeId,
+        true,
+      );
+      console.log({ canceledTrade });
+    }
 
     res.status(200).json({
       resolvedAt: now,
@@ -736,7 +740,6 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
     }
 
     const now = new Date();
-
     await prisma.$transaction([
       // Update the trade status
       prisma.trade.update({
@@ -761,7 +764,7 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
       // Send system message to trader
       prisma.systemMessage.create({
         data: {
-          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          type: SystemMessageType.TRADE_CANCELLED_BY_MODERATOR,
           userId: dispute.trade.traderId,
           message: `The dispute for trade #${dispute.tradeId} was resolved by canceling the trade.`,
           url: `/trades/${dispute.tradeId}`,
@@ -771,7 +774,7 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
       // Send system message to vendor
       prisma.systemMessage.create({
         data: {
-          type: SystemMessageType.TRADE_DISPUTE_RESOLVED,
+          type: SystemMessageType.TRADE_CANCELLED_BY_MODERATOR,
           userId: dispute.trade.vendorId,
           message: `The dispute for trade #${dispute.tradeId} was resolved by canceling the trade.`,
           url: `/trades/${dispute.tradeId}`,
@@ -790,12 +793,15 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      const canceledTrade = await cancelTrade(dispute.trade.blockchainTradeId);
+      const canceledTrade = await cancelTrade(
+        dispute.trade.blockchainTradeId,
+        true,
+      );
     }
 
-    res
-      .status(200)
-      .json({ message: 'Trade canceled successfully by moderator.' });
+    res.status(200).json({
+      resolvedAt: now,
+    });
     return;
   } catch (err) {
     console.error(err);

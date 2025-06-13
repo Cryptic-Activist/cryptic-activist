@@ -111,7 +111,9 @@ const useDispute = () => {
 		},
 		enabled:
 			!!disputeQuery.data?.trade?.trader?.id &&
-			!!disputeQuery.data?.trade?.vendor?.id
+			!!disputeQuery.data?.trade?.vendor?.id,
+		staleTime: 0,
+		refetchOnWindowFocus: true
 	});
 
 	const addDisputePartyNoteMutation = useMutation({
@@ -119,30 +121,9 @@ const useDispute = () => {
 		mutationFn: async (params: AddDisputePartyNoteBody) =>
 			addDisputePartyNote(params),
 		onSuccess: (data: any) => {
-			console.log({ data });
 			setValuesDisputeNotes('content', '');
 			setValuesDisputeNotes('userId', '');
-			setPreviousDisputePartyNotes((prev) => {
-				if ($dispute.trade?.vendor?.id === data.targetUserId) {
-					return {
-						vendor: {
-							username: $dispute.trade?.vendor?.username,
-							content: data.content
-						},
-						trader: prev?.trader
-					};
-				}
-				if ($dispute.trade?.trader?.id === data.targetUserId) {
-					return {
-						trader: {
-							username: $dispute.trade?.trader?.username,
-							content: data.content
-						},
-						vendor: prev?.vendor
-					};
-				}
-				return prev;
-			});
+			previousDisputePartyNoteQuery.refetch();
 		}
 	});
 
@@ -155,10 +136,7 @@ const useDispute = () => {
 			setValuesResolution('notifyBothUsers', false);
 			setValuesResolution('resolutionNote', '');
 			setValuesResolution('resolutionType', '');
-			setDispute({
-				resolutionNote: data.resolutionNote,
-				resolutionType: data.resolutionType
-			});
+			resolutionTypesQuery.refetch();
 		}
 	});
 
@@ -171,7 +149,7 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			console.log({ data });
+			disputeQuery.refetch();
 		}
 	});
 
@@ -187,9 +165,7 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			setDispute({
-				resolvedAt: data.resolvedAt
-			});
+			disputeQuery.refetch();
 		}
 	});
 
@@ -205,9 +181,7 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			setDispute({
-				resolvedAt: data.resolvedAt
-			});
+			disputeQuery.refetch();
 		}
 	});
 
@@ -223,7 +197,7 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			console.log({ data });
+			disputeQuery.refetch();
 		}
 	});
 

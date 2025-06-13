@@ -64,7 +64,7 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "cancelTrade",
-    values: [BigNumberish]
+    values: [BigNumberish, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "confirmTrade",
@@ -373,7 +373,7 @@ export interface MultiTradeEscrow extends BaseContract {
   autoCancelTrades: TypedContractMethod<[], [void], "nonpayable">;
 
   cancelTrade: TypedContractMethod<
-    [_tradeId: BigNumberish],
+    [_tradeId: BigNumberish, _forceCancel: boolean],
     [void],
     "nonpayable"
   >;
@@ -526,7 +526,11 @@ export interface MultiTradeEscrow extends BaseContract {
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "cancelTrade"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [_tradeId: BigNumberish, _forceCancel: boolean],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "confirmTrade"
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;

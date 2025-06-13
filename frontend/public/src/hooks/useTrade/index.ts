@@ -29,6 +29,8 @@ const useTrade = () => {
     retry: 3,
     enabled: !!id,
     refetchOnMount: 'always',
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {

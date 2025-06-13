@@ -273,8 +273,8 @@ contract MultiTradeEscrow {
         emit TradeCancelled(_tradeId);
     }
 
-    function cancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
-        _cancelTrade(_tradeId, false);
+    function cancelTrade(uint256 _tradeId, bool _forceCancel) external tradeExists(_tradeId) {
+        _cancelTrade(_tradeId, _forceCancel);
     }
 
     function autoCancelTrades() external {

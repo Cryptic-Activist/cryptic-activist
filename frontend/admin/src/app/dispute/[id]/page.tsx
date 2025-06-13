@@ -308,7 +308,7 @@ const DisputeDetailsPage = () => {
 									<label>Crypto Amount</label>
 									<div className={`${styles.value} ${styles.cryptoAmount}`}>
 										{`${$dispute.trade?.cryptocurrencyAmount} ${toUpperCase(
-											$dispute.trade?.cryptocurrency.symbol
+											$dispute.trade?.cryptocurrency?.symbol
 										)}`}
 									</div>
 								</div>
@@ -316,7 +316,7 @@ const DisputeDetailsPage = () => {
 									<label>Fiat Amount</label>
 									<div className={`${styles.value} ${styles.fiatAmount}`}>
 										{`${$dispute.trade?.fiatAmount} ${toUpperCase(
-											$dispute.trade?.fiat.symbol
+											$dispute.trade?.fiat?.symbol
 										)}`}
 									</div>
 								</div>
@@ -324,7 +324,7 @@ const DisputeDetailsPage = () => {
 									<label>Exchange Rate</label>
 									<div className={styles.value}>
 										{`${$dispute.trade?.exchangeRate} ${toUpperCase(
-											$dispute.trade?.fiat.symbol
+											$dispute.trade?.fiat?.symbol
 										)}`}
 									</div>
 								</div>
