@@ -101,8 +101,8 @@ router.get(
   getDisputeUserManagementActions,
 );
 
-router.get(
-  '/user-management/trigger/action/admin',
+router.post(
+  '/user-management/trigger/actions/admin',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
   triggerAction,

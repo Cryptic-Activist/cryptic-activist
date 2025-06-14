@@ -8,10 +8,17 @@ import {
 } from '@prisma/client';
 import { Request, Response, response } from 'express';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
+import {
+  createAccountReview,
+  getSuspensionDuration,
+  sendTradeDisputeUserWarning,
+  suspendUser,
+} from '@/services/moderation';
 
 import ChatMessage from '@/models/ChatMessage';
 import SystemMessage from '@/services/systemMessage';
 import { UserManagementActions } from './data';
+import { getFutureDate } from '@/utils/date';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
 
@@ -450,19 +457,132 @@ export async function getDisputeUserManagementActions(
 
 export async function triggerAction(req: Request, res: Response) {
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const { disputeId, actionForTrader, actionForVendor, moderatorId } =
+      req.body;
 
     console.log({ actionForTrader, actionForVendor });
 
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: {
+        id: disputeId,
+      },
+      select: {
+        id: true,
+        severity: true,
+        trade: {
+          select: {
+            trader: {
+              select: {
+                id: true,
+              },
+            },
+            vendor: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!dispute?.trade?.trader?.id) {
+      res.status(400).json({
+        error: 'Trader is not found',
+      });
+      return;
+    }
+
+    if (!dispute?.trade?.vendor?.id) {
+      res.status(400).json({
+        error: 'Vendor is not found',
+      });
+      return;
+    }
+
     switch (actionForTrader) {
       case UserManagementActions.NO_ACTION: {
+        break;
+      }
+      case UserManagementActions.TEMPORARY_SUSPENSION: {
+        const suspensionInDays = await getSuspensionDuration(
+          dispute.severity,
+          dispute.trade.trader.id,
+        );
+        const suspendedUntil = getFutureDate({
+          days: suspensionInDays,
+        });
+        await suspendUser({
+          moderatorId,
+          reason: 'Disciplinary suspension after dispute resolution',
+          userId: dispute?.trade?.trader?.id,
+          disputeId: dispute?.id,
+          suspendedUntil,
+        });
+        break;
+      }
+      case UserManagementActions.SEND_WARNING: {
+        await sendTradeDisputeUserWarning({
+          message: 'Disciplinary suspension after dispute resolution',
+          userId: dispute?.trade?.trader?.id,
+          issuedByAdminId: moderatorId,
+          relatedDisputeId: dispute.id,
+        });
+        break;
+      }
+      case UserManagementActions.ACCOUNT_REVIEW: {
+        await createAccountReview({
+          userId: dispute.trade.trader.id,
+          reason: 'Flagged for manual account review after dispute resolution',
+          relatedDisputeId: dispute.id,
+          reviewerId: moderatorId,
+        });
+        break;
       }
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    switch (actionForVendor) {
+      case UserManagementActions.NO_ACTION: {
+        break;
+      }
+      case UserManagementActions.TEMPORARY_SUSPENSION: {
+        const suspensionInDays = await getSuspensionDuration(
+          dispute.severity,
+          dispute.trade.vendor.id,
+        );
+        const suspendedUntil = getFutureDate({
+          days: suspensionInDays,
+        });
+        await suspendUser({
+          moderatorId,
+          reason: 'Disciplinary suspension after dispute resolution',
+          userId: dispute?.trade?.vendor?.id,
+          disputeId: dispute?.id,
+          suspendedUntil,
+        });
+        break;
+      }
+      case UserManagementActions.SEND_WARNING: {
+        await sendTradeDisputeUserWarning({
+          message: 'Disciplinary suspension after dispute resolution',
+          userId: dispute?.trade?.vendor?.id,
+          issuedByAdminId: moderatorId,
+          relatedDisputeId: dispute.id,
+        });
+        break;
+      }
+      case UserManagementActions.ACCOUNT_REVIEW: {
+        await createAccountReview({
+          userId: dispute.trade.vendor.id,
+          reason: 'Flagged for manual account review after dispute resolution',
+          relatedDisputeId: dispute.id,
+          reviewerId: moderatorId,
+        });
+        break;
+      }
+    }
+
+    res.status(200).json({ ok: true });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

@@ -128,3 +128,20 @@ export function getTodayAndYesterdayBoundaries() {
 export const formatMinutes = (avgMinutes: number) => {
   return Math.round(avgMinutes) + 'm';
 };
+
+export const getFutureDate = (options: {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}): Date => {
+  const now = new Date();
+  const future = new Date(now);
+
+  if (options.days) future.setDate(future.getDate() + options.days);
+  if (options.hours) future.setHours(future.getHours() + options.hours);
+  if (options.minutes) future.setMinutes(future.getMinutes() + options.minutes);
+  if (options.seconds) future.setSeconds(future.getSeconds() + options.seconds);
+
+  return future;
+};

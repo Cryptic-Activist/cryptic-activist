@@ -11,6 +11,8 @@ import { Trade, User } from '@prisma/client';
 import { prisma, redisClient } from '../db';
 
 import { FRONTEND_PUBLIC } from '@/constants/env';
+import { SendWarningToUserParams } from './types';
+import buildUserWarningEmail from '../email/templates/user-warning';
 import { getIO } from '../socket';
 import { publishToQueue } from '../rabbitmq';
 
@@ -633,5 +635,43 @@ export default class SystemMessage {
         text: 'Trade has been cancelled',
       });
     }
+  }
+
+  async sendWarningToUser(params: SendWarningToUserParams) {
+    const newSystemMessageVendor = await prisma.systemMessage.create({
+      data: {
+        type: 'USER_WARNING',
+        userId: params.user.id,
+        message: params.message,
+      },
+    });
+
+    // // Check if recipient is online via Redis
+    const userSocketId = await redisClient.hGet('onlineUsers', params.user.id);
+    if (userSocketId) {
+      const io = getIO();
+
+      // Deliver message in real time
+      io.to(userSocketId).emit('notification_system', {
+        message: newSystemMessageVendor.message,
+      });
+    }
+
+    const userWarningEmailBody = buildUserWarningEmail(
+      params.trade,
+      params.user,
+    );
+    await publishToQueue('emails', {
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: params.user.email,
+          name: `${params.user.firstName} ${params.user.lastName}`,
+        },
+      ],
+      subject: 'You have received a warning - Cryptic Activist',
+      html: userWarningEmailBody,
+      text: 'You have received a warning',
+    });
   }
 }

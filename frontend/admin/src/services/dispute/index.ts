@@ -156,7 +156,7 @@ export const submitDisputeUserManagementActions = async (
 	}
 
 	const response = await fetchPost(
-		`${BACKEND}/disputes/dispute/user-management/actions/admin`,
+		`${BACKEND}/disputes/dispute/user-management/trigger/actions/admin`,
 		params,
 		{
 			Authorization: getBearerToken(accessToken)

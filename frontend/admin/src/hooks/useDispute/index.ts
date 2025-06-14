@@ -123,7 +123,7 @@ const useDispute = () => {
 		mutationKey: ['addDisputePartyNote'],
 		mutationFn: async (params: AddDisputePartyNoteBody) =>
 			addDisputePartyNote(params),
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			setValuesDisputeNotes('content', '');
 			setValuesDisputeNotes('userId', '');
 			previousDisputePartyNoteQuery.refetch();
@@ -134,7 +134,7 @@ const useDispute = () => {
 		mutationKey: ['resolution'],
 		mutationFn: async (params: SubmitDisputeResolutionBody) =>
 			submitDisputeResolution(params),
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			setValuesResolution('logAdminAction', false);
 			setValuesResolution('notifyBothUsers', false);
 			setValuesResolution('resolutionNote', '');
@@ -151,7 +151,7 @@ const useDispute = () => {
 				return response;
 			}
 		},
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			disputeQuery.refetch();
 		}
 	});
@@ -167,7 +167,7 @@ const useDispute = () => {
 				return response;
 			}
 		},
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			disputeQuery.refetch();
 		}
 	});
@@ -183,7 +183,7 @@ const useDispute = () => {
 				return submitted;
 			}
 		},
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			disputeQuery.refetch();
 		}
 	});
@@ -199,7 +199,7 @@ const useDispute = () => {
 				return submitted;
 			}
 		},
-		onSuccess: (data: any) => {
+		onSuccess: () => {
 			disputeQuery.refetch();
 		}
 	});

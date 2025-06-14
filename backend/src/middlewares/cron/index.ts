@@ -1,4 +1,5 @@
 import SystemMessage from '@/services/systemMessage';
+import { autoLiftExpiredSuspensions } from '@/services/moderation';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
 import { prisma } from '@/services/db';
@@ -55,6 +56,18 @@ export const expireTimer = async () => {
           });
         }
       }
+    }
+  });
+};
+
+export const handleAutoSuspensionLifting = async () => {
+  cron.schedule('*/15 * * * *', async () => {
+    try {
+      await autoLiftExpiredSuspensions();
+    } catch (error) {
+      console.error('Auto-lift error:', error);
+      prisma.$disconnect();
+      process.exit(1);
     }
   });
 };

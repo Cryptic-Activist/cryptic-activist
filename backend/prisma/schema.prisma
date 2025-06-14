@@ -63,6 +63,9 @@ model Admin {
   disputeEvidenceRequest DisputeEvidenceRequest[]
   userSuspensionLifted   UserSuspension[]         @relation("liftedSuspensionModerator")
   userSuspension         UserSuspension[]         @relation("suspendedModerator")
+  userWarning            UserWarning[]
+  userSuspensionLog      UserSuspensionLog[]
+  accountReview          AccountReview[]
 
   @@map("admins")
 }
@@ -320,6 +323,7 @@ enum SystemMessageType {
   COMPLIANCE_NOTICE
   SYSTEM_ERROR
   API_DOWNTIME
+  USER_WARNING
 }
 
 model SystemMessage {
@@ -327,7 +331,7 @@ model SystemMessage {
   type      SystemMessageType
   message   String            @db.VarChar(256)
   whenSeen  DateTime?         @db.Timestamp()
-  url       String
+  url       String?
   deletedAt DateTime?         @db.Timestamp()
   createdAt DateTime?         @default(now()) @db.Timestamp()
   updatedAt DateTime?         @updatedAt @db.Timestamp()
@@ -574,6 +578,8 @@ model TradeDispute {
   disputePartyNote       DisputePartyNote[]       @relation("disputePartyNote")
   disputeEvidenceRequest DisputeEvidenceRequest[]
   userSuspension         UserSuspension[]
+  userWarning            UserWarning[]
+  userSuspensionLog      UserSuspensionLog[]
 
   @@index([status, priority])
   @@map("trade_disputes")
@@ -640,7 +646,7 @@ model UserStats {
   totalDisputes   Int       @default(0)
   disputesLost    Int       @default(0)
   fraudFlagged    Boolean   @default(false)
-  lastDisputeDate DateTime?
+  lastDisputeDate DateTime? @db.Timestamp()
 
   @@map("user_stats")
 }
@@ -674,6 +680,37 @@ model UserSuspension {
   @@map("user_suspensions")
 }
 
+model UserSuspensionLog {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  action      String // e.g., "SUSPENDED", "LIFTED"
+  reason      String
+  moderatorId String?
+  moderator   Admin?        @relation(fields: [moderatorId], references: [id])
+  disputeId   String?
+  dispute     TradeDispute? @relation(fields: [disputeId], references: [id])
+  createdAt   DateTime      @default(now()) @db.Timestamp()
+
+  @@map("user_suspension_logs")
+}
+
+model UserWarning {
+  id               String        @id @default(uuid())
+  userId           String
+  user             User          @relation("userWarnings", fields: [userId], references: [id])
+  message          String        @db.Text()
+  createdAt        DateTime      @default(now()) @db.Timestamp()
+  issuedById       String?
+  issuedBy         Admin?        @relation(fields: [issuedById], references: [id])
+  relatedDisputeId String?
+  relatedDispute   TradeDispute? @relation(fields: [relatedDisputeId], references: [id])
+  read             Boolean       @default(false)
+
+  @@index([userId])
+  @@map("user_warnings")
+}
+
 model User {
   id                       String                     @id @default(uuid())
   profileColor             String                     @db.VarChar(10)
@@ -685,11 +722,12 @@ model User {
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean
   isPremium                Boolean?
+  underReview              Boolean                    @default(false)
   xp                       Int                        @default(0)
   trustScore               Int                        @default(50)
   twoFactorSecret          String?
   twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
-  lastLoginAt              DateTime?                  @db.Timestamptz
+  lastLoginAt              DateTime?                  @db.Timestamp
   createdById              String? // Admin who created the account (Foreign key)
   createdBy                Admin?                     @relation("userCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
   lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
@@ -725,10 +763,56 @@ model User {
   userStats                UserStats?                 @relation("userStats")
   disputePartyNote         DisputePartyNote[]         @relation("disputePartyNoteTarget")
   disputeEvidenceRequest   DisputeEvidenceRequest[]
-  userSuspension           UserSuspension?            @relation("userSuspension")
+  isSuspended              Boolean                    @default(false)
+  suspensionId             String?
+  suspension               UserSuspension?            @relation("userSuspension")
+  warnings                 UserWarning[]              @relation("userWarnings")
+  totalWarnings            Int                        @default(0)
+  userSuspensionLog        UserSuspensionLog[]
+  accountReview            AccountReview[]
 
   @@index([username])
   @@map("users")
+}
+
+model AccountReview {
+  id               String       @id @default(uuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id])
+  status           ReviewStatus @default(PENDING)
+  reason           String       @db.Text()
+  reviewerId       String?
+  reviewer         Admin?       @relation(fields: [reviewerId], references: [id])
+  relatedDisputeId String?
+  createdAt        DateTime     @default(now()) @db.Timestamp()
+  resolvedAt       DateTime?    @db.Timestamp()
+  resolutionNote   String?
+
+  @@index([status])
+  @@map("account_reviews")
+}
+
+enum ReviewStatus {
+  PENDING
+  UNDER_REVIEW
+  ESCALATED
+  CLOSED
+}
+
+model UserModerationLog {
+  id              String           @id @default(uuid())
+  userId          String
+  action          ModerationAction
+  message         String?          @db.Text()
+  relatedReviewId String?
+  moderatorId     String?
+  timestamp       DateTime         @default(now()) @db.Timestamp()
+}
+
+enum ModerationAction {
+  SEND_WARNING
+  SUSPEND
+  ACCOUNT_REVIEW
 }
 
 model Token {

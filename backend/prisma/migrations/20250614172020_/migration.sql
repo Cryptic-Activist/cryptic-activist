@@ -8,7 +8,7 @@ CREATE TYPE "FeedbackType" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
 CREATE TYPE "KYCStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME');
+CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING');
 
 -- CreateEnum
 CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
@@ -42,6 +42,12 @@ CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
 
 -- CreateEnum
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
+
+-- CreateEnum
+CREATE TYPE "ReviewStatus" AS ENUM ('PENDING', 'UNDER_REVIEW', 'ESCALATED', 'CLOSED');
+
+-- CreateEnum
+CREATE TYPE "ModerationAction" AS ENUM ('SEND_WARNING', 'SUSPEND', 'ACCOUNT_REVIEW');
 
 -- CreateTable
 CREATE TABLE "accepted_cryptocurrencies" (
@@ -283,7 +289,7 @@ CREATE TABLE "system_messages" (
     "type" "SystemMessageType" NOT NULL,
     "message" VARCHAR(256) NOT NULL,
     "whenSeen" TIMESTAMP,
-    "url" TEXT NOT NULL,
+    "url" TEXT,
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
@@ -463,7 +469,7 @@ CREATE TABLE "user_stats" (
     "totalDisputes" INTEGER NOT NULL DEFAULT 0,
     "disputesLost" INTEGER NOT NULL DEFAULT 0,
     "fraudFlagged" BOOLEAN NOT NULL DEFAULT false,
-    "lastDisputeDate" TIMESTAMP(3),
+    "lastDisputeDate" TIMESTAMP,
 
     CONSTRAINT "user_stats_pkey" PRIMARY KEY ("id")
 );
@@ -493,6 +499,32 @@ CREATE TABLE "user_suspensions" (
 );
 
 -- CreateTable
+CREATE TABLE "user_suspension_logs" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "reason" TEXT NOT NULL,
+    "moderatorId" TEXT,
+    "disputeId" TEXT,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_suspension_logs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_warnings" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "issuedById" TEXT,
+    "relatedDisputeId" TEXT,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "user_warnings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "profileColor" VARCHAR(10) NOT NULL,
@@ -504,11 +536,12 @@ CREATE TABLE "users" (
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
     "isPremium" BOOLEAN,
+    "underReview" BOOLEAN NOT NULL DEFAULT false,
     "xp" INTEGER NOT NULL DEFAULT 0,
     "trustScore" INTEGER NOT NULL DEFAULT 50,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN DEFAULT false,
-    "lastLoginAt" TIMESTAMPTZ,
+    "lastLoginAt" TIMESTAMP,
     "createdById" TEXT,
     "lastUpdatedById" TEXT,
     "deletedAt" TIMESTAMP,
@@ -517,8 +550,39 @@ CREATE TABLE "users" (
     "tierId" TEXT,
     "kycId" TEXT,
     "referralCode" VARCHAR(20) NOT NULL DEFAULT substring(md5(gen_random_uuid()::text), 1, 16),
+    "isSuspended" BOOLEAN NOT NULL DEFAULT false,
+    "suspensionId" TEXT,
+    "totalWarnings" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "account_reviews" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "status" "ReviewStatus" NOT NULL DEFAULT 'PENDING',
+    "reason" TEXT NOT NULL,
+    "reviewerId" TEXT,
+    "relatedDisputeId" TEXT,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "resolvedAt" TIMESTAMP,
+    "resolutionNote" TEXT,
+
+    CONSTRAINT "account_reviews_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserModerationLog" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "action" "ModerationAction" NOT NULL,
+    "message" TEXT,
+    "relatedReviewId" TEXT,
+    "moderatorId" TEXT,
+    "timestamp" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UserModerationLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -601,6 +665,9 @@ CREATE UNIQUE INDEX "user_stats_userId_key" ON "user_stats"("userId");
 CREATE UNIQUE INDEX "user_suspensions_userId_key" ON "user_suspensions"("userId");
 
 -- CreateIndex
+CREATE INDEX "user_warnings_userId_idx" ON "user_warnings"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
 -- CreateIndex
@@ -614,6 +681,9 @@ CREATE UNIQUE INDEX "users_referralCode_key" ON "users"("referralCode");
 
 -- CreateIndex
 CREATE INDEX "users_username_idx" ON "users"("username");
+
+-- CreateIndex
+CREATE INDEX "account_reviews_status_idx" ON "account_reviews"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
@@ -784,6 +854,24 @@ ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_disputeId_fkey" 
 ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_liftedById_fkey" FOREIGN KEY ("liftedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "user_suspension_logs" ADD CONSTRAINT "user_suspension_logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspension_logs" ADD CONSTRAINT "user_suspension_logs_moderatorId_fkey" FOREIGN KEY ("moderatorId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_suspension_logs" ADD CONSTRAINT "user_suspension_logs_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_warnings" ADD CONSTRAINT "user_warnings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_warnings" ADD CONSTRAINT "user_warnings_issuedById_fkey" FOREIGN KEY ("issuedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_warnings" ADD CONSTRAINT "user_warnings_relatedDisputeId_fkey" FOREIGN KEY ("relatedDisputeId") REFERENCES "trade_disputes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -791,3 +879,9 @@ ALTER TABLE "users" ADD CONSTRAINT "users_lastUpdatedById_fkey" FOREIGN KEY ("la
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_tierId_fkey" FOREIGN KEY ("tierId") REFERENCES "tiers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_reviewerId_fkey" FOREIGN KEY ("reviewerId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;

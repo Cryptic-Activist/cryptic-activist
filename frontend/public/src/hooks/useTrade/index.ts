@@ -11,8 +11,10 @@ import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
+import useUser from '../useUser';
 
 const useTrade = () => {
+  const { user } = useUser();
   const params = useParams();
   const id = params.id?.toString();
   const { trade } = useRootStore();
@@ -26,7 +28,7 @@ const useTrade = () => {
         return data;
       }
     },
-    enabled: !!id,
+    enabled: !!user.id,
     refetchOnMount: 'always',
     staleTime: 0,
     refetchOnWindowFocus: true,
