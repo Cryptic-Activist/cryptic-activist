@@ -8,7 +8,7 @@ import {
 	TimelineItemProps,
 	UserCardProps
 } from './types';
-import React, { FC, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
 import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';
@@ -28,6 +28,8 @@ const DisputeDetailsPage = () => {
 		resolveInVendorFavorMutation,
 		escalateToSeniorAdminMutation,
 		isSeniorOrSuperAdmin,
+		openRequestedFrom,
+		toggleRequestedFrom,
 		registerDisputeNotes,
 		handleSubmitDisputeNotes,
 		onSubmitDisputeNotes,
@@ -41,6 +43,8 @@ const DisputeDetailsPage = () => {
 
 	const [fileSrc, setFileSrc] = useState<string>();
 	const [fileOpen, setFileOpen] = useState(false);
+
+	const requestEvidencesFromRef = useOutsideClick(toggleRequestedFrom);
 
 	const openFileViewer = (src: string) => {
 		setFileOpen(true);
@@ -170,6 +174,50 @@ const DisputeDetailsPage = () => {
 			<div className={styles.timelineContent}>{event}</div>
 		</div>
 	);
+
+	const RequestEvidencesFrom = () => {
+		const canRequestEvidenceToTraderFilter =
+			$dispute.disputeEvidenceRequest?.filter(
+				(request) => request.requestedFromId === $dispute.trade?.trader.id
+			);
+		const canRequestEvidenceToVendorFilter =
+			$dispute.disputeEvidenceRequest?.filter(
+				(request) => request.requestedFromId === $dispute.trade?.vendor.id
+			);
+		const canRequestEvidenceToTrader =
+			canRequestEvidenceToTraderFilter &&
+			canRequestEvidenceToTraderFilter.length === 0;
+		const canRequestEvidenceToVendor =
+			canRequestEvidenceToVendorFilter &&
+			canRequestEvidenceToVendorFilter.length === 0;
+
+		return (
+			<div
+				className={styles.requestEvidencesFrom}
+				ref={requestEvidencesFromRef}
+			>
+				{!canRequestEvidenceToTrader && !canRequestEvidenceToVendor && (
+					<span>Can not request more evidences</span>
+				)}
+				{canRequestEvidenceToTrader && (
+					<button
+						className={styles.trader}
+						onClick={() => requestMoreEvidencesMutation.mutate('trader')}
+					>
+						Trader
+					</button>
+				)}
+				{canRequestEvidenceToVendor && (
+					<button
+						className={styles.vendor}
+						onClick={() => requestMoreEvidencesMutation.mutate('vendor')}
+					>
+						Vendor
+					</button>
+				)}
+			</div>
+		);
+	};
 
 	const MessageItem = (message: Message) => {
 		if (message.type === 'info') return null;
@@ -426,12 +474,15 @@ const DisputeDetailsPage = () => {
 										>
 											Resolve in Vendor's Favor
 										</button>
-										<button
-											className={`${styles.btn} ${styles.btnPrimary}`}
-											onClick={() => requestMoreEvidencesMutation.mutate()}
-										>
-											Request More Evidence
-										</button>
+										<div className={styles.requestEvidencesContainer}>
+											<button
+												className={`${styles.btn} ${styles.btnPrimary}`}
+												onClick={toggleRequestedFrom}
+											>
+												Request More Evidence
+											</button>
+											{openRequestedFrom && <RequestEvidencesFrom />}
+										</div>
 										{$dispute.status === 'OPEN' && (
 											<button
 												className={`${styles.btn} ${styles.btnSecondary}`}

@@ -25,7 +25,9 @@ export type Type =
   | 'PROMOTIONAL_OFFER'
   | 'COMPLIANCE_NOTICE'
   | 'SYSTEM_ERROR'
-  | 'API_DOWNTIME';
+  | 'API_DOWNTIME'
+  | 'USER_WARNING'
+  | 'TRADE_DISPUTE_MORE_EVIDENCES';
 
 export type Notification = {
   id: string;

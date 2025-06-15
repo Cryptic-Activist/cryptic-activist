@@ -569,6 +569,41 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 }
 
+.requestEvidencesContainer {
+  position: relative;
+}
+
+.requestEvidencesFrom {
+  position: absolute;
+  top: 4rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 2px 4px globals.$box-shadow-default-color;
+  background-color: globals.$white;
+  border: 1px solid #c6c6c6;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 9;
+  button {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 0.4rem;
+    border: none;
+    color: globals.$white;
+    cursor: pointer;
+  }
+  .trader {
+    background-color: $success-color;
+  }
+  .vendor {
+    background-color: $danger-color;
+  }
+  span {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
 .actionButtonFlex {
   display: flex;
   flex-direction: column;

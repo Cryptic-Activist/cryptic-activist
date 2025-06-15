@@ -25,6 +25,7 @@ import {
   validateAddResolutionDecision,
   validateCancelTradeByModerator,
   validateGetPreviousPartyNote,
+  validateRequestMoreEvidences,
   validateResolveInFavor,
 } from './middleware';
 
@@ -129,6 +130,7 @@ router.post(
   '/quick-actions/request-more-evidences/admin',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  validateRequestMoreEvidences,
   requestMoreEvidences,
 );
 

@@ -45,6 +45,7 @@ const useDispute = () => {
 	const $dispute = useStore(dispute);
 	const [previousDisputePartyNotes, setPreviousDisputePartyNotes] =
 		useState<PreviousDisputePartyNotes>();
+	const [openRequestedFrom, setOpenRequestedFrom] = useState(false);
 
 	const seniorOrSuperAdminFiltered = admin?.data?.roles?.filter(
 		(role) => role.role === 'SENIOR_ADMIN' || role.role === 'SUPER_ADMIN'
@@ -53,7 +54,9 @@ const useDispute = () => {
 		? seniorOrSuperAdminFiltered.length > 0
 		: false;
 
-	console.log({ isSeniorOrSuperAdmin, admin: admin.data });
+	const toggleRequestedFrom = () => {
+		setOpenRequestedFrom((prev) => !prev);
+	};
 
 	const {
 		register: registerDisputeNotes,
@@ -217,16 +220,18 @@ const useDispute = () => {
 
 	const requestMoreEvidencesMutation = useMutation({
 		mutationKey: ['requestMoreEvidences'],
-		mutationFn: async () => {
+		mutationFn: async (requestedFrom: 'vendor' | 'trader') => {
 			if ($dispute.id && admin?.data?.id) {
 				const submitted = await submitRequestMoreEvidences({
 					disputeId: $dispute.id,
-					moderatorId: admin?.data?.id
+					moderatorId: admin?.data?.id,
+					requestedFrom
 				});
 				return submitted;
 			}
 		},
 		onSuccess: (data: any) => {
+			disputeQuery.refetch();
 			console.log({ data });
 		}
 	});
@@ -300,6 +305,7 @@ const useDispute = () => {
 		onSubmitDisputeNotes,
 		onSubmitResolutionNotes,
 		onSubmitUserManagement,
+		toggleRequestedFrom,
 		resolveInVendorFavorMutation,
 		resolveInTraderFavorMutation,
 		cancelTradeByModeratorMutation,
@@ -319,7 +325,8 @@ const useDispute = () => {
 			actionForTrader: getValuesUserManagement('actionForTrader'),
 			actionForVendor: getValuesUserManagement('actionForVendor')
 		},
-		isSeniorOrSuperAdmin
+		isSeniorOrSuperAdmin,
+		openRequestedFrom
 	};
 };
 

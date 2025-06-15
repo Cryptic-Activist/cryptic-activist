@@ -23,3 +23,18 @@ export const AddResolutionDecision = z.object({
 export const ResolveInFavor = z.object({
   disputeId: z.string().min(1),
 });
+
+export const RequestMoreEvidences = z
+  .object({
+    disputeId: z.string().min(1),
+    requestedFrom: z.string().min(1),
+  })
+  .superRefine(({ requestedFrom }, ctx) => {
+    if (requestedFrom !== 'vendor' && requestedFrom !== 'trader') {
+      ctx.addIssue({
+        code: 'custom',
+        message: "requestedForm must be 'vendor' or 'trader'",
+        path: ['requestedFrom'],
+      });
+    }
+  });

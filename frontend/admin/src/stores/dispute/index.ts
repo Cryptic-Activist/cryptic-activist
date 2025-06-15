@@ -17,6 +17,7 @@ export const dispute = map<DisputeState>({
 	resolutionNote: undefined,
 	resolutionType: undefined,
 	evidences: undefined,
+	disputeEvidenceRequest: undefined,
 	resolvedAt: undefined,
 	updatedAt: undefined,
 	winner: undefined,
@@ -37,6 +38,8 @@ const setter = (params: SetterParams) => {
 		status: params.status ?? aux.status,
 		trade: params.trade ?? aux.trade,
 		evidences: params.evidences ?? aux.evidences,
+		disputeEvidenceRequest:
+			params.disputeEvidenceRequest ?? aux.disputeEvidenceRequest,
 		type: params.type ?? aux.type,
 		loser: params.loser ?? aux.loser,
 		raisedBy: params.raisedBy ?? aux.raisedBy,
@@ -74,6 +77,7 @@ export const resetDispute = async () => {
 		winner: undefined,
 		traderStatement: undefined,
 		vendorStatement: undefined,
-		evidences: undefined
+		evidences: undefined,
+		disputeEvidenceRequest: undefined
 	});
 };

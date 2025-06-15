@@ -164,7 +164,7 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
     const filesListRef = useOutsideClick(toggleFilesList);
 
     return (
-      <div className={`${styles.uploaderWrapper} ${className || ''}`}>
+      <div className={`${styles.wrapper} ${className || ''}`}>
         <div className={styles.uploaderCard}>
           <div className={styles.labelFilesButton}>
             <label className={styles.title}>{label}</label>

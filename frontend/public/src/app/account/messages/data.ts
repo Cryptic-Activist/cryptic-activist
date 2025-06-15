@@ -34,6 +34,20 @@ export const icons: Icons = [
     mainActionButtonLabel: 'Go to Trade Details',
   },
   {
+    type: 'USER_WARNING',
+    name: 'FaTriangleExclamation',
+    backgroundColor: '#F59E0B',
+    color: '#FFFFFF',
+    title: 'Warning',
+  },
+  {
+    type: 'TRADE_DISPUTE_MORE_EVIDENCES',
+    name: 'FaTriangleExclamation',
+    backgroundColor: '#F59E0B',
+    color: '#FFFFFF',
+    title: 'Warning',
+  },
+  {
     type: 'TRADE_DISPUTE_OPENED',
     name: 'FaTriangleExclamation',
     backgroundColor: '#EF4444',

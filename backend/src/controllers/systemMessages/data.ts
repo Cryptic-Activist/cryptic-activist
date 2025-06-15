@@ -28,5 +28,6 @@ export const filtersType = {
     'API_DOWNTIME',
     'REVIEW_RECEIVED',
     'REVIEW_REMINDER',
+    'USER_WARNING',
   ],
 };

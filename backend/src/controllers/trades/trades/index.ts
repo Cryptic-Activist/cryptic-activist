@@ -545,36 +545,20 @@ export const getTotalCompletedTradesToday = async (
 
 export const getTotalDisputedTrades = async (_req: Request, res: Response) => {
   try {
-    const totalTrades = await prisma.trade.count({
-      where: {
-        status: 'DISPUTED',
-        tradeDispute: {
-          isNot: null,
-        },
-      },
-    });
+    const totalDisputes = await prisma.tradeDispute.count();
 
     const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
 
-    // Get counts
     const [thisMonthCount, lastMonthCount] = await Promise.all([
-      prisma.trade.count({
+      prisma.tradeDispute.count({
         where: {
-          status: 'DISPUTED',
-          tradeDispute: {
-            isNot: null,
-          },
           createdAt: {
             gte: startOfThisMonth,
           },
         },
       }),
-      prisma.trade.count({
+      prisma.tradeDispute.count({
         where: {
-          status: 'DISPUTED',
-          tradeDispute: {
-            isNot: null,
-          },
           createdAt: {
             gte: startOfLastMonth,
             lt: startOfThisMonth,
@@ -588,7 +572,7 @@ export const getTotalDisputedTrades = async (_req: Request, res: Response) => {
       lastMonthCount,
     );
 
-    res.status(200).json({ total: totalTrades, percentageChange });
+    res.status(200).json({ total: totalDisputes, percentageChange });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

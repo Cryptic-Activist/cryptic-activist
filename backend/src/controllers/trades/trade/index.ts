@@ -404,6 +404,7 @@ export async function getTradeDetails(req: Request, res: Response) {
             type: true,
             resolvedAt: true,
             slaDueAt: true,
+            disputeEvidenceRequest: true,
             winner: {
               select: {
                 id: true,

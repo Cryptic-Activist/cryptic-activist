@@ -2,6 +2,7 @@ import {
   AddDisputePartyNote,
   AddResolutionDecision,
   GetPreviousDisputePartyNote,
+  RequestMoreEvidences,
   ResolveInFavor,
 } from './zod';
 import { NextFunction, Request, Response } from 'express';
@@ -100,3 +101,24 @@ export const validateCancelTradeByModerator = (
 
   next();
 };
+
+export const validateRequestMoreEvidences = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { body } = req;
+
+  const validated = RequestMoreEvidences.safeParse(body);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+    return;
+  }
+
+  next();
+};
+
+RequestMoreEvidences;

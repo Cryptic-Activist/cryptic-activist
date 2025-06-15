@@ -23,7 +23,6 @@ import { UserManagementActions } from './data';
 import { getFutureDate } from '@/utils/date';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
-import { string } from 'zod';
 
 export async function getDisputeTypes(_req: Request, res: Response) {
   try {
@@ -84,6 +83,11 @@ export async function getDisputeAdmin(req: Request, res: Response) {
           },
         },
         traderStatement: true,
+        disputeEvidenceRequest: {
+          select: {
+            requestedFromId: true,
+          },
+        },
         vendorStatement: true,
         resolutionNote: true,
         resolutionType: true,
@@ -832,17 +836,58 @@ export async function requestMoreEvidences(req: Request, res: Response) {
     if (requestedFrom === 'vendor') {
       requestedFromId = dispute.trade.vendorId;
     } else if (requestedFrom === 'trader') {
-      requestedFromId = dispute.trade.vendorId;
+      requestedFromId = dispute.trade.traderId;
     }
+
+    console.log({ requestedFrom, requestedFromId });
+
+    const evidencesRequestedCount = await prisma.disputeEvidenceRequest.count({
+      where: {
+        disputeId: dispute.id,
+        requestedFromId,
+      },
+    });
+
+    if (evidencesRequestedCount > 0) {
+      res.status(400).json({
+        error:
+          'Can not request more than once on dispute and this specific user',
+      });
+      return;
+    }
+
+    const message = 'More evidences were requested by the moderator.';
 
     const requested = await requestMoreEvidence({
       requestedFromId,
-      description: 'More evidences were requested by the moderator.',
+      description: message,
       disputeId: dispute.id,
       moderatorId: dispute.moderatorId,
     });
 
-    return requested;
+    if (requested) {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: requestedFromId,
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      });
+      const systemMessage = new SystemMessage();
+
+      systemMessage.sendRequestMoreEvidences({
+        message,
+        trade: dispute.trade,
+        user: user!,
+      });
+    }
+
+    res.status(200).json(requested);
+    return;
   } catch (err) {
     console.log(err);
     res.status(500).send({

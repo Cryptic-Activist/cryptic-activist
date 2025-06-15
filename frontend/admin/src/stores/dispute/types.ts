@@ -26,6 +26,10 @@ export type Filters = {
 	moderator?: Moderator;
 };
 
+export type DisputeEvidenceRequest = {
+	requestedFromId: string;
+};
+
 type PaymentMethod = {
 	name: string;
 };
@@ -132,6 +136,7 @@ export type Dispute = {
 	createdAt?: string;
 	updatedAt?: string;
 	evidences?: Evidence[];
+	disputeEvidenceRequest?: DisputeEvidenceRequest[];
 };
 
 export type DisputeState = Dispute;

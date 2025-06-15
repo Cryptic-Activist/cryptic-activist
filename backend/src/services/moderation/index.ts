@@ -293,9 +293,8 @@ export const requestMoreEvidence = async ({
   moderatorId,
   deadlineHours = 24,
 }: RequestMoreEvidenceParams) => {
-  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
-
   try {
+    const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
     const transactions = await prisma.$transaction([
       prisma.tradeDispute.update({
         where: { id: disputeId },
@@ -314,10 +313,6 @@ export const requestMoreEvidence = async ({
         },
       }),
     ]);
-
-    // Optional: notify the user
-    // const userId = await getUserIdFromDispute(disputeId, requestedFrom);
-    // await sendEvidenceRequestNotification(userId, disputeId, reason, deadline);
 
     return transactions;
   } catch (error) {

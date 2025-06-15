@@ -1,13 +1,12 @@
 @use "../../../styles/globals.module.scss";
 
 .wrapper {
-  background-color: #f9fafb;
-  min-height: 100vh;
+  max-height: fit-content;
+  max-width: fit-content;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: sans-serif;
-  padding: 1rem;
 }
 
 .container {

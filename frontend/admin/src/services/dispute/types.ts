@@ -51,5 +51,6 @@ export type EscalateToSeniorAdminBody = {
 
 export type RequestMoreEvidencesBody = {
 	disputeId: string;
+	requestedFrom: 'vendor' | 'trader';
 	moderatorId: string;
 };
