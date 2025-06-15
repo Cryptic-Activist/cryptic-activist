@@ -2,12 +2,15 @@ import {
   addDisputePartyNote,
   addResolutionDecision,
   cancelTradeByModerator,
+  contactBothUsers,
   createDispute,
+  escalateToSeniorAdmin,
   getDisputeAdmin,
   getDisputeResolutionTypes,
   getDisputeTypes,
   getDisputeUserManagementActions,
   getPreviousDisputePartyNote,
+  requestMoreEvidences,
   resolveInTraderFavor,
   resolveInVendorFavor,
   triggerAction,
@@ -113,6 +116,27 @@ router.get(
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
   triggerAction,
+);
+
+router.post(
+  '/quick-actions/escalate/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  escalateToSeniorAdmin,
+);
+
+router.post(
+  '/quick-actions/request-more-evidences/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  requestMoreEvidences,
+);
+
+router.post(
+  '/quick-actions/contact-both-users/admin',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
+  contactBothUsers,
 );
 
 export default router;

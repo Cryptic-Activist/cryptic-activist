@@ -60,7 +60,7 @@ export const expireTimer = async () => {
   });
 };
 
-export const handleAutoSuspensionLifting = async () => {
+export const handleAutoLiftSuspension = async () => {
   cron.schedule('*/15 * * * *', async () => {
     try {
       await autoLiftExpiredSuspensions();

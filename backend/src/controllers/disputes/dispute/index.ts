@@ -10,7 +10,9 @@ import { Request, Response, response } from 'express';
 import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
 import {
   createAccountReview,
+  escalateDispute,
   getSuspensionDuration,
+  requestMoreEvidence,
   sendTradeDisputeUserWarning,
   suspendUser,
 } from '@/services/moderation';
@@ -21,6 +23,7 @@ import { UserManagementActions } from './data';
 import { getFutureDate } from '@/utils/date';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
+import { string } from 'zod';
 
 export async function getDisputeTypes(_req: Request, res: Response) {
   try {
@@ -460,8 +463,6 @@ export async function triggerAction(req: Request, res: Response) {
     const { disputeId, actionForTrader, actionForVendor, moderatorId } =
       req.body;
 
-    console.log({ actionForTrader, actionForVendor });
-
     const dispute = await prisma.tradeDispute.findUnique({
       where: {
         id: disputeId,
@@ -505,25 +506,38 @@ export async function triggerAction(req: Request, res: Response) {
         break;
       }
       case UserManagementActions.TEMPORARY_SUSPENSION: {
-        const suspensionInDays = await getSuspensionDuration(
-          dispute.severity,
-          dispute.trade.trader.id,
-        );
-        const suspendedUntil = getFutureDate({
-          days: suspensionInDays,
+        const userSuspension = await prisma.user.findUnique({
+          where: {
+            id: dispute.trade.trader.id,
+          },
+          select: {
+            isSuspended: true,
+          },
         });
-        await suspendUser({
-          moderatorId,
-          reason: 'Disciplinary suspension after dispute resolution',
-          userId: dispute?.trade?.trader?.id,
-          disputeId: dispute?.id,
-          suspendedUntil,
-        });
+
+        const isUserAlreadySuspended = userSuspension?.isSuspended;
+        if (!isUserAlreadySuspended) {
+          const suspensionInDays = await getSuspensionDuration(
+            dispute.severity,
+            dispute.trade.trader.id,
+          );
+          const suspendedUntil = getFutureDate({
+            days: suspensionInDays,
+          });
+          await suspendUser({
+            moderatorId,
+            reason: 'Disciplinary suspension after dispute resolution',
+            userId: dispute?.trade?.trader?.id,
+            disputeId: dispute?.id,
+            suspendedUntil,
+          });
+        }
         break;
       }
       case UserManagementActions.SEND_WARNING: {
         await sendTradeDisputeUserWarning({
-          message: 'Disciplinary suspension after dispute resolution',
+          message:
+            'Disciplinary warning after dispute resolution. Repeated warnings will lead to temporary and permanent account suspension.',
           userId: dispute?.trade?.trader?.id,
           issuedByAdminId: moderatorId,
           relatedDisputeId: dispute.id,
@@ -546,25 +560,38 @@ export async function triggerAction(req: Request, res: Response) {
         break;
       }
       case UserManagementActions.TEMPORARY_SUSPENSION: {
-        const suspensionInDays = await getSuspensionDuration(
-          dispute.severity,
-          dispute.trade.vendor.id,
-        );
-        const suspendedUntil = getFutureDate({
-          days: suspensionInDays,
+        const userSuspension = await prisma.user.findUnique({
+          where: {
+            id: dispute.trade.vendor.id,
+          },
+          select: {
+            isSuspended: true,
+          },
         });
-        await suspendUser({
-          moderatorId,
-          reason: 'Disciplinary suspension after dispute resolution',
-          userId: dispute?.trade?.vendor?.id,
-          disputeId: dispute?.id,
-          suspendedUntil,
-        });
+
+        const isUserAlreadySuspended = userSuspension?.isSuspended;
+        if (!isUserAlreadySuspended) {
+          const suspensionInDays = await getSuspensionDuration(
+            dispute.severity,
+            dispute.trade.vendor.id,
+          );
+          const suspendedUntil = getFutureDate({
+            days: suspensionInDays,
+          });
+          await suspendUser({
+            moderatorId,
+            reason: 'Disciplinary suspension after dispute resolution',
+            userId: dispute?.trade?.vendor?.id,
+            disputeId: dispute?.id,
+            suspendedUntil,
+          });
+        }
         break;
       }
       case UserManagementActions.SEND_WARNING: {
         await sendTradeDisputeUserWarning({
-          message: 'Disciplinary suspension after dispute resolution',
+          message:
+            'Disciplinary warning after dispute resolution. Repeated warnings will lead to temporary and permanent account suspension.',
           userId: dispute?.trade?.vendor?.id,
           issuedByAdminId: moderatorId,
           relatedDisputeId: dispute.id,
@@ -584,6 +611,7 @@ export async function triggerAction(req: Request, res: Response) {
 
     res.status(200).json({ ok: true });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });
@@ -773,20 +801,50 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
 
 export async function requestMoreEvidences(req: Request, res: Response) {
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const { disputeId, requestedFrom } = req.body;
 
-    console.log({ actionForTrader, actionForVendor });
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: { id: disputeId },
+      select: {
+        id: true,
+        moderatorId: true,
+        trade: {
+          select: {
+            traderId: true,
+            vendorId: true,
+          },
+        },
+      },
+    });
 
-    switch (actionForTrader) {
-      case UserManagementActions.NO_ACTION: {
-      }
+    if (!dispute) {
+      res.status(404).json({ errors: ['Dispute not found'] });
+      return;
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    if (!dispute.moderatorId) {
+      res.status(404).json({ errors: ['Dispute moderator not found'] });
+      return;
+    }
+
+    let requestedFromId = '';
+
+    if (requestedFrom === 'vendor') {
+      requestedFromId = dispute.trade.vendorId;
+    } else if (requestedFrom === 'trader') {
+      requestedFromId = dispute.trade.vendorId;
+    }
+
+    const requested = await requestMoreEvidence({
+      requestedFromId,
+      description: 'More evidences were requested by the moderator.',
+      disputeId: dispute.id,
+      moderatorId: dispute.moderatorId,
+    });
+
+    return requested;
   } catch (err) {
+    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });
@@ -795,19 +853,45 @@ export async function requestMoreEvidences(req: Request, res: Response) {
 
 export async function escalateToSeniorAdmin(req: Request, res: Response) {
   try {
-    const { actionForTrader, actionForVendor } = req.body;
+    const { disputeId } = req.body;
 
-    console.log({ actionForTrader, actionForVendor });
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: {
+        id: disputeId,
+      },
+      select: {
+        id: true,
+        moderator: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+    });
 
-    switch (actionForTrader) {
-      case UserManagementActions.NO_ACTION: {
-      }
+    if (!dispute?.id) {
+      res.status(400).json({ error: 'Dispute not found' });
+      return;
     }
 
-    const disputeTypes = Object.values(UserManagementActions).map(
-      (type) => type,
-    );
-    res.status(200).json(disputeTypes);
+    if (!dispute.moderator?.id) {
+      res.status(400).json({ error: 'Moderator not found' });
+      return;
+    }
+
+    const escalated = await escalateDispute({
+      disputeId: dispute.id,
+      escalatedByAdminId: dispute?.moderator?.id,
+      reason: `Escalated by ${dispute?.moderator?.username} via Dispute Quick Actions menu`,
+    });
+
+    if (!escalated) {
+      res.status(400).json({ error: 'Unable to escalate dispute' });
+      return;
+    }
+
+    res.status(200).json(escalated);
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
@@ -815,7 +899,7 @@ export async function escalateToSeniorAdmin(req: Request, res: Response) {
   }
 }
 
-export async function contractBothUsers(req: Request, res: Response) {
+export async function contactBothUsers(req: Request, res: Response) {
   try {
     const { actionForTrader, actionForVendor } = req.body;
 

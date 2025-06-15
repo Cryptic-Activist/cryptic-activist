@@ -27,8 +27,6 @@ export const dispute = map<DisputeState>({
 const setter = (params: SetterParams) => {
 	const aux = dispute.get();
 
-	console.log({ params });
-
 	dispute.set({
 		createdAt: params.createdAt ?? aux.createdAt,
 		id: params.id ?? aux.id,

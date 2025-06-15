@@ -22,6 +22,7 @@ model AcceptedCryptocurrency {
 
 enum AdminRole {
   SUPER_ADMIN // Full access: user management, trades, disputes, KYC, settings
+  SENIOR_ADMIN // Handles escalated cases and oversees other admins
   MODERATOR // Can manage trades, disputes, and users (limited control)
   KYC_REVIEWER // Only reviews and approves/rejects KYC documents
   DISPUTE_MANAGER // Handles only dispute resolution between traders
@@ -428,6 +429,7 @@ enum DisputeAction {
   DECISION_MADE
   USER_BANNED
   SYSTEM_ESCALATION
+  MANUAL_ESCALATION
 }
 
 model DisputeAuditLog {
@@ -486,8 +488,7 @@ model DisputeEvidenceRequest {
   deadline        DateTime? // optional deadline to submit
   submittedAt     DateTime? // when the user responded
   status          EvidenceRequestStatus @default(PENDING)
-  evidenceId      String?
-  evidence        DisputeEvidence?      @relation(fields: [evidenceId], references: [id])
+  evidences       DisputeEvidence[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -580,6 +581,7 @@ model TradeDispute {
   userSuspension         UserSuspension[]
   userWarning            UserWarning[]
   userSuspensionLog      UserSuspensionLog[]
+  accountReview          AccountReview[]
 
   @@index([status, priority])
   @@map("trade_disputes")
@@ -776,16 +778,17 @@ model User {
 }
 
 model AccountReview {
-  id               String       @id @default(uuid())
+  id               String        @id @default(uuid())
   userId           String
-  user             User         @relation(fields: [userId], references: [id])
-  status           ReviewStatus @default(PENDING)
-  reason           String       @db.Text()
+  user             User          @relation(fields: [userId], references: [id])
+  status           ReviewStatus  @default(PENDING)
+  reason           String        @db.Text()
   reviewerId       String?
-  reviewer         Admin?       @relation(fields: [reviewerId], references: [id])
+  reviewer         Admin?        @relation(fields: [reviewerId], references: [id])
   relatedDisputeId String?
-  createdAt        DateTime     @default(now()) @db.Timestamp()
-  resolvedAt       DateTime?    @db.Timestamp()
+  dispute          TradeDispute? @relation(fields: [relatedDisputeId], references: [id])
+  createdAt        DateTime      @default(now()) @db.Timestamp()
+  resolvedAt       DateTime?     @db.Timestamp()
   resolutionNote   String?
 
   @@index([status])
@@ -797,6 +800,8 @@ enum ReviewStatus {
   UNDER_REVIEW
   ESCALATED
   CLOSED
+  ACTION_TAKEN
+  NO_ACTION_NEEDED
 }
 
 model UserModerationLog {
@@ -807,6 +812,8 @@ model UserModerationLog {
   relatedReviewId String?
   moderatorId     String?
   timestamp       DateTime         @default(now()) @db.Timestamp()
+
+  @@map("user_moderation_logs")
 }
 
 enum ModerationAction {

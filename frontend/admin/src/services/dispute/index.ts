@@ -252,7 +252,7 @@ export const submitEscalateToSeniorAdmin = async (
 	}
 
 	const response = await fetchPost(
-		`${BACKEND}/disputes/dispute/resolutancel/admin`,
+		`${BACKEND}/disputes/dispute/quick-actions/escalate/admin`,
 		params,
 		{
 			Authorization: getBearerToken(accessToken)
@@ -276,7 +276,7 @@ export const submitRequestMoreEvidences = async (
 	}
 
 	const response = await fetchPost(
-		`${BACKEND}/disputes/dispute/resoancel/admin`,
+		`${BACKEND}/disputes/dispute/quick-actions/request-more-evidences/admin`,
 		params,
 		{
 			Authorization: getBearerToken(accessToken)

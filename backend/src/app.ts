@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import '@/sentry/instrument';
 
-import { expireTimer, handleAutoSuspensionLifting } from '@/middlewares/cron';
+import { expireTimer, handleAutoLiftSuspension } from '@/middlewares/cron';
 
 import { Server } from 'socket.io';
 import { connectDB } from '@/services/db';
@@ -31,6 +31,6 @@ startEmailConsumer().then();
 
 // Cron jobs
 expireTimer();
-handleAutoSuspensionLifting();
+handleAutoLiftSuspension();
 
 export default server;

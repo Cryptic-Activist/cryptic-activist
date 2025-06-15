@@ -1,13 +1,16 @@
 import {
   CreateAccountReviewParams,
+  EscalateDisputeParams,
   LiftSuspensionOptions,
+  RequestMoreEvidenceParams,
+  ResolveAccountReviewParams,
   SendWarningInput,
   SuspendUserOptions,
 } from './types';
 
 import { DisputeSeverity } from '@prisma/client';
 import SystemMessage from '../systemMessage';
-import { getIO } from '../socket';
+import { getRandomSeniorSuperAdmin } from '../admin';
 import { prisma } from '../db';
 
 export const suspendUser = async (options: SuspendUserOptions) => {
@@ -226,4 +229,99 @@ export const createAccountReview = async ({
       reviewerId,
     },
   });
+};
+
+export const resolveAccountReview = async ({
+  reviewId,
+  resolutionNote,
+  status, // ACTION_TAKEN | NO_ACTION_NEEDED
+  resolvedByAdminId,
+}: ResolveAccountReviewParams) => {
+  return await prisma.accountReview.update({
+    where: { id: reviewId },
+    data: {
+      status,
+      resolutionNote,
+      resolvedAt: new Date(),
+      reviewerId: resolvedByAdminId,
+    },
+  });
+};
+
+export const escalateDispute = async ({
+  disputeId,
+  escalatedByAdminId,
+  reason,
+}: EscalateDisputeParams) => {
+  try {
+    const newSeniorAdmin = await getRandomSeniorSuperAdmin(true);
+
+    console.log({ newSeniorAdmin });
+    if (!newSeniorAdmin) return null;
+
+    const transactions = await prisma.$transaction([
+      // Update the dispute status and moderator
+      prisma.tradeDispute.update({
+        where: { id: disputeId },
+        data: {
+          status: 'ESCALATED',
+          moderatorId: newSeniorAdmin.id,
+        },
+      }),
+      // Create an audit log entry for the escalation
+      prisma.disputeAuditLog.create({
+        data: {
+          disputeId,
+          changedById: escalatedByAdminId,
+          action: 'MANUAL_ESCALATION',
+          note: reason,
+        },
+      }),
+    ]);
+
+    return transactions;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+export const requestMoreEvidence = async ({
+  disputeId,
+  requestedFromId,
+  description,
+  moderatorId,
+  deadlineHours = 24,
+}: RequestMoreEvidenceParams) => {
+  const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
+
+  try {
+    const transactions = await prisma.$transaction([
+      prisma.tradeDispute.update({
+        where: { id: disputeId },
+        data: {
+          status: 'PENDING_EVIDENCE',
+        },
+      }),
+      prisma.disputeEvidenceRequest.create({
+        data: {
+          requestedFromId,
+          disputeId,
+          description,
+          requestedById: moderatorId,
+          deadline,
+          status: 'PENDING',
+        },
+      }),
+    ]);
+
+    // Optional: notify the user
+    // const userId = await getUserIdFromDispute(disputeId, requestedFrom);
+    // await sendEvidenceRequestNotification(userId, disputeId, reason, deadline);
+
+    return transactions;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 };

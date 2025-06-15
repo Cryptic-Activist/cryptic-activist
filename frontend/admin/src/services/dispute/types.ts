@@ -25,6 +25,8 @@ export type SubmitDisputeResolutionBody = {
 export type SubmitDisputeUserManagementActionsBody = {
 	actionForTrader: string;
 	actionForVendor: string;
+	disputeId: string;
+	moderatorId: string;
 };
 
 export type ResolveInTraderFavorBody = {

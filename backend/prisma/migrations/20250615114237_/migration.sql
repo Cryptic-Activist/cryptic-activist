@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "AdminRole" AS ENUM ('SUPER_ADMIN', 'MODERATOR', 'KYC_REVIEWER', 'DISPUTE_MANAGER', 'SUPPORT_AGENT', 'AUDITOR', 'FINANCE_MANAGER');
+CREATE TYPE "AdminRole" AS ENUM ('SUPER_ADMIN', 'SENIOR_ADMIN', 'MODERATOR', 'KYC_REVIEWER', 'DISPUTE_MANAGER', 'SUPPORT_AGENT', 'AUDITOR', 'FINANCE_MANAGER');
 
 -- CreateEnum
 CREATE TYPE "FeedbackType" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
@@ -14,7 +14,7 @@ CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TR
 CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "DisputeAction" AS ENUM ('STATUS_CHANGED', 'EVIDENCE_REQUESTED', 'MODERATOR_ASSIGNED', 'DECISION_MADE', 'USER_BANNED', 'SYSTEM_ESCALATION');
+CREATE TYPE "DisputeAction" AS ENUM ('STATUS_CHANGED', 'EVIDENCE_REQUESTED', 'MODERATOR_ASSIGNED', 'DECISION_MADE', 'USER_BANNED', 'SYSTEM_ESCALATION', 'MANUAL_ESCALATION');
 
 -- CreateEnum
 CREATE TYPE "EvidenceType" AS ENUM ('SCREENSHOT', 'VIDEO', 'BANK_STATEMENT', 'CHAT_LOG', 'PAYMENT_RECEIPT', 'OTHER');
@@ -44,7 +44,7 @@ CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
 CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "ReviewStatus" AS ENUM ('PENDING', 'UNDER_REVIEW', 'ESCALATED', 'CLOSED');
+CREATE TYPE "ReviewStatus" AS ENUM ('PENDING', 'UNDER_REVIEW', 'ESCALATED', 'CLOSED', 'ACTION_TAKEN', 'NO_ACTION_NEEDED');
 
 -- CreateEnum
 CREATE TYPE "ModerationAction" AS ENUM ('SEND_WARNING', 'SUSPEND', 'ACCOUNT_REVIEW');
@@ -392,7 +392,6 @@ CREATE TABLE "dispute_evidence_requests" (
     "deadline" TIMESTAMP(3),
     "submittedAt" TIMESTAMP(3),
     "status" "EvidenceRequestStatus" NOT NULL DEFAULT 'PENDING',
-    "evidenceId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -573,7 +572,7 @@ CREATE TABLE "account_reviews" (
 );
 
 -- CreateTable
-CREATE TABLE "UserModerationLog" (
+CREATE TABLE "user_moderation_logs" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "action" "ModerationAction" NOT NULL,
@@ -582,7 +581,7 @@ CREATE TABLE "UserModerationLog" (
     "moderatorId" TEXT,
     "timestamp" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "UserModerationLog_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "user_moderation_logs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -593,6 +592,14 @@ CREATE TABLE "tokens" (
     "isUsed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_DisputeEvidenceToDisputeEvidenceRequest" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -687,6 +694,9 @@ CREATE INDEX "account_reviews_status_idx" ON "account_reviews"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
+
+-- CreateIndex
+CREATE INDEX "_DisputeEvidenceToDisputeEvidenceRequest_B_index" ON "_DisputeEvidenceToDisputeEvidenceRequest"("B");
 
 -- AddForeignKey
 ALTER TABLE "admin_roles" ADD CONSTRAINT "admin_roles_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -800,9 +810,6 @@ ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_request
 ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_requestedFromId_fkey" FOREIGN KEY ("requestedFromId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_evidenceId_fkey" FOREIGN KEY ("evidenceId") REFERENCES "dispute_evidences"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "trade_disputes" ADD CONSTRAINT "trade_disputes_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -885,3 +892,12 @@ ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_userId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_reviewerId_fkey" FOREIGN KEY ("reviewerId") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_relatedDisputeId_fkey" FOREIGN KEY ("relatedDisputeId") REFERENCES "trade_disputes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DisputeEvidenceToDisputeEvidenceRequest" ADD CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_A_fkey" FOREIGN KEY ("A") REFERENCES "dispute_evidences"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DisputeEvidenceToDisputeEvidenceRequest" ADD CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_B_fkey" FOREIGN KEY ("B") REFERENCES "dispute_evidence_requests"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -647,7 +647,7 @@ export default class SystemMessage {
     });
 
     // // Check if recipient is online via Redis
-    const userSocketId = await redisClient.hGet('onlineUsers', params.user.id);
+    const userSocketId = await redisClient.hGet('onlineUsers', params.user?.id);
     if (userSocketId) {
       const io = getIO();
 
@@ -665,8 +665,8 @@ export default class SystemMessage {
       from: EMAIL_FROM.ACCOUNT,
       to: [
         {
-          email: params.user.email,
-          name: `${params.user.firstName} ${params.user.lastName}`,
+          email: params.user?.email,
+          name: `${params.user?.firstName} ${params.user?.lastName}`,
         },
       ],
       subject: 'You have received a warning - Cryptic Activist',

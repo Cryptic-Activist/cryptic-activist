@@ -17,6 +17,7 @@ import styles from './page.module.scss';
 
 const DisputeDetailsPage = () => {
 	const {
+		admin,
 		$dispute,
 		previousDisputePartyNotes,
 		resolutionTypesQuery,
@@ -26,6 +27,7 @@ const DisputeDetailsPage = () => {
 		resolveInTraderFavorMutation,
 		resolveInVendorFavorMutation,
 		escalateToSeniorAdminMutation,
+		isSeniorOrSuperAdmin,
 		registerDisputeNotes,
 		handleSubmitDisputeNotes,
 		onSubmitDisputeNotes,
@@ -54,45 +56,6 @@ const DisputeDetailsPage = () => {
 		$dispute?.resolutionType?.length > 0 &&
 		$dispute?.resolutionNote &&
 		$dispute.resolutionNote?.length > 0;
-
-	// Mock dispute data
-	const disputeData = {
-		id: 'DSP-2024-1573',
-		tradeId: 'TRD-2024-89456',
-		status: 'open',
-		priority: 'high',
-		category: 'Payment Not Received',
-		assignedAdmin: 'Sarah Chen',
-		createdAt: '2 hours ago',
-		lastUpdated: '15 minutes ago',
-		trade: {
-			cryptoAmount: '0.15 BTC',
-			fiatAmount: '$6,750.00 USD',
-			exchangeRate: '$45,000.00',
-			type: 'Buy BTC',
-			paymentMethod: 'Bank Transfer',
-			startedAt: 'Dec 15, 2024 14:30'
-		},
-		buyer: {
-			username: 'john_crypto24',
-			avatar: 'JD',
-			rating: 4.9,
-			trades: 127,
-			successRate: 98
-		},
-		seller: {
-			username: 'mike_trader',
-			avatar: 'MT',
-			rating: 4.7,
-			trades: 89,
-			successRate: 95
-		},
-		blockchain: {
-			escrowAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-			txHash: 'a1b2c3d4e5f6789...xyz',
-			confirmations: '6/6'
-		}
-	};
 
 	const timeline = [
 		{
@@ -142,20 +105,10 @@ const DisputeDetailsPage = () => {
 
 	const StatusBadge: FC<StatusBadgeProps> = ({ status, priority }) => (
 		<div className={styles.statusRow}>
-			<span
-				className={`${styles.statusBadge} ${
-					styles[`status${status.charAt(0).toUpperCase() + status.slice(1)}`]
-				}`}
-			>
+			<span className={`${styles.statusBadge} ${styles[status]}`}>
 				{toUpperCase($dispute.status)}
 			</span>
-			<span
-				className={`${styles.statusBadge} ${
-					styles[
-						`priority${priority.charAt(0).toUpperCase() + priority.slice(1)}`
-					]
-				}`}
-			>
+			<span className={`${styles.statusBadge} ${styles[priority]}`}>
 				{toUpperCase($dispute.priority)} PRIORITY
 			</span>
 			<span className={styles.timeStamp}>
@@ -276,10 +229,9 @@ const DisputeDetailsPage = () => {
 			{/* Header */}
 			<div className={styles.header}>
 				<h1 className={styles.disputeId}>Dispute {$dispute.id}</h1>
-				<StatusBadge
-					status={disputeData.status}
-					priority={disputeData.priority}
-				/>
+				{$dispute.status && $dispute.priority && (
+					<StatusBadge status={$dispute.status} priority={$dispute.priority} />
+				)}
 				<div className={styles.metaInfo}>
 					<div>
 						<strong>Trade ID:</strong> <span>{$dispute.trade?.id}</span>
@@ -460,47 +412,56 @@ const DisputeDetailsPage = () => {
 						<div className={styles.card}>
 							<div className={styles.cardHeader}>Quick Actions</div>
 							<div className={styles.cardContent}>
-								<div className={styles.actionButtons}>
+								<div className={styles.actionButtonFlex}>
+									<div className={styles.actionButtonsGrid}>
+										<button
+											className={`${styles.btn} ${styles.btnSuccess}`}
+											onClick={() => resolveInTraderFavorMutation.mutate()}
+										>
+											Resolve in Trader's Favor
+										</button>
+										<button
+											className={`${styles.btn} ${styles.btnDanger}`}
+											onClick={() => resolveInVendorFavorMutation.mutate()}
+										>
+											Resolve in Vendor's Favor
+										</button>
+										<button
+											className={`${styles.btn} ${styles.btnPrimary}`}
+											onClick={() => requestMoreEvidencesMutation.mutate()}
+										>
+											Request More Evidence
+										</button>
+										{$dispute.status === 'OPEN' && (
+											<button
+												className={`${styles.btn} ${styles.btnSecondary}`}
+												onClick={() => escalateToSeniorAdminMutation.mutate()}
+											>
+												Escalate to Senior Admin
+											</button>
+										)}
+										{/* {!isSeniorOrSuperAdmin && $dispute.status === 'OPEN' && (
+											<button
+												className={`${styles.btn} ${styles.btnSecondary}`}
+												onClick={() => escalateToSeniorAdminMutation.mutate()}
+											>
+												Escalate to Senior Admin
+											</button>
+										)} */}
+									</div>
 									<button
-										className={`${styles.btn} ${styles.btnSuccess}`}
-										onClick={() => resolveInTraderFavorMutation.mutate()}
+										className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
+										onClick={handleContactUsers}
 									>
-										Resolve in Trader's Favor
+										Contact Both Users
 									</button>
 									<button
-										className={`${styles.btn} ${styles.btnDanger}`}
-										onClick={() => resolveInVendorFavorMutation.mutate()}
+										className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
+										onClick={() => cancelTradeByModeratorMutation.mutate()}
 									>
-										Resolve in Vendor's Favor
+										Cancel Trade
 									</button>
 								</div>
-								<div className={styles.actionButtons}>
-									<button
-										className={`${styles.btn} ${styles.btnPrimary}`}
-										onClick={() => requestMoreEvidencesMutation.mutate()}
-									>
-										Request More Evidence
-									</button>
-									<button
-										className={`${styles.btn} ${styles.btnSecondary}`}
-										onClick={() => escalateToSeniorAdminMutation.mutate()}
-									>
-										Escalate to Senior Admin
-									</button>
-								</div>
-								<button
-									className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
-									onClick={handleContactUsers}
-								>
-									Contact Both Users
-								</button>
-								<button
-									className={`${styles.btn} ${styles.btnDanger} ${styles.fullWidth}`}
-									style={{ marginTop: '12px' }}
-									onClick={() => cancelTradeByModeratorMutation.mutate()}
-								>
-									Cancel Trade
-								</button>
 							</div>
 						</div>
 					)}

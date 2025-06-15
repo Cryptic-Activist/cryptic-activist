@@ -38,13 +38,22 @@ import { useParams } from 'next/navigation';
 import { useStore } from '@nanostores/react';
 
 const useDispute = () => {
+	const params = useParams();
+	const id = params?.id as string;
+
 	const { admin } = useAdmin();
 	const $dispute = useStore(dispute);
-	const params = useParams();
 	const [previousDisputePartyNotes, setPreviousDisputePartyNotes] =
 		useState<PreviousDisputePartyNotes>();
 
-	const id = params?.id as string;
+	const seniorOrSuperAdminFiltered = admin?.data?.roles?.filter(
+		(role) => role.role === 'SENIOR_ADMIN' || role.role === 'SUPER_ADMIN'
+	);
+	const isSeniorOrSuperAdmin = seniorOrSuperAdminFiltered
+		? seniorOrSuperAdminFiltered.length > 0
+		: false;
+
+	console.log({ isSeniorOrSuperAdmin, admin: admin.data });
 
 	const {
 		register: registerDisputeNotes,
@@ -152,7 +161,9 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: () => {
-			disputeQuery.refetch();
+			setValuesUserManagement('actionForTrader', 'NO_ACTION');
+			setValuesUserManagement('actionForVendor', 'NO_ACTION');
+			userManagementActionsQuery.refetch();
 		}
 	});
 
@@ -232,12 +243,11 @@ const useDispute = () => {
 			}
 		},
 		onSuccess: (data: any) => {
-			console.log({ data });
+			disputeQuery.refetch();
 		}
 	});
 
 	const onSubmitDisputeNotes = async (data: any) => {
-		console.log({ data });
 		addDisputePartyNoteMutation.mutate({
 			...data,
 			disputeId: $dispute.id,
@@ -246,13 +256,15 @@ const useDispute = () => {
 	};
 
 	const onSubmitResolutionNotes = async (data: any) => {
-		console.log({ data });
 		resolutionMutation.mutate({ ...data, disputeId: $dispute.id });
 	};
 
 	const onSubmitUserManagement = async (data: any) => {
-		console.log({ data });
-		userManagementActiosMutation.mutate(data);
+		userManagementActiosMutation.mutate({
+			...data,
+			disputeId: $dispute.id,
+			moderatorId: admin?.data?.id
+		});
 	};
 
 	useEffect(() => {
@@ -274,6 +286,7 @@ const useDispute = () => {
 	}, []);
 
 	return {
+		admin,
 		$dispute,
 		previousDisputePartyNotes,
 		resolutionTypesQuery,
@@ -305,7 +318,8 @@ const useDispute = () => {
 		userManagementValues: {
 			actionForTrader: getValuesUserManagement('actionForTrader'),
 			actionForVendor: getValuesUserManagement('actionForVendor')
-		}
+		},
+		isSeniorOrSuperAdmin
 	};
 };
 

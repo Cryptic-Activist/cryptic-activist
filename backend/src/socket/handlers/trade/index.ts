@@ -215,7 +215,31 @@ export default class Trade {
       'trade_set_canceled',
       async ({ chatId }: SetTradeAsCanceledParams) => {
         const systemMessage = new SystemMessage();
-        const canceledTrade = await cancelTrade();
+
+        const chatObject = await prisma.chat.findUnique({
+          where: {
+            id: chatId,
+          },
+          select: {
+            trade: {
+              select: {
+                blockchainTradeId: true,
+              },
+            },
+          },
+        });
+
+        if (!chatObject?.trade?.blockchainTradeId) {
+          this.io.to(chatId).emit('trade_set_canceled_error', {
+            error: true,
+          });
+          return;
+        }
+
+        const canceledTrade = await cancelTrade(
+          chatObject?.trade.blockchainTradeId,
+          true,
+        );
 
         if (canceledTrade.message !== 'Trade cancelled') {
           this.io.to(chatId).emit('trade_set_canceled_error', {

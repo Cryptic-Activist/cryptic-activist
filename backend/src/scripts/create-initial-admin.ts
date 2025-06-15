@@ -29,12 +29,51 @@ const main = async () => {
       password: hashedPassword,
       isVerified: true,
       roles: {
-        create: [{ role: 'SUPER_ADMIN' }, { role: 'AUDITOR' }],
+        create: [
+          { role: 'AUDITOR' },
+          { role: 'DISPUTE_MANAGER' },
+          { role: 'FINANCE_MANAGER' },
+          { role: 'KYC_REVIEWER' },
+          { role: 'MODERATOR' },
+          { role: 'SENIOR_ADMIN' },
+          { role: 'SUPER_ADMIN' },
+          { role: 'SUPPORT_AGENT' },
+        ],
+      },
+    },
+  });
+
+  const disputeManagerEmail = 'dispute@manager.com';
+  const disputeManagerPlainPassword = 'dispute';
+  const disputeManagerHashedPassword = await bcrypt.hash(
+    disputeManagerPlainPassword,
+    10,
+  );
+
+  const disputeManagerExists = await prisma.admin.findUnique({
+    where: { email: disputeManagerEmail },
+  });
+  if (disputeManagerExists) {
+    console.log('Dispute Manager already exists');
+    return;
+  }
+
+  const disputeManager = await prisma.admin.create({
+    data: {
+      firstName: 'Dispute',
+      lastName: 'Manager',
+      username: 'dispute-manager',
+      email: disputeManagerEmail,
+      password: disputeManagerHashedPassword,
+      isVerified: true,
+      roles: {
+        create: [{ role: 'DISPUTE_MANAGER' }],
       },
     },
   });
 
   console.log('Admin created:', admin);
+  console.log('Dispute Manager:', disputeManager);
   process.exit(0);
 };
 

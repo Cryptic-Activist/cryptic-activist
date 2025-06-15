@@ -24,10 +24,10 @@ const buildUserWarningEmail = (trade: any, user: any) => {
     <tr>
       <td style="padding: 30px 40px;">
         <p style="margin:0 0 20px;color:#333333;font-size:16px;line-height:24px;">
-          Hi <strong>${user.firstName} ${user.lastName}</strong>,
+          Hi <strong>${user?.firstName} ${user?.lastName}</strong>,
         </p>
         <p style="margin:0 0 20px;color:#333333;font-size:16px;line-height:24px;">
-          This is a warning of misbehavior as a resolution of the last dispute resolution involving your trade with <strong>${trade.trader.firstName} ${trade.trader.lastName}</strong> (${trade.trader.username}).
+          This is a warning of misbehavior as a resolution of the last dispute resolution involving your trade with <strong>${trade?.trader?.firstName} ${trade?.trader?.lastName}</strong> (${trade?.trader?.username}).
         </p>
 
 
