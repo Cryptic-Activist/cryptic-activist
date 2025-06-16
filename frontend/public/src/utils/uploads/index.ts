@@ -11,7 +11,7 @@ export const processFileToUpload = async (files: File[]) => {
       try {
         processedFile = await imageCompression(file, {
           maxSizeMB: 1,
-          maxWidthOrHeight: 1024,
+          maxWidthOrHeight: 720,
           useWebWorker: true,
         });
       } catch (err) {

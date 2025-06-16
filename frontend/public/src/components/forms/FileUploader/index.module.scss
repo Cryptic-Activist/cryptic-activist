@@ -67,6 +67,7 @@
   flex-direction: column;
   gap: 0.25rem;
   align-items: flex-start;
+  position: relative;
 }
 
 .dropContent {
@@ -114,12 +115,13 @@
 
 .fileListWrapper {
   position: absolute;
-  top: 6.2rem;
-  right: 1rem;
+  top: 1.5rem;
+  right: 0.3rem;
   background-color: #e6e6e6;
   border-radius: 0.4rem;
   padding: 0.5rem;
   box-shadow: 0 2px 4px globals.$box-shadow-default-color;
+  z-index: 9;
 }
 
 .previewSection {

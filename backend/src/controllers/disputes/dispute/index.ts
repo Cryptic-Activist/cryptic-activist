@@ -896,6 +896,72 @@ export async function requestMoreEvidences(req: Request, res: Response) {
   }
 }
 
+export async function addMoreEvidences(req: Request, res: Response) {
+  try {
+    const { disputeId, evidences, userId } = req.body;
+
+    const dispute = await prisma.tradeDispute.findUnique({
+      where: { id: disputeId },
+      select: {
+        id: true,
+        moderatorId: true,
+        disputeEvidenceRequest: true,
+        trade: {
+          select: {
+            traderId: true,
+            vendorId: true,
+          },
+        },
+      },
+    });
+
+    if (!dispute) {
+      res.status(404).json({ errors: ['Dispute not found'] });
+      return;
+    }
+
+    if (!dispute.moderatorId) {
+      res.status(404).json({ errors: ['Dispute moderator not found'] });
+      return;
+    }
+
+    const promises = dispute.disputeEvidenceRequest.map(async (request) => {
+      if (request.requestedFromId === userId) {
+        const toCreateEvidences = evidences.map((evidence: any) => ({
+          fileUrl: evidence.url,
+          disputeId: request.disputeId,
+          submittedById: request.requestedFromId,
+          type: 'BANK_STATEMENT',
+        }));
+        await prisma.disputeEvidenceRequest.update({
+          where: {
+            id: request.id,
+            disputeId: request.disputeId,
+            requestedFromId: request.requestedFromId,
+          },
+          data: {
+            submittedAt: new Date(),
+            evidences: {
+              create: toCreateEvidences,
+            },
+            status: 'SUBMITTED',
+          },
+        });
+      }
+    });
+
+    const fulfilled = await Promise.all(promises);
+
+    res.status(200).json(fulfilled);
+    return;
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}
+
 export async function escalateToSeniorAdmin(req: Request, res: Response) {
   try {
     const { disputeId } = req.body;

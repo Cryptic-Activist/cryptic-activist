@@ -1,5 +1,6 @@
 import {
   addDisputePartyNote,
+  addMoreEvidences,
   addResolutionDecision,
   cancelTradeByModerator,
   contactBothUsers,
@@ -22,6 +23,7 @@ import {
 } from '@/middlewares/authorization';
 import {
   validateAddDisputePartyNote,
+  validateAddMoreEvidences,
   validateAddResolutionDecision,
   validateCancelTradeByModerator,
   validateGetPreviousPartyNote,
@@ -132,6 +134,13 @@ router.post(
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
   validateRequestMoreEvidences,
   requestMoreEvidences,
+);
+
+router.post(
+  '/quick-actions/more-evidences/add',
+  authenticateUser,
+  validateAddMoreEvidences,
+  addMoreEvidences,
 );
 
 router.post(

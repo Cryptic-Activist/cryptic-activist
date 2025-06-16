@@ -1,5 +1,6 @@
 import {
   AddDisputePartyNote,
+  AddMoreEvidences,
   AddResolutionDecision,
   GetPreviousDisputePartyNote,
   RequestMoreEvidences,
@@ -121,4 +122,21 @@ export const validateRequestMoreEvidences = (
   next();
 };
 
-RequestMoreEvidences;
+export const validateAddMoreEvidences = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { body } = req;
+
+  const validated = AddMoreEvidences.safeParse(body);
+
+  if (!validated.success) {
+    res.status(400).send({
+      errors: validated.error,
+    });
+    return;
+  }
+
+  next();
+};

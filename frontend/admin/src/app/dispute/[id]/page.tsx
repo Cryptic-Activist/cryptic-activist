@@ -483,7 +483,8 @@ const DisputeDetailsPage = () => {
 											</button>
 											{openRequestedFrom && <RequestEvidencesFrom />}
 										</div>
-										{$dispute.status === 'OPEN' && (
+										{($dispute.status === 'OPEN' ||
+											$dispute.status === 'PENDING_EVIDENCE') && (
 											<button
 												className={`${styles.btn} ${styles.btnSecondary}`}
 												onClick={() => escalateToSeniorAdminMutation.mutate()}

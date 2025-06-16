@@ -1,7 +1,7 @@
 'use client';
 
 import { FeedbackProps, TradeDetailsProps } from './types';
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   formatEnum,
   formatTimestamp,
@@ -9,17 +9,13 @@ import {
   getFutureDateByHours,
   getInitials,
   getLocaleFullDateString,
-  processFileToUpload,
   toUpperCase,
 } from '@/utils';
 
 import { Button } from '@/components';
 import { FileUploader } from '@/components/forms';
-import { FileUploaderHandle } from '@/components/forms/FileUploader/types';
 import Image from 'next/image';
-import { getSocket } from '@/services/socket';
 import styles from './index.module.scss';
-import { uploadFiles } from '@/services/uploads';
 import { useNavigationBar } from '@/hooks';
 
 const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
@@ -53,12 +49,19 @@ const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
   );
 };
 
-const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
+const TradeDetailsPage: FC<TradeDetailsProps> = ({
+  trade,
+  app,
+  user,
+  onSubmitMoreEvidences,
+  onUploadEvidences,
+  handleSubmitMoreEvidences,
+  uploaderRef,
+}) => {
   const { tradeDetails, chatMessages } = trade;
   const { toggleModal } = useNavigationBar();
 
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const uploaderRef = useRef<FileUploaderHandle>(null);
 
   const toggleChatView = () => {
     setIsChatOpen((prev) => !prev);
@@ -70,21 +73,11 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
     tradeDetails.tradeDispute?.disputeEvidenceRequest?.filter(
       (request: any) => request?.requestedFromId === user?.id
     );
-  const hasMoreEvidenceRequest = moreEvidenceRequestFiltered.length > 0;
+  const hasMoreEvidenceRequest =
+    moreEvidenceRequestFiltered.length > 0 &&
+    moreEvidenceRequestFiltered[0].submittedAt === null;
 
-  // const handleEvidenceUpload = () => {
-  //   uploaderRef.current?.upload();
-  // };
-
-  const onUploadEvidences = async (files: File[]) => {
-    const socket = getSocket();
-    if (socket.connected && trade.chat?.id && user.id) {
-      const formData = await processFileToUpload(files);
-      const uploadedFiles = await uploadFiles(formData);
-
-      console.log({ uploadedFiles });
-    }
-  };
+  console.log({ moreEvidenceRequestFiltered, hasMoreEvidenceRequest });
 
   return (
     <div className={styles.container}>
@@ -466,8 +459,11 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
         {hasMoreEvidenceRequest && <div className={styles.divider} />}
 
         {hasMoreEvidenceRequest && (
-          <div className={styles.chatSection}>
-            <h3 className={styles.sectionTitle}>More Evidences</h3>
+          <form
+            className={styles.evidencesForm}
+            onSubmit={handleSubmitMoreEvidences(onSubmitMoreEvidences)}
+          >
+            <h3>More Evidences</h3>
             <p className={styles.evidencesStatement}>
               The dispute moderator is requesting more evidences to resolve the
               open dispute.
@@ -480,13 +476,14 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
                 'image/webp',
                 // 'application/pdf',
               ]}
-              maxFileSize={2 * 1024 * 1024} // 1MB
+              maxFileSize={2 * 1024 * 1024} // 2MB
               maxFiles={4}
               label="Upload Evidence"
               onUpload={onUploadEvidences}
               ref={uploaderRef}
             />
-          </div>
+            <Button type="submit">Submit</Button>
+          </form>
         )}
 
         {(canLeaveFeedback || tradeDetails.paymentReceipt) && (

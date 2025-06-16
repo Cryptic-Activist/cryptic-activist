@@ -38,3 +38,14 @@ export const RequestMoreEvidences = z
       });
     }
   });
+
+export const AddMoreEvidences = z.object({
+  disputeId: z.string().min(1),
+  evidences: z.array(
+    z.object({
+      fileName: z.string().min(1),
+      url: z.string().min(1),
+    }),
+  ),
+  userId: z.string().min(1),
+});

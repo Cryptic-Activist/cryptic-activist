@@ -379,8 +379,10 @@ $border-radius: 0.5rem;
   }
 }
 
-.evidencesStatement {
-  margin-bottom: 1rem;
+.evidencesForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .link {
