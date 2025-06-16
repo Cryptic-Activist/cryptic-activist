@@ -1,6 +1,11 @@
 import {
+  authenticateAdmin,
+  requireAdminRole,
+} from '@/middlewares/authorization';
+import {
   getAllUsers,
   getRandomCredentials,
+  getTotalUsers,
   getUserById,
   getUserByUsername,
   getUserController,
@@ -26,5 +31,12 @@ router.get('/get', validateGetUserRequest, getUserController);
 router.get('/get/users', validateGetUserRequest, getUsersController);
 
 router.get('/get/verify', validateGetUserRequest, getUserVerify);
+
+router.get(
+  '/total',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getTotalUsers,
+);
 
 export default router;

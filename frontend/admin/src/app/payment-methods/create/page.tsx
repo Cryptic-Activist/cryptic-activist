@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-
-import { Input, Select, Submit } from '@/components/Form';
+import { Input, Select, Submit } from '@/components/form';
 import { usePaymentMethodCategories, usePaymentMethods } from '@/hooks';
-import { mapPaymentMethodCategories } from '@/utils/map/paymentMethodCategories';
 
+import { mapPaymentMethodCategories } from '@/utils/map/paymentMethodCategories';
 import page from './page.module.scss';
+import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
 const PaymentMethodsCreate = () => {
 	const { paymentMethodCategories } = usePaymentMethodCategories(true);

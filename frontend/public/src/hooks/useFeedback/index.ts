@@ -1,22 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { leaveAFeedbackResolver, moreEvidencesResolver } from './zod';
+import { onSubmitFeedback, submitMoreEvidences } from '@/services/feedback';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import { FileUploaderHandle } from '@/components/forms/FileUploader/types';
+import { OnSubmitMoreEvidences } from '@/services/feedback/types';
 import { Type } from '@/components/FeedbackSelector/types';
 import { getTradeDetails } from '@/services/trade';
-import { leaveAFeedbackResolver } from './zod';
-import { onSubmitFeedback } from '@/services/feedback';
+import { processFileToUpload } from '@/utils';
+import { uploadFiles } from '@/services/uploads';
 import useApp from '../useApp';
 import { useForm } from 'react-hook-form';
 import useNavigationBar from '../useNavigationBar';
 import { useParams } from 'next/navigation';
+import useUser from '../useUser';
 
 const useFeedback = (enabled: boolean) => {
   const params = useParams();
   const id = params.id?.toString();
   const { setValue: setValueApp, app } = useApp();
   const { toggleModal } = useNavigationBar();
+  const { user } = useUser();
+  const uploaderRef = useRef<FileUploaderHandle>(null);
 
   const query = useQuery({
     queryKey: ['tradeDetails', id],
@@ -48,7 +55,41 @@ const useFeedback = (enabled: boolean) => {
     formState: { errors },
   } = useForm({ resolver: leaveAFeedbackResolver });
 
+  const {
+    handleSubmit: handleSubmitMoreEvidences,
+    getValues: getValuesMoreEvidences,
+    setValue: setValueMoreEvidences,
+  } = useForm({ resolver: moreEvidencesResolver });
+
   const [leftAFeedback, setLeftAFeedback] = useState(false);
+
+  const submitMoreEvidencesMutation = useMutation({
+    mutationKey: ['subMoreEvidences'],
+    mutationFn: async (params: OnSubmitMoreEvidences) =>
+      submitMoreEvidences(params),
+    onSuccess: () => query.refetch(),
+  });
+
+  const handleEvidenceUpload = () => {
+    uploaderRef.current?.upload();
+  };
+
+  const onUploadEvidences = async (files: File[]) => {
+    if (query.data?.tradeDetails?.tradeDispute.id && user.id) {
+      const formData = await processFileToUpload(files);
+      const uploadedFiles = await uploadFiles(formData);
+
+      submitMoreEvidencesMutation.mutate({
+        disputeId: query.data?.tradeDetails?.tradeDispute?.id,
+        userId: user.id,
+        evidences: uploadedFiles,
+      });
+    }
+  };
+
+  const onSubmitMoreEvidences = () => {
+    handleEvidenceUpload();
+  };
 
   useEffect(() => {
     if (query.data?.cryptocurrency) {
@@ -92,6 +133,13 @@ const useFeedback = (enabled: boolean) => {
     handleSubmit,
     onSubmit,
     handleFeedbackType,
+    onUploadEvidences,
+    handleEvidenceUpload,
+    handleSubmitMoreEvidences,
+    getValuesMoreEvidences,
+    setValueMoreEvidences,
+    onSubmitMoreEvidences,
+    uploaderRef,
     values: {
       message: getValues('message'),
     },

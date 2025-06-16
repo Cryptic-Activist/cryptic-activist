@@ -111,6 +111,7 @@ export type Trade = {
     createdAt?: string;
     endedAt?: string;
     fundedAt?: string;
+    disputedAt?: string;
     blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
@@ -141,6 +142,7 @@ export type TradeStore = {
     createdAt?: string;
     endedAt?: string;
     fundedAt?: string;
+    disputedAt?: string;
     blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
@@ -170,6 +172,7 @@ export type TradeSetter = {
   paidAt?: string;
   expiredAt?: string;
   startedAt?: string;
+  disputedAt?: string;
   createdAt?: string;
   endedAt?: string;
   fundedAt?: string;

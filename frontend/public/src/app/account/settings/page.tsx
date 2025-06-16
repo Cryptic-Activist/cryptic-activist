@@ -1,120 +1,27 @@
 'use client';
 
-import React, { FormEvent, useEffect, useState } from 'react';
-import {
-  addSpokenLanguage,
-  removeSpokenLanguage,
-  updateEmailRequest,
-} from '@/services/user/settings';
-import { useApp, useNavigationBar, useUser } from '@/hooks';
-
 import { Button } from '@/components';
 import { FaPlus } from 'react-icons/fa6';
 import { Input } from '@/components/forms';
+import React from 'react';
 import styles from './page.module.scss';
+import { useAccountSettings } from '@/hooks';
 
 const AccountSettings = () => {
-  const { toggleModal } = useNavigationBar();
-  const { addToast } = useApp();
-  const { user } = useUser();
-  const [languages, setLanguages] = useState(user.languages);
-  const [newLanguage, setNewLanguage] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newEmailRequestButtonLabel, setNewEmailRequestButtonLabel] =
-    useState('Update Email');
-
-  const addLanguage = (newLang: { id: string; name: string }) => {
-    const filtered = languages?.filter((lang) =>
-      lang.name.toLowerCase().trim().includes(newLanguage.toLowerCase().trim())
-    );
-    if (filtered?.length === 0) {
-      setLanguages((prev) => [
-        ...(prev || []),
-        {
-          name: newLang.name,
-          id: newLang.id,
-        },
-      ]);
-    }
-  };
-
-  const removeLanguage = async (languageId: string) => {
-    if (user.id) {
-      const removedLang = await removeSpokenLanguage({
-        languageId,
-        userId: user.id,
-      });
-
-      if (removedLang.ok) {
-        setLanguages((prevLangs) => {
-          const filtered = prevLangs?.filter(
-            (prevLang) => languageId !== prevLang.id
-          );
-          return filtered;
-        });
-      }
-    }
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (user.id) {
-      const addedLanguage = await addSpokenLanguage({
-        language: newLanguage,
-        userId: user.id,
-      });
-
-      if (addedLanguage.errors) {
-        addToast('error', addedLanguage.errors[0], 5000);
-        return;
-      }
-
-      if (addedLanguage) {
-        addLanguage({ id: addedLanguage.languageId, name: newLanguage });
-        setNewLanguage('');
-      }
-    }
-  };
-
-  const handleChangeEmailRequestSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-    if (user.id) {
-      const requested = await updateEmailRequest({
-        userId: user.id,
-        email: newEmail,
-      });
-
-      if (!requested) {
-        addToast('error', 'Unable to send email change request.', 5000);
-        return;
-      }
-
-      setNewEmail('');
-      setNewEmailRequestButtonLabel('Request Sent');
-      addToast(
-        'info',
-        'Email change request sent to your current email.',
-        5000
-      );
-      setTimeout(() => {
-        setNewEmailRequestButtonLabel('Update Email');
-      }, 5000);
-    }
-  };
-
-  const handleNewLanguage = (value: string) => {
-    setNewLanguage(value);
-  };
-
-  const handleNewEmail = (value: string) => {
-    setNewEmail(value);
-  };
-
-  useEffect(() => {
-    setLanguages(user.languages);
-  }, [user.languages]);
+  const {
+    handleChangeEmailRequestSubmit,
+    handleNewEmail,
+    handleNewLanguage,
+    handleSubmit,
+    newEmailRequestButtonLabel,
+    removeLanguage,
+    toggleModal,
+    user,
+    languages,
+    newLanguage,
+    newEmail,
+    handleDisable2FA,
+  } = useAccountSettings();
 
   return (
     <div className={styles.container}>
@@ -125,7 +32,7 @@ const AccountSettings = () => {
           {user.id && (
             <>
               {user.twoFactorEnabled ? (
-                <Button>Disable 2FA</Button>
+                <Button onClick={handleDisable2FA}>Disable 2FA</Button>
               ) : (
                 <Button onClick={() => toggleModal('enableTwoFactor')}>
                   Enable 2FA

@@ -5,7 +5,8 @@ export type Theme =
   | 'secondary'
   | 'ghost'
   | 'transparent'
-  | 'danger';
+  | 'danger'
+  | 'alert';
 
 export type ButtonProps = {
   type?: 'button' | 'submit';
@@ -17,5 +18,6 @@ export type ButtonProps = {
   size?: number;
   fullWidth?: boolean;
   isDisabled?: boolean;
+  className?: string;
   onClick?: () => void;
 };

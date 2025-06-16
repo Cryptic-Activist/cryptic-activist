@@ -86,3 +86,18 @@ export const updateEmail = async (token: string) => {
 
   return response.data;
 };
+
+export const disable2FA = async (userId: string) => {
+  const accessToken = getCookie('accessToken');
+  const response = await fetchPut(
+    BACKEND + '/users/auth/2fa/disable/' + userId,
+    {},
+    {
+      Authorization: `Bearer ${accessToken}`,
+    }
+  );
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};

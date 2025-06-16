@@ -59,3 +59,89 @@ export const getDuration = (startedAt: Date, endedAt: Date) => {
     formatted,
   };
 };
+
+export const getMonthBoundaries = () => {
+  const now = new Date();
+
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // day 0 of this month = last day of last month
+
+  return {
+    now,
+    startOfThisMonth,
+    startOfLastMonth,
+    endOfLastMonth,
+  };
+};
+
+export function getTodayAndYesterdayBoundaries() {
+  const now = new Date();
+
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+  );
+  const todayEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  const yesterdayStart = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    0,
+    0,
+    0,
+  );
+  const yesterdayEnd = new Date(
+    yesterday.getFullYear(),
+    yesterday.getMonth(),
+    yesterday.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  return {
+    todayStart,
+    todayEnd,
+    yesterdayStart,
+    yesterdayEnd,
+  };
+}
+
+export const formatMinutes = (avgMinutes: number) => {
+  return Math.round(avgMinutes) + 'm';
+};
+
+export const getFutureDate = (options: {
+  days?: number;
+  hours?: number;
+  minutes?: number;
+  seconds?: number;
+}): Date => {
+  const now = new Date();
+  const future = new Date(now);
+
+  if (options.days) future.setDate(future.getDate() + options.days);
+  if (options.hours) future.setHours(future.getHours() + options.hours);
+  if (options.minutes) future.setMinutes(future.getMinutes() + options.minutes);
+  if (options.seconds) future.setSeconds(future.getSeconds() + options.seconds);
+
+  return future;
+};

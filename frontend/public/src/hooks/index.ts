@@ -27,3 +27,4 @@ export { default as useFeedback } from './useFeedback';
 export { default as useVendor } from './useVendor';
 export { default as useMyOffers } from './useMyOffers';
 export { default as useEditOffer } from './useEditOffer';
+export { default as useAccountSettings } from './useAccountSettings';

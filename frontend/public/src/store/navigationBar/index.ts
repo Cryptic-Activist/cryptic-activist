@@ -32,6 +32,7 @@ export const useNavigationBarSlice: StateCreator<
       verifyAccount: false,
       feedback: false,
       startTradeConfirmation: false,
+      disputeRequest: false,
     },
     status: 'idle',
     setNavigationBarValue: (params, actionName = 'navigationBar/setValue') => {
@@ -121,6 +122,7 @@ export const useNavigationBarSlice: StateCreator<
             verifyAccount: false,
             feedback: false,
             startTradeConfirmation: false,
+            disputeRequest: false,
           },
           status: 'idle',
           tooltips: {

@@ -11,7 +11,6 @@ import {
   generateToken,
 } from '@/utils/generators/jwt';
 
-import { JWT_SECRET } from '@/constants/env';
 import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
 import buildAccountCreatedEmail from '@/services/email/templates/account-created';
@@ -20,7 +19,6 @@ import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { generateRandomHash } from '@/utils/string';
 import { getExpiresAt } from '@/utils/date';
 import { getRandomHighContrastColor } from '@/utils/color';
-import { languages } from 'unique-names-generator';
 import { prisma } from '@/services/db';
 import { publishToQueue } from '@/services/rabbitmq';
 import speakeasy from 'speakeasy';
@@ -310,7 +308,8 @@ export const register = async (req: Request, res: Response) => {
         where: { referralCode },
       });
       if (!referringUser) {
-        return res.status(400).json({ error: 'Invalid referral code.' });
+        res.status(400).json({ error: 'Invalid referral code.' });
+        return;
       }
       referrerId = referringUser.id;
     }
@@ -885,6 +884,43 @@ export const verify2FA = async (req: Request, res: Response) => {
     console.log({ publishedTwoFactorActivated });
 
     res.status(200).json({ success: true });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const disable2FA = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      res.status(404).send({
+        error: 'User not found',
+      });
+      return;
+    }
+
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        twoFactorSecret: null,
+        twoFactorEnabled: false,
+      },
+    });
+
+    res.status(200).json({ ok: true });
     return;
   } catch (err) {
     res.status(500).send({

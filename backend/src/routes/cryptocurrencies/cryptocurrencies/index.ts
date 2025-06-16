@@ -1,6 +1,7 @@
 import {
   createAcceptedCryptocurrencyCoinGecko,
   createCryptocurrenciesCoinGecko,
+  getCryptocurrencyFilters,
   index,
   indexCoinGecko,
 } from '@/controllers/cryptocurrencies';
@@ -16,5 +17,7 @@ router.get('/coin-gecko', indexCoinGecko);
 router.post('/coin-gecko/create', createCryptocurrenciesCoinGecko);
 
 router.post('/accepted/create', createAcceptedCryptocurrencyCoinGecko);
+
+router.get('/filters', getCryptocurrencyFilters);
 
 export default router;

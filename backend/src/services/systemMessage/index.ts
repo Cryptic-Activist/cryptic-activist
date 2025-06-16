@@ -1,15 +1,22 @@
 import {
   EMAIL_FROM,
   buildTradeCancelledEmail,
+  buildTradeDisputeMoreEvidencesRequestEmail,
+  buildTradeDisputeResolvedEmail,
   buildTradeExpiredEmail,
   buildTradeFailedEmail,
   buildTradeStartedEmail,
   buildTradeSuccessfulEmail,
 } from '../email';
+import {
+  SendRequestMoreEvidencesParams,
+  SendWarningToUserParams,
+} from './types';
 import { Trade, User } from '@prisma/client';
 import { prisma, redisClient } from '../db';
 
 import { FRONTEND_PUBLIC } from '@/constants/env';
+import buildUserWarningEmail from '../email/templates/user-warning';
 import { getIO } from '../socket';
 import { publishToQueue } from '../rabbitmq';
 
@@ -486,7 +493,7 @@ export default class SystemMessage {
         text: 'Trade has been cancelled',
       });
 
-      const newSystemMessage = await prisma.systemMessage.create({
+      const newSystemMessageTrader = await prisma.systemMessage.create({
         data: {
           type: 'TRADE_CANCELLED',
           userId: trade.trader.id,
@@ -504,7 +511,7 @@ export default class SystemMessage {
 
         // Deliver message in real time
         io.to(traderSocketId).emit('notification_system', {
-          message: newSystemMessage.message,
+          message: newSystemMessageTrader.message,
         });
       }
 
@@ -525,5 +532,187 @@ export default class SystemMessage {
         text: 'Trade has been cancelled',
       });
     }
+  }
+
+  async tradeDisputeResolution(tradeId: string) {
+    const trade = await prisma.trade.findUnique({
+      where: { id: tradeId },
+      select: {
+        id: true,
+        vendor: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        trader: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (trade) {
+      const TradeDisputeResolvedUrl =
+        FRONTEND_PUBLIC + '/trade/' + trade.id + '/details';
+      const message = `The trade with ${trade.trader.firstName} ${trade.trader.lastName} (${trade.trader.username}) has its dispute resolved. Check the final decision.`;
+
+      const newSystemMessageVendor = await prisma.systemMessage.create({
+        data: {
+          type: 'TRADE_DISPUTE_RESOLVED',
+          userId: trade.vendor.id,
+          url: TradeDisputeResolvedUrl,
+          message,
+        },
+      });
+
+      // // Check if recipient is online via Redis
+      const vendorSocketId = await redisClient.hGet(
+        'onlineUsers',
+        trade.vendor.id,
+      );
+      if (vendorSocketId) {
+        const io = getIO();
+
+        // Deliver message in real time
+        io.to(vendorSocketId).emit('notification_system', {
+          message: newSystemMessageVendor.message,
+        });
+      }
+
+      const tradeDisputeResolutionEmailBodyVendor =
+        buildTradeDisputeResolvedEmail(trade, trade.vendor);
+      await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: trade.vendor.email,
+            name: `${trade.vendor.firstName} ${trade.vendor.lastName}`,
+          },
+        ],
+        subject: 'Trade dispute resolved - Cryptic Activist',
+        html: tradeDisputeResolutionEmailBodyVendor,
+        text: 'Trade dispute resolved',
+      });
+
+      const newSystemMessageTrader = await prisma.systemMessage.create({
+        data: {
+          type: 'TRADE_DISPUTE_RESOLVED',
+          userId: trade.trader.id,
+          url: TradeDisputeResolvedUrl,
+          message,
+        },
+      });
+
+      const traderSocketId = await redisClient.hGet(
+        'onlineUsers',
+        trade.trader.id,
+      );
+      if (traderSocketId) {
+        const io = getIO();
+
+        // Deliver message in real time
+        io.to(traderSocketId).emit('notification_system', {
+          message: newSystemMessageTrader.message,
+        });
+      }
+
+      const tradeDisputeResolvedEmailBodyTrader =
+        buildTradeDisputeResolvedEmail(trade, trade.trader);
+      await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: trade.trader.email,
+            name: `${trade.trader.firstName} ${trade.trader.lastName}`,
+          },
+        ],
+        subject: 'Trade has been cancelled - Cryptic Activist',
+        html: tradeDisputeResolvedEmailBodyTrader,
+        text: 'Trade has been cancelled',
+      });
+    }
+  }
+
+  async sendWarningToUser(params: SendWarningToUserParams) {
+    const newSystemMessageVendor = await prisma.systemMessage.create({
+      data: {
+        type: 'USER_WARNING',
+        userId: params.user.id,
+        message: params.message,
+      },
+    });
+
+    // // Check if recipient is online via Redis
+    const userSocketId = await redisClient.hGet('onlineUsers', params.user?.id);
+    if (userSocketId) {
+      const io = getIO();
+
+      // Deliver message in real time
+      io.to(userSocketId).emit('notification_system', {
+        message: newSystemMessageVendor.message,
+      });
+    }
+
+    const userWarningEmailBody = buildUserWarningEmail(
+      params.trade,
+      params.user,
+    );
+    await publishToQueue('emails', {
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: params.user?.email,
+          name: `${params.user?.firstName} ${params.user?.lastName}`,
+        },
+      ],
+      subject: 'You have received a warning - Cryptic Activist',
+      html: userWarningEmailBody,
+      text: 'You have received a warning',
+    });
+  }
+  async sendRequestMoreEvidences(params: SendRequestMoreEvidencesParams) {
+    const newSystemMessageVendor = await prisma.systemMessage.create({
+      data: {
+        type: 'TRADE_DISPUTE_MORE_EVIDENCES',
+        userId: params.user.id,
+        message: params.message,
+      },
+    });
+
+    // // Check if recipient is online via Redis
+    const userSocketId = await redisClient.hGet('onlineUsers', params.user?.id);
+    if (userSocketId) {
+      const io = getIO();
+
+      // Deliver message in real time
+      io.to(userSocketId).emit('notification_system', {
+        message: newSystemMessageVendor.message,
+      });
+    }
+
+    const userWarningEmailBody = buildTradeDisputeMoreEvidencesRequestEmail(
+      params.trade,
+      params.user,
+    );
+    await publishToQueue('emails', {
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: params.user?.email,
+          name: `${params.user?.firstName} ${params.user?.lastName}`,
+        },
+      ],
+      subject: 'You have received a warning - Cryptic Activist',
+      html: userWarningEmailBody,
+      text: 'You have received a warning',
+    });
   }
 }

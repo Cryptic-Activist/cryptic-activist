@@ -1,3 +1,5 @@
+@use "../styles/globals.module.scss";
+
 .main {
   display: flex;
   height: calc(100vh - 6.17rem);
@@ -8,6 +10,7 @@
   width: 100%;
   overflow-y: scroll;
   padding: 0 1rem;
+  background-color: rgba(globals.$primary, 0.2);
   &::-webkit-scrollbar {
     width: 8px;
   }

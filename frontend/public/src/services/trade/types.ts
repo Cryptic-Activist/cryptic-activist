@@ -17,3 +17,7 @@ export type getCurrentTradingFeeParams = {
   fiatAmount: number;
   currentPrice: number;
 };
+
+export type SubmitDisputeParams = {
+  formData: FormData;
+};

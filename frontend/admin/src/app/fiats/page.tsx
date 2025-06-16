@@ -1,12 +1,13 @@
-"use client";
-import React from "react";
-import useFiats from "@/hooks/useFiats";
-import { FiatsList as List } from "@/components/List";
+'use client';
+
+import { FiatsList as List } from '@/components/lists';
+import React from 'react';
+import useFiats from '@/hooks/useFiats';
 
 const Fiats = () => {
-  const { fiats } = useFiats(true);
+	const { fiats } = useFiats(true);
 
-  return <List items={fiats.data} />;
+	return <List items={fiats.data} />;
 };
 
 export default Fiats;

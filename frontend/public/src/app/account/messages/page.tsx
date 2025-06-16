@@ -18,12 +18,14 @@ const Message: FC<MessageProps> = ({ note }) => {
   };
   const notification = getNotification();
 
+  console.log({ note });
+
   const getActionButtons = () => {
     return (
       <>
         {notification?.mainActionButtonLabel && (
           <Link
-            href={note.url}
+            href={note.url ? note.url : '#'}
             style={{
               backgroundColor: notification?.backgroundColor,
               color: notification?.color,

@@ -8,8 +8,8 @@ export const capitalizePathname = (string: string, splitFactor: string) => {
 	return capitalized.join(' ');
 };
 
-export const toUpperCase = (text: string) => {
-	return text.toUpperCase();
+export const toUpperCase = (text?: string) => {
+	return text ? text?.toUpperCase() : '';
 };
 
 export const toLowerCase = (text: string) => {
@@ -38,3 +38,32 @@ export const toCapitalize = (string: string): string => {
 		string.length
 	)}`;
 };
+
+export const humanizeCamelCase = (str: string) => {
+	return (
+		str
+			// Insert a space before all capital letters
+			.replace(/([A-Z])/g, ' $1')
+			// Capitalize the first character
+			.replace(/^./, (char) => char.toUpperCase())
+	);
+};
+
+export const formatEnum = (input?: string) => {
+	if (!input) return '';
+
+	return input
+		.toLowerCase()
+		.replace(/_/g, ' ')
+		.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+// export const getBearerToken = () => {
+// 	const accessToken = getCookie('accessToken');
+
+// 	if (accessToken === null) {
+// 		throw new Error('JWT not found');
+// 	}
+
+// 	return `Bearer ${accessToken}`;
+// };

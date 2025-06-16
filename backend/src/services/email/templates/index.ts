@@ -16,3 +16,5 @@ export { default as buildTradeFailedEmail } from './trade-has-failed';
 export { default as buildTradeExpiredEmail } from './trade-has-expired';
 export { default as buildTradeSuccessfulEmail } from './trade-has-completed';
 export { default as buildTradeCancelledEmail } from './trade-has-cancelled';
+export { default as buildTradeDisputeResolvedEmail } from './trade-dispute-resolved';
+export { default as buildTradeDisputeMoreEvidencesRequestEmail } from './trade-dispute-more-evidences-request';

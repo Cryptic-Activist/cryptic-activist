@@ -16,9 +16,6 @@ export default class Timer {
 
   update() {
     this.socket.on('timer:update', async ({ remaining, chatId }) => {
-      console.log(
-        `Timer expired for trade ${chatId} with remaining time ${remaining}`,
-      );
       this.io.to(chatId).emit('trade_timer_update', { remaining, chatId });
     });
   }

@@ -9,7 +9,13 @@ import {
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
-import { useRouter, useTrade, useTradeSocket, useUser } from '@/hooks';
+import {
+  useNavigationBar,
+  useRouter,
+  useTrade,
+  useTradeSocket,
+  useUser,
+} from '@/hooks';
 
 import styles from './page.module.scss';
 
@@ -18,6 +24,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   onSetAsPaid,
+  toggleModal,
 }) => {
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
@@ -36,12 +43,19 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
     !trade.disputedAt;
+  const isDisputed = trade.disputedAt && trade.status === 'DISPUTED';
 
   return (
     <section className={styles.actionButtons}>
       <div className={styles.actionButtonsGrid}>
         {isRaiseADisputeVisible && (
-          <Button type="button" fullWidth padding="1rem">
+          <Button
+            type="button"
+            fullWidth
+            padding="1rem"
+            theme="alert"
+            onClick={() => toggleModal('disputeRequest')}
+          >
             Raise a Dispute
           </Button>
         )}
@@ -81,6 +95,16 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           <strong>Set as Paid</strong>
         </Button>
       )}
+      {isDisputed && (
+        <Button
+          type="button"
+          fullWidth
+          padding="1rem"
+          href={`/trade/${trade.id}/details`}
+        >
+          <strong>See Trade Details</strong>
+        </Button>
+      )}
     </section>
   );
 };
@@ -88,10 +112,12 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 const Trade: FC<TradeProps> = ({
   replace,
   setAsCanceled,
+  setAsDisputed,
   setAsPaid,
   trade,
   tradeRemaingTime,
   ref,
+  toggleModal,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -332,16 +358,25 @@ const Trade: FC<TradeProps> = ({
         replace={replace}
         setAsCanceled={setAsCanceled}
         onSetAsPaid={setAsPaid}
+        setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
     </div>
   );
 };
 
 export default function TradePage() {
-  const { trade, setPaid, setCanceled, setPaymentConfirmed, setTradeCreated } =
-    useTrade();
+  const {
+    trade,
+    setPaid,
+    setCanceled,
+    setPaymentConfirmed,
+    setTradeCreated,
+    setDisputed,
+  } = useTrade();
   const { user, query } = useUser();
   const { replace } = useRouter();
+  const { toggleModal } = useNavigationBar();
 
   const {
     sendMessage,
@@ -350,6 +385,7 @@ export default function TradePage() {
     tradeRemaingTime,
     setAsPaid,
     setAsCanceled,
+    setAsDisputed,
     tradeContainerRef,
   } = useTradeSocket({
     chatId: trade.chat?.id,
@@ -361,6 +397,7 @@ export default function TradePage() {
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetTradeCreated: setTradeCreated,
+    onSetDisputed: setDisputed,
   });
 
   // useEffect(() => {
@@ -386,9 +423,11 @@ export default function TradePage() {
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaid={setAsPaid}
+        setAsDisputed={setAsDisputed}
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
+        toggleModal={toggleModal}
       />
       <div>
         {trade.id &&

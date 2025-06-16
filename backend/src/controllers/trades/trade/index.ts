@@ -174,7 +174,7 @@ export async function getTradeController(req: Request, res: Response) {
                 username: true,
               },
             },
-            reason: true,
+            type: true,
             resolutionNote: true,
             resolvedAt: true,
             moderator: {
@@ -397,6 +397,44 @@ export async function getTradeDetails(req: Request, res: Response) {
         expiredAt: true,
         fiat: true,
         fiatAmount: true,
+        tradeDispute: {
+          select: {
+            id: true,
+            createdAt: true,
+            type: true,
+            resolvedAt: true,
+            slaDueAt: true,
+            disputeEvidenceRequest: true,
+            winner: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+            loser: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+            status: true,
+            raisedBy: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        offer: {
+          select: {
+            paymentDetails: {
+              select: {
+                instructions: true,
+              },
+            },
+          },
+        },
         paymentMethod: {
           select: {
             name: true,
@@ -430,11 +468,6 @@ export async function getTradeDetails(req: Request, res: Response) {
             },
           },
         },
-        // paymentDetails: {
-        //   select: {
-        //     instructions: true,
-        //   },
-        // },
         trader: {
           select: {
             id: true,

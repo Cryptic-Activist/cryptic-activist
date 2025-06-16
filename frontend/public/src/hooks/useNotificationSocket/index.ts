@@ -1,8 +1,7 @@
 'use client';
 
-import { BACKEND } from '@/constants';
 import { UseSocketParams } from './types';
-import io from 'socket.io-client';
+import { getSocket } from '@/services/socket';
 import { useApp } from '@/hooks';
 import { useEffect } from 'react';
 import { useRootStore } from '@/store';
@@ -13,15 +12,15 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
 
   useEffect(() => {
     if (user?.id) {
-      const newSocket = io(BACKEND, {
-        transports: ['websocket'],
-      });
+      const socket = getSocket();
 
-      newSocket.on('connect', () => {
-        newSocket.emit('join', { user });
-      });
+      if (!socket.connected) {
+        socket.connect();
+      }
 
-      newSocket.on('notification_system', () => {
+      socket.emit('join', { user });
+
+      socket.on('notification_system', () => {
         addToast('info', 'New message received', 10000);
         notifications.setHasNewNotification(true);
         const notificationSound = new Audio('/sounds/notification-default.mp3');
@@ -30,11 +29,11 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
         });
       });
 
-      notifications.setSocket(newSocket);
+      notifications.setSocket(socket);
 
       return () => {
-        if (newSocket) {
-          newSocket.disconnect();
+        if (socket) {
+          socket.disconnect();
         }
       };
     }

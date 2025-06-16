@@ -31,7 +31,9 @@ async function main() {
 
   await escrow.waitForDeployment();
   const escrowAddress = await escrow.getAddress();
-  console.log(`MultiTradeEscrow deployed to: ${escrowAddress}`);
+  console.log(
+    `MultiTradeEscrow deployed to (contract address): ${escrowAddress}`
+  );
 
   // Verify contract on Etherscan (if on supported network)
   if (network.name !== "hardhat" && network.name !== "localhost") {

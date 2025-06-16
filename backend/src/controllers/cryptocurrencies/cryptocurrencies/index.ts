@@ -115,3 +115,23 @@ export const createAcceptedCryptocurrencyCoinGecko = async (
     });
   }
 };
+
+export const getCryptocurrencyFilters = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const filters = await prisma.cryptocurrency.findMany({
+      select: {
+        id: true,
+        name: true,
+        symbol: true,
+      },
+    });
+    res.status(200).send(filters);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};

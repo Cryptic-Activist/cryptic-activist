@@ -18,3 +18,7 @@ export const LeaveAFeedback = z
   });
 
 export const leaveAFeedbackResolver = zodResolver(LeaveAFeedback);
+
+export const MoreEvidences = z.any();
+
+export const moreEvidencesResolver = zodResolver(MoreEvidences);

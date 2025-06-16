@@ -88,3 +88,25 @@ export const updateTradeVendorWalletAddress = async (
 
   return response.data;
 };
+
+export const getDisputeTypes = async () => {
+  const bearerToken = getBearerToken();
+  const response = await fetchGet(`${BACKEND}/disputes/dispute/types`, {
+    Authorization: bearerToken,
+  });
+
+  if (response.status !== 200) return null;
+
+  return response.data;
+};
+
+// export const submitDispute = async (formData: SubmitDisputeParams) => {
+//   const bearerToken = getBearerToken();
+//   const response = await fetchPost(`${BACKEND}/dispute`, {
+//     Authorization: bearerToken,
+//   });
+
+//   if (response.status !== 200) return null;
+
+//   return response.data;
+// };

@@ -2,6 +2,7 @@
 
 import {
   Cryptocurrencies,
+  DisputeRequest,
   EnableTwoFactorAuthnetication,
   Feedback,
   Fiats,
@@ -40,6 +41,7 @@ const AllModals = () => {
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : null}
       {navigationBar.modals.blockchain ? <WalletModal /> : null}
       {navigationBar.modals.feedback ? <Feedback /> : null}
+      {navigationBar.modals.disputeRequest ? <DisputeRequest /> : null}
       {navigationBar.modals.startTradeConfirmation ? (
         <StartTradeConfirmation />
       ) : null}

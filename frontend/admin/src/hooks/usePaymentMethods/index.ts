@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-
+import { CreatePaymentMethodParams, UsePaymentMethodsParams } from './types';
+import { ZodPaymentMethod, paymentMethodResolver } from './zod';
 import {
 	createPaymentMethod,
 	listPaymentMethod,
 	paymentMethodCategories,
 	paymentMethods
 } from '@/stores';
-import { useStore } from '@nanostores/react';
 
-import { CreatePaymentMethodParams, UsePaymentMethodsParams } from './types';
-import { ZodPaymentMethod, paymentMethodResolver } from './zod';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useStore } from '@nanostores/react';
 
 const UsePaymentMethods = (fetchData?: UsePaymentMethodsParams) => {
 	const $paymentMethods = useStore(paymentMethods);
@@ -35,13 +34,10 @@ const UsePaymentMethods = (fetchData?: UsePaymentMethodsParams) => {
 	};
 
 	const onSubmit = (data: any) => {
-		console.log({ data });
 		handleCreatePaymentMethod(data);
 		setValue('name', '');
 		setValue('paymentMethodCategory.id', '');
 	};
-
-	console.log(getValues());
 
 	useEffect(() => {
 		if (fetchData) {

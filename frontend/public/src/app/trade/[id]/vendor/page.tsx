@@ -11,6 +11,7 @@ import {
 } from '@/utils';
 import {
   useBlockchain,
+  useNavigationBar,
   useRouter,
   useTrade,
   useTradeSocket,
@@ -24,6 +25,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   replace,
   setAsCanceled,
   setAsPaymentConfirmed,
+  toggleModal,
 }) => {
   const isSetPaymentReceivedVisible =
     !trade.dispitedAt &&
@@ -43,12 +45,19 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
     !trade.disputedAt;
+  const isDisputed = trade.disputedAt && trade.status === 'DISPUTED';
 
   return (
     <section className={styles.actionButtons}>
       <div className={styles.actionButtonsGrid}>
         {isRaiseADisputeVisible && (
-          <Button type="button" fullWidth padding="1rem">
+          <Button
+            type="button"
+            fullWidth
+            theme="alert"
+            padding="1rem"
+            onClick={() => toggleModal('disputeRequest')}
+          >
             Raise a Dispute
           </Button>
         )}
@@ -88,6 +97,16 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           <strong>Set as Payment Received</strong>
         </Button>
       )}
+      {isDisputed && (
+        <Button
+          type="button"
+          fullWidth
+          padding="1rem"
+          href={`/trade/${trade.id}/details`}
+        >
+          <strong>See Trade Details</strong>
+        </Button>
+      )}
     </section>
   );
 };
@@ -95,10 +114,12 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 const Trade: FC<TradeProps> = ({
   trade,
   setAsCanceled,
+  setAsDisputed,
   setAsPaymentConfirmed,
   replace,
   tradeRemaingTime,
   ref,
+  toggleModal,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -327,6 +348,8 @@ const Trade: FC<TradeProps> = ({
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaymentConfirmed={setAsPaymentConfirmed}
+        setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
     </div>
   );
@@ -340,9 +363,10 @@ const TradeVendor = () => {
     setPaymentConfirmed,
     setVendorWalletAddress,
     setTradeCreated,
+    setDisputed,
   } = useTrade();
   const { user, query } = useUser();
-  // const { addToast } = useApp();
+  const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
   const { replace } = useRouter();
 
@@ -350,6 +374,7 @@ const TradeVendor = () => {
     sendMessage,
     setAsCanceled,
     setAsPaymentConfirmed,
+    setAsDisputed,
     messages,
     receiverStatus,
     tradeRemaingTime,
@@ -366,6 +391,7 @@ const TradeVendor = () => {
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
     onSetTradeCreated: setTradeCreated,
+    onSetDisputed: setDisputed,
   });
 
   useEffect(() => {
@@ -404,6 +430,8 @@ const TradeVendor = () => {
         trade={trade}
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
+        setAsDisputed={setAsDisputed}
+        toggleModal={toggleModal}
       />
 
       {trade?.id &&

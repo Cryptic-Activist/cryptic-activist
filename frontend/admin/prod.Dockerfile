@@ -1,45 +1,45 @@
-FROM node:lts-alpine AS base
-
-# Install dependencies only when needed
-FROM base AS deps
+# Stage 1: Install dependencies
+FROM node:lts-alpine AS deps
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (include lockfile for deterministic builds)
 COPY frontend/admin/package.json frontend/admin/package-lock.json* ./
 RUN npm ci
 
-# Build stage
-FROM base AS builder
+# Stage 2: Build the application
+FROM node:lts-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/admin/ .
 COPY envs/prod.frontend-admin.env .env
 
-# Build the application
+# Set standalone output in next.config.js (or via env)
+ENV NEXT_OUTPUT=standalone
+
+# Build the app
 RUN npm run build
 
-# Production image, copy all the files and run next
-FROM base AS runner
+# Stage 3: Production image
+FROM node:lts-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install serve globally
-RUN npm install -g serve
-
-# Create non-root user for security
+# Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
-# Copy build artifacts
-COPY --from=builder /app/out ./out
-RUN chown -R nextjs:nodejs /app
+# Copy standalone build artifacts from builder
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Set correct permissions
+# Set permissions
 USER nextjs
 
+ENV PORT=3001
 EXPOSE 3001
 
-# Serve the static files on port 3001
-CMD ["serve", "-s", "out", "-l", "3001"]
+# Use Node.js to run the server (no 'serve' needed)
+CMD ["sh", "-c", "PORT=$PORT node server.js"]

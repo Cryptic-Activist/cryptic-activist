@@ -1,9 +1,7 @@
 import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
-  ETHEREUM_ESCROW_ADDRESS,
   ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-  ETHEREUM_ESCROW_PRIVATE_KEY,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
 import { InitTradeParams, Token } from './types';
@@ -127,6 +125,13 @@ export const createTrade = async (params: InitTradeParams) => {
 export const fundTrade = async (tradeId: number, value: bigint) => {
   try {
     const contract = getEscrowContract();
+
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
+
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.fundTrade(tradeId, {
       value,
@@ -166,9 +171,9 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   }
 };
 
-export const cancelTrade = async () => {
+export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
   const contract = getEscrowContract();
-  const tx = await contract.cancelTrade();
+  const tx = await contract.cancelTrade(tradeId, forcedCancel);
   await tx.wait();
   return { message: 'Trade cancelled', txHash: tx.hash };
 };

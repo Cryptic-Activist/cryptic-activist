@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { generateRandomNames, slugifyStringLowerCase } from '@/utils/string';
 
+import { calculatePercentageChange } from '@/utils/number';
 import { convertWhere } from '@/utils/object';
+import { getMonthBoundaries } from '@/utils/date';
 import { mapUsers } from '@/utils/map/users';
 import { prisma } from '@/services/db';
 import { sanitize } from '@/utils/sanitizer';
@@ -209,3 +211,41 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     });
   }
 };
+
+export async function getTotalUsers(_req: Request, res: Response) {
+  try {
+    const totalUsers = await prisma.user.count();
+
+    const { startOfLastMonth, startOfThisMonth } = getMonthBoundaries();
+
+    // Get counts
+    const [thisMonthCount, lastMonthCount] = await Promise.all([
+      prisma.user.count({
+        where: {
+          createdAt: {
+            gte: startOfThisMonth,
+          },
+        },
+      }),
+      prisma.user.count({
+        where: {
+          createdAt: {
+            gte: startOfLastMonth,
+            lt: startOfThisMonth,
+          },
+        },
+      }),
+    ]);
+
+    const percentageChange = calculatePercentageChange(
+      thisMonthCount,
+      lastMonthCount,
+    );
+
+    res.status(200).json({ total: totalUsers, percentageChange });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+}

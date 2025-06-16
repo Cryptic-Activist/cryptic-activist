@@ -1,4 +1,3 @@
-// scripts/deploy.js
 const hre = require("hardhat");
 require("dotenv").config();
 
@@ -20,9 +19,12 @@ async function main() {
     feeRate,
     profitMargin
   );
-  await escrow.waitForDeployment(); // ✅ Ethers v6 replacement for .deployed()
+  await escrow.waitForDeployment();
 
-  console.log("Deployed to(contract address):", await escrow.getAddress());
+  console.log(
+    "Deployed to (Escrow Contract Address):",
+    await escrow.getAddress()
+  );
 }
 
 main().catch((error) => {

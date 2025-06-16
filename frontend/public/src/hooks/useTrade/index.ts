@@ -1,14 +1,20 @@
 'use client';
 
-import { SetPaymentConfirmedParams, SetTradeCancelledParams } from './types';
+import {
+  SetPaymentConfirmedParams,
+  SetPaymentDisputedParams,
+  SetTradeCancelledParams,
+} from './types';
 
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
+import useUser from '../useUser';
 
 const useTrade = () => {
+  const { user } = useUser();
   const params = useParams();
   const id = params.id?.toString();
   const { trade } = useRootStore();
@@ -22,9 +28,10 @@ const useTrade = () => {
         return data;
       }
     },
-    retry: 3,
-    enabled: !!id,
+    enabled: !!user.id,
     refetchOnMount: 'always',
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {
@@ -53,12 +60,18 @@ const useTrade = () => {
   };
 
   const setPaymentConfirmed = (params: SetPaymentConfirmedParams) => {
-    console.log({ params });
     trade.setTradeValue({
       status: params.paymentConfirmedAt ? 'COMPLETED' : 'IN_PROGRESS',
       paymentConfirmedAt: params.paymentConfirmedAt,
       endedAt: params.endedAt,
       escrowReleasedAt: params.escrowReleasedAt,
+    });
+  };
+
+  const setDisputed = (params: SetPaymentDisputedParams) => {
+    trade.setTradeValue({
+      status: params.status,
+      disputedAt: params.disputedAt,
     });
   };
 
@@ -68,6 +81,12 @@ const useTrade = () => {
     });
   };
 
+  useEffect(() => {
+    return () => {
+      trade.resetTrade();
+    };
+  }, []);
+
   return {
     queryTrade,
     trade,
@@ -76,6 +95,7 @@ const useTrade = () => {
     setPaymentConfirmed,
     setVendorWalletAddress,
     setTradeCreated,
+    setDisputed,
   };
 };
 

@@ -20,21 +20,53 @@ model AcceptedCryptocurrency {
   @@map("accepted_cryptocurrencies")
 }
 
+enum AdminRole {
+  SUPER_ADMIN // Full access: user management, trades, disputes, KYC, settings
+  SENIOR_ADMIN // Handles escalated cases and oversees other admins
+  MODERATOR // Can manage trades, disputes, and users (limited control)
+  KYC_REVIEWER // Only reviews and approves/rejects KYC documents
+  DISPUTE_MANAGER // Handles only dispute resolution between traders
+  SUPPORT_AGENT // Can respond to support queries, chat moderation
+  AUDITOR // Read-only access to logs, trades, feedback, for auditing
+  FINANCE_MANAGER // Views and manages fiat/crypto flow stats, premium purchases
+}
+
+model AdminRoles {
+  id      String    @id @default(uuid())
+  role    AdminRole
+  admin   Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId String
+
+  @@unique([adminId, role]) // Prevent duplicate roles per admin
+  @@map("admin_roles")
+}
+
 model Admin {
-  id           String         @id @default(uuid())
-  firstName    String         @db.VarChar(50)
-  lastName     String         @db.VarChar(50)
-  username     String         @unique @db.VarChar(120)
-  email        String         @unique @db.VarChar(120)
-  password     String
-  isVerified   Boolean?       @default(false) @db.Boolean
-  deletedAt    DateTime?      @db.Timestamp()
-  createdAt    DateTime?      @default(now()) @db.Timestamp()
-  updatedAt    DateTime?      @updatedAt @db.Timestamp()
-  kyc          KYC[]
-  createdUsers User[]         @relation("userCreatedBy") // All users created by this admin
-  updatedUsers User[]         @relation("userLastUpdatedBy") // All users updated by this admin
-  tradeDispute TradeDispute[] @relation("moderatorTradeDispute")
+  id                     String                   @id @default(uuid())
+  firstName              String                   @db.VarChar(50)
+  lastName               String                   @db.VarChar(50)
+  username               String                   @unique @db.VarChar(120)
+  email                  String                   @unique @db.VarChar(120)
+  password               String
+  isVerified             Boolean?                 @default(false) @db.Boolean
+  twoFactorSecret        String?
+  twoFactorEnabled       Boolean?                 @default(false) @db.Boolean
+  deletedAt              DateTime?                @db.Timestamp()
+  createdAt              DateTime?                @default(now()) @db.Timestamp()
+  updatedAt              DateTime?                @updatedAt @db.Timestamp()
+  kyc                    KYC[]
+  createdUsers           User[]                   @relation("userCreatedBy") // All users created by this admin
+  updatedUsers           User[]                   @relation("userLastUpdatedBy") // All users updated by this admin
+  tradeDispute           TradeDispute[]           @relation("moderatorTradeDispute")
+  roles                  AdminRoles[] // Many-to-many relation to roles
+  disputeAuditLog        DisputeAuditLog[]        @relation("disputeAuditLogChangedBy")
+  disputePartyNote       DisputePartyNote[]       @relation("disputePartyNoteAddedBy")
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+  userSuspensionLifted   UserSuspension[]         @relation("liftedSuspensionModerator")
+  userSuspension         UserSuspension[]         @relation("suspendedModerator")
+  userWarning            UserWarning[]
+  userSuspensionLog      UserSuspensionLog[]
+  accountReview          AccountReview[]
 
   @@map("admins")
 }
@@ -187,6 +219,7 @@ model Offer {
 model PaymentMethod {
   id                      String                @id @default(uuid())
   name                    String                @db.VarChar(60)
+  isRisky                 Boolean               @default(false) @db.Boolean
   deletedAt               DateTime?             @db.Timestamp()
   createdAt               DateTime?             @default(now()) @db.Timestamp()
   updatedAt               DateTime?             @updatedAt @db.Timestamp()
@@ -269,8 +302,10 @@ enum SystemMessageType {
   TRADE_STARTED
   TRADE_COMPLETED
   TRADE_CANCELLED
+  TRADE_CANCELLED_BY_MODERATOR
   TRADE_DISPUTE_OPENED
   TRADE_DISPUTE_RESOLVED
+  TRADE_DISPUTE_MORE_EVIDENCES
   TRADE_EXPIRED
   TRADE_FAILED
   TRADE_NEW_MESSAGE
@@ -290,6 +325,7 @@ enum SystemMessageType {
   COMPLIANCE_NOTICE
   SYSTEM_ERROR
   API_DOWNTIME
+  USER_WARNING
 }
 
 model SystemMessage {
@@ -297,7 +333,7 @@ model SystemMessage {
   type      SystemMessageType
   message   String            @db.VarChar(256)
   whenSeen  DateTime?         @db.Timestamp()
-  url       String
+  url       String?
   deletedAt DateTime?         @db.Timestamp()
   createdAt DateTime?         @default(now()) @db.Timestamp()
   updatedAt DateTime?         @updatedAt @db.Timestamp()
@@ -373,18 +409,183 @@ model Trade {
   @@map("trades")
 }
 
+model DisputePartyNote {
+  id           String       @id @default(uuid())
+  disputeId    String
+  dispute      TradeDispute @relation("disputePartyNote", fields: [disputeId], references: [id])
+  targetUserId String
+  targetUser   User         @relation("disputePartyNoteTarget", fields: [targetUserId], references: [id])
+  addedById    String
+  addedBy      Admin        @relation("disputePartyNoteAddedBy", fields: [addedById], references: [id])
+  content      String       @db.Text()
+  createdAt    DateTime     @default(now())
+
+  @@map("dispute_party_notes")
+}
+
+enum DisputeAction {
+  STATUS_CHANGED
+  EVIDENCE_REQUESTED
+  MODERATOR_ASSIGNED
+  DECISION_MADE
+  USER_BANNED
+  SYSTEM_ESCALATION
+  MANUAL_ESCALATION
+}
+
+model DisputeAuditLog {
+  id          String        @id @default(uuid())
+  disputeId   String
+  dispute     TradeDispute  @relation("disputeAuditLog", fields: [disputeId], references: [id])
+  changedById String?
+  changedBy   Admin?        @relation("disputeAuditLogChangedBy", fields: [changedById], references: [id])
+  action      DisputeAction
+  note        String?       @db.Text()
+  createdAt   DateTime      @default(now())
+
+  @@map("dispute_audit_logs")
+}
+
+enum EvidenceType {
+  SCREENSHOT
+  VIDEO
+  BANK_STATEMENT
+  CHAT_LOG
+  PAYMENT_RECEIPT
+  OTHER
+}
+
+model DisputeEvidence {
+  id                     String                   @id @default(uuid())
+  disputeId              String
+  dispute                TradeDispute             @relation("disputeEvidences", fields: [disputeId], references: [id])
+  submittedById          String
+  submittedBy            User                     @relation(fields: [submittedById], references: [id])
+  type                   EvidenceType
+  fileUrl                String? // If hosted on S3 or similar
+  textContent            String?                  @db.Text()
+  createdAt              DateTime                 @default(now())
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+
+  @@map("dispute_evidences")
+}
+
+enum EvidenceRequestStatus {
+  PENDING
+  SUBMITTED
+  DECLINED
+  EXPIRED
+}
+
+model DisputeEvidenceRequest {
+  id              String                @id @default(uuid())
+  disputeId       String
+  dispute         TradeDispute          @relation(fields: [disputeId], references: [id])
+  requestedById   String
+  requestedBy     Admin                 @relation(fields: [requestedById], references: [id])
+  requestedFromId String
+  requestedFrom   User                  @relation(fields: [requestedFromId], references: [id])
+  description     String                @db.Text() // what kind of evidence is requested (e.g. proof of bank transfer)
+  deadline        DateTime? // optional deadline to submit
+  submittedAt     DateTime? // when the user responded
+  status          EvidenceRequestStatus @default(PENDING)
+  evidences       DisputeEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([disputeId, requestedFromId])
+  @@map("dispute_evidence_requests")
+}
+
+enum DisputeType {
+  PAYMENT_NOT_RECEIVED // Buyer claims payment was made, seller denies receipt
+  PAYMENT_FRAUD // Payment originated from stolen or fraudulent sources
+  CRYPTO_NOT_RELEASED // Seller refuses to release crypto after payment
+  INCORRECT_PAYMENT_AMOUNT // Amount sent does not match agreed value
+  PAYMENT_TO_WRONG_ACCOUNT // Payment sent to incorrect or third-party account
+  FAKE_PAYMENT_PROOF // Buyer uploaded false or edited proof of payment
+  LATE_PAYMENT // Buyer sent payment outside the allowed time window
+  COMMUNICATION_ISSUE // Dispute caused by misunderstanding or non-responsiveness
+  OFF_PLATFORM_TRANSACTION // Trade or payment occurred outside the platform
+  TRADE_TIMEOUT // Trade expired without proper resolution
+  ABUSIVE_BEHAVIOR // One party was abusive, threatening, or uncooperative
+  IDENTITY_MISMATCH // KYC or identity verification doesn't match account info
+  PLATFORM_ERROR // Technical issue caused by the platform (e.g., UI bug)
+  SUSPICIOUS_ACTIVITY // Suspicious behavior detected in trade flow
+  SCAM // Scamming activity
+  OTHER // Miscellaneous disputes that don't fall under known types
+}
+
+enum DisputePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DisputeSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DisputeStatus {
+  OPEN
+  PENDING_EVIDENCE
+  INVESTIGATING
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum DisputeResolutionType {
+  RELEASE_CRYPTO // Crypto released to buyer
+  REFUND_PAYMENT // Payment refunded to sender
+  CANCEL_TRADE // Trade cancelled without settlement
+  PARTIAL_REFUND // Partial amount refunded or settled
+  SPLIT_RESOLUTION // Both parties share responsibility (e.g., 50/50)
+  NO_ACTION_TAKEN // Dispute closed with no action (e.g., invalid)
+  OFF_PLATFORM_DECISION // Handled outside the platform (e.g., legal process)
+  PLATFORM_COMPENSATION // Platform took responsibility and compensated
+}
+
 model TradeDispute {
-  id             String    @id @default(uuid())
-  tradeId        String    @unique
-  trade          Trade     @relation(fields: [tradeId], references: [id])
-  raisedById     String
-  raisedBy       User      @relation(fields: [raisedById], references: [id])
-  reason         String
-  resolutionNote String?
-  resolvedAt     DateTime?
-  moderatorId    String?
-  moderator      Admin?    @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
-  createdAt      DateTime  @default(now())
+  id                     String                   @id @default(uuid())
+  tradeId                String                   @unique
+  trade                  Trade                    @relation(fields: [tradeId], references: [id])
+  raisedById             String
+  raisedBy               User                     @relation(fields: [raisedById], references: [id])
+  type                   DisputeType
+  vendorStatement        String?                  @default("") @db.Text()
+  traderStatement        String?                  @default("") @db.Text()
+  severity               DisputeSeverity
+  status                 DisputeStatus
+  resolutionNote         String?
+  resolutionType         DisputeResolutionType?
+  resolvedAt             DateTime?
+  moderatorId            String?
+  moderator              Admin?                   @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
+  priority               DisputePriority          @default(MEDIUM)
+  slaDueAt               DateTime                 @db.Timestamp() // SLA target datetime
+  createdAt              DateTime                 @default(now()) @db.Timestamp()
+  winnerId               String?
+  winner                 User?                    @relation("wonDisputes", fields: [winnerId], references: [id])
+  loserId                String?
+  loser                  User?                    @relation("lostDisputes", fields: [loserId], references: [id])
+  evidences              DisputeEvidence[]        @relation("disputeEvidences")
+  updatedAt              DateTime                 @updatedAt @db.Timestamp()
+  disputeAuditLog        DisputeAuditLog[]        @relation("disputeAuditLog")
+  disputePartyNote       DisputePartyNote[]       @relation("disputePartyNote")
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+  userSuspension         UserSuspension[]
+  userWarning            UserWarning[]
+  userSuspensionLog      UserSuspensionLog[]
+  accountReview          AccountReview[]
+
+  @@index([status, priority])
+  @@map("trade_disputes")
 }
 
 enum TransactionPaymentMethodType {
@@ -441,6 +642,18 @@ model Trust {
   @@map("trusts")
 }
 
+model UserStats {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation("userStats", fields: [userId], references: [id])
+  totalDisputes   Int       @default(0)
+  disputesLost    Int       @default(0)
+  fraudFlagged    Boolean   @default(false)
+  lastDisputeDate DateTime? @db.Timestamp()
+
+  @@map("user_stats")
+}
+
 model UserLanguage {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId     String
@@ -449,6 +662,56 @@ model UserLanguage {
 
   @@id([userId, languageId])
   @@map("user_languages")
+}
+
+model UserSuspension {
+  id             String        @id @default(uuid())
+  userId         String        @unique
+  user           User          @relation("userSuspension", fields: [userId], references: [id])
+  reason         String        @db.Text()
+  initiatedAt    DateTime      @default(now()) @db.Timestamp()
+  suspendedUntil DateTime?     @db.Timestamp() // null = permanent suspension
+  moderatorId    String?
+  moderator      Admin?        @relation("suspendedModerator", fields: [moderatorId], references: [id])
+  disputeId      String?
+  dispute        TradeDispute? @relation(fields: [disputeId], references: [id])
+  liftedAt       DateTime?     @db.Timestamp()
+  liftedById     String?
+  liftedBy       Admin?        @relation("liftedSuspensionModerator", fields: [liftedById], references: [id])
+  liftReason     String?
+
+  @@map("user_suspensions")
+}
+
+model UserSuspensionLog {
+  id          String        @id @default(uuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  action      String // e.g., "SUSPENDED", "LIFTED"
+  reason      String
+  moderatorId String?
+  moderator   Admin?        @relation(fields: [moderatorId], references: [id])
+  disputeId   String?
+  dispute     TradeDispute? @relation(fields: [disputeId], references: [id])
+  createdAt   DateTime      @default(now()) @db.Timestamp()
+
+  @@map("user_suspension_logs")
+}
+
+model UserWarning {
+  id               String        @id @default(uuid())
+  userId           String
+  user             User          @relation("userWarnings", fields: [userId], references: [id])
+  message          String        @db.Text()
+  createdAt        DateTime      @default(now()) @db.Timestamp()
+  issuedById       String?
+  issuedBy         Admin?        @relation(fields: [issuedById], references: [id])
+  relatedDisputeId String?
+  relatedDispute   TradeDispute? @relation(fields: [relatedDisputeId], references: [id])
+  read             Boolean       @default(false)
+
+  @@index([userId])
+  @@map("user_warnings")
 }
 
 model User {
@@ -462,10 +725,12 @@ model User {
   privateKeys              String[]                   @unique
   isVerified               Boolean?                   @default(false) @db.Boolean
   isPremium                Boolean?
+  underReview              Boolean                    @default(false)
   xp                       Int                        @default(0)
+  trustScore               Int                        @default(50)
   twoFactorSecret          String?
   twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
-  lastLoginAt              DateTime?                  @db.Timestamptz
+  lastLoginAt              DateTime?                  @db.Timestamp
   createdById              String? // Admin who created the account (Foreign key)
   createdBy                Admin?                     @relation("userCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
   lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
@@ -493,11 +758,69 @@ model User {
   referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
   referrer                 Referral[]                 @relation("referrer")
   referre                  Referral?                  @relation("referee")
-  PaymentDetails           PaymentDetails[]
+  paymentDetails           PaymentDetails[]
   tradeDispute             TradeDispute[]
+  disputeWinner            TradeDispute[]             @relation("wonDisputes")
+  disputeLoser             TradeDispute[]             @relation("lostDisputes")
+  disputeEvidence          DisputeEvidence[]
+  userStats                UserStats?                 @relation("userStats")
+  disputePartyNote         DisputePartyNote[]         @relation("disputePartyNoteTarget")
+  disputeEvidenceRequest   DisputeEvidenceRequest[]
+  isSuspended              Boolean                    @default(false)
+  suspensionId             String?
+  suspension               UserSuspension?            @relation("userSuspension")
+  warnings                 UserWarning[]              @relation("userWarnings")
+  totalWarnings            Int                        @default(0)
+  userSuspensionLog        UserSuspensionLog[]
+  accountReview            AccountReview[]
 
   @@index([username])
   @@map("users")
+}
+
+model AccountReview {
+  id               String        @id @default(uuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  status           ReviewStatus  @default(PENDING)
+  reason           String        @db.Text()
+  reviewerId       String?
+  reviewer         Admin?        @relation(fields: [reviewerId], references: [id])
+  relatedDisputeId String?
+  dispute          TradeDispute? @relation(fields: [relatedDisputeId], references: [id])
+  createdAt        DateTime      @default(now()) @db.Timestamp()
+  resolvedAt       DateTime?     @db.Timestamp()
+  resolutionNote   String?
+
+  @@index([status])
+  @@map("account_reviews")
+}
+
+enum ReviewStatus {
+  PENDING
+  UNDER_REVIEW
+  ESCALATED
+  CLOSED
+  ACTION_TAKEN
+  NO_ACTION_NEEDED
+}
+
+model UserModerationLog {
+  id              String           @id @default(uuid())
+  userId          String
+  action          ModerationAction
+  message         String?          @db.Text()
+  relatedReviewId String?
+  moderatorId     String?
+  timestamp       DateTime         @default(now()) @db.Timestamp()
+
+  @@map("user_moderation_logs")
+}
+
+enum ModerationAction {
+  SEND_WARNING
+  SUSPEND
+  ACCOUNT_REVIEW
 }
 
 model Token {

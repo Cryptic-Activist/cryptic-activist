@@ -4,6 +4,7 @@ export type Type =
   | 'TRADE_STARTED'
   | 'TRADE_COMPLETED'
   | 'TRADE_CANCELLED'
+  | 'TRADE_CANCELLED_BY_MODERATOR'
   | 'TRADE_DISPUTE_OPENED'
   | 'TRADE_DISPUTE_RESOLVED'
   | 'TRADE_EXPIRED'
@@ -24,7 +25,9 @@ export type Type =
   | 'PROMOTIONAL_OFFER'
   | 'COMPLIANCE_NOTICE'
   | 'SYSTEM_ERROR'
-  | 'API_DOWNTIME';
+  | 'API_DOWNTIME'
+  | 'USER_WARNING'
+  | 'TRADE_DISPUTE_MORE_EVIDENCES';
 
 export type Notification = {
   id: string;

@@ -3,14 +3,17 @@
 import { FeedbackProps, TradeDetailsProps } from './types';
 import React, { FC, useState } from 'react';
 import {
+  formatEnum,
   formatTimestamp,
   getDuration,
+  getFutureDateByHours,
   getInitials,
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
 
 import { Button } from '@/components';
+import { FileUploader } from '@/components/forms';
 import Image from 'next/image';
 import styles from './index.module.scss';
 import { useNavigationBar } from '@/hooks';
@@ -46,7 +49,15 @@ const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
   );
 };
 
-const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
+const TradeDetailsPage: FC<TradeDetailsProps> = ({
+  trade,
+  app,
+  user,
+  onSubmitMoreEvidences,
+  onUploadEvidences,
+  handleSubmitMoreEvidences,
+  uploaderRef,
+}) => {
   const { tradeDetails, chatMessages } = trade;
   const { toggleModal } = useNavigationBar();
 
@@ -58,6 +69,15 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
 
   const isUserTrader = user.id === tradeDetails.trader.id;
   const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
+  const moreEvidenceRequestFiltered =
+    tradeDetails.tradeDispute?.disputeEvidenceRequest?.filter(
+      (request: any) => request?.requestedFromId === user?.id
+    );
+  const hasMoreEvidenceRequest =
+    moreEvidenceRequestFiltered.length > 0 &&
+    moreEvidenceRequestFiltered[0].submittedAt === null;
+
+  console.log({ moreEvidenceRequestFiltered, hasMoreEvidenceRequest });
 
   return (
     <div className={styles.container}>
@@ -326,6 +346,145 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({ trade, app, user }) => {
             {isChatOpen ? 'Close' : 'View'} Chat History
           </button>
         </div>
+
+        {tradeDetails.tradeDispute?.id && <div className={styles.divider} />}
+
+        {tradeDetails.tradeDispute?.id && (
+          <div className={styles.chatSection}>
+            <h3 className={styles.sectionTitle}>Dispute</h3>
+            <div className={styles.tradeInfo}>
+              <div className={styles.tradeInfoGroup}>
+                <div>
+                  <div className={styles.infoLabel}>Dispute ID</div>
+                  <div className={styles.infoValue}>
+                    {tradeDetails.tradeDispute?.id}
+                  </div>
+                </div>
+
+                <div>
+                  <div className={styles.infoLabel}>Initiated At</div>
+                  <div className={styles.infoValue}>
+                    {getLocaleFullDateString(
+                      new Date(tradeDetails.tradeDispute?.createdAt)
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className={styles.infoLabel}>Raised by</div>
+                  <div className={styles.infoValue}>
+                    {`${tradeDetails.tradeDispute?.raisedBy?.username} ${
+                      user.id === tradeDetails.tradeDispute?.raisedBy?.id
+                        ? '(You)'
+                        : ''
+                    }`}
+                  </div>
+                </div>
+
+                {tradeDetails.tradeDispute?.winner?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>Status</div>
+                    <div className={styles.infoValue}>
+                      {formatEnum(tradeDetails.tradeDispute?.status)}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={styles.tradeInfoGroup}>
+                <div>
+                  <div className={styles.infoLabel}>Dispute Type</div>
+                  <div className={styles.infoValue}>
+                    {formatEnum(tradeDetails.tradeDispute?.type)}
+                  </div>
+                </div>
+
+                {tradeDetails.tradeDispute?.resolvedAt ? (
+                  <div>
+                    <div className={styles.infoLabel}>Resolved At</div>
+                    <div className={styles.infoValue}>
+                      {getLocaleFullDateString(
+                        new Date(tradeDetails.tradeDispute?.resolvedAt)
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className={styles.infoLabel}>SLA Due At</div>
+                    <div
+                      className={`${styles.infoValue} ${styles.badge} ${
+                        getFutureDateByHours(
+                          new Date(tradeDetails.tradeDispute?.slaDueAt)
+                        ) === '0m'
+                          ? styles.overdue
+                          : styles.ontime
+                      }`}
+                    >
+                      {getFutureDateByHours(
+                        new Date(tradeDetails.tradeDispute?.slaDueAt)
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {tradeDetails.tradeDispute?.winner?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>Winner</div>
+                    <div className={styles.infoValue}>
+                      {`${tradeDetails.tradeDispute?.winner?.username} ${
+                        tradeDetails.tradeDispute?.winner?.id === user.id
+                          ? '(You)'
+                          : ''
+                      }`}
+                    </div>
+                  </div>
+                )}
+
+                {tradeDetails.tradeDispute?.loser?.id && (
+                  <div>
+                    <div className={styles.infoLabel}>Loser</div>
+                    <div className={styles.infoValue}>
+                      {`${tradeDetails.tradeDispute?.loser?.username} ${
+                        tradeDetails.tradeDispute?.loser?.id === user.id
+                          ? '(You)'
+                          : ''
+                      }`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasMoreEvidenceRequest && <div className={styles.divider} />}
+
+        {hasMoreEvidenceRequest && (
+          <form
+            className={styles.evidencesForm}
+            onSubmit={handleSubmitMoreEvidences(onSubmitMoreEvidences)}
+          >
+            <h3>More Evidences</h3>
+            <p className={styles.evidencesStatement}>
+              The dispute moderator is requesting more evidences to resolve the
+              open dispute.
+            </p>
+            <FileUploader
+              allowMultiple
+              allowedFileTypes={[
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                // 'application/pdf',
+              ]}
+              maxFileSize={2 * 1024 * 1024} // 2MB
+              maxFiles={4}
+              label="Upload Evidence"
+              onUpload={onUploadEvidences}
+              ref={uploaderRef}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        )}
 
         {(canLeaveFeedback || tradeDetails.paymentReceipt) && (
           <div className={styles.divider} />

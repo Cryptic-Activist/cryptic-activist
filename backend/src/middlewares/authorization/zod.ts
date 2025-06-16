@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const AuthenticationUser = z
+export const Authorization = z
   .object({
     authorization: z.string(),
   })

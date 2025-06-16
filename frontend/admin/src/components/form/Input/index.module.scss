@@ -1,0 +1,50 @@
+@use "../../../styles/globals.module.scss";
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.labelLinkContainer {
+  display: flex;
+  justify-content: space-between;
+  a {
+    color: globals.$primary;
+    text-decoration: none;
+    font-weight: 700;
+  }
+}
+
+.label {
+  font-size: 0.8rem;
+  width: fit-content;
+  font-weight: 700;
+}
+
+.input {
+  background-color: white;
+  color: globals.$secondary;
+  padding: 1rem;
+  border: 1px solid globals.$input-border-color;
+  border-radius: 0.4rem;
+  box-shadow: 0 0px 6px -2px rgb(0, 0, 0, 0.3);
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: globals.$secondary;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.errorMessage {
+  color: globals.$secondary;
+  font-size: 0.9rem;
+}

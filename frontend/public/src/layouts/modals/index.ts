@@ -15,3 +15,4 @@ export { default as TwoFactorAuthentication } from './TwoFactorAuthentication';
 export { default as EnableTwoFactorAuthnetication } from './EnableTwoFactorAuthnetication';
 export { default as Feedback } from './Feedback';
 export { default as StartTradeConfirmation } from './StartTradeConfirmation';
+export { default as DisputeRequest } from './DisputeRequest';

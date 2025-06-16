@@ -1,8 +1,9 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 
-import { handleRegisterAdmin } from '@/stores/admin';
-
 import { RegisterAdmin } from './types';
+import { handleRegisterAdmin } from '@/stores/admin';
 
 const useNewAdmin = () => {
 	const [firstName, setFirstName] = useState('');

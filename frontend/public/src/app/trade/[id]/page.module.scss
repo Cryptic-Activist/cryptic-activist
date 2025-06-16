@@ -139,6 +139,7 @@
   }
   .DISPUTED {
     background-color: globals.$trade-status-disputed;
+    color: globals.$white;
   }
   .EXPIRED {
     background-color: globals.$trade-status-expired;

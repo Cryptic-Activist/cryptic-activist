@@ -25,6 +25,7 @@ type Modals = {
   blockchain: boolean;
   feedback: boolean;
   startTradeConfirmation: boolean;
+  disputeRequest: boolean;
 };
 
 export type NavigationBarStore = {
@@ -73,7 +74,8 @@ export type Modal =
   | 'paymentMethods'
   | 'blockchain'
   | 'feedback'
-  | 'startTradeConfirmation';
+  | 'startTradeConfirmation'
+  | 'disputeRequest';
 
 export type ToggleModalActionPayload = {
   modal: Modal;
