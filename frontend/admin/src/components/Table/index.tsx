@@ -1,6 +1,5 @@
-import { DynamicIcon, Pagination } from '@/components';
-import React, { useState } from 'react';
 import {
+	Cell,
 	SortingState,
 	flexRender,
 	getCoreRowModel,
@@ -8,6 +7,9 @@ import {
 	getSortedRowModel,
 	useReactTable
 } from '@tanstack/react-table';
+import { DynamicIcon, Pagination } from '@/components';
+import React, { useState } from 'react';
+import { getFutureDateByHours, getLocaleFullDateString } from '@/utils/date';
 
 import { GenericTableProps } from './types';
 import styles from './index.module.scss';
@@ -32,6 +34,29 @@ const Table = <T extends object>({
 		getSortedRowModel: getSortedRowModel(),
 		getPaginationRowModel: getPaginationRowModel()
 	});
+
+	const getCellText = (cell: Cell<any, unknown>) => {
+		const cellDef = cell.column.columnDef.cell;
+		const context = cell.getContext();
+
+		// If cellDef is a function, try to call it with context
+		if (typeof cellDef === 'function') {
+			const rendered = cellDef(context);
+
+			if (typeof rendered === 'string' || typeof rendered === 'number') {
+				return rendered.toString();
+			}
+
+			// If the result is JSX, you may not be able to extract plain text safely
+			return '';
+		}
+
+		// Fallback to cell.getValue() (raw data)
+		const value = cell.getValue();
+		return typeof value === 'string' || typeof value === 'number'
+			? value.toString()
+			: '';
+	};
 
 	return (
 		<div className={styles.container}>
@@ -75,16 +100,18 @@ const Table = <T extends object>({
 					{table?.getRowModel()?.rows?.map((row) => (
 						<tr key={row.id}>
 							{row.getVisibleCells().map((cell) => {
-								const isStatusColumn =
+								const isBadgeColumn =
 									cell.column.id === 'status' || cell.column.id === 'type';
-								const statusCellStyle = isStatusColumn ? styles.statusCell : '';
+								const badgeCellStyle = isBadgeColumn ? styles.statusCell : '';
+								const isSlaColumn = cell.column.id === 'slaStatus';
+								const isFullDate = cell.column.id === 'createdAt';
 								return (
 									<td
 										key={cell.id}
 										title={cell.getValue() as string}
-										className={statusCellStyle}
+										className={badgeCellStyle}
 									>
-										{isStatusColumn ? (
+										{isBadgeColumn && (
 											<span
 												className={`${styles.badge} ${
 													styles[cell.getValue() as string]
@@ -95,9 +122,21 @@ const Table = <T extends object>({
 													cell.getContext()
 												)}
 											</span>
-										) : (
-											flexRender(cell.column.columnDef.cell, cell.getContext())
 										)}
+										{isSlaColumn && (
+											<span>
+												{getFutureDateByHours(new Date(getCellText(cell)))}
+											</span>
+										)}
+										{isFullDate && (
+											<span>
+												{getLocaleFullDateString(new Date(getCellText(cell)))}
+											</span>
+										)}
+										{!isBadgeColumn &&
+											!isSlaColumn &&
+											!isFullDate &&
+											flexRender(cell.column.columnDef.cell, cell.getContext())}
 									</td>
 								);
 							})}

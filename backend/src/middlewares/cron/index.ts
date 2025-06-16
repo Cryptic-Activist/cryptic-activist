@@ -1,5 +1,6 @@
 import SystemMessage from '@/services/systemMessage';
 import { autoLiftExpiredSuspensions } from '@/services/moderation';
+import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
 import { prisma } from '@/services/db';
@@ -70,4 +71,22 @@ export const handleAutoLiftSuspension = async () => {
       process.exit(1);
     }
   });
+};
+
+export const autoCloseDisputes = async () => {
+  cron.schedule('*/1 * * * *', async () => {
+    try {
+      console.log('Closing past due disputes and trades...');
+      await closeAllOverdueDispute();
+    } catch (error) {
+      console.error('Auto-close error:', error);
+      prisma.$disconnect();
+      process.exit(1);
+    }
+  });
+};
+
+export const runCronJobs = async () => {
+  await expireTimer();
+  await handleAutoLiftSuspension();
 };

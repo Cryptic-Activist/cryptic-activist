@@ -1,14 +1,13 @@
 import 'dotenv/config';
 import '@/sentry/instrument';
 
-import { expireTimer, handleAutoLiftSuspension } from '@/middlewares/cron';
-
 import { Server } from 'socket.io';
 import { connectDB } from '@/services/db';
 import { createServer } from 'node:http';
 import express from 'express';
 import middleware from '@/middlewares';
 import routes from '@/routes';
+import { runCronJobs } from '@/middlewares/cron';
 import { setIO } from '@/services/socket';
 import socketHandler from '@/socket';
 import { startEmailConsumer } from './services/rabbitmq';
@@ -29,8 +28,6 @@ connectDB();
 // RabbitMQ - Queues
 startEmailConsumer().then();
 
-// Cron jobs
-expireTimer();
-handleAutoLiftSuspension();
+runCronJobs().then();
 
 export default server;
