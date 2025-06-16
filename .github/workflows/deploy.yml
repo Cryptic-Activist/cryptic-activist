@@ -124,9 +124,7 @@ jobs:
         command_timeout: 120m
         script: |
           cd app
-          docker container prune -f
-          docker image prune -a -f
-
+          docker system prune -a -f
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
