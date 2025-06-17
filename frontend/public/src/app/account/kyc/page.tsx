@@ -31,6 +31,8 @@ const KYCPage = () => {
     onSelectDocumentFront,
     onSelectSelfie,
     onSelectUtilityBill,
+    nationalitiesListQuery,
+    documentTypesListQuery,
     showBackDocument,
     termsAndSubmitValues,
     personalInformationValues,
@@ -99,33 +101,17 @@ const KYCPage = () => {
                   options={[
                     {
                       label: 'Select your nationality',
-                      value: 'dfdfh',
+                      value: '',
                     },
+                    ...(nationalitiesListQuery.data
+                      ? nationalitiesListQuery.data?.map((filter: any) => ({
+                          label: filter,
+                          value: filter,
+                        }))
+                      : []),
                   ]}
                   label="Nationality"
                 />
-                {/* <select
-                  id="nationality"
-                  name="nationality"
-                  value={formData.nationality}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select your nationality</option>
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="DE">Germany</option>
-                  <option value="FR">France</option>
-                  <option value="AU">Australia</option>
-                  <option value="JP">Japan</option>
-                  <option value="SG">Singapore</option>
-                  <option value="IN">India</option>
-                  <option value="BR">Brazil</option>
-                  <option value="MX">Mexico</option>
-                  <option value="ZA">South Africa</option>
-                  <option value="OTHER">Other</option>
-                </select> */}
               </div>
             </div>
 
@@ -153,29 +139,17 @@ const KYCPage = () => {
                   options={[
                     {
                       label: 'Select document type',
-                      value: 'fgjmngh',
+                      value: '',
                     },
+                    ...(documentTypesListQuery.data
+                      ? documentTypesListQuery.data?.map((filter: any) => ({
+                          label: filter,
+                          value: filter,
+                        }))
+                      : []),
                   ]}
                   label="Document Type"
                 />
-                {/* <select
-                  id="documentType"
-                  name="documentType"
-                  value={formData.documentType}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select document type</option>
-                  <option value="PASSPORT">Passport</option>
-                  <option value="NATIONAL_ID">National ID Card</option>
-                  <option value="DRIVER_LICENSE">Driver's License</option>
-                  <option value="RESIDENCE_PERMIT">Residence Permit</option>
-                  <option value="VOTER_ID">Voter ID</option>
-                  <option value="BIRTH_CERTIFICATE">Birth Certificate</option>
-                  <option value="SOCIAL_SECURITY_CARD">
-                    Social Security Card
-                  </option>
-                </select> */}
               </div>
               <div className={styles.formGroup}>
                 <Input

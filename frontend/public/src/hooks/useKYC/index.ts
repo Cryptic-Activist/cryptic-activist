@@ -1,5 +1,6 @@
 'use client';
 
+import { getDocumentTypes, getNationalities } from '@/services/user/kyc';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueries } from '@tanstack/react-query';
 
@@ -22,14 +23,7 @@ const useKYC = () => {
   const utilityBillRef = useRef<FileUploaderHandle>(null);
   const bankStatementRef = useRef<FileUploaderHandle>(null);
 
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    getValues,
-    watch,
-    formState: { errors },
-  } = useForm({
+  const { handleSubmit, register, setValue, getValues, watch } = useForm({
     resolver: KYCFormResolver,
   });
 
@@ -59,7 +53,18 @@ const useKYC = () => {
   };
 
   const [nationalitiesListQuery, documentTypesListQuery] = useQueries({
-    queries: [],
+    queries: [
+      {
+        queryKey: ['nationalities'],
+        queryFn: getNationalities,
+        enabled: !!user.id,
+      },
+      {
+        queryKey: ['documentTypes'],
+        queryFn: getDocumentTypes,
+        enabled: !!user.id,
+      },
+    ],
   });
 
   const uploadDocumentFrontMutation = useMutation({
@@ -199,8 +204,6 @@ const useKYC = () => {
     }
     console.log({ uploadedFiles });
   }, [showBackDocument, uploadedFiles]);
-
-  console.log({ errors, uploadedFiles });
 
   return {
     nationalitiesListQuery,
