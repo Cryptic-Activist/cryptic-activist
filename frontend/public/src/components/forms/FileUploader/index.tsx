@@ -84,6 +84,7 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
       allowedFileTypes,
       allowMultiple,
       onUpload,
+      onSelect,
       label = 'File Uploader',
       description = 'Images (PNG, JPG, GIF) or PDF files',
       maxFiles,
@@ -126,8 +127,14 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
 
       if (allowMultiple) {
         setSelectedFiles((prev) => [...prev, ...validFiles]);
+        if (onSelect) {
+          onSelect(validFiles);
+        }
       } else {
         setSelectedFiles(validFiles.slice(0, 1));
+        if (onSelect) {
+          onSelect(validFiles.slice(0, 1));
+        }
       }
     };
 

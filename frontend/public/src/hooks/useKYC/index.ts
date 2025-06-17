@@ -1,17 +1,10 @@
 'use client';
 
-import {
-  additionalDocumentsResolver,
-  documentInformationResolver,
-  documentUploadResolver,
-  personalInformationResolver,
-  selfieVerificationResolver,
-  termsAndSubmitResolver,
-} from './zod';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueries } from '@tanstack/react-query';
 
 import { FileUploaderHandle } from '@/components/forms/FileUploader/types';
+import { KYCFormResolver } from './zod';
 import { UploadKYCFilesParams } from '@/services/uploads/types';
 import { UploadedFiles } from './types';
 import { processFileToUpload } from '@/utils';
@@ -22,7 +15,6 @@ import useUser from '../useUser';
 const useKYC = () => {
   const { user } = useUser();
 
-  const [step, setStep] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>([]);
   const documentFrontRef = useRef<FileUploaderHandle>(null);
   const documentBackRef = useRef<FileUploaderHandle>(null);
@@ -31,84 +23,39 @@ const useKYC = () => {
   const bankStatementRef = useRef<FileUploaderHandle>(null);
 
   const {
-    handleSubmit: handleSubmitPersonalInformation,
-    register: registerPersonalInformation,
-    setValue: setValuePersonalInformation,
-    watch: watchPersonalInformation,
+    handleSubmit,
+    register,
+    setValue,
+    getValues,
+    watch,
+    formState: { errors },
   } = useForm({
-    resolver: personalInformationResolver,
+    resolver: KYCFormResolver,
   });
-  const {
-    getValues: getValuesDocumentInformation,
-    handleSubmit: handleSubmitDocumentInformation,
-    register: registerDocumentInformation,
-  } = useForm({
-    resolver: documentInformationResolver,
-  });
-  const {
-    handleSubmit: handleSubmitDocumentUpload,
-    register: registerDocumentUpload,
-    setValue: setValueDocumentUpload,
-  } = useForm({
-    resolver: documentUploadResolver,
-  });
-  const {
-    handleSubmit: handleSubmitSelfieVerification,
-    register: registerSelfieVerification,
-  } = useForm({
-    resolver: selfieVerificationResolver,
-  });
-  const {
-    handleSubmit: handleSubmitAdditionalDocuments,
-    register: registerAdditionalDocuments,
-  } = useForm({
-    resolver: additionalDocumentsResolver,
-  });
-  const {
-    handleSubmit: handleSubmitTermsAndSubmit,
-    register: registerTermsAndSubmit,
-    watch: watchTermsAndSubmit,
-    getValues: getValuesTermsAndSubmit,
-    setValue: setValueTermsAndSubmit,
-  } = useForm({
-    resolver: termsAndSubmitResolver,
-  });
-
-  const onNextStep = () => {
-    setStep((prev) => {
-      return prev + 1;
-    });
-  };
-
-  const onPreviousStep = () => {
-    setStep((prev) => {
-      return prev - 1;
-    });
-  };
 
   const showBackDocument =
-    getValuesDocumentInformation('documentType') &&
+    getValues('documentType') &&
     !['PASSPORT', 'BIRTH_CERTIFICATE', 'SOCIAL_SECURITY_CARD'].includes(
-      getValuesDocumentInformation('documentType')
+      getValues('documentType')
     );
-  const birthDate = watchPersonalInformation('birthDate');
-  const agreeTerms = watchTermsAndSubmit('agreeTerms');
-  const consentProcessing = watchTermsAndSubmit('consentProcessing');
+  const birthDate = watch('birthDate');
+  const agreeTerms = watch('agreeTerms');
+  const consentProcessing = watch('consentProcessing');
 
   const onSelectBirthDate = (date?: Date) => {
     if (date) {
-      setValuePersonalInformation('birthDate', date);
+      setValue('birthDate', date);
     }
   };
 
   const onCheckAgreeTerms = () => {
-    const auxAgreeTerms = getValuesTermsAndSubmit('agreeTerms');
-    setValueTermsAndSubmit('agreeTerms', !auxAgreeTerms);
+    const auxAgreeTerms = getValues('agreeTerms');
+    setValue('agreeTerms', !auxAgreeTerms);
   };
 
   const onCheckConsentProcessing = () => {
-    const auxConsentProcessing = getValuesTermsAndSubmit('consentProcessing');
-    setValueTermsAndSubmit('consentProcessing', !auxConsentProcessing);
+    const auxConsentProcessing = getValues('consentProcessing');
+    setValue('consentProcessing', !auxConsentProcessing);
   };
 
   const [nationalitiesListQuery, documentTypesListQuery] = useQueries({
@@ -128,6 +75,10 @@ const useKYC = () => {
     bankStatementRef.current?.upload();
   };
 
+  const onSelectDocumentFront = (files: File[]) => {
+    setValue('documentFront.url', files[0].name);
+  };
+
   const uploadDocumentFront = async (files: File[]) => {
     if (user?.id) {
       const formData = await processFileToUpload(files);
@@ -142,8 +93,12 @@ const useKYC = () => {
           file: uploaded[0],
         },
       ]);
-      setValueDocumentUpload('documentFront.url', uploaded[0].url);
+      setValue('documentFront.url', uploaded[0].url);
     }
+  };
+
+  const onSelectDocumentBack = (files: File[]) => {
+    setValue('documentBack.url', files[0].name);
   };
 
   const uploadDocumentBack = async (files: File[]) => {
@@ -160,8 +115,12 @@ const useKYC = () => {
           file: uploaded[0],
         },
       ]);
-      setValueDocumentUpload('documentBack.url', uploaded[0].url);
+      setValue('documentBack.url', uploaded[0].url);
     }
+  };
+
+  const onSelectSelfie = (files: File[]) => {
+    setValue('selfie.url', files[0].name);
   };
 
   const uploadSelfie = async (files: File[]) => {
@@ -178,7 +137,12 @@ const useKYC = () => {
           file: uploaded[0],
         },
       ]);
+      setValue('selfie.url', uploaded[0].url);
     }
+  };
+
+  const onSelectUtilityBill = (files: File[]) => {
+    setValue('utilityBill.url', files[0].name);
   };
 
   const uploadUtilityBill = async (files: File[]) => {
@@ -195,7 +159,12 @@ const useKYC = () => {
           file: uploaded[0],
         },
       ]);
+      setValue('utilityBill.url', uploaded[0].url);
     }
+  };
+
+  const onSelectBankStatement = (files: File[]) => {
+    setValue('bankStatement.url', files[0].name);
   };
 
   const uploadBankStatement = async (files: File[]) => {
@@ -212,35 +181,11 @@ const useKYC = () => {
           file: uploaded[0],
         },
       ]);
+      setValue('bankStatement.url', uploaded[0].url);
     }
   };
 
-  const onSubmitPersonalInformation = (data: any) => {
-    console.log({ data });
-    onNextStep();
-  };
-
-  const onSubmitDocumentInformation = (data: any) => {
-    console.log({ data });
-    onNextStep();
-  };
-
-  const onSubmitDocumentUpload = (data: any) => {
-    console.log({ data });
-    onNextStep();
-  };
-
-  const onSubmitSelfieVerification = (data: any) => {
-    console.log({ data });
-    onNextStep();
-  };
-
-  const onSubmitAdditionalDocuments = (data: any) => {
-    console.log({ data });
-    onNextStep();
-  };
-
-  const onSubmitTermsAndSubmit = (data: any) => {
+  const onSubmitKYC = (data: any) => {
     console.log({ data });
     handleUploadAllFiles();
   };
@@ -255,8 +200,9 @@ const useKYC = () => {
     console.log({ uploadedFiles });
   }, [showBackDocument, uploadedFiles]);
 
+  console.log({ errors, uploadedFiles });
+
   return {
-    step,
     nationalitiesListQuery,
     documentTypesListQuery,
     showBackDocument,
@@ -273,26 +219,11 @@ const useKYC = () => {
     utilityBillRef,
     bankStatementRef,
     uploadedFiles,
-    onNextStep,
-    onPreviousStep,
-    handleSubmitPersonalInformation,
-    handleSubmitDocumentInformation,
-    handleSubmitDocumentUpload,
-    handleSubmitSelfieVerification,
-    handleSubmitAdditionalDocuments,
-    handleSubmitTermsAndSubmit,
-    onSubmitPersonalInformation,
-    onSubmitDocumentInformation,
-    onSubmitDocumentUpload,
-    onSubmitSelfieVerification,
-    onSubmitAdditionalDocuments,
-    onSubmitTermsAndSubmit,
-    registerAdditionalDocuments,
-    registerDocumentInformation,
-    registerDocumentUpload,
-    registerPersonalInformation,
-    registerSelfieVerification,
-    registerTermsAndSubmit,
+    handleSubmit,
+    register,
+    setValue,
+    watch,
+    onSubmitKYC,
     onCheckAgreeTerms,
     onCheckConsentProcessing,
     onSelectBirthDate,
@@ -301,6 +232,11 @@ const useKYC = () => {
     uploadDocumentFront,
     uploadSelfie,
     uploadUtilityBill,
+    onSelectBankStatement,
+    onSelectDocumentBack,
+    onSelectDocumentFront,
+    onSelectSelfie,
+    onSelectUtilityBill,
   };
 };
 
