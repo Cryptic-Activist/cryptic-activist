@@ -14,6 +14,8 @@ export type FileUploaderProps = {
   maxFiles?: number;
   maxFileSize?: number; // in bytes
   className?: string;
+  fullWidth?: boolean;
+  fullHeight?: boolean;
 };
 
 export type FileUploaderHandle = {

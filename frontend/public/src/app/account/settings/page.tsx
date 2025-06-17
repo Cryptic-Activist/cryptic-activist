@@ -32,9 +32,14 @@ const AccountSettings = () => {
           {user.id && (
             <>
               {user.twoFactorEnabled ? (
-                <Button onClick={handleDisable2FA}>Disable 2FA</Button>
+                <Button onClick={handleDisable2FA} padding="1rem">
+                  Disable 2FA
+                </Button>
               ) : (
-                <Button onClick={() => toggleModal('enableTwoFactor')}>
+                <Button
+                  onClick={() => toggleModal('enableTwoFactor')}
+                  padding="1rem"
+                >
                   Enable 2FA
                 </Button>
               )}
@@ -100,6 +105,16 @@ const AccountSettings = () => {
             </p>
           )}
         </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.subHeading}>KYC</h2>
+          {!user.kyc && (
+            <Button href="/account/kyc" size={16} padding="1rem">
+              Begin KYC Procedure
+            </Button>
+          )}
+        </section>
+
         {/* Additional Account Settings can be added here */}
       </div>
     </div>

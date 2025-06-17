@@ -8,6 +8,9 @@ CREATE TYPE "FeedbackType" AS ENUM ('POSITIVE', 'NEUTRAL', 'NEGATIVE');
 CREATE TYPE "KYCStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 
 -- CreateEnum
+CREATE TYPE "KYCDocumentType" AS ENUM ('PASSPORT', 'NATIONAL_ID', 'DRIVER_LICENSE', 'RESIDENCE_PERMIT', 'VOTER_ID', 'UTILITY_BILL', 'BANK_STATEMENT', 'TAX_BILL', 'RENTAL_AGREEMENT', 'INSURANCE_POLICY', 'SELFIE', 'VIDEO_VERIFICATION', 'BIRTH_CERTIFICATE', 'SOCIAL_SECURITY_CARD', 'GOVERNMENT_LETTER', 'OTHER');
+
+-- CreateEnum
 CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_DISPUTE_MORE_EVIDENCES', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING');
 
 -- CreateEnum
@@ -152,22 +155,24 @@ CREATE TABLE "fiats" (
 );
 
 -- CreateTable
-CREATE TABLE "kyc" (
+CREATE TABLE "kycs" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "documentType" TEXT NOT NULL,
-    "documentUrl" TEXT NOT NULL,
-    "selfieUrl" TEXT NOT NULL,
-    "proofOfAddress" TEXT NOT NULL,
     "status" "KYCStatus" NOT NULL DEFAULT 'PENDING',
     "rejectionReason" TEXT,
-    "reviewedBy" TEXT,
+    "fullName" TEXT NOT NULL,
+    "dateOfBirth" DATE NOT NULL,
+    "nationality" TEXT NOT NULL,
+    "documentType" "KYCDocumentType" NOT NULL,
+    "documentNumber" TEXT NOT NULL,
+    "documentFront" TEXT NOT NULL,
+    "documentBack" TEXT,
+    "selfie" TEXT NOT NULL,
+    "submittedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reviewedAt" TIMESTAMP,
-    "deletedAt" TIMESTAMP,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP,
+    "reviewedById" TEXT,
 
-    CONSTRAINT "kyc_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "kycs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -352,7 +357,7 @@ CREATE TABLE "dispute_party_notes" (
     "targetUserId" TEXT NOT NULL,
     "addedById" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "dispute_party_notes_pkey" PRIMARY KEY ("id")
 );
@@ -364,7 +369,7 @@ CREATE TABLE "dispute_audit_logs" (
     "changedById" TEXT,
     "action" "DisputeAction" NOT NULL,
     "note" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "dispute_audit_logs_pkey" PRIMARY KEY ("id")
 );
@@ -377,7 +382,7 @@ CREATE TABLE "dispute_evidences" (
     "type" "EvidenceType" NOT NULL,
     "fileUrl" TEXT,
     "textContent" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "dispute_evidences_pkey" PRIMARY KEY ("id")
 );
@@ -389,11 +394,11 @@ CREATE TABLE "dispute_evidence_requests" (
     "requestedById" TEXT NOT NULL,
     "requestedFromId" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "deadline" TIMESTAMP(3),
-    "submittedAt" TIMESTAMP(3),
+    "deadline" TIMESTAMP,
+    "submittedAt" TIMESTAMP,
     "status" "EvidenceRequestStatus" NOT NULL DEFAULT 'PENDING',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "dispute_evidence_requests_pkey" PRIMARY KEY ("id")
 );
@@ -410,7 +415,7 @@ CREATE TABLE "trade_disputes" (
     "status" "DisputeStatus" NOT NULL,
     "resolutionNote" TEXT,
     "resolutionType" "DisputeResolutionType",
-    "resolvedAt" TIMESTAMP(3),
+    "resolvedAt" TIMESTAMP,
     "moderatorId" TEXT,
     "priority" "DisputePriority" NOT NULL DEFAULT 'MEDIUM',
     "slaDueAt" TIMESTAMP NOT NULL,
@@ -627,7 +632,7 @@ CREATE UNIQUE INDEX "cryptocurrencies_coingeckoId_key" ON "cryptocurrencies"("co
 CREATE UNIQUE INDEX "feedbacks_tradeId_key" ON "feedbacks"("tradeId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "kyc_userId_key" ON "kyc"("userId");
+CREATE UNIQUE INDEX "kycs_userId_key" ON "kycs"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "languages_name_key" ON "languages"("name");
@@ -717,10 +722,10 @@ ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_traderId_fkey" FOREIGN KEY ("t
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "kyc" ADD CONSTRAINT "kyc_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "kyc" ADD CONSTRAINT "kyc_reviewedBy_fkey" FOREIGN KEY ("reviewedBy") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "offers" ADD CONSTRAINT "offers_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -22,6 +22,7 @@ const Button: FC<ButtonProps> = ({
   const danger = theme === 'danger' ? styles.danger : null;
   const alert = theme === 'alert' ? styles.alert : null;
   const transparent = theme === 'transparent' ? styles.transparent : null;
+  const gradient = theme === 'gradient' ? styles.gradient : null;
   const alignment =
     align === 'center' ? 'center' : align === 'left' ? 'start' : 'end';
 
@@ -30,7 +31,7 @@ const Button: FC<ButtonProps> = ({
       {href ? (
         <Link
           href={isDisabled ? '#' : href}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${alert} ${transparent} ${className}`}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${alert} ${transparent} ${gradient} ${className}`}
           style={{
             padding,
             textAlign: alignment,
@@ -44,7 +45,7 @@ const Button: FC<ButtonProps> = ({
       ) : (
         <button
           type={type}
-          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${alert} ${transparent} ${className}`}
+          className={`${styles.button} ${primary} ${secondary} ${ghost} ${danger} ${alert} ${transparent} ${gradient} ${className}`}
           onClick={onClick}
           disabled={isDisabled}
           style={{

@@ -1,0 +1,82 @@
+@use "../../../styles/globals.module.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  position: relative;
+}
+
+.btn {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: globals.$white;
+  border-radius: 0.4rem;
+  border: 1px solid globals.$black;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.label {
+  font-size: 0.9rem;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.calendarRef {
+  position: absolute;
+  top: 5rem;
+}
+
+.calendar {
+  background-color: globals.$white;
+  padding: 0.5rem;
+  border: 1px solid globals.$black;
+  border-radius: 0.4rem;
+  box-shadow: 0 1px 4px globals.$box-shadow-default-color;
+  display: flex;
+}
+
+.nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btnPrevNext {
+  background-color: globals.$black;
+  border-radius: 0.4rem;
+  border: none;
+  padding: 0.3rem;
+  svg {
+    fill: globals.$primary;
+  }
+}
+
+.dayBtn {
+  font-size: 1rem;
+  width: 2rem;
+  height: 2rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.4rem;
+}
+
+.today {
+  background-color: #e8e8e8;
+  border-radius: 0.2rem;
+}
+
+.selected {
+  background-color: globals.$black;
+  border-radius: 0.2rem;
+  button {
+    color: globals.$primary;
+  }
+}
+
+.monthCaption {
+  margin-top: 1rem;
+}
