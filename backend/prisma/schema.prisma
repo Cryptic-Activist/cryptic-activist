@@ -154,21 +154,25 @@ enum KYCStatus {
 }
 
 enum KYCDocumentType {
+  ALIEN_REGISTRATION_CARD
+  CITIZENSHIP_CERTIFICATE
+  CONSULAR_ID_CARD
+  DRIVERS_LICENSE
+  FIREARMS_LICENSE
+  GOVERNMENT_ISSUED_ID_CARD
+  HEALTH_INSURANCE_CARD
+  IMMIGRATION_DOCUMENT
+  INCOME_TAX_IDENTIFICATION_DOCUMENT
+  MILITARY_ID
+  NATIONAL_ID_CARD
   PASSPORT
-  NATIONAL_ID
-  DRIVER_LICENSE
+  PERMANENT_RESIDENT_CARD
+  REFUGEE_TRAVEL_DOCUMENT
   RESIDENCE_PERMIT
-  VOTER_ID
-  UTILITY_BILL
-  BANK_STATEMENT
-  TAX_BILL
-  RENTAL_AGREEMENT
-  INSURANCE_POLICY
-  SELFIE
-  VIDEO_VERIFICATION
-  BIRTH_CERTIFICATE
   SOCIAL_SECURITY_CARD
-  GOVERNMENT_LETTER
+  TAX_IDENTIFICATION_CARD
+  VOTER_ID_CARD
+  WORK_PERMIT
   OTHER
 }
 
@@ -189,28 +193,31 @@ model UploadedFile {
 }
 
 model KYC {
-  id              String        @id @default(uuid())
-  userId          String        @unique
-  user            User          @relation(fields: [userId], references: [id])
-  status          KYCStatus     @default(PENDING)
-  rejectionReason String?       @db.Text()
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  user            User?           @relation(fields: [userId], references: [id])
+  status          KYCStatus       @default(PENDING)
+  rejectionReason String?         @db.Text()
   fullName        String
-  dateOfBirth     DateTime      @db.Date()
+  dateOfBirth     DateTime        @db.Date()
+  documentType    KYCDocumentType
+  documentNumber  String?         @db.VarChar(100)
+  additionalNotes String?         @db.Text()
   nationality     String
-  documentFrontId String        @unique
-  documentFront   UploadedFile  @relation("documentFront", fields: [documentFrontId], references: [id])
-  documentBackId  String?       @unique
-  documentBack    UploadedFile? @relation("documentBack", fields: [documentBackId], references: [id])
-  selfieId        String        @unique
-  selfie          UploadedFile  @relation("selfie", fields: [selfieId], references: [id])
-  utilityBillId   String?       @unique
-  utilityBill     UploadedFile? @relation("utilityBill", fields: [utilityBillId], references: [id])
-  bankStatementId String?       @unique
-  bankStatement   UploadedFile? @relation("bankStatement", fields: [bankStatementId], references: [id])
-  submittedAt     DateTime      @default(now()) @db.Timestamp()
-  reviewedAt      DateTime?     @db.Timestamp()
+  documentFrontId String          @unique
+  documentFront   UploadedFile    @relation("documentFront", fields: [documentFrontId], references: [id])
+  documentBackId  String?         @unique
+  documentBack    UploadedFile?   @relation("documentBack", fields: [documentBackId], references: [id])
+  selfieId        String          @unique
+  selfie          UploadedFile    @relation("selfie", fields: [selfieId], references: [id])
+  utilityBillId   String?         @unique
+  utilityBill     UploadedFile?   @relation("utilityBill", fields: [utilityBillId], references: [id])
+  bankStatementId String?         @unique
+  bankStatement   UploadedFile?   @relation("bankStatement", fields: [bankStatementId], references: [id])
+  submittedAt     DateTime        @default(now()) @db.Timestamp()
+  reviewedAt      DateTime?       @db.Timestamp()
   reviewedById    String?
-  reviewedBy      Admin?        @relation(fields: [reviewedById], references: [id])
+  reviewedBy      Admin?          @relation(fields: [reviewedById], references: [id])
 
   @@map("kycs")
 }

@@ -196,7 +196,6 @@ export const countries = [
 
 export const documentTypes = [
   { label: 'Alien Registration Card', value: 'ALIEN_REGISTRATION_CARD' },
-  { label: 'Birth Certificate', value: 'BIRTH_CERTIFICATE' },
   { label: 'Citizenship Certificate', value: 'CITIZENSHIP_CERTIFICATE' },
   { label: 'Consular ID Card', value: 'CONSULAR_ID_CARD' },
   { label: "Driver's License", value: 'DRIVERS_LICENSE' },

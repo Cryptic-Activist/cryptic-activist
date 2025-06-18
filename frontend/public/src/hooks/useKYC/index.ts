@@ -1,13 +1,18 @@
 'use client';
 
-import { getDocumentTypes, getNationalities } from '@/services/user/kyc';
+import { Type, UploadedFiles } from './types';
+import {
+  getDocumentTypes,
+  getNationalities,
+  submitKYC,
+} from '@/services/user/kyc';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQueries } from '@tanstack/react-query';
 
 import { FileUploaderHandle } from '@/components/forms/FileUploader/types';
 import { KYCFormResolver } from './zod';
+import { SubmitKYCParams } from '@/services/user/kyc/types';
 import { UploadKYCFilesParams } from '@/services/uploads/types';
-import { UploadedFiles } from './types';
 import { processFileToUpload } from '@/utils';
 import { uploadKYCFiles } from '@/services/uploads';
 import { useForm } from 'react-hook-form';
@@ -17,6 +22,8 @@ const useKYC = () => {
   const { user } = useUser();
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>([]);
+  const selectedFileTypesRef = useRef<Set<Type>>(new Set());
+
   const documentFrontRef = useRef<FileUploaderHandle>(null);
   const documentBackRef = useRef<FileUploaderHandle>(null);
   const selfieRef = useRef<FileUploaderHandle>(null);
@@ -68,6 +75,16 @@ const useKYC = () => {
     mutationFn: (params: UploadKYCFilesParams) => uploadKYCFiles(params),
   });
 
+  const submitKYCMutation = useMutation({
+    mutationKey: ['submitKYC'],
+    mutationFn: async (params: SubmitKYCParams) => {
+      if (user?.id) {
+        const response = await submitKYC(params);
+        return response;
+      }
+    },
+  });
+
   const handleUploadAllFiles = () => {
     documentFrontRef.current?.upload();
     documentBackRef.current?.upload();
@@ -78,6 +95,7 @@ const useKYC = () => {
 
   const onSelectDocumentFront = (files: File[]) => {
     setValue('documentFront.url', files[0].name);
+    selectedFileTypesRef.current.add('DOCUMENT_FRONT');
   };
 
   const uploadDocumentFront = async (files: File[]) => {
@@ -100,6 +118,7 @@ const useKYC = () => {
 
   const onSelectDocumentBack = (files: File[]) => {
     setValue('documentBack.url', files[0].name);
+    selectedFileTypesRef.current.add('DOCUMENT_BACK');
   };
 
   const uploadDocumentBack = async (files: File[]) => {
@@ -122,6 +141,7 @@ const useKYC = () => {
 
   const onSelectSelfie = (files: File[]) => {
     setValue('selfie.url', files[0].name);
+    selectedFileTypesRef.current.add('SELFIE');
   };
 
   const uploadSelfie = async (files: File[]) => {
@@ -144,6 +164,7 @@ const useKYC = () => {
 
   const onSelectUtilityBill = (files: File[]) => {
     setValue('utilityBill.url', files[0].name);
+    selectedFileTypesRef.current.add('UTILITY_BILL');
   };
 
   const uploadUtilityBill = async (files: File[]) => {
@@ -166,6 +187,7 @@ const useKYC = () => {
 
   const onSelectBankStatement = (files: File[]) => {
     setValue('bankStatement.url', files[0].name);
+    selectedFileTypesRef.current.add('BANK_STATEMENT');
   };
 
   const uploadBankStatement = async (files: File[]) => {
@@ -186,14 +208,15 @@ const useKYC = () => {
     }
   };
 
-  const onSubmitKYC = (data: any) => {
-    console.log({ data });
+  const onSubmitKYC = (_data: any) => {
     handleUploadAllFiles();
   };
 
   const showBackDocument =
     documentType &&
     documentTypesListQuery.data?.documentTypesWithBack.includes(documentType);
+  const showKYCForm =
+    submitKYCMutation.isSuccess || (user.kyc && user.kyc?.length > 0);
 
   useEffect(() => {
     if (showBackDocument && uploadedFiles.length < 3) {
@@ -202,10 +225,27 @@ const useKYC = () => {
     if (!showBackDocument && uploadedFiles.length < 2) {
       return;
     }
-    console.log({ uploadedFiles });
-  }, [showBackDocument, uploadedFiles]);
+
+    if (selectedFileTypesRef.current.size === uploadedFiles.length) {
+      submitKYCMutation.mutate({
+        files: uploadedFiles,
+        fullName: getValues('fullName'),
+        birthDate: getValues('birthDate').toString(),
+        documentNumber: getValues('documentNumber'),
+        documentType: getValues('documentType'),
+        nationality: getValues('nationality'),
+        agreeTerms: getValues('agreeTerms'),
+        consentProcessing: getValues('consentProcessing'),
+        additionalNotes: getValues('additionalNotes'),
+        userId: user?.id || '',
+      });
+    }
+  }, [showBackDocument, uploadedFiles, selectedFileTypesRef]);
 
   return {
+    user,
+    submitKYCMutation,
+    showKYCForm,
     nationalitiesListQuery,
     documentTypesListQuery,
     showBackDocument,

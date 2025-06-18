@@ -1,4 +1,4 @@
-type Type =
+export type Type =
   | 'DOCUMENT_FRONT'
   | 'DOCUMENT_BACK'
   | 'SELFIE'
