@@ -172,24 +172,45 @@ enum KYCDocumentType {
   OTHER
 }
 
+model UploadedFile {
+  id               String           @id @default(uuid())
+  key              String
+  mimeType         String? // e.g., "image/jpeg"
+  size             Int?
+  submittedAt      DateTime         @default(now())
+  documentFrontKYC KYC?             @relation("documentFront")
+  documentBackKYC  KYC?             @relation("documentBack")
+  selfieKYC        KYC?             @relation("selfie")
+  utilityBillKYC   KYC?             @relation("utilityBill")
+  bankStatementKYC KYC?             @relation("bankStatement")
+  disputeEvidence  DisputeEvidence?
+
+  @@map("uploaded_files")
+}
+
 model KYC {
-  id              String          @id @default(uuid())
-  userId          String          @unique
-  user            User            @relation(fields: [userId], references: [id])
-  status          KYCStatus       @default(PENDING)
-  rejectionReason String?         @db.Text()
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id])
+  status          KYCStatus     @default(PENDING)
+  rejectionReason String?       @db.Text()
   fullName        String
-  dateOfBirth     DateTime        @db.Date()
+  dateOfBirth     DateTime      @db.Date()
   nationality     String
-  documentType    KYCDocumentType
-  documentNumber  String
-  documentFront   String // S3 URL or path
-  documentBack    String?
-  selfie          String // S3 URL or path
-  submittedAt     DateTime        @default(now()) @db.Timestamp()
-  reviewedAt      DateTime?       @db.Timestamp()
+  documentFrontId String        @unique
+  documentFront   UploadedFile  @relation("documentFront", fields: [documentFrontId], references: [id])
+  documentBackId  String?       @unique
+  documentBack    UploadedFile? @relation("documentBack", fields: [documentBackId], references: [id])
+  selfieId        String        @unique
+  selfie          UploadedFile  @relation("selfie", fields: [selfieId], references: [id])
+  utilityBillId   String?       @unique
+  utilityBill     UploadedFile? @relation("utilityBill", fields: [utilityBillId], references: [id])
+  bankStatementId String?       @unique
+  bankStatement   UploadedFile? @relation("bankStatement", fields: [bankStatementId], references: [id])
+  submittedAt     DateTime      @default(now()) @db.Timestamp()
+  reviewedAt      DateTime?     @db.Timestamp()
   reviewedById    String?
-  reviewedBy      Admin?          @relation(fields: [reviewedById], references: [id])
+  reviewedBy      Admin?        @relation(fields: [reviewedById], references: [id])
 
   @@map("kycs")
 }
@@ -483,7 +504,8 @@ model DisputeEvidence {
   submittedById          String
   submittedBy            User                     @relation(fields: [submittedById], references: [id])
   type                   EvidenceType
-  fileUrl                String? // If hosted on S3 or similar
+  fileId                 String?                  @unique
+  file                   UploadedFile?            @relation(fields: [fileId], references: [id]) // If hosted on S3 or similar
   textContent            String?                  @db.Text()
   createdAt              DateTime                 @default(now()) @db.Timestamp()
   disputeEvidenceRequest DisputeEvidenceRequest[]

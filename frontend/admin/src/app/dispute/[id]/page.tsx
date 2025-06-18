@@ -243,14 +243,14 @@ const DisputeDetailsPage = () => {
 	};
 
 	const EvidenceItem = (evidence: Evidence) => {
-		const split = evidence.fileUrl.split('/');
+		const split = evidence.file?.key.split('/');
 		const filename = split[split.length - 1];
 		const fileExt = filename.split('.')[1];
 		const fileType = fileExt === 'pdf' ? 'PDF' : 'Image';
 		return (
 			<button
 				className={styles.evidenceItem}
-				onClick={() => openFileViewer(evidence.fileUrl)}
+				onClick={() => openFileViewer(evidence.file.key)}
 			>
 				{fileType === 'PDF' ? (
 					<DynamicIcon iconName="MdPictureAsPdf" size={45} color="#000" />
@@ -258,7 +258,7 @@ const DisputeDetailsPage = () => {
 					<div
 						className={styles.evidenceImage}
 						style={{
-							backgroundImage: `url(${evidence.fileUrl})`
+							backgroundImage: `url(${evidence.file.key})`
 						}}
 					/>
 				)}

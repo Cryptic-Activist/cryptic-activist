@@ -18,8 +18,6 @@ const Message: FC<MessageProps> = ({ note }) => {
   };
   const notification = getNotification();
 
-  console.log({ note });
-
   const getActionButtons = () => {
     return (
       <>

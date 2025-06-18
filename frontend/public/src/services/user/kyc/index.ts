@@ -9,7 +9,6 @@ export const getNationalities = async () => {
       Authorization: `Bearer ${accessToken}`,
     });
 
-    console.log({ response });
     if (response.status !== 200) return null;
 
     return response.data;

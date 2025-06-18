@@ -19,7 +19,9 @@ type DisputeType =
 
 export type Evidence = {
   fileName: string;
-  url: string;
+  key: string;
+  mimeType: string;
+  size: number;
 };
 
 export type SetTradeAsPaidParams = SetTradeAs;

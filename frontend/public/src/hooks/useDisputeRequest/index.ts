@@ -5,7 +5,7 @@ import { disputeRequestResolver } from './zod';
 import { getDisputeTypes } from '@/services/trade';
 import { getSocket } from '@/services/socket';
 import { processFileToUpload } from '@/utils';
-import { uploadFiles } from '@/services/uploads';
+import { uploadEvidenceFiles } from '@/services/uploads';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
@@ -36,9 +36,12 @@ const useDisputeRequest = () => {
 
   const onUploadEvidences = async (files: File[]) => {
     const socket = getSocket();
-    if (socket.connected && trade.chat?.id && user.id) {
+    if (socket.connected && trade.id && trade.chat?.id && user.id) {
       const formData = await processFileToUpload(files);
-      const uploadedFiles = await uploadFiles(formData);
+      const uploadedFiles = await uploadEvidenceFiles({
+        formData,
+        tradeId: trade.id,
+      });
 
       const from = user.id;
       const to =

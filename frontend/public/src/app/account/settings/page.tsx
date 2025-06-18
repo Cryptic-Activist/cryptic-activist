@@ -108,7 +108,7 @@ const AccountSettings = () => {
 
         <section className={styles.section}>
           <h2 className={styles.subHeading}>KYC</h2>
-          {!user.kyc && (
+          {user.id && user.kyc?.length === 0 && (
             <Button href="/account/kyc" size={16} padding="1rem">
               Begin KYC Procedure
             </Button>

@@ -155,6 +155,17 @@ CREATE TABLE "fiats" (
 );
 
 -- CreateTable
+CREATE TABLE "uploaded_files" (
+    "id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "mimeType" TEXT,
+    "size" INTEGER,
+    "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "uploaded_files_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "kycs" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -163,11 +174,11 @@ CREATE TABLE "kycs" (
     "fullName" TEXT NOT NULL,
     "dateOfBirth" DATE NOT NULL,
     "nationality" TEXT NOT NULL,
-    "documentType" "KYCDocumentType" NOT NULL,
-    "documentNumber" TEXT NOT NULL,
-    "documentFront" TEXT NOT NULL,
-    "documentBack" TEXT,
-    "selfie" TEXT NOT NULL,
+    "documentFrontId" TEXT NOT NULL,
+    "documentBackId" TEXT,
+    "selfieId" TEXT NOT NULL,
+    "utilityBillId" TEXT,
+    "bankStatementId" TEXT,
     "submittedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reviewedAt" TIMESTAMP,
     "reviewedById" TEXT,
@@ -380,7 +391,7 @@ CREATE TABLE "dispute_evidences" (
     "disputeId" TEXT NOT NULL,
     "submittedById" TEXT NOT NULL,
     "type" "EvidenceType" NOT NULL,
-    "fileUrl" TEXT,
+    "fileId" TEXT,
     "textContent" TEXT,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -635,6 +646,21 @@ CREATE UNIQUE INDEX "feedbacks_tradeId_key" ON "feedbacks"("tradeId");
 CREATE UNIQUE INDEX "kycs_userId_key" ON "kycs"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "kycs_documentFrontId_key" ON "kycs"("documentFrontId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "kycs_documentBackId_key" ON "kycs"("documentBackId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "kycs_selfieId_key" ON "kycs"("selfieId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "kycs_utilityBillId_key" ON "kycs"("utilityBillId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "kycs_bankStatementId_key" ON "kycs"("bankStatementId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "languages_name_key" ON "languages"("name");
 
 -- CreateIndex
@@ -654,6 +680,9 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "dispute_evidences_fileId_key" ON "dispute_evidences"("fileId");
 
 -- CreateIndex
 CREATE INDEX "dispute_evidence_requests_disputeId_requestedFromId_idx" ON "dispute_evidence_requests"("disputeId", "requestedFromId");
@@ -723,6 +752,21 @@ ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_tradeId_fkey" FOREIGN KEY ("tr
 
 -- AddForeignKey
 ALTER TABLE "kycs" ADD CONSTRAINT "kycs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_documentFrontId_fkey" FOREIGN KEY ("documentFrontId") REFERENCES "uploaded_files"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_documentBackId_fkey" FOREIGN KEY ("documentBackId") REFERENCES "uploaded_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_selfieId_fkey" FOREIGN KEY ("selfieId") REFERENCES "uploaded_files"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_utilityBillId_fkey" FOREIGN KEY ("utilityBillId") REFERENCES "uploaded_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "kycs" ADD CONSTRAINT "kycs_bankStatementId_fkey" FOREIGN KEY ("bankStatementId") REFERENCES "uploaded_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "kycs" ADD CONSTRAINT "kycs_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -804,6 +848,9 @@ ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_disputeId_fkey
 
 -- AddForeignKey
 ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_submittedById_fkey" FOREIGN KEY ("submittedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dispute_evidences" ADD CONSTRAINT "dispute_evidences_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "uploaded_files"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "dispute_evidence_requests" ADD CONSTRAINT "dispute_evidence_requests_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

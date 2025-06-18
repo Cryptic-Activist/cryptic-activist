@@ -65,7 +65,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         slaDueAt: true,
         evidences: {
           select: {
-            fileUrl: true,
+            file: true,
             submittedBy: {
               select: {
                 id: true,
@@ -900,6 +900,8 @@ export async function addMoreEvidences(req: Request, res: Response) {
   try {
     const { disputeId, evidences, userId } = req.body;
 
+    console.log({ disputeId, evidences, userId });
+
     const dispute = await prisma.tradeDispute.findUnique({
       where: { id: disputeId },
       select: {
@@ -925,30 +927,54 @@ export async function addMoreEvidences(req: Request, res: Response) {
       return;
     }
 
-    const promises = dispute.disputeEvidenceRequest.map(async (request) => {
-      if (request.requestedFromId === userId) {
-        const toCreateEvidences = evidences.map((evidence: any) => ({
-          fileUrl: evidence.url,
-          disputeId: request.disputeId,
-          submittedById: request.requestedFromId,
-          type: 'BANK_STATEMENT',
-        }));
-        await prisma.disputeEvidenceRequest.update({
-          where: {
-            id: request.id,
-            disputeId: request.disputeId,
-            requestedFromId: request.requestedFromId,
-          },
-          data: {
-            submittedAt: new Date(),
-            evidences: {
-              create: toCreateEvidences,
+    const promises = dispute.disputeEvidenceRequest
+      .filter((request) => request.requestedFromId === userId)
+      .map((request) => {
+        return prisma.$transaction(async (tx) => {
+          // 1. Create UploadedFiles
+          const uploadedFiles = await Promise.all(
+            evidences.map((evidence: any) =>
+              tx.uploadedFile.create({
+                data: {
+                  key: evidence.key,
+                  mimeType: evidence.mimeType,
+                  size: evidence.size,
+                },
+              }),
+            ),
+          );
+
+          // 2. Create DisputeEvidences linking the uploadedFiles
+          await Promise.all(
+            uploadedFiles.map((file) =>
+              tx.disputeEvidence.create({
+                data: {
+                  type: 'BANK_STATEMENT', // or use evidence.type if available
+                  disputeId: request.disputeId,
+                  submittedById: request.requestedFromId,
+                  fileId: file.id,
+                  disputeEvidenceRequest: {
+                    connect: { id: request.id },
+                  },
+                },
+              }),
+            ),
+          );
+
+          // 3. Mark the request as submitted
+          await tx.disputeEvidenceRequest.update({
+            where: {
+              id: request.id,
+              disputeId: request.disputeId,
+              requestedFromId: request.requestedFromId,
             },
-            status: 'SUBMITTED',
-          },
+            data: {
+              submittedAt: new Date(),
+              status: 'SUBMITTED',
+            },
+          });
         });
-      }
-    });
+      });
 
     const fulfilled = await Promise.all(promises);
 

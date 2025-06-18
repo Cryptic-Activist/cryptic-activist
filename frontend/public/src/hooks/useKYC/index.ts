@@ -27,14 +27,10 @@ const useKYC = () => {
     resolver: KYCFormResolver,
   });
 
-  const showBackDocument =
-    getValues('documentType') &&
-    !['PASSPORT', 'BIRTH_CERTIFICATE', 'SOCIAL_SECURITY_CARD'].includes(
-      getValues('documentType')
-    );
   const birthDate = watch('birthDate');
   const agreeTerms = watch('agreeTerms');
   const consentProcessing = watch('consentProcessing');
+  const documentType = watch('documentType');
 
   const onSelectBirthDate = (date?: Date) => {
     if (date) {
@@ -195,11 +191,15 @@ const useKYC = () => {
     handleUploadAllFiles();
   };
 
+  const showBackDocument =
+    documentType &&
+    documentTypesListQuery.data?.documentTypesWithBack.includes(documentType);
+
   useEffect(() => {
-    if (showBackDocument && uploadedFiles.length < 5) {
+    if (showBackDocument && uploadedFiles.length < 3) {
       return;
     }
-    if (!showBackDocument && uploadedFiles.length < 4) {
+    if (!showBackDocument && uploadedFiles.length < 2) {
       return;
     }
     console.log({ uploadedFiles });

@@ -141,11 +141,13 @@ const KYCPage = () => {
                       label: 'Select document type',
                       value: '',
                     },
-                    ...(documentTypesListQuery.data
-                      ? documentTypesListQuery.data?.map((filter: any) => ({
-                          label: filter,
-                          value: filter,
-                        }))
+                    ...(documentTypesListQuery.data?.documentTypes
+                      ? documentTypesListQuery.data?.documentTypes?.map(
+                          (filter: any) => ({
+                            label: filter.label,
+                            value: filter.value,
+                          })
+                        )
                       : []),
                   ]}
                   label="Document Type"

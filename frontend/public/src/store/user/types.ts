@@ -60,7 +60,7 @@ export type User = {
   languages?: Language[];
   twoFactorEnabled?: boolean;
   referralCode?: string;
-  kyc?: KYC;
+  kyc?: KYC[];
   xp?: number;
   tier?: Tier;
   _count?: Count;
