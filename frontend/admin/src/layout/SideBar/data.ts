@@ -10,6 +10,11 @@ export const sidebarItems = [
 		icon: 'FaUsers'
 	},
 	{
+		href: '/kyc',
+		label: 'KYC',
+		icon: 'FaIdCard'
+	},
+	{
 		href: '/offers',
 		label: 'Offers',
 		icon: 'FaTags'

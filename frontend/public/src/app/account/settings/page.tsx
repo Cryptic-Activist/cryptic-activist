@@ -1,11 +1,12 @@
 'use client';
 
+import { useAccountSettings, useKYC } from '@/hooks';
+
 import { Button } from '@/components';
 import { FaPlus } from 'react-icons/fa6';
 import { Input } from '@/components/forms';
 import React from 'react';
 import styles from './page.module.scss';
-import { useAccountSettings } from '@/hooks';
 
 const AccountSettings = () => {
   const {
@@ -22,6 +23,8 @@ const AccountSettings = () => {
     newEmail,
     handleDisable2FA,
   } = useAccountSettings();
+
+  const { isKYCPending } = useKYC();
 
   return (
     <div className={styles.container}>
@@ -111,6 +114,11 @@ const AccountSettings = () => {
           {user.id && user.kyc?.length === 0 && (
             <Button href="/account/kyc" size={16} padding="1rem">
               Begin KYC Procedure
+            </Button>
+          )}
+          {isKYCPending && (
+            <Button href="/account/kyc" size={16} padding="1rem">
+              Check KYC Status
             </Button>
           )}
         </section>

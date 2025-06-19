@@ -22,7 +22,7 @@ const DisputesFilters = () => {
 	} = useDisputes();
 	return (
 		<div className={styles.container}>
-			<h2 className={styles.heading}>Filter Trades</h2>
+			<h2 className={styles.heading}>Filter Disputes</h2>
 			<form className={styles.form} onSubmit={handleSubmit(onSubmitFilters)}>
 				<Select
 					register={register}

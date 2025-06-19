@@ -104,7 +104,9 @@ const Table = <T extends object>({
 									cell.column.id === 'status' || cell.column.id === 'type';
 								const badgeCellStyle = isBadgeColumn ? styles.statusCell : '';
 								const isSlaColumn = cell.column.id === 'slaStatus';
-								const isFullDate = cell.column.id === 'createdAt';
+								const isFullDate =
+									cell.column.id === 'createdAt' ||
+									cell.column.id === 'submittedAt';
 								return (
 									<td
 										key={cell.id}

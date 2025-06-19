@@ -161,6 +161,9 @@ CREATE TABLE "uploaded_files" (
     "mimeType" TEXT,
     "size" INTEGER,
     "submittedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "uploaded_files_pkey" PRIMARY KEY ("id")
 );
@@ -185,6 +188,9 @@ CREATE TABLE "kycs" (
     "submittedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reviewedAt" TIMESTAMP,
     "reviewedById" TEXT,
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP,
 
     CONSTRAINT "kycs_pkey" PRIMARY KEY ("id")
 );

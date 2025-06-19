@@ -188,6 +188,9 @@ model UploadedFile {
   utilityBillKYC   KYC?             @relation("utilityBill")
   bankStatementKYC KYC?             @relation("bankStatement")
   disputeEvidence  DisputeEvidence?
+  deletedAt        DateTime?        @db.Timestamp()
+  createdAt        DateTime?        @default(now()) @db.Timestamp()
+  updatedAt        DateTime?        @updatedAt @db.Timestamp()
 
   @@map("uploaded_files")
 }
@@ -218,6 +221,9 @@ model KYC {
   reviewedAt      DateTime?       @db.Timestamp()
   reviewedById    String?
   reviewedBy      Admin?          @relation(fields: [reviewedById], references: [id])
+  deletedAt       DateTime?       @db.Timestamp()
+  createdAt       DateTime?       @default(now()) @db.Timestamp()
+  updatedAt       DateTime?       @updatedAt @db.Timestamp()
 
   @@map("kycs")
 }

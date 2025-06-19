@@ -19,10 +19,11 @@ import { useForm } from 'react-hook-form';
 import useUser from '../useUser';
 
 const useKYC = () => {
-  const { user } = useUser();
+  const { user, query } = useUser();
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFiles>([]);
   const selectedFileTypesRef = useRef<Set<Type>>(new Set());
+  const [forceShowForm, setForceShowForm] = useState(false);
 
   const documentFrontRef = useRef<FileUploaderHandle>(null);
   const documentBackRef = useRef<FileUploaderHandle>(null);
@@ -81,6 +82,12 @@ const useKYC = () => {
       if (user?.id) {
         const response = await submitKYC(params);
         return response;
+      }
+    },
+    onSuccess: (data) => {
+      console.log('KYC submitted successfully', data);
+      if (data?.ok) {
+        query.refetch();
       }
     },
   });
@@ -212,11 +219,21 @@ const useKYC = () => {
     handleUploadAllFiles();
   };
 
+  const toggleForceShowForm = () => {
+    setForceShowForm((prev) => !prev);
+  };
+
   const showBackDocument =
     documentType &&
     documentTypesListQuery.data?.documentTypesWithBack.includes(documentType);
-  const showKYCForm =
-    submitKYCMutation.isSuccess || (user.kyc && user.kyc?.length > 0);
+
+  const isKYCRejected = user?.kyc?.[0]?.status === 'REJECTED';
+  const isKYCApproved = user?.kyc?.[0]?.status === 'VERIFIED';
+  const isKYCPending = user?.kyc?.[0]?.status === 'PENDING';
+
+  const showKYCForm = forceShowForm || !user?.kyc?.length;
+
+  console.log({ forceShowForm, showKYCForm });
 
   useEffect(() => {
     if (showBackDocument && uploadedFiles.length < 3) {
@@ -262,6 +279,9 @@ const useKYC = () => {
     utilityBillRef,
     bankStatementRef,
     uploadedFiles,
+    isKYCApproved,
+    isKYCRejected,
+    isKYCPending,
     handleSubmit,
     register,
     setValue,
@@ -280,6 +300,7 @@ const useKYC = () => {
     onSelectDocumentFront,
     onSelectSelfie,
     onSelectUtilityBill,
+    toggleForceShowForm,
   };
 };
 
