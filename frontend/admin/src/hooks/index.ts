@@ -13,3 +13,4 @@ export { default as useDisputes } from './useDisputes';
 export { default as useRouter } from './useRouter';
 export { default as useDispute } from './useDispute';
 export { default as useKYCs } from './useKYCs';
+export { default as useKYC } from './useKYC';

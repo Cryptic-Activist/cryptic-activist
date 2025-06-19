@@ -408,19 +408,19 @@ const KYCPage = () => {
               </h2>
               {isKYCApproved && (
                 <p className={styles.statusApproved}>
-                  Your KYC verification has been <strong>approved</strong>!
+                  Your KYC verification has been <strong>Approved</strong>!
                 </p>
               )}
               {isKYCPending && (
                 <p className={styles.statusApproved}>
-                  Your KYC verification is <strong>pending</strong> review. We
+                  Your KYC verification is <strong>Pending</strong> review. We
                   will notify you via email once it has been processed.
                 </p>
               )}
               {isKYCRejected && (
                 <>
                   <p className={styles.statusApproved}>
-                    Your KYC verification was <strong>rejected</strong>. You
+                    Your KYC verification was <strong>Rejected</strong>. You
                     should try submitting the KYC application again.
                   </p>
                   <Button

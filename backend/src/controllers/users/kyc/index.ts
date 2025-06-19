@@ -340,3 +340,138 @@ export const getKYCsAdminFilters = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getKYCDetailsAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const kyc = await prisma.kYC.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        },
+        documentFront: true,
+        documentBack: true,
+        selfie: true,
+        utilityBill: true,
+        bankStatement: true,
+        reviewedBy: true,
+        fullName: true,
+        documentType: true,
+        documentNumber: true,
+        additionalNotes: true,
+        createdAt: true,
+        dateOfBirth: true,
+        id: true,
+        rejectionReason: true,
+        nationality: true,
+        status: true,
+        submittedAt: true,
+        updatedAt: true,
+        reviewedAt: true,
+      },
+    });
+
+    res.status(200).json(kyc);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const approveKYCAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { adminId } = req.body;
+
+    const admin = await prisma.admin.findUnique({
+      where: {
+        id: adminId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!admin) {
+      res.status(400).json({ error: 'Unable to find Admin' });
+      return;
+    }
+
+    const kyc = await prisma.kYC.findUnique({
+      where: { id },
+      select: {
+        userId: true,
+      },
+    });
+
+    if (!kyc) {
+      res.status(400).json({ error: 'Unable to find KYC application' });
+      return;
+    }
+
+    await prisma.kYC.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'VERIFIED',
+        reviewedAt: new Date(),
+        reviewedById: adminId,
+      },
+    });
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
+export const rejectKYCAdmin = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { adminId, rejectionReason } = req.body;
+
+    const admin = await prisma.admin.findUnique({
+      where: {
+        id: adminId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!admin) {
+      res.status(400).json({ error: 'Unable to find Admin' });
+      return;
+    }
+
+    await prisma.kYC.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'REJECTED',
+        reviewedAt: new Date(),
+        reviewedById: adminId,
+        rejectionReason,
+      },
+    });
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};

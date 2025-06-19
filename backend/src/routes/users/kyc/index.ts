@@ -1,10 +1,7 @@
 import {
-  authenticateAdmin,
-  authenticateUser,
-  requireAdminRole,
-} from '@/middlewares/authorization';
-import {
+  approveKYCAdmin,
   getDocumentTypes,
+  getKYCDetailsAdmin,
   getKYCsAdmin,
   getKYCsAdminFilters,
   getNationalities,
@@ -12,8 +9,14 @@ import {
   getTotalKYCApplications,
   getTotalPendingKYC,
   getTotalRejectedKYC,
+  rejectKYCAdmin,
   submitKYC,
 } from '@/controllers/users/kyc';
+import {
+  authenticateAdmin,
+  authenticateUser,
+  requireAdminRole,
+} from '@/middlewares/authorization';
 
 import { Router } from 'express';
 import { validateSubmitKYC } from './middleware';
@@ -42,5 +45,15 @@ router.get(
   requireAdminRole(['SUPER_ADMIN', 'DISPUTE_MANAGER']),
   getKYCsAdminFilters,
 );
+
+router.get(
+  '/:id/details/:adminId/details',
+  authenticateAdmin,
+  getKYCDetailsAdmin,
+);
+
+router.post('/:id/approve', authenticateAdmin, approveKYCAdmin);
+
+router.post('/:id/reject', authenticateAdmin, rejectKYCAdmin);
 
 export default router;
