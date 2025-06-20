@@ -84,6 +84,7 @@ export const getOfferController = async (req: Request, res: Response) => {
         label: true,
         terms: true,
         instructions: true,
+        kycOnly: true,
         createdAt: true,
         updatedAt: true,
         averageTradeSpeed: true,
@@ -132,7 +133,14 @@ export const getOfferController = async (req: Request, res: Response) => {
             createdAt: true,
             profileColor: true,
             lastLoginAt: true,
-            kyc: true,
+            kyc: {
+              where: {
+                status: 'VERIFIED',
+              },
+              select: {
+                status: true,
+              },
+            },
             feedbackTrader: {
               orderBy: {
                 createdAt: 'desc',
@@ -221,6 +229,7 @@ export const getEditOffer = async (req: Request, res: Response) => {
         instructions: true,
         limitMax: true,
         limitMin: true,
+        kycOnly: true,
         listAt: true,
         offerType: true,
         paymentMethodId: true,

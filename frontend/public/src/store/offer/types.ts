@@ -15,6 +15,7 @@ export type Tier = {
 
 export type KYC = {
   id?: string;
+  status: 'VERIFIED' | 'REJECTED' | 'PENDING';
 };
 
 export type UserLanguage = {
@@ -47,7 +48,7 @@ export type Vendor = {
   profileColor: string;
   lastLoginAt: string;
   tier?: Tier;
-  kyc?: KYC;
+  kyc?: KYC[];
   userLanguage?: UserLanguage[];
   feedbacksVendor?: FeedbacksVendor[];
 };
@@ -58,6 +59,7 @@ export type Offer = {
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
     vendor?: Vendor;
+    kycOnly?: boolean;
     offerType?: OfferType;
     paymentMethodId?: string;
     pricingType?: TradePricingType;
@@ -83,6 +85,7 @@ export type OfferStore = {
     offerType?: OfferType;
     paymentMethodId?: string;
     pricingType?: TradePricingType;
+    kycOnly?: boolean;
     listAt?: number;
     limitMin?: number;
     limitMax?: number;
@@ -112,6 +115,7 @@ export type OfferSetter = {
   limitMax?: number;
   timeLimit?: number;
   tags?: string[];
+  kycOnly?: boolean;
   label?: string;
   terms?: string;
   instructions?: string;

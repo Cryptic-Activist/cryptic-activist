@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Label, ProgressBar, Tags } from '@/components';
+import { Button, Checkbox, Label, ProgressBar, Tags } from '@/components';
 
 import { CreateOfferTradeInstructionsProps } from './types';
 import { FC } from 'react';
@@ -38,6 +38,7 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
 
   const submitOffer = () => {
     if (createOffer.isTradeInstructionsCompleted && vendorWalletAddress) {
+      console.log({ ...createOffer, vendorWalletAddress });
       createOfferMutation.mutate({ ...createOffer, vendorWalletAddress });
     }
   };
@@ -58,6 +59,11 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
     setCreateOfferValue({ instructions: value }, 'createOffer/Instructions');
   };
 
+  const checkKYCOnly = () => {
+    const auxKYCOnly = createOffer.kycOnly ?? false;
+    setCreateOfferValue({ kycOnly: !auxKYCOnly }, 'createOffer/KYCOnly');
+  };
+
   const backToTradePricing = () => {
     saveCreateOfferLocally();
     toStep(1);
@@ -76,11 +82,21 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
             currentStep={step}
             onClickEvents={onClickEvents}
           />
+
           <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>
               Step 3: Trade Instructions
             </h2>
             <Tags createOffer={createOffer} onChange={inputTags} />
+          </section>
+          <section className={stylesCore.horizontalGroup}>
+            <Checkbox
+              label="KYC Only"
+              checked={createOffer.kycOnly ?? false}
+              id="kycOnly"
+              onClick={checkKYCOnly}
+              name="kycOnly"
+            />
           </section>
           <section className={stylesCore.horizontalGroup}>
             <Label createOffer={createOffer} onChange={inputLabel} />

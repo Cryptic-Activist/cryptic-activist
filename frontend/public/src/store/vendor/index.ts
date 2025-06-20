@@ -16,6 +16,7 @@ export const useVendorSlice: StateCreator<
     username: undefined,
     createdAt: undefined,
     updatedAt: undefined,
+    kyc: undefined,
     setVendorValue: (params, actionName = 'vendor/setValue') => {
       set(
         ({ vendor }) => {
@@ -35,6 +36,7 @@ export const useVendorSlice: StateCreator<
               lastLoginAt: params.lastLoginAt ?? vendor.lastLoginAt,
               createdAt: params.createdAt ?? vendor.createdAt,
               updatedAt: params.updatedAt ?? vendor.updatedAt,
+              kyc: params.kyc ?? vendor.kyc,
               _count: params._count ?? vendor._count,
             },
           };
@@ -62,6 +64,7 @@ export const useVendorSlice: StateCreator<
             createdAt: undefined,
             updatedAt: undefined,
             twoFactorEnabled: undefined,
+            kyc: undefined,
           },
         }),
         false,

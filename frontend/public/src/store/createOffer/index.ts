@@ -20,6 +20,7 @@ export const useCreateOfferSlice: StateCreator<
     listAt: undefined,
     limitMin: undefined,
     limitMax: undefined,
+    kycOnly: false,
     timeLimit: undefined,
     isTradePricingCompleted: undefined,
     tags: undefined,
@@ -31,38 +32,46 @@ export const useCreateOfferSlice: StateCreator<
     isSubmitted: undefined,
     setCreateOfferValue: (params, actionName = 'createOffer/setValue') => {
       set(
-        ({ createOffer }) => ({
-          createOffer: {
-            ...createOffer,
-            cryptocurrency: params.cryptocurrency ?? createOffer.cryptocurrency,
-            fiat: params.fiat ?? createOffer.fiat,
-            instructions: params.instructions ?? createOffer.instructions,
-            isFilled: params.isFilled ?? createOffer.isFilled,
-            isPaymentMethodCompleted:
-              params.isPaymentMethodCompleted ??
-              createOffer.isPaymentMethodCompleted,
-            isSubmitted: params.isSubmitted ?? createOffer.isSubmitted,
-            isTradeInstructionsCompleted:
-              params.isTradeInstructionsCompleted ??
-              createOffer.isTradeInstructionsCompleted,
-            isTradePricingCompleted:
-              params.isTradePricingCompleted ??
-              createOffer.isTradePricingCompleted,
-            label: params.label ?? createOffer.label,
-            limitMax: params.limitMax ?? createOffer.limitMax,
-            limitMin: params.limitMin ?? createOffer.limitMin,
-            listAt: params.listAt ?? createOffer.listAt,
-            offerType: params.offerType ?? createOffer.offerType,
-            paymentMethodId:
-              params.paymentMethodId ?? createOffer.paymentMethodId,
-            paymentDetails: params.paymentDetails ?? createOffer.paymentDetails,
-            pricingType: params.pricingType ?? createOffer.pricingType,
-            tags: params.tags ?? createOffer.tags,
-            terms: params.terms ?? createOffer.terms,
-            timeLimit: params.timeLimit ?? createOffer.timeLimit,
-            vendorId: params.vendorId ?? createOffer.vendorId,
-          },
-        }),
+        ({ createOffer }) => {
+          return {
+            createOffer: {
+              ...createOffer,
+              cryptocurrency:
+                params.cryptocurrency ?? createOffer.cryptocurrency,
+              fiat: params.fiat ?? createOffer.fiat,
+              instructions: params.instructions ?? createOffer.instructions,
+              isFilled: params.isFilled ?? createOffer.isFilled,
+              isPaymentMethodCompleted:
+                params.isPaymentMethodCompleted ??
+                createOffer.isPaymentMethodCompleted,
+              isSubmitted: params.isSubmitted ?? createOffer.isSubmitted,
+              isTradeInstructionsCompleted:
+                params.isTradeInstructionsCompleted ??
+                createOffer.isTradeInstructionsCompleted,
+              isTradePricingCompleted:
+                params.isTradePricingCompleted ??
+                createOffer.isTradePricingCompleted,
+              label: params.label ?? createOffer.label,
+              kycOnly:
+                params.kycOnly === undefined
+                  ? createOffer.kycOnly
+                  : params.kycOnly === true,
+              limitMax: params.limitMax ?? createOffer.limitMax,
+              limitMin: params.limitMin ?? createOffer.limitMin,
+              listAt: params.listAt ?? createOffer.listAt,
+              offerType: params.offerType ?? createOffer.offerType,
+              paymentMethodId:
+                params.paymentMethodId ?? createOffer.paymentMethodId,
+              paymentDetails:
+                params.paymentDetails ?? createOffer.paymentDetails,
+              pricingType: params.pricingType ?? createOffer.pricingType,
+              tags: params.tags ?? createOffer.tags,
+              terms: params.terms ?? createOffer.terms,
+              timeLimit: params.timeLimit ?? createOffer.timeLimit,
+              vendorId: params.vendorId ?? createOffer.vendorId,
+            },
+          };
+        },
         false,
         actionName
       );
@@ -87,6 +96,7 @@ export const useCreateOfferSlice: StateCreator<
             listAt: undefined,
             limitMin: undefined,
             limitMax: undefined,
+            kycOnly: false,
             timeLimit: undefined,
             isTradePricingCompleted: undefined,
             tags: undefined,

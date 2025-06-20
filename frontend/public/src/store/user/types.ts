@@ -91,7 +91,7 @@ export type UserSetter = {
   userLanguage?: UserLanguage;
   twoFactorEnabled?: boolean;
   referralCode?: string;
-  kyc?: KYC;
+  kyc?: KYC[];
   xp?: number;
   tier?: Tier;
   _count?: Count;

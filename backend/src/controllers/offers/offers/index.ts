@@ -38,6 +38,7 @@ export const getOffersController = async (
         tags: true,
         timeLimit: true,
         pricingType: true,
+        kycOnly: true,
         listAt: true,
         limitMin: true,
         limitMax: true,
@@ -48,6 +49,14 @@ export const getOffersController = async (
             username: true,
             profileColor: true,
             id: true,
+            kyc: {
+              where: {
+                status: 'VERIFIED',
+              },
+              select: {
+                status: true,
+              },
+            },
           },
         },
         cryptocurrency: {
@@ -104,6 +113,7 @@ export const getCurrentVendorOffers = async (
         terms: true,
         tags: true,
         timeLimit: true,
+        kycOnly: true,
         pricingType: true,
         listAt: true,
         limitMin: true,
@@ -116,6 +126,14 @@ export const getCurrentVendorOffers = async (
             username: true,
             profileColor: true,
             id: true,
+            kyc: {
+              where: {
+                status: 'VERIFIED',
+              },
+              select: {
+                status: true,
+              },
+            },
           },
         },
         cryptocurrency: {
@@ -212,6 +230,7 @@ export const getOffersPaginationController = async (
         timeLimit: true,
         pricingType: true,
         listAt: true,
+        kycOnly: true,
         limitMin: true,
         limitMax: true,
         vendor: {
@@ -222,6 +241,14 @@ export const getOffersPaginationController = async (
             profileColor: true,
             lastLoginAt: true,
             id: true,
+            kyc: {
+              where: {
+                status: 'VERIFIED',
+              },
+              select: {
+                status: true,
+              },
+            },
           },
         },
         cryptocurrency: {
@@ -284,6 +311,7 @@ export const getMyOffersPaginationController = async (
           timeLimit: true,
           pricingType: true,
           listAt: true,
+          kycOnly: true,
           limitMin: true,
           limitMax: true,
           instructions: true,

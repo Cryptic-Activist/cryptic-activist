@@ -5,4 +5,5 @@ export type ProfileNameUsernameProps = {
   };
   username?: string;
   isUser: boolean;
+  hasKYC?: boolean;
 };

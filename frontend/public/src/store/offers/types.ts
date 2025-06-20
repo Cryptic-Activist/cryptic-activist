@@ -5,6 +5,10 @@ type OfferType = 'sell' | 'buy';
 
 type TradePricingType = 'market' | 'fixed';
 
+type KYC = {
+  status: 'VERIFIED' | 'REJECTED' | 'PENDING';
+};
+
 type Vendor = {
   id: string;
   firstName: string;
@@ -14,6 +18,7 @@ type Vendor = {
   lastLoginAt: string;
   createdAt: string;
   updatedAt: string;
+  kyc: KYC[];
 };
 
 export type Offer = {
@@ -37,6 +42,7 @@ export type Offer = {
   label: string;
   terms: string;
   instructions: string;
+  kycOnly: boolean;
 };
 
 export type PaymentMethod = {
@@ -97,6 +103,7 @@ export type OffersSetter = {
     label: string;
     terms: string;
     instructions: string;
+    kycOnly: boolean;
   }[];
 };
 

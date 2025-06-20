@@ -58,6 +58,7 @@ export const submitOfferCreate = async (
     label: data.label,
     terms: data.terms,
     instructions: data.instructions,
+    kycOnly: data.kycOnly,
     vendorWalletAddress: data.vendorWalletAddress,
     paymentDetails: data.paymentDetails,
   };

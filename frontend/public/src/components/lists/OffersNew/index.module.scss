@@ -556,6 +556,45 @@
   }
 }
 
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  background-color: globals.$blue-check;
+  color: globals.$white;
+  height: fit-content;
+  width: fit-content;
+  font-size: 0.8rem;
+}
+
+.kycVerified {
+  background-color: globals.$blue-check;
+  color: globals.$white;
+  min-width: 0.9rem;
+  min-height: 0.9rem;
+  max-width: 0.9rem;
+  max-height: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+}
+
+.checkTooltip {
+  background-color: globals.$white;
+  border-radius: 0.4em;
+  border: 1px solid globals.$black;
+  color: globals.$black;
+  padding: 0.3em;
+  text-align: start;
+  width: 15rem;
+  box-shadow: 0 0 4px 1px globals.$box-shadow-default-color;
+}
+
+.nameCheck {
+  display: flex;
+  gap: 0.25rem;
+}
+
 @media (max-width: 56.25rem) {
   .primaryFilters,
   .secondaryFilters {

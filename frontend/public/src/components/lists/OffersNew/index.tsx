@@ -15,16 +15,22 @@ import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { getInitials, setLocalStorage, timeSince, toUpperCase } from '@/utils';
 import { useApp, useNavigationBar, useOffers, useOutsideClick } from '@/hooks';
 
+import DynamicIcon from '@/components/DynamicIcon';
 import { FaSpinner } from 'react-icons/fa';
 import Image from 'next/image';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Info from '@/components/Info';
 import Link from 'next/link';
+import Tooltip from '@/components/Tooltip';
 import styles from './index.module.scss';
 import useDebounce from '@/hooks/useDebounce';
 
 export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
   const isRatePositive = offer.pricingType === 'market' && offer.listAt > 0;
+  const isVendorKYCVerified =
+    offer.vendor?.kyc &&
+    offer.vendor?.kyc?.length > 0 &&
+    offer.vendor?.kyc[0]?.status === 'VERIFIED';
 
   return (
     <div className={styles.offerItem}>
@@ -42,9 +48,21 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
         </div>
         <div className={styles.traderDetails}>
           <Link href={`/vendor/${offer.vendor.id}`}>
-            <div
-              className={styles.traderName}
-            >{`${offer.vendor.firstName} ${offer.vendor.lastName}`}</div>
+            <div className={styles.nameCheck}>
+              <div
+                className={styles.traderName}
+              >{`${offer.vendor.firstName} ${offer.vendor.lastName}`}</div>
+              {isVendorKYCVerified && (
+                <Tooltip position="bottom" spacing={30}>
+                  <div className={styles.kycVerified}>
+                    <DynamicIcon iconName="FaCheck" color="#fff" size={9} />
+                  </div>
+                  <div className={styles.checkTooltip}>
+                    This vendor has been verified through KYC
+                  </div>
+                </Tooltip>
+              )}
+            </div>
             <div className={styles.traderUsername}>{offer.vendor.username}</div>
           </Link>
           <div className={styles.traderMetrics}>
@@ -72,6 +90,7 @@ export const OfferItem: FC<OfferItemProps> = ({ offer, app }) => {
             </span>
           ))}
         </div>
+        {offer.kycOnly && <span className={styles.badge}>KYC Only</span>}
       </div>
 
       <div className={styles.tradeSpeed}>

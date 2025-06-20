@@ -28,6 +28,7 @@ export type CreateOffer = {
     timeLimit?: number;
     isTradePricingCompleted?: boolean;
     tags?: string[];
+    kycOnly: boolean;
     label?: string;
     terms?: string;
     instructions?: string;
@@ -55,6 +56,7 @@ export type CreateOfferSetter = {
   timeLimit?: number;
   isTradePricingCompleted?: boolean;
   tags?: string[];
+  kycOnly?: boolean;
   label?: string;
   terms?: string;
   instructions?: string;

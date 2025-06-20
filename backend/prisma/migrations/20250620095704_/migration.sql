@@ -220,6 +220,7 @@ CREATE TABLE "offers" (
     "terms" TEXT NOT NULL,
     "averageTradeSpeed" DOUBLE PRECISION,
     "instructions" TEXT NOT NULL,
+    "kycOnly" BOOLEAN NOT NULL DEFAULT false,
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,

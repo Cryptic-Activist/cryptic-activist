@@ -16,6 +16,10 @@ const Vendor: FC<VendorPageProps> = ({ vendor }) => {
   const { user } = useUser();
 
   const isSameUser = vendor.id === user.id;
+  const isVendorKYCVerified =
+    vendor?.kyc &&
+    vendor?.kyc?.length > 0 &&
+    vendor?.kyc[0]?.status === 'VERIFIED';
 
   return (
     <div className={styles.container}>
@@ -25,6 +29,7 @@ const Vendor: FC<VendorPageProps> = ({ vendor }) => {
           names={vendor?.names}
           username={vendor?.username}
           isUser={isSameUser}
+          hasKYC={isVendorKYCVerified}
         />
         <Status status="offline" />
         <FeedbackCount feedbacksCount={vendor._count?.feedbacks} />
