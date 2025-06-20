@@ -2,6 +2,7 @@ import {
   ZodCryptocurrency,
   ZodFiat,
   ZodInstructions,
+  ZodKYCOnly,
   ZodLabel,
   ZodLimitMax,
   ZodLimitMin,
@@ -66,6 +67,7 @@ const ethereumWalletAddressRegex = /^0x[a-fA-F0-9]{40}$/;
 export const CreateOfferTradeInstructions = z
   .object({
     tags: ZodTags,
+    kycOnly: ZodKYCOnly,
     label: ZodLabel,
     terms: ZodTerms,
     instructions: ZodInstructions,

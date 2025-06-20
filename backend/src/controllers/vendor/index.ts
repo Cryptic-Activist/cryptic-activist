@@ -25,6 +25,14 @@ export async function getVendor(req: Request, res: Response) {
         username: true,
         createdAt: true,
         lastLoginAt: true,
+        kyc: {
+          where: {
+            status: 'VERIFIED',
+          },
+          select: {
+            status: true,
+          },
+        },
         tier: {
           select: {
             id: true,
@@ -110,6 +118,7 @@ export async function getVendor(req: Request, res: Response) {
         lastName: vendor.lastName,
       },
       lastLoginAt,
+      kyc: vendor.kyc,
       _count: {
         ..._count,
         trades: userTradesCount,

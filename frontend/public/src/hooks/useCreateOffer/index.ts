@@ -120,6 +120,7 @@ const useCreateOffer = () => {
   useEffect(() => {
     const validated = CreateOfferTradeInstructions.safeParse({
       tags: createOffer?.tags,
+      kycOnly: createOffer?.kycOnly,
       label: createOffer?.label,
       terms: createOffer?.terms,
       instructions: createOffer?.instructions,
@@ -174,6 +175,7 @@ const useCreateOffer = () => {
       terms: createOffer.terms,
       instructions: createOffer.instructions,
       isTradeInstructionsCompleted: createOffer.isTradeInstructionsCompleted,
+      kycOnly: createOffer.kycOnly,
     },
     step,
     onClickEvents,

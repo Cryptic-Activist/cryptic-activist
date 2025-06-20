@@ -1,4 +1,5 @@
-import { Button } from '@/components';
+import { Button, DynamicIcon, Tooltip } from '@/components';
+
 import { FC } from 'react';
 import { FaGear } from 'react-icons/fa6';
 import type { ProfileNameUsernameProps } from './types';
@@ -8,12 +9,26 @@ const ProfileNameUsername: FC<ProfileNameUsernameProps> = ({
   names,
   username,
   isUser,
+  hasKYC,
 }) => {
   const fullname = [names?.firstName ?? '', names?.lastName ?? ''].join(' ');
+
   return (
     <div className={styles.container}>
       <div className={styles.column}>
-        <h1 className={styles.name}>{fullname}</h1>
+        <div className={styles.nameCheck}>
+          <h1 className={styles.name}>{fullname}</h1>
+          {hasKYC && (
+            <Tooltip position="bottom" spacing={30}>
+              <div className={styles.kycVerified}>
+                <DynamicIcon iconName="FaCheck" color="#fff" size={15} />
+              </div>
+              <div className={styles.checkTooltip}>
+                This vendor has been verified through KYC
+              </div>
+            </Tooltip>
+          )}
+        </div>
         <h2 className={styles.username}>{username}</h2>
       </div>
       {isUser && (

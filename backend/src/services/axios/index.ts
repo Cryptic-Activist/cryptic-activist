@@ -3,9 +3,22 @@ import axios, { type AxiosRequestHeaders } from 'axios';
 export const fetchGet = async (
   endpoint: string,
   headers?: AxiosRequestHeaders | any,
+  timeout = 5000,
 ) => {
-  const response = await axios.get(endpoint, { headers });
-  return response;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await axios.get(endpoint, {
+      headers,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const fetchPost = async (

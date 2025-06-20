@@ -15,6 +15,7 @@ export type Tier = {
 
 export type KYC = {
   id?: string;
+  status: 'VERIFIED' | 'REJECTED' | 'PENDING';
 };
 
 export type UserLanguage = {
@@ -47,7 +48,7 @@ export type Vendor = {
   profileColor: string;
   lastLoginAt: string;
   tier?: Tier;
-  kyc?: KYC;
+  kyc?: KYC[];
   userLanguage?: UserLanguage[];
   feedbacksVendor?: FeedbacksVendor[];
 };

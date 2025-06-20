@@ -252,6 +252,7 @@ model Offer {
   terms               String
   averageTradeSpeed   Float?
   instructions        String
+  kycOnly             Boolean         @default(false) @db.Boolean
   deletedAt           DateTime?       @db.Timestamp()
   createdAt           DateTime?       @default(now()) @db.Timestamp()
   updatedAt           DateTime?       @updatedAt @db.Timestamp()

@@ -27,6 +27,10 @@ type Names = {
   lastName?: string;
 };
 
+type KYC = {
+  status: 'VERIFIED' | 'REJECTED' | 'PENDING';
+};
+
 export type Vendor = {
   id?: string;
   names?: Names;
@@ -35,6 +39,7 @@ export type Vendor = {
   lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  kyc?: KYC[];
   languages?: Language[];
   _count?: Count;
   setVendorValue: (value: Value, actionName: `vendor/${string}`) => void;
@@ -54,6 +59,7 @@ export type VendorSetter = {
   lastLoginAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  kyc?: KYC[];
   languages?: Language[];
   userLanguage?: UserLanguage;
   _count?: Count;

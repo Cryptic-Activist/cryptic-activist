@@ -1,3 +1,5 @@
+@use "../../styles/globals.module.scss";
+
 .container {
   display: flex;
   justify-content: space-between;
@@ -23,4 +25,33 @@
 .btns {
   display: flex;
   gap: 0.5rem;
+}
+
+.nameCheck {
+  display: flex;
+  gap: 1rem;
+}
+
+.kycVerified {
+  background-color: globals.$blue-check;
+  color: globals.$white;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  max-width: 1.5rem;
+  max-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+}
+
+.checkTooltip {
+  background-color: globals.$white;
+  border-radius: 0.4em;
+  border: 1px solid globals.$black;
+  color: globals.$black;
+  padding: 0.3em;
+  text-align: start;
+  width: 15rem;
+  box-shadow: 0 0 4px 1px globals.$box-shadow-default-color;
 }

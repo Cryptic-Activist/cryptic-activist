@@ -10,6 +10,10 @@ import styles from './index.module.scss';
 import { timeSince } from '@/utils';
 
 const VendorInfo: FC<VendorInfoProps> = ({ vendor, size }) => {
+  const isVendorKYCVerified =
+    vendor?.kyc &&
+    vendor?.kyc?.length > 0 &&
+    vendor?.kyc[0]?.status === 'VERIFIED';
   return (
     <div className={styles.vendor}>
       <ProfileImage
@@ -32,7 +36,7 @@ const VendorInfo: FC<VendorInfoProps> = ({ vendor, size }) => {
               className={styles.names}
             >{`${vendor.firstName} ${vendor.lastName}`}</span>
             <Tooltip position="bottom" spacing={20}>
-              {vendor.kyc !== null ? (
+              {isVendorKYCVerified ? (
                 <FaCircleCheck size={15} className={styles.check} />
               ) : (
                 <></>
