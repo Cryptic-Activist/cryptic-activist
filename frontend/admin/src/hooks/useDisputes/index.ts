@@ -201,15 +201,6 @@ const useDisputes = () => {
 	};
 
 	const onSubmitFilters = (data: any) => {
-		console.log({
-			page: $disputes.currentPage,
-			pageSize: $disputes.pageSize,
-			amount: data.amount,
-			moderatorId: data.moderatorId,
-			severity: data.severity,
-			status: data.status,
-			type: data.type
-		});
 		disputesMutation.mutate({
 			page: $disputes.currentPage,
 			pageSize: $disputes.pageSize,

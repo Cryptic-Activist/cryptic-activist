@@ -84,11 +84,14 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
       allowedFileTypes,
       allowMultiple,
       onUpload,
+      onSelect,
       label = 'File Uploader',
       description = 'Images (PNG, JPG, GIF) or PDF files',
       maxFiles,
       maxFileSize,
       className,
+      fullHeight = false,
+      fullWidth = false,
     },
     ref
   ) => {
@@ -124,8 +127,14 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
 
       if (allowMultiple) {
         setSelectedFiles((prev) => [...prev, ...validFiles]);
+        if (onSelect) {
+          onSelect(validFiles);
+        }
       } else {
         setSelectedFiles(validFiles.slice(0, 1));
+        if (onSelect) {
+          onSelect(validFiles.slice(0, 1));
+        }
       }
     };
 
@@ -164,8 +173,16 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
     const filesListRef = useOutsideClick(toggleFilesList);
 
     return (
-      <div className={`${styles.wrapper} ${className || ''}`}>
-        <div className={styles.uploaderCard}>
+      <div
+        className={`${styles.wrapper} ${className || ''} ${
+          fullHeight ? styles.fullHeight : ''
+        } ${fullWidth ? styles.fullWidth : ''}`}
+      >
+        <div
+          className={`${styles.uploaderCard} ${
+            fullHeight ? styles.fullHeight : ''
+          } ${fullWidth ? styles.fullWidth : ''}`}
+        >
           <div className={styles.labelFilesButton}>
             <label className={styles.title}>{label}</label>
             {selectedFiles.length > 0 && (
@@ -192,6 +209,8 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
             onDrop={handleDrop}
             className={`${styles.dropzone} ${
               isDragging ? styles.dragging : ''
+            } ${fullHeight ? styles.fullHeight : ''} ${
+              fullWidth ? styles.fullWidth : ''
             }`}
           >
             <input

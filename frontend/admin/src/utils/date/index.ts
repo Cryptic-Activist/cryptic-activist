@@ -128,18 +128,19 @@ const getOrdinalSuffix = (day: number) => {
 	}
 };
 
-export const getLocaleFullDateString = (date: Date) => {
-	const day = date.getDate();
+export const getLocaleFullDateString = (date: string) => {
+	const newDate = new Date(date);
+	const day = newDate.getDate();
 	const suffix = getOrdinalSuffix(day);
-	const month = date.toLocaleString('en-US', { month: 'long' });
-	const year = date.getFullYear();
-	const hours = String(date.getHours()).padStart(2, '0');
-	const minutes = String(date.getMinutes()).padStart(2, '0');
+	const month = newDate.toLocaleString('en-US', { month: 'long' });
+	const year = newDate.getFullYear();
+	const hours = String(newDate.getHours()).padStart(2, '0');
+	const minutes = String(newDate.getMinutes()).padStart(2, '0');
 
 	const formatter = new Intl.DateTimeFormat('en-US', {
 		timeZoneName: 'short'
 	});
-	const parts = formatter.formatToParts(date);
+	const parts = formatter.formatToParts(newDate);
 	const timeZone =
 		parts.find((part) => part.type === 'timeZoneName')?.value || '';
 

@@ -1,12 +1,12 @@
 'use client';
 
-import { DatePicker, Input, Select } from '@/components/form';
-import { formatEnum, toUpperCase } from '@/utils';
-import { useDisputes, useTrades } from '@/hooks';
+import { Input, Select } from '@/components/form';
 
 import Button from '@/components/Button';
 import React from 'react';
+import { formatEnum } from '@/utils';
 import styles from './index.module.scss';
+import { useDisputes } from '@/hooks';
 
 const DisputesFilters = () => {
 	const {
@@ -22,7 +22,7 @@ const DisputesFilters = () => {
 	} = useDisputes();
 	return (
 		<div className={styles.container}>
-			<h2 className={styles.heading}>Filter Trades</h2>
+			<h2 className={styles.heading}>Filter Disputes</h2>
 			<form className={styles.form} onSubmit={handleSubmit(onSubmitFilters)}>
 				<Select
 					register={register}

@@ -57,13 +57,3 @@ export const formatEnum = (input?: string) => {
 		.replace(/_/g, ' ')
 		.replace(/\b\w/g, (char) => char.toUpperCase());
 };
-
-// export const getBearerToken = () => {
-// 	const accessToken = getCookie('accessToken');
-
-// 	if (accessToken === null) {
-// 		throw new Error('JWT not found');
-// 	}
-
-// 	return `Bearer ${accessToken}`;
-// };

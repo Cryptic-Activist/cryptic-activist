@@ -111,8 +111,12 @@ export type DisputeStatus =
 	| 'RESOLVED'
 	| 'CLOSED';
 
+type File = {
+	key: string;
+};
+
 type Evidence = {
-	fileUrl: string;
+	file: File;
 	submittedBy: User;
 };
 

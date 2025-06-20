@@ -23,6 +23,7 @@ import ChatMessage from '@/models/ChatMessage';
 import { EMAIL_FROM } from '@/services/email';
 import SystemMessage from '@/services/systemMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
+import { create } from 'node:domain';
 import { getRandomAdmin } from '@/services/admin';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
@@ -401,13 +402,25 @@ export default class Trade {
           });
 
           for (const evidence of evidences) {
-            const evidenceFile = await prisma.disputeEvidence.create({
-              data: {
-                type: 'BANK_STATEMENT',
-                disputeId: dispute.id,
-                submittedById: disputeRaiser.id,
-                fileUrl: evidence.url,
-              },
+            await prisma.$transaction(async (tx) => {
+              const uploadedFile = await tx.uploadedFile.create({
+                data: {
+                  mimeType: evidence.mimeType,
+                  key: evidence.key,
+                  size: evidence.size,
+                },
+              });
+
+              const disputeEvidence = await tx.disputeEvidence.create({
+                data: {
+                  type: 'BANK_STATEMENT',
+                  disputeId: dispute.id,
+                  submittedById: disputeRaiser.id,
+                  fileId: uploadedFile.id,
+                },
+              });
+
+              return { uploadedFile, disputeEvidence };
             });
           }
 
@@ -427,6 +440,7 @@ export default class Trade {
             disputedAt: disputedAtEndedAt,
           });
         } catch (error) {
+          console.error('Error setting trade as disputed:', error);
           this.io.to(chatId).emit('trade_set_disputed_error', {
             error,
           });

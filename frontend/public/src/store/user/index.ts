@@ -26,6 +26,7 @@ export const useUserSlice: StateCreator<
     updatedAt: undefined,
     twoFactorEnabled: undefined,
     referralCode: undefined,
+    kyc: undefined,
     xp: undefined,
     tier: undefined,
     setUserValue: (params, actionName = 'user/setValue') => {
@@ -51,6 +52,7 @@ export const useUserSlice: StateCreator<
               twoFactorEnabled:
                 params.twoFactorEnabled ?? user.twoFactorEnabled,
               referralCode: params.referralCode ?? user.referralCode,
+              kyc: params.kyc ?? user.kyc,
               xp: params.xp ?? user.xp,
               tier: params.tier ?? user.tier,
               _count: params._count ?? user._count,
@@ -81,6 +83,7 @@ export const useUserSlice: StateCreator<
             updatedAt: undefined,
             twoFactorEnabled: undefined,
             referralCode: undefined,
+            kyc: undefined,
             xp: undefined,
             tier: undefined,
             _count: undefined,

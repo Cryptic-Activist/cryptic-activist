@@ -44,7 +44,9 @@ export const AddMoreEvidences = z.object({
   evidences: z.array(
     z.object({
       fileName: z.string().min(1),
-      url: z.string().min(1),
+      key: z.string().min(1),
+      mimeType: z.string().min(1),
+      size: z.number().min(1),
     }),
   ),
   userId: z.string().min(1),

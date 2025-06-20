@@ -6,7 +6,8 @@ export type Theme =
   | 'ghost'
   | 'transparent'
   | 'danger'
-  | 'alert';
+  | 'alert'
+  | 'gradient';
 
 export type ButtonProps = {
   type?: 'button' | 'submit';

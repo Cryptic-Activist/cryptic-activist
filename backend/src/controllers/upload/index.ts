@@ -57,6 +57,9 @@ export const uploadFile = async (req: Request, res: Response) => {
               .greyscale()
               .toBuffer();
 
+        const size = finalBuffer.length;
+        const mimeType = isPdf ? file.mimetype : 'image/webp';
+
         if (!IS_DEVELOPMENT) {
           // Upload to S3
           const uploadParams = {
@@ -71,7 +74,9 @@ export const uploadFile = async (req: Request, res: Response) => {
 
           return {
             fileName,
-            url: Location,
+            key: Location,
+            mimeType,
+            size,
           };
         } else {
           // Save to local /uploads folder
@@ -82,9 +87,13 @@ export const uploadFile = async (req: Request, res: Response) => {
           const filePath = path.join(localPath, fileName);
           fs.writeFileSync(filePath, finalBuffer);
 
+          const key = `${BACKEND}/uploads/${folder}/${fileName}`;
+
           return {
             fileName,
-            url: `${BACKEND}/uploads/${folder}/${fileName}`,
+            key,
+            mimeType,
+            size,
           };
         }
       }),

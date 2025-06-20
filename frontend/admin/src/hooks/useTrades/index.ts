@@ -63,7 +63,7 @@ const useTrades = () => {
 				fiatAmount: `${rt.fiatAmount} ${toUpperCase(rt.fiat?.symbol)}`,
 				paymentMethod: rt.paymentMethod.name,
 				status: rt.status,
-				startedAt: getLocaleFullDateString(new Date(rt.startedAt))
+				startedAt: getLocaleFullDateString(rt.startedAt)
 			}));
 			setTrades({
 				data: mappedTrades,
@@ -178,8 +178,12 @@ const useTrades = () => {
 			pageSize: $trades.pageSize,
 			amount: data?.amount,
 			cryptocurrencyId: data?.cryptocurrencyId,
-			dateRageEnd: data?.dateRangeEnd,
-			dateRageStart: data?.dateRangeStart,
+			dateRageEnd: data?.dateRangeEnd
+				? data?.dateRangeEnd.toDateString()
+				: undefined,
+			dateRageStart: data?.dateRangeStart
+				? data?.dateRangeStart.toDateString()
+				: undefined,
 			status: data?.status,
 			username: data?.username
 		});

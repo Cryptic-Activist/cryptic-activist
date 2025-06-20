@@ -153,24 +153,79 @@ enum KYCStatus {
   REJECTED
 }
 
-model KYC {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id])
-  documentType    String // e.g., "passport", "driver_license"
-  documentUrl     String // URL of the uploaded document
-  selfieUrl       String // URL of the selfie for verification
-  proofOfAddress  String // URL of address proof (if required)
-  status          KYCStatus @default(PENDING)
-  rejectionReason String? // Optional reason for rejection
-  reviewedBy      String? // Admin who reviewed the KYC
-  reviewer        Admin?    @relation(fields: [reviewedBy], references: [id])
-  reviewedAt      DateTime? @db.Timestamp()
-  deletedAt       DateTime? @db.Timestamp()
-  createdAt       DateTime? @default(now()) @db.Timestamp()
-  updatedAt       DateTime? @updatedAt @db.Timestamp()
+enum KYCDocumentType {
+  ALIEN_REGISTRATION_CARD
+  CITIZENSHIP_CERTIFICATE
+  CONSULAR_ID_CARD
+  DRIVERS_LICENSE
+  FIREARMS_LICENSE
+  GOVERNMENT_ISSUED_ID_CARD
+  HEALTH_INSURANCE_CARD
+  IMMIGRATION_DOCUMENT
+  INCOME_TAX_IDENTIFICATION_DOCUMENT
+  MILITARY_ID
+  NATIONAL_ID_CARD
+  PASSPORT
+  PERMANENT_RESIDENT_CARD
+  REFUGEE_TRAVEL_DOCUMENT
+  RESIDENCE_PERMIT
+  SOCIAL_SECURITY_CARD
+  TAX_IDENTIFICATION_CARD
+  VOTER_ID_CARD
+  WORK_PERMIT
+  OTHER
+}
 
-  @@map("kyc")
+model UploadedFile {
+  id               String           @id @default(uuid())
+  key              String
+  mimeType         String? // e.g., "image/jpeg"
+  size             Int?
+  submittedAt      DateTime         @default(now())
+  documentFrontKYC KYC?             @relation("documentFront")
+  documentBackKYC  KYC?             @relation("documentBack")
+  selfieKYC        KYC?             @relation("selfie")
+  utilityBillKYC   KYC?             @relation("utilityBill")
+  bankStatementKYC KYC?             @relation("bankStatement")
+  disputeEvidence  DisputeEvidence?
+  deletedAt        DateTime?        @db.Timestamp()
+  createdAt        DateTime?        @default(now()) @db.Timestamp()
+  updatedAt        DateTime?        @updatedAt @db.Timestamp()
+
+  @@map("uploaded_files")
+}
+
+model KYC {
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  user            User?           @relation(fields: [userId], references: [id])
+  status          KYCStatus       @default(PENDING)
+  rejectionReason String?         @db.Text()
+  fullName        String
+  dateOfBirth     DateTime        @db.Date()
+  documentType    KYCDocumentType
+  documentNumber  String?         @db.VarChar(100)
+  additionalNotes String?         @db.Text()
+  nationality     String
+  documentFrontId String          @unique
+  documentFront   UploadedFile    @relation("documentFront", fields: [documentFrontId], references: [id])
+  documentBackId  String?         @unique
+  documentBack    UploadedFile?   @relation("documentBack", fields: [documentBackId], references: [id])
+  selfieId        String          @unique
+  selfie          UploadedFile    @relation("selfie", fields: [selfieId], references: [id])
+  utilityBillId   String?         @unique
+  utilityBill     UploadedFile?   @relation("utilityBill", fields: [utilityBillId], references: [id])
+  bankStatementId String?         @unique
+  bankStatement   UploadedFile?   @relation("bankStatement", fields: [bankStatementId], references: [id])
+  submittedAt     DateTime        @default(now()) @db.Timestamp()
+  reviewedAt      DateTime?       @db.Timestamp()
+  reviewedById    String?
+  reviewedBy      Admin?          @relation(fields: [reviewedById], references: [id])
+  deletedAt       DateTime?       @db.Timestamp()
+  createdAt       DateTime?       @default(now()) @db.Timestamp()
+  updatedAt       DateTime?       @updatedAt @db.Timestamp()
+
+  @@map("kycs")
 }
 
 model Language {
@@ -418,7 +473,7 @@ model DisputePartyNote {
   addedById    String
   addedBy      Admin        @relation("disputePartyNoteAddedBy", fields: [addedById], references: [id])
   content      String       @db.Text()
-  createdAt    DateTime     @default(now())
+  createdAt    DateTime     @default(now()) @db.Timestamp()
 
   @@map("dispute_party_notes")
 }
@@ -441,7 +496,7 @@ model DisputeAuditLog {
   changedBy   Admin?        @relation("disputeAuditLogChangedBy", fields: [changedById], references: [id])
   action      DisputeAction
   note        String?       @db.Text()
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime      @default(now()) @db.Timestamp()
 
   @@map("dispute_audit_logs")
 }
@@ -462,9 +517,10 @@ model DisputeEvidence {
   submittedById          String
   submittedBy            User                     @relation(fields: [submittedById], references: [id])
   type                   EvidenceType
-  fileUrl                String? // If hosted on S3 or similar
+  fileId                 String?                  @unique
+  file                   UploadedFile?            @relation(fields: [fileId], references: [id]) // If hosted on S3 or similar
   textContent            String?                  @db.Text()
-  createdAt              DateTime                 @default(now())
+  createdAt              DateTime                 @default(now()) @db.Timestamp()
   disputeEvidenceRequest DisputeEvidenceRequest[]
 
   @@map("dispute_evidences")
@@ -486,13 +542,12 @@ model DisputeEvidenceRequest {
   requestedFromId String
   requestedFrom   User                  @relation(fields: [requestedFromId], references: [id])
   description     String                @db.Text() // what kind of evidence is requested (e.g. proof of bank transfer)
-  deadline        DateTime? // optional deadline to submit
-  submittedAt     DateTime? // when the user responded
+  deadline        DateTime?             @db.Timestamp() // optional deadline to submit
+  submittedAt     DateTime?             @db.Timestamp() // when the user responded
   status          EvidenceRequestStatus @default(PENDING)
   evidences       DisputeEvidence[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime              @default(now()) @db.Timestamp()
+  updatedAt       DateTime              @updatedAt @db.Timestamp()
 
   @@index([disputeId, requestedFromId])
   @@map("dispute_evidence_requests")
@@ -564,7 +619,7 @@ model TradeDispute {
   status                 DisputeStatus
   resolutionNote         String?
   resolutionType         DisputeResolutionType?
-  resolvedAt             DateTime?
+  resolvedAt             DateTime?                @db.Timestamp()
   moderatorId            String?
   moderator              Admin?                   @relation("moderatorTradeDispute", fields: [moderatorId], references: [id])
   priority               DisputePriority          @default(MEDIUM)
@@ -751,7 +806,7 @@ model User {
   tier                     Tier?                      @relation(fields: [tierId], references: [id])
   tierId                   String?
   premiumPurchase          PremiumPurchase?
-  kyc                      KYC?
+  kyc                      KYC[]
   kycId                    String?
   transactionPaymentMethod TransactionPaymentMethod[]
   transactions             Transaction[]

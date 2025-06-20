@@ -1,7 +1,7 @@
 export type CheckboxProps = {
   label: string;
   checked: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   disabled?: boolean;
   className?: string;
   id?: string;
@@ -9,4 +9,5 @@ export type CheckboxProps = {
   value?: string;
   required?: boolean;
   errorMessage?: string;
+  register?: any;
 };

@@ -40,6 +40,14 @@ type Tier = {
   requiredXP: number;
 };
 
+type KYCStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+
+type KYC = {
+  id: string;
+  status: KYCStatus;
+  rejectionReason: string;
+};
+
 export type User = {
   id?: string;
   names?: Names;
@@ -52,6 +60,7 @@ export type User = {
   languages?: Language[];
   twoFactorEnabled?: boolean;
   referralCode?: string;
+  kyc?: KYC[];
   xp?: number;
   tier?: Tier;
   _count?: Count;
@@ -82,6 +91,7 @@ export type UserSetter = {
   userLanguage?: UserLanguage;
   twoFactorEnabled?: boolean;
   referralCode?: string;
+  kyc?: KYC;
   xp?: number;
   tier?: Tier;
   _count?: Count;

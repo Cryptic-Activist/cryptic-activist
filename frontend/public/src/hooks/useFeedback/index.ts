@@ -10,7 +10,7 @@ import { OnSubmitMoreEvidences } from '@/services/feedback/types';
 import { Type } from '@/components/FeedbackSelector/types';
 import { getTradeDetails } from '@/services/trade';
 import { processFileToUpload } from '@/utils';
-import { uploadFiles } from '@/services/uploads';
+import { uploadEvidenceFiles } from '@/services/uploads';
 import useApp from '../useApp';
 import { useForm } from 'react-hook-form';
 import useNavigationBar from '../useNavigationBar';
@@ -75,9 +75,16 @@ const useFeedback = (enabled: boolean) => {
   };
 
   const onUploadEvidences = async (files: File[]) => {
-    if (query.data?.tradeDetails?.tradeDispute.id && user.id) {
+    if (
+      query.data?.tradeDetails?.id &&
+      query.data?.tradeDetails?.tradeDispute.id &&
+      user.id
+    ) {
       const formData = await processFileToUpload(files);
-      const uploadedFiles = await uploadFiles(formData);
+      const uploadedFiles = await uploadEvidenceFiles({
+        formData,
+        tradeId: query.data?.tradeDetails?.id,
+      });
 
       submitMoreEvidencesMutation.mutate({
         disputeId: query.data?.tradeDetails?.tradeDispute?.id,

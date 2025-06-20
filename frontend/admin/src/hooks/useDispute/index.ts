@@ -232,7 +232,6 @@ const useDispute = () => {
 		},
 		onSuccess: (data: any) => {
 			disputeQuery.refetch();
-			console.log({ data });
 		}
 	});
 

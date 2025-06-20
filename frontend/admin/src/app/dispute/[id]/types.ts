@@ -6,8 +6,12 @@ export type Message = {
 	type?: string;
 };
 
+export type File = {
+	key: string;
+};
+
 export type Evidence = {
-	fileUrl: string;
+	file: File;
 	submittedBy: any;
 };
 
