@@ -16,6 +16,9 @@ export default function Account() {
   const { user } = useUser();
   const {} = useDynamicTitle('Account | Cryptic Activist');
 
+  const isKYCVerified =
+    user?.kyc && user?.kyc?.length > 0 && user?.kyc[0]?.status === 'VERIFIED';
+
   return (
     <div className={styles.container}>
       <ProfileImageInfo user={user} />
@@ -24,6 +27,7 @@ export default function Account() {
           names={user?.names}
           username={user?.username}
           isUser={true}
+          hasKYC={isKYCVerified}
         />
         <Status status="offline" />
         <FeedbackCount feedbacksCount={user._count?.feedbacks} />
