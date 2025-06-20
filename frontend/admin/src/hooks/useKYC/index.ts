@@ -8,7 +8,7 @@ import {
 	getTotalPendingKYC,
 	getTotalRejectedKYC
 } from '@/services/kycs';
-import { kyc, setKYC } from '@/stores/kyc';
+import { kyc, resetKYC, setKYC } from '@/stores/kyc';
 import { kycs, setKYCs, setKYCsCurrentPage } from '@/stores';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
@@ -41,10 +41,11 @@ const useKYC = () => {
 				kycId: id,
 				adminId: admin.data?.id as string
 			}),
-		enabled: !!admin.data?.id && !!id
+		enabled: !!admin.data?.id && !!id,
+		staleTime: 0
 	});
 
-	console.log({ kycQuery: kycQuery.data });
+	console.log({ kycQuery: kycQuery.data, $kyc });
 
 	const approveKYCMutation = useMutation({
 		mutationFn: async () => {
@@ -82,6 +83,7 @@ const useKYC = () => {
 
 	useEffect(() => {
 		if (kycQuery.data) {
+			resetKYC();
 			setKYC(kycQuery.data);
 		}
 	}, [kycQuery.data]);

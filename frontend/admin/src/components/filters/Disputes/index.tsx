@@ -1,12 +1,12 @@
 'use client';
 
-import { DatePicker, Input, Select } from '@/components/form';
-import { formatEnum, toUpperCase } from '@/utils';
-import { useDisputes, useTrades } from '@/hooks';
+import { Input, Select } from '@/components/form';
 
 import Button from '@/components/Button';
 import React from 'react';
+import { formatEnum } from '@/utils';
 import styles from './index.module.scss';
+import { useDisputes } from '@/hooks';
 
 const DisputesFilters = () => {
 	const {

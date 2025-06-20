@@ -20,9 +20,8 @@
 }
 
 .label {
-  font-size: 0.9rem;
-  width: fit-content;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .calendarRef {
@@ -62,6 +61,9 @@
   border: none;
   cursor: pointer;
   border-radius: 0.4rem;
+  &:hover {
+    background-color: #f0f0f0;
+  }
 }
 
 .today {
@@ -79,4 +81,41 @@
 
 .monthCaption {
   margin-top: 1rem;
+}
+
+.dropdowns {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dropdown {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+}
+
+.visuallyHidden {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
+.captionLabel {
+  display: none;
+}
+
+.selectMonthYear {
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+  }
 }

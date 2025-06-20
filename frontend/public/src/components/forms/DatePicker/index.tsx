@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 
 import { DatePickerProps } from './types';
 import { DayPicker } from 'react-day-picker';
@@ -15,12 +15,12 @@ const DatePicker: FC<DatePickerProps> = ({
   onSelect,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const toggleOpen = () => setIsOpen((prev) => !prev);
+  const ref = useOutsideClick(() => setIsOpen(false));
 
-  const toggleOpen = () => {
-    setIsOpen((prev) => !prev);
-  };
-
-  const ref = useOutsideClick(toggleOpen);
+  const currentYear = new Date().getFullYear();
+  const minDate = new Date(currentYear - 100, 0, 1); // Jan 1, 100 years ago
+  const maxDate = new Date(currentYear + 10, 11, 31); // Dec 31, 10 years ahead
 
   return (
     <div className={styles.container}>
@@ -28,9 +28,7 @@ const DatePicker: FC<DatePickerProps> = ({
       <button className={styles.btn} onClick={toggleOpen}>
         {selectedDate
           ? selectedDate.toDateString()
-          : placeholder
-          ? placeholder
-          : 'Select a date'}
+          : placeholder ?? 'Select a date'}
         <DynamicIcon iconName="FaCalendarCheck" size={14} />
       </button>
 
@@ -43,6 +41,12 @@ const DatePicker: FC<DatePickerProps> = ({
               onSelect(date);
               setIsOpen(false);
             }}
+            captionLayout="dropdown"
+            defaultMonth={selectedDate ?? new Date()}
+            disabled={{
+              before: minDate,
+              after: maxDate,
+            }}
             className={styles.calendar}
             classNames={{
               button_previous: styles.btnPrevNext,
@@ -52,6 +56,11 @@ const DatePicker: FC<DatePickerProps> = ({
               today: styles.today,
               selected: styles.selected,
               month_caption: styles.monthCaption,
+              dropdown: styles.dropdown,
+              caption_label: styles.captionLabel,
+              months_dropdown: styles.selectMonthYear,
+              years_dropdown: styles.selectMonthYear,
+              dropdowns: styles.dropdowns,
             }}
           />
         </div>

@@ -64,19 +64,19 @@ const DisputeDetailsPage = () => {
 	const timeline = [
 		{
 			time: $dispute?.trade?.createdAt
-				? getLocaleFullDateString(new Date($dispute?.trade?.createdAt))
+				? getLocaleFullDateString($dispute?.trade?.createdAt)
 				: '',
 			event: `Trade initiated by ${$dispute.trade?.trader?.username}`
 		},
 		{
 			time: $dispute.trade?.fundedAt
-				? getLocaleFullDateString(new Date($dispute?.trade?.fundedAt))
+				? getLocaleFullDateString($dispute?.trade?.fundedAt)
 				: '',
 			event: 'Trade was funded'
 		},
 		{
 			time: $dispute.trade?.paidAt
-				? getLocaleFullDateString(new Date($dispute?.trade?.paidAt))
+				? getLocaleFullDateString($dispute?.trade?.paidAt)
 				: '',
 			event: `${$dispute.trade?.trader?.username} marked payment as sent`
 		},
@@ -91,13 +91,13 @@ const DisputeDetailsPage = () => {
 
 		{
 			time: $dispute?.createdAt
-				? getLocaleFullDateString(new Date($dispute?.createdAt))
+				? getLocaleFullDateString($dispute?.createdAt)
 				: '',
 			event: `Dispute opened by ${$dispute.raisedBy?.username}`
 		},
 		{
 			time: $dispute?.updatedAt
-				? getLocaleFullDateString(new Date($dispute?.updatedAt))
+				? getLocaleFullDateString($dispute?.updatedAt)
 				: '',
 			event: `Dispute assigned to ${$dispute.moderator?.firstName} ${$dispute.moderator?.lastName}`
 		}
@@ -233,7 +233,7 @@ const DisputeDetailsPage = () => {
 					<span>{username}</span>
 					<span>
 						{message.createdAt
-							? getLocaleFullDateString(new Date(message.createdAt))
+							? getLocaleFullDateString(message.createdAt)
 							: ''}
 					</span>
 				</div>
@@ -346,9 +346,7 @@ const DisputeDetailsPage = () => {
 									<label>Trade Started</label>
 									<div className={styles.value}>
 										{$dispute.trade?.startedAt &&
-											getLocaleFullDateString(
-												new Date($dispute.trade?.startedAt)
-											)}
+											getLocaleFullDateString($dispute.trade?.startedAt)}
 									</div>
 								</div>
 							</div>

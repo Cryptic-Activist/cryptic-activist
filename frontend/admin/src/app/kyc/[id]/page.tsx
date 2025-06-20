@@ -22,8 +22,6 @@ import styles from './page.module.scss';
 const KYCDetaisPage = () => {
 	const { $kyc, approveKYCMutation, rejectKYCMutation } = useKYC();
 
-	console.log({ $kyc });
-
 	const [fileSrc, setFileSrc] = useState<string>();
 	const [fileOpen, setFileOpen] = useState(false);
 
@@ -38,53 +36,20 @@ const KYCDetaisPage = () => {
 		setFileSrc(undefined);
 	};
 
-	// const hasResolutionNote =
-	// 	$kyc?.resolutionType &&
-	// 	$kyc?.resolutionType?.length > 0 &&
-	// 	$kyc?.resolutionNote &&
-	// 	$kyc.resolutionNote?.length > 0;
-
-	// const timeline = [
-	// 	{
-	// 		time: $kyc?.trade?.createdAt
-	// 			? getLocaleFullDateString(new Date($kyc?.trade?.createdAt))
-	// 			: '',
-	// 		event: `Trade initiated by ${$kyc.trade?.trader?.username}`
-	// 	},
-	// 	{
-	// 		time: $kyc.trade?.fundedAt
-	// 			? getLocaleFullDateString(new Date($kyc?.trade?.fundedAt))
-	// 			: '',
-	// 		event: 'Trade was funded'
-	// 	},
-	// 	{
-	// 		time: $kyc.trade?.paidAt
-	// 			? getLocaleFullDateString(new Date($kyc?.trade?.paidAt))
-	// 			: '',
-	// 		event: `${$kyc.trade?.trader?.username} marked payment as sent`
-	// 	},
-	// 	...($kyc.trade?.paymentReceipt?.createdAt
-	// 		? [
-	// 				{
-	// 					time: $kyc.trade?.paymentReceipt?.createdAt,
-	// 					event: `${$kyc.trade?.trader?.username} uploaded payment receipt`
-	// 				}
-	// 		  ]
-	// 		: []),
-
-	// 	{
-	// 		time: $kyc?.createdAt
-	// 			? getLocaleFullDateString(new Date($kyc?.createdAt))
-	// 			: '',
-	// 		event: `Dispute opened by ${$kyc.raisedBy?.username}`
-	// 	},
-	// 	{
-	// 		time: $kyc?.updatedAt
-	// 			? getLocaleFullDateString(new Date($kyc?.updatedAt))
-	// 			: '',
-	// 		event: `Dispute assigned to ${$kyc.moderator?.firstName} ${$kyc.moderator?.lastName}`
-	// 	}
-	// ];
+	const timeline = [
+		{
+			time: $kyc?.submittedAt ? getLocaleFullDateString($kyc?.submittedAt) : '',
+			event: `KYC Application submitted by ${$kyc.user?.username}`
+		},
+		...($kyc.reviewedAt && $kyc.reviewedBy
+			? [
+					{
+						time: getLocaleFullDateString($kyc.reviewedAt),
+						event: `Was reviewed by ${$kyc.reviewedBy.username}`
+					}
+			  ]
+			: [])
+	];
 
 	const StatusBadge: FC<StatusBadgeProps> = ({ status }) => (
 		<div className={styles.statusRow}>
@@ -94,126 +59,12 @@ const KYCDetaisPage = () => {
 		</div>
 	);
 
-	// const UserCard: FC<UserCardProps> = ({ user, role, winner, loser }) => {
-	// 	return (
-	// 		<div className={styles.userCard}>
-	// 			<div className={styles.userHeader}>
-	// 				<div
-	// 					className={styles.userAvatar}
-	// 					style={{ backgroundColor: user?.profileColor }}
-	// 				>
-	// 					{user && getInitials(user?.firstName, user?.lastName)}
-	// 				</div>
-	// 				<div className={styles.userInfo}>
-	// 					<div className={styles.usernameRole}>
-	// 						<h4>{user?.username}</h4>
-	// 						<div className={styles.userRole}>{role}</div>
-	// 					</div>
-	// 					{winner?.id && winner?.id === user?.id && (
-	// 						<span
-	// 							className={`${styles.statusBadge} ${styles.statusResolved}`}
-	// 						>
-	// 							Winner
-	// 						</span>
-	// 					)}
-	// 					{loser?.id && loser?.id === user?.id && (
-	// 						<span className={`${styles.statusBadge} ${styles.priorityHigh}`}>
-	// 							Loser
-	// 						</span>
-	// 					)}
-	// 				</div>
-	// 			</div>
-	// 			{/* <div className={styles.userStats}>
-	// 			<div className={styles.stat}>
-	// 				<div className={styles.statValue}>{user.rating}</div>
-	// 				<div className={styles.statLabel}>Rating</div>
-	// 			</div>
-	// 			<div className={styles.stat}>
-	// 				<div className={styles.statValue}>{user.trades}</div>
-	// 				<div className={styles.statLabel}>Trades</div>
-	// 			</div>
-	// 			<div className={styles.stat}>
-	// 				<div className={styles.statValue}>{user.successRate}%</div>
-	// 				<div className={styles.statLabel}>Success</div>
-	// 			</div>
-	// 		</div> */}
-	// 		</div>
-	// 	);
-	// };
-
-	// const TimelineItem: FC<TimelineItemProps> = ({ time, event }) => (
-	// 	<div className={styles.timelineItem}>
-	// 		<div className={styles.timelineTime}>{time}</div>
-	// 		<div className={styles.timelineContent}>{event}</div>
-	// 	</div>
-	// );
-
-	// const RequestEvidencesFrom = () => {
-	// 	const canRequestEvidenceToTraderFilter =
-	// 		$kyc.disputeEvidenceRequest?.filter(
-	// 			(request) => request.requestedFromId === $kyc.trade?.trader.id
-	// 		);
-	// 	const canRequestEvidenceToVendorFilter =
-	// 		$kyc.disputeEvidenceRequest?.filter(
-	// 			(request) => request.requestedFromId === $kyc.trade?.vendor.id
-	// 		);
-	// 	const canRequestEvidenceToTrader =
-	// 		canRequestEvidenceToTraderFilter &&
-	// 		canRequestEvidenceToTraderFilter.length === 0;
-	// 	const canRequestEvidenceToVendor =
-	// 		canRequestEvidenceToVendorFilter &&
-	// 		canRequestEvidenceToVendorFilter.length === 0;
-
-	// 	return (
-	// 		<div
-	// 			className={styles.requestEvidencesFrom}
-	// 			ref={requestEvidencesFromRef}
-	// 		>
-	// 			{!canRequestEvidenceToTrader && !canRequestEvidenceToVendor && (
-	// 				<span>Can not request more evidences</span>
-	// 			)}
-	// 			{canRequestEvidenceToTrader && (
-	// 				<button
-	// 					className={styles.trader}
-	// 					onClick={() => requestMoreEvidencesMutation.mutate('trader')}
-	// 				>
-	// 					Trader
-	// 				</button>
-	// 			)}
-	// 			{canRequestEvidenceToVendor && (
-	// 				<button
-	// 					className={styles.vendor}
-	// 					onClick={() => requestMoreEvidencesMutation.mutate('vendor')}
-	// 				>
-	// 					Vendor
-	// 				</button>
-	// 			)}
-	// 		</div>
-	// 	);
-	// };
-
-	// const MessageItem = (message: Message) => {
-	// 	if (message.type === 'info') return null;
-
-	// 	const username =
-	// 		message.from === $kyc.trade?.trader?.id
-	// 			? $kyc.trade?.trader?.username
-	// 			: $kyc.trade?.vendor?.username;
-
-	// 	return (
-	// 		<div className={`${styles.message}`}>
-	// 			<div className={styles.messageHeader}>
-	// 				<span>{username}</span>
-	// 				<span>
-	// 					{message.createdAt
-	// 						? getLocaleFullDateString(new Date(message.createdAt))
-	// 						: ''}
-	// 				</span>
-	// 			</div>
-	// 			<div>{message.message}</div>
-	// 		</div>
-	// 	);
-	// };
+	const TimelineItem: FC<TimelineItemProps> = ({ time, event }) => (
+		<div className={styles.timelineItem}>
+			<div className={styles.timelineTime}>{time}</div>
+			<div className={styles.timelineContent}>{event}</div>
+		</div>
+	);
 
 	const SubmittedDocumentItem = (document: Document) => {
 		const split = document.file?.key?.split('/');
@@ -256,7 +107,12 @@ const KYCDetaisPage = () => {
 						<strong>KYC ID:</strong> <span>{$kyc?.id}</span>
 					</div>
 					<div>
-						<strong>Submitted At:</strong> <span>{$kyc?.submittedAt}</span>
+						<strong>Submitted At:</strong>{' '}
+						<span>
+							{$kyc.submittedAt
+								? getLocaleFullDateString($kyc.submittedAt)
+								: ''}
+						</span>
 					</div>
 				</div>
 			</div>
@@ -286,6 +142,18 @@ const KYCDetaisPage = () => {
 									<label>Nationality</label>
 									<div className={styles.value}>
 										{$kyc.nationality ? $kyc.nationality : ''}
+									</div>
+								</div>
+								<div className={styles.tradeDetail}>
+									<label>Document Type</label>
+									<div className={styles.value}>
+										{$kyc.documentType ? formatEnum($kyc.documentType) : ''}
+									</div>
+								</div>
+								<div className={styles.tradeDetail}>
+									<label>Document Number</label>
+									<div className={styles.value}>
+										{$kyc.documentNumber ? $kyc.documentNumber : ''}
 									</div>
 								</div>
 							</div>
@@ -333,13 +201,13 @@ const KYCDetaisPage = () => {
 						<div className={styles.cardHeader}>Verification Timeline</div>
 						<div className={styles.cardContent}>
 							<div className={styles.timeline}>
-								{/* {timeline.map((item, index) => (
+								{timeline.map((item, index) => (
 									<TimelineItem
 										key={index}
 										time={item.time}
 										event={item.event}
 									/>
-								))} */}
+								))}
 							</div>
 						</div>
 					</div>

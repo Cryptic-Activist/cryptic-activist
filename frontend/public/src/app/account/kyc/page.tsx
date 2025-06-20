@@ -125,7 +125,6 @@ const KYCPage = () => {
               </div>
 
               {/* Document Information Section */}
-
               <h2 className={styles.sectionTitle}>
                 <span className={styles.sectionNumber}>2</span>
                 Document Information
@@ -329,7 +328,6 @@ const KYCPage = () => {
               </div>
 
               {/* Terms and Submit Section */}
-
               <h2 className={styles.sectionTitle}>
                 <span className={styles.sectionNumber}>6</span>
                 Terms & Submit
@@ -353,19 +351,6 @@ const KYCPage = () => {
                   onClick={onCheckAgreeTerms}
                   name="agreeTerms"
                 />
-                {/* <label htmlFor="termsAgree">
-                I agree to the{' '}
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="#" target="_blank" rel="noopener noreferrer">
-                  Privacy Policy
-                </a>
-                , and I confirm that all information provided is accurate and
-                up-to-date. I understand that providing false information may
-                result in account suspension.
-              </label> */}
               </div>
 
               <div className={styles.checkboxGroup}>

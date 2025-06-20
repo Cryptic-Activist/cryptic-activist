@@ -85,7 +85,6 @@ const useKYC = () => {
       }
     },
     onSuccess: (data) => {
-      console.log('KYC submitted successfully', data);
       if (data?.ok) {
         query.refetch();
       }
@@ -233,8 +232,6 @@ const useKYC = () => {
 
   const showKYCForm = forceShowForm || !user?.kyc?.length;
 
-  console.log({ forceShowForm, showKYCForm });
-
   useEffect(() => {
     if (showBackDocument && uploadedFiles.length < 3) {
       return;
@@ -247,7 +244,7 @@ const useKYC = () => {
       submitKYCMutation.mutate({
         files: uploadedFiles,
         fullName: getValues('fullName'),
-        birthDate: getValues('birthDate').toString(),
+        birthDate: getValues('birthDate').toDateString(),
         documentNumber: getValues('documentNumber'),
         documentType: getValues('documentType'),
         nationality: getValues('nationality'),

@@ -47,7 +47,6 @@ const useKYCs = () => {
 			}
 		},
 		onSuccess: (response) => {
-			console.log({ response });
 			const mappedKYCs = response?.data?.map((d: any) => {
 				const username = d.user.username;
 				return {

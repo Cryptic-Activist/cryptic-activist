@@ -43,7 +43,7 @@ const useDashboard = () => {
 				amount: `${rt.fiatAmount} ${toUpperCase(rt.fiat?.symbol)}`,
 				crypto: toUpperCase(rt.cryptocurrency.symbol),
 				status: rt.status,
-				startedAt: getLocaleFullDateString(new Date(rt.startedAt))
+				startedAt: getLocaleFullDateString(rt.startedAt)
 			}));
 			setRecentTrades(mappedRecentTrades);
 			setTotalPages(response.totalPages);

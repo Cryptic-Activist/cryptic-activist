@@ -131,9 +131,7 @@ const Table = <T extends object>({
 											</span>
 										)}
 										{isFullDate && (
-											<span>
-												{getLocaleFullDateString(new Date(getCellText(cell)))}
-											</span>
+											<span>{getLocaleFullDateString(getCellText(cell))}</span>
 										)}
 										{!isBadgeColumn &&
 											!isSlaColumn &&

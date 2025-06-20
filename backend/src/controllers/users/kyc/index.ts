@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { countries, documentTypes, documentTypesWithBack } from './data';
+import { getMonthBoundaries, toUTCDateOnly } from '@/utils/date';
 
 import { KYCStatus } from '@prisma/client';
 import { calculatePercentageChange } from '@/utils/number';
-import { getMonthBoundaries } from '@/utils/date';
 import { prisma } from '@/services/db';
 
 export const getNationalities = async (_req: Request, res: Response) => {
@@ -81,7 +81,7 @@ export const submitKYC = async (req: Request, res: Response) => {
           utilityBillId: utilityBill?.id,
           bankStatementId: bankStatement?.id,
           nationality,
-          dateOfBirth: new Date(birthDate),
+          dateOfBirth: toUTCDateOnly(birthDate),
           documentType,
           documentNumber,
           additionalNotes,

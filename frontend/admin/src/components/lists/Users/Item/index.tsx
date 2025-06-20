@@ -11,8 +11,8 @@ const Item: FC<ItemProps> = ({ item }) => {
 			<div>{item.names.firstName}</div>
 			<div>{item.names.lastName}</div>
 			<div>{item.username}</div>
-			<div>{getLocaleFullDateString(new Date(item.createdAt))}</div>
-			<div>{getLocaleFullDateString(new Date(item.updatedAt))}</div>
+			<div>{getLocaleFullDateString(item.createdAt)}</div>
+			<div>{getLocaleFullDateString(item.updatedAt)}</div>
 			<div className={styles.actions}>
 				<button className={styles.action}>
 					<FaPen />

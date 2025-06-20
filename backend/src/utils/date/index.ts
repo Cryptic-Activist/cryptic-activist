@@ -145,3 +145,12 @@ export const getFutureDate = (options: {
 
   return future;
 };
+
+export const toUTCDateOnly = (isoDateStr: string): Date => {
+  console.log({ isoDateStr });
+  const date = new Date(isoDateStr); // already in UTC
+  console.log({ date });
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+};
