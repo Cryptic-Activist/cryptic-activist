@@ -23,9 +23,7 @@ const ProfileNameUsername: FC<ProfileNameUsernameProps> = ({
               <div className={styles.kycVerified}>
                 <DynamicIcon iconName="FaCheck" color="#fff" size={15} />
               </div>
-              <div className={styles.checkTooltip}>
-                This vendor has been verified through KYC
-              </div>
+              <div className={styles.checkTooltip}>KYC verified user</div>
             </Tooltip>
           )}
         </div>

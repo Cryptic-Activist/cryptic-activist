@@ -25,12 +25,17 @@ export type StatusBadgeProps = {
 	priority: string;
 };
 
+type KYC = {
+	status: 'VERIFIED' | 'REJECTED' | 'PENDING';
+};
+
 type User = {
 	id: string;
 	username: string;
 	firstName: string;
 	lastName: string;
 	profileColor: string;
+	kyc?: KYC[];
 };
 
 export type UserCardProps = {

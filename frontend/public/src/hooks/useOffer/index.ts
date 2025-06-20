@@ -172,13 +172,19 @@ const useOffer = () => {
   ]);
 
   useEffect(() => {
+    const kycOnlyAllowed = offer.kycOnly && user.kyc && user.kyc.length === 0;
+    const isUserDifferentThanVendor = user.id !== offer.vendor?.id;
+
+    console.log({ kyc: user?.kyc });
+
     if (
       isLoggedIn() &&
       user.id &&
       offer.vendor?.id &&
       blockchain.account?.address &&
       cryptocurrencyAmount &&
-      user.id !== offer.vendor?.id
+      isUserDifferentThanVendor &&
+      !kycOnlyAllowed
     ) {
       setIsTradingAvailable(true);
     } else {

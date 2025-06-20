@@ -154,6 +154,14 @@ export async function getDisputeAdmin(req: Request, res: Response) {
                 lastName: true,
                 username: true,
                 profileColor: true,
+                kyc: {
+                  where: {
+                    status: 'VERIFIED',
+                  },
+                  select: {
+                    status: true,
+                  },
+                },
               },
             },
             trader: {
@@ -163,6 +171,14 @@ export async function getDisputeAdmin(req: Request, res: Response) {
                 lastName: true,
                 username: true,
                 profileColor: true,
+                kyc: {
+                  where: {
+                    status: 'VERIFIED',
+                  },
+                  select: {
+                    status: true,
+                  },
+                },
               },
             },
           },

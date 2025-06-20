@@ -1,6 +1,6 @@
 'use client';
 
-import { DynamicIcon, Viewer } from '@/components';
+import { DynamicIcon, Tooltip, Viewer } from '@/components';
 import {
 	Evidence,
 	Message,
@@ -122,6 +122,8 @@ const DisputeDetailsPage = () => {
 	);
 
 	const UserCard: FC<UserCardProps> = ({ user, role, winner, loser }) => {
+		const isVendorKYCVerified =
+			user?.kyc && user?.kyc?.length > 0 && user?.kyc[0]?.status === 'VERIFIED';
 		return (
 			<div className={styles.userCard}>
 				<div className={styles.userHeader}>
@@ -133,7 +135,17 @@ const DisputeDetailsPage = () => {
 					</div>
 					<div className={styles.userInfo}>
 						<div className={styles.usernameRole}>
-							<h4>{user?.username}</h4>
+							<div className={styles.nameCheck}>
+								<h4>{user?.username}</h4>
+								{isVendorKYCVerified && (
+									<Tooltip position="bottom" spacing={30}>
+										<div className={styles.kycVerified}>
+											<DynamicIcon iconName="FaCheck" color="#fff" size={9} />
+										</div>
+										<div className={styles.checkTooltip}>KYC Verified</div>
+									</Tooltip>
+								)}
+							</div>
 							<div className={styles.userRole}>{role}</div>
 						</div>
 						{winner?.id && winner?.id === user?.id && (

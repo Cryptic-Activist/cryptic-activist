@@ -19,6 +19,7 @@ const HowMuch: FC<HowMuchProps> = ({
   createTrade: { cryptocurrencyAmount, isTradingAvailable },
   isLoggedIn,
 }) => {
+  console.log({ user, offer });
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
   useEffect(() => {
     const getSubmitButtonLabel = () => {
@@ -37,7 +38,9 @@ const HowMuch: FC<HowMuchProps> = ({
       if (!blockchain.account?.address) {
         return 'Connect your wallet before trading';
       }
-
+      if (offer.kycOnly && user.kyc && user.kyc.length === 0) {
+        return 'KYC Verified Users Only';
+      }
       return 'Start trading';
     };
     const label = getSubmitButtonLabel();

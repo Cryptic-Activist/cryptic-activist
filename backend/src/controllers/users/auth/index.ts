@@ -187,7 +187,14 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         lastLoginAt: true,
         twoFactorEnabled: true,
         referralCode: true,
-        kyc: true,
+        kyc: {
+          where: {
+            status: 'VERIFIED',
+          },
+          select: {
+            status: true,
+          },
+        },
         xp: true,
         tier: {
           select: {
