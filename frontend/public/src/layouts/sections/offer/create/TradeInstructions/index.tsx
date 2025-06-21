@@ -38,7 +38,6 @@ const CreateOfferTradeInstructions: FC<CreateOfferTradeInstructionsProps> = ({
 
   const submitOffer = () => {
     if (createOffer.isTradeInstructionsCompleted && vendorWalletAddress) {
-      console.log({ ...createOffer, vendorWalletAddress });
       createOfferMutation.mutate({ ...createOffer, vendorWalletAddress });
     }
   };

@@ -19,7 +19,6 @@ const HowMuch: FC<HowMuchProps> = ({
   createTrade: { cryptocurrencyAmount, isTradingAvailable },
   isLoggedIn,
 }) => {
-  console.log({ user, offer });
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
   useEffect(() => {
     const getSubmitButtonLabel = () => {

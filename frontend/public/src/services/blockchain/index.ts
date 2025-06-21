@@ -1,6 +1,8 @@
 import { Config, getConnections, switchChain } from '@wagmi/core';
 
+import { BACKEND } from '@/constants';
 import { Connector } from 'wagmi';
+import { fetchGet } from '../axios';
 import { wagmiConfig } from '@/config';
 
 export const checkInstalledWallet = async (connector: Connector) => {
@@ -30,4 +32,16 @@ export const getCurrentConnector = () => {
   } else {
     return null;
   }
+};
+
+export const getSupportedChains = async () => {
+  const response = await fetchGet(
+    `${BACKEND}/blockchains/wallet/supported/chains`
+  );
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  return response.data;
 };

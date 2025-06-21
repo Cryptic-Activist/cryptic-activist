@@ -77,8 +77,6 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({
     moreEvidenceRequestFiltered.length > 0 &&
     moreEvidenceRequestFiltered[0].submittedAt === null;
 
-  console.log({ moreEvidenceRequestFiltered, hasMoreEvidenceRequest });
-
   return (
     <div className={styles.container}>
       <div className={styles.card}>

@@ -2,11 +2,12 @@
 
 import { BRAVE_WALLET, METAMASK } from '@/constants';
 import { Brave, EthereumLogo, MetaMask, PolygonLogo } from '@/assets';
-import { FaChevronRight, FaPowerOff } from 'react-icons/fa';
 import { ProviderImageProps, ValueContainerProps } from './types';
 import React, { FC, useEffect, useState } from 'react';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 
+import { DynamicIcon } from '@/components';
+import { FaChevronRight } from 'react-icons/fa';
 import Image from 'next/image';
 import { copyToClipboard } from '@/utils';
 import styles from './index.module.scss';
@@ -46,14 +47,24 @@ const ValueContainer: FC<ValueContainerProps> = ({ label, value }) => {
 const Wallet = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isChainsOpened, setIsChainsOpened] = useState(false);
 
   const { toggleDrawer } = useNavigationBar();
-  const { blockchain, onDisconnectWallet } = useBlockchain();
+  const {
+    blockchain,
+    onDisconnectWallet,
+    handleSwitchChain,
+    supportedChainsQuery,
+  } = useBlockchain();
   const { user } = useUser();
 
   const isEthereum = blockchain?.chain?.name === 'Ethereum';
-  const isPolygon = blockchain?.chain?.name === 'Polygon';
+  const isPolygon =
+    blockchain?.chain?.name === 'Polygon' ||
+    blockchain?.chain?.name === 'Chain-80002';
   const isLocalhost = blockchain.chain?.name === 'Localhost';
+
+  console.log({ blockchainName: blockchain.chain.name });
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
@@ -69,6 +80,10 @@ const Wallet = () => {
     setIsCopied((prev) => !prev);
   };
 
+  const toggleSwitchChain = () => {
+    setIsChainsOpened((prev) => !prev);
+  };
+
   useEffect(() => {
     setTimeout(() => {
       setIsCopied(false);
@@ -78,6 +93,7 @@ const Wallet = () => {
   const ethereumBgColor =
     isEthereum || isLocalhost ? styles.ethereumBgColor : '';
   const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
+  const chainsStyle = isChainsOpened ? styles.switchChainListOpened : '';
 
   return (
     <>
@@ -130,10 +146,39 @@ const Wallet = () => {
                 {isCopied ? 'Address copied' : blockchain.account?.address}
               </p>
             </button>
-            <button className={styles.disconnect} onClick={onDisconnectWallet}>
-              <FaPowerOff size={24} />
-            </button>
+            <div className={styles.switchPowerContainer}>
+              <button
+                className={styles.disconnect}
+                onClick={onDisconnectWallet}
+              >
+                <DynamicIcon iconName="FaPowerOff" size={24} color="#ffcd2b" />
+              </button>
+            </div>
           </div>
+          <section>
+            <div className={styles.accordion}>
+              <button
+                className={`${styles.menuButton} ${styles.userButton}`}
+                onClick={toggleSwitchChain}
+              >
+                Switch Chain
+              </button>
+              <ul className={`${styles.switchChainList} ${chainsStyle}`}>
+                {supportedChainsQuery?.data?.map(
+                  (chain: any, index: number) => (
+                    <li className={styles.subMenuItem} key={index}>
+                      <button
+                        onClick={() => handleSwitchChain(chain.value)}
+                        className={styles.chainButton}
+                      >
+                        {chain.label}
+                      </button>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          </section>
           <section className={styles.row}>
             <div className={styles.column}>
               <ValueContainer label={'Chain ID'} value={blockchain.chain?.id} />
@@ -147,7 +192,7 @@ const Wallet = () => {
               value={
                 blockchain.balance?.formatted
                   ? `${parseFloat(blockchain.balance?.formatted)} ${
-                      blockchain?.chain?.nativeCurrency?.symbol
+                      blockchain?.balance.symbol
                     }`
                   : ''
               }

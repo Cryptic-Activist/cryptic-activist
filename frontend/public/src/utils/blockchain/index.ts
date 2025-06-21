@@ -1,5 +1,4 @@
 import { Connector } from 'wagmi';
-import { SUPPORTED_CHAIN_IDS } from '@/constants';
 
 export const getChainNameById = (id: number) => {
   switch (id) {
@@ -25,6 +24,9 @@ export const getWalletType = (
   return 'Unknown';
 };
 
-export const isSupportedChain = (id: number | undefined): boolean => {
-  return id != null && SUPPORTED_CHAIN_IDS.includes(id);
+export const isSupportedChain = (
+  id: number | undefined,
+  supportedChainIds: { label: string; value: number }[]
+): boolean => {
+  return id != null && supportedChainIds.some((chain) => chain.value === id);
 };

@@ -175,8 +175,6 @@ const useOffer = () => {
     const kycOnlyAllowed = offer.kycOnly && user.kyc && user.kyc.length === 0;
     const isUserDifferentThanVendor = user.id !== offer.vendor?.id;
 
-    console.log({ kyc: user?.kyc });
-
     if (
       isLoggedIn() &&
       user.id &&
