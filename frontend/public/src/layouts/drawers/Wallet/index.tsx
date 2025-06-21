@@ -81,7 +81,7 @@ const Wallet = () => {
 
   return (
     <>
-      <div className={styles.background} />
+      <div className={styles.background} onClick={closeWallet} />
       <aside className={`${styles.container} ${walletStyle}`}>
         <button className={styles.closeButton} onClick={closeWallet}>
           <FaChevronRight size={18} />

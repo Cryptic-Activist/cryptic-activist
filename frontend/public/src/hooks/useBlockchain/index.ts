@@ -1,17 +1,27 @@
 'use client';
 
 import {
+  BRAVE_WALLET,
+  CHAIN_STORAGE_KEY,
+  DEFAULT_CHAIN_ID,
+  WALLET_STORAGE_KEY,
+} from '@/constants';
+import {
   Connector,
   useAccount,
   useAccountEffect,
   useBalance,
   useConnect,
-  useSwitchAccount,
+  useSwitchChain,
 } from 'wagmi';
+import {
+  getChainNameById,
+  getWalletType,
+  isSupportedChain,
+} from '@/utils/blockchain';
+import { useEffect, useMemo } from 'react';
 
-import { BRAVE_WALLET } from '@/constants';
 import { getCurrentConnector } from '@/services/blockchain';
-import { useEffect } from 'react';
 import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
 
@@ -27,24 +37,58 @@ const useBlockchain = () => {
     },
     navigationBar: { resetNavigationBar, toggleModal },
   } = useRootStore();
+
   const { connect, connectors } = useConnect();
-  const { isConnected, address } = useAccount();
-  const balance = useBalance({ address: address as `0x${string}` });
-  const {} = useSwitchAccount();
+
+  const {
+    isConnected,
+    address: wagmiAddress,
+    connector: wagmiConnector,
+  } = useAccount();
+  const balance = useBalance({ address: wagmiAddress as `0x${string}` });
+  const { chains, switchChain } = useSwitchChain();
+
   const {
     isLoggedIn,
     user: { id },
   } = useUser();
-  const isWalletConnected = isLoggedIn() && isConnected;
+
+  const isWalletConnected = useMemo(() => {
+    return isLoggedIn() && !!account?.address && !!wallet;
+  }, [isLoggedIn, account?.address, wallet]);
 
   const resetWalletNavigation = () => {
     resetNavigationBar();
     resetBlockchain();
   };
 
+  const handleSwitchChain = () => {
+    if (switchChain) {
+      switchChain({
+        chainId: DEFAULT_CHAIN_ID,
+      });
+    }
+  };
+
   const onConnectWallet = async (connector: Connector) => {
-    connect({ connector });
-    toggleModal('blockchain');
+    try {
+      const { chainId } = await connector.connect();
+
+      // Prevent connecting to unsupported chains
+      if (!isSupportedChain(chainId)) {
+        localStorage.removeItem(WALLET_STORAGE_KEY);
+        localStorage.removeItem(CHAIN_STORAGE_KEY);
+
+        connect({ connector, chainId: DEFAULT_CHAIN_ID });
+        toggleModal('blockchain');
+        return;
+      }
+
+      connect({ connector });
+      toggleModal('blockchain');
+    } catch (err) {
+      console.error('Failed to connect wallet:', err);
+    }
   };
 
   const onDisconnectWallet = async () => {
@@ -57,14 +101,21 @@ const useBlockchain = () => {
 
   useAccountEffect({
     async onConnect({ connector, address: onConnectAddress, chain }) {
-      // const address = await connector.getAccounts();
-      // const chain = await connector.getChainId();
-
       if (id) {
+        let chainLocal = chain;
+        if (!isSupportedChain(chain?.id)) {
+          localStorage.removeItem(WALLET_STORAGE_KEY);
+          localStorage.removeItem(CHAIN_STORAGE_KEY);
+
+          const connector = wagmiConnector ?? getCurrentConnector();
+          if (!isConnected || !id || !connector) return;
+
+          chainLocal = chains.find((c) => c.id === DEFAULT_CHAIN_ID) ?? chain;
+        }
         setBlockchainValue(
           {
             account: { address: onConnectAddress },
-            chain,
+            chain: chainLocal,
             wallet: connector.name,
             balance: balance.data,
           },
@@ -78,10 +129,132 @@ const useBlockchain = () => {
   });
 
   useEffect(() => {
+    const maybeHydrateFromWagmi = async () => {
+      const connector = wagmiConnector ?? getCurrentConnector();
+      if (!isConnected || !id || !connector) return;
+
+      let chainData = chain;
+
+      // Try to get missing chainId if needed
+      if (!chainData?.id && connector?.getChainId) {
+        try {
+          const chainId = await connector.getChainId?.();
+          chainData = { id: chainId, name: getChainNameById(chainId) };
+        } catch (err) {
+          console.warn('Failed to get chain ID from connector:', err);
+        }
+      }
+
+      const address = wagmiAddress as string;
+      const hydrated = account?.address && wallet && chain?.id;
+
+      const shouldUpdate =
+        !hydrated || // initial hydration
+        account?.address !== address ||
+        wallet !== connector.name ||
+        chain?.id !== chainData?.id;
+
+      if (shouldUpdate) {
+        const walletType = getWalletType(connector);
+
+        const walletInfo = {
+          name: connector.name,
+          type: walletType,
+        };
+
+        const chainInfo = {
+          id: chainData?.id,
+          name: chainData?.name,
+        };
+
+        if (!isSupportedChain(chainInfo.id)) {
+          handleSwitchChain();
+          localStorage.removeItem(WALLET_STORAGE_KEY);
+          localStorage.removeItem(CHAIN_STORAGE_KEY);
+
+          connect({ connector, chainId: DEFAULT_CHAIN_ID });
+          toggleModal('blockchain');
+          return;
+        }
+
+        localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(walletInfo));
+        localStorage.setItem(CHAIN_STORAGE_KEY, JSON.stringify(chainInfo));
+
+        setBlockchainValue(
+          {
+            account: { address },
+            chain: chainInfo,
+            wallet: connector.name,
+            balance: balance.data,
+          },
+          'blockchain/updateOnWalletOrChainChange'
+        );
+      }
+    };
+
+    maybeHydrateFromWagmi();
+  }, [
+    isConnected,
+    id,
+    account?.address,
+    chain?.id,
+    chain?.name,
+    wallet,
+    wagmiAddress,
+    wagmiConnector,
+    balance.data,
+    setBlockchainValue,
+  ]);
+
+  useEffect(() => {
     if (id && balance.isSuccess) {
       setBlockchainValue({ balance: balance.data }, 'blockchain/setBalance');
     }
-  }, [balance.isSuccess, id]);
+  }, [balance.isSuccess, balance.data, id, setBlockchainValue]);
+
+  useEffect(() => {
+    const restoreFromStorage = () => {
+      if (isConnected) return;
+
+      const storedWallet = localStorage.getItem(WALLET_STORAGE_KEY);
+      const storedChain = localStorage.getItem(CHAIN_STORAGE_KEY);
+
+      if (storedWallet && storedChain) {
+        try {
+          const parsedWallet = JSON.parse(storedWallet);
+          const parsedChain = JSON.parse(storedChain);
+
+          // Prevent connecting to unsupported chains
+          if (!isSupportedChain(parsedChain)) {
+            localStorage.removeItem(WALLET_STORAGE_KEY);
+            localStorage.removeItem(CHAIN_STORAGE_KEY);
+
+            const connector = wagmiConnector ?? getCurrentConnector();
+            if (!isConnected || !id || !connector) return;
+
+            connect({ connector, chainId: DEFAULT_CHAIN_ID });
+            toggleModal('blockchain');
+            return;
+          }
+
+          setBlockchainValue(
+            {
+              wallet: parsedWallet.name,
+              chain: parsedChain,
+            },
+            'blockchain/restoreFromStorage'
+          );
+        } catch (err) {
+          console.warn(
+            'Failed to restore blockchain data from localStorage:',
+            err
+          );
+        }
+      }
+    };
+
+    restoreFromStorage();
+  }, [setBlockchainValue]);
 
   return {
     blockchain: {
@@ -92,6 +265,7 @@ const useBlockchain = () => {
     },
     connectors,
     isWalletConnected,
+    handleSwitchChain,
     connect,
     onConnectWallet,
     onDisconnectWallet,

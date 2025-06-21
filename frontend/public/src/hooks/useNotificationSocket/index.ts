@@ -29,8 +29,6 @@ const useNotificationSocket = ({ user }: UseSocketParams) => {
         });
       });
 
-      notifications.setSocket(socket);
-
       return () => {
         if (socket) {
           socket.disconnect();
