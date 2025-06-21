@@ -1,7 +1,6 @@
 import { Notification, NotificationsStore } from './types';
 
 import { RootStore } from '../root/types';
-import { Socket } from 'socket.io-client';
 import { StateCreator } from 'zustand';
 
 export const useNotificationsSlice: StateCreator<
@@ -13,7 +12,6 @@ export const useNotificationsSlice: StateCreator<
   notifications: {
     data: [],
     hasNewNotification: false,
-    socket: undefined,
     totalPages: 1,
     currentPage: 1,
     pageSize: 10,
@@ -28,16 +26,11 @@ export const useNotificationsSlice: StateCreator<
             pageSize: params.pageSize ?? notifications.pageSize,
             hasNewNotification:
               params.hasNewNotification ?? notifications.hasNewNotification,
-            socket: params.socket ?? notifications.socket,
           },
         }),
         false,
         actionName
       );
-    },
-    setSocket: (socket: Socket) => {
-      const setValue = get().notifications.setNotificationValue;
-      setValue({ socket }, 'notifications/setSocket');
     },
     appendNotification: (notification: Notification) => {
       const prevNotification = get().notifications.data;

@@ -5,6 +5,7 @@ import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 
 import Image from 'next/image';
 import React from 'react';
+import { getChainNameById } from '@/utils/blockchain';
 import styles from './index.module.scss';
 
 const ConnectedWallet = () => {
@@ -16,15 +17,20 @@ const ConnectedWallet = () => {
       drawers: { wallet },
     },
   } = useNavigationBar();
-  const isEthereum = blockchain?.chain?.name === 'Ethereum';
-  const isPolygon = blockchain?.chain?.name === 'Polygon';
-  const isLocalhost = blockchain.chain?.name === 'Localhost';
+  const chainName =
+    blockchain.chain?.name || getChainNameById(blockchain.chain?.id);
+
+  const isEthereum = chainName === 'Ethereum';
+  const isPolygon = chainName === 'Polygon';
+  const isLocalhost = chainName === 'Localhost';
 
   const openWallet = () => {
     if (!wallet) {
       toggleDrawer('wallet');
     }
   };
+
+  console.log({ blockchain });
 
   const ethereumBgColor =
     isEthereum || isLocalhost ? styles.ethereumBgColor : '';

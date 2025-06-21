@@ -1,5 +1,3 @@
-import { Socket } from 'socket.io-client';
-
 export type Type =
   | 'TRADE_STARTED'
   | 'TRADE_COMPLETED'
@@ -41,7 +39,6 @@ export type Notification = {
 export type NotificationsSetter = {
   data?: Notification[];
   hasNewNotification?: boolean;
-  socket?: Socket;
   totalPages?: number;
   currentPage?: number;
   pageSize?: number;
@@ -53,7 +50,6 @@ export type NotificationsStore = {
   notifications: {
     data: Notification[];
     hasNewNotification: boolean;
-    socket?: Socket;
     totalPages: number;
     currentPage: number;
     pageSize: number;
@@ -61,7 +57,6 @@ export type NotificationsStore = {
       value: Value,
       action?: `notifications/${string}`
     ) => void;
-    setSocket: (socket: Socket) => void;
     setHasNewNotification: (hasNotification: boolean) => void;
   };
 };

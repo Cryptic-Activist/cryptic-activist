@@ -7,11 +7,11 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
+import { getSocket } from '@/services/socket';
 import useApp from '../useApp';
 import useBlockchain from '../useBlockchain';
 import useDebounce from '../useDebounce';
 import useNavigationBar from '../useNavigationBar';
-import useNotification from '../useNotification';
 import { useRootStore } from '@/store';
 import useUser from '../useUser';
 
@@ -22,7 +22,6 @@ const useOffer = () => {
 
   const { isLoggedIn, user } = useUser();
   const { addToast } = useApp();
-  const { notifications } = useNotification();
   const { blockchain } = useBlockchain();
   const { toggleModal } = useNavigationBar();
 
@@ -116,7 +115,8 @@ const useOffer = () => {
           paymentMethodId: offer.paymentMethod.id,
           traderWalletAddress: blockchain.account.address,
         });
-        notifications.socket?.emit('notification_trade_start_sent', {
+        const socket = getSocket();
+        socket?.emit('notification_trade_start_sent', {
           tradeId: newTrade.trade.id,
         });
       } else {
