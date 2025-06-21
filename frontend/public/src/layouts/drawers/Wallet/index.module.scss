@@ -36,6 +36,11 @@
   }
 }
 
+.switchPowerContainer {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .opened {
   right: 0;
 }
@@ -58,8 +63,7 @@
   background-color: globals.$primary;
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .header {
@@ -67,6 +71,7 @@
   justify-content: space-between;
   width: 100%;
   height: fit-content;
+  padding: 1rem;
 }
 
 .accountInfo {
@@ -125,7 +130,8 @@
   text-align: start;
 }
 
-.disconnect {
+.disconnect,
+.switchChain {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,6 +157,7 @@
   display: flex;
   gap: 0.5rem;
   flex-direction: column;
+  padding: 0.5rem 1rem;
 }
 
 .valueContainer {
@@ -161,6 +168,7 @@
   width: 100%;
   padding: 1rem;
   border-radius: 0.5em;
+  border: 1px solid globals.$primary-darken-25;
   .label {
     font-size: 0.9rem;
   }
@@ -175,4 +183,66 @@
 
 .polygonBgColor {
   background-color: #631cf1;
+}
+
+.menuButton {
+  background-color: transparent;
+  border: none;
+  padding: 1rem;
+  width: 100%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: globals.$black;
+  button {
+    text-decoration: none;
+    color: globals.$black;
+  }
+  &:hover {
+    background-color: globals.$primary-darken-15;
+  }
+  &:active {
+    background-color: globals.$primary-darken-20;
+  }
+}
+
+.chainButton {
+  font-size: 1rem;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  font-size: 1.2rem;
+  padding: 1rem;
+  text-align: left;
+  cursor: pointer;
+  &:hover {
+    background-color: globals.$primary-darken-15;
+  }
+  &:active {
+    background-color: globals.$primary-darken-20;
+  }
+}
+
+.userButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: center;
+  .userButtonNames {
+    font-size: 1.5rem;
+  }
+  .userButtonUsername {
+    font-size: 1rem;
+  }
+}
+
+.switchChainList {
+  height: auto;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out;
+  background-color: globals.$primary-darken-10;
+}
+
+.switchChainListOpened {
+  max-height: 21rem;
 }
