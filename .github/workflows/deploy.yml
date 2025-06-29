@@ -104,18 +104,7 @@ jobs:
           echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
           echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
 
-    # - name: Back up PostgreSQL database
-    #   uses: appleboy/ssh-action@v1.2.2
-    #   with:
-    #     host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-    #     username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-    #     key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-    #     command_timeout: 120m
-    #     script: |
-    #       cd app
-    #       docker compose --profile backup run --rm postgres-backup
-
-    - name: Clean up Docker
+    - name: Back up PostgreSQL database
       uses: appleboy/ssh-action@v1.2.2
       with:
         host: ${{ secrets.DIGITAL_OCEAN_HOST }}
@@ -124,7 +113,20 @@ jobs:
         command_timeout: 120m
         script: |
           cd app
-          docker system prune -a -f
+          docker compose -f prod.docker-compose.yml --profile backup up --build -d
+          docker compose -f prod.docker-compose.yml --profile backup exec -T postgres-backup sh -c "pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} > /backups/backup_$(date +%F-%H-%M-%S).sql"
+          docker compose -f prod.docker-compose.yml --profile backup down
+
+    - name: Stop and remove old containers
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+        command_timeout: 120m
+        script: |
+          cd app
+          docker compose -f prod.docker-compose.yml down
 
     - name: Deploy to DigitalOcean
       uses: appleboy/ssh-action@v1.2.2
@@ -138,5 +140,5 @@ jobs:
           git restore .
           git pull origin main --ff
           docker compose pull
-          docker compose -f prod.docker-compose.yml --profile prod up -d --build
+          docker compose -f prod.docker-compose.yml --profile prod up -d --build --remove-orphans
 
