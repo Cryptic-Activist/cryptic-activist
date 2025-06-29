@@ -21,7 +21,7 @@ const ConnectedWallet = () => {
     blockchain.chain?.name || getChainNameById(blockchain.chain?.id);
 
   const isEthereum = chainName === 'Ethereum';
-  const isPolygon = chainName === 'Polygon';
+  const isPolygon = chainName === 'Polygon' || chainName === 'Chain-80002';
   const isLocalhost = chainName === 'Localhost';
 
   const openWallet = () => {
@@ -29,8 +29,6 @@ const ConnectedWallet = () => {
       toggleDrawer('wallet');
     }
   };
-
-  console.log({ blockchain });
 
   const ethereumBgColor =
     isEthereum || isLocalhost ? styles.ethereumBgColor : '';
