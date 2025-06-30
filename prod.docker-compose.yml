@@ -270,6 +270,6 @@ services:
     profiles:
       - green
     depends_on:
-      - frontend-public_blue
-      - frontend-admin_blue
-      - backend_blue
+      - frontend-public_green
+      - frontend-admin_green
+      - backend_green
