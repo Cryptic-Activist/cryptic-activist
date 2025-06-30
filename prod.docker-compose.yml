@@ -270,9 +270,6 @@ services:
     profiles:
       - green
     depends_on:
-      frontend-public_green:
-        condition: service_healthy
-      frontend-admin_green:
-        condition: service_healthy
-      backend_green:
-        condition: service_healthy
+      - frontend-public_blue
+      - frontend-admin_blue
+      - backend_blue
