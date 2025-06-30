@@ -18,18 +18,18 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
-              echo "ACTIVE_COLOR=blue" >> $GITHUB_ENV
+              echo "ACTIVE_COLOR=blue" >> $env:GITHUB_ENV
             else
-              echo "ACTIVE_COLOR=green" >> $GITHUB_ENV
+              echo "ACTIVE_COLOR=green" >> $env:GITHUB_ENV
             fi
 
       - name: Set inactive color
         id: inactive_color
         run: |
           if [ "$ACTIVE_COLOR" == "blue" ]; then
-            echo "INACTIVE_COLOR=green" >> $GITHUB_ENV
+            echo "INACTIVE_COLOR=green" >> $env:GITHUB_ENV
           else
-            echo "INACTIVE_COLOR=blue" >> $GITHUB_ENV
+            echo "INACTIVE_COLOR=blue" >> $env:GITHUB_ENV
           fi
 
       - name: Create .env files on Droplet
