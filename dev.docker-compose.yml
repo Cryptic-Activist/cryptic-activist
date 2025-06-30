@@ -106,7 +106,7 @@ services:
 
   hardhat-node:
     container_name: hardhat-node
-    build:
+    build: 
       context: libraries/ethereum-smart-contracts
       dockerfile: dev.Dockerfile
     ports:
@@ -114,142 +114,65 @@ services:
     networks:
       - app-network
 
-  backend_blue:
-    container_name: backend_blue
+  backend:
+    container_name: backend
     build:
       context: backend/
       dockerfile: dev.Dockerfile
-    expose:
-      - "5000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    env_file:
-      - envs/dev.backend.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run migrate:dev && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 4GB
-    depends_on:
-      - postgres
-      - redis
-      - mongodb
-      - rabbitmq
-      - hardhat-node
-
-  backend_green:
-    container_name: backend_green
-    build:
-      context: backend/
-      dockerfile: dev.Dockerfile
-    expose:
-      - "5000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    env_file:
-      - envs/dev.backend.env
-    environment:
-      - NODE_OPTIONS=--max-old-space-size=4096
-    networks:
-      - app-network
-    entrypoint: ["sh", "-c", "npm run migrate:dev && npm run dev"]
-    deploy:
-      resources:
-        limits:
-          memory: 4GB
-    depends_on:
-      - postgres
-      - redis
-      - mongodb
-      - rabbitmq
-      - hardhat-node
-
-  frontend-public_blue:
-    container_name: public_blue
-    build:
-      context: frontend/public/
-      dockerfile: dev.Dockerfile
-    expose:
-      - "3000"
-    env_file:
-      - envs/dev.frontend-public.env
-    volumes:
-      - ./frontend/public:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    depends_on:
-      - backend_blue
-
-  frontend-public_green:
-    container_name: public_green
-    build:
-      context: frontend/public/
-      dockerfile: dev.Dockerfile
-    expose:
-      - "3000"
-    env_file:
-      - envs/dev.frontend-public.env
-    volumes:
-      - ./frontend/public:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    depends_on:
-      - backend_green
-
-  frontend-admin_blue:
-    container_name: admin_blue
-    build:
-      context: frontend/admin/
-      dockerfile: dev.Dockerfile
-    expose:
-      - "3001"
-    env_file:
-      - envs/dev.frontend-admin.env
-    volumes:
-      - ./frontend/admin:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    depends_on:
-      - backend_blue
-
-  frontend-admin_green:
-    container_name: admin_green
-    build:
-      context: frontend/admin/
-      dockerfile: dev.Dockerfile
-    expose:
-      - "3001"
-    env_file:
-      - envs/dev.frontend-admin.env
-    volumes:
-      - ./frontend/admin:/app
-      - /app/node_modules
-    networks:
-      - app-network
-    depends_on:
-      - backend_green
-
-  nginx:
-    container_name: nginx
-    build:
-      context: nginx/
-      dockerfile: Dockerfile
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/logs:/var/log/nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     env_file:
-      - envs/dev.nginx.env
+      - envs/dev.backend.env
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=4096
     networks:
       - app-network
+    entrypoint: ["sh", "-c", "npm run migrate:dev && npm run dev"] 
+    deploy:
+      resources:
+        limits:
+          memory: 4GB
+    depends_on:
+      - postgres
+      - redis
+      - mongodb
+      - rabbitmq
+      - hardhat-node
+
+
+  frontend-public:
+    container_name: public
+    build:
+      context: frontend/public/
+      dockerfile: dev.Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - envs/dev.frontend-public.env
+    volumes:
+      - ./frontend/public:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  frontend-admin:
+    container_name: admin
+    build:
+      context: frontend/admin/
+      dockerfile: dev.Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - envs/dev.frontend-admin.env
+    volumes:
+      - ./frontend/admin:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - backend

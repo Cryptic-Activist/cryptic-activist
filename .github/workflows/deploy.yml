@@ -181,4 +181,4 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} down --remove-orphans
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} down
