@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
-            if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
+            if [ "$(docker ps --filter "name=backend_blue" --format "{{.Names}}" | tr -d '\r' | xargs)" = "backend_blue" ]; then
               echo "ACTIVE_COLOR=blue"
             else
               echo "ACTIVE_COLOR=green"
