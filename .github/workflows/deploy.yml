@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine active color
+      - name: Determine active color on Droplet
         id: active_color
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -18,18 +18,20 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
-              echo "ACTIVE_COLOR=blue" >> $env:GITHUB_ENV
+              echo "blue"
             else
-              echo "ACTIVE_COLOR=green" >> $env:GITHUB_ENV
+              echo "green"
             fi
 
-      - name: Set inactive color
-        id: inactive_color
+      - name: Export ACTIVE_COLOR to env
+        run: echo "ACTIVE_COLOR=${{ steps.active_color.outputs.stdout }}" >> $GITHUB_ENV
+
+      - name: Set INACTIVE_COLOR based on ACTIVE_COLOR
         run: |
-          if [ "$ACTIVE_COLOR" == "blue" ]; then
-            echo "INACTIVE_COLOR=green" >> $env:GITHUB_ENV
+          if [ "$ACTIVE_COLOR" = "blue" ]; then
+            echo "INACTIVE_COLOR=green" >> $GITHUB_ENV
           else
-            echo "INACTIVE_COLOR=blue" >> $env:GITHUB_ENV
+            echo "INACTIVE_COLOR=blue" >> $GITHUB_ENV
           fi
 
       - name: Create .env files on Droplet
@@ -42,6 +44,11 @@ jobs:
           script: |
             cd app
             mkdir -p envs
+
+            # Use INACTIVE_COLOR from GitHub Actions
+            echo "UPSTREAM_PUBLIC=public_${INACTIVE_COLOR}" > envs/prod.nginx.env
+            echo "UPSTREAM_ADMIN=admin_${INACTIVE_COLOR}" >> envs/prod.nginx.env
+            echo "UPSTREAM_BACKEND=backend_${INACTIVE_COLOR}" >> envs/prod.nginx.env
 
             # prod.backend.env
             echo "CI=${{ secrets.CI }}" >> envs/prod.backend.env
@@ -113,9 +120,6 @@ jobs:
             echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
             echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
             echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
-            echo "UPSTREAM_PUBLIC=public_$INACTIVE_COLOR" > envs/prod.nginx.env
-            echo "UPSTREAM_ADMIN=admin_$INACTIVE_COLOR" >> envs/prod.nginx.env
-            echo "UPSTREAM_BACKEND=backend_$INACTIVE_COLOR" >> envs/prod.nginx.env
 
             # prod.postgres.env
             echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
