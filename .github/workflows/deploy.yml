@@ -2,143 +2,183 @@ name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Create .env files on Droplet
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 120m
-        script: |
-          cd app
-          mkdir -p envs  # Make sure the 'envs' directory exists
+      - name: Determine active color
+        id: active_color
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          script: |
+            if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
+              echo "::set-output name=active_color::blue"
+            else
+              echo "::set-output name=active_color::green"
+            fi
 
-          # prod.backend.env
-          echo "CI=${{ secrets.CI }}" >> envs/prod.backend.env
-          echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" >> envs/prod.backend.env
-          echo "MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}" >> envs/prod.backend.env
-          echo "MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}" >> envs/prod.backend.env
-          echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
-          echo "APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
-          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> envs/prod.backend.env
-          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> envs/prod.backend.env
-          echo "APP_SESSION_SECRET=${{ secrets.APP_SESSION_SECRET }}" >> envs/prod.backend.env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> envs/prod.backend.env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> envs/prod.backend.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> envs/prod.backend.env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> envs/prod.backend.env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.backend.env
-          echo "FRONTEND_PUBLIC=${{ secrets.FRONTEND_PUBLIC }}" >> envs/prod.backend.env
-          echo "FRONTEND_ADMIN=${{ secrets.FRONTEND_ADMIN }}" >> envs/prod.backend.env
-          echo "BACKEND=${{ secrets.BACKEND }}" >> envs/prod.backend.env
-          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.backend.env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.backend.env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.backend.env
-          echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
-          echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
-          echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
-          echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
-          echo "ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}" >> envs/prod.backend.env
-          echo "ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}" >> envs/prod.backend.env
-          echo "ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}" >> envs/prod.backend.env
-          echo "ETHEREUM_ESCROW_CONTRACT_ADDRESS=${{ secrets.ETHEREUM_ESCROW_CONTRACT_ADDRESS }}" >> envs/prod.backend.env
-          echo "ETHEREUM_ESCROW_ARBITRATOR_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ARBITRATOR_ADDRESS }}" >> envs/prod.backend.env
-          echo "ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}" >> envs/prod.backend.env
-          echo "ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}" >> envs/prod.backend.env
-          echo "ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}" >> envs/prod.backend.env
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}" >> envs/prod.backend.env
+      - name: Set inactive color
+        id: inactive_color
+        run: |
+          if [ "${{ steps.active_color.outputs.active_color }}" == "blue" ]; then
+            echo "::set-output name=inactive_color::green"
+          else
+            echo "::set-output name=inactive_color::blue"
+          fi
 
-          # prod.base-ca.env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.base-ca.env
-          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.base-ca.env
-          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.base-ca.env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.base-ca.env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
+      - name: Create .env files on Droplet
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            mkdir -p envs
 
-          # prod.frontend-admin.env
-          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
-          echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
-          echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
-          echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
-          echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-admin.env
+            # prod.backend.env
+            echo "CI=${{ secrets.CI }}" >> envs/prod.backend.env
+            echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" >> envs/prod.backend.env
+            echo "MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}" >> envs/prod.backend.env
+            echo "MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}" >> envs/prod.backend.env
+            echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
+            echo "APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> envs/prod.backend.env
+            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> envs/prod.backend.env
+            echo "APP_SESSION_SECRET=${{ secrets.APP_SESSION_SECRET }}" >> envs/prod.backend.env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> envs/prod.backend.env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> envs/prod.backend.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> envs/prod.backend.env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> envs/prod.backend.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.backend.env
+            echo "FRONTEND_PUBLIC=${{ secrets.FRONTEND_PUBLIC }}" >> envs/prod.backend.env
+            echo "FRONTEND_ADMIN=${{ secrets.FRONTEND_ADMIN }}" >> envs/prod.backend.env
+            echo "BACKEND=${{ secrets.BACKEND }}" >> envs/prod.backend.env
+            echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.backend.env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.backend.env
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.backend.env
+            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
+            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
+            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
+            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
+            echo "ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}" >> envs/prod.backend.env
+            echo "ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}" >> envs/prod.backend.env
+            echo "ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}" >> envs/prod.backend.env
+            echo "ETHEREUM_ESCROW_CONTRACT_ADDRESS=${{ secrets.ETHEREUM_ESCROW_CONTRACT_ADDRESS }}" >> envs/prod.backend.env
+            echo "ETHEREUM_ESCROW_ARBITRATOR_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ARBITRATOR_ADDRESS }}" >> envs/prod.backend.env
+            echo "ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}" >> envs/prod.backend.env
+            echo "ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}" >> envs/prod.backend.env
+            echo "ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}" >> envs/prod.backend.env
+            echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}" >> envs/prod.backend.env
 
-          # prod.frontend-public.env
-          echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-          echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-          echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
-          echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
-          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-          echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-public.env
-          echo "GA_ID=${{ secrets.GA_ID }}" >> envs/prod.frontend-public.env
+            # prod.base-ca.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.base-ca.env
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.base-ca.env
+            echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.base-ca.env
+            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.base-ca.env
+            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
 
-          # prod.mongodb.env
-          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> envs/prod.mongodb.env
-          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> envs/prod.mongodb.env
+            # prod.frontend-admin.env
+            echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
+            echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
+            echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
+            echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
+            echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-admin.env
 
-          # prod.nginx.env
-          echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" >> envs/prod.nginx.env
-          echo "FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}" >> envs/prod.nginx.env
-          echo "FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}" >> envs/prod.nginx.env
-          echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
-          echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
-          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
+            # prod.frontend-public.env
+            echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
+            echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
+            echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
+            echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
+            echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
+            echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-public.env
+            echo "GA_ID=${{ secrets.GA_ID }}" >> envs/prod.frontend-public.env
 
-          # prod.postgres.env
-          echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
-          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres.env
-          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
-          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
+            # prod.mongodb.env
+            echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> envs/prod.mongodb.env
+            echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> envs/prod.mongodb.env
 
-          # prod.redis.env
-          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
+            # prod.nginx.env
+            echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" >> envs/prod.nginx.env
+            echo "FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}" >> envs/prod.nginx.env
+            echo "FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}" >> envs/prod.nginx.env
+            echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
+            echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
+            echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
+            echo "UPSTREAM_PUBLIC=public_${{ steps.inactive_color.outputs.inactive_color }}" > envs/prod.nginx.env
+            echo "UPSTREAM_ADMIN=admin_${{ steps.inactive_color.outputs.inactive_color }}" >> envs/prod.nginx.env
+            echo "UPSTREAM_BACKEND=backend_${{ steps.inactive_color.outputs.inactive_color }}" >> envs/prod.nginx.env
 
-          # prod.rabbitmq.env
-          echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
-          echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
+            # prod.postgres.env
+            echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres.env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
 
-    - name: Back up PostgreSQL database
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 120m
-        script: |
-          cd app
-          docker compose -f prod.docker-compose.yml --profile backup up --build -d
-          docker compose -f prod.docker-compose.yml --profile backup exec -T postgres-backup sh -c "pg_dump -h postgres -U ${POSTGRES_USER} ${POSTGRES_DB} > /backups/backup_$(date +%F-%H-%M-%S).sql"
-          docker compose -f prod.docker-compose.yml --profile backup down
+            # prod.redis.env
+            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
 
-    - name: Stop and remove old containers
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 120m
-        script: |
-          cd app
-          docker compose -f prod.docker-compose.yml down
+            # prod.rabbitmq.env
+            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
+            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
 
-    - name: Deploy to DigitalOcean
-      uses: appleboy/ssh-action@v1.2.2
-      with:
-        host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-        username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-        key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-        command_timeout: 120m
-        script: |
-          cd app
-          git restore .
-          git pull origin main --ff
-          docker compose pull
-          docker compose -f prod.docker-compose.yml --profile prod up -d --build --remove-orphans
 
+      - name: Deploy to inactive color
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            git restore .
+            git pull origin main --ff
+            docker compose pull
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.inactive_color.outputs.inactive_color }} up -d --build --remove-orphans
+
+      - name: Wait for containers to be healthy
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            docker compose -f prod.docker-compose.yml ps --profile ${{ steps.inactive_color.outputs.inactive_color }} | while read -r line; do
+              if [[ $line == *"(healthy)"* ]]; then
+                echo "All containers are healthy."
+                break
+              fi
+            done
+
+      - name: Switch traffic to new color
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            docker compose -f prod.docker-compose.yml --profile prod up -d nginx
+
+      - name: Stop old containers
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} down --remove-orphans
