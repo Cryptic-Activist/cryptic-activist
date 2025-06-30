@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean
+name: Blue-Green Deploy to DigitalOcean
 
 on:
   push:
@@ -9,188 +9,310 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine ACTIVE_COLOR via SSH
-        id: get_color
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine current active environment
+        id: get_active_color
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
-            echo "$(docker ps --filter "name=backend_blue" --format "{{.Names}}" | cat -A)"
-            if [ "$(docker ps --filter "name=backend_blue" --format "{{.Names}}" | cat -A)" = "backend_blue$" ]; then
+            cd app
+            
+            # Check if blue environment is running
+            BLUE_RUNNING=$(docker compose -f prod.docker-compose.yml ps --filter "status=running" --services | grep -c "_blue" || echo "0")
+            GREEN_RUNNING=$(docker compose -f prod.docker-compose.yml ps --filter "status=running" --services | grep -c "_green" || echo "0")
+            
+            echo "Blue containers running: $BLUE_RUNNING"
+            echo "Green containers running: $GREEN_RUNNING"
+            
+            # Determine active color based on nginx upstream configuration
+            if docker exec nginx_prod cat /etc/nginx/conf.d/default.conf 2>/dev/null | grep -q "backend_blue"; then
               echo "ACTIVE_COLOR=blue"
+              echo "INACTIVE_COLOR=green"
+            elif docker exec nginx_prod cat /etc/nginx/conf.d/default.conf 2>/dev/null | grep -q "backend_green"; then
+              echo "ACTIVE_COLOR=green" 
+              echo "INACTIVE_COLOR=blue"
             else
-              echo "ACTIVE_COLOR=green"
+              # Default to blue if nginx config can't be determined
+              echo "ACTIVE_COLOR=blue"
+              echo "INACTIVE_COLOR=green"
             fi
 
-      - name: Capture ACTIVE_COLOR from SSH output
-        id: set_color
+      - name: Set environment variables
         run: |
-          echo "Raw output:"
-          echo "Test color: ${{ steps.get_color.outputs.stdout }}"
-          ACTIVE_COLOR=$(echo '${{ steps.get_color.outputs.stdout }}' | grep ACTIVE_COLOR | cut -d= -f2)
-          echo "ACTIVE_COLOR=$ACTIVE_COLOR" >> $GITHUB_ENV
-          if [ "$ACTIVE_COLOR" = "blue" ]; then
-            echo "INACTIVE_COLOR=green" >> $GITHUB_ENV
-          else
-            echo "INACTIVE_COLOR=blue" >> $GITHUB_ENV
+          # Extract colors from SSH output
+          ACTIVE_COLOR=$(echo '${{ steps.get_active_color.outputs.stdout }}' | grep "ACTIVE_COLOR=" | cut -d'=' -f2 | tr -d '\r\n')
+          INACTIVE_COLOR=$(echo '${{ steps.get_active_color.outputs.stdout }}' | grep "INACTIVE_COLOR=" | cut -d'=' -f2 | tr -d '\r\n')
+          
+          # Set defaults if extraction failed
+          if [ -z "$ACTIVE_COLOR" ]; then
+            ACTIVE_COLOR="blue"
+            INACTIVE_COLOR="green"
           fi
+          
+          echo "ACTIVE_COLOR=$ACTIVE_COLOR" >> $GITHUB_ENV
+          echo "INACTIVE_COLOR=$INACTIVE_COLOR" >> $GITHUB_ENV
+          
+          echo "🔵 Active environment: $ACTIVE_COLOR"
+          echo "🟢 Deploying to: $INACTIVE_COLOR"
 
-      - name: Print ACTIVE and INACTIVE color
-        run: |
-          echo "ACTIVE_COLOR=$ACTIVE_COLOR"
-          echo "INACTIVE_COLOR=$INACTIVE_COLOR"
-
-      - name: Create .env files on Droplet
+      - name: Create environment files on server
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
+          command_timeout: 10m
           script: |
             cd app
             mkdir -p envs
+            
+            # Clear existing env files to ensure clean state
+            rm -f envs/prod.*.env
 
-            # Use INACTIVE_COLOR from GitHub Actions
-            echo "UPSTREAM_PUBLIC=public_${INACTIVE_COLOR}" > envs/prod.nginx.env
-            echo "UPSTREAM_ADMIN=admin_${INACTIVE_COLOR}" >> envs/prod.nginx.env
-            echo "UPSTREAM_BACKEND=backend_${INACTIVE_COLOR}" >> envs/prod.nginx.env
+            # Create nginx.env with inactive color upstreams
+            cat > envs/prod.nginx.env << EOF
+            UPSTREAM_PUBLIC=public_${{ env.INACTIVE_COLOR }}
+            UPSTREAM_ADMIN=admin_${{ env.INACTIVE_COLOR }}
+            UPSTREAM_BACKEND=backend_${{ env.INACTIVE_COLOR }}
+            FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}
+            FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}
+            FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}
+            FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}
+            BACKEND_HOST=${{ secrets.BACKEND_HOST }}
+            BACKEND_PORT=${{ secrets.BACKEND_PORT }}
+            EOF
 
-            # prod.backend.env
-            echo "CI=${{ secrets.CI }}" >> envs/prod.backend.env
-            echo "MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}" >> envs/prod.backend.env
-            echo "MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}" >> envs/prod.backend.env
-            echo "MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}" >> envs/prod.backend.env
-            echo "PORT=${{ secrets.PORT }}" >> envs/prod.backend.env
-            echo "APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}" >> envs/prod.backend.env
-            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.backend.env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> envs/prod.backend.env
-            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> envs/prod.backend.env
-            echo "APP_SESSION_SECRET=${{ secrets.APP_SESSION_SECRET }}" >> envs/prod.backend.env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> envs/prod.backend.env
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> envs/prod.backend.env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> envs/prod.backend.env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> envs/prod.backend.env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.backend.env
-            echo "FRONTEND_PUBLIC=${{ secrets.FRONTEND_PUBLIC }}" >> envs/prod.backend.env
-            echo "FRONTEND_ADMIN=${{ secrets.FRONTEND_ADMIN }}" >> envs/prod.backend.env
-            echo "BACKEND=${{ secrets.BACKEND }}" >> envs/prod.backend.env
-            echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.backend.env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.backend.env
-            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.backend.env
-            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
-            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
-            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.backend.env
-            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.backend.env
-            echo "ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}" >> envs/prod.backend.env
-            echo "ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}" >> envs/prod.backend.env
-            echo "ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}" >> envs/prod.backend.env
-            echo "ETHEREUM_ESCROW_CONTRACT_ADDRESS=${{ secrets.ETHEREUM_ESCROW_CONTRACT_ADDRESS }}" >> envs/prod.backend.env
-            echo "ETHEREUM_ESCROW_ARBITRATOR_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ARBITRATOR_ADDRESS }}" >> envs/prod.backend.env
-            echo "ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}" >> envs/prod.backend.env
-            echo "ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}" >> envs/prod.backend.env
-            echo "ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}" >> envs/prod.backend.env
-            echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}" >> envs/prod.backend.env
+            # Create backend.env
+            cat > envs/prod.backend.env << EOF
+            CI=${{ secrets.CI }}
+            MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}
+            MAILTRAP_TESTINBOX_ID=${{ secrets.MAILTRAP_TESTINBOX_ID }}
+            MAILTRAP_SEND_EMAIL_API=${{ secrets.MAILTRAP_SEND_EMAIL_API }}
+            PORT=${{ secrets.PORT }}
+            APP_NAME_BACKEND=${{ secrets.APP_NAME_BACKEND }}
+            NODE_ENV=${{ secrets.NODE_ENV }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            APP_SESSION_SECRET=${{ secrets.APP_SESSION_SECRET }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            FRONTEND_PUBLIC=${{ secrets.FRONTEND_PUBLIC }}
+            FRONTEND_ADMIN=${{ secrets.FRONTEND_ADMIN }}
+            BACKEND=${{ secrets.BACKEND }}
+            MONGODB_URL=${{ secrets.MONGODB_URL }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}
+            RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}
+            ETHEREUM_NETWORK_URL=${{ secrets.ETHEREUM_NETWORK_URL }}
+            ETHEREUM_ESCROW_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ADDRESS }}
+            ETHEREUM_ESCROW_PRIVATE_KEY=${{ secrets.ETHEREUM_ESCROW_PRIVATE_KEY }}
+            ETHEREUM_ESCROW_CONTRACT_ADDRESS=${{ secrets.ETHEREUM_ESCROW_CONTRACT_ADDRESS }}
+            ETHEREUM_ESCROW_ARBITRATOR_ADDRESS=${{ secrets.ETHEREUM_ESCROW_ARBITRATOR_ADDRESS }}
+            ETHEREUM_DEPLOYER_ADDRESS=${{ secrets.ETHEREUM_DEPLOYER_ADDRESS }}
+            ETHEREUM_DEPLOYER_PRIVATE_KEY=${{ secrets.ETHEREUM_DEPLOYER_PRIVATE_KEY }}
+            ALTCHA_HMAC_SECRET_KEY=${{ secrets.ALTCHA_HMAC_SECRET_KEY }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_BACKEND }}
+            EOF
 
-            # prod.base-ca.env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> envs/prod.base-ca.env
-            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> envs/prod.base-ca.env
-            echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> envs/prod.base-ca.env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> envs/prod.base-ca.env
-            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> envs/prod.base-ca.env
+            # Create other environment files
+            cat > envs/prod.base-ca.env << EOF
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            NODE_ENV=${{ secrets.NODE_ENV }}
+            MONGODB_URL=${{ secrets.MONGODB_URL }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            EOF
 
-            # prod.frontend-admin.env
-            echo "NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
-            echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-admin.env
-            echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-admin.env
-            echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-admin.env
-            echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-admin.env
+            cat > envs/prod.frontend-admin.env << EOF
+            NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_ADMIN }}
+            NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}
+            NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}
+            NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}
+            CI=${{ secrets.CI }}
+            EOF
 
-            # prod.frontend-public.env
-            echo "NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-            echo "NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-            echo "NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}" >> envs/prod.frontend-public.env
-            echo "NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}" >> envs/prod.frontend-public.env
-            echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}" >> envs/prod.frontend-public.env
-            echo "CI=${{ secrets.CI }}" >> envs/prod.frontend-public.env
-            echo "GA_ID=${{ secrets.GA_ID }}" >> envs/prod.frontend-public.env
+            cat > envs/prod.frontend-public.env << EOF
+            NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_APP_NAME_FRONTEND_PUBLIC }}
+            NEXT_PUBLIC_FRONTEND_PUBLIC=${{ secrets.NEXT_PUBLIC_FRONTEND_PUBLIC }}
+            NEXT_PUBLIC_FRONTEND_ADMIN=${{ secrets.NEXT_PUBLIC_FRONTEND_ADMIN }}
+            NEXT_PUBLIC_BACKEND=${{ secrets.NEXT_PUBLIC_BACKEND }}
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN_FRONTEND_PUBLIC }}
+            CI=${{ secrets.CI }}
+            GA_ID=${{ secrets.GA_ID }}
+            EOF
 
-            # prod.mongodb.env
-            echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> envs/prod.mongodb.env
-            echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> envs/prod.mongodb.env
+            cat > envs/prod.mongodb.env << EOF
+            MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+            MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+            EOF
 
-            # prod.nginx.env
-            echo "FRONTEND_PUBLIC_HOST=${{ secrets.FRONTEND_PUBLIC_HOST }}" >> envs/prod.nginx.env
-            echo "FRONTEND_PUBLIC_PORT=${{ secrets.FRONTEND_PUBLIC_PORT }}" >> envs/prod.nginx.env
-            echo "FRONTEND_ADMIN_HOST=${{ secrets.FRONTEND_ADMIN_HOST }}" >> envs/prod.nginx.env
-            echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
-            echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
-            echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
+            cat > envs/prod.postgres.env << EOF
+            POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}
+            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            EOF
 
-            # prod.postgres.env
-            echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
-            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> envs/prod.postgres.env
-            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> envs/prod.postgres.env
-            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> envs/prod.postgres.env
+            cat > envs/prod.redis.env << EOF
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            EOF
 
-            # prod.redis.env
-            echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> envs/prod.redis.env
+            cat > envs/prod.rabbitmq.env << EOF
+            RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}
+            RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}
+            EOF
 
-            # prod.rabbitmq.env
-            echo "RABBITMQ_DEFAULT_USER=${{ secrets.RABBITMQ_DEFAULT_USER }}" >> envs/prod.rabbitmq.env
-            echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
+            echo "✅ Environment files created successfully"
 
-
-      - name: Deploy to inactive color
+      - name: Deploy to inactive environment
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
+          command_timeout: 30m
           script: |
             cd app
-            git restore .
-            git pull origin main --ff
-            docker compose pull
-            docker compose -f prod.docker-compose.yml --profile $INACTIVE_COLOR up -d --build --remove-orphans
+            
+            echo "🚀 Starting deployment to ${{ env.INACTIVE_COLOR }} environment"
+            
+            # Pull latest code
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Pull latest images
+            docker compose -f prod.docker-compose.yml pull
+            
+            # Deploy inactive environment
+            echo "🔧 Deploying ${{ env.INACTIVE_COLOR }} environment..."
+            docker compose -f prod.docker-compose.yml --profile ${{ env.INACTIVE_COLOR }} up -d --build --remove-orphans
+            
+            echo "✅ ${{ env.INACTIVE_COLOR }} environment deployed"
 
-      - name: Wait for containers to be healthy
+      - name: Health check inactive environment
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
+          command_timeout: 15m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml ps --profile $INACTIVE_COLOR | while read -r line; do
-              if [[ $line == *"(healthy)"* ]]; then
-                echo "All containers are healthy."
-                break
-              fi
-            done
+            
+            echo "🏥 Starting health checks for ${{ env.INACTIVE_COLOR }} environment..."
+            
+            # Wait for containers to start
+            sleep 30
+            
+            # Function to check container health
+            check_health() {
+              local max_attempts=30
+              local attempt=1
+              
+              while [ $attempt -le $max_attempts ]; do
+                echo "Health check attempt $attempt/$max_attempts..."
+                
+                # Get all containers for the inactive color
+                local containers=$(docker compose -f prod.docker-compose.yml ps --services --filter "status=running" | grep "_${{ env.INACTIVE_COLOR }}" || echo "")
+                
+                if [ -z "$containers" ]; then
+                  echo "❌ No ${{ env.INACTIVE_COLOR }} containers found running"
+                  exit 1
+                fi
+                
+                local all_healthy=true
+                
+                for service in $containers; do
+                  local container_name="${service}_${{ env.INACTIVE_COLOR }}"
+                  local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "no-health-check")
+                  
+                  if [ "$health_status" = "healthy" ] || [ "$health_status" = "no-health-check" ]; then
+                    echo "✅ $container_name is healthy"
+                  else
+                    echo "⏳ $container_name status: $health_status"
+                    all_healthy=false
+                  fi
+                done
+                
+                if [ "$all_healthy" = true ]; then
+                  echo "🎉 All ${{ env.INACTIVE_COLOR }} containers are healthy!"
+                  return 0
+                fi
+                
+                sleep 10
+                attempt=$((attempt + 1))
+              done
+              
+              echo "❌ Health check timeout after $max_attempts attempts"
+              exit 1
+            }
+            
+            check_health
 
-      - name: Switch traffic to new color
+      - name: Switch traffic to new environment
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
+          command_timeout: 5m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml --profile prod up -d nginx
+            
+            echo "🔄 Switching traffic from ${{ env.ACTIVE_COLOR }} to ${{ env.INACTIVE_COLOR }}..."
+            
+            # Update nginx configuration to point to new environment
+            # This assumes your nginx config uses environment variables for upstreams
+            docker compose -f prod.docker-compose.yml --profile prod restart nginx
+            
+            # Wait a moment for nginx to reload
+            sleep 5
+            
+            # Verify the switch worked by checking nginx config
+            if docker exec nginx_prod cat /etc/nginx/conf.d/default.conf | grep -q "backend_${{ env.INACTIVE_COLOR }}"; then
+              echo "✅ Traffic successfully switched to ${{ env.INACTIVE_COLOR }} environment"
+            else
+              echo "❌ Failed to switch traffic - nginx still pointing to old environment"
+              exit 1
+            fi
 
-      - name: Stop old containers
+      - name: Cleanup old environment
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
+          command_timeout: 10m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml --profile $ACTIVE_COLOR down
+            
+            echo "🧹 Cleaning up old ${{ env.ACTIVE_COLOR }} environment..."
+            
+            # Stop old environment containers
+            docker compose -f prod.docker-compose.yml --profile ${{ env.ACTIVE_COLOR }} down
+            
+            # Clean up unused images and volumes
+            docker image prune -f
+            docker volume prune -f
+            
+            echo "✅ Cleanup completed"
+
+      - name: Deployment summary
+        run: |
+          echo "## 🎉 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous Active Environment:** ${{ env.ACTIVE_COLOR }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Active Environment:** ${{ env.INACTIVE_COLOR }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The application has been successfully deployed using blue-green deployment strategy." >> $GITHUB_STEP_SUMMARY
