@@ -26,6 +26,12 @@ services:
       - envs/prod.redis.env
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   mongodb:
     image: mongo:6-jammy
@@ -39,6 +45,12 @@ services:
     restart: always
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   postgres:
     image: postgres:latest
@@ -69,6 +81,12 @@ services:
     networks:
       - app-network
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   backend_blue:
     container_name: backend_blue
