@@ -1,5 +1,3 @@
-2025/05/27 08:05:24 [notice] 49#49: signal process started
-2025/05/27 08:05:28 [notice] 51#51: signal process started
-2025/05/27 08:05:36 [notice] 53#53: signal process started
-2025/05/27 08:05:37 [notice] 55#55: signal process started
-2025/06/30 09:03:31 [emerg] 1#1: host not found in upstream "public_blue:3000" in /etc/nginx/nginx.conf:10
+2025/06/30 15:18:30 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:68
+2025/06/30 15:19:47 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:68
+2025/06/30 15:26:14 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:149
