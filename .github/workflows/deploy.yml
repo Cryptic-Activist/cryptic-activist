@@ -140,7 +140,7 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} stop nginx_${{ steps.active_color.outputs.active_color }}
+            docker compose -f prod.docker-compose.yml stop nginx_${{ steps.active_color.outputs.active_color }}
 
       - name: Deploy to inactive color
         uses: appleboy/ssh-action@v1.2.2
