@@ -218,3 +218,10 @@ services:
       - envs/prod.nginx.env
     networks:
       - app-network
+    depends_on:
+    - frontend-public_blue
+    - frontend-public_green
+    - frontend-admin_blue
+    - frontend-admin_green
+    - backend_blue
+    - backend_green
