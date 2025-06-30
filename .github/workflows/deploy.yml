@@ -291,7 +291,8 @@ jobs:
                 for container in "${all_services[@]}"; do
                   if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$container.*Up"; then
                     local health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-health-check{{end}}' "$container" 2>/dev/null || echo "not-found")
-                    
+                    echo "localHealth=$health_status"
+
                     if [ "$health_status" = "healthy" ] || [ "$health_status" = "no-health-check" ]; then
                       echo "✅ $container is healthy"
                     else
