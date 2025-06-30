@@ -1,0 +1,3 @@
+2025/06/30 15:18:30 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:68
+2025/06/30 15:19:47 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:68
+2025/06/30 15:26:14 [emerg] 1#1: upstream "public_blue" may not have port 3000 in /etc/nginx/nginx.conf:149
