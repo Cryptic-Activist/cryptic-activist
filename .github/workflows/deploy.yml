@@ -181,4 +181,4 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml down backend_${{ steps.active_color.outputs.active_color }} frontend-public_${{ steps.active_color.outputs.active_color }} frontend-admin_${{ steps.active_color.outputs.active_color }}
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} down

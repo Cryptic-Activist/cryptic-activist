@@ -217,5 +217,12 @@ services:
       - "443:443"
     env_file:
       - envs/prod.nginx.env
+    environment:
+      - ACTIVE_COLOR=blue # Set this to 'blue' or 'green' for your active deployment
     networks:
       - app-network
+    depends_on:
+      - frontend-public_blue
+      - frontend-admin_blue
+      - frontend-public_green
+      - frontend-admin_green
