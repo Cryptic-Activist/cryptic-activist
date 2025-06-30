@@ -22,7 +22,6 @@ jobs:
             else
               echo "ACTIVE_COLOR=green"
             fi
-        continue-on-error: false
 
       - name: Capture ACTIVE_COLOR from SSH output
         id: set_color
