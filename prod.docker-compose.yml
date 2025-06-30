@@ -94,7 +94,7 @@ services:
       - mongodb
       - rabbitmq
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -123,7 +123,7 @@ services:
       - mongodb
       - rabbitmq
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -146,6 +146,12 @@ services:
       - app-network
     depends_on:
       - backend_blue
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-public_green:
     container_name: public_green
@@ -165,6 +171,12 @@ services:
       - app-network
     depends_on:
       - backend_green
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-admin_blue:
     container_name: admin_blue
@@ -184,6 +196,12 @@ services:
       - app-network
     depends_on:
       - backend_blue
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-admin_green:
     container_name: admin_green
@@ -203,25 +221,58 @@ services:
       - app-network
     depends_on:
       - backend_green
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
-  nginx:
-    container_name: nginx
+  nginx_blue:
+    container_name: nginx_blue
     build:
       context: nginx/
       dockerfile: Dockerfile
     volumes:
+      - ./nginx/nginx.blue.conf:/etc/nginx/nginx.conf
       - ./nginx/logs:/var/log/nginx
     ports:
       - "80:80"
       - "443:443"
-    env_file:
-      - envs/prod.nginx.env
     networks:
       - app-network
+    profiles:
+      - blue
     depends_on:
-    - frontend-public_blue
-    - frontend-public_green
-    - frontend-admin_blue
-    - frontend-admin_green
-    - backend_blue
-    - backend_green
+      - frontend-public_blue
+      - frontend-admin_blue
+      - backend_blue
+      # frontend-public_blue:
+      #   condition: service_healthy
+      # frontend-admin_blue:
+      #   condition: service_healthy
+      # backend_blue:
+      #   condition: service_healthy
+
+  nginx_green:
+    container_name: nginx_green
+    build:
+      context: nginx/
+      dockerfile: Dockerfile
+    volumes:
+      - ./nginx/nginx.green.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+    profiles:
+      - green
+    depends_on:
+      frontend-public_green:
+        condition: service_healthy
+      frontend-admin_green:
+        condition: service_healthy
+      backend_green:
+        condition: service_healthy
