@@ -9,8 +9,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine active color on Droplet
-        id: active_color
+      - name: Determine ACTIVE_COLOR via SSH
+        id: get_color
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
@@ -18,27 +18,29 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
-              echo "blue"
+              echo "ACTIVE_COLOR=blue"
             else
-              echo "green"
+              echo "ACTIVE_COLOR=green"
             fi
+        continue-on-error: false
 
-      - name: Export ACTIVE_COLOR to env
-        run: echo "ACTIVE_COLOR=${{ steps.active_color.outputs.stdout }}" >> $GITHUB_ENV
-
-      - name: Set INACTIVE_COLOR based on ACTIVE_COLOR
+      - name: Capture ACTIVE_COLOR from SSH output
+        id: set_color
         run: |
+          echo "Raw output:"
+          echo "${{ steps.get_color.outputs.stdout }}"
+          ACTIVE_COLOR=$(echo '${{ steps.get_color.outputs.stdout }}' | grep ACTIVE_COLOR | cut -d= -f2)
+          echo "ACTIVE_COLOR=$ACTIVE_COLOR" >> $GITHUB_ENV
           if [ "$ACTIVE_COLOR" = "blue" ]; then
             echo "INACTIVE_COLOR=green" >> $GITHUB_ENV
           else
             echo "INACTIVE_COLOR=blue" >> $GITHUB_ENV
           fi
 
-      - name: Display INACTIVE_COLOR
-        run: echo "Deploying to INACTIVE_COLOR=$INACTIVE_COLOR"
-
-      - name: Display ACTIVE_COLOR
-        run: echo "Deploying to ACTIVE_COLOR=$ACTIVE_COLOR"
+      - name: Print ACTIVE and INACTIVE color
+        run: |
+          echo "ACTIVE_COLOR=$ACTIVE_COLOR"
+          echo "INACTIVE_COLOR=$INACTIVE_COLOR"
 
       - name: Create .env files on Droplet
         uses: appleboy/ssh-action@v1.2.2
