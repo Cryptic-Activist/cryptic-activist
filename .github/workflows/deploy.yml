@@ -28,7 +28,7 @@ jobs:
         id: set_color
         run: |
           echo "Raw output:"
-          echo "${{ steps.get_color.outputs.stdout }}"
+          echo "${{ steps.get_color }}"
           ACTIVE_COLOR=$(echo '${{ steps.get_color.outputs.stdout }}' | grep ACTIVE_COLOR | cut -d= -f2)
           echo "ACTIVE_COLOR=$ACTIVE_COLOR" >> $GITHUB_ENV
           if [ "$ACTIVE_COLOR" = "blue" ]; then
