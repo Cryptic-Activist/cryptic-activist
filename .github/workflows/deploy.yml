@@ -10,40 +10,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Determine active color
-        id: active_color
+        id: active_color_step
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
-            set -x
-            echo "Checking active backend container..."
-            docker_ps_output=$(docker ps --filter "name=backend_blue" --format "{{.Names}}")
-            echo "docker ps output for backend_blue: $docker_ps_output"
-            if echo "$docker_ps_output" | grep -q "backend_blue"; then
-              echo "Determined active color: blue"
-              echo "::set-output name=active_color::blue"
+            if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
+              echo "blue"
             else
-              docker_ps_output=$(docker ps --filter "name=backend_green" --format "{{.Names}}")
-              echo "docker ps output for backend_green: $docker_ps_output"
-              if echo "$docker_ps_output" | grep -q "backend_green"; then
-                echo "Determined active color: green"
-                echo "::set-output name=active_color::green"
-              else
-                echo "Neither backend_blue nor backend_green found running. Defaulting to blue for initial deployment."
-                echo "::set-output name=active_color::blue"
-              fi
+              echo "green"
             fi
 
-      - name: Set inactive color
-        id: inactive_color
+      - name: Set active and inactive colors
+        id: set_colors
         run: |
-          if [ "${{ steps.active_color.outputs.active_color }}" == "blue" ]; then
-            echo "::set-output name=inactive_color::green"
+          ACTIVE_COLOR="${{ steps.active_color_step.outputs.result }}"
+          echo "Active color determined: $ACTIVE_COLOR"
+          echo "active_color=$ACTIVE_COLOR" >> $GITHUB_OUTPUT
+
+          if [ "$ACTIVE_COLOR" == "blue" ]; then
+            INACTIVE_COLOR="green"
           else
-            echo "::set-output name=inactive_color::blue"
+            INACTIVE_COLOR="blue"
           fi
+          echo "Inactive color determined: $INACTIVE_COLOR"
+          echo "inactive_color=$INACTIVE_COLOR" >> $GITHUB_OUTPUT
 
       - name: Create .env files on Droplet
         uses: appleboy/ssh-action@v1.2.2
@@ -126,9 +119,9 @@ jobs:
             echo "FRONTEND_ADMIN_PORT=${{ secrets.FRONTEND_ADMIN_PORT }}" >> envs/prod.nginx.env
             echo "BACKEND_HOST=${{ secrets.BACKEND_HOST }}" >> envs/prod.nginx.env
             echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> envs/prod.nginx.env
-            echo "UPSTREAM_PUBLIC=public_${{ steps.inactive_color.outputs.inactive_color }}" > envs/prod.nginx.env
-            echo "UPSTREAM_ADMIN=admin_${{ steps.inactive_color.outputs.inactive_color }}" >> envs/prod.nginx.env
-            echo "UPSTREAM_BACKEND=backend_${{ steps.inactive_color.outputs.inactive_color }}" >> envs/prod.nginx.env
+            echo "UPSTREAM_PUBLIC=public_${{ steps.set_colors.outputs.inactive_color }}" > envs/prod.nginx.env
+            echo "UPSTREAM_ADMIN=admin_${{ steps.set_colors.outputs.inactive_color }}" >> envs/prod.nginx.env
+            echo "UPSTREAM_BACKEND=backend_${{ steps.set_colors.outputs.inactive_color }}" >> envs/prod.nginx.env
 
             # prod.postgres.env
             echo "POSTGRES_VOLUME=${{ secrets.POSTGRES_VOLUME }}" >> envs/prod.postgres.env
@@ -153,7 +146,7 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml stop nginx_${{ steps.active_color.outputs.active_color }}
+            docker compose -f prod.docker-compose.yml stop nginx_${{ steps.set_colors.outputs.active_color }}
 
       - name: Deploy to inactive color
         uses: appleboy/ssh-action@v1.2.2
@@ -167,7 +160,7 @@ jobs:
             git restore .
             git pull origin main --ff
             docker compose pull
-            docker compose -f prod.docker-compose.yml --profile ${{ steps.inactive_color.outputs.inactive_color }} up -d --build --remove-orphans
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.set_colors.outputs.inactive_color }} up -d --build --remove-orphans
 
       - name: Wait for containers to be healthy
         uses: appleboy/ssh-action@v1.2.2
@@ -179,8 +172,7 @@ jobs:
           script: |
             cd app
             # List of services to check for health
-            SERVICES=("backend_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-public_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-admin_${{ steps.inactive_color.outputs.inactive_color }}" "nginx_${{ steps.inactive_color.outputs.inactive_color }}")
-            SERVICES=("backend_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-public_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-admin_${{ steps.inactive_color.outputs.inactive_color }}" "nginx_${{ steps.inactive_color.outputs.inactive_color }}")
+            SERVICES=("backend_${{ steps.set_colors.outputs.inactive_color }}" "frontend-public_${{ steps.set_colors.outputs.inactive_color }}" "frontend-admin_${{ steps.set_colors.outputs.inactive_color }}" "nginx_${{ steps.set_colors.outputs.inactive_color }}")
             for SERVICE in "${SERVICES[@]}"; do
               echo "Waiting for $SERVICE to be healthy..."
               for i in $(seq 1 30); do # Wait up to 5 minutes (30 * 10 seconds)
@@ -211,4 +203,4 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml --profile ${{ steps.active_color.outputs.active_color }} down
+            docker compose -f prod.docker-compose.yml --profile ${{ steps.set_colors.outputs.active_color }} down
