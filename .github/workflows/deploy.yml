@@ -34,6 +34,12 @@ jobs:
             echo "INACTIVE_COLOR=blue" >> $GITHUB_ENV
           fi
 
+      - name: Display INACTIVE_COLOR
+        run: echo "Deploying to INACTIVE_COLOR=$INACTIVE_COLOR"
+
+      - name: Display ACTIVE_COLOR
+        run: echo "Deploying to ACTIVE_COLOR=$ACTIVE_COLOR"
+
       - name: Create .env files on Droplet
         uses: appleboy/ssh-action@v1.2.2
         with:
