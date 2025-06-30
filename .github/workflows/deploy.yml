@@ -131,6 +131,17 @@ jobs:
             echo "RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}" >> envs/prod.rabbitmq.env
 
 
+      - name: Stop active Nginx
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          command_timeout: 120m
+          script: |
+            cd app
+            docker compose -f prod.docker-compose.yml stop nginx_${{ steps.active_color.outputs.active_color }}
+
       - name: Deploy to inactive color
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -154,23 +165,26 @@ jobs:
           command_timeout: 120m
           script: |
             cd app
-            docker compose -f prod.docker-compose.yml ps --profile ${{ steps.inactive_color.outputs.inactive_color }} | while read -r line; do
-              if [[ $line == *"(healthy)"* ]]; then
-                echo "All containers are healthy."
-                break
-              fi
+            # List of services to check for health
+            SERVICES=("backend_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-public_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-admin_${{ steps.inactive_color.outputs.inactive_color }}" "nginx_${{ steps.inactive_color.outputs.inactive_color }}")
+            for SERVICE in "${SERVICES[@]}"; do
+              echo "Waiting for $SERVICE to be healthy..."
+              for i in $(seq 1 30); do # Wait up to 5 minutes (30 * 10 seconds)
+                HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$SERVICE" 2>/dev/null || true)
+                if [ "$HEALTH_STATUS" == "healthy" ]; then
+                  echo "$SERVICE is healthy."
+                  break
+                fi
+                if [ $i -eq 30 ]; then
+                  echo "Error: $SERVICE did not become healthy in time."
+                  exit 1
+                fi
+                sleep 10
+              done
             done
+            echo "All new containers are healthy."
 
-      - name: Switch traffic to new color
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 120m
-          script: |
-            cd app
-            docker compose -f prod.docker-compose.yml --profile prod up -d nginx
+      
 
       - name: Stop old containers
         uses: appleboy/ssh-action@v1.2.2
