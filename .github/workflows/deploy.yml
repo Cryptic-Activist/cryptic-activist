@@ -18,12 +18,22 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             set -x
-            if docker ps --filter "name=backend_blue" --format "{{.Names}}" | grep -q "backend_blue"; then
-              echo "Active color is blue"
+            echo "Checking active backend container..."
+            docker_ps_output=$(docker ps --filter "name=backend_blue" --format "{{.Names}}")
+            echo "docker ps output for backend_blue: $docker_ps_output"
+            if echo "$docker_ps_output" | grep -q "backend_blue"; then
+              echo "Determined active color: blue"
               echo "::set-output name=active_color::blue"
             else
-              echo "Active color is green"
-              echo "::set-output name=active_color::green"
+              docker_ps_output=$(docker ps --filter "name=backend_green" --format "{{.Names}}")
+              echo "docker ps output for backend_green: $docker_ps_output"
+              if echo "$docker_ps_output" | grep -q "backend_green"; then
+                echo "Determined active color: green"
+                echo "::set-output name=active_color::green"
+              else
+                echo "Neither backend_blue nor backend_green found running. Defaulting to blue for initial deployment."
+                echo "::set-output name=active_color::blue"
+              fi
             fi
 
       - name: Set inactive color
@@ -169,7 +179,7 @@ jobs:
           script: |
             cd app
             # List of services to check for health
-            SERVICES=("backend_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-public_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-admin_${{ steps.inactive_color.outputs.inactive_color }}")
+            SERVICES=("backend_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-public_${{ steps.inactive_color.outputs.inactive_color }}" "frontend-admin_${{ steps.inactive_color.outputs.inactive_color }}" "nginx_${{ steps.inactive_color.outputs.inactive_color }}")
             for SERVICE in "${SERVICES[@]}"; do
               echo "Waiting for $SERVICE to be healthy..."
               for i in $(seq 1 30); do # Wait up to 5 minutes (30 * 10 seconds)
@@ -186,6 +196,8 @@ jobs:
               done
             done
             echo "All new containers are healthy."
+
+      
 
       - name: Stop old containers
         uses: appleboy/ssh-action@v1.2.2
