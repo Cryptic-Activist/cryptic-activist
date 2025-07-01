@@ -97,6 +97,20 @@ model Chat {
   @@map("chats")
 }
 
+model CryptocurrencyChain {
+  id               String         @id @default(uuid())
+  cryptocurrency   Cryptocurrency @relation("chainCryptocurrency", fields: [cryptocurrencyId], references: [id], onDelete: Cascade)
+  cryptocurrencyId String
+  chain            Chain          @relation("chainCryptocurrency", fields: [chainId], references: [id], onDelete: Cascade)
+  chainId          String
+  contractAddress  String?        @db.VarChar(200) // Contract address on this specific chain
+  isVerified       Boolean        @default(false) @db.Boolean // Whether the token is verified on this chain
+  createdAt        DateTime       @default(now()) @db.Timestamp()
+
+  @@unique([cryptocurrencyId, chainId])
+  @@map("cryptocurrency_chains")
+}
+
 model Cryptocurrency {
   id          String    @id @default(uuid())
   coingeckoId String    @unique @db.VarChar(200)
@@ -106,8 +120,11 @@ model Cryptocurrency {
   deletedAt   DateTime? @db.Timestamp()
   createdAt   DateTime? @default(now()) @db.Timestamp()
   updatedAt   DateTime? @updatedAt @db.Timestamp()
-  offers      Offer[]   @relation("offer")
-  trades      Trade[]   @relation("trade")
+
+  // Relations
+  chains CryptocurrencyChain[] @relation("chainCryptocurrency")
+  offers Offer[]               @relation("offer")
+  trades Trade[]               @relation("trade")
 
   @@map("cryptocurrencies")
 }
@@ -239,6 +256,28 @@ model Language {
   @@map("languages")
 }
 
+model Chain {
+  id             String   @id @default(uuid())
+  name           String   @unique // e.g., "Ethereum", "Polygon"
+  symbol         String   @unique // e.g., "ETH", "MATIC"
+  chainId        Int      @unique // Network chain ID (e.g., 1 for Ethereum mainnet)
+  rpcUrl         String? // RPC endpoint URL
+  explorerUrl    String? // Block explorer URL
+  nativeCurrency String // Native currency symbol
+  isTestnet      Boolean  @default(false) @db.Boolean
+  isActive       Boolean  @default(true) @db.Boolean
+  logoUrl        String? // Chain logo/icon URL
+  description    String?
+  createdAt      DateTime @default(now()) @db.Timestamp()
+  updatedAt      DateTime @updatedAt @db.Timestamp()
+
+  // Relations
+  offers               Offer[]               @relation("offer")
+  cryptocurrencyChains CryptocurrencyChain[] @relation("chainCryptocurrency")
+
+  @@map("chains")
+}
+
 model Offer {
   id                  String          @id @default(uuid())
   offerType           String
@@ -253,6 +292,8 @@ model Offer {
   averageTradeSpeed   Float?
   instructions        String
   kycOnly             Boolean         @default(false) @db.Boolean
+  chain               Chain           @relation("offer", fields: [chainId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  chainId             String
   deletedAt           DateTime?       @db.Timestamp()
   createdAt           DateTime?       @default(now()) @db.Timestamp()
   updatedAt           DateTime?       @updatedAt @db.Timestamp()
