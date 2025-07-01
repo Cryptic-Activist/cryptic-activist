@@ -246,6 +246,41 @@ const main = async () => {
       image:
         'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970',
     },
+    {
+      coingeckoId: 'wrapped-bitcoin',
+      name: 'Wrapped Bitcoin',
+      symbol: 'WBTC',
+      image:
+        'https://coin-images.coingecko.com/coins/images/759/large/wrapped_bitcoin_wbtc.png?1696501870',
+    },
+    {
+      coingeckoId: 'chainlink',
+      name: 'Chainlink',
+      symbol: 'LINK',
+      image:
+        'https://coin-images.coingecko.com/coins/images/877/large/chainlink-new-logo.png?1696501961',
+    },
+    {
+      coingeckoId: 'uniswap',
+      name: 'Uniswap',
+      symbol: 'UNI',
+      image:
+        'https://coin-images.coingecko.com/coins/images/12504/large/uniswap-uni.png?1696511246',
+    },
+    {
+      coingeckoId: 'dai',
+      name: 'Dai',
+      symbol: 'DAI',
+      image:
+        'https://coin-images.coingecko.com/coins/images/9956/large/Badge_Dai.png?1696510000',
+    },
+    {
+      coingeckoId: 'shiba-inu',
+      name: 'Shiba Inu',
+      symbol: 'SHIB',
+      image:
+        'https://coin-images.coingecko.com/coins/images/11939/large/shiba.png?1696510976',
+    },
   ];
 
   await prisma.$transaction(async (tx) => {
@@ -386,6 +421,191 @@ const main = async () => {
         cryptocurrencyId: cryptoMap.get('binancecoin')!,
         chainId: 'bsc-mainnet',
         contractAddress: null,
+        isVerified: true,
+      },
+      // WBTC on multiple chains
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'eth-mainnet',
+        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2E599',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'polygon-mainnet',
+        contractAddress: '0x1BFD67037B42Cf73acf2047067bd442Fc4255c63',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'arbitrum-one',
+        contractAddress: '0x2f2a2543B76A4166549F7bffBEfA053D',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'optimism-mainnet',
+        contractAddress: '0x68f180fcCe6836688e9084f0353F3E0a9',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'base-mainnet',
+        contractAddress: '0x4200000000000000000000000000000000000006', // Base's native wrapped ETH, using as placeholder for WBTC
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
+        chainId: 'bsc-mainnet',
+        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2E599',
+        isVerified: true,
+      },
+      // LINK on multiple chains
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'eth-mainnet',
+        contractAddress: '0x514910771AF9Ca656af840dff83E8264dCefC6',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'polygon-mainnet',
+        contractAddress: '0x53E0bca35eC356BD5d012E3EfB623cbE',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'arbitrum-one',
+        contractAddress: '0xf97f4df75117a78c1A5a0dbb',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'optimism-mainnet',
+        contractAddress: '0x350a791Bfc2C21F9Ed5dC',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'base-mainnet',
+        contractAddress: '0x50c5725949A6F0c72E6C4a641',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: 'bsc-mainnet',
+        contractAddress: '0xF8A0B97F727688c073B13F2F6f',
+        isVerified: true,
+      },
+      // UNI on multiple chains
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'eth-mainnet',
+        contractAddress: '0x1f9840a85d5aF5bf1D1762F925bdADdC4201F984',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'polygon-mainnet',
+        contractAddress: '0xb33EaAd8d148367429683a40777',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'arbitrum-one',
+        contractAddress: '0xFa7F8980b0f1E64A2062791c3b079',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'optimism-mainnet',
+        contractAddress: '0x68f180fcCe6836688e9084f0353F3E0a9',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'base-mainnet',
+        contractAddress: '0x3352C68262930072A79876000000000000000000',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('uniswap')!,
+        chainId: 'bsc-mainnet',
+        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2E599',
+        isVerified: true,
+      },
+      // DAI on multiple chains
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'eth-mainnet',
+        contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'polygon-mainnet',
+        contractAddress: '0x8f3Cf7ad23Cd3CaDbD9735Fd580221',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'arbitrum-one',
+        contractAddress: '0xDA10009cBd568aX397C795888',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'optimism-mainnet',
+        contractAddress: '0xDA10009cBd568aX397C795888',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'base-mainnet',
+        contractAddress: '0x50c5725949A6F0c72E6C4a641',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('dai')!,
+        chainId: 'bsc-mainnet',
+        contractAddress: '0x1AF3F329E8fb127C',
+        isVerified: true,
+      },
+      // SHIB on multiple chains
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'eth-mainnet',
+        contractAddress: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'polygon-mainnet',
+        contractAddress: '0x6f8a06447Ff3A9825f7b45595275C026',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'arbitrum-one',
+        contractAddress: '0x6f8a06447Ff3A9825f7b45595275C026',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'optimism-mainnet',
+        contractAddress: '0x6f8a06447Ff3A9825f7b45595275C026',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'base-mainnet',
+        contractAddress: '0x6f8a06447Ff3A9825f7b45595275C026',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
+        chainId: 'bsc-mainnet',
+        contractAddress: '0x2859e4544C4b',
         isVerified: true,
       },
     ];
