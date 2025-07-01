@@ -210,83 +210,93 @@ const main = async () => {
       ],
     });
 
-  // Create cryptocurrencies (contract addresses will be stored in CryptocurrencyChain junction table)
-  const cryptocurrencies = await prisma.cryptocurrency.createMany({
-    data: [
-      {
-        id: 'eth',
-        coingeckoId: 'ethereum',
-        name: 'Ethereum',
-        symbol: 'ETH',
-        image:
-          'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628',
-      },
-      {
-        id: 'pol',
-        coingeckoId: 'polygon-ecosystem-token',
-        name: 'POL (ex-MATIC)',
-        symbol: 'POL',
-        image:
-          'https://coin-images.coingecko.com/coins/images/32440/large/polygon.png?1698233684',
-      },
-      {
-        id: 'usdt',
-        coingeckoId: 'tether',
-        name: 'Tether USD',
-        symbol: 'USDT',
-        image:
-          'https://coin-images.coingecko.com/coins/images/325/large/Tether-logo.png?1696501661',
-      },
-      {
-        id: 'usdc',
-        coingeckoId: 'usd-coin',
-        name: 'USD Coin',
-        symbol: 'USDC',
-        image:
-          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1696506694',
-      },
-      {
-        id: 'bnb',
-        coingeckoId: 'binancecoin',
-        name: 'BNB',
-        symbol: 'BNB',
-        image:
-          'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970',
-      },
-    ],
-  });
+  const cryptocurrencyData = [
+    {
+      coingeckoId: 'ethereum',
+      name: 'Ethereum',
+      symbol: 'ETH',
+      image:
+        'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628',
+    },
+    {
+      coingeckoId: 'polygon-ecosystem-token',
+      name: 'POL (ex-MATIC)',
+      symbol: 'POL',
+      image:
+        'https://coin-images.coingecko.com/coins/images/32440/large/polygon.png?1698233684',
+    },
+    {
+      coingeckoId: 'tether',
+      name: 'Tether USD',
+      symbol: 'USDT',
+      image:
+        'https://coin-images.coingecko.com/coins/images/325/large/Tether-logo.png?1696501661',
+    },
+    {
+      coingeckoId: 'usd-coin',
+      name: 'USD Coin',
+      symbol: 'USDC',
+      image:
+        'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1696506694',
+    },
+    {
+      coingeckoId: 'binancecoin',
+      name: 'BNB',
+      symbol: 'BNB',
+      image:
+        'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970',
+    },
+  ];
 
-  // Create cryptocurrency-chain relationships
-  const cryptocurrencyChains = await prisma.cryptocurrencyChain.createMany({
-    data: [
+  await prisma.$transaction(async (tx) => {
+    // Create cryptocurrencies
+    await tx.cryptocurrency.createMany({
+      data: cryptocurrencyData,
+    });
+
+    // Fetch the created cryptocurrencies to get their generated IDs
+    const createdCryptos = await tx.cryptocurrency.findMany({
+      where: {
+        coingeckoId: {
+          in: cryptocurrencyData.map((c) => c.coingeckoId),
+        },
+      },
+    });
+
+    const cryptoMap = new Map(
+      createdCryptos.map((crypto) => [crypto.coingeckoId, crypto.id]),
+    );
+
+    // Create cryptocurrency-chain relationships
+    const cryptocurrencyChainData = [
       // Ethereum native on Ethereum
       {
-        cryptocurrencyId: 'eth',
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: 'eth-mainnet',
         contractAddress: null,
         isVerified: true,
       },
       // Ethereum on other chains (wrapped/bridged)
       {
-        cryptocurrencyId: 'eth',
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: 'polygon-mainnet',
         contractAddress: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'eth',
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: 'arbitrum-one',
         contractAddress: null, // Native on Arbitrum
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'eth',
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: 'base-mainnet',
         contractAddress: null, // Native on Base
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'eth',
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: 'optimism-mainnet',
         contractAddress: null, // Native on Optimism
         isVerified: true,
@@ -294,14 +304,14 @@ const main = async () => {
 
       // POL/MATIC native on Polygon
       {
-        cryptocurrencyId: 'pol',
+        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token')!,
         chainId: 'polygon-mainnet',
         contractAddress: null,
         isVerified: true,
       },
       // POL on Ethereum (as ERC-20)
       {
-        cryptocurrencyId: 'pol',
+        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token')!,
         chainId: 'eth-mainnet',
         contractAddress: '0x455e53908408684533026eDA59C4C4C9b7B98F3b',
         isVerified: true,
@@ -309,31 +319,31 @@ const main = async () => {
 
       // USDT on multiple chains
       {
-        cryptocurrencyId: 'usdt',
+        cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: 'eth-mainnet',
         contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdt',
+        cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: 'polygon-mainnet',
         contractAddress: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdt',
+        cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: 'arbitrum-one',
         contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdt',
+        cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: 'bsc-mainnet',
         contractAddress: '0x55d398326f99059fF775485246999027B3197955',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdt',
+        cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: 'optimism-mainnet',
         contractAddress: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
         isVerified: true,
@@ -341,31 +351,31 @@ const main = async () => {
 
       // USDC on multiple chains
       {
-        cryptocurrencyId: 'usdc',
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
         chainId: 'eth-mainnet',
         contractAddress: '0xA0b86a33E6441947F6Bcf21a1E8AA3e3DdC6e62F',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdc',
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
         chainId: 'polygon-mainnet',
         contractAddress: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdc',
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
         chainId: 'arbitrum-one',
         contractAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdc',
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
         chainId: 'base-mainnet',
         contractAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         isVerified: true,
       },
       {
-        cryptocurrencyId: 'usdc',
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
         chainId: 'optimism-mainnet',
         contractAddress: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
         isVerified: true,
@@ -373,12 +383,15 @@ const main = async () => {
 
       // BNB native on BSC
       {
-        cryptocurrencyId: 'bnb',
+        cryptocurrencyId: cryptoMap.get('binancecoin')!,
         chainId: 'bsc-mainnet',
         contractAddress: null,
         isVerified: true,
       },
-    ],
+    ];
+    await tx.cryptocurrencyChain.createMany({
+      data: cryptocurrencyChainData,
+    });
   });
 
   // Create first trader user
@@ -559,8 +572,6 @@ const main = async () => {
     newTraderOffer,
     newVendorOffer,
     chainsCreated: 6,
-    cryptocurrenciesCreated: 5,
-    cryptocurrencyChainRelations: 16,
   });
 
   process.exit(0);
