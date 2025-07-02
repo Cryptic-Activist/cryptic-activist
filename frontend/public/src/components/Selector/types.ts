@@ -1,7 +1,12 @@
 import { ReactElement } from 'react';
 
 export type SelectorProps = {
-  type: 'cryptocurrency' | 'fiat' | 'paymentMethod' | 'paymentDetails';
+  type:
+    | 'cryptocurrency'
+    | 'fiat'
+    | 'paymentMethod'
+    | 'paymentDetails'
+    | 'chain';
   hasLabel?: boolean;
   overrideLabel?: string;
 };

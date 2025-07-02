@@ -1,3 +1,4 @@
+import { Chain } from '@/store/chain/types';
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { Fiat } from '@/store/fiat/types';
 import { PaymentMethod } from '@/store/paymentMethod/types';
@@ -21,6 +22,7 @@ type Defaults = {
   fiat?: Fiat;
   cryptocurrency?: Cryptocurrency;
   paymentMethod?: PaymentMethod;
+  chain?: Chain;
   amount?: number;
 };
 
@@ -57,6 +59,7 @@ export type AppStoreSetter = {
     fiat?: Fiat | null;
     cryptocurrency?: Cryptocurrency | null;
     paymentMethod?: PaymentMethod | null;
+    chain?: Chain | null;
     amount?: number;
   };
   currentPrice?: CurrentPrice;

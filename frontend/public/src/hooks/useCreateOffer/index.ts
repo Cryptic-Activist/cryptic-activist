@@ -70,14 +70,17 @@ const useCreateOffer = () => {
       {
         fiat: defaults?.fiat,
         cryptocurrency: defaults?.cryptocurrency,
+        chain: defaults?.chain,
       },
-      'createOffer/setFiatCryptocurrency'
+      'createOffer/setFiatCryptocurrencyChain'
     );
-  }, [defaults?.cryptocurrency, defaults?.fiat]);
+  }, [defaults?.cryptocurrency, defaults?.fiat, defaults?.chain]);
 
   useEffect(() => {
+    console.log({ createOfferChain: createOffer });
     const validated = CreateOfferPaymentMethod.safeParse({
       fiat: createOffer?.fiat,
+      chain: createOffer?.chain,
       cryptocurrency: createOffer?.cryptocurrency,
       offerType: createOffer?.offerType,
       paymentMethodId: createOffer?.paymentMethodId,
@@ -91,6 +94,7 @@ const useCreateOffer = () => {
   }, [
     createOffer?.fiat,
     createOffer?.cryptocurrency,
+    createOffer?.chain,
     createOffer?.offerType,
     createOffer?.paymentMethodId,
     createOffer?.paymentDetails,
@@ -159,6 +163,7 @@ const useCreateOffer = () => {
     createOffer: {
       cryptocurrency: createOffer.cryptocurrency,
       fiat: createOffer.fiat,
+      chain: createOffer.chain,
       vendorId: createOffer.vendorId,
       offerType: createOffer.offerType,
       paymentMethodId: createOffer.paymentMethodId,

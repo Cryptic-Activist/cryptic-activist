@@ -6,3 +6,12 @@ export type CryptocurrencyParams = {
   symbol?: string;
   name?: string;
 };
+
+export type ChainParams = {
+  id?: string;
+  coingeckoId?: string;
+  symbol?: string;
+  name?: string;
+  chainId?: number;
+  logoUrl?: string;
+};

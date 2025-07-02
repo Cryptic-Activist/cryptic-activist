@@ -17,6 +17,7 @@ export type GetOffersPaginationRequest = {
   paymentMethodIds?: string;
   amount?: string;
   fiatId?: string;
+  chainId?: string;
   excludedVendorId?: string;
   cursor?: string;
 };

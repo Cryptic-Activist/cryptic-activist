@@ -11,6 +11,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'coin-images.coingecko.com',
       } as RemotePattern,
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+      } as RemotePattern,
+      {
+        protocol: 'https',
+        hostname: 'altcoinsbox.com',
+      } as RemotePattern,
       ...(IS_DEV
         ? [
             {

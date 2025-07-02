@@ -174,6 +174,7 @@ export const getOffersPaginationController = async (
   const {
     cryptocurrencyId,
     fiatId,
+    chainId,
     offerType,
     paymentMethodIds,
     limit,
@@ -198,14 +199,13 @@ export const getOffersPaginationController = async (
       where: {
         cryptocurrencyId,
         fiatId,
+        chainId,
         offerType,
         ...(paymentMethodIdsArray && {
           paymentMethodId: { in: paymentMethodIdsArray },
         }),
         deletedAt: null,
-        vendorId: {
-          ...(excludedVendorId && { notIn: [excludedVendorId] }),
-        },
+        ...(excludedVendorId && { vendorId: { notIn: [excludedVendorId] } }),
         ...(amount && {
           AND: [
             { limitMin: { lte: amountNum } },
@@ -232,6 +232,7 @@ export const getOffersPaginationController = async (
         listAt: true,
         kycOnly: true,
         limitMin: true,
+        offerType: true,
         limitMax: true,
         vendor: {
           select: {
@@ -262,6 +263,13 @@ export const getOffersPaginationController = async (
           select: {
             id: true,
             name: true,
+            symbol: true,
+          },
+        },
+        chain: {
+          select: {
+            name: true,
+            logoUrl: true,
             symbol: true,
           },
         },

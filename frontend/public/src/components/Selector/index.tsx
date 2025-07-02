@@ -55,6 +55,8 @@ const Selector: FC<SelectorProps> = ({
           countryFlags[defaults.fiat.country],
           defaults.fiat.name
         );
+      } else if (type === 'chain' && defaults.chain) {
+        return buildLabel(defaults.chain.logoUrl, defaults.chain.name);
       } else if (type === 'paymentMethod' && defaults.paymentMethod) {
         if (overrideLabel) {
           return overrideLabel;
@@ -77,10 +79,13 @@ const Selector: FC<SelectorProps> = ({
     if (type === 'paymentMethod') {
       toggleModal('paymentMethods');
     }
+    if (type === 'chain') {
+      toggleModal('chains');
+    }
   };
 
   useEffect(() => {
-    if (defaults.cryptocurrency && defaults.fiat) {
+    if (defaults.cryptocurrency && defaults.fiat && defaults.chain) {
       getButtonLabel();
     }
   }, [defaults, type]);

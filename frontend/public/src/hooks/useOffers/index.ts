@@ -20,6 +20,7 @@ const useOffers = () => {
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
+      chainId: app.defaults.chain?.id,
       paymentMethodIds: offers.selectedPaymentMethodIds.join(','),
       amount: app.defaults.amount,
       offerType: app.type,
@@ -44,6 +45,7 @@ const useOffers = () => {
     const newOffers = await fetchOffersPagination({
       cryptocurrencyId: app.defaults.cryptocurrency?.id,
       fiatId: app.defaults.fiat?.id,
+      chainId: app.defaults.chain?.id,
       paymentMethodIds: offers.selectedPaymentMethodIds.join(','),
       offerType: app.type,
       excludedVendorId: user.id,
@@ -100,6 +102,7 @@ const useOffers = () => {
   }, [
     app.defaults.cryptocurrency?.id,
     app.defaults.fiat?.id,
+    app.defaults.chain?.id,
     offers.selectedPaymentMethodIds,
     app.defaults.amount,
     app.type,

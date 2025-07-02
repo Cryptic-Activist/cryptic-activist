@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Chains,
   Cryptocurrencies,
   DisputeRequest,
   EnableTwoFactorAuthnetication,
@@ -37,6 +38,7 @@ const AllModals = () => {
       {navigationBar.modals.resetPassword ? <ResetPassword /> : null}
       {navigationBar.modals.fiats ? <Fiats /> : null}
       {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : null}
+      {navigationBar.modals.chains ? <Chains /> : null}
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : null}
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : null}
       {navigationBar.modals.blockchain ? <WalletModal /> : null}

@@ -20,6 +20,7 @@ type Modals = {
   verifyAccount: boolean;
   privateKeys: boolean;
   cryptocurrencies: boolean;
+  chains: boolean;
   fiats: boolean;
   paymentMethods: boolean;
   blockchain: boolean;
@@ -71,11 +72,13 @@ export type Modal =
   | 'privateKeys'
   | 'cryptocurrencies'
   | 'fiats'
+  | 'chains'
   | 'paymentMethods'
   | 'blockchain'
   | 'feedback'
   | 'startTradeConfirmation'
-  | 'disputeRequest';
+  | 'disputeRequest'
+  | 'chains';
 
 export type ToggleModalActionPayload = {
   modal: Modal;

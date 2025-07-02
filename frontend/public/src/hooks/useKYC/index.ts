@@ -232,6 +232,8 @@ const useKYC = () => {
 
   const showKYCForm = forceShowForm || !user?.kyc?.length;
 
+  console.log({ showKYCForm, userKyc: user?.kyc });
+
   useEffect(() => {
     if (showBackDocument && uploadedFiles.length < 3) {
       return;

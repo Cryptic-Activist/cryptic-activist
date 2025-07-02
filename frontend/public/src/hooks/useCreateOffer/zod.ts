@@ -1,4 +1,5 @@
 import {
+  ZodChain,
   ZodCryptocurrency,
   ZodFiat,
   ZodInstructions,
@@ -24,6 +25,7 @@ export const CreateOfferPaymentMethod = z
   .object({
     fiat: ZodFiat,
     cryptocurrency: ZodCryptocurrency,
+    chain: ZodChain,
     offerType: ZodOfferType,
     paymentMethodId: ZodPaymentMethodId,
     paymentDetails: ZodPaymentDetails,

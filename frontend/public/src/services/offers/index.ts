@@ -42,11 +42,13 @@ export const fetchCurrentVendorOffers = async (vendorId: string) => {
 export const submitOfferCreate = async (
   data: CreateOfferSetter & { vendorWalletAddress: string }
 ) => {
+  console.log({ data });
   const bearerToken = getBearerToken();
   const payload = {
     vendorId: data.vendorId,
     cryptocurrencyId: data.cryptocurrency?.id,
     fiatId: data.fiat?.id,
+    chainId: data.chain?.id,
     offerType: data.offerType,
     paymentMethodId: data.paymentMethodId,
     pricingType: data.pricingType,
