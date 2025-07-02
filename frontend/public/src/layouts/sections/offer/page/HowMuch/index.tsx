@@ -5,6 +5,7 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { HowMuchProps } from './types';
 import coreStyles from '../index.module.scss';
+import { isFloatGreaterThanBigIntPrecise } from '@/utils/math';
 import styles from './index.module.scss';
 import { toUpperCase } from '@/utils';
 
@@ -20,6 +21,9 @@ const HowMuch: FC<HowMuchProps> = ({
   isLoggedIn,
 }) => {
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
+
+  console.log({ balacne: blockchain.balance, cryptocurrencyAmount });
+
   useEffect(() => {
     const getSubmitButtonLabel = () => {
       if (!isLoggedIn()) {
@@ -40,6 +44,25 @@ const HowMuch: FC<HowMuchProps> = ({
       if (offer.kycOnly && user.kyc && user.kyc.length === 0) {
         return 'KYC Verified Users Only';
       }
+      if (blockchain?.chain?.id !== offer.chain?.chainId) {
+        return 'Your wallet is not connected to the same offer chain';
+      }
+      if (
+        blockchain.balance &&
+        cryptocurrencyAmount &&
+        blockchain?.balance?.value
+      ) {
+        const hasSuffientBalance = isFloatGreaterThanBigIntPrecise(
+          cryptocurrencyAmount,
+          blockchain.balance.value
+        );
+        console.log({
+          hasSuffientBalance,
+        });
+        if (!hasSuffientBalance) {
+          return 'Insuffient balance for this trade';
+        }
+      }
       return 'Start trading';
     };
     const label = getSubmitButtonLabel();
@@ -51,6 +74,8 @@ const HowMuch: FC<HowMuchProps> = ({
     isLoggedIn,
     mutationStartTrade.isPending,
     mutationStartTrade.isError,
+    blockchain.balance,
+    cryptocurrencyAmount,
   ]);
 
   return (

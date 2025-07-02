@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import { getSocket } from '@/services/socket';
+import { isFloatGreaterThanBigIntPrecise } from '@/utils/math';
 import useApp from '../useApp';
 import useBlockchain from '../useBlockchain';
 import useDebounce from '../useDebounce';
@@ -174,6 +175,13 @@ const useOffer = () => {
   useEffect(() => {
     const kycOnlyAllowed = offer.kycOnly && user.kyc && user.kyc.length === 0;
     const isUserDifferentThanVendor = user.id !== offer.vendor?.id;
+    const hasSuffientBalance =
+      cryptocurrencyAmount &&
+      blockchain.balance?.value &&
+      isFloatGreaterThanBigIntPrecise(
+        cryptocurrencyAmount,
+        blockchain.balance.value
+      );
 
     if (
       isLoggedIn() &&
@@ -182,7 +190,9 @@ const useOffer = () => {
       blockchain.account?.address &&
       cryptocurrencyAmount &&
       isUserDifferentThanVendor &&
-      !kycOnlyAllowed
+      !kycOnlyAllowed &&
+      blockchain?.chain?.id === offer.chain?.chainId &&
+      hasSuffientBalance
     ) {
       setIsTradingAvailable(true);
     } else {

@@ -29,7 +29,16 @@ const ThisOffer: FC<ThisOfferProps> = ({ offer, currentPrice }) => {
             {offer.cryptocurrency?.id && (
               <DisplayCurrency
                 image={offer.cryptocurrency?.image}
-                name={offer.cryptocurrency?.name}
+                name={`${offer.cryptocurrency?.symbol} - ${offer.cryptocurrency?.name}`}
+              />
+            )}
+          </div>
+          <div className={styles.section}>
+            <h4 className={styles.subHeading}>Chain</h4>
+            {offer.chain?.id && (
+              <DisplayCurrency
+                image={offer.chain?.logoUrl}
+                name={offer.chain?.name}
               />
             )}
           </div>

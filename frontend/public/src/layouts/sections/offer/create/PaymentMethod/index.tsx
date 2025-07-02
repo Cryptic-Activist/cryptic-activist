@@ -60,6 +60,10 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
     );
   };
 
+  console.log({
+    createOfferVendorWalletAddress: createOffer.vendorWalletAddress,
+  });
+
   return (
     <>
       <Head>
@@ -76,6 +80,14 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
           <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>Choose Fiat</h2>
             <Selector type="fiat" hasLabel={false} />
+          </section>
+          <section className={stylesCore.horizontalGroup}>
+            <h2 className={stylesCore.groupHeading}>Choose Wallet</h2>
+            <Selector
+              type="wallet"
+              hasLabel={false}
+              selected={createOffer.vendorWalletAddress}
+            />
           </section>
           <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>Choose Cryptocurrency</h2>

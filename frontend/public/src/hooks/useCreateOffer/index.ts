@@ -6,22 +6,19 @@ import {
   CreateOfferTradePricing,
 } from './zod';
 import { getLocalStorage, setLocalStorage } from '@/utils';
-import { useApp, useBlockchain, useUser } from '@/hooks';
+import { useApp, useUser } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { fetchPaymentDetails } from '@/services/paymentDetails';
 import { useRootStore } from '@/store';
 
-const useCreateOffer = () => {
+const useCreateOffer = (enabled = true) => {
   const { createOffer } = useRootStore();
   const {
     app: { defaults },
   } = useApp();
   const { user } = useUser();
-  const {
-    blockchain: { account },
-  } = useBlockchain();
 
   const [step, setStep] = useState(0);
   // const [paymentDetailsList, setPaymentDetailsList] = useState([]);
@@ -33,7 +30,7 @@ const useCreateOffer = () => {
 
   const {} = useQuery({
     queryKey: ['vendor', user.id],
-    enabled: !!user.id,
+    enabled: enabled ? !!user.id : false,
     queryFn: () => {
       createOffer.setCreateOfferValue(
         { vendorId: user.id },
@@ -77,10 +74,10 @@ const useCreateOffer = () => {
   }, [defaults?.cryptocurrency, defaults?.fiat, defaults?.chain]);
 
   useEffect(() => {
-    console.log({ createOfferChain: createOffer });
     const validated = CreateOfferPaymentMethod.safeParse({
       fiat: createOffer?.fiat,
       chain: createOffer?.chain,
+      vendorWalletAddress: createOffer?.vendorWalletAddress,
       cryptocurrency: createOffer?.cryptocurrency,
       offerType: createOffer?.offerType,
       paymentMethodId: createOffer?.paymentMethodId,
@@ -95,6 +92,7 @@ const useCreateOffer = () => {
     createOffer?.fiat,
     createOffer?.cryptocurrency,
     createOffer?.chain,
+    createOffer?.vendorWalletAddress,
     createOffer?.offerType,
     createOffer?.paymentMethodId,
     createOffer?.paymentDetails,
@@ -128,7 +126,6 @@ const useCreateOffer = () => {
       label: createOffer?.label,
       terms: createOffer?.terms,
       instructions: createOffer?.instructions,
-      vendorWalletAddress: account?.address,
     });
 
     createOffer.setCreateOfferValue(
@@ -142,7 +139,6 @@ const useCreateOffer = () => {
     createOffer?.label,
     createOffer?.terms,
     createOffer?.instructions,
-    account?.address,
   ]);
 
   useEffect(() => {
@@ -163,6 +159,7 @@ const useCreateOffer = () => {
     createOffer: {
       cryptocurrency: createOffer.cryptocurrency,
       fiat: createOffer.fiat,
+      vendorWalletAddress: createOffer.vendorWalletAddress,
       chain: createOffer.chain,
       vendorId: createOffer.vendorId,
       offerType: createOffer.offerType,

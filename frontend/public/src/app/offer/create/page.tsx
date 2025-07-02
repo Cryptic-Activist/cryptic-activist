@@ -1,14 +1,9 @@
 'use client';
 
 import { PaymentMethod, TradeInstructions, TradePricing } from '@/layouts';
-import React, { useEffect } from 'react';
-import {
-  useApp,
-  useBlockchain,
-  useCreateOffer,
-  useDynamicTitle,
-  useUser,
-} from '@/hooks';
+import { useBlockchain, useCreateOffer, useDynamicTitle } from '@/hooks';
+
+import React from 'react';
 
 export default function OfferCreatePage() {
   const {
@@ -21,21 +16,11 @@ export default function OfferCreatePage() {
     saveCreateOfferLocally,
     resetCreateOffer,
   } = useCreateOffer();
-  const {
-    user: { id },
-  } = useUser();
+
   const {} = useDynamicTitle('Create an Offer | Cryptic Activist');
   const {
-    isWalletConnected,
     blockchain: { account },
   } = useBlockchain();
-  const { addToast } = useApp();
-
-  useEffect(() => {
-    if (isWalletConnected === false && id) {
-      addToast('info', 'Wallet must be connected to create an offer', 5000);
-    }
-  }, [isWalletConnected, id]);
 
   return (
     <>

@@ -17,3 +17,4 @@ export { default as Feedback } from './Feedback';
 export { default as StartTradeConfirmation } from './StartTradeConfirmation';
 export { default as DisputeRequest } from './DisputeRequest';
 export { default as Chains } from './Chains';
+export { default as Wallets } from './Wallets';

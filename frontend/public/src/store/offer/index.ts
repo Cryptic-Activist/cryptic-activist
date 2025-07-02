@@ -12,6 +12,7 @@ export const useOfferSlice: StateCreator<
     id: undefined,
     cryptocurrency: undefined,
     fiat: undefined,
+    chain: undefined,
     vendor: undefined,
     offerType: undefined,
     paymentMethodId: undefined,
@@ -34,6 +35,7 @@ export const useOfferSlice: StateCreator<
             id: params.id ?? offer.id,
             cryptocurrency: params.cryptocurrency ?? offer.cryptocurrency,
             fiat: params.fiat ?? offer.fiat,
+            chain: params.chain ?? offer.chain,
             vendor: params.vendor ?? offer.vendor,
             offerType: params.offerType ?? offer.offerType,
             paymentMethodId: params.paymentMethodId ?? offer.paymentMethodId,
@@ -63,7 +65,29 @@ export const useOfferSlice: StateCreator<
     resetOffer: () => {
       const setValue = get().offer.setOfferValue;
 
-      setValue({}, 'offer/resetOffer');
+      setValue(
+        {
+          id: undefined,
+          cryptocurrency: undefined,
+          fiat: undefined,
+          chain: undefined,
+          vendor: undefined,
+          offerType: undefined,
+          paymentMethodId: undefined,
+          paymentMethod: undefined,
+          pricingType: undefined,
+          kycOnly: undefined,
+          listAt: undefined,
+          limitMin: undefined,
+          limitMax: undefined,
+          timeLimit: undefined,
+          tags: undefined,
+          label: undefined,
+          terms: undefined,
+          instructions: undefined,
+        },
+        'offer/resetOffer'
+      );
     },
   },
 });

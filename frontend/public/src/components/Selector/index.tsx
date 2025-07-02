@@ -19,6 +19,7 @@ const Selector: FC<SelectorProps> = ({
   type,
   hasLabel = true,
   overrideLabel,
+  selected,
 }) => {
   const [label, setLabel] = useState<
     string | ReactElement<unknown, string | JSXElementConstructor<any>>
@@ -43,6 +44,8 @@ const Selector: FC<SelectorProps> = ({
     );
   };
 
+  // console.log({ selected, type });
+
   const getButtonLabel = () => {
     const build = () => {
       if (type === 'cryptocurrency' && defaults.cryptocurrency) {
@@ -57,6 +60,18 @@ const Selector: FC<SelectorProps> = ({
         );
       } else if (type === 'chain' && defaults.chain) {
         return buildLabel(defaults.chain.logoUrl, defaults.chain.name);
+      } else if (type === 'wallet' && selected) {
+        return (
+          <div className={styles.labelContent}>
+            <span>{selected}</span>
+          </div>
+        );
+      } else if (type === 'wallet' && !selected) {
+        return (
+          <div className={styles.labelContent}>
+            <span>Select Wallet</span>
+          </div>
+        );
       } else if (type === 'paymentMethod' && defaults.paymentMethod) {
         if (overrideLabel) {
           return overrideLabel;
@@ -82,13 +97,16 @@ const Selector: FC<SelectorProps> = ({
     if (type === 'chain') {
       toggleModal('chains');
     }
+    if (type === 'wallet') {
+      toggleModal('wallets');
+    }
   };
 
   useEffect(() => {
     if (defaults.cryptocurrency && defaults.fiat && defaults.chain) {
       getButtonLabel();
     }
-  }, [defaults, type]);
+  }, [defaults, type, selected]);
 
   return (
     <div className={styles.container}>

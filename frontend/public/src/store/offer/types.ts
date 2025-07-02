@@ -1,3 +1,4 @@
+import { Chain } from '../chain/types';
 import { Cryptocurrency } from '../cryptocurrency/types';
 import { Fiat } from '../fiat/types';
 import { PaymentMethod } from '../paymentMethod/types';
@@ -58,6 +59,7 @@ export type Offer = {
     id?: string;
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
+    chain?: Chain;
     vendor?: Vendor;
     kycOnly?: boolean;
     offerType?: OfferType;
@@ -80,6 +82,7 @@ export type OfferStore = {
     id?: string;
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
+    chain?: Chain;
     paymentMethod?: PaymentMethod;
     vendor?: Vendor;
     offerType?: OfferType;
@@ -105,6 +108,7 @@ export type OfferSetter = {
   id?: string;
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
+  chain?: Chain;
   paymentMethod?: PaymentMethod;
   vendor?: Vendor;
   offerType?: OfferType;

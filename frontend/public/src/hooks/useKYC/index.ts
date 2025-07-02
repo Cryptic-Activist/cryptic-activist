@@ -230,9 +230,7 @@ const useKYC = () => {
   const isKYCApproved = user?.kyc?.[0]?.status === 'VERIFIED';
   const isKYCPending = user?.kyc?.[0]?.status === 'PENDING';
 
-  const showKYCForm = forceShowForm || !user?.kyc?.length;
-
-  console.log({ showKYCForm, userKyc: user?.kyc });
+  const showKYCForm = forceShowForm || user?.kyc?.length === 0;
 
   useEffect(() => {
     if (showBackDocument && uploadedFiles.length < 3) {

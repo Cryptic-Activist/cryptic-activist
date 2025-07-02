@@ -46,10 +46,10 @@ const useBlockchain = () => {
     address: wagmiAddress,
     connector: wagmiConnector,
     chain: wagmiChain,
+    addresses,
   } = useAccount();
   const balance = useBalance({ address: wagmiAddress as `0x${string}` });
   const { chains, switchChain } = useSwitchChain();
-
   const {
     isLoggedIn,
     user: { id },
@@ -316,6 +316,7 @@ const useBlockchain = () => {
       wallet,
       balance: balanceBlockchainStore,
     },
+    addresses,
     connectors,
     isWalletConnected,
     supportedChainsQuery,

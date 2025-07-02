@@ -227,6 +227,7 @@ export async function getTradeController(req: Request, res: Response) {
             createdAt: true,
             cryptocurrency: true,
             fiat: true,
+            chain: true,
             label: true,
             limitMax: true,
             limitMin: true,
@@ -428,6 +429,7 @@ export async function getTradeDetails(req: Request, res: Response) {
         },
         offer: {
           select: {
+            chain: true,
             paymentDetails: {
               select: {
                 instructions: true,

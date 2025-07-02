@@ -21,8 +21,10 @@ const ListTemplate: FC<ListTemplateProps> = ({
   };
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.currentTarget.value;
-    onFilter(value);
+    if (onFilter) {
+      const value = e.currentTarget.value;
+      onFilter(value);
+    }
   };
 
   return (
@@ -35,12 +37,14 @@ const ListTemplate: FC<ListTemplateProps> = ({
             <FaPlus size={18} />
           </button>
         </header>
-        <div className={styles.search}>
-          <input type="text" placeholder="Search" onChange={handleSearch} />
-          <button>
-            <FaSearch size={16} />
-          </button>
-        </div>
+        {onFilter && (
+          <div className={styles.search}>
+            <input type="text" placeholder="Search" onChange={handleSearch} />
+            <button>
+              <FaSearch size={16} />
+            </button>
+          </div>
+        )}
         {children}
       </div>
     </>

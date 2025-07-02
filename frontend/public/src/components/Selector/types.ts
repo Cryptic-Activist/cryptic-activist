@@ -6,9 +6,11 @@ export type SelectorProps = {
     | 'fiat'
     | 'paymentMethod'
     | 'paymentDetails'
-    | 'chain';
+    | 'chain'
+    | 'wallet';
   hasLabel?: boolean;
   overrideLabel?: string;
+  selected?: string;
 };
 
 export type BuildLabel = (symbol: string, name: string) => string;

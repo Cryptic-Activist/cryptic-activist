@@ -18,6 +18,7 @@ export type CreateOffer = {
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
     chain?: Chain;
+    vendorWalletAddress?: string;
     vendorId?: string;
     offerType?: OfferType;
     paymentMethodId?: string;
@@ -47,6 +48,7 @@ export type CreateOfferSetter = {
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
   chain?: Chain;
+  vendorWalletAddress?: string;
   vendorId?: string;
   offerType?: OfferType;
   paymentMethodId?: string;

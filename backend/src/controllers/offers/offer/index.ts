@@ -200,6 +200,14 @@ export const getOfferController = async (req: Request, res: Response) => {
             name: true,
           },
         },
+        chain: {
+          select: {
+            id: true,
+            name: true,
+            logoUrl: true,
+            chainId: true,
+          },
+        },
       },
     });
 
