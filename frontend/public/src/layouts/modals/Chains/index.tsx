@@ -18,8 +18,6 @@ const Chains = () => {
     toggleModal('chains');
   };
 
-  console.log({ chainsList });
-
   return (
     <ListTemplate
       width="30rem"

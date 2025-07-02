@@ -42,6 +42,7 @@ const useBlockchain = () => {
       tokens,
     },
     navigationBar: { resetNavigationBar, toggleModal },
+    chains: chainsStore,
   } = useRootStore();
 
   const { connect, connectors } = useConnect();
@@ -145,10 +146,20 @@ const useBlockchain = () => {
           chainLocal = chains.find((c) => c.id === DEFAULT_CHAIN_ID) ?? chain;
         }
 
+        const foundChain = chainsStore.data?.find(
+          (c) => c.chainId === chainLocal?.id
+        );
+
+        console.log({ found2: foundChain });
+
         setBlockchainValue(
           {
             account: { address: onConnectAddress },
-            chain: chainLocal,
+            chain: {
+              id: foundChain?.chainId,
+              name: foundChain?.name,
+              logoUrl: foundChain?.logoUrl,
+            },
             wallet: connector.name,
             balance: balance.data,
           },
@@ -261,6 +272,8 @@ const useBlockchain = () => {
           const parsedWallet = JSON.parse(storedWallet);
           const parsedChain = JSON.parse(storedChain);
 
+          console.log({ parsedChain });
+
           // Prevent connecting to unsupported chains
           if (
             supportedChainsQuery.data &&
@@ -311,9 +324,16 @@ const useBlockchain = () => {
         return;
       }
 
+      const foundChain = chainsStore.data?.find(
+        (c) => c.chainId === wagmiChain.id
+      );
+
+      console.log({ found1: foundChain });
+
       const chainInfo = {
         id: wagmiChain.id,
         name: getChainNameById(wagmiChain.id),
+        logoUrl: foundChain?.logoUrl,
       };
 
       setBlockchainValue(

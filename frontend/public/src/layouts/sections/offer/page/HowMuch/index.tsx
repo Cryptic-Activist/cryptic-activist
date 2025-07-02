@@ -22,8 +22,6 @@ const HowMuch: FC<HowMuchProps> = ({
 }) => {
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
 
-  console.log({ balacne: blockchain.balance, cryptocurrencyAmount });
-
   useEffect(() => {
     const getSubmitButtonLabel = () => {
       if (!isLoggedIn()) {
@@ -56,9 +54,7 @@ const HowMuch: FC<HowMuchProps> = ({
           cryptocurrencyAmount,
           blockchain.balance.value
         );
-        console.log({
-          hasSuffientBalance,
-        });
+
         if (!hasSuffientBalance) {
           return 'Insuffient balance for this trade';
         }

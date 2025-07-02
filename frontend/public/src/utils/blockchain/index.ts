@@ -26,7 +26,7 @@ export const getWalletType = (
 
 export const isSupportedChain = (
   id: number | undefined,
-  supportedChainIds: { label: string; value: number }[]
+  supportedChainIds: { chainId: number }[]
 ): boolean => {
-  return id != null && supportedChainIds.some((chain) => chain.value === id);
+  return id != null && supportedChainIds.some((chain) => chain.chainId === id);
 };

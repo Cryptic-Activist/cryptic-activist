@@ -60,10 +60,6 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
     );
   };
 
-  console.log({
-    createOfferVendorWalletAddress: createOffer.vendorWalletAddress,
-  });
-
   return (
     <>
       <Head>

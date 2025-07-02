@@ -26,19 +26,12 @@ export const connectWallet = async (req: Request, res: Response) => {
 
 export const getSupportedChains = async (_req: Request, res: Response) => {
   try {
-    const chains = await prisma.cryptocurrencyChain.findMany({
+    const chains = await prisma.chain.findMany({
       where: {
-        chain: {
-          isTestnet: IS_DEVELOPMENT,
-        },
-      },
-      select: {
-        chain: true,
-        cryptocurrency: true,
+        isTestnet: IS_DEVELOPMENT,
       },
     });
-    console.log(chains);
-    res.status(200).json(SUPPORTED_CHAIN_IDS);
+    res.status(200).json(chains);
   } catch (error) {
     res.status(500).json({ error });
   }

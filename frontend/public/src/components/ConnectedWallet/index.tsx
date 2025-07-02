@@ -1,6 +1,5 @@
 'use client';
 
-import { EthereumLogo, PolygonLogo } from '@/assets';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 
 import Image from 'next/image';
@@ -42,7 +41,15 @@ const ConnectedWallet = () => {
           backgroundColor: !blockchain?.chain?.name ? user.profileColor : '',
         }}
       >
-        {isEthereum || isLocalhost ? (
+        {blockchain.chain?.logoUrl && (
+          <Image
+            src={blockchain.chain?.logoUrl}
+            alt="Ethereum Logo"
+            width={28}
+            height={28}
+          />
+        )}
+        {/* {isEthereum || isLocalhost ? (
           <Image
             src={EthereumLogo.src ?? null}
             alt="Ethereum Logo"
@@ -61,7 +68,7 @@ const ConnectedWallet = () => {
           />
         ) : (
           ''
-        )}
+        )} */}
       </div>
       <p className={styles.address}>{blockchain.account?.address}</p>
     </button>
