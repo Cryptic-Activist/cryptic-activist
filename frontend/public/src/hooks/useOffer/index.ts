@@ -183,6 +183,18 @@ const useOffer = () => {
         blockchain.balance.value
       );
 
+    console.log(
+      isLoggedIn(),
+      user.id,
+      offer.vendor?.id,
+      blockchain.account?.address,
+      cryptocurrencyAmount,
+      isUserDifferentThanVendor,
+      !kycOnlyAllowed,
+      blockchain?.chain?.id === offer.chain?.chainId,
+      hasSuffientBalance
+    );
+
     if (
       isLoggedIn() &&
       user.id &&

@@ -259,7 +259,7 @@ model Language {
 model Chain {
   id             String   @id @default(uuid())
   name           String   @unique // e.g., "Ethereum", "Polygon"
-  symbol         String   @unique // e.g., "ETH", "MATIC"
+  symbol         String
   chainId        Int      @unique // Network chain ID (e.g., 1 for Ethereum mainnet)
   rpcUrl         String? // RPC endpoint URL
   explorerUrl    String? // Block explorer URL

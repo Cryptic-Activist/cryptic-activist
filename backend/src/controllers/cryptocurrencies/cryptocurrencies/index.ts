@@ -135,3 +135,29 @@ export const getCryptocurrencyFilters = async (
     });
   }
 };
+
+export const getSupportedTokens = async (req: Request, res: Response) => {
+  const chainId = req.params.chainId as string;
+
+  const parsedChainId = parseInt(chainId);
+
+  try {
+    const filters = await prisma.cryptocurrencyChain.findMany({
+      where: {
+        chain: {
+          chainId: parsedChainId,
+        },
+      },
+      select: {
+        chain: true,
+        contractAddress: true,
+        cryptocurrency: true,
+      },
+    });
+    res.status(200).send(filters);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};

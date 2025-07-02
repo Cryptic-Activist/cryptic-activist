@@ -63,6 +63,9 @@ const HowMuch: FC<HowMuchProps> = ({
           return 'Insuffient balance for this trade';
         }
       }
+      if (!blockchain?.balance?.value) {
+        return 'Unable to verify balance';
+      }
       return 'Start trading';
     };
     const label = getSubmitButtonLabel();

@@ -1,3 +1,5 @@
+import { Cryptocurrency } from '../cryptocurrency/types';
+
 export type SetChainParam = any;
 export type SetProviderParam = any;
 export type Wallet = string;
@@ -18,6 +20,9 @@ export type BlockchainSetter = {
   wallet?: string;
   account?: Account;
   balance?: Balance;
+  tokens?: {
+    cryptocurrency: Cryptocurrency;
+  }[];
 };
 
 export type Value = BlockchainSetter;
@@ -28,6 +33,9 @@ export type BlockchainStore = {
     wallet?: string;
     account?: Account;
     balance?: Balance;
+    tokens?: {
+      cryptocurrency: Cryptocurrency;
+    }[];
     setBlockchainValue: (
       value: Value,
       actionName?: `blockchain/${string}`

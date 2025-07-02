@@ -185,6 +185,90 @@ const main = async () => {
       logoUrl:
         'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', // BNB
     },
+    {
+      name: 'Sepolia',
+      symbol: 'ETH',
+      chainId: 11155111,
+      rpcUrl: 'https://sepolia.infura.io/v3/YOUR_KEY',
+      explorerUrl: 'https://sepolia.etherscan.io',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Ethereum testnet',
+      tempId: 'sepolia-testnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/279/large/ethereum.png', // Ethereum
+    },
+    {
+      name: 'Amoy',
+      symbol: 'MATIC',
+      chainId: 80002,
+      rpcUrl: 'https://rpc-amoy.polygon.technology',
+      explorerUrl: 'https://www.oklink.com/amoy',
+      nativeCurrency: 'MATIC',
+      isTestnet: true,
+      isActive: true,
+      description: 'Polygon testnet',
+      tempId: 'amoy-testnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png', // Polygon
+    },
+    {
+      name: 'Arbitrum Sepolia',
+      symbol: 'ETH',
+      chainId: 421614,
+      rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+      explorerUrl: 'https://sepolia.arbiscan.io',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Arbitrum testnet',
+      tempId: 'arbitrum-sepolia-testnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/16547/large/photo_2023-03-29_21.47.00.jpeg', // Arbitrum
+    },
+    {
+      name: 'Base Sepolia',
+      symbol: 'ETH',
+      chainId: 84532,
+      rpcUrl: 'https://sepolia.base.org',
+      explorerUrl: 'https://sepolia.basescan.org',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Base testnet',
+      tempId: 'base-sepolia-testnet',
+      logoUrl:
+        'https://altcoinsbox.com/base-logo-download-coinbase-base-logo.png', // Base
+    },
+    {
+      name: 'Optimism Sepolia',
+      symbol: 'ETH',
+      chainId: 11155420,
+      rpcUrl: 'https://sepolia.optimism.io',
+      explorerUrl: 'https://sepolia-optimism.etherscan.io',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Optimism testnet',
+      tempId: 'optimism-sepolia-testnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
+    },
+    {
+      name: 'BNB Smart Chain Testnet',
+      symbol: 'tBNB',
+      chainId: 97,
+      rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+      explorerUrl: 'https://testnet.bscscan.com',
+      nativeCurrency: 'tBNB',
+      isTestnet: true,
+      isActive: true,
+      description: 'BNB Smart Chain testnet',
+      tempId: 'bsc-testnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', // BNB
+    },
   ];
   await prisma.chain.createMany({
     data: chainData.map(({ tempId, ...rest }) => rest),
@@ -637,7 +721,159 @@ const main = async () => {
         contractAddress: '0x2859e4544C4b',
         isVerified: true,
       },
+
+      // Testnet Data
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('sepolia-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('sepolia-testnet')!,
+        contractAddress: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('sepolia-testnet')!,
+        contractAddress: '0xaA8E23Fb4C70490F1d682248DF9C520ada8894E1',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('sepolia-testnet')!,
+        contractAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+        isVerified: true,
+      },
+
+      {
+        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token')!,
+        chainId: chainMap.get('amoy-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('amoy-testnet')!,
+        contractAddress: '0x41e94Eb019C0762f9BFC4813CE31252235c172c9',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('amoy-testnet')!,
+        contractAddress: '0x41e94Eb019C0762f9BFC4813CE31252235c172c9',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('amoy-testnet')!,
+        contractAddress: '0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904',
+        isVerified: true,
+      },
+
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('arbitrum-sepolia-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('arbitrum-sepolia-testnet')!,
+        contractAddress: '0x75faf114e5b4C165553D417535b27361bA6D3C44',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('arbitrum-sepolia-testnet')!,
+        contractAddress: '0x75faf114e5b4C165553D417535b27361bA6D3C44',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('arbitrum-sepolia-testnet')!,
+        contractAddress: '0xb1d4538B4571d411F07960EF2838Ce337FE1E80E',
+        isVerified: true,
+      },
+
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('base-sepolia-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('base-sepolia-testnet')!,
+        contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('base-sepolia-testnet')!,
+        contractAddress: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('base-sepolia-testnet')!,
+        contractAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        isVerified: true,
+      },
+
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('optimism-sepolia-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('optimism-sepolia-testnet')!,
+        contractAddress: '0x59b670e9fA9D0A427751Af201D676719a970857b',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('optimism-sepolia-testnet')!,
+        contractAddress: '0x59b670e9fA9D0A427751Af201D676719a970857b',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('optimism-sepolia-testnet')!,
+        contractAddress: '0x1622bF67e6e5747b81866FE0b85178a93C7F8892',
+        isVerified: true,
+      },
+
+      {
+        cryptocurrencyId: cryptoMap.get('binancecoin')!,
+        chainId: chainMap.get('bsc-testnet')!,
+        contractAddress: null, // Native token
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('bsc-testnet')!,
+        contractAddress: '0x645445525442ce44444445454545451425451254',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('tether')!,
+        chainId: chainMap.get('bsc-testnet')!,
+        contractAddress: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+        isVerified: true,
+      },
+      {
+        cryptocurrencyId: cryptoMap.get('chainlink')!,
+        chainId: chainMap.get('bsc-testnet')!,
+        contractAddress: '0x84b9B710E0A3435169E121020536f12414b2A381',
+        isVerified: true,
+      },
     ];
+    ('');
     await tx.cryptocurrencyChain.createMany({
       data: cryptocurrencyChainData,
     });

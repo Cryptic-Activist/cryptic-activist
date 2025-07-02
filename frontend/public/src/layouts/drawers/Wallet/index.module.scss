@@ -205,7 +205,8 @@
   }
 }
 
-.chainButton {
+.chainButton,
+.tokenButton {
   font-size: 1rem;
   background-color: transparent;
   border: none;
@@ -222,6 +223,12 @@
   }
 }
 
+.tokenButton {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .userButton {
   display: flex;
   flex-direction: column;
@@ -235,7 +242,8 @@
   }
 }
 
-.switchChainList {
+.switchChainList,
+.tokensList {
   height: auto;
   max-height: 0;
   overflow: hidden;
@@ -245,4 +253,7 @@
 
 .switchChainListOpened {
   max-height: 21rem;
+}
+.tokensListOpened {
+  max-height: 31rem;
 }

@@ -9,6 +9,7 @@ export const SUPPORTED_CHAIN_IDS = [
     label: 'Polygon',
     value: 137,
   },
+  { label: 'BNB Chain', value: 56 },
   ...(IS_DEVELOPMENT
     ? [
         { label: 'Localhost', value: 1337 },

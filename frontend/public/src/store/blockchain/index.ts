@@ -13,6 +13,7 @@ export const useBlockchainSlice: StateCreator<
     balance: undefined,
     chain: undefined,
     wallet: undefined,
+    tokens: undefined,
     setBlockchainValue: (params, actionName = 'blockchain/setValue') => {
       set(
         ({ blockchain }) => ({
@@ -22,6 +23,7 @@ export const useBlockchainSlice: StateCreator<
             balance: params.balance ?? blockchain.balance,
             chain: params.chain ?? blockchain.chain,
             wallet: params.wallet ?? blockchain.wallet,
+            tokens: params.tokens ?? blockchain.tokens,
           },
         }),
         false,
@@ -36,6 +38,7 @@ export const useBlockchainSlice: StateCreator<
             balance: undefined,
             chain: undefined,
             wallet: undefined,
+            tokens: undefined,
             setBlockchainValue: get().blockchain.setBlockchainValue,
             resetBlockchain: get().blockchain.resetBlockchain,
           },
