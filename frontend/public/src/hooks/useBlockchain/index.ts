@@ -19,10 +19,14 @@ import {
   getWalletType,
   isSupportedChain,
 } from '@/utils/blockchain';
-import { getCurrentConnector, getSupportedChains } from '@/services/blockchain';
+import {
+  getCurrentConnector,
+  getSupportedChains,
+  getSupportedTokens,
+} from '@/services/blockchain';
 import { useEffect, useMemo } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { useQuery } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
 import { useUser } from '@/hooks';
 
@@ -35,8 +39,10 @@ const useBlockchain = () => {
       chain,
       balance: balanceBlockchainStore,
       wallet,
+      tokens,
     },
     navigationBar: { resetNavigationBar, toggleModal },
+    chains: chainsStore,
   } = useRootStore();
 
   const { connect, connectors } = useConnect();
@@ -46,10 +52,10 @@ const useBlockchain = () => {
     address: wagmiAddress,
     connector: wagmiConnector,
     chain: wagmiChain,
+    addresses,
   } = useAccount();
   const balance = useBalance({ address: wagmiAddress as `0x${string}` });
   const { chains, switchChain } = useSwitchChain();
-
   const {
     isLoggedIn,
     user: { id },
@@ -76,6 +82,19 @@ const useBlockchain = () => {
   const supportedChainsQuery = useQuery({
     queryKey: ['supportedChains'],
     queryFn: getSupportedChains,
+  });
+
+  const tokensMutation = useMutation({
+    mutationKey: ['tokens'],
+    mutationFn: async (chainId?: number) => {
+      if (chainId) {
+        const response = await getSupportedTokens(chainId);
+        return response;
+      }
+    },
+    onSuccess: (data) => {
+      setBlockchainValue({ tokens: data }, 'blockchain/setTokens');
+    },
   });
 
   const onConnectWallet = async (connector: Connector) => {
@@ -127,10 +146,18 @@ const useBlockchain = () => {
           chainLocal = chains.find((c) => c.id === DEFAULT_CHAIN_ID) ?? chain;
         }
 
+        const foundChain = chainsStore.data?.find(
+          (c) => c.chainId === chainLocal?.id
+        );
+
         setBlockchainValue(
           {
             account: { address: onConnectAddress },
-            chain: chainLocal,
+            chain: {
+              id: foundChain?.chainId,
+              name: foundChain?.name,
+              logoUrl: foundChain?.logoUrl,
+            },
             wallet: connector.name,
             balance: balance.data,
           },
@@ -293,9 +320,14 @@ const useBlockchain = () => {
         return;
       }
 
+      const foundChain = chainsStore.data?.find(
+        (c) => c.chainId === wagmiChain.id
+      );
+
       const chainInfo = {
         id: wagmiChain.id,
         name: getChainNameById(wagmiChain.id),
+        logoUrl: foundChain?.logoUrl,
       };
 
       setBlockchainValue(
@@ -309,6 +341,12 @@ const useBlockchain = () => {
     syncChainChange();
   }, [wagmiChain?.id, supportedChainsQuery.data]);
 
+  useEffect(() => {
+    if (chain?.id) {
+      tokensMutation.mutate(chain?.id);
+    }
+  }, [chain?.id]);
+
   return {
     blockchain: {
       account,
@@ -316,9 +354,12 @@ const useBlockchain = () => {
       wallet,
       balance: balanceBlockchainStore,
     },
+    addresses,
     connectors,
     isWalletConnected,
     supportedChainsQuery,
+    tokensMutation,
+    tokens,
     handleSwitchChain,
     connect,
     onConnectWallet,

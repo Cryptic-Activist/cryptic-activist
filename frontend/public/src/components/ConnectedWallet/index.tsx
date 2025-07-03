@@ -1,11 +1,10 @@
 'use client';
 
-import { EthereumLogo, PolygonLogo } from '@/assets';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
 
 import Image from 'next/image';
 import React from 'react';
-import { getChainNameById } from '@/utils/blockchain';
+// import { getChainNameById } from '@/utils/blockchain';
 import styles from './index.module.scss';
 
 const ConnectedWallet = () => {
@@ -17,12 +16,10 @@ const ConnectedWallet = () => {
       drawers: { wallet },
     },
   } = useNavigationBar();
-  const chainName =
-    blockchain.chain?.name || getChainNameById(blockchain.chain?.id);
+  // const chainName =
+  //   blockchain.chain?.name || getChainNameById(blockchain.chain?.id);
 
-  const isEthereum = chainName === 'Ethereum';
-  const isPolygon = chainName === 'Polygon' || chainName === 'Chain-80002';
-  const isLocalhost = chainName === 'Localhost';
+  // const isLocalhost = chainName === 'Localhost';
 
   const openWallet = () => {
     if (!wallet) {
@@ -30,19 +27,23 @@ const ConnectedWallet = () => {
     }
   };
 
-  const ethereumBgColor =
-    isEthereum || isLocalhost ? styles.ethereumBgColor : '';
-  const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
-
   return (
     <button className={styles.container} onClick={openWallet}>
       <div
-        className={`${styles.profileColor} ${ethereumBgColor} ${polygonBgColor}`}
+        className={styles.profileColor}
         style={{
           backgroundColor: !blockchain?.chain?.name ? user.profileColor : '',
         }}
       >
-        {isEthereum || isLocalhost ? (
+        {blockchain.chain?.logoUrl && (
+          <Image
+            src={blockchain.chain?.logoUrl}
+            alt="Ethereum Logo"
+            width={28}
+            height={28}
+          />
+        )}
+        {/* {isEthereum || isLocalhost ? (
           <Image
             src={EthereumLogo.src ?? null}
             alt="Ethereum Logo"
@@ -61,7 +62,7 @@ const ConnectedWallet = () => {
           />
         ) : (
           ''
-        )}
+        )} */}
       </div>
       <p className={styles.address}>{blockchain.account?.address}</p>
     </button>

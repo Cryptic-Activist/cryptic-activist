@@ -114,6 +114,18 @@ CREATE TABLE "chats" (
 );
 
 -- CreateTable
+CREATE TABLE "cryptocurrency_chains" (
+    "id" TEXT NOT NULL,
+    "cryptocurrencyId" TEXT NOT NULL,
+    "chainId" TEXT NOT NULL,
+    "contractAddress" VARCHAR(200),
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "cryptocurrency_chains_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "cryptocurrencies" (
     "id" TEXT NOT NULL,
     "coingeckoId" VARCHAR(200) NOT NULL,
@@ -207,6 +219,25 @@ CREATE TABLE "languages" (
 );
 
 -- CreateTable
+CREATE TABLE "chains" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "symbol" TEXT NOT NULL,
+    "chainId" INTEGER NOT NULL,
+    "rpcUrl" TEXT,
+    "explorerUrl" TEXT,
+    "nativeCurrency" TEXT NOT NULL,
+    "isTestnet" BOOLEAN NOT NULL DEFAULT false,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "logoUrl" TEXT,
+    "description" TEXT,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
+
+    CONSTRAINT "chains_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "offers" (
     "id" TEXT NOT NULL,
     "offerType" TEXT NOT NULL,
@@ -221,6 +252,7 @@ CREATE TABLE "offers" (
     "averageTradeSpeed" DOUBLE PRECISION,
     "instructions" TEXT NOT NULL,
     "kycOnly" BOOLEAN NOT NULL DEFAULT false,
+    "chainId" TEXT NOT NULL,
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
@@ -647,6 +679,9 @@ CREATE UNIQUE INDEX "blocks_blockerId_blockedId_key" ON "blocks"("blockerId", "b
 CREATE UNIQUE INDEX "chats_tradeId_key" ON "chats"("tradeId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "cryptocurrency_chains_cryptocurrencyId_chainId_key" ON "cryptocurrency_chains"("cryptocurrencyId", "chainId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "cryptocurrencies_coingeckoId_key" ON "cryptocurrencies"("coingeckoId");
 
 -- CreateIndex
@@ -672,6 +707,15 @@ CREATE UNIQUE INDEX "kycs_bankStatementId_key" ON "kycs"("bankStatementId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "languages_name_key" ON "languages"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "chains_name_key" ON "chains"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "chains_symbol_key" ON "chains"("symbol");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "chains_chainId_key" ON "chains"("chainId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "premium_purchases_depositAddress_key" ON "premium_purchases"("depositAddress");
@@ -755,6 +799,12 @@ ALTER TABLE "blocks" ADD CONSTRAINT "blocks_blockedId_fkey" FOREIGN KEY ("blocke
 ALTER TABLE "chats" ADD CONSTRAINT "chats_tradeId_fkey" FOREIGN KEY ("tradeId") REFERENCES "trades"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "cryptocurrency_chains" ADD CONSTRAINT "cryptocurrency_chains_cryptocurrencyId_fkey" FOREIGN KEY ("cryptocurrencyId") REFERENCES "cryptocurrencies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cryptocurrency_chains" ADD CONSTRAINT "cryptocurrency_chains_chainId_fkey" FOREIGN KEY ("chainId") REFERENCES "chains"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -780,6 +830,9 @@ ALTER TABLE "kycs" ADD CONSTRAINT "kycs_bankStatementId_fkey" FOREIGN KEY ("bank
 
 -- AddForeignKey
 ALTER TABLE "kycs" ADD CONSTRAINT "kycs_reviewedById_fkey" FOREIGN KEY ("reviewedById") REFERENCES "admins"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "offers" ADD CONSTRAINT "offers_chainId_fkey" FOREIGN KEY ("chainId") REFERENCES "chains"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "offers" ADD CONSTRAINT "offers_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

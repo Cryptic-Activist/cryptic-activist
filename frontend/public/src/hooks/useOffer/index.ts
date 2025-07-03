@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import { getSocket } from '@/services/socket';
+import { hasEnoughBalance } from '@/utils/math';
 import useApp from '../useApp';
 import useBlockchain from '../useBlockchain';
 import useDebounce from '../useDebounce';
@@ -21,7 +22,7 @@ const useOffer = () => {
   const router = useRouter();
 
   const { isLoggedIn, user } = useUser();
-  const { addToast } = useApp();
+  const { addToast, app } = useApp();
   const { blockchain } = useBlockchain();
   const { toggleModal } = useNavigationBar();
 
@@ -174,6 +175,18 @@ const useOffer = () => {
   useEffect(() => {
     const kycOnlyAllowed = offer.kycOnly && user.kyc && user.kyc.length === 0;
     const isUserDifferentThanVendor = user.id !== offer.vendor?.id;
+    const hasSuffientBalance =
+      cryptocurrencyAmount &&
+      blockchain.balance?.value &&
+      app.settings?.depositPerTradePercent &&
+      offer.offerType &&
+      hasEnoughBalance(
+        cryptocurrencyAmount,
+        blockchain.balance.value,
+        blockchain.balance.decimals,
+        app.settings?.depositPerTradePercent,
+        offer.offerType
+      );
 
     if (
       isLoggedIn() &&
@@ -182,13 +195,22 @@ const useOffer = () => {
       blockchain.account?.address &&
       cryptocurrencyAmount &&
       isUserDifferentThanVendor &&
-      !kycOnlyAllowed
+      !kycOnlyAllowed &&
+      blockchain?.chain?.id === offer.chain?.chainId &&
+      hasSuffientBalance
     ) {
       setIsTradingAvailable(true);
     } else {
       setIsTradingAvailable(false);
     }
-  }, [user.id, offer.vendor?.id, isLoggedIn, blockchain]);
+  }, [
+    user.id,
+    offer.vendor?.id,
+    isLoggedIn,
+    blockchain,
+    cryptocurrencyAmount,
+    blockchain.balance?.value,
+  ]);
 
   useEffect(() => {
     if (offer.fiat?.symbol && offer.cryptocurrency?.coingeckoId) {

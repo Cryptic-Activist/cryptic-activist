@@ -1,5 +1,7 @@
 import type { AppStore } from '../app/types';
 import type { BlockchainStore } from '../blockchain/types';
+import { ChainStore } from '../chain/types';
+import { ChainsStore } from '../chains/types';
 import type { CreateOfferStore } from '../createOffer/types';
 import type { CryptocurrenciesStore } from '../cryptocurrencies/types';
 import type { CryptocurrencyStore } from '../cryptocurrency/types';
@@ -24,6 +26,8 @@ import type { VerifyAccountStore } from '../verifyAccount/types';
 
 export type RootStore = AppStore &
   BlockchainStore &
+  ChainsStore &
+  ChainStore &
   CryptocurrencyStore &
   CryptocurrenciesStore &
   FiatStore &

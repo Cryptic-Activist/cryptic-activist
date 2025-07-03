@@ -3,6 +3,7 @@ import { RootStore } from '../root/types';
 import { StateCreator } from 'zustand';
 import { fetchCurrentPrice } from '@/services/app';
 import { generateUUID } from '@/utils';
+import { getPublicSettings } from '@/services/settings';
 
 export const useAppSlice: StateCreator<
   RootStore,
@@ -17,6 +18,7 @@ export const useAppSlice: StateCreator<
     toasts: [],
     defaults: {},
     referralCode: undefined,
+    settings: undefined,
     setAppValue: (params, actionName = 'app/setValue') => {
       set(
         ({ app }) => ({
@@ -28,12 +30,14 @@ export const useAppSlice: StateCreator<
             type: params.type ?? app.type,
             currentPrice: params.currentPrice ?? app.currentPrice,
             referralCode: params.referralCode ?? app.referralCode,
+            settings: params.settings ?? app.settings,
             defaults: {
               cryptocurrency:
                 params.defaults?.cryptocurrency ?? app.defaults.cryptocurrency,
               fiat: params.defaults?.fiat ?? app.defaults.fiat,
               paymentMethod:
                 params.defaults?.paymentMethod ?? app.defaults.paymentMethod,
+              chain: params.defaults?.chain ?? app.defaults.chain,
               amount: params.defaults?.amount ?? app.defaults.amount,
             },
           },
@@ -101,6 +105,17 @@ export const useAppSlice: StateCreator<
       } = get();
 
       setAppValue({ referralCode }, 'app/setReferralCode');
+    },
+    setSettings: async () => {
+      const {
+        app: { setAppValue },
+      } = get();
+
+      const platformSettings = await getPublicSettings();
+
+      console.log({ platformSettings });
+
+      setAppValue({ settings: platformSettings }, 'app/setSettings');
     },
   },
 });

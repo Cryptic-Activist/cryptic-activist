@@ -1,3 +1,4 @@
+import { Chain } from '@/store/chain/types';
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { Fiat } from '@/store/fiat/types';
 
@@ -16,6 +17,8 @@ export type CreateOffer = {
   createOffer: {
     cryptocurrency?: Cryptocurrency;
     fiat?: Fiat;
+    chain?: Chain;
+    vendorWalletAddress?: string;
     vendorId?: string;
     offerType?: OfferType;
     paymentMethodId?: string;
@@ -44,6 +47,8 @@ export type CreateOffer = {
 export type CreateOfferSetter = {
   cryptocurrency?: Cryptocurrency;
   fiat?: Fiat;
+  chain?: Chain;
+  vendorWalletAddress?: string;
   vendorId?: string;
   offerType?: OfferType;
   paymentMethodId?: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Chains,
   Cryptocurrencies,
   DisputeRequest,
   EnableTwoFactorAuthnetication,
@@ -15,6 +16,7 @@ import {
   StartTradeConfirmation,
   TwoFactorAuthentication,
   WalletModal,
+  Wallets,
 } from '@/layouts/modals';
 
 import { useNavigationBar } from '@/hooks';
@@ -37,6 +39,8 @@ const AllModals = () => {
       {navigationBar.modals.resetPassword ? <ResetPassword /> : null}
       {navigationBar.modals.fiats ? <Fiats /> : null}
       {navigationBar.modals.cryptocurrencies ? <Cryptocurrencies /> : null}
+      {navigationBar.modals.chains ? <Chains /> : null}
+      {navigationBar.modals.wallets ? <Wallets /> : null}
       {navigationBar.modals.paymentMethods ? <PaymentMethods /> : null}
       {navigationBar.modals.privateKeys ? <PrivateKeys /> : null}
       {navigationBar.modals.blockchain ? <WalletModal /> : null}

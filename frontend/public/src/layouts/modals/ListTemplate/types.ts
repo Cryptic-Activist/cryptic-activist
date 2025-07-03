@@ -5,5 +5,5 @@ export type ListTemplateProps = {
   width?: string;
   height?: string;
   heading?: string;
-  onFilter: (term: string) => void;
+  onFilter?: (term: string) => void;
 };

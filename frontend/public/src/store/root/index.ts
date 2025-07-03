@@ -4,6 +4,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useAppSlice } from '@/store/app';
 import { useBlockchainSlice } from '@/store/blockchain';
+import { useChainSlice } from '../chain';
+import { useChainsSlice } from '@/store/chains';
 import { useCreateOfferSlice } from '@/store/createOffer';
 import { useCryptocurrenciesSlice } from '@/store/cryptocurrencies';
 import { useCryptocurrencySlice } from '@/store/cryptocurrency';
@@ -31,6 +33,8 @@ export const useRootStore = create<RootStore>()(
     (set, get, store) => ({
       ...useAppSlice(set, get, store),
       ...useBlockchainSlice(set, get, store),
+      ...useChainsSlice(set, get, store),
+      ...useChainSlice(set, get, store),
       ...useCryptocurrencySlice(set, get, store),
       ...useCryptocurrenciesSlice(set, get, store),
       ...useFiatSlice(set, get, store),

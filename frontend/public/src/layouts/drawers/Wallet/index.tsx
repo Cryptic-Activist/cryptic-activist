@@ -1,7 +1,7 @@
 'use client';
 
 import { BRAVE_WALLET, METAMASK } from '@/constants';
-import { Brave, EthereumLogo, MetaMask, PolygonLogo } from '@/assets';
+import { Brave, MetaMask } from '@/assets';
 import { ProviderImageProps, ValueContainerProps } from './types';
 import React, { FC, useEffect, useState } from 'react';
 import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
@@ -48,6 +48,7 @@ const Wallet = () => {
   const [isOpened, setIsOpened] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isChainsOpened, setIsChainsOpened] = useState(false);
+  const [isTokensOpened, setIsTokensOpened] = useState(false);
 
   const { toggleDrawer } = useNavigationBar();
   const {
@@ -55,16 +56,11 @@ const Wallet = () => {
     onDisconnectWallet,
     handleSwitchChain,
     supportedChainsQuery,
+    tokens,
   } = useBlockchain();
   const { user } = useUser();
 
-  const isEthereum = blockchain?.chain?.name === 'Ethereum';
-  const isPolygon =
-    blockchain?.chain?.name === 'Polygon' ||
-    blockchain?.chain?.name === 'Chain-80002';
-  const isLocalhost = blockchain.chain?.name === 'Localhost';
-
-  console.log({ blockchainName: blockchain.chain.name });
+  // const isLocalhost = blockchain.chain?.name === 'Localhost';
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
 
@@ -84,16 +80,18 @@ const Wallet = () => {
     setIsChainsOpened((prev) => !prev);
   };
 
+  const toggleTokens = () => {
+    setIsTokensOpened((prev) => !prev);
+  };
+
   useEffect(() => {
     setTimeout(() => {
       setIsCopied(false);
     }, 1500);
   }, [isCopied]);
 
-  const ethereumBgColor =
-    isEthereum || isLocalhost ? styles.ethereumBgColor : '';
-  const polygonBgColor = isPolygon ? styles.polygonBgColor : '';
   const chainsStyle = isChainsOpened ? styles.switchChainListOpened : '';
+  const tokensStyle = isTokensOpened ? styles.tokensListOpened : '';
 
   return (
     <>
@@ -111,32 +109,20 @@ const Wallet = () => {
             >
               <div className={styles.profileColorProvider}>
                 <div
-                  className={`${styles.profileColor} ${ethereumBgColor} ${polygonBgColor}`}
+                  className={styles.profileColor}
                   style={{
                     backgroundColor: !blockchain?.chain?.name
                       ? user.profileColor
-                      : '',
+                      : '#fff',
                   }}
                 >
-                  {isEthereum || isLocalhost ? (
+                  {blockchain.chain?.logoUrl && (
                     <Image
-                      src={EthereumLogo.src ?? null}
-                      alt="Ethereum Logo"
-                      width={30}
-                      height={30}
-                    />
-                  ) : (
-                    ''
-                  )}
-                  {isPolygon ? (
-                    <Image
-                      src={PolygonLogo.src ?? null}
+                      src={blockchain.chain?.logoUrl}
                       alt="Polygon Logo"
-                      width={30}
-                      height={30}
+                      width={40}
+                      height={40}
                     />
-                  ) : (
-                    ''
                   )}
                 </div>
                 <ProviderImage provider={blockchain.wallet} />
@@ -168,13 +154,49 @@ const Wallet = () => {
                   (chain: any, index: number) => (
                     <li className={styles.subMenuItem} key={index}>
                       <button
-                        onClick={() => handleSwitchChain(chain.value)}
+                        onClick={() => handleSwitchChain(chain.chainId)}
                         className={styles.chainButton}
                       >
-                        {chain.label}
+                        {chain.name}
                       </button>
                     </li>
                   )
+                )}
+              </ul>
+            </div>
+          </section>
+          <section>
+            <div className={styles.accordion}>
+              <button
+                className={`${styles.menuButton} ${styles.userButton}`}
+                onClick={toggleTokens}
+              >
+                Tokens
+              </button>
+              <ul className={`${styles.tokensList} ${tokensStyle}`}>
+                {tokens && tokens?.length > 0 ? (
+                  tokens?.map((token: any, index: number) => (
+                    <li className={styles.subMenuItem} key={index}>
+                      <button
+                        // onClick={() => handleSwitchChain(token.value)}
+                        className={styles.tokenButton}
+                      >
+                        <Image
+                          src={token.cryptocurrency?.image}
+                          width={30}
+                          height={30}
+                          alt={token.cryptocurrency?.name}
+                        />
+                        <span>{token.cryptocurrency?.name}</span>
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className={styles.subMenuItem}>
+                    <button className={styles.tokenButton}>
+                      No Tokens Available
+                    </button>
+                  </li>
                 )}
               </ul>
             </div>

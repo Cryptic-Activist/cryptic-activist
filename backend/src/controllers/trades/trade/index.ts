@@ -227,6 +227,7 @@ export async function getTradeController(req: Request, res: Response) {
             createdAt: true,
             cryptocurrency: true,
             fiat: true,
+            chain: true,
             label: true,
             limitMax: true,
             limitMin: true,
@@ -360,8 +361,6 @@ export const calculateReceivingAmount = async (
 
     const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
 
-    console.log({ finalCryptoAmount });
-
     res.status(200).send({
       fiatAmount,
       tradingFee,
@@ -428,6 +427,7 @@ export async function getTradeDetails(req: Request, res: Response) {
         },
         offer: {
           select: {
+            chain: true,
             paymentDetails: {
               select: {
                 instructions: true,

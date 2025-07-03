@@ -189,7 +189,9 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         referralCode: true,
         kyc: {
           where: {
-            status: 'VERIFIED',
+            status: {
+              in: ['VERIFIED', 'PENDING', 'REJECTED'],
+            },
           },
           select: {
             status: true,

@@ -11,6 +11,8 @@ export const useCreateOfferSlice: StateCreator<
   createOffer: {
     cryptocurrency: undefined,
     fiat: undefined,
+    chain: undefined,
+    vendorWalletAddress: undefined,
     vendorId: undefined,
     offerType: undefined,
     paymentMethodId: undefined,
@@ -39,6 +41,9 @@ export const useCreateOfferSlice: StateCreator<
               cryptocurrency:
                 params.cryptocurrency ?? createOffer.cryptocurrency,
               fiat: params.fiat ?? createOffer.fiat,
+              chain: params.chain ?? createOffer.chain,
+              vendorWalletAddress:
+                params.vendorWalletAddress ?? createOffer.vendorWalletAddress,
               instructions: params.instructions ?? createOffer.instructions,
               isFilled: params.isFilled ?? createOffer.isFilled,
               isPaymentMethodCompleted:
@@ -86,6 +91,8 @@ export const useCreateOfferSlice: StateCreator<
           createOffer: {
             ...createOffer,
             cryptocurrency: undefined,
+            chain: undefined,
+            vendorWalletAddress: undefined,
             fiat: undefined,
             vendorId: undefined,
             offerType: undefined,

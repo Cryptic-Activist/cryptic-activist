@@ -147,6 +147,7 @@ export const useUserSlice: StateCreator<
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
             referralCode: user.referralCode,
+            kyc: user.kyc,
             _count: user._count,
           },
           'user/login'
@@ -201,6 +202,7 @@ export const useUserSlice: StateCreator<
             lastLoginAt: user.lastLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            kyc: user.kyc,
             _count: user._count,
           },
           'user/login2FA'

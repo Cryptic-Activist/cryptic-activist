@@ -11,6 +11,13 @@ export const ZodCryptocurrency = z.object({
   name: z.string().min(2),
   symbol: z.string().min(2),
 });
+export const ZodChain = z.object({
+  id: z.string().min(2),
+  chainId: z.number().min(1),
+  logoUrl: z.string().min(2),
+  name: z.string().min(2),
+  symbol: z.string().min(2),
+});
 export const ZodOfferType = z.string().min(3);
 export const ZodPaymentMethodId = z.string().min(2);
 export const ZodPaymentDetails = z.union([

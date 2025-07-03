@@ -10,6 +10,11 @@
   justify-content: space-between;
 }
 
+.willReceiveRequiredAmountContainer {
+  display: flex;
+  gap: 1rem;
+}
+
 .willReceive {
   display: flex;
   align-items: flex-end;

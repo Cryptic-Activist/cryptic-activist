@@ -1,6 +1,14 @@
 'use client';
 
-import { DEFAULT_CRYPTOCURRENCY_ID, DEFAULT_FIAT_SYMBOL } from '@/constants';
+import {
+  ChainParams,
+  CryptocurrencyParams,
+} from '@/hooks/useCryptocurrencies/types';
+import {
+  DEFAULT_CHAIN_ID,
+  DEFAULT_CRYPTOCURRENCY_ID,
+  DEFAULT_FIAT_SYMBOL,
+} from '@/constants';
 import { getLocalStorage, removeLocalStorage, setLocalStorage } from '@/utils';
 import {
   useApp,
@@ -12,17 +20,23 @@ import {
   useUser,
 } from '@/hooks';
 
-import { CryptocurrencyParams } from '@/hooks/useCryptocurrencies/types';
 import { FiatParams } from '@/hooks/useFiats/types';
 import { Type } from '@/store/app/types';
 import { useEffect } from 'react';
 
 const InitialSettings = () => {
   const { getFiats, getFiat, fiats } = useFiats();
-  const { getCryptocurrencies, getCryptocurrency, cryptocurrencies } =
-    useCryptocurrencies();
+  const {
+    getCryptocurrencies,
+    getCryptocurrency,
+    cryptocurrencies,
+    getChains,
+    getChain,
+    chains,
+  } = useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
+  const { setValue, setCurrentPrice, app, checkIsMobile, setSettings } =
+    useApp();
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
   const {} = useParams();
@@ -51,6 +65,35 @@ const InitialSettings = () => {
         'app/setDefaultCryptocurrency'
       );
       setLocalStorage('DEFAULT_CRYPTOCURRENCY_ID', cryptocurrency.id);
+      return true;
+    }
+  };
+
+  const setDefaultChain = (params: ChainParams) => {
+    const chain = getChain(params);
+
+    if (!chain) {
+      removeLocalStorage('DEFAULT_CHAIN_ID');
+      return false;
+    }
+
+    if (chain) {
+      setValue(
+        {
+          defaults: {
+            chain: {
+              coingeckoId: chain.coingeckoId,
+              id: chain.id,
+              name: chain.name,
+              symbol: chain.symbol,
+              logoUrl: chain.logoUrl,
+              chainId: chain.chainId,
+            },
+          },
+        },
+        'app/setDefaultChain'
+      );
+      setLocalStorage('DEFAULT_CHAIN_ID', chain.id);
       return true;
     }
   };
@@ -101,6 +144,8 @@ const InitialSettings = () => {
     getCryptocurrencies();
     getFiats();
     getPaymentMethods();
+    getChains();
+    setSettings();
   }, []);
 
   useEffect(() => {
@@ -128,6 +173,30 @@ const InitialSettings = () => {
       setDefaultCryptocurrency({ coingeckoId: DEFAULT_CRYPTOCURRENCY_ID });
     }
   }, [cryptocurrencies.data]);
+
+  useEffect(() => {
+    if (chains.data) {
+      const localStorageChain = getLocalStorage('DEFAULT_CHAIN_ID');
+
+      if (localStorageChain) {
+        const maxAttempts = 1;
+        for (let i = 0; i < maxAttempts; i++) {
+          const wasSet = setDefaultChain({
+            id: localStorageChain,
+          });
+
+          if (wasSet) {
+            return;
+          }
+
+          i++;
+        }
+        return;
+      }
+
+      setDefaultChain({ chainId: DEFAULT_CHAIN_ID });
+    }
+  }, [chains.data]);
 
   useEffect(() => {
     if (fiats.data) {

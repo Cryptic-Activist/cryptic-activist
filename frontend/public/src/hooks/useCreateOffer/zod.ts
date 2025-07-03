@@ -1,4 +1,5 @@
 import {
+  ZodChain,
   ZodCryptocurrency,
   ZodFiat,
   ZodInstructions,
@@ -24,16 +25,25 @@ export const CreateOfferPaymentMethod = z
   .object({
     fiat: ZodFiat,
     cryptocurrency: ZodCryptocurrency,
+    chain: ZodChain,
     offerType: ZodOfferType,
     paymentMethodId: ZodPaymentMethodId,
     paymentDetails: ZodPaymentDetails,
+    vendorWalletAddress: ZodVendorWalletAddress,
   })
-  .superRefine(({ offerType }, ctx) => {
+  .superRefine(({ offerType, vendorWalletAddress }, ctx) => {
     if (offerType !== 'sell' && offerType !== 'buy') {
       ctx.addIssue({
         code: 'custom',
         message: "Offer type must be either 'sell' or 'buy'",
         path: ['offerType'],
+      });
+    }
+    if (!ethereumWalletAddressRegex.test(vendorWalletAddress)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Must be a valid wallet address',
+        path: ['vendorWalletAddress'],
       });
     }
   });
@@ -64,24 +74,13 @@ export const createOfferTradePricing = zodResolver(CreateOfferTradePricing);
 
 const ethereumWalletAddressRegex = /^0x[a-fA-F0-9]{40}$/;
 
-export const CreateOfferTradeInstructions = z
-  .object({
-    tags: ZodTags,
-    kycOnly: ZodKYCOnly,
-    label: ZodLabel,
-    terms: ZodTerms,
-    instructions: ZodInstructions,
-    vendorWalletAddress: ZodVendorWalletAddress,
-  })
-  .superRefine(({ vendorWalletAddress }, ctx) => {
-    if (!ethereumWalletAddressRegex.test(vendorWalletAddress)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Must be a valid wallet address',
-        path: ['vendorWalletAddress'],
-      });
-    }
-  });
+export const CreateOfferTradeInstructions = z.object({
+  tags: ZodTags,
+  kycOnly: ZodKYCOnly,
+  label: ZodLabel,
+  terms: ZodTerms,
+  instructions: ZodInstructions,
+});
 
 export const createOfferTradeInstructions = zodResolver(
   CreateOfferTradeInstructions

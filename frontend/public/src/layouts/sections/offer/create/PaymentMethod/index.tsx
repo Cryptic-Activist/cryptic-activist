@@ -78,8 +78,20 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             <Selector type="fiat" hasLabel={false} />
           </section>
           <section className={stylesCore.horizontalGroup}>
+            <h2 className={stylesCore.groupHeading}>Choose Wallet</h2>
+            <Selector
+              type="wallet"
+              hasLabel={false}
+              selected={createOffer.vendorWalletAddress}
+            />
+          </section>
+          <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>Choose Cryptocurrency</h2>
             <Selector type="cryptocurrency" hasLabel={false} />
+          </section>
+          <section className={stylesCore.horizontalGroup}>
+            <h2 className={stylesCore.groupHeading}>Choose Chain</h2>
+            <Selector type="chain" hasLabel={false} />
           </section>
           {createOffer?.cryptocurrency && (
             <section className={stylesCore.horizontalGroup}>

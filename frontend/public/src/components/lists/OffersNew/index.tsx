@@ -183,6 +183,10 @@ export const FilterSection: FC<FilterSectionProps> = ({
     toggleModal('cryptocurrencies');
   };
 
+  const openChainsModal = () => {
+    toggleModal('chains');
+  };
+
   const openFiatModal = () => {
     toggleModal('fiats');
   };
@@ -254,7 +258,6 @@ export const FilterSection: FC<FilterSectionProps> = ({
             Sell
           </button>
         </div>
-
         <button
           className={styles.cryptoSelector}
           onClick={openCryptocurrenciesModal}
@@ -270,7 +273,25 @@ export const FilterSection: FC<FilterSectionProps> = ({
                   className={styles.cryptoIcon}
                 />
               )}
-              <span>{app.defaults?.cryptocurrency?.name}</span>
+              <span>{app.defaults?.cryptocurrency?.symbol}</span>
+            </>
+          ) : (
+            <span className={styles.noData}>No Data</span>
+          )}
+        </button>
+        <button className={styles.cryptoSelector} onClick={openChainsModal}>
+          {app.defaults?.chain?.name ? (
+            <>
+              {app.defaults.chain.logoUrl && (
+                <Image
+                  src={app.defaults?.chain?.logoUrl ?? null}
+                  alt={app.defaults?.chain?.name}
+                  width={30}
+                  height={30}
+                  className={styles.cryptoIcon}
+                />
+              )}
+              <span>{app.defaults?.chain?.name}</span>
             </>
           ) : (
             <span className={styles.noData}>No Data</span>

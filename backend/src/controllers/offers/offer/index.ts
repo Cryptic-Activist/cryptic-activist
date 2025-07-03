@@ -43,6 +43,8 @@ export const createOfferController = async (req: Request, res: Response) => {
       paymentDetailsId = existingPaymentDetails.id;
     }
 
+    console.log({ body });
+
     const timeLimitInSeconds = parseInt(timeLimit, 10) * 60;
     const newOffer = await prisma.offer.create({
       data: { paymentDetailsId, timeLimit: timeLimitInSeconds, ...restBody },
@@ -196,6 +198,14 @@ export const getOfferController = async (req: Request, res: Response) => {
           select: {
             id: true,
             name: true,
+          },
+        },
+        chain: {
+          select: {
+            id: true,
+            name: true,
+            logoUrl: true,
+            chainId: true,
           },
         },
       },

@@ -1,3 +1,4 @@
+import { Chain } from '@/store/chain/types';
 import { Cryptocurrency } from '@/store/cryptocurrency/types';
 import { Fiat } from '@/store/fiat/types';
 import { PaymentMethod } from '@/store/paymentMethod/types';
@@ -21,7 +22,12 @@ type Defaults = {
   fiat?: Fiat;
   cryptocurrency?: Cryptocurrency;
   paymentMethod?: PaymentMethod;
+  chain?: Chain;
   amount?: number;
+};
+
+type Settings = {
+  depositPerTradePercent?: number;
 };
 
 export type CurrentPrice = number;
@@ -39,12 +45,14 @@ export type AppStore = {
     defaults: Defaults;
     currentPrice?: CurrentPrice;
     referralCode?: string;
+    settings?: Settings;
     setAppValue: (value: Partial<Value>, actionName?: `app/${string}`) => void;
     setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
     removeToast: (id: string) => void;
     addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
     checkIsMobile: (params: IsCheckIsMobileParams) => void;
     setReferralCode: (referralCode: string) => void;
+    setSettings: () => void;
   };
 };
 
@@ -57,10 +65,12 @@ export type AppStoreSetter = {
     fiat?: Fiat | null;
     cryptocurrency?: Cryptocurrency | null;
     paymentMethod?: PaymentMethod | null;
+    chain?: Chain | null;
     amount?: number;
   };
   currentPrice?: CurrentPrice;
   referralCode?: string;
+  settings?: Settings;
 };
 
 export type Value = AppStoreSetter;

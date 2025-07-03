@@ -45,3 +45,15 @@ export const getSupportedChains = async () => {
 
   return response.data;
 };
+
+export const getSupportedTokens = async (chainId: number) => {
+  const response = await fetchGet(
+    `${BACKEND}/cryptocurrencies/supported/${chainId}/tokens`
+  );
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  return response.data;
+};
