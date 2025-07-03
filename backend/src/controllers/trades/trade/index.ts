@@ -361,8 +361,6 @@ export const calculateReceivingAmount = async (
 
     const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
 
-    console.log({ finalCryptoAmount });
-
     res.status(200).send({
       fiatAmount,
       tradingFee,

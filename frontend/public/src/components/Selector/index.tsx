@@ -44,8 +44,6 @@ const Selector: FC<SelectorProps> = ({
     );
   };
 
-  // console.log({ selected, type });
-
   const getButtonLabel = () => {
     const build = () => {
       if (type === 'cryptocurrency' && defaults.cryptocurrency) {

@@ -40,7 +40,6 @@ export const fetchCurrentVendorOffers = async (vendorId: string) => {
 };
 
 export const submitOfferCreate = async (data: CreateOfferSetter) => {
-  console.log({ data });
   const bearerToken = getBearerToken();
   const payload = {
     vendorId: data.vendorId,

@@ -5,9 +5,10 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { HowMuchProps } from './types';
 import coreStyles from '../index.module.scss';
-import { isFloatGreaterThanBigIntPrecise } from '@/utils/math';
+import { hasEnoughBalance } from '@/utils/math';
 import styles from './index.module.scss';
 import { toUpperCase } from '@/utils';
+import { useApp } from '@/hooks';
 
 const HowMuch: FC<HowMuchProps> = ({
   user,
@@ -21,6 +22,7 @@ const HowMuch: FC<HowMuchProps> = ({
   isLoggedIn,
 }) => {
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
+  const { app } = useApp();
 
   useEffect(() => {
     const getSubmitButtonLabel = () => {
@@ -48,11 +50,14 @@ const HowMuch: FC<HowMuchProps> = ({
       if (
         blockchain.balance &&
         cryptocurrencyAmount &&
-        blockchain?.balance?.value
+        blockchain?.balance?.value &&
+        app.settings?.depositPerTradePercent
       ) {
-        const hasSuffientBalance = isFloatGreaterThanBigIntPrecise(
+        const hasSuffientBalance = hasEnoughBalance(
           cryptocurrencyAmount,
-          blockchain.balance.value
+          blockchain.balance.value,
+          blockchain.balance.decimals,
+          app.settings?.depositPerTradePercent
         );
 
         if (!hasSuffientBalance) {
@@ -73,7 +78,7 @@ const HowMuch: FC<HowMuchProps> = ({
     isLoggedIn,
     mutationStartTrade.isPending,
     mutationStartTrade.isError,
-    blockchain.balance,
+    blockchain.balance?.value,
     cryptocurrencyAmount,
   ]);
 

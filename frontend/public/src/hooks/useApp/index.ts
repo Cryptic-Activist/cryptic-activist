@@ -12,12 +12,14 @@ const useApp = () => {
       type,
       currentPrice,
       referralCode,
+      settings,
       setCurrentPrice: setCurrentPriceStore,
       addToast,
       removeToast,
       setAppValue,
       checkIsMobile,
       setReferralCode,
+      setSettings,
     },
   } = useRootStore();
 
@@ -39,6 +41,7 @@ const useApp = () => {
       defaults,
       currentPrice,
       referralCode,
+      settings,
     },
     setValue: setAppValue,
     setCurrentPrice,
@@ -46,6 +49,7 @@ const useApp = () => {
     removeToast,
     checkIsMobile,
     setReferralCode,
+    setSettings,
   };
 };
 

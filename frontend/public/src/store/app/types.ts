@@ -26,6 +26,10 @@ type Defaults = {
   amount?: number;
 };
 
+type Settings = {
+  depositPerTradePercent?: number;
+};
+
 export type CurrentPrice = number;
 export type IsCheckIsMobileParams = {
   width: number;
@@ -41,12 +45,14 @@ export type AppStore = {
     defaults: Defaults;
     currentPrice?: CurrentPrice;
     referralCode?: string;
+    settings?: Settings;
     setAppValue: (value: Partial<Value>, actionName?: `app/${string}`) => void;
     setCurrentPrice: (id: string, fiatSymbol: string) => Promise<void>;
     removeToast: (id: string) => void;
     addToast: (type: ToastType, content: ToastContent, timeout: number) => void;
     checkIsMobile: (params: IsCheckIsMobileParams) => void;
     setReferralCode: (referralCode: string) => void;
+    setSettings: () => void;
   };
 };
 
@@ -64,6 +70,7 @@ export type AppStoreSetter = {
   };
   currentPrice?: CurrentPrice;
   referralCode?: string;
+  settings?: Settings;
 };
 
 export type Value = AppStoreSetter;

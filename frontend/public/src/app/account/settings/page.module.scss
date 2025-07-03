@@ -14,9 +14,9 @@
 }
 
 .content {
-  display: flex;
-  gap: 1rem;
-  flex-direction: column;
+  display: grid;
+  gap: 3rem;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .section {
@@ -61,10 +61,28 @@
 .addLanguage {
   display: flex;
   gap: 0.5rem;
+  width: 100%;
+}
+
+.emailInput {
+  width: 100%;
 }
 
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+  }
+}
+
+@media (max-width: 1385px) {
+  .content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .content {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
   }
 }

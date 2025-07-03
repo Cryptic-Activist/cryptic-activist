@@ -8,7 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { fetchCurrentPrice } from '@/services/app';
 import { getOffer } from '@/services/offer';
 import { getSocket } from '@/services/socket';
-import { isFloatGreaterThanBigIntPrecise } from '@/utils/math';
+import { hasEnoughBalance } from '@/utils/math';
 import useApp from '../useApp';
 import useBlockchain from '../useBlockchain';
 import useDebounce from '../useDebounce';
@@ -22,7 +22,7 @@ const useOffer = () => {
   const router = useRouter();
 
   const { isLoggedIn, user } = useUser();
-  const { addToast } = useApp();
+  const { addToast, app } = useApp();
   const { blockchain } = useBlockchain();
   const { toggleModal } = useNavigationBar();
 
@@ -178,9 +178,12 @@ const useOffer = () => {
     const hasSuffientBalance =
       cryptocurrencyAmount &&
       blockchain.balance?.value &&
-      isFloatGreaterThanBigIntPrecise(
+      app.settings?.depositPerTradePercent &&
+      hasEnoughBalance(
         cryptocurrencyAmount,
-        blockchain.balance.value
+        blockchain.balance.value,
+        blockchain.balance.decimals,
+        app.settings?.depositPerTradePercent
       );
 
     if (
@@ -198,7 +201,14 @@ const useOffer = () => {
     } else {
       setIsTradingAvailable(false);
     }
-  }, [user.id, offer.vendor?.id, isLoggedIn, blockchain]);
+  }, [
+    user.id,
+    offer.vendor?.id,
+    isLoggedIn,
+    blockchain,
+    cryptocurrencyAmount,
+    blockchain.balance?.value,
+  ]);
 
   useEffect(() => {
     if (offer.fiat?.symbol && offer.cryptocurrency?.coingeckoId) {

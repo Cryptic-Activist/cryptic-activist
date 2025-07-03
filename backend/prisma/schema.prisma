@@ -369,16 +369,16 @@ model PaymentDetails {
 }
 
 model PremiumPurchase {
-  id             String    @id @default(cuid())
-  depositAddress String    @unique
-  userId         String    @unique
-  user           User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  expectedAmount Float
-  status         String // e.g., "pending", "completed", "failed"
-  transactionId  String?
-  deletedAt      DateTime? @db.Timestamp()
-  createdAt      DateTime? @default(now()) @db.Timestamp()
-  updatedAt      DateTime? @updatedAt @db.Timestamp()
+  id                        String    @id @default(cuid())
+  depositAddress            String    @unique
+  userId                    String    @unique
+  user                      User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  expectedAmount            Float
+  status                    String // e.g., "pending", "completed", "failed"
+  blockchainTransactionHash String
+  deletedAt                 DateTime? @db.Timestamp()
+  createdAt                 DateTime? @default(now()) @db.Timestamp()
+  updatedAt                 DateTime? @updatedAt @db.Timestamp()
 
   @@map("premium_purchases")
 }
@@ -685,45 +685,6 @@ model TradeDispute {
   @@map("trade_disputes")
 }
 
-enum TransactionPaymentMethodType {
-  CREDIT_CARD
-}
-
-model TransactionPaymentMethod {
-  id                         String                       @id @default(cuid()) // ID from the payment gateway (e.g., Stripe payment method ID)
-  transactionPaymentMethodId String
-  userId                     String
-  user                       User                         @relation(fields: [userId], references: [id])
-  type                       TransactionPaymentMethodType
-  transactions               Transaction[]
-
-  @@map("transaction_payment_method")
-}
-
-enum TransactionStatus {
-  PENDING
-  COMPLETED
-  FAILED
-}
-
-model Transaction {
-  id                         String                   @id @default(cuid())
-  userId                     String
-  user                       User                     @relation(fields: [userId], references: [id])
-  transactionPaymentMethodId String
-  transactionPaymentMethod   TransactionPaymentMethod @relation(fields: [transactionPaymentMethodId], references: [id])
-  amount                     Float
-  currency                   String
-  status                     TransactionStatus // e.g., 'pending', 'completed', 'failed'
-  gatewayTransactionId       String? // ID from the payment gateway (e.g., Stripe charge ID)
-  deletedAt                  DateTime?                @db.Timestamp()
-  createdAt                  DateTime?                @default(now()) @db.Timestamp()
-  updatedAt                  DateTime?                @updatedAt @db.Timestamp()
-
-  @@unique([gatewayTransactionId]) // Prevent duplicate transactions
-  @@map("transactions")
-}
-
 model Trust {
   id         String    @id @default(uuid())
   truster    User      @relation("trusters", fields: [trusterId], references: [id], onDelete: Cascade, onUpdate: Cascade) // User who trusts
@@ -812,64 +773,62 @@ model UserWarning {
 }
 
 model User {
-  id                       String                     @id @default(uuid())
-  profileColor             String                     @db.VarChar(10)
-  firstName                String                     @db.VarChar(50)
-  lastName                 String                     @db.VarChar(50)
-  username                 String                     @unique @db.VarChar(120)
-  email                    String                     @unique @db.VarChar(120)
-  password                 String
-  privateKeys              String[]                   @unique
-  isVerified               Boolean?                   @default(false) @db.Boolean
-  isPremium                Boolean?
-  underReview              Boolean                    @default(false)
-  xp                       Int                        @default(0)
-  trustScore               Int                        @default(50)
-  twoFactorSecret          String?
-  twoFactorEnabled         Boolean?                   @default(false) @db.Boolean
-  lastLoginAt              DateTime?                  @db.Timestamp
-  createdById              String? // Admin who created the account (Foreign key)
-  createdBy                Admin?                     @relation("userCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
-  lastUpdatedById          String? // Admin who last updated the profile (Foreign key)
-  lastUpdatedBy            Admin?                     @relation("userLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
-  deletedAt                DateTime?                  @db.Timestamp()
-  createdAt                DateTime?                  @default(now()) @db.Timestamp()
-  updatedAt                DateTime?                  @updatedAt @db.Timestamp()
-  userLanguage             UserLanguage[]
-  systemMessages           SystemMessage[]
-  trusters                 Trust[]                    @relation("trusters")
-  trusted                  Trust[]                    @relation("trusted")
-  blockers                 Block[]                    @relation("blockers")
-  blocked                  Block[]                    @relation("blocked")
-  offers                   Offer[]                    @relation("offer")
-  feedbackTrader           Feedback[]                 @relation("feedbackTrader")
-  tradeVendor              Trade[]                    @relation("vendorTrade")
-  tradeTrader              Trade[]                    @relation("traderTrade")
-  tier                     Tier?                      @relation(fields: [tierId], references: [id])
-  tierId                   String?
-  premiumPurchase          PremiumPurchase?
-  kyc                      KYC[]
-  kycId                    String?
-  transactionPaymentMethod TransactionPaymentMethod[]
-  transactions             Transaction[]
-  referralCode             String                     @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
-  referrer                 Referral[]                 @relation("referrer")
-  referre                  Referral?                  @relation("referee")
-  paymentDetails           PaymentDetails[]
-  tradeDispute             TradeDispute[]
-  disputeWinner            TradeDispute[]             @relation("wonDisputes")
-  disputeLoser             TradeDispute[]             @relation("lostDisputes")
-  disputeEvidence          DisputeEvidence[]
-  userStats                UserStats?                 @relation("userStats")
-  disputePartyNote         DisputePartyNote[]         @relation("disputePartyNoteTarget")
-  disputeEvidenceRequest   DisputeEvidenceRequest[]
-  isSuspended              Boolean                    @default(false)
-  suspensionId             String?
-  suspension               UserSuspension?            @relation("userSuspension")
-  warnings                 UserWarning[]              @relation("userWarnings")
-  totalWarnings            Int                        @default(0)
-  userSuspensionLog        UserSuspensionLog[]
-  accountReview            AccountReview[]
+  id                     String                   @id @default(uuid())
+  profileColor           String                   @db.VarChar(10)
+  firstName              String                   @db.VarChar(50)
+  lastName               String                   @db.VarChar(50)
+  username               String                   @unique @db.VarChar(120)
+  email                  String                   @unique @db.VarChar(120)
+  password               String
+  privateKeys            String[]                 @unique
+  isVerified             Boolean?                 @default(false) @db.Boolean
+  isPremium              Boolean?
+  underReview            Boolean                  @default(false)
+  xp                     Int                      @default(0)
+  trustScore             Int                      @default(50)
+  twoFactorSecret        String?
+  twoFactorEnabled       Boolean?                 @default(false) @db.Boolean
+  lastLoginAt            DateTime?                @db.Timestamp
+  createdById            String? // Admin who created the account (Foreign key)
+  createdBy              Admin?                   @relation("userCreatedBy", fields: [createdById], references: [id]) // Relation to Admin
+  lastUpdatedById        String? // Admin who last updated the profile (Foreign key)
+  lastUpdatedBy          Admin?                   @relation("userLastUpdatedBy", fields: [lastUpdatedById], references: [id]) // Relation to Admin
+  deletedAt              DateTime?                @db.Timestamp()
+  createdAt              DateTime?                @default(now()) @db.Timestamp()
+  updatedAt              DateTime?                @updatedAt @db.Timestamp()
+  userLanguage           UserLanguage[]
+  systemMessages         SystemMessage[]
+  trusters               Trust[]                  @relation("trusters")
+  trusted                Trust[]                  @relation("trusted")
+  blockers               Block[]                  @relation("blockers")
+  blocked                Block[]                  @relation("blocked")
+  offers                 Offer[]                  @relation("offer")
+  feedbackTrader         Feedback[]               @relation("feedbackTrader")
+  tradeVendor            Trade[]                  @relation("vendorTrade")
+  tradeTrader            Trade[]                  @relation("traderTrade")
+  tier                   Tier?                    @relation(fields: [tierId], references: [id])
+  tierId                 String?
+  premiumPurchase        PremiumPurchase[]
+  kyc                    KYC[]
+  kycId                  String?
+  referralCode           String                   @unique @default(dbgenerated("substring(md5(gen_random_uuid()::text), 1, 16)")) @db.VarChar(20)
+  referrer               Referral[]               @relation("referrer")
+  referre                Referral?                @relation("referee")
+  paymentDetails         PaymentDetails[]
+  tradeDispute           TradeDispute[]
+  disputeWinner          TradeDispute[]           @relation("wonDisputes")
+  disputeLoser           TradeDispute[]           @relation("lostDisputes")
+  disputeEvidence        DisputeEvidence[]
+  userStats              UserStats?               @relation("userStats")
+  disputePartyNote       DisputePartyNote[]       @relation("disputePartyNoteTarget")
+  disputeEvidenceRequest DisputeEvidenceRequest[]
+  isSuspended            Boolean                  @default(false)
+  suspensionId           String?
+  suspension             UserSuspension?          @relation("userSuspension")
+  warnings               UserWarning[]            @relation("userWarnings")
+  totalWarnings          Int                      @default(0)
+  userSuspensionLog      UserSuspensionLog[]
+  accountReview          AccountReview[]
 
   @@index([username])
   @@map("users")
@@ -928,4 +887,23 @@ model Token {
 
   @@unique([id, token])
   @@map("tokens")
+}
+
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+model PlatformSetting {
+  id        String      @id @default(uuid())
+  key       String      @unique
+  value     String // Store as string, convert as needed
+  type      SettingType @default(STRING)
+  isPrivate Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("platform_settings")
 }

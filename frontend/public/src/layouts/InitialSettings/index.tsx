@@ -35,7 +35,8 @@ const InitialSettings = () => {
     chains,
   } = useCryptocurrencies();
   const { getPaymentMethods } = usePaymentMethods();
-  const { setValue, setCurrentPrice, app, checkIsMobile } = useApp();
+  const { setValue, setCurrentPrice, app, checkIsMobile, setSettings } =
+    useApp();
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
   const {} = useParams();
@@ -144,6 +145,7 @@ const InitialSettings = () => {
     getFiats();
     getPaymentMethods();
     getChains();
+    setSettings();
   }, []);
 
   useEffect(() => {

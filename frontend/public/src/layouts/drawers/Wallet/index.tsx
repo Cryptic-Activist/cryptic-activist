@@ -93,8 +93,6 @@ const Wallet = () => {
   const chainsStyle = isChainsOpened ? styles.switchChainListOpened : '';
   const tokensStyle = isTokensOpened ? styles.tokensListOpened : '';
 
-  console.log({ blockchainData: blockchain.chain.logoUrl });
-
   return (
     <>
       <div className={styles.background} onClick={closeWallet} />

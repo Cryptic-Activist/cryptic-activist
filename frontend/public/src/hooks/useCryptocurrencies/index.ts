@@ -62,7 +62,6 @@ const useCryptocurrency = () => {
   };
 
   const getChain = (params: ChainParams) => {
-    console.log({ chains: chains.data, params });
     if (!chains.data) {
       return null;
     }

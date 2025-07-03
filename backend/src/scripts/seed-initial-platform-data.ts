@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { IS_DEVELOPMENT } from '@/constants';
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
@@ -9,6 +10,16 @@ import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
 
 const main = async () => {
+  // Create General Platform Settings
+  const settings = await prisma.platformSetting.create({
+    data: {
+      key: 'depositPerTradePercent',
+      type: 'NUMBER',
+      value: '0.2',
+      isPrivate: false,
+    },
+  });
+
   // Create tiers
   const tiers = await prisma.tier.createMany({
     data: [
@@ -270,6 +281,7 @@ const main = async () => {
         'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', // BNB
     },
   ];
+
   await prisma.chain.createMany({
     data: chainData.map(({ tempId, ...rest }) => rest),
   });
@@ -885,13 +897,19 @@ const main = async () => {
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
 
-    const tierBronze = await prisma.tier.findFirst({
+    const tierBronze = await tx.tier.findFirst({
       where: {
         level: 0,
       },
     });
 
-    const newTrader = await prisma.user.create({
+    const language = await tx.language.upsert({
+      where: { name: 'English' },
+      update: {},
+      create: { name: 'English' },
+    });
+
+    const newTrader = await tx.user.create({
       data: {
         firstName: 'Trader',
         lastName: 'Example',
@@ -905,6 +923,10 @@ const main = async () => {
       },
     });
 
+    await tx.userLanguage.create({
+      data: { languageId: language.id, userId: newTrader.id },
+    });
+
     // Create first vendor user
     const vendorPassword = 'password';
     const vendorGeneratedSalt = await bcrypt.genSalt(10);
@@ -912,7 +934,7 @@ const main = async () => {
     const vendorPrivateKeysArrObj = await generatePrivateKeysBip39();
     const vendorProfileColor = getRandomHighContrastColor();
 
-    const vendorTier = await prisma.tier.upsert({
+    const vendorTier = await tx.tier.upsert({
       where: {
         name: 'Bronze',
       },
@@ -929,7 +951,7 @@ const main = async () => {
       },
     });
 
-    const newVendor = await prisma.user.create({
+    const newVendor = await tx.user.create({
       data: {
         firstName: 'Vendor',
         lastName: 'Example',
@@ -943,10 +965,14 @@ const main = async () => {
       },
     });
 
+    await tx.userLanguage.create({
+      data: { languageId: language.id, userId: newVendor.id },
+    });
+
     // Get references for offer creation
     const crypto = await tx.cryptocurrency.findFirst({
       where: {
-        coingeckoId: 'ethereum',
+        coingeckoId: 'polygon-ecosystem-token',
       },
     });
     const fiat = await tx.fiat.findFirst({
@@ -959,9 +985,10 @@ const main = async () => {
         name: 'SEPA',
       },
     });
+
     const ethChain = await tx.chain.findFirst({
       where: {
-        chainId: 1,
+        chainId: IS_DEVELOPMENT ? 80002 : 137,
       },
       select: {
         id: true,
@@ -976,7 +1003,6 @@ const main = async () => {
       },
     });
 
-    console.log({ newTrader, crypto, fiat, ethChain });
     // Create first trader offer with chain support
     const newTraderOffer = await tx.offer.create({
       data: {

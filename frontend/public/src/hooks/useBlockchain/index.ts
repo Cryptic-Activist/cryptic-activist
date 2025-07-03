@@ -150,8 +150,6 @@ const useBlockchain = () => {
           (c) => c.chainId === chainLocal?.id
         );
 
-        console.log({ found2: foundChain });
-
         setBlockchainValue(
           {
             account: { address: onConnectAddress },
@@ -272,8 +270,6 @@ const useBlockchain = () => {
           const parsedWallet = JSON.parse(storedWallet);
           const parsedChain = JSON.parse(storedChain);
 
-          console.log({ parsedChain });
-
           // Prevent connecting to unsupported chains
           if (
             supportedChainsQuery.data &&
@@ -327,8 +323,6 @@ const useBlockchain = () => {
       const foundChain = chainsStore.data?.find(
         (c) => c.chainId === wagmiChain.id
       );
-
-      console.log({ found1: foundChain });
 
       const chainInfo = {
         id: wagmiChain.id,

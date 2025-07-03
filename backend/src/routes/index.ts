@@ -12,6 +12,7 @@ import fiats from './fiats';
 import health from './health';
 import offers from './offers';
 import path from 'path';
+import settings from './settings';
 import systemMessages from './systemMessages';
 import tiers from './tiers';
 import trades from './trades';
@@ -36,6 +37,7 @@ export default (app: Application): void => {
   app.use('/tiers', tiers);
   app.use('/health', health);
   app.use('/upload', upload);
+  app.use('/settings', settings);
 
   if (IS_DEVELOPMENT) {
     app.use('/uploads', static_(path.join(__dirname, '../uploads')));
