@@ -179,11 +179,13 @@ const useOffer = () => {
       cryptocurrencyAmount &&
       blockchain.balance?.value &&
       app.settings?.depositPerTradePercent &&
+      offer.offerType &&
       hasEnoughBalance(
         cryptocurrencyAmount,
         blockchain.balance.value,
         blockchain.balance.decimals,
-        app.settings?.depositPerTradePercent
+        app.settings?.depositPerTradePercent,
+        offer.offerType
       );
 
     if (
