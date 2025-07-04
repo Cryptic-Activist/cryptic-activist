@@ -4,7 +4,7 @@ import {
   createTrade,
   fundTrade,
   getCreateTradeDetails,
-} from '@/services/blockchains/ethereum';
+} from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';

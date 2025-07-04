@@ -15,7 +15,7 @@ import {
   cancelTrade,
   confirmTrade,
   raiseDispute,
-} from '@/services/blockchains/ethereum';
+} from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 

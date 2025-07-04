@@ -6,7 +6,7 @@ import {
   getProvider,
   raiseDispute,
   resolveDispute,
-} from '@/services/blockchains/ethereum';
+} from '@/services/blockchains/escrow';
 
 import { ethers } from 'ethers';
 

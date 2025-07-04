@@ -244,7 +244,7 @@ async function main() {
   console.log("\n📝 Contract Verification:");
   console.log("To verify the contract on block explorer, run:");
   console.log(
-    `npx hardhat verify --network ${networkName} ${contract.address} "${paymentTokenAddress}" "${monthlyPrice}" "${yearlyPrice}"`
+    `npx hardhat verify --network ${networkName} ${contract.target} "${paymentTokenAddress}" "${monthlyPrice}" "${yearlyPrice}"`
   );
 
   // Usage examples
