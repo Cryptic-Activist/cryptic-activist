@@ -12,14 +12,14 @@ export const subscribePremium = async (req: Request, res: Response) => {
   try {
     const { period, userId, payerAddress } = req.body;
 
-    // Check if user already has an active subscription for the same period
+    // Check for active subscription of the same type
     const existing = await prisma.premiumPurchase.findFirst({
       where: {
         userId,
         period,
         status: 'COMPLETED',
         expiresAt: {
-          gte: new Date(), // Still valid
+          gte: new Date(),
         },
       },
     });
@@ -30,20 +30,18 @@ export const subscribePremium = async (req: Request, res: Response) => {
       });
     }
 
-    // Get pricing from settings
     const settingKey =
       period === 'monthly' ? 'premiumPriceMonthly' : 'premiumPriceYearly';
     const expectedAmount = await getSetting(settingKey);
 
-    // Calculate expiry date
     const now = new Date();
     const expiresAt =
       period === 'monthly'
-        ? new Date(now.setMonth(now.getMonth() + 1))
-        : new Date(now.setFullYear(now.getFullYear() + 1));
+        ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
     const blockchainTransactionHash =
-      '0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0'; // Replace with actual tx hash
+      '0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0'; // Replace with actual hash
 
     await prisma.premiumPurchase.create({
       data: {
@@ -53,6 +51,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
         expectedAmount,
         blockchainTransactionHash,
         status: 'COMPLETED',
+        startsAt: now,
         expiresAt,
       },
     });
@@ -73,7 +72,6 @@ export const changeToYearlyPremiumSubscription = async (
 
     const now = new Date();
 
-    // Get active monthly subscription
     const activeMonthly = await prisma.premiumPurchase.findFirst({
       where: {
         userId,
@@ -90,20 +88,15 @@ export const changeToYearlyPremiumSubscription = async (
       });
     }
 
-    // Expire the current subscription (soft expire)
+    // Expire current monthly
     await prisma.premiumPurchase.update({
       where: { id: activeMonthly.id },
-      data: {
-        expiresAt: now,
-      },
+      data: { expiresAt: now },
     });
 
-    // Get yearly price from settings
     const yearlyPrice = await getSetting('premiumPriceYearly');
 
-    // Create new yearly subscription
-    const oneYearLater = new Date();
-    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+    const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
     const blockchainTransactionHash = '0xCHANGE_TO_YEARLY_HASH'; // Replace with real hash
 
@@ -116,7 +109,7 @@ export const changeToYearlyPremiumSubscription = async (
         expectedAmount: yearlyPrice,
         blockchainTransactionHash,
         startsAt: now,
-        expiresAt: oneYearLater,
+        expiresAt,
       },
     });
 
@@ -136,7 +129,6 @@ export const changeToMonthlyPremiumSubscription = async (
 
     const now = new Date();
 
-    // Get active yearly subscription
     const activeYearly = await prisma.premiumPurchase.findFirst({
       where: {
         userId,
@@ -153,37 +145,30 @@ export const changeToMonthlyPremiumSubscription = async (
       });
     }
 
-    // Expire the current yearly subscription
-    await prisma.premiumPurchase.update({
-      where: { id: activeYearly.id },
-      data: {
-        expiresAt: now,
-      },
-    });
-
-    // Get monthly price from settings
     const monthlyPrice = await getSetting('premiumPriceMonthly');
 
-    // Create new monthly subscription
-    const oneMonthLater = new Date();
-    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+    const startsAt = activeYearly.expiresAt;
+    const expiresAt = new Date(startsAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    const blockchainTransactionHash = '0xCHANGE_TO_MONTHLY_HASH'; // Replace with real hash
+    const blockchainTransactionHash = '0xSCHEDULED_MONTHLY_HASH'; // Replace with real hash
 
     await prisma.premiumPurchase.create({
       data: {
         userId,
         payerAddress,
         period: 'MONTHLY',
-        status: 'COMPLETED',
+        status: 'SCHEDULED', // Will be activated later
         expectedAmount: monthlyPrice,
         blockchainTransactionHash,
-        startsAt: now,
-        expiresAt: oneMonthLater,
+        startsAt,
+        expiresAt,
       },
     });
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({
+      ok: true,
+      scheduledStart: startsAt,
+    });
   } catch (err) {
     console.error({ err });
     return res.status(500).json({ error: err.message });
