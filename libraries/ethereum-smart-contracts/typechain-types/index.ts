@@ -16,5 +16,9 @@ export type { SafeERC20 } from "./@openzeppelin/contracts/token/ERC20/utils/Safe
 export { SafeERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/utils/SafeERC20__factory";
 export type { IERC165 } from "./@openzeppelin/contracts/utils/introspection/IERC165";
 export { IERC165__factory } from "./factories/@openzeppelin/contracts/utils/introspection/IERC165__factory";
+export type { MockERC20 } from "./contracts/MockERC20";
+export { MockERC20__factory } from "./factories/contracts/MockERC20__factory";
 export type { MultiTradeEscrow } from "./contracts/MultiTradeEscrow";
 export { MultiTradeEscrow__factory } from "./factories/contracts/MultiTradeEscrow__factory";
+export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager";
+export { PremiumSubscriptionManager__factory } from "./factories/contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager__factory";

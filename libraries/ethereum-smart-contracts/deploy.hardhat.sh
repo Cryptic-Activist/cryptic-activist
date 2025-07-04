@@ -1,7 +1,7 @@
 npx hardhat run scripts/deploy.hardhat.js --network localhost 
 
 echo "Emptying contracts folder..."
-rm -rf ../../backend/src/contracts/ethereum/artifacts/*
+rm -rf ../../backend/src/contracts/ethereum/artifacts/MultiTradeEscrow.*
 
 echo "Copying contract artifacts..."
 cp artifacts/contracts/MultiTradeEscrow.sol/MultiTradeEscrow.json ../../backend/src/contracts/ethereum/artifacts/MultiTradeEscrow.json
