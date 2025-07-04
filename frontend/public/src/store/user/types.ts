@@ -24,6 +24,10 @@ type Count = {
   trades: number;
 };
 
+type Premium = {
+  period: 'MONTHLY' | 'YEARLY';
+};
+
 type Names = {
   firstName?: string;
   lastName?: string;
@@ -60,10 +64,10 @@ export type User = {
   languages?: Language[];
   twoFactorEnabled?: boolean;
   referralCode?: string;
-  isPremium?: boolean;
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
+  premium?: Premium;
   _count?: Count;
   setUserValue: (value: Value, actionName: `user/${string}`) => void;
   setUser: (user: Value) => void;
@@ -92,10 +96,10 @@ export type UserSetter = {
   userLanguage?: UserLanguage;
   twoFactorEnabled?: boolean;
   referralCode?: string;
-  isPremium?: boolean;
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
+  premium?: Premium;
   _count?: Count;
 };
 

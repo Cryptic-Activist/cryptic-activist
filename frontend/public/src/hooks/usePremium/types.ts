@@ -1,1 +1,1 @@
-export type Period = 'monthly' | 'yearly';
+export type Period = 'MONTHLY' | 'YEARLY';

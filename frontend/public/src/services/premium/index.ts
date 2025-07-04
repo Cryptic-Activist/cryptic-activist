@@ -1,15 +1,21 @@
 import { BACKEND } from '@/constants';
 import { Period } from '@/hooks/usePremium/types';
+import { Wallet } from '@/store/blockchain/types';
 import { fetchPost } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 
-export const subscribeToPremium = async (userId: string, period: Period) => {
+export const subscribeToPremium = async (
+  userId: string,
+  period: Period,
+  wallet: Wallet
+) => {
   const bearerToken = getBearerToken();
   const response = await fetchPost(
     `${BACKEND}/premium/subscribe`,
     {
       userId,
       period,
+      payerAddress: wallet,
     },
     { Authorization: bearerToken }
   );

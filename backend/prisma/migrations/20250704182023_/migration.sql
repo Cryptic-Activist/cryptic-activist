@@ -11,6 +11,12 @@ CREATE TYPE "KYCStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 CREATE TYPE "KYCDocumentType" AS ENUM ('ALIEN_REGISTRATION_CARD', 'CITIZENSHIP_CERTIFICATE', 'CONSULAR_ID_CARD', 'DRIVERS_LICENSE', 'FIREARMS_LICENSE', 'GOVERNMENT_ISSUED_ID_CARD', 'HEALTH_INSURANCE_CARD', 'IMMIGRATION_DOCUMENT', 'INCOME_TAX_IDENTIFICATION_DOCUMENT', 'MILITARY_ID', 'NATIONAL_ID_CARD', 'PASSPORT', 'PERMANENT_RESIDENT_CARD', 'REFUGEE_TRAVEL_DOCUMENT', 'RESIDENCE_PERMIT', 'SOCIAL_SECURITY_CARD', 'TAX_IDENTIFICATION_CARD', 'VOTER_ID_CARD', 'WORK_PERMIT', 'OTHER');
 
 -- CreateEnum
+CREATE TYPE "PremiumPurchaseStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'SCHEDULED');
+
+-- CreateEnum
+CREATE TYPE "PremiumPeriod" AS ENUM ('MONTHLY', 'YEARLY');
+
+-- CreateEnum
 CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_DISPUTE_MORE_EVIDENCES', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING');
 
 -- CreateEnum
@@ -316,14 +322,17 @@ CREATE TABLE "payment_details" (
 -- CreateTable
 CREATE TABLE "premium_purchases" (
     "id" TEXT NOT NULL,
-    "payerAddress" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "expectedAmount" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
+    "payerAddress" TEXT NOT NULL,
+    "expectedAmount" DECIMAL NOT NULL,
+    "status" "PremiumPurchaseStatus" NOT NULL,
+    "period" "PremiumPeriod" NOT NULL,
     "blockchainTransactionHash" TEXT NOT NULL,
+    "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "premium_purchases_pkey" PRIMARY KEY ("id")
 );
@@ -563,7 +572,6 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
-    "isPremium" BOOLEAN,
     "underReview" BOOLEAN NOT NULL DEFAULT false,
     "xp" INTEGER NOT NULL DEFAULT 0,
     "trustScore" INTEGER NOT NULL DEFAULT 50,
@@ -699,7 +707,10 @@ CREATE UNIQUE INDEX "chains_name_key" ON "chains"("name");
 CREATE UNIQUE INDEX "chains_chainId_key" ON "chains"("chainId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "premium_purchases_userId_key" ON "premium_purchases"("userId");
+CREATE INDEX "premium_purchases_userId_period_status_expiresAt_idx" ON "premium_purchases"("userId", "period", "status", "expiresAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "premium_purchases_userId_period_status_key" ON "premium_purchases"("userId", "period", "status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "referrals_refereeId_key" ON "referrals"("refereeId");

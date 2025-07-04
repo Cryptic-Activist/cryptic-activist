@@ -398,7 +398,7 @@ model PremiumPurchase {
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([userId, period, status], name: "only_one_scheduled_per_period")
-  @@index([userId, status, expiresAt])
+  @@index([userId, period, status, expiresAt])
   @@map("premium_purchases")
 }
 
@@ -801,7 +801,6 @@ model User {
   password               String
   privateKeys            String[]                 @unique
   isVerified             Boolean?                 @default(false) @db.Boolean
-  isPremium              Boolean?
   underReview            Boolean                  @default(false)
   xp                     Int                      @default(0)
   trustScore             Int                      @default(50)

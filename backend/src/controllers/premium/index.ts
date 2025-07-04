@@ -5,18 +5,33 @@ import {
 } from '@/services/blockchains/premium';
 
 import { ETHEREUM_PREMIUM_CONTRACT_ADDRESS } from '@/constants/env';
+import { PremiumPeriod } from '@prisma/client';
 import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 
+function parsePeriod(period: string): PremiumPeriod {
+  switch (period.toUpperCase()) {
+    case 'MONTHLY':
+      return PremiumPeriod.MONTHLY;
+    case 'YEARLY':
+      return PremiumPeriod.YEARLY;
+    default:
+      throw new Error(`Invalid subscription period: ${period}`);
+  }
+}
+
 export const subscribePremium = async (req: Request, res: Response) => {
   try {
-    const { period, userId, payerAddress } = req.body;
+    const { period: periodRaw, userId, payerAddress } = req.body;
+
+    console.log({ periodRaw });
+
+    const period = parsePeriod(periodRaw);
 
     // Check for active subscription of the same type
     const existing = await prisma.premiumPurchase.findFirst({
       where: {
         userId,
-        period,
         status: 'COMPLETED',
         expiresAt: {
           gte: new Date(),
@@ -26,7 +41,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
 
     if (existing) {
       return res.status(409).json({
-        error: `You already have an active ${period} subscription.`,
+        error: `You already have an active subscription.`,
       });
     }
 
@@ -45,12 +60,14 @@ export const subscribePremium = async (req: Request, res: Response) => {
     }
 
     const settingKey =
-      period === 'monthly' ? 'premiumPriceMonthly' : 'premiumPriceYearly';
+      period === PremiumPeriod.MONTHLY
+        ? 'premiumPriceMonthly'
+        : 'premiumPriceYearly';
     const expectedAmount = await getSetting(settingKey);
 
     const now = new Date();
     const expiresAt =
-      period === 'monthly'
+      period === PremiumPeriod.MONTHLY
         ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
         : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 

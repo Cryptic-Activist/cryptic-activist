@@ -5,6 +5,7 @@ import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { getCoinPrice } from '@/services/coinGecko';
+import { isUserPremium } from '@/utils/user';
 import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
@@ -250,7 +251,6 @@ export async function getTradeController(req: Request, res: Response) {
             firstName: true,
             lastName: true,
             username: true,
-            isPremium: true,
             lastLoginAt: true,
             kyc: true,
           },
@@ -262,7 +262,6 @@ export async function getTradeController(req: Request, res: Response) {
             firstName: true,
             lastName: true,
             username: true,
-            isPremium: true,
             lastLoginAt: true,
           },
         },
@@ -309,7 +308,7 @@ export const calculateReceivingAmount = async (
     const user = await prisma.user.findFirst({
       where: { id: userId as string },
       select: {
-        isPremium: true,
+        id: true,
         tierId: true,
       },
     });
@@ -352,7 +351,9 @@ export const calculateReceivingAmount = async (
 
     let feeRate = tier?.tradingFee! - tier?.discount!;
 
-    if (user?.isPremium) {
+    const isPremium = await isUserPremium(user.id);
+
+    if (isPremium) {
       feeRate -= DEFAULT_PREMIUM_DISCOUNT;
     }
 

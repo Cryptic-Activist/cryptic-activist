@@ -10,10 +10,10 @@ const PremiumPage = () => {
   return (
     <div>
       <h1>Subscribe to Premium</h1>
-      <Button onClick={() => subscribeToPremiumMutation.mutate('monthly')}>
+      <Button onClick={() => subscribeToPremiumMutation.mutate('MONTHLY')}>
         Montly
       </Button>
-      <Button onClick={() => subscribeToPremiumMutation.mutate('yearly')}>
+      <Button onClick={() => subscribeToPremiumMutation.mutate('YEARLY')}>
         Yearly
       </Button>
     </div>
