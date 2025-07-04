@@ -4,6 +4,7 @@ import {
   SetTradeCancelledParams,
 } from '../useTrade/types';
 
+import { BlockchainSetter } from '@/store/blockchain/types';
 import { TradeSetter } from '@/store/trade/types';
 
 type Status = 'online' | 'offline';
@@ -15,6 +16,7 @@ export type UseSocketParams = {
   tradePaid?: string;
   trade: TradeSetter;
   walletAddress?: string;
+  blockchain?: BlockchainSetter;
   onStatusChange?: (status: Status) => void;
   onSetPaid: (paidAt: string) => void;
   onSetTradeCreated: () => void;

@@ -119,6 +119,7 @@ const Trade: FC<TradeProps> = ({
   replace,
   tradeRemaingTime,
   ref,
+  vendorHasEnoughFunds,
   toggleModal,
 }) => {
   const hasTimer =
@@ -127,6 +128,7 @@ const Trade: FC<TradeProps> = ({
     <div className={styles.trade} ref={ref}>
       <section className={styles.tradeSection}>
         <h2>Trade Summary</h2>
+        {!vendorHasEnoughFunds && <h1>Not enough funds</h1>}
         <ul>
           <li>
             <strong>Trade ID:</strong>
@@ -379,12 +381,14 @@ const TradeVendor = () => {
     receiverStatus,
     tradeRemaingTime,
     tradeContainerRef,
+    vendorHasEnoughFunds,
   } = useTradeSocket({
     chatId: trade.chat?.id,
     user: trade.vendor,
     timeLimit: trade.offer?.timeLimit,
     tradePaid: trade.paidAt,
     trade: trade,
+    blockchain,
     walletAddress: blockchain.account?.address,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
@@ -432,12 +436,14 @@ const TradeVendor = () => {
         ref={tradeContainerRef}
         setAsDisputed={setAsDisputed}
         toggleModal={toggleModal}
+        vendorHasEnoughFunds={vendorHasEnoughFunds}
       />
 
       {trade?.id &&
       trade?.vendor &&
       trade?.trader &&
-      (trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING') ? (
+      (trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING') &&
+      vendorHasEnoughFunds ? (
         <Chat
           receiver={trade.trader}
           sender={trade.vendor}

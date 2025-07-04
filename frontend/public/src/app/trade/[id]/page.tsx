@@ -10,6 +10,7 @@ import {
   toUpperCase,
 } from '@/utils';
 import {
+  useBlockchain,
   useNavigationBar,
   useRouter,
   useTrade,
@@ -377,6 +378,7 @@ export default function TradePage() {
   const { user, query } = useUser();
   const { replace } = useRouter();
   const { toggleModal } = useNavigationBar();
+  const { blockchain } = useBlockchain();
 
   const {
     sendMessage,
@@ -393,6 +395,7 @@ export default function TradePage() {
     timeLimit: trade.offer?.timeLimit,
     tradePaid: trade.paidAt,
     trade,
+    blockchain,
     onSetPaid: setPaid,
     onSetCanceled: setCanceled,
     onSetPaymentConfirmed: setPaymentConfirmed,

@@ -2,6 +2,14 @@ import { Filters, Icons } from './types';
 
 export const icons: Icons = [
   {
+    status: 'PENDING',
+    name: 'FaHandshake',
+    backgroundColor: '#FACC15',
+    color: '#000000',
+    title: 'Trade is Pending',
+    mainActionButtonLabel: 'Go to Trade',
+  },
+  {
     status: 'IN_PROGRESS',
     name: 'FaHandshake',
     backgroundColor: '#3B82F6',

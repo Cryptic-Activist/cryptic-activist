@@ -45,7 +45,7 @@ const HowMuch: FC<HowMuchProps> = ({
         return 'KYC Verified Users Only';
       }
       if (blockchain?.chain?.id !== offer.chain?.chainId) {
-        return 'Your wallet is not connected to the same offer chain';
+        return `You must use ${offer.chain?.name} chain to start trading`;
       }
       if (
         blockchain.balance &&

@@ -1,5 +1,6 @@
 'use client';
 
+import { getLocalStorage, setLocalStorage } from '@/utils';
 import { useEffect, useState } from 'react';
 
 import { GetTradesByUserAs } from '@/services/trades/types';
@@ -45,6 +46,7 @@ const useTrades = () => {
   const toggleAs = () => {
     setAs((prev) => {
       const newState = prev === 'trader' ? 'vendor' : 'trader';
+      setLocalStorage('TRADES_AS', newState);
       return newState;
     });
     trades.setTradeValue({ currentPage: 1, pageSize: 10, totalPages: 1 });
@@ -53,6 +55,13 @@ const useTrades = () => {
   const onChangePage = (page: number) => {
     trades.setTradeValue({ currentPage: page }, 'trades/setCurrentPage');
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const localStorageAs = getLocalStorage('TRADES_AS');
+      setAs((localStorageAs as unknown as GetTradesByUserAs) ?? 'vendor');
+    }
+  }, [typeof window]);
 
   return {
     trades,

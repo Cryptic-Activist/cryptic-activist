@@ -30,6 +30,8 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
 
   const tradeObj = getTrade();
 
+  console.log({ tradeObj, trade });
+
   return (
     <div
       key={trade.id}
