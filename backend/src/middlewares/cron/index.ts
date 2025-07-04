@@ -86,6 +86,36 @@ export const autoCloseDisputes = async () => {
   });
 };
 
+export const activateScheduledPremiums = async () => {
+  cron.schedule('*/1 * * * *', async () => {
+    try {
+      const now = new Date();
+
+      const scheduled = await prisma.premiumPurchase.findMany({
+        where: {
+          status: 'SCHEDULED',
+          startsAt: {
+            lte: now,
+          },
+        },
+      });
+
+      for (const premium of scheduled) {
+        await prisma.premiumPurchase.update({
+          where: { id: premium.id },
+          data: {
+            status: 'COMPLETED',
+          },
+        });
+
+        console.log(`Activated premium for user ${premium.userId}`);
+      }
+    } catch (error) {
+      console.error('Error activating scheduled premiums:', error);
+    }
+  });
+};
+
 export const runCronJobs = async () => {
   await expireTimer();
   await handleAutoLiftSuspension();

@@ -397,6 +397,7 @@ model PremiumPurchase {
 
   user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
+  @@unique([userId, period, status], name: "only_one_scheduled_per_period")
   @@index([userId, status, expiresAt])
   @@map("premium_purchases")
 }

@@ -30,6 +30,20 @@ export const subscribePremium = async (req: Request, res: Response) => {
       });
     }
 
+    const scheduled = await prisma.premiumPurchase.findFirst({
+      where: {
+        userId,
+        status: 'SCHEDULED',
+        period,
+      },
+    });
+
+    if (scheduled) {
+      return res.status(409).json({
+        error: `You already have a pending ${period} subscription scheduled to activate.`,
+      });
+    }
+
     const settingKey =
       period === 'monthly' ? 'premiumPriceMonthly' : 'premiumPriceYearly';
     const expectedAmount = await getSetting(settingKey);
@@ -88,32 +102,44 @@ export const changeToYearlyPremiumSubscription = async (
       });
     }
 
-    // Expire current monthly
-    await prisma.premiumPurchase.update({
-      where: { id: activeMonthly.id },
-      data: { expiresAt: now },
+    const alreadyScheduledYearly = await prisma.premiumPurchase.findFirst({
+      where: {
+        userId,
+        status: 'SCHEDULED',
+        period: 'YEARLY',
+      },
     });
+
+    if (alreadyScheduledYearly) {
+      return res.status(409).json({
+        error: 'You already have a scheduled yearly subscription.',
+      });
+    }
 
     const yearlyPrice = await getSetting('premiumPriceYearly');
 
-    const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const startsAt = activeMonthly.expiresAt;
+    const expiresAt = new Date(startsAt.getTime() + 365 * 24 * 60 * 60 * 1000);
 
-    const blockchainTransactionHash = '0xCHANGE_TO_YEARLY_HASH'; // Replace with real hash
+    const blockchainTransactionHash = '0xSCHEDULED_YEARLY_HASH'; // Replace with real hash
 
     await prisma.premiumPurchase.create({
       data: {
         userId,
         payerAddress,
         period: 'YEARLY',
-        status: 'COMPLETED',
+        status: 'SCHEDULED', // Marked for activation later
         expectedAmount: yearlyPrice,
         blockchainTransactionHash,
-        startsAt: now,
+        startsAt,
         expiresAt,
       },
     });
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({
+      ok: true,
+      scheduledStart: startsAt,
+    });
   } catch (err) {
     console.error({ err });
     return res.status(500).json({ error: err.message });
@@ -142,6 +168,20 @@ export const changeToMonthlyPremiumSubscription = async (
     if (!activeYearly) {
       return res.status(400).json({
         error: 'No active yearly subscription found.',
+      });
+    }
+
+    const alreadyScheduledMonthly = await prisma.premiumPurchase.findFirst({
+      where: {
+        userId,
+        status: 'SCHEDULED',
+        period: 'MONTHLY',
+      },
+    });
+
+    if (alreadyScheduledMonthly) {
+      return res.status(409).json({
+        error: 'You already have a scheduled monthly subscription.',
       });
     }
 
