@@ -187,6 +187,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         lastLoginAt: true,
         twoFactorEnabled: true,
         referralCode: true,
+        isPremium: true,
         kyc: {
           where: {
             status: {

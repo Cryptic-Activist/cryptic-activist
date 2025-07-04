@@ -12,6 +12,7 @@ import fiats from './fiats';
 import health from './health';
 import offers from './offers';
 import path from 'path';
+import premium from './premium';
 import settings from './settings';
 import systemMessages from './systemMessages';
 import tiers from './tiers';
@@ -29,6 +30,7 @@ export default (app: Application): void => {
   app.use('/offers', offers);
   app.use('/trades', trades);
   app.use('/users', users);
+  app.use('/premium', premium);
   app.use('/system-messages', systemMessages);
   app.use('/feedbacks', feedbacks);
   app.use('/blockchains', blockchains);

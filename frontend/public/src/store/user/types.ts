@@ -60,6 +60,7 @@ export type User = {
   languages?: Language[];
   twoFactorEnabled?: boolean;
   referralCode?: string;
+  isPremium?: boolean;
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
@@ -91,6 +92,7 @@ export type UserSetter = {
   userLanguage?: UserLanguage;
   twoFactorEnabled?: boolean;
   referralCode?: string;
+  isPremium?: boolean;
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
