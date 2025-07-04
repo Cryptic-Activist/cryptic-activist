@@ -33,6 +33,7 @@ export const DEFAULT_PREMIUM_DISCOUNT = parseFloat(
   process.env.DEFAULT_PREMIUM_DISCOUNT as string,
 );
 
+// Escrow Contract
 export const ETHEREUM_NETWORK_URL = process.env.ETHEREUM_NETWORK_URL as string;
 export const ETHEREUM_ESCROW_CONTRACT_ADDRESS = process.env
   .ETHEREUM_ESCROW_CONTRACT_ADDRESS as `0x${string}`;
@@ -40,6 +41,12 @@ export const ETHEREUM_ESCROW_ARBITRATOR_ADDRESS = process.env
   .ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as `0x${string}`;
 export const ETHEREUM_DEPLOYER_PRIVATE_KEY = process.env
   .ETHEREUM_DEPLOYER_PRIVATE_KEY as `0${string}`;
+
+// Premium Subscription Contract
+export const ETHEREUM_PREMIUM_CONTRACT_ADDRESS = process.env
+  .ETHEREUM_PREMIUM_CONTRACT_ADDRESS as `0x${string}`;
+export const ETHEREUM_PREMIUM_ARBITRATOR_ADDRESS = process.env
+  .ETHEREUM_PREMIUM_ARBITRATOR_ADDRESS as `0x${string}`;
 
 export const ALTCHA_HMAC_SECRET_KEY = process.env
   .ALTCHA_HMAC_SECRET_KEY as string;

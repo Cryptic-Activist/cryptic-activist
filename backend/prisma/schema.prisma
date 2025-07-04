@@ -368,17 +368,24 @@ model PaymentDetails {
   @@map("payment_details")
 }
 
+enum PremiumPurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 model PremiumPurchase {
-  id                        String    @id @default(cuid())
-  depositAddress            String    @unique
-  userId                    String    @unique
-  user                      User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  expectedAmount            Float
-  status                    String // e.g., "pending", "completed", "failed"
+  id                        String                @id @default(cuid())
+  payerAddress              String
+  userId                    String                @unique
+  user                      User                  @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  expectedAmount            Decimal               @db.Decimal()
+  status                    PremiumPurchaseStatus // e.g., "pending", "completed", "failed"
+  // blockchainTransactionHash String    @unique
   blockchainTransactionHash String
-  deletedAt                 DateTime? @db.Timestamp()
-  createdAt                 DateTime? @default(now()) @db.Timestamp()
-  updatedAt                 DateTime? @updatedAt @db.Timestamp()
+  deletedAt                 DateTime?             @db.Timestamp()
+  createdAt                 DateTime?             @default(now()) @db.Timestamp()
+  updatedAt                 DateTime?             @updatedAt @db.Timestamp()
 
   @@map("premium_purchases")
 }

@@ -4,20 +4,32 @@ import { IS_DEVELOPMENT } from '@/constants';
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
-import { getCoinPrice } from '@/services/coinGecko';
-import { getPrice } from '@/controllers/cryptocurrencies';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
 
 const main = async () => {
   // Create General Platform Settings
-  const settings = await prisma.platformSetting.create({
-    data: {
-      key: 'depositPerTradePercent',
-      type: 'NUMBER',
-      value: '0.2',
-      isPrivate: false,
-    },
+  const settings = await prisma.platformSetting.createMany({
+    data: [
+      {
+        key: 'depositPerTradePercent',
+        type: 'NUMBER',
+        value: '0.2',
+        isPrivate: false,
+      },
+      {
+        key: 'premiumPriceMonthly',
+        type: 'NUMBER',
+        value: '10',
+        isPrivate: false,
+      },
+      {
+        key: 'premiumPriceYearly',
+        type: 'NUMBER',
+        value: '100',
+        isPrivate: false,
+      },
+    ],
   });
 
   // Create tiers
