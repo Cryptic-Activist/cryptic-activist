@@ -7,7 +7,7 @@ import {
   TradeStatus,
 } from '@prisma/client';
 import { Request, Response, response } from 'express';
-import { cancelTrade, confirmTrade } from '@/services/blockchains/ethereum';
+import { cancelTrade, confirmTrade } from '@/services/blockchains/escrow';
 import {
   createAccountReview,
   escalateDispute,

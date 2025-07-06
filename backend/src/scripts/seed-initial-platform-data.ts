@@ -4,20 +4,32 @@ import { IS_DEVELOPMENT } from '@/constants';
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
-import { getCoinPrice } from '@/services/coinGecko';
-import { getPrice } from '@/controllers/cryptocurrencies';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
 
 const main = async () => {
   // Create General Platform Settings
-  const settings = await prisma.platformSetting.create({
-    data: {
-      key: 'depositPerTradePercent',
-      type: 'NUMBER',
-      value: '0.2',
-      isPrivate: false,
-    },
+  const settings = await prisma.platformSetting.createMany({
+    data: [
+      {
+        key: 'depositPerTradePercent',
+        type: 'NUMBER',
+        value: '0.2',
+        isPrivate: false,
+      },
+      {
+        key: 'premiumPriceMonthly',
+        type: 'NUMBER',
+        value: '10',
+        isPrivate: false,
+      },
+      {
+        key: 'premiumPriceYearly',
+        type: 'NUMBER',
+        value: '100',
+        isPrivate: false,
+      },
+    ],
   });
 
   // Create tiers
@@ -112,6 +124,20 @@ const main = async () => {
 
   // Create blockchain chains
   const chainData = [
+    {
+      name: 'Hardhat',
+      symbol: 'ETH',
+      chainId: 1337,
+      rpcUrl: 'http://localhost:8545',
+      explorerUrl: '',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Local Hardhat testnet',
+      tempId: 'hardhat-localnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/279/large/ethereum.png', // Ethereum
+    },
     {
       name: 'Ethereum',
       symbol: 'ETH',
@@ -429,11 +455,18 @@ const main = async () => {
 
     // Create cryptocurrency-chain relationships
     const cryptocurrencyChainData = [
+      // Ethereum native on Hardhat
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('hardhat-localnet')!,
+        contractAddress: '0x0000000000000000000000000000000000000000',
+        isVerified: true,
+      },
       // Ethereum native on Ethereum
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('eth-mainnet')!,
-        contractAddress: null,
+        contractAddress: '0x0000000000000000000000000000000000000000',
         isVerified: true,
       },
       // Ethereum on other chains (wrapped/bridged)

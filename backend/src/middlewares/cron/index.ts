@@ -3,6 +3,7 @@ import { autoLiftExpiredSuspensions } from '@/services/moderation';
 import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
+import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 
 export const expireTimer = async () => {
@@ -86,7 +87,105 @@ export const autoCloseDisputes = async () => {
   });
 };
 
+export const activateScheduledPremiums = async () => {
+  cron.schedule('*/1 * * * *', async () => {
+    try {
+      const now = new Date();
+
+      const scheduled = await prisma.premiumPurchase.findMany({
+        where: {
+          status: 'SCHEDULED',
+          startsAt: {
+            lte: now,
+          },
+        },
+      });
+
+      for (const premium of scheduled) {
+        await prisma.premiumPurchase.update({
+          where: { id: premium.id },
+          data: {
+            status: 'COMPLETED',
+          },
+        });
+
+        console.log(`Activated premium for user ${premium.userId}`);
+      }
+    } catch (error) {
+      console.error('Error activating scheduled premiums:', error);
+    }
+  });
+};
+
+export const chargeRecurringPremiums = async () => {
+  cron.schedule('0 * * * *', async () => {
+    try {
+      const now = new Date();
+
+      const expiredPremiums = await prisma.premiumPurchase.findMany({
+        where: {
+          status: 'COMPLETED',
+          expiresAt: {
+            lte: now,
+          },
+        },
+        distinct: ['userId', 'period'], // avoid duplicating for same user/period
+        orderBy: {
+          expiresAt: 'desc',
+        },
+      });
+
+      for (const premium of expiredPremiums) {
+        const alreadyScheduled = await prisma.premiumPurchase.findFirst({
+          where: {
+            userId: premium.userId,
+            status: 'SCHEDULED',
+            period: premium.period,
+          },
+        });
+
+        if (alreadyScheduled) {
+          continue; // skip if already scheduled
+        }
+
+        const settingKey =
+          premium.period === 'MONTHLY'
+            ? 'premiumPriceMonthly'
+            : 'premiumPriceYearly';
+
+        const expectedAmount = await getSetting(settingKey);
+        const startsAt = new Date(premium.expiresAt);
+        const expiresAt =
+          premium.period === 'MONTHLY'
+            ? new Date(startsAt.getTime() + 30 * 24 * 60 * 60 * 1000)
+            : new Date(startsAt.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+        await prisma.premiumPurchase.create({
+          data: {
+            userId: premium.userId,
+            payerAddress: premium.payerAddress,
+            period: premium.period,
+            status: 'SCHEDULED',
+            startsAt,
+            expiresAt,
+            expectedAmount,
+            blockchainTransactionHash: '0xRECURRING_PLACEHOLDER', // to be replaced when on-chain
+          },
+        });
+
+        console.log(
+          `Scheduled recurring ${premium.period} premium for user ${premium.userId}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error scheduling recurring premium charges:', error);
+    }
+  });
+};
+
 export const runCronJobs = async () => {
   await expireTimer();
   await handleAutoLiftSuspension();
+  await activateScheduledPremiums();
+  await chargeRecurringPremiums();
 };

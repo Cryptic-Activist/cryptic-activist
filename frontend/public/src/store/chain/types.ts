@@ -5,6 +5,7 @@ export type Chain = {
   coingeckoId: string;
   logoUrl: string;
   chainId: number;
+  description: string;
 };
 
 export type ChainSetter = {

@@ -26,6 +26,7 @@ export const useUserSlice: StateCreator<
     updatedAt: undefined,
     twoFactorEnabled: undefined,
     referralCode: undefined,
+    premium: undefined,
     kyc: undefined,
     xp: undefined,
     tier: undefined,
@@ -52,6 +53,7 @@ export const useUserSlice: StateCreator<
               twoFactorEnabled:
                 params.twoFactorEnabled ?? user.twoFactorEnabled,
               referralCode: params.referralCode ?? user.referralCode,
+              premium: params.premium ?? user.premium,
               kyc: params.kyc ?? user.kyc,
               xp: params.xp ?? user.xp,
               tier: params.tier ?? user.tier,
@@ -83,6 +85,7 @@ export const useUserSlice: StateCreator<
             updatedAt: undefined,
             twoFactorEnabled: undefined,
             referralCode: undefined,
+            premium: undefined,
             kyc: undefined,
             xp: undefined,
             tier: undefined,

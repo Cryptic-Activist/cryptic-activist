@@ -11,6 +11,12 @@ CREATE TYPE "KYCStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED');
 CREATE TYPE "KYCDocumentType" AS ENUM ('ALIEN_REGISTRATION_CARD', 'CITIZENSHIP_CERTIFICATE', 'CONSULAR_ID_CARD', 'DRIVERS_LICENSE', 'FIREARMS_LICENSE', 'GOVERNMENT_ISSUED_ID_CARD', 'HEALTH_INSURANCE_CARD', 'IMMIGRATION_DOCUMENT', 'INCOME_TAX_IDENTIFICATION_DOCUMENT', 'MILITARY_ID', 'NATIONAL_ID_CARD', 'PASSPORT', 'PERMANENT_RESIDENT_CARD', 'REFUGEE_TRAVEL_DOCUMENT', 'RESIDENCE_PERMIT', 'SOCIAL_SECURITY_CARD', 'TAX_IDENTIFICATION_CARD', 'VOTER_ID_CARD', 'WORK_PERMIT', 'OTHER');
 
 -- CreateEnum
+CREATE TYPE "PremiumPurchaseStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'SCHEDULED');
+
+-- CreateEnum
+CREATE TYPE "PremiumPeriod" AS ENUM ('MONTHLY', 'YEARLY');
+
+-- CreateEnum
 CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_DISPUTE_MORE_EVIDENCES', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING');
 
 -- CreateEnum
@@ -41,16 +47,13 @@ CREATE TYPE "DisputeStatus" AS ENUM ('OPEN', 'PENDING_EVIDENCE', 'INVESTIGATING'
 CREATE TYPE "DisputeResolutionType" AS ENUM ('RELEASE_CRYPTO', 'REFUND_PAYMENT', 'CANCEL_TRADE', 'PARTIAL_REFUND', 'SPLIT_RESOLUTION', 'NO_ACTION_TAKEN', 'OFF_PLATFORM_DECISION', 'PLATFORM_COMPENSATION');
 
 -- CreateEnum
-CREATE TYPE "TransactionPaymentMethodType" AS ENUM ('CREDIT_CARD');
-
--- CreateEnum
-CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
-
--- CreateEnum
 CREATE TYPE "ReviewStatus" AS ENUM ('PENDING', 'UNDER_REVIEW', 'ESCALATED', 'CLOSED', 'ACTION_TAKEN', 'NO_ACTION_NEEDED');
 
 -- CreateEnum
 CREATE TYPE "ModerationAction" AS ENUM ('SEND_WARNING', 'SUSPEND', 'ACCOUNT_REVIEW');
+
+-- CreateEnum
+CREATE TYPE "SettingType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'JSON');
 
 -- CreateTable
 CREATE TABLE "accepted_cryptocurrencies" (
@@ -319,14 +322,17 @@ CREATE TABLE "payment_details" (
 -- CreateTable
 CREATE TABLE "premium_purchases" (
     "id" TEXT NOT NULL,
-    "depositAddress" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "expectedAmount" DOUBLE PRECISION NOT NULL,
-    "status" TEXT NOT NULL,
-    "transactionId" TEXT,
+    "payerAddress" TEXT NOT NULL,
+    "expectedAmount" DECIMAL NOT NULL,
+    "status" "PremiumPurchaseStatus" NOT NULL,
+    "period" "PremiumPeriod" NOT NULL,
+    "blockchainTransactionHash" TEXT NOT NULL,
+    "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "premium_purchases_pkey" PRIMARY KEY ("id")
 );
@@ -481,32 +487,6 @@ CREATE TABLE "trade_disputes" (
 );
 
 -- CreateTable
-CREATE TABLE "transaction_payment_method" (
-    "id" TEXT NOT NULL,
-    "transactionPaymentMethodId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "type" "TransactionPaymentMethodType" NOT NULL,
-
-    CONSTRAINT "transaction_payment_method_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "transactions" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "transactionPaymentMethodId" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
-    "currency" TEXT NOT NULL,
-    "status" "TransactionStatus" NOT NULL,
-    "gatewayTransactionId" TEXT,
-    "deletedAt" TIMESTAMP,
-    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP,
-
-    CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "trusts" (
     "id" TEXT NOT NULL,
     "trusterId" TEXT NOT NULL,
@@ -592,7 +572,6 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "privateKeys" TEXT[],
     "isVerified" BOOLEAN DEFAULT false,
-    "isPremium" BOOLEAN,
     "underReview" BOOLEAN NOT NULL DEFAULT false,
     "xp" INTEGER NOT NULL DEFAULT 0,
     "trustScore" INTEGER NOT NULL DEFAULT 50,
@@ -650,6 +629,19 @@ CREATE TABLE "tokens" (
     "isUsed" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "platform_settings" (
+    "id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+    "type" "SettingType" NOT NULL DEFAULT 'STRING',
+    "isPrivate" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "platform_settings_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -712,16 +704,13 @@ CREATE UNIQUE INDEX "languages_name_key" ON "languages"("name");
 CREATE UNIQUE INDEX "chains_name_key" ON "chains"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "chains_symbol_key" ON "chains"("symbol");
-
--- CreateIndex
 CREATE UNIQUE INDEX "chains_chainId_key" ON "chains"("chainId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "premium_purchases_depositAddress_key" ON "premium_purchases"("depositAddress");
+CREATE INDEX "premium_purchases_userId_period_status_expiresAt_idx" ON "premium_purchases"("userId", "period", "status", "expiresAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "premium_purchases_userId_key" ON "premium_purchases"("userId");
+CREATE UNIQUE INDEX "premium_purchases_userId_period_status_key" ON "premium_purchases"("userId", "period", "status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "referrals_refereeId_key" ON "referrals"("refereeId");
@@ -746,9 +735,6 @@ CREATE UNIQUE INDEX "trade_disputes_tradeId_key" ON "trade_disputes"("tradeId");
 
 -- CreateIndex
 CREATE INDEX "trade_disputes_status_priority_idx" ON "trade_disputes"("status", "priority");
-
--- CreateIndex
-CREATE UNIQUE INDEX "transactions_gatewayTransactionId_key" ON "transactions"("gatewayTransactionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "trustedId");
@@ -782,6 +768,9 @@ CREATE INDEX "account_reviews_status_idx" ON "account_reviews"("status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "platform_settings_key_key" ON "platform_settings"("key");
 
 -- CreateIndex
 CREATE INDEX "_DisputeEvidenceToDisputeEvidenceRequest_B_index" ON "_DisputeEvidenceToDisputeEvidenceRequest"("B");
@@ -938,15 +927,6 @@ ALTER TABLE "trade_disputes" ADD CONSTRAINT "trade_disputes_winnerId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "trade_disputes" ADD CONSTRAINT "trade_disputes_loserId_fkey" FOREIGN KEY ("loserId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "transaction_payment_method" ADD CONSTRAINT "transaction_payment_method_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_transactionPaymentMethodId_fkey" FOREIGN KEY ("transactionPaymentMethodId") REFERENCES "transaction_payment_method"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trusterId_fkey" FOREIGN KEY ("trusterId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

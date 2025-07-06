@@ -368,18 +368,37 @@ model PaymentDetails {
   @@map("payment_details")
 }
 
-model PremiumPurchase {
-  id                        String    @id @default(cuid())
-  depositAddress            String    @unique
-  userId                    String    @unique
-  user                      User      @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  expectedAmount            Float
-  status                    String // e.g., "pending", "completed", "failed"
-  blockchainTransactionHash String
-  deletedAt                 DateTime? @db.Timestamp()
-  createdAt                 DateTime? @default(now()) @db.Timestamp()
-  updatedAt                 DateTime? @updatedAt @db.Timestamp()
+enum PremiumPurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  SCHEDULED
+}
 
+enum PremiumPeriod {
+  MONTHLY
+  YEARLY
+}
+
+model PremiumPurchase {
+  id                        String                @id @default(cuid())
+  userId                    String
+  payerAddress              String
+  expectedAmount            Decimal               @db.Decimal()
+  status                    PremiumPurchaseStatus
+  period                    PremiumPeriod
+  // blockchainTransactionHash String                @unique
+  blockchainTransactionHash String
+  startsAt                  DateTime              @default(now())
+  expiresAt                 DateTime
+  deletedAt                 DateTime?             @db.Timestamp()
+  createdAt                 DateTime              @default(now()) @db.Timestamp()
+  updatedAt                 DateTime              @updatedAt @db.Timestamp()
+
+  user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([userId, period, status], name: "only_one_scheduled_per_period")
+  @@index([userId, period, status, expiresAt])
   @@map("premium_purchases")
 }
 
@@ -782,7 +801,6 @@ model User {
   password               String
   privateKeys            String[]                 @unique
   isVerified             Boolean?                 @default(false) @db.Boolean
-  isPremium              Boolean?
   underReview            Boolean                  @default(false)
   xp                     Int                      @default(0)
   trustScore             Int                      @default(50)

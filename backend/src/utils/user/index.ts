@@ -93,3 +93,19 @@ export const getAccountAgeInMonths = async (userId: string) => {
   const ageInMonths = result[0]?.account_age_months ?? 0;
   return ageInMonths;
 };
+
+export const isUserPremium = async (userId: string) => {
+  const now = new Date();
+
+  const activePremium = await prisma.premiumPurchase.findFirst({
+    where: {
+      userId,
+      status: 'COMPLETED',
+      expiresAt: {
+        gte: now,
+      },
+    },
+  });
+
+  return !!activePremium;
+};

@@ -8,3 +8,13 @@ export type WalletsList = {
   onConnect: () => void;
   // onClick: (wallet: WalletName) => void;
 }[];
+
+export type TokenBalance = {
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  balance: string;
+  formattedBalance: string;
+  logoUrl?: string;
+};

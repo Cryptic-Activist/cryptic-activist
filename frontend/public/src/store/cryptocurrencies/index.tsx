@@ -26,8 +26,8 @@ export const useCryptocurrenciesSlice: StateCreator<
         actionName
       );
     },
-    getCryptocurrencies: async () => {
-      const cryptocurrencies = await fetchCryptocurrencies();
+    getCryptocurrencies: async (chainId: number) => {
+      const cryptocurrencies = await fetchCryptocurrencies(chainId);
       const setValue = get().cryptocurrencies.setCryptocurrenciesValue;
 
       setValue(

@@ -157,6 +157,36 @@ const AccountSettings = () => {
           )}
         </section>
 
+        <section className={styles.section}>
+          <h2 className={styles.subHeading}>Premium Account</h2>
+          <p>
+            Subscribe to a Premium acount now and reduce the amount of fees you
+            can on each trade.
+          </p>
+          {user.id && !user.isPremium && (
+            <Button
+              href="/account/premium"
+              size={16}
+              padding="1rem"
+              theme="gradient"
+              fullWidth
+            >
+              Subscribe to Premium
+            </Button>
+          )}
+          {user.id && user.isPremium && (
+            <Button
+              href="/account/premium/change"
+              size={16}
+              padding="1rem"
+              theme="gradient"
+              fullWidth
+            >
+              Change or Cancel your Premium account
+            </Button>
+          )}
+        </section>
+
         {/* Additional Account Settings can be added here */}
       </div>
     </div>

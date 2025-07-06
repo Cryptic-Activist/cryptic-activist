@@ -1,13 +1,19 @@
 'use client';
 
-import React, { FC } from 'react';
-import { toCapitalize, toUpperCase } from '@/utils';
+import React, { FC, useEffect } from 'react';
+import {
+  getLocalStorage,
+  setLocalStorage,
+  toCapitalize,
+  toUpperCase,
+} from '@/utils';
 import { useApp, useMyOffers, useUser } from '@/hooks';
 
 import { Button } from '@/components';
 import Image from 'next/image';
 import { MyOfferItemProps } from './types';
 import Pagination from '@/components/Pagination';
+import { Type } from '@/store/app/types';
 import { filters } from './data';
 import styles from './page.module.scss';
 
@@ -108,8 +114,9 @@ const MyOffers = () => {
     user: { id },
   } = useUser();
 
-  const handleOffersType = (type: 'buy' | 'sell') => {
+  const handleOffersType = (type: Type) => {
     setValue({ type });
+    setLocalStorage('MY_OFFERS_TYPE', type);
   };
 
   const onDeleteOffer = async (offerId: string) => {
@@ -117,6 +124,15 @@ const MyOffers = () => {
       mutationDeleteOffer.mutate({ userId: id, offerId });
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const localStorageType = getLocalStorage(
+        'MY_OFFERS_TYPE'
+      ) as unknown as Type;
+      setValue({ type: localStorageType });
+    }
+  }, [typeof window]);
 
   return (
     <div className={styles.container}>

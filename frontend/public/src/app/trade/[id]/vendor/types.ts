@@ -9,6 +9,7 @@ export type TradeProps = {
   tradeRemaingTime: number | null;
   ref: any;
   toggleModal: (modal: Modal) => void;
+  vendorHasEnoughFunds: boolean;
 };
 
 export type ActionButtonsProps = {

@@ -13,7 +13,7 @@ export type CryptocurrenciesStore = {
       value: Value,
       action?: `cryptocurrencies/${string}`
     ) => void;
-    getCryptocurrencies: () => Promise<void>;
+    getCryptocurrencies: (chainId: number) => Promise<void>;
   };
 };
 
