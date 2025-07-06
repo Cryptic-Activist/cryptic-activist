@@ -163,6 +163,7 @@ export default class Chat {
               type: 'info',
               message: 'Vendor has entered the chat',
             });
+
             this.io.to(chatId).emit('room_messages', [
               {
                 _id: 'none',
@@ -172,8 +173,10 @@ export default class Chat {
                 message: 'Vendor has entered the chat',
               },
             ]);
+
             const createTradeDetails =
               await getCreateTradeDetails(updatedTrade);
+
             if (!createTradeDetails) {
               const endedAt = new Date();
               await prisma.trade.update({
@@ -190,6 +193,7 @@ export default class Chat {
               await systemMessage.tradeFailed(trade.id);
               return;
             }
+
             this.io.to(chatId).emit('room_messages', [
               {
                 _id: 'none',
@@ -199,6 +203,7 @@ export default class Chat {
                 message: 'Initiating trade...',
               },
             ]);
+
             const tradeCreated = await createTrade({
               arbitrator: createTradeDetails.arbitrator,
               buyer: createTradeDetails.buyer,
@@ -211,6 +216,7 @@ export default class Chat {
               sellerCollateral: createTradeDetails.sellerCollateralWei,
               sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
             });
+
             if (tradeCreated.error) {
               await prisma.trade.update({
                 where: { id: trade.id },
@@ -225,6 +231,7 @@ export default class Chat {
               await systemMessage.tradeFailed(trade.id);
               return;
             }
+
             await ChatMessage.create({
               chatId,
               from: 'none',
@@ -232,6 +239,7 @@ export default class Chat {
               type: 'info',
               message: tradeCreated.message,
             });
+
             await prisma.trade.update({
               where: { id: trade.id },
               data: {
@@ -239,6 +247,7 @@ export default class Chat {
                 blockchainTransactionHash: tradeCreated.txHash,
               },
             });
+
             this.io.to(chatId).emit('room_messages', [
               {
                 _id: 'none',
@@ -248,10 +257,12 @@ export default class Chat {
                 message: 'Funding trade...',
               },
             ]);
+
             const tradeFunded = await fundTrade(
               tradeCreated.data?.tradeId,
               createTradeDetails.sellerFundAmountWei,
             );
+
             if (tradeFunded.error) {
               await prisma.trade.update({
                 where: { id: trade.id },
@@ -266,6 +277,7 @@ export default class Chat {
               await systemMessage.tradeFailed(trade.id);
               return;
             }
+
             if (tradeFunded.data) {
               await ChatMessage.create({
                 chatId,
@@ -275,6 +287,7 @@ export default class Chat {
                 message: tradeFunded.message,
               });
             }
+
             await prisma.trade.update({
               where: {
                 id: trade?.id,
@@ -284,9 +297,11 @@ export default class Chat {
                 fundedAt: new Date(),
               },
             });
+
             this.io.to(chatId).emit('trade_funded_success', {
               fundedAt: new Date(),
             });
+
             this.io.to(chatId).emit('blockchain_trade_created', {
               blockchainTradeId: tradeCreated.data?.tradeId.toString(),
             });

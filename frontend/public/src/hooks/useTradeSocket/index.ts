@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
 import { getSocket } from '@/services/socket';
-import { hasEnoughBalance } from '@/utils/math';
 import { scrollElement } from '@/utils';
 import { useApp } from '@/hooks';
 
@@ -22,14 +21,13 @@ const useTradeSocket = ({
   timeLimit,
   trade,
   walletAddress,
-  blockchain,
   onSetPaid,
   onSetCanceled,
   onSetPaymentConfirmed,
   onSetTradeCreated,
   onSetDisputed,
 }: UseSocketParams) => {
-  const { addToast, app } = useApp();
+  const { addToast } = useApp();
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,8 +40,8 @@ const useTradeSocket = ({
   );
   const tradeContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const [vendorHasEnoughFunds, setVendorHasEnoughFunds] = useState(true);
-  const [traderHasEnoughFunds, setTraderHasEnoughFunds] = useState(true);
+  const [vendorHasEnoughFunds, _setVendorHasEnoughFunds] = useState(true);
+  const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -95,69 +93,69 @@ const useTradeSocket = ({
       const vendorWalletAddress =
         user.id === trade.vendor?.id ? walletAddress : undefined;
 
-      if (
-        trade?.cryptocurrencyAmount &&
-        blockchain?.balance?.value &&
-        blockchain?.balance?.decimals &&
-        app.settings?.depositPerTradePercent &&
-        trade?.offer?.offerType
-      ) {
-        // Vendor
-        if (user.id === trade.vendor?.id) {
-          let hasEnoughVendor = false;
-          if (trade.offer?.offerType === 'buy') {
-            hasEnoughVendor = hasEnoughBalance(
-              trade.cryptocurrencyAmount,
-              blockchain?.balance?.value,
-              blockchain?.balance?.decimals,
-              app.settings?.depositPerTradePercent,
-              'sell'
-            );
-          } else if (trade.offer?.offerType === 'sell') {
-            hasEnoughVendor = hasEnoughBalance(
-              trade.cryptocurrencyAmount,
-              blockchain?.balance?.value,
-              blockchain?.balance?.decimals,
-              app.settings?.depositPerTradePercent,
-              'buy'
-            );
-          }
+      // if (
+      //   trade?.cryptocurrencyAmount &&
+      //   blockchain?.balance?.value &&
+      //   blockchain?.balance?.decimals &&
+      //   app.settings?.depositPerTradePercent &&
+      //   trade?.offer?.offerType
+      // ) {
+      //   // Vendor
+      //   if (user.id === trade.vendor?.id) {
+      //     let hasEnoughVendor = false;
+      //     if (trade.offer?.offerType === 'buy') {
+      //       hasEnoughVendor = hasEnoughBalance(
+      //         trade.cryptocurrencyAmount,
+      //         blockchain?.balance?.value,
+      //         blockchain?.balance?.decimals,
+      //         app.settings?.depositPerTradePercent,
+      //         'sell'
+      //       );
+      //     } else if (trade.offer?.offerType === 'sell') {
+      //       hasEnoughVendor = hasEnoughBalance(
+      //         trade.cryptocurrencyAmount,
+      //         blockchain?.balance?.value,
+      //         blockchain?.balance?.decimals,
+      //         app.settings?.depositPerTradePercent,
+      //         'buy'
+      //       );
+      //     }
 
-          console.log({ hasEnoughVendor });
+      //     console.log({ hasEnoughVendor });
 
-          if (!hasEnoughVendor) {
-            setVendorHasEnoughFunds(false);
-            return;
-          }
-        }
-        // Trader
-        if (user.id === trade.trader?.id) {
-          console.log('Trader...');
-          let hasEnoughTrader = false;
-          if (trade.offer?.offerType === 'buy') {
-            hasEnoughTrader = hasEnoughBalance(
-              trade.cryptocurrencyAmount,
-              blockchain?.balance?.value,
-              blockchain?.balance?.decimals,
-              app.settings?.depositPerTradePercent,
-              'buy'
-            );
-          } else if (trade.offer?.offerType === 'sell') {
-            hasEnoughTrader = hasEnoughBalance(
-              trade.cryptocurrencyAmount,
-              blockchain?.balance?.value,
-              blockchain?.balance?.decimals,
-              app.settings?.depositPerTradePercent,
-              'sell'
-            );
-          }
+      //     if (!hasEnoughVendor) {
+      //       setVendorHasEnoughFunds(false);
+      //       return;
+      //     }
+      //   }
+      //   // Trader
+      //   if (user.id === trade.trader?.id) {
+      //     console.log('Trader...');
+      //     let hasEnoughTrader = false;
+      //     if (trade.offer?.offerType === 'buy') {
+      //       hasEnoughTrader = hasEnoughBalance(
+      //         trade.cryptocurrencyAmount,
+      //         blockchain?.balance?.value,
+      //         blockchain?.balance?.decimals,
+      //         app.settings?.depositPerTradePercent,
+      //         'buy'
+      //       );
+      //     } else if (trade.offer?.offerType === 'sell') {
+      //       hasEnoughTrader = hasEnoughBalance(
+      //         trade.cryptocurrencyAmount,
+      //         blockchain?.balance?.value,
+      //         blockchain?.balance?.decimals,
+      //         app.settings?.depositPerTradePercent,
+      //         'sell'
+      //       );
+      //     }
 
-          if (!hasEnoughTrader) {
-            setTraderHasEnoughFunds(false);
-            return;
-          }
-        }
-      }
+      //     if (!hasEnoughTrader) {
+      //       setTraderHasEnoughFunds(false);
+      //       return;
+      //     }
+      //   }
+      // }
 
       console.log('continuing');
 
@@ -328,7 +326,7 @@ const useTradeSocket = ({
         }
       };
     }
-  }, [chatId, user, blockchain, app]);
+  }, [chatId, user]);
 
   useEffect(() => {
     if (trade.escrowReleasedAt) {
