@@ -100,6 +100,7 @@ const useCryptocurrency = () => {
             coingeckoId: chain.coingeckoId,
             logoUrl: chain.logoUrl,
             chainId: chain.chainId,
+            description: chain.description,
           },
         },
       },

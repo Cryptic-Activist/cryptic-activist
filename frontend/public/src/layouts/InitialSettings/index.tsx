@@ -88,6 +88,7 @@ const InitialSettings = () => {
               symbol: chain.symbol,
               logoUrl: chain.logoUrl,
               chainId: chain.chainId,
+              description: chain.description,
             },
           },
         },
@@ -141,12 +142,17 @@ const InitialSettings = () => {
   }, []);
 
   useEffect(() => {
-    getCryptocurrencies();
     getFiats();
     getPaymentMethods();
     getChains();
     setSettings();
   }, []);
+
+  useEffect(() => {
+    if (app.defaults.chain?.chainId) {
+      getCryptocurrencies(app.defaults.chain.chainId);
+    }
+  }, [app.defaults.chain?.chainId]);
 
   useEffect(() => {
     if (cryptocurrencies.data) {

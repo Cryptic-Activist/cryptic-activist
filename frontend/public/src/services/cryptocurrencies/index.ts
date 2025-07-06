@@ -1,9 +1,11 @@
 import { BACKEND } from '@/constants';
 import { fetchGet } from '@/services/axios';
+import { getQueries } from '@/utils';
 
-export const fetchCryptocurrencies = async () => {
+export const fetchCryptocurrencies = async (chainId: number) => {
   try {
-    const response = await fetchGet(BACKEND + '/cryptocurrencies');
+    const queries = getQueries({ chainId });
+    const response = await fetchGet(BACKEND + '/cryptocurrencies' + queries);
 
     if (response.status !== 200) {
       return null;

@@ -3,16 +3,27 @@ import { getCoin, getCoins } from '@/services/coinGecko';
 
 import { fetchGet } from '@/services/axios';
 import { filterLongShort } from '@/utils/filters';
-import { getQueries } from '@/utils/axios';
 import { prisma } from '@/services/db/prisma';
 
-export const index = async (_req: Request, res: Response) => {
+export const index = async (req: Request, res: Response) => {
   try {
-    const cryptocurrencies = await prisma.cryptocurrency.findMany();
+    const chainId = req.query.chainId as string;
 
-    res.status(200).send([...cryptocurrencies]);
+    const cryptocurrencies = await prisma.cryptocurrency.findMany({
+      where: {
+        chains: {
+          some: {
+            chain: {
+              chainId: parseInt(chainId),
+            },
+          },
+        },
+      },
+    });
+
+    res.status(200).json(cryptocurrencies);
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }
@@ -41,11 +52,11 @@ export async function indexCoinGecko(_req: Request, res: Response) {
 
     const promises = await Promise.all(createdCryptocurrencyMapped);
 
-    res.status(200).send({
+    res.status(200).json({
       ...promises,
     });
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }
@@ -80,11 +91,11 @@ export const createCryptocurrenciesCoinGecko = async (
       data: mapped,
     });
 
-    res.status(200).send({
+    res.status(200).json({
       ...created,
     });
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }
@@ -108,9 +119,9 @@ export const createAcceptedCryptocurrencyCoinGecko = async (
         },
       });
 
-    res.status(200).send(createdAcceptedCryptocurrency);
+    res.status(200).json(createdAcceptedCryptocurrency);
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }
@@ -128,9 +139,9 @@ export const getCryptocurrencyFilters = async (
         symbol: true,
       },
     });
-    res.status(200).send(filters);
+    res.status(200).json(filters);
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }
@@ -154,9 +165,9 @@ export const getSupportedTokens = async (req: Request, res: Response) => {
         cryptocurrency: true,
       },
     });
-    res.status(200).send(filters);
+    res.status(200).json(filters);
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
   }

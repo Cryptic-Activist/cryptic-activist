@@ -148,148 +148,148 @@ export default class Chat {
         // Start trade if vendor wallet address is provided
         if (vendorWalletAddress) {
           if (!trade?.vendorWalletAddress) {
-            //   const updatedTrade = await prisma.trade.update({
-            //     where: {
-            //       id: trade?.id,
-            //     },
-            //     data: {
-            //       vendorWalletAddress,
-            //     },
-            //   });
-            //   await ChatMessage.create({
-            //     chatId,
-            //     from: 'none',
-            //     to: 'none',
-            //     type: 'info',
-            //     message: 'Vendor has entered the chat',
-            //   });
-            //   this.io.to(chatId).emit('room_messages', [
-            //     {
-            //       _id: 'none',
-            //       from: 'none',
-            //       to: 'none',
-            //       type: 'info',
-            //       message: 'Vendor has entered the chat',
-            //     },
-            //   ]);
-            //   const createTradeDetails =
-            //     await getCreateTradeDetails(updatedTrade);
-            //   if (!createTradeDetails) {
-            //     const endedAt = new Date();
-            //     await prisma.trade.update({
-            //       where: { id: trade.id },
-            //       data: {
-            //         status: 'FAILED',
-            //         endedAt,
-            //       },
-            //     });
-            //     this.io.to(chatId).emit('trade_failed', {
-            //       error: 'Trade details not found',
-            //       endedAt,
-            //     });
-            //     await systemMessage.tradeFailed(trade.id);
-            //     return;
-            //   }
-            //   this.io.to(chatId).emit('room_messages', [
-            //     {
-            //       _id: 'none',
-            //       from: 'none',
-            //       to: 'none',
-            //       type: 'info',
-            //       message: 'Initiating trade...',
-            //     },
-            //   ]);
-            //   const tradeCreated = await createTrade({
-            //     arbitrator: createTradeDetails.arbitrator,
-            //     buyer: createTradeDetails.buyer,
-            //     cryptoAmount: createTradeDetails.cryptoAmountWei,
-            //     feeRate: createTradeDetails.feeRate,
-            //     profitMargin: createTradeDetails.profitMargin,
-            //     seller: createTradeDetails.seller,
-            //     tradeDuration: createTradeDetails.tradeDuration,
-            //     buyerCollateral: createTradeDetails.buyerCollateralWei,
-            //     sellerCollateral: createTradeDetails.sellerCollateralWei,
-            //     sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
-            //   });
-            //   if (tradeCreated.error) {
-            //     await prisma.trade.update({
-            //       where: { id: trade.id },
-            //       data: {
-            //         status: 'FAILED',
-            //         endedAt: new Date(),
-            //       },
-            //     });
-            //     this.io.to(chatId).emit('trade_error', {
-            //       error: 'Trade creation error',
-            //     });
-            //     await systemMessage.tradeFailed(trade.id);
-            //     return;
-            //   }
-            //   await ChatMessage.create({
-            //     chatId,
-            //     from: 'none',
-            //     to: 'none',
-            //     type: 'info',
-            //     message: tradeCreated.message,
-            //   });
-            //   await prisma.trade.update({
-            //     where: { id: trade.id },
-            //     data: {
-            //       blockchainTradeId: tradeCreated.data?.tradeId,
-            //       blockchainTransactionHash: tradeCreated.txHash,
-            //     },
-            //   });
-            //   this.io.to(chatId).emit('room_messages', [
-            //     {
-            //       _id: 'none',
-            //       from: 'none',
-            //       to: 'none',
-            //       type: 'info',
-            //       message: 'Funding trade...',
-            //     },
-            //   ]);
-            //   const tradeFunded = await fundTrade(
-            //     tradeCreated.data?.tradeId,
-            //     createTradeDetails.sellerFundAmountWei,
-            //   );
-            //   if (tradeFunded.error) {
-            //     await prisma.trade.update({
-            //       where: { id: trade.id },
-            //       data: {
-            //         status: 'FAILED',
-            //         endedAt: new Date(),
-            //       },
-            //     });
-            //     this.io.to(chatId).emit('trade_error', {
-            //       error: 'Trade funding error',
-            //     });
-            //     await systemMessage.tradeFailed(trade.id);
-            //     return;
-            //   }
-            //   if (tradeFunded.data) {
-            //     await ChatMessage.create({
-            //       chatId,
-            //       from: 'none',
-            //       to: 'none',
-            //       type: 'info',
-            //       message: tradeFunded.message,
-            //     });
-            //   }
-            //   await prisma.trade.update({
-            //     where: {
-            //       id: trade?.id,
-            //     },
-            //     data: {
-            //       status: 'IN_PROGRESS',
-            //       fundedAt: new Date(),
-            //     },
-            //   });
-            //   this.io.to(chatId).emit('trade_funded_success', {
-            //     fundedAt: new Date(),
-            //   });
-            //   this.io.to(chatId).emit('blockchain_trade_created', {
-            //     blockchainTradeId: tradeCreated.data?.tradeId.toString(),
-            //   });
+            const updatedTrade = await prisma.trade.update({
+              where: {
+                id: trade?.id,
+              },
+              data: {
+                vendorWalletAddress,
+              },
+            });
+            await ChatMessage.create({
+              chatId,
+              from: 'none',
+              to: 'none',
+              type: 'info',
+              message: 'Vendor has entered the chat',
+            });
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Vendor has entered the chat',
+              },
+            ]);
+            const createTradeDetails =
+              await getCreateTradeDetails(updatedTrade);
+            if (!createTradeDetails) {
+              const endedAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                  endedAt,
+                },
+              });
+              this.io.to(chatId).emit('trade_failed', {
+                error: 'Trade details not found',
+                endedAt,
+              });
+              await systemMessage.tradeFailed(trade.id);
+              return;
+            }
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Initiating trade...',
+              },
+            ]);
+            const tradeCreated = await createTrade({
+              arbitrator: createTradeDetails.arbitrator,
+              buyer: createTradeDetails.buyer,
+              cryptoAmount: createTradeDetails.cryptoAmountWei,
+              feeRate: createTradeDetails.feeRate,
+              profitMargin: createTradeDetails.profitMargin,
+              seller: createTradeDetails.seller,
+              tradeDuration: createTradeDetails.tradeDuration,
+              buyerCollateral: createTradeDetails.buyerCollateralWei,
+              sellerCollateral: createTradeDetails.sellerCollateralWei,
+              sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
+            });
+            if (tradeCreated.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                  endedAt: new Date(),
+                },
+              });
+              this.io.to(chatId).emit('trade_error', {
+                error: 'Trade creation error',
+              });
+              await systemMessage.tradeFailed(trade.id);
+              return;
+            }
+            await ChatMessage.create({
+              chatId,
+              from: 'none',
+              to: 'none',
+              type: 'info',
+              message: tradeCreated.message,
+            });
+            await prisma.trade.update({
+              where: { id: trade.id },
+              data: {
+                blockchainTradeId: tradeCreated.data?.tradeId,
+                blockchainTransactionHash: tradeCreated.txHash,
+              },
+            });
+            this.io.to(chatId).emit('room_messages', [
+              {
+                _id: 'none',
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: 'Funding trade...',
+              },
+            ]);
+            const tradeFunded = await fundTrade(
+              tradeCreated.data?.tradeId,
+              createTradeDetails.sellerFundAmountWei,
+            );
+            if (tradeFunded.error) {
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'FAILED',
+                  endedAt: new Date(),
+                },
+              });
+              this.io.to(chatId).emit('trade_error', {
+                error: 'Trade funding error',
+              });
+              await systemMessage.tradeFailed(trade.id);
+              return;
+            }
+            if (tradeFunded.data) {
+              await ChatMessage.create({
+                chatId,
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: tradeFunded.message,
+              });
+            }
+            await prisma.trade.update({
+              where: {
+                id: trade?.id,
+              },
+              data: {
+                status: 'IN_PROGRESS',
+                fundedAt: new Date(),
+              },
+            });
+            this.io.to(chatId).emit('trade_funded_success', {
+              fundedAt: new Date(),
+            });
+            this.io.to(chatId).emit('blockchain_trade_created', {
+              blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+            });
           }
         }
 

@@ -125,6 +125,20 @@ const main = async () => {
   // Create blockchain chains
   const chainData = [
     {
+      name: 'Hardhat',
+      symbol: 'ETH',
+      chainId: 1337,
+      rpcUrl: 'http://localhost:8545',
+      explorerUrl: '',
+      nativeCurrency: 'ETH',
+      isTestnet: true,
+      isActive: true,
+      description: 'Local Hardhat testnet',
+      tempId: 'hardhat-localnet',
+      logoUrl:
+        'https://assets.coingecko.com/coins/images/279/large/ethereum.png', // Ethereum
+    },
+    {
       name: 'Ethereum',
       symbol: 'ETH',
       chainId: 1,
@@ -441,11 +455,18 @@ const main = async () => {
 
     // Create cryptocurrency-chain relationships
     const cryptocurrencyChainData = [
+      // Ethereum native on Hardhat
+      {
+        cryptocurrencyId: cryptoMap.get('ethereum')!,
+        chainId: chainMap.get('hardhat-localnet')!,
+        contractAddress: '0x0000000000000000000000000000000000000000',
+        isVerified: true,
+      },
       // Ethereum native on Ethereum
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('eth-mainnet')!,
-        contractAddress: null,
+        contractAddress: '0x0000000000000000000000000000000000000000',
         isVerified: true,
       },
       // Ethereum on other chains (wrapped/bridged)
