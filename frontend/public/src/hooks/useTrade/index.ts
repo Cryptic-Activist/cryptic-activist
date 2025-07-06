@@ -6,6 +6,7 @@ import {
   SetTradeCancelledParams,
 } from './types';
 
+import { getEscrowContract } from '@/services/ethers/escrow';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -40,10 +41,12 @@ const useTrade = () => {
     }
   }, [queryTrade.data]);
 
-  const setTradeCreated = () => {
+  const setTradeCreated = async () => {
     trade.setTradeValue({
       status: 'IN_PROGRESS',
     });
+    const contract = await getEscrowContract();
+    console.log({ contract });
   };
 
   const setPaid = (paidAt: string) => {

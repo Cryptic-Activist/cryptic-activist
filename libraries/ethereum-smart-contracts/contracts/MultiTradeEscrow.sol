@@ -146,7 +146,6 @@ contract MultiTradeEscrow {
     function fundTrade(uint256 _tradeId) 
         external 
         payable 
-        onlyOwner() 
         inState(_tradeId, TradeState.Created) 
         tradeExists(_tradeId) 
     {
@@ -163,7 +162,6 @@ contract MultiTradeEscrow {
     function confirmTrade(uint256 _tradeId) 
         external 
         payable 
-        onlyOwner() 
         inState(_tradeId, TradeState.Funded) 
         tradeExists(_tradeId) 
     {

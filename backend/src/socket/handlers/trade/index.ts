@@ -37,6 +37,49 @@ export default class Trade {
     this.io = io;
   }
 
+  fundTrade() {
+    try {
+      this.socket.on(
+        'blockchain_trade_fund_tx_success',
+        async ({ chatId, tx }) => {
+          const trade = await prisma.trade.findFirst({
+            where: {
+              chat: {
+                id: chatId,
+              },
+            },
+            select: {
+              id: true,
+            },
+          });
+
+          if (!trade?.id) {
+            this.io
+              .to(chatId)
+              .emit('blockchain_trade_fund_tx_error', { error: true });
+            return;
+          }
+
+          const fundedAt = new Date();
+
+          await prisma.trade.update({
+            where: {
+              id: trade?.id,
+            },
+            data: {
+              status: 'IN_PROGRESS',
+              fundedAt,
+            },
+          });
+
+          this.io.to(chatId).emit('trade_funded_success', {
+            fundedAt,
+          });
+        },
+      );
+    } catch (error) {}
+  }
+
   setAsPaid() {
     this.socket.on(
       'trade_set_paid',

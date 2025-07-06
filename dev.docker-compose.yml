@@ -54,20 +54,6 @@ services:
     networks:
       - app-network
 
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    env_file:
-      - envs/dev.mongo-express.env
-    volumes:
-      - ./data:/data/db
-    networks:
-      - app-network
-    ports:
-      - "8082:8081"
-    depends_on:
-      - mongodb
-
   postgres:
     image: postgres:latest
     container_name: postgres

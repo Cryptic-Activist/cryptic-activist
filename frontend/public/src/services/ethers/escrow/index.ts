@@ -9,25 +9,34 @@ import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 const iface = new Interface(EscrowArtifact.abi);
 
 export const getProvider = () => {
-  const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
-  return provider;
+  if (typeof window !== 'undefined' && window.ethereum) {
+    return new ethers.BrowserProvider(window.ethereum);
+  }
+
+  // Fallback: local hardhat or RPC provider
+  return new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
 };
 
 export const getSigner = async () => {
   const provider = getProvider();
-  const signer = await provider.getSigner(0);
-  return signer;
+
+  // If using BrowserProvider (MetaMask), get signer normally
+  if (provider instanceof ethers.BrowserProvider) {
+    await provider.send('eth_requestAccounts', []);
+    return await provider.getSigner();
+  }
+
+  // If using JsonRpcProvider (e.g., localhost), fall back to account 0
+  return await provider.getSigner(0);
 };
 
 export const getEscrowContract = async () => {
   const signer = await getSigner();
-  console.log({ ETHEREUM_ESCROW_CONTRACT_ADDRESS, EscrowArtifact, signer });
-  const contract = new ethers.Contract(
+  return new ethers.Contract(
     ETHEREUM_ESCROW_CONTRACT_ADDRESS,
     EscrowArtifact.abi,
     signer
   );
-  return contract;
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -66,38 +75,38 @@ export const decodeFunctionData = (receipt: any) => {
   }
 };
 
-// export const fundTrade = async (tradeId: number, value: bigint) => {
-//   try {
-//     const contract = getEscrowContract();
+export const fundTrade = async (tradeId: number, value: bigint) => {
+  try {
+    const contract = await getEscrowContract();
 
-//     if (!contract) {
-//       return {
-//         error: 'Contract not found',
-//       };
-//     }
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
 
-//     console.log({ contract, tradeId, value });
+    console.log({ contract, tradeId, value });
 
-//     // Buyer deposits require sending value along with the transaction.
-//     const tx = await contract.fundTrade(tradeId, {
-//       value,
-//     });
-//     const receipt = await tx.wait();
-//     const decoded = decodeFunctionData(receipt);
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.fundTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
 
-//     return {
-//       data: decoded,
-//       txHash: tx.hash,
-//       message: 'Trade funded successfully',
-//     };
-//   } catch (error) {
-//     console.log({ fundError: error });
-//     return {
-//       message: 'Error funding trade',
-//       error: error,
-//     };
-//   }
-// };
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Trade funded successfully',
+    };
+  } catch (error) {
+    console.log({ fundError: error });
+    return {
+      message: 'Error funding trade',
+      error: error,
+    };
+  }
+};
 
 // export const confirmTrade = async (tradeId: bigint, value: bigint) => {
 //   try {

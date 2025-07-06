@@ -30,301 +30,262 @@ export default class Chat {
     this.socket.on(
       'join_room',
       async ({ chatId, user, vendorWalletAddress }: JoinRoomParams) => {
-        await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
-        const systemMessage = new SystemMessage();
+        try {
+          await redisClient.hSet('onlineTradingUsers', user.id, this.socket.id);
+          const systemMessage = new SystemMessage();
 
-        this.socket.join(chatId);
-        this.socket.to(chatId).emit('room_users_update', {
-          user,
-          status: 'online',
-        });
+          this.socket.join(chatId);
+          this.socket.to(chatId).emit('room_users_update', {
+            user,
+            status: 'online',
+          });
 
-        const chat = await prisma.chat.findFirst({
-          where: { id: chatId },
-          select: {
-            tradeId: true,
-          },
-        });
+          const chat = await prisma.chat.findFirst({
+            where: { id: chatId },
+            select: {
+              tradeId: true,
+            },
+          });
 
-        const trade = await prisma.trade.findFirst({
-          where: { id: chat?.tradeId },
-          select: {
-            id: true,
-            traderId: true,
-            vendorId: true,
-            traderWalletAddress: true,
-            vendorWalletAddress: true,
-            cryptocurrencyAmount: true,
-            status: true,
-            trader: {
-              select: {
-                tier: {
-                  select: {
-                    tradingFee: true,
-                    discount: true,
+          const trade = await prisma.trade.findFirst({
+            where: { id: chat?.tradeId },
+            select: {
+              id: true,
+              traderId: true,
+              vendorId: true,
+              traderWalletAddress: true,
+              vendorWalletAddress: true,
+              cryptocurrencyAmount: true,
+              status: true,
+              trader: {
+                select: {
+                  tier: {
+                    select: {
+                      tradingFee: true,
+                      discount: true,
+                    },
                   },
                 },
               },
-            },
-            offer: {
-              select: {
-                timeLimit: true,
-                offerType: true,
+              offer: {
+                select: {
+                  timeLimit: true,
+                  offerType: true,
+                },
               },
             },
-          },
-        });
-
-        if (!trade?.id) {
-          this.io.to(chatId).emit('trade_error', {
-            error: 'Trade not found',
           });
-          return;
-        }
 
-        const remaining = await getRemainingTime(trade.id);
-        if (remaining === null) {
-          if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
-            const expiredAt = new Date();
-            await prisma.trade.update({
-              where: { id: trade.id },
-              data: { expiredAt, status: 'EXPIRED' },
+          if (!trade?.id) {
+            this.io.to(chatId).emit('trade_error', {
+              error: 'Trade not found',
             });
-            this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
             return;
           }
-        }
 
-        this.io.to(chatId).emit('timer:update', { remaining, chatId });
-
-        const interval = setInterval(async () => {
           const remaining = await getRemainingTime(trade.id);
-          if (remaining === null || remaining <= 0) {
-            const endedTrade = await prisma.trade.findUnique({
-              where: {
-                id: trade.id,
-                status: {
-                  in: ['COMPLETED', 'FAILED', 'DISPUTED'],
-                },
-              },
-              select: {
-                status: true,
-                id: true,
-                endedAt: true,
-                disputedAt: true,
-              },
-            });
-            if (endedTrade?.status === 'COMPLETED') {
-              this.io.to(chatId).emit('trade_completed', {
-                chatId,
-                endedAt: endedTrade.endedAt,
+          if (remaining === null) {
+            if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
+              const expiredAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: { expiredAt, status: 'EXPIRED' },
               });
+              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+              return;
             }
-            if (endedTrade?.status === 'FAILED') {
-              this.io.to(chatId).emit('trade_failed', {
-                chatId,
-                endedAt: endedTrade.endedAt,
-              });
-            }
-            if (endedTrade?.status === 'DISPUTED') {
-              this.io.to(chatId).emit('trade_set_disputed_success', {
-                status: 'DISPUTED',
-                disputedAt: endedTrade.disputedAt,
-              });
-            }
-            clearInterval(interval);
-          } else {
-            this.io.to(chatId).emit('timer:update', { remaining, chatId });
           }
-        }, 1000);
 
-        if (trade?.traderWalletAddress === vendorWalletAddress) {
-          this.io.to(chatId).emit('trade_error', {
-            error: "Vendor's wallet can not be the same as Trader's wallet",
-          });
-          return;
-        }
+          this.io.to(chatId).emit('timer:update', { remaining, chatId });
 
-        // Start trade if vendor wallet address is provided
-        if (vendorWalletAddress) {
-          if (!trade?.vendorWalletAddress) {
-            const updatedTrade = await prisma.trade.update({
-              where: {
-                id: trade?.id,
-              },
-              data: {
-                vendorWalletAddress,
-              },
-            });
-            await ChatMessage.create({
-              chatId,
-              from: 'none',
-              to: 'none',
-              type: 'info',
-              message: 'Vendor has entered the chat',
-            });
-
-            this.io.to(chatId).emit('room_messages', [
-              {
-                _id: 'none',
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: 'Vendor has entered the chat',
-              },
-            ]);
-
-            const createTradeDetails =
-              await getCreateTradeDetails(updatedTrade);
-
-            console.log({ createTradeDetails });
-
-            if (!createTradeDetails) {
-              const endedAt = new Date();
-              await prisma.trade.update({
-                where: { id: trade.id },
-                data: {
-                  status: 'FAILED',
-                  endedAt,
+          const interval = setInterval(async () => {
+            const remaining = await getRemainingTime(trade.id);
+            if (remaining === null || remaining <= 0) {
+              const endedTrade = await prisma.trade.findUnique({
+                where: {
+                  id: trade.id,
+                  status: {
+                    in: ['COMPLETED', 'FAILED', 'DISPUTED'],
+                  },
+                },
+                select: {
+                  status: true,
+                  id: true,
+                  endedAt: true,
+                  disputedAt: true,
                 },
               });
-              this.io.to(chatId).emit('trade_failed', {
-                error: 'Trade details not found',
-                endedAt,
-              });
-              await systemMessage.tradeFailed(trade.id);
-              return;
+              if (endedTrade?.status === 'COMPLETED') {
+                this.io.to(chatId).emit('trade_completed', {
+                  chatId,
+                  endedAt: endedTrade.endedAt,
+                });
+              }
+              if (endedTrade?.status === 'FAILED') {
+                this.io.to(chatId).emit('trade_failed', {
+                  chatId,
+                  endedAt: endedTrade.endedAt,
+                });
+              }
+              if (endedTrade?.status === 'DISPUTED') {
+                this.io.to(chatId).emit('trade_set_disputed_success', {
+                  status: 'DISPUTED',
+                  disputedAt: endedTrade.disputedAt,
+                });
+              }
+              clearInterval(interval);
+            } else {
+              this.io.to(chatId).emit('timer:update', { remaining, chatId });
             }
+          }, 1000);
 
-            this.io.to(chatId).emit('room_messages', [
-              {
-                _id: 'none',
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: 'Initiating trade...',
-              },
-            ]);
-
-            const tradeCreated = await createTrade({
-              arbitrator: createTradeDetails.arbitrator,
-              buyer: createTradeDetails.buyer,
-              cryptoAmount: createTradeDetails.cryptoAmountWei,
-              feeRate: createTradeDetails.feeRate,
-              profitMargin: createTradeDetails.profitMargin,
-              seller: createTradeDetails.seller,
-              tradeDuration: createTradeDetails.tradeDuration,
-              buyerCollateral: createTradeDetails.buyerCollateralWei,
-              sellerCollateral: createTradeDetails.sellerCollateralWei,
-              sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
+          if (trade?.traderWalletAddress === vendorWalletAddress) {
+            this.io.to(chatId).emit('trade_error', {
+              error: "Vendor's wallet can not be the same as Trader's wallet",
             });
+            return;
+          }
 
-            console.log({ tradeCreated });
-
-            if (tradeCreated.error) {
-              await prisma.trade.update({
-                where: { id: trade.id },
+          // Start trade if vendor wallet address is provided
+          if (vendorWalletAddress) {
+            if (!trade?.vendorWalletAddress) {
+              const updatedTrade = await prisma.trade.update({
+                where: {
+                  id: trade?.id,
+                },
                 data: {
-                  status: 'FAILED',
-                  endedAt: new Date(),
+                  vendorWalletAddress,
                 },
               });
-              this.io.to(chatId).emit('trade_error', {
-                error: 'Trade creation error',
-              });
-              await systemMessage.tradeFailed(trade.id);
-              return;
-            }
-
-            await ChatMessage.create({
-              chatId,
-              from: 'none',
-              to: 'none',
-              type: 'info',
-              message: tradeCreated.message,
-            });
-
-            await prisma.trade.update({
-              where: { id: trade.id },
-              data: {
-                blockchainTradeId: tradeCreated.data?.tradeId,
-                blockchainTransactionHash: tradeCreated.txHash,
-              },
-            });
-
-            this.io.to(chatId).emit('room_messages', [
-              {
-                _id: 'none',
-                from: 'none',
-                to: 'none',
-                type: 'info',
-                message: 'Funding trade...',
-              },
-            ]);
-
-            const tradeFunded = await fundTrade(
-              tradeCreated.data?.tradeId,
-              createTradeDetails.sellerFundAmountWei,
-            );
-
-            console.log({ tradeFunded });
-
-            if (tradeFunded.error) {
-              await prisma.trade.update({
-                where: { id: trade.id },
-                data: {
-                  status: 'FAILED',
-                  endedAt: new Date(),
-                },
-              });
-              this.io.to(chatId).emit('trade_error', {
-                error: 'Trade funding error',
-              });
-              await systemMessage.tradeFailed(trade.id);
-              return;
-            }
-
-            if (tradeFunded.data) {
               await ChatMessage.create({
                 chatId,
                 from: 'none',
                 to: 'none',
                 type: 'info',
-                message: tradeFunded.message,
+                message: 'Vendor has entered the chat',
               });
+
+              this.io.to(chatId).emit('room_messages', [
+                {
+                  _id: 'none',
+                  from: 'none',
+                  to: 'none',
+                  type: 'info',
+                  message: 'Vendor has entered the chat',
+                },
+              ]);
+
+              const createTradeDetails =
+                await getCreateTradeDetails(updatedTrade);
+
+              console.log({ createTradeDetails });
+
+              if (!createTradeDetails) {
+                const endedAt = new Date();
+                await prisma.trade.update({
+                  where: { id: trade.id },
+                  data: {
+                    status: 'FAILED',
+                    endedAt,
+                  },
+                });
+                this.io.to(chatId).emit('trade_failed', {
+                  error: 'Trade details not found',
+                  endedAt,
+                });
+                await systemMessage.tradeFailed(trade.id);
+                return;
+              }
+
+              this.io.to(chatId).emit('room_messages', [
+                {
+                  _id: 'none',
+                  from: 'none',
+                  to: 'none',
+                  type: 'info',
+                  message: 'Initiating trade...',
+                },
+              ]);
+
+              const createTradeObj = {
+                arbitrator: createTradeDetails.arbitrator,
+                buyer: createTradeDetails.buyer,
+                cryptoAmount: createTradeDetails.cryptoAmountWei,
+                feeRate: createTradeDetails.feeRate,
+                profitMargin: createTradeDetails.profitMargin,
+                seller: createTradeDetails.seller,
+                tradeDuration: createTradeDetails.tradeDuration,
+                buyerCollateral: createTradeDetails.buyerCollateralWei,
+                sellerCollateral: createTradeDetails.sellerCollateralWei,
+                sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
+              };
+
+              const tradeCreated = await createTrade(createTradeObj);
+
+              if (tradeCreated.error) {
+                await prisma.trade.update({
+                  where: { id: trade.id },
+                  data: {
+                    status: 'FAILED',
+                    endedAt: new Date(),
+                  },
+                });
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Trade creation error',
+                });
+                await systemMessage.tradeFailed(trade.id);
+                return;
+              }
+
+              await ChatMessage.create({
+                chatId,
+                from: 'none',
+                to: 'none',
+                type: 'info',
+                message: tradeCreated.message,
+              });
+
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'IN_PROGRESS',
+                  blockchainTradeId: tradeCreated.data?.tradeId,
+                  blockchainTransactionHash: tradeCreated.txHash,
+                },
+              });
+
+              console.log({ ...createTradeObj });
+
+              const payload = JSON.stringify(
+                {
+                  blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+                  ...createTradeObj,
+                },
+                (_, value) =>
+                  typeof value === 'bigint' ? value.toString() : value,
+              );
+              console.log({ payload });
+              this.io.to(chatId).emit('blockchain_trade_created', payload);
             }
-
-            await prisma.trade.update({
-              where: {
-                id: trade?.id,
-              },
-              data: {
-                status: 'IN_PROGRESS',
-                fundedAt: new Date(),
-              },
-            });
-
-            this.io.to(chatId).emit('trade_funded_success', {
-              fundedAt: new Date(),
-            });
-
-            this.io.to(chatId).emit('blockchain_trade_created', {
-              blockchainTradeId: tradeCreated.data?.tradeId.toString(),
-            });
           }
+
+          // Send existing room messages
+          let query = ChatMessage.find(
+            { chatId },
+            'createdAt from message type to',
+          );
+          query = query.sort('desc');
+          const chatMessages = await query.exec();
+
+          this.io.to(chatId).emit('room_messages', chatMessages);
+          // Notify room about new user
+          this.io.emit('user_status', { user, status: 'online' });
+        } catch (error) {
+          console.log({ error });
+          this.io.to(chatId).emit('trade_error', {
+            error: 'Trade creation error',
+          });
         }
-
-        // Send existing room messages
-        let query = ChatMessage.find(
-          { chatId },
-          'createdAt from message type to',
-        );
-        query = query.sort('desc');
-        const chatMessages = await query.exec();
-
-        this.io.to(chatId).emit('room_messages', chatMessages);
-        // Notify room about new user
-        this.io.emit('user_status', { user, status: 'online' });
       },
     );
   }

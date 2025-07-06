@@ -11,6 +11,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
+import { fundTrade } from '@/services/ethers/escrow';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
 import { useApp } from '@/hooks';
@@ -42,6 +43,8 @@ const useTradeSocket = ({
 
   const [vendorHasEnoughFunds, _setVendorHasEnoughFunds] = useState(true);
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
+
+  const hasFundedRef = useRef(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -157,8 +160,6 @@ const useTradeSocket = ({
       //   }
       // }
 
-      console.log('continuing');
-
       // Join room
       socket.emit('join_room', {
         chatId,
@@ -273,9 +274,31 @@ const useTradeSocket = ({
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
-      socket.on('blockchain_trade_created', (_payload) => {
+      socket.on('blockchain_trade_created', async (payload) => {
+        // Only the vendor should fund the trade
+        const isVendor = user.id === trade.vendor?.id;
+        if (!isVendor || hasFundedRef.current) return;
+
+        hasFundedRef.current = true;
+
+        const data = JSON.parse(payload);
         onSetTradeCreated();
-        // setMessages((prevMessages) => [...prevMessages, message]);
+
+        try {
+          const tx = await fundTrade(
+            data.blockchainTradeId,
+            BigInt(data.sellerTotalDeposit)
+          );
+          console.log({ tx });
+
+          socket.emit('blockchain_trade_fund_tx_success', {
+            chatId,
+            tx,
+          });
+        } catch (_err) {
+          hasFundedRef.current = false; // Optional: allow retry on error
+          addToast('error', 'Funding transaction failed', 8000);
+        }
       });
 
       socket.on('timer:update', (data) => {
