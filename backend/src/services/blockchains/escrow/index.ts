@@ -55,6 +55,7 @@ export const approveToken = async (_token: Token, amount: number) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
+  console.log({ receipt });
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
@@ -132,6 +133,8 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       };
     }
 
+    console.log({ contract, tradeId, value });
+
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.fundTrade(tradeId, {
       value,
@@ -145,6 +148,7 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       message: 'Trade funded successfully',
     };
   } catch (error) {
+    console.log({ fundError: error });
     return {
       message: 'Error funding trade',
       error: error,

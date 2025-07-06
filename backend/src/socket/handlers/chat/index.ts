@@ -177,6 +177,8 @@ export default class Chat {
             const createTradeDetails =
               await getCreateTradeDetails(updatedTrade);
 
+            console.log({ createTradeDetails });
+
             if (!createTradeDetails) {
               const endedAt = new Date();
               await prisma.trade.update({
@@ -216,6 +218,8 @@ export default class Chat {
               sellerCollateral: createTradeDetails.sellerCollateralWei,
               sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
             });
+
+            console.log({ tradeCreated });
 
             if (tradeCreated.error) {
               await prisma.trade.update({
@@ -262,6 +266,8 @@ export default class Chat {
               tradeCreated.data?.tradeId,
               createTradeDetails.sellerFundAmountWei,
             );
+
+            console.log({ tradeFunded });
 
             if (tradeFunded.error) {
               await prisma.trade.update({
