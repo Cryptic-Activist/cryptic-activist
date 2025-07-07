@@ -4,7 +4,7 @@ export type InitTradeParams = {
   buyer: Address;
   seller: Address;
   arbitrator: Address;
-  cryptoAmount: bigint;
+  tradeAmount: bigint;
   buyerCollateral: bigint;
   sellerCollateral: bigint;
   sellerTotalDeposit: bigint;

@@ -57,6 +57,11 @@ export default class Chat {
               vendorWalletAddress: true,
               cryptocurrencyAmount: true,
               status: true,
+              tradeEscrowDetails: {
+                select: {
+                  id: true,
+                },
+              },
               trader: {
                 select: {
                   tier: {
@@ -178,8 +183,6 @@ export default class Chat {
               const createTradeDetails =
                 await getCreateTradeDetails(updatedTrade);
 
-              console.log({ createTradeDetails });
-
               if (!createTradeDetails) {
                 const endedAt = new Date();
                 await prisma.trade.update({
@@ -208,16 +211,16 @@ export default class Chat {
               ]);
 
               const createTradeObj = {
-                arbitrator: createTradeDetails.arbitrator,
-                buyer: createTradeDetails.buyer,
-                cryptoAmount: createTradeDetails.cryptoAmountWei,
+                arbitrator: createTradeDetails.arbitratorWallet,
+                buyer: createTradeDetails.buyerWallet,
+                seller: createTradeDetails.sellerWallet,
+                tradeAmount: createTradeDetails.tradeAmountInWei,
                 feeRate: createTradeDetails.feeRate,
                 profitMargin: createTradeDetails.profitMargin,
-                seller: createTradeDetails.seller,
-                tradeDuration: createTradeDetails.tradeDuration,
-                buyerCollateral: createTradeDetails.buyerCollateralWei,
-                sellerCollateral: createTradeDetails.sellerCollateralWei,
-                sellerTotalDeposit: createTradeDetails.sellerFundAmountWei,
+                tradeDuration: createTradeDetails.tradeDurationInSeconds,
+                buyerCollateral: createTradeDetails.buyerCollateralInWei,
+                sellerCollateral: createTradeDetails.sellerCollateralInWei,
+                sellerTotalDeposit: createTradeDetails.sellerTotalFundInWei,
               };
 
               const tradeCreated = await createTrade(createTradeObj);
@@ -237,6 +240,49 @@ export default class Chat {
                 return;
               }
 
+              const tradeEscrowDetails =
+                await prisma.tradeEscrowDetails.findFirst({
+                  where: {
+                    trade: {
+                      some: {
+                        id: trade.id,
+                      },
+                    },
+                  },
+                });
+
+              if (!tradeEscrowDetails) {
+                console.log({ blockchainTradeId: tradeCreated.data });
+                const tradeEscrowDetails =
+                  await prisma.tradeEscrowDetails.create({
+                    data: {
+                      arbitratorWallet: createTradeDetails.arbitratorWallet,
+                      buyerCollateralInWei:
+                        createTradeDetails.buyerCollateralInWei.toString(),
+                      buyerWallet: createTradeDetails.buyerWallet,
+                      tradeAmountInWei:
+                        createTradeDetails.tradeAmountInWei.toString(),
+                      feeRate: createTradeDetails.feeRate,
+                      profitMargin: createTradeDetails.profitMargin,
+                      sellerWallet: createTradeDetails.sellerWallet,
+                      sellerCollateralInWei:
+                        createTradeDetails.sellerCollateralInWei.toString(),
+                      sellerTotalFundInWei:
+                        createTradeDetails.sellerTotalFundInWei.toString(),
+                      tradeDurationInSeconds:
+                        createTradeDetails.tradeDurationInSeconds,
+                      blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+                    },
+                  });
+
+                await prisma.trade.update({
+                  where: { id: trade.id },
+                  data: {
+                    tradeEscrowDetailsId: tradeEscrowDetails.id,
+                  },
+                });
+              }
+
               await ChatMessage.create({
                 chatId,
                 from: 'none',
@@ -254,8 +300,6 @@ export default class Chat {
                 },
               });
 
-              console.log({ ...createTradeObj });
-
               const payload = JSON.stringify(
                 {
                   blockchainTradeId: tradeCreated.data?.tradeId.toString(),
@@ -264,7 +308,6 @@ export default class Chat {
                 (_, value) =>
                   typeof value === 'bigint' ? value.toString() : value,
               );
-              console.log({ payload });
               this.io.to(chatId).emit('blockchain_trade_created', payload);
             }
           }

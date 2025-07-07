@@ -33,6 +33,7 @@ export const useTradeSlice: StateCreator<
     chat: undefined,
     createdAt: undefined,
     tradeDispute: undefined,
+    tradeEscrowDetails: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
@@ -72,6 +73,8 @@ export const useTradeSlice: StateCreator<
                 trade.blockchainTransactionHash,
               createdAt: params.createdAt ?? trade.createdAt,
               tradeDispute: params.tradeDispute ?? trade.tradeDispute,
+              tradeEscrowDetails:
+                params.tradeEscrowDetails ?? trade.tradeEscrowDetails,
             },
           };
         },
@@ -115,6 +118,7 @@ export const useTradeSlice: StateCreator<
           traderWalletAddress: undefined,
           vendor: undefined,
           vendorWalletAddress: undefined,
+          tradeEscrowDetails: undefined,
         },
         'trade/resetTrade'
       );

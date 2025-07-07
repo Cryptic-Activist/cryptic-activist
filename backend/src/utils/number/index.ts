@@ -28,3 +28,13 @@ export const calculatePercentageChange = (
 
   return 'No change from last month';
 };
+
+export const toBigIntSafe = (input: any) => {
+  if (typeof input === 'bigint') return input;
+  if (typeof input === 'string' || typeof input === 'number')
+    return BigInt(input);
+  if (input && typeof input === 'object' && typeof input.value === 'string')
+    return BigInt(input.value);
+
+  throw new Error('Invalid BigInt input: ' + JSON.stringify(input));
+};

@@ -24,6 +24,7 @@ export type UseSocketParams = {
   onSetPaymentConfirmed: (params: SetPaymentConfirmedParams) => void;
   onSetDisputed: (params: SetPaymentDisputedParams) => void;
   onSetUpdateVendorWalletAddress?: (walletAddress: string) => void;
+  refetchTrade: any;
 };
 
 type User = {

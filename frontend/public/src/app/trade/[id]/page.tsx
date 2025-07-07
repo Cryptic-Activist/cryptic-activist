@@ -368,6 +368,7 @@ const Trade: FC<TradeProps> = ({
 
 export default function TradePage() {
   const {
+    queryTrade,
     trade,
     setPaid,
     setCanceled,
@@ -401,6 +402,7 @@ export default function TradePage() {
     onSetPaymentConfirmed: setPaymentConfirmed,
     onSetTradeCreated: setTradeCreated,
     onSetDisputed: setDisputed,
+    refetchTrade: queryTrade.refetch,
   });
 
   // useEffect(() => {

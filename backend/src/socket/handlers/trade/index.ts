@@ -14,6 +14,7 @@ import {
 import {
   cancelTrade,
   confirmTrade,
+  executeTrade,
   raiseDispute,
 } from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
@@ -37,47 +38,138 @@ export default class Trade {
     this.io = io;
   }
 
-  fundTrade() {
+  sellerFundedTrade() {
     try {
-      this.socket.on(
-        'blockchain_trade_fund_tx_success',
-        async ({ chatId, tx }) => {
-          const trade = await prisma.trade.findFirst({
-            where: {
-              chat: {
-                id: chatId,
-              },
+      this.socket.on('blockchain_seller_funded_trade', async ({ chatId }) => {
+        const trade = await prisma.trade.findFirst({
+          where: {
+            chat: {
+              id: chatId,
             },
-            select: {
-              id: true,
+          },
+          select: {
+            id: true,
+            buyerfundedAt: true,
+          },
+        });
+
+        if (!trade?.id) {
+          this.io
+            .to(chatId)
+            .emit('blockchain_seller_funded_trade_error', { error: true });
+          return;
+        }
+
+        const fundedAt = new Date();
+
+        await prisma.trade.update({
+          where: {
+            id: trade?.id,
+          },
+          data: {
+            status: 'IN_PROGRESS',
+            sellerfundedAt: fundedAt,
+            fundedAt: trade.buyerfundedAt ? fundedAt : null,
+          },
+        });
+
+        console.log({ sellerFundedAt: fundedAt });
+
+        this.io.to(chatId).emit('blockchain_seller_funded_trade_success', {
+          fundedAt: new Date(),
+        });
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  buyerFundedTrade() {
+    try {
+      this.socket.on('blockchain_buyer_funded_trade', async ({ chatId }) => {
+        const trade = await prisma.trade.findFirst({
+          where: {
+            chat: {
+              id: chatId,
             },
-          });
+          },
+          select: {
+            id: true,
+            sellerfundedAt: true,
+          },
+        });
 
-          if (!trade?.id) {
-            this.io
-              .to(chatId)
-              .emit('blockchain_trade_fund_tx_error', { error: true });
-            return;
-          }
+        if (!trade?.id) {
+          this.io
+            .to(chatId)
+            .emit('blockchain_buyer_funded_trade_error', { error: true });
+          return;
+        }
 
-          const fundedAt = new Date();
+        const fundedAt = new Date();
 
-          await prisma.trade.update({
-            where: {
-              id: trade?.id,
+        await prisma.trade.update({
+          where: {
+            id: trade?.id,
+          },
+          data: {
+            status: 'IN_PROGRESS',
+            buyerfundedAt: fundedAt,
+            fundedAt: trade.sellerfundedAt ? fundedAt : null,
+          },
+        });
+
+        console.log({ buyerFundedAt: fundedAt });
+
+        this.io.to(chatId).emit('blockchain_buyer_funded_trade_success', {
+          fundedAt: new Date(),
+        });
+      });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  fundTradeSuccess() {
+    try {
+      this.socket.on('blockchain_trade_fund_tx_success', async ({ chatId }) => {
+        const trade = await prisma.trade.findFirst({
+          where: {
+            chat: {
+              id: chatId,
             },
-            data: {
-              status: 'IN_PROGRESS',
-              fundedAt,
-            },
-          });
+          },
+          select: {
+            id: true,
+          },
+        });
 
-          this.io.to(chatId).emit('trade_funded_success', {
+        if (!trade?.id) {
+          this.io
+            .to(chatId)
+            .emit('blockchain_trade_fund_tx_error', { error: true });
+          return;
+        }
+
+        const fundedAt = new Date();
+
+        await prisma.trade.update({
+          where: {
+            id: trade?.id,
+          },
+          data: {
+            status: 'IN_PROGRESS',
             fundedAt,
-          });
-        },
-      );
-    } catch (error) {}
+          },
+        });
+
+        this.io.to(chatId).emit('trade_funded_success', {
+          fundedAt: new Date(),
+        });
+      });
+    } catch (error) {
+      console.log({ error });
+    }
   }
 
   setAsPaid() {
@@ -149,10 +241,9 @@ export default class Trade {
         });
 
         if (trade?.blockchainTradeId?.toString()) {
-          const confirmedTrade = await confirmTrade(
-            trade.blockchainTradeId,
-            parseEther(trade?.cryptocurrencyAmount.toString()),
-          );
+          const confirmedTrade = await executeTrade(trade?.blockchainTradeId);
+
+          console.log({ confirmedTrade });
 
           if (confirmedTrade.error) {
             this.io.to(chatId).emit('trade_set_payment_confirmed_error', {

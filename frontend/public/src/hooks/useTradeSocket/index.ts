@@ -8,10 +8,10 @@ import {
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
+import { buyerFundTrade, sellerFundTrade } from '@/services/ethers/escrow';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
-import { fundTrade } from '@/services/ethers/escrow';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
 import { useApp } from '@/hooks';
@@ -25,8 +25,8 @@ const useTradeSocket = ({
   onSetPaid,
   onSetCanceled,
   onSetPaymentConfirmed,
-  onSetTradeCreated,
   onSetDisputed,
+  refetchTrade,
 }: UseSocketParams) => {
   const { addToast } = useApp();
 
@@ -45,6 +45,7 @@ const useTradeSocket = ({
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
 
   const hasFundedRef = useRef(false);
+  // const hasPaidRef = useRef(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -73,8 +74,32 @@ const useTradeSocket = ({
     }
   };
 
-  const setAsPaymentConfirmed = (params: SetAsPaidParams) => {
+  const setAsPaymentConfirmed = async (params: SetAsPaidParams) => {
     if (socket) {
+      // const whoShouldDeposit =
+      //   trade.offer?.offerType === 'buy' ? trade.trader?.id : trade.vendor?.id;
+
+      // const isDepositer = user?.id === whoShouldDeposit;
+
+      console.log({ trade });
+
+      // if (!isDepositer || hasPaidRef.current) return;
+
+      // hasPaidRef.current = true;
+
+      console.log({ trade });
+
+      // try {
+      //   const confirmed = await confirmTrade(
+      //     trade.tradeEscrowDetails?.blockchainTradeId
+      //   );
+      // } catch (_err) {
+      //   hasPaidRef.current = false; // Optional: allow retry on error
+      //   addToast('error', 'Trade confirmation transaction failed', 8000);
+      //   // socket.emit('blockchain_trade_created', payload);
+      //   return;
+      // }
+
       socket.emit('trade_set_payment_confirmed', { ...params, chatId });
     }
   };
@@ -205,6 +230,7 @@ const useTradeSocket = ({
       });
 
       socket.on('trade_funded_success', (data) => {
+        refetchTrade();
         if (data.fundedAt) {
           // @ts-ignore
           trade.setTradeValue(
@@ -275,30 +301,96 @@ const useTradeSocket = ({
       });
 
       socket.on('blockchain_trade_created', async (payload) => {
-        // Only the vendor should fund the trade
-        const isVendor = user.id === trade.vendor?.id;
-        if (!isVendor || hasFundedRef.current) return;
+        // if (trade.status === 'PENDING') return;
+
+        const sellerId =
+          trade.offer?.offerType === 'buy'
+            ? trade.vendor?.id
+            : trade.trader?.id;
+        const buyerId =
+          trade.offer?.offerType === 'buy'
+            ? trade.trader?.id
+            : trade.vendor?.id;
+
+        if (hasFundedRef.current) return;
 
         hasFundedRef.current = true;
 
         const data = JSON.parse(payload);
-        onSetTradeCreated();
+        console.log({ data });
 
         try {
-          const tx = await fundTrade(
-            data.blockchainTradeId,
-            BigInt(data.sellerTotalDeposit)
-          );
-          console.log({ tx });
+          // let sellerFunded = false;
+          // let buyerFunded = false;
 
-          socket.emit('blockchain_trade_fund_tx_success', {
-            chatId,
-            tx,
+          const mapped = [
+            { type: 'seller', id: sellerId },
+            { type: 'buyer', id: buyerId },
+          ].map(async (u) => {
+            if (u.type === 'seller' && u.id === user.id) {
+              const tx = await sellerFundTrade(
+                data.blockchainTradeId,
+                BigInt(data.sellerTotalDeposit)
+              );
+              return tx;
+            }
+            if (u.type === 'buyer' && u.id === user.id) {
+              const tx = await buyerFundTrade(
+                data.blockchainTradeId,
+                BigInt(data.buyerCollateral)
+              );
+              return tx;
+            }
           });
+
+          const [sellerTx, buyerTx] = await Promise.all(mapped);
+
+          console.log({ sellerTx, buyerTx });
+
+          if (sellerTx) {
+            socket.emit('blockchain_seller_funded_trade', {
+              chatId: trade.chat?.id,
+            });
+          }
+
+          if (buyerTx) {
+            socket.emit('blockchain_buyer_funded_trade', {
+              chatId: trade.chat?.id,
+            });
+          }
+
+          // if (socket) {
+          //   socket.emit('blockchain_trade_fund_tx_success', {
+          //     chatId: trade.chat?.id,
+          //   });
+          //   onSetTradeCreated();
+          // }
         } catch (_err) {
           hasFundedRef.current = false; // Optional: allow retry on error
           addToast('error', 'Funding transaction failed', 8000);
+          // socket.emit('blockchain_trade_created', payload);
+          return;
         }
+      });
+
+      socket.on('blockchain_buyer_funded_trade_success', (_data) => {
+        // const buyerId =
+        //   trade.offer?.offerType === 'buy'
+        //     ? trade.trader?.id
+        //     : trade.vendor?.id;
+        // if (buyerId === user.id) {
+        refetchTrade();
+        // }
+      });
+
+      socket.on('blockchain_seller_funded_trade_success', (_data) => {
+        // const sellerId =
+        //   trade.offer?.offerType === 'buy'
+        //     ? trade.vendor?.id
+        //     : trade.trader?.id;
+        // if (sellerId === user.id) {
+        refetchTrade();
+        // }
       });
 
       socket.on('timer:update', (data) => {

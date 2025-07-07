@@ -52,6 +52,18 @@ export const decodeFunctionData = (receipt: any) => {
           case 'TradeFunded': {
             return parsedLog.args.toObject();
           }
+          case 'SellerFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'BuyerFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'TradeFullyFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'TradeExecuted': {
+            return parsedLog.args.toObject();
+          }
           case 'TradeConfirmed': {
             return parsedLog.args.toObject();
           }
@@ -85,8 +97,6 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       };
     }
 
-    console.log({ contract, tradeId, value });
-
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.fundTrade(tradeId, {
       value,
@@ -108,24 +118,86 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
   }
 };
 
-// export const confirmTrade = async (tradeId: bigint, value: bigint) => {
-//   try {
-//     const contract = getEscrowContract();
-//     // Buyer deposits require sending value along with the transaction.
-//     const tx = await contract.confirmTrade(tradeId, {
-//       value,
-//     });
-//     const receipt = await tx.wait();
-//     const decoded = decodeFunctionData(receipt);
+export const sellerFundTrade = async (tradeId: number, value: bigint) => {
+  try {
+    const contract = await getEscrowContract();
 
-//     return { data: decoded, txHash: tx.hash, message: 'Trade confirmed' };
-//   } catch (error) {
-//     return {
-//       message: 'Error confirming trade',
-//       error: error,
-//     };
-//   }
-// };
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
+
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.sellerFundTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
+
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Seller funded the trade successfully',
+    };
+  } catch (error) {
+    console.log({ fundError: error });
+    return {
+      message: 'Error seller funding trade',
+      error: error,
+    };
+  }
+};
+
+export const buyerFundTrade = async (tradeId: number, value: bigint) => {
+  try {
+    const contract = await getEscrowContract();
+
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
+
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.buyerFundTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
+
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Seller funded the trade successfully',
+    };
+  } catch (error) {
+    console.log({ fundError: error });
+    return {
+      message: 'Error buyer funding trade',
+      error: error,
+    };
+  }
+};
+
+export const confirmTrade = async (tradeId: bigint, value: bigint) => {
+  try {
+    const contract = await getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.confirmTrade(tradeId, {
+      value,
+    });
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
+
+    return { data: decoded, txHash: tx.hash, message: 'Trade confirmed' };
+  } catch (error) {
+    return {
+      message: 'Error confirming trade',
+      error: error,
+    };
+  }
+};
 
 // export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
 //   const contract = getEscrowContract();

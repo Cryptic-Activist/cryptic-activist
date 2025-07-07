@@ -6,10 +6,10 @@ import {
 } from '@/constants/env';
 import { InitTradeParams, Token } from './types';
 import { Interface, ethers, parseEther } from 'ethers';
-import { abis, addresses } from './data';
 
 import { Address } from './types';
-import escrowArtifact from '@/contracts/ethereum/artifacts/MultiTradeEscrow.json';
+import escrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 
 const iface = new Interface(escrowArtifact.abi);
@@ -25,13 +25,6 @@ export const getSigner = () => {
   return signer;
 };
 
-export const getToken = (token: Token) => {
-  const address = addresses.chainlink;
-  const abi = abis.chainlink;
-  const signer = getSigner();
-  return new ethers.Contract(address, abi, signer);
-};
-
 export const getEscrowContract = () => {
   const signer = getSigner();
   return new ethers.Contract(
@@ -39,19 +32,6 @@ export const getEscrowContract = () => {
     escrowArtifact.abi,
     signer,
   );
-};
-
-export const approveToken = async (_token: Token, amount: number) => {
-  const token = getToken(_token);
-  const amountWei = parseEther(amount.toString());
-
-  const approvedTx = await token.approve(
-    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    amountWei,
-  );
-
-  const approved = await approvedTx.wait();
-  return approved;
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -65,6 +45,18 @@ export const decodeFunctionData = (receipt: any) => {
             return parsedLog.args.toObject();
           }
           case 'TradeFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'SellerFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'BuyerFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'TradeFullyFunded': {
+            return parsedLog.args.toObject();
+          }
+          case 'TradeExecuted': {
             return parsedLog.args.toObject();
           }
           case 'TradeConfirmed': {
@@ -84,7 +76,7 @@ export const decodeFunctionData = (receipt: any) => {
           }
         }
       }
-    } catch (error) {
+    } catch (_error) {
       continue;
     }
   }
@@ -98,7 +90,7 @@ export const createTrade = async (params: InitTradeParams) => {
       params.buyer,
       params.seller,
       params.arbitrator,
-      params.cryptoAmount,
+      params.tradeAmount,
       params.buyerCollateral,
       params.sellerCollateral,
       params.sellerTotalDeposit,
@@ -175,6 +167,27 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   }
 };
 
+export const executeTrade = async (tradeId: BigInt) => {
+  try {
+    const contract = getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.executeTrade(tradeId);
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
+
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Trade executed successfully',
+    };
+  } catch (error) {
+    return {
+      message: 'Error executing trade',
+      error: error,
+    };
+  }
+};
+
 export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
   const contract = getEscrowContract();
   const tx = await contract.cancelTrade(tradeId, forcedCancel);
@@ -221,44 +234,46 @@ export const getCreateTradeDetails = async (trade: any) => {
   try {
     const offer = await prisma.offer.findFirst({
       where: { id: trade.offerId },
-      select: {
-        timeLimit: true,
-        offerType: true,
-      },
+      select: { timeLimit: true, offerType: true },
     });
 
-    if (!offer) {
-      return null;
-    }
+    if (!offer) return null;
 
-    const isBuyOffer = offer?.offerType === 'buy';
+    const depositRate = (await getSetting('depositPerTradePercent')) ?? 0.25;
 
-    const buyer = isBuyOffer
+    const isBuyOffer = offer.offerType === 'buy';
+
+    const buyerWallet = isBuyOffer
       ? trade.traderWalletAddress
       : trade.vendorWalletAddress;
-    const seller = isBuyOffer
+
+    const sellerWallet = isBuyOffer
       ? trade.vendorWalletAddress
       : trade.traderWalletAddress;
-    const tradeDuration = offer?.timeLimit * 60; // minutes -> seconds
-    const cryptoAmount = trade.cryptocurrencyAmount;
-    const collateral = cryptoAmount * 0.25;
-    const sellerFundAmount = cryptoAmount + collateral;
 
-    // Converting to Wei
-    const cryptoAmountWei = parseEther(cryptoAmount.toString());
-    const buyerCollateralWei = parseEther(collateral.toString());
-    const sellerCollateralWei = parseEther(collateral.toString());
-    const sellerFundAmountWei = parseEther(sellerFundAmount.toString());
+    const tradeAmount = trade.cryptocurrencyAmount;
+    const buyerCollateral = tradeAmount * depositRate;
+    const sellerCollateral = tradeAmount * depositRate;
+    const sellerTotalFund = tradeAmount + sellerCollateral;
+
+    const tradeAmountInWei = parseEther(tradeAmount.toString());
+    const buyerCollateralInWei = parseEther(buyerCollateral.toString());
+    const sellerCollateralInWei = parseEther(sellerCollateral.toString());
+    const sellerTotalFundInWei = parseEther(sellerTotalFund.toString());
+
+    const tradeDurationInSeconds = offer.timeLimit * 60;
 
     return {
-      buyer: buyer as Address,
-      seller: seller as Address,
-      arbitrator: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
-      cryptoAmountWei,
-      buyerCollateralWei,
-      sellerCollateralWei,
-      sellerFundAmountWei,
-      tradeDuration,
+      buyerWallet: buyerWallet as Address,
+      sellerWallet: sellerWallet as Address,
+      arbitratorWallet: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+
+      tradeAmountInWei,
+      buyerCollateralInWei,
+      sellerCollateralInWei,
+      sellerTotalFundInWei,
+
+      tradeDurationInSeconds,
       feeRate: 250,
       profitMargin: 150,
     };

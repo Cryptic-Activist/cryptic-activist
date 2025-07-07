@@ -360,6 +360,7 @@ const Trade: FC<TradeProps> = ({
 const TradeVendor = () => {
   const {
     trade,
+    queryTrade,
     setPaid,
     setCanceled,
     setPaymentConfirmed,
@@ -396,6 +397,7 @@ const TradeVendor = () => {
     onSetUpdateVendorWalletAddress: setVendorWalletAddress,
     onSetTradeCreated: setTradeCreated,
     onSetDisputed: setDisputed,
+    refetchTrade: queryTrade.refetch,
   });
 
   useEffect(() => {

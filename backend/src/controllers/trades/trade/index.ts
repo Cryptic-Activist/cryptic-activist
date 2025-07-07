@@ -163,6 +163,7 @@ export async function getTradeController(req: Request, res: Response) {
         blockchainTransactionHash: true,
         exchangeRate: true,
         createdAt: true,
+        tradeEscrowDetails: true,
         tradeDispute: {
           select: {
             createdAt: true,
