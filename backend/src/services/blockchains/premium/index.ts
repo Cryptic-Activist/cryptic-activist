@@ -5,7 +5,7 @@ import {
 } from '@/constants/env';
 import { Interface, ethers, parseEther } from 'ethers';
 
-import premium from '@/contracts/ethereum/artifacts/PremiumSubscriptionManager.json';
+import premium from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
 
 const iface = new Interface(premium.abi);
 

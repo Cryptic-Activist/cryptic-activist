@@ -1,5 +1,6 @@
 import SystemMessage from '@/services/systemMessage';
 import { autoLiftExpiredSuspensions } from '@/services/moderation';
+import { cancelTrade } from '@/services/blockchains/escrow';
 import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
@@ -25,6 +26,7 @@ export const expireTimer = async () => {
       select: {
         id: true,
         startedAt: true,
+        blockchainTradeId: true,
         chat: {
           select: {
             id: true,
@@ -44,11 +46,14 @@ export const expireTimer = async () => {
       );
       const expiredAt = new Date();
       if (now >= expiryTime) {
+        if (trade.blockchainTradeId) {
+          await cancelTrade(trade.blockchainTradeId);
+        }
         await prisma.trade.update({
           where: { id: trade.id },
           data: { expiredAt, status: 'EXPIRED' },
         });
-        await systemMessage.tradeStarted(trade.id);
+        await systemMessage.tradeExpired(trade.id);
 
         if (trade.chat?.id) {
           const io = getIO();
