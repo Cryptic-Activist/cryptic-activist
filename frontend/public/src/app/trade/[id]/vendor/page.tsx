@@ -26,6 +26,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   setAsCanceled,
   setAsPaymentConfirmed,
   toggleModal,
+  fundTrade,
 }) => {
   const isSetPaymentReceivedVisible =
     !trade.dispitedAt &&
@@ -45,7 +46,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
     !trade.disputedAt;
-  const isDisputed = trade.disputedAt && trade.status === 'DISPUTED';
+  const isTradeDetailsVisible =
+    trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
+  const isFundTradeVisible =
+    trade.status === 'IN_PROGRESS' && trade.vendorRejectedFunding;
 
   return (
     <section className={styles.actionButtons}>
@@ -97,7 +101,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           <strong>Set as Payment Received</strong>
         </Button>
       )}
-      {isDisputed && (
+      {isTradeDetailsVisible && (
         <Button
           type="button"
           fullWidth
@@ -105,6 +109,17 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           href={`/trade/${trade.id}/details`}
         >
           <strong>See Trade Details</strong>
+        </Button>
+      )}
+      {isFundTradeVisible && (
+        <Button
+          fullWidth
+          theme="gradient"
+          padding="1rem"
+          size={18}
+          onClick={fundTrade}
+        >
+          Funding trade
         </Button>
       )}
     </section>
@@ -121,6 +136,7 @@ const Trade: FC<TradeProps> = ({
   ref,
   vendorHasEnoughFunds,
   toggleModal,
+  fundTrade,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -352,6 +368,7 @@ const Trade: FC<TradeProps> = ({
         setAsPaymentConfirmed={setAsPaymentConfirmed}
         setAsDisputed={setAsDisputed}
         toggleModal={toggleModal}
+        fundTrade={fundTrade}
       />
     </div>
   );
@@ -378,6 +395,8 @@ const TradeVendor = () => {
     setAsCanceled,
     setAsPaymentConfirmed,
     setAsDisputed,
+    fundTradeAsSeller,
+    fundTradeAsBuyer,
     messages,
     receiverStatus,
     tradeRemaingTime,
@@ -439,6 +458,9 @@ const TradeVendor = () => {
         setAsDisputed={setAsDisputed}
         toggleModal={toggleModal}
         vendorHasEnoughFunds={vendorHasEnoughFunds}
+        fundTrade={
+          user?.id === trade?.sellerId ? fundTradeAsSeller : fundTradeAsBuyer
+        }
       />
 
       {trade?.id &&

@@ -30,6 +30,10 @@ const socketHandler = (
 
     trade.buyerFundedTrade();
 
+    trade.sellerFundTradeRejected();
+
+    trade.buyerFundTradeRejected();
+
     // Set trade as Paid
     trade.setAsPaid();
 

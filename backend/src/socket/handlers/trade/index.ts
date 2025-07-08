@@ -40,45 +40,88 @@ export default class Trade {
 
   sellerFundedTrade() {
     try {
-      this.socket.on('blockchain_seller_funded_trade', async ({ chatId }) => {
-        const trade = await prisma.trade.findFirst({
-          where: {
-            chat: {
-              id: chatId,
-            },
-          },
-          select: {
-            id: true,
-            buyerfundedAt: true,
-          },
-        });
+      this.socket.on(
+        'blockchain_seller_funded_trade',
+        async ({ chatId, senderId }) => {
+          try {
+            const result = await prisma.$transaction(async (tx) => {
+              // 1. Fetch trade and related offer
+              const trade = await tx.trade.findFirst({
+                where: {
+                  chat: { id: chatId },
+                },
+                select: {
+                  id: true,
+                  vendorId: true,
+                  traderId: true,
+                  buyerfundedAt: true,
+                  offer: {
+                    select: { offerType: true },
+                  },
+                },
+              });
 
-        if (!trade?.id) {
-          this.io
-            .to(chatId)
-            .emit('blockchain_seller_funded_trade_error', { error: true });
-          return;
-        }
+              if (!trade) return { error: 'Trade not found' };
 
-        const fundedAt = new Date();
+              // 2. Determine seller based on offer type
+              const sellerId =
+                trade.offer.offerType === 'buy'
+                  ? trade.vendorId
+                  : trade.traderId;
 
-        await prisma.trade.update({
-          where: {
-            id: trade?.id,
-          },
-          data: {
-            status: 'IN_PROGRESS',
-            sellerfundedAt: fundedAt,
-            fundedAt: trade.buyerfundedAt ? fundedAt : null,
-          },
-        });
+              const isSeller = senderId === sellerId;
 
-        console.log({ sellerFundedAt: fundedAt });
+              if (!isSeller) {
+                return { error: 'Only the seller can fund the trade' };
+              }
 
-        this.io.to(chatId).emit('blockchain_seller_funded_trade_success', {
-          fundedAt: new Date(),
-        });
-      });
+              const fundedAt = new Date();
+
+              // 3. Set rejection reset flags based on offer type
+              const updateData: any = {
+                status: 'IN_PROGRESS',
+                sellerfundedAt: fundedAt,
+                fundedAt: trade.buyerfundedAt ? fundedAt : null,
+              };
+
+              if (trade.offer.offerType === 'buy') {
+                updateData.vendorRejectedFunding = false;
+              } else {
+                updateData.traderRejectedFunding = false;
+              }
+
+              // 4. Update trade
+              const updatedTrade = await tx.trade.update({
+                where: { id: trade.id },
+                data: updateData,
+              });
+
+              return { updatedTrade, fundedAt };
+            });
+
+            // 5. Emit error or success
+            if ('error' in result) {
+              this.io.to(chatId).emit('blockchain_seller_funded_trade_error', {
+                error: true,
+                message: result.error,
+              });
+              return;
+            }
+
+            this.io.to(chatId).emit('blockchain_seller_funded_trade_success', {
+              fundedAt: result.fundedAt,
+            });
+
+            console.log({ sellerFundedAt: result.fundedAt });
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            this.io.to(chatId).emit('blockchain_seller_funded_trade_error', {
+              error: true,
+              message: 'Server error occurred.',
+            });
+          }
+        },
+      );
     } catch (error) {
       console.log({ error });
     }
@@ -86,45 +129,86 @@ export default class Trade {
 
   buyerFundedTrade() {
     try {
-      this.socket.on('blockchain_buyer_funded_trade', async ({ chatId }) => {
-        const trade = await prisma.trade.findFirst({
-          where: {
-            chat: {
-              id: chatId,
-            },
-          },
-          select: {
-            id: true,
-            sellerfundedAt: true,
-          },
-        });
+      this.socket.on(
+        'blockchain_buyer_funded_trade',
+        async ({ chatId, senderId }) => {
+          try {
+            const result = await prisma.$transaction(async (tx) => {
+              // 1. Fetch trade and related offer
+              const trade = await tx.trade.findFirst({
+                where: {
+                  chat: { id: chatId },
+                },
+                select: {
+                  id: true,
+                  vendorId: true,
+                  traderId: true,
+                  sellerfundedAt: true,
+                  offer: {
+                    select: { offerType: true },
+                  },
+                },
+              });
 
-        if (!trade?.id) {
-          this.io
-            .to(chatId)
-            .emit('blockchain_buyer_funded_trade_error', { error: true });
-          return;
-        }
+              if (!trade) return { error: 'Trade not found' };
 
-        const fundedAt = new Date();
+              // 2. Determine buyer based on offer type
+              const buyerId =
+                trade.offer.offerType === 'sell'
+                  ? trade.vendorId
+                  : trade.traderId;
 
-        await prisma.trade.update({
-          where: {
-            id: trade?.id,
-          },
-          data: {
-            status: 'IN_PROGRESS',
-            buyerfundedAt: fundedAt,
-            fundedAt: trade.sellerfundedAt ? fundedAt : null,
-          },
-        });
+              const isBuyer = senderId === buyerId;
 
-        console.log({ buyerFundedAt: fundedAt });
+              if (!isBuyer) {
+                return { error: 'Only the buyer can fund the trade' };
+              }
 
-        this.io.to(chatId).emit('blockchain_buyer_funded_trade_success', {
-          fundedAt: new Date(),
-        });
-      });
+              const fundedAt = new Date();
+
+              // 3. Set rejection reset flags based on offer type
+              const updateData: any = {
+                status: 'IN_PROGRESS',
+                buyerfundedAt: fundedAt,
+                fundedAt: trade.sellerfundedAt ? fundedAt : null,
+              };
+
+              if (trade.offer.offerType === 'sell') {
+                updateData.vendorRejectedFunding = false;
+              } else {
+                updateData.traderRejectedFunding = false;
+              }
+
+              // 4. Update trade
+              const updatedTrade = await tx.trade.update({
+                where: { id: trade.id },
+                data: updateData,
+              });
+
+              return { updatedTrade, fundedAt };
+            });
+
+            // 5. Emit error or success
+            if ('error' in result) {
+              this.io.to(chatId).emit('blockchain_buyer_funded_trade_error', {
+                error: true,
+                message: result.error,
+              });
+              return;
+            }
+
+            this.io.to(chatId).emit('blockchain_buyer_funded_trade_success', {
+              fundedAt: result.fundedAt,
+            });
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            this.io.to(chatId).emit('blockchain_buyer_funded_trade_error', {
+              error: true,
+              message: 'Server error occurred.',
+            });
+          }
+        },
+      );
     } catch (error) {
       console.log({ error });
     }
@@ -167,6 +251,174 @@ export default class Trade {
           fundedAt: new Date(),
         });
       });
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  buyerFundTradeRejected() {
+    try {
+      this.socket.on(
+        'blockchaion_buyer_fund_trade_rejected',
+        async ({ chatId, senderId }) => {
+          try {
+            const result = await prisma.$transaction(async (tx) => {
+              // 1. Get the trade with chat and offer info
+              const trade = await tx.trade.findFirst({
+                where: {
+                  chat: {
+                    id: chatId,
+                  },
+                },
+                select: {
+                  id: true,
+                  vendorId: true,
+                  traderId: true,
+                  offer: {
+                    select: {
+                      offerType: true,
+                    },
+                  },
+                },
+              });
+
+              if (!trade) return { error: 'Trade not found' };
+
+              // 2. Determine buyer based on offerType
+              const buyerId =
+                trade.offer.offerType === 'sell'
+                  ? trade.traderId
+                  : trade.vendorId;
+
+              // 3. Ensure sender is the buyer
+              // if (senderId !== buyerId) {
+              //   return { error: 'Only the buyer can reject funding' };
+              // }
+
+              // 4. Update trade
+              const updatedTrade = await tx.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'IN_PROGRESS',
+                  traderRejectedFunding: true,
+                },
+              });
+
+              return { updatedTrade };
+            });
+
+            // 5. Emit error if any
+            if ('error' in result) {
+              this.io
+                .to(chatId)
+                .emit('blockchaion_buyer_fund_trade_rejected_error', {
+                  error: true,
+                  message: result.error,
+                });
+              return;
+            }
+
+            // 6. Emit success
+            this.io
+              .to(chatId)
+              .emit('blockchaion_buyer_fund_trade_rejected_success', {
+                traderRejectedFunding: true,
+              });
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            this.io
+              .to(chatId)
+              .emit('blockchaion_buyer_fund_trade_rejected_error', {
+                error: true,
+                message: 'Server error occurred.',
+              });
+          }
+        },
+      );
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
+  sellerFundTradeRejected() {
+    try {
+      this.socket.on(
+        'blockchaion_seller_fund_trade_rejected',
+        async ({ chatId, senderId }) => {
+          try {
+            const result = await prisma.$transaction(async (tx) => {
+              // 1. Find trade with offer and chat by chatId
+              const trade = await tx.trade.findFirst({
+                where: {
+                  chat: {
+                    id: chatId,
+                  },
+                },
+                select: {
+                  id: true,
+                  vendorId: true,
+                  traderId: true,
+                  offer: {
+                    select: {
+                      offerType: true,
+                    },
+                  },
+                },
+              });
+
+              if (!trade) return { error: 'Trade not found' };
+
+              // 2. Determine seller based on offerType
+              const sellerId =
+                trade.offer.offerType === 'buy'
+                  ? trade.vendorId
+                  : trade.traderId;
+
+              // 3. Check if the sender is the actual seller
+              if (senderId !== sellerId) {
+                return { error: 'Only the seller can reject funding' };
+              }
+
+              // 4. Update trade
+              const updatedTrade = await tx.trade.update({
+                where: { id: trade.id },
+                data: {
+                  status: 'IN_PROGRESS',
+                  vendorRejectedFunding: true,
+                },
+              });
+
+              return { updatedTrade };
+            });
+
+            // 5. Handle error cases
+            if ('error' in result) {
+              this.io
+                .to(chatId)
+                .emit('blockchaion_seller_fund_trade_rejected_error', {
+                  error: true,
+                  message: result.error,
+                });
+              return;
+            }
+
+            // 6. Emit success
+            this.io
+              .to(chatId)
+              .emit('blockchaion_seller_fund_trade_rejected_success', {
+                vendorRejectedFunding: true,
+              });
+          } catch (err) {
+            console.error('Transaction failed:', err);
+            this.io
+              .to(chatId)
+              .emit('blockchaion_seller_fund_trade_rejected_error', {
+                error: true,
+                message: 'Server error occurred.',
+              });
+          }
+        },
+      );
     } catch (error) {
       console.log({ error });
     }

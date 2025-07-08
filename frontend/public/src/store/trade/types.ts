@@ -132,6 +132,10 @@ export type Trade = {
     vendorWalletAddress?: string;
     chat?: Chat;
     tradeDispute?: TradeDispute;
+    vendorRejectedFunding?: boolean;
+    traderRejectedFunding?: boolean;
+    buyerId?: string;
+    sellerId?: string;
   };
 };
 
@@ -161,6 +165,10 @@ export type TradeStore = {
     blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
+    vendorRejectedFunding?: boolean;
+    traderRejectedFunding?: boolean;
+    buyerId?: string;
+    sellerId?: string;
     chat?: Chat;
     tradeDispute?: TradeDispute;
     tradeEscrowDetails?: TradeEscrowDetails;
@@ -198,6 +206,10 @@ export type TradeSetter = {
   chat?: Chat;
   tradeDispute?: TradeDispute;
   tradeEscrowDetails?: TradeEscrowDetails;
+  vendorRejectedFunding?: boolean;
+  traderRejectedFunding?: boolean;
+  buyerId?: string;
+  sellerId?: string;
 };
 
 export type Value = TradeSetter;

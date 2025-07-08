@@ -7,6 +7,7 @@ export type ActionButtonsProps = {
   setAsDisputed: any;
   replace: any;
   toggleModal: (modal: Modal) => void;
+  fundTrade: () => Promise<void>;
 };
 
 export type TradeProps = {
@@ -18,4 +19,5 @@ export type TradeProps = {
   tradeRemaingTime: number | null;
   ref: any;
   toggleModal: (modal: Modal) => void;
+  fundTrade: () => Promise<void>;
 };

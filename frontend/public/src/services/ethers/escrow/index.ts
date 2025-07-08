@@ -136,12 +136,12 @@ export const sellerFundTrade = async (tradeId: number, value: bigint) => {
     const decoded = decodeFunctionData(receipt);
 
     return {
+      tx,
       data: decoded,
       txHash: tx.hash,
       message: 'Seller funded the trade successfully',
     };
-  } catch (error) {
-    console.log({ fundError: error });
+  } catch (error: any) {
     return {
       message: 'Error seller funding trade',
       error: error,
@@ -167,12 +167,12 @@ export const buyerFundTrade = async (tradeId: number, value: bigint) => {
     const decoded = decodeFunctionData(receipt);
 
     return {
+      tx,
       data: decoded,
       txHash: tx.hash,
       message: 'Seller funded the trade successfully',
     };
-  } catch (error) {
-    console.log({ fundError: error });
+  } catch (error: any) {
     return {
       message: 'Error buyer funding trade',
       error: error,

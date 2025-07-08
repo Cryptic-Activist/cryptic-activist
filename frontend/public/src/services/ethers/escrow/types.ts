@@ -14,3 +14,7 @@ export type InitTradeParams = {
 };
 
 export type Token = 'chainlnik' | 'pol';
+
+export const TX_CODE = {
+  ACTION_REJECTED: 'ACTION_REJECTED',
+};

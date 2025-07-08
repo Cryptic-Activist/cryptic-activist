@@ -512,6 +512,10 @@ model Trade {
   trader                    User                @relation("traderTrade", fields: [traderId], references: [id])
   traderId                  String
   traderWalletAddress       String
+  buyer                     User                @relation("buyerTrade", fields: [buyerId], references: [id])
+  buyerId                   String
+  seller                    User                @relation("sellerTrade", fields: [sellerId], references: [id])
+  sellerId                  String
   offer                     Offer               @relation("tradeOffer", fields: [offerId], references: [id])
   offerId                   String
   cryptocurrency            Cryptocurrency      @relation("trade", fields: [cryptocurrencyId], references: [id])
@@ -531,6 +535,8 @@ model Trade {
   status                    TradeStatus
   paidAt                    DateTime?           @db.Timestamp()
   fundedAt                  DateTime?           @db.Timestamp()
+  vendorRejectedFunding     Boolean             @default(false) @db.Boolean
+  traderRejectedFunding     Boolean             @default(false) @db.Boolean
   sellerfundedAt            DateTime?           @db.Timestamp()
   buyerfundedAt             DateTime?           @db.Timestamp()
   paymentConfirmedAt        DateTime?           @db.Timestamp()
@@ -847,6 +853,8 @@ model User {
   feedbackTrader         Feedback[]               @relation("feedbackTrader")
   tradeVendor            Trade[]                  @relation("vendorTrade")
   tradeTrader            Trade[]                  @relation("traderTrade")
+  tradeBuyer             Trade[]                  @relation("buyerTrade")
+  tradeSeller            Trade[]                  @relation("sellerTrade")
   tier                   Tier?                    @relation(fields: [tierId], references: [id])
   tierId                 String?
   premiumPurchase        PremiumPurchase[]

@@ -39,36 +39,51 @@ export async function createTradeController(req: Request, res: Response) {
       fiat?.symbol!,
     );
 
-    const newTrade = await prisma.trade.create({
-      data: {
-        traderId: body.traderId,
-        vendorId: body.vendorId,
-        offerId: body.offerId,
-        cryptocurrencyId: body.cryptocurrencyId,
-        fiatId: body.fiatId,
-        cryptocurrencyAmount: body.cryptocurrencyAmount,
-        fiatAmount: body.fiatAmount,
-        status: 'PENDING',
-        startedAt: new Date(),
-        paymentMethodId: body.paymentMethodId,
-        traderWalletAddress: body.traderWalletAddress,
-        exchangeRate: exchangeRate,
-      },
+    const transactions = await prisma.$transaction(async (tx) => {
+      const offer = await tx.offer.findUnique({
+        where: { id: body.offerId },
+        select: { offerType: true, vendorId: true },
+      });
+
+      const sellerId =
+        offer?.offerType === 'buy' ? offer.vendorId : body.traderId;
+      const buyerId =
+        offer?.offerType === 'sell' ? body.tradeId : offer?.vendorId;
+
+      const newTrade = await tx.trade.create({
+        data: {
+          traderId: body.traderId,
+          vendorId: body.vendorId,
+          offerId: body.offerId,
+          cryptocurrencyId: body.cryptocurrencyId,
+          fiatId: body.fiatId,
+          cryptocurrencyAmount: body.cryptocurrencyAmount,
+          fiatAmount: body.fiatAmount,
+          status: 'PENDING',
+          startedAt: new Date(),
+          paymentMethodId: body.paymentMethodId,
+          traderWalletAddress: body.traderWalletAddress,
+          exchangeRate: exchangeRate,
+          buyerId,
+          sellerId,
+        },
+      });
+
+      console.log({ newTrade: newTrade.id });
+
+      const newChat = await tx.chat.create({
+        data: {
+          tradeId: newTrade.id,
+        },
+      });
+
+      return { newTrade, newChat };
     });
 
-    // const newPaymentDetails = await prisma.paymentDetails.create({
-    //   data: {
-    //     instructions: body.paymentDetails,
-    //   },
-    // });
-
-    const newChat = await prisma.chat.create({
-      data: {
-        tradeId: newTrade.id,
-      },
+    res.status(200).send({
+      trade: { ...transactions.newTrade },
+      chat: { ...transactions.newChat },
     });
-
-    res.status(200).send({ trade: { ...newTrade }, chat: { ...newChat } });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -164,6 +179,12 @@ export async function getTradeController(req: Request, res: Response) {
         exchangeRate: true,
         createdAt: true,
         tradeEscrowDetails: true,
+        traderWalletAddress: true,
+        vendorWalletAddress: true,
+        traderRejectedFunding: true,
+        vendorRejectedFunding: true,
+        buyerId: true,
+        sellerId: true,
         tradeDispute: {
           select: {
             createdAt: true,

@@ -26,9 +26,13 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   setAsCanceled,
   onSetAsPaid,
   toggleModal,
+  fundTrade,
 }) => {
+  console.log({ trade });
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
+    !trade.vendorRejectedFunding &&
+    !trade.traderRejectedFunding &&
     !trade.paymentConfirmedAt &&
     !trade.paidAt;
   const isRaiseADisputeVisible =
@@ -44,7 +48,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
     !trade.disputedAt;
-  const isDisputed = trade.disputedAt && trade.status === 'DISPUTED';
+  const isTradeDetailsVisible =
+    trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
+  const isFundTradeVisible =
+    trade.status === 'IN_PROGRESS' && trade.traderRejectedFunding;
 
   return (
     <section className={styles.actionButtons}>
@@ -96,7 +103,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           <strong>Set as Paid</strong>
         </Button>
       )}
-      {isDisputed && (
+      {isTradeDetailsVisible && (
         <Button
           type="button"
           fullWidth
@@ -104,6 +111,17 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           href={`/trade/${trade.id}/details`}
         >
           <strong>See Trade Details</strong>
+        </Button>
+      )}
+      {isFundTradeVisible && (
+        <Button
+          fullWidth
+          theme="gradient"
+          padding="1rem"
+          size={18}
+          onClick={fundTrade}
+        >
+          Funding trade
         </Button>
       )}
     </section>
@@ -119,6 +137,7 @@ const Trade: FC<TradeProps> = ({
   tradeRemaingTime,
   ref,
   toggleModal,
+  fundTrade,
 }) => {
   const hasTimer =
     trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING';
@@ -257,6 +276,17 @@ const Trade: FC<TradeProps> = ({
         <div className={styles.tradeSection}>
           <h2>Escrow Status</h2>
           <ul>
+            {(trade?.vendorRejectedFunding || trade?.traderRejectedFunding) && (
+              <li>
+                <strong>Escrow funding rejected by:</strong>
+                <span>{`${
+                  trade?.vendorRejectedFunding ? trade?.vendor?.username : ''
+                } - ${
+                  trade?.traderRejectedFunding ? trade?.trader?.username : ''
+                }`}</span>
+              </li>
+            )}
+
             <li>
               <strong>Funded:</strong>
               <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
@@ -361,6 +391,7 @@ const Trade: FC<TradeProps> = ({
         onSetAsPaid={setAsPaid}
         setAsDisputed={setAsDisputed}
         toggleModal={toggleModal}
+        fundTrade={fundTrade}
       />
     </div>
   );
@@ -389,6 +420,8 @@ export default function TradePage() {
     setAsPaid,
     setAsCanceled,
     setAsDisputed,
+    fundTradeAsBuyer,
+    fundTradeAsSeller,
     tradeContainerRef,
   } = useTradeSocket({
     chatId: trade.chat?.id,
@@ -433,6 +466,9 @@ export default function TradePage() {
         tradeRemaingTime={tradeRemaingTime}
         ref={tradeContainerRef}
         toggleModal={toggleModal}
+        fundTrade={
+          user?.id === trade?.sellerId ? fundTradeAsSeller : fundTradeAsBuyer
+        }
       />
       <div>
         {trade.id &&
