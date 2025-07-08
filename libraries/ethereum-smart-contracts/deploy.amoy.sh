@@ -1,9 +1,11 @@
 npx hardhat run scripts/deploy.amoy.js --network amoy 
 
 echo "Emptying contracts folder..."
-rm -rf ../../backend/src/contracts/ethereum/artifacts/MultiTradeEscrow.*
+rm -rf ../../frontend/public/src/contracts/escrow/artifacts/MultiTradeEscrow.*
+rm -rf ../../backend/src/contracts/escrow/artifacts/MultiTradeEscrow.*
 
 echo "Copying contract artifacts..."
-cp artifacts/contracts/MultiTradeEscrow.sol/MultiTradeEscrow.json ../../backend/src/contracts/ethereum/artifacts/MultiTradeEscrow.json
+cp artifacts/contracts/MultiTradeEscrow.sol/MultiTradeEscrow.json ../../frontend/public/src/contracts/escrow/artifacts/MultiTradeEscrow.json
+cp artifacts/contracts/MultiTradeEscrow.sol/MultiTradeEscrow.json ../../backend/src/contracts/escrow/artifacts/MultiTradeEscrow.json
 
 echo "---Deployment complete---"

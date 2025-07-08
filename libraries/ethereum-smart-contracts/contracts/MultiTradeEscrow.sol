@@ -11,7 +11,7 @@ contract MultiTradeEscrow {
     uint256 public defaultProfitMargin; // Basis points
     uint256 public tradeCount;
     
-    enum TradeState { Created, Funded, BuyerConfirmed, Disputed, Completed, Cancelled }
+    enum TradeState { Created, SellerFunded, BuyerFunded, FullyFunded, Executed, Disputed, Completed, Cancelled }
     
     struct Trade {
         uint256 id;
@@ -26,6 +26,8 @@ contract MultiTradeEscrow {
         uint256 profitMargin; // Basis points
         uint256 tradeDeadline;
         TradeState state;
+        bool sellerFunded;
+        bool buyerFunded;
     }
     
     // Mapping from trade ID to Trade struct
@@ -33,8 +35,10 @@ contract MultiTradeEscrow {
     
     // Events
     event TradeCreated(uint256 indexed tradeId, address indexed buyer, address indexed seller, uint256 amount);
-    event TradeFunded(uint256 indexed tradeId, uint256 amount, uint256 sellerCollateral);
-    event TradeConfirmed(uint256 indexed tradeId);
+    event SellerFunded(uint256 indexed tradeId, uint256 amount);
+    event BuyerFunded(uint256 indexed tradeId, uint256 collateral);
+    event TradeFullyFunded(uint256 indexed tradeId);
+    event TradeExecuted(uint256 indexed tradeId);
     event TradeDisputed(uint256 indexed tradeId, address initiator);
     event TradeCompleted(uint256 indexed tradeId);
     event TradeCancelled(uint256 indexed tradeId);
@@ -133,7 +137,9 @@ contract MultiTradeEscrow {
             feeRate: feeRate,
             profitMargin: profitMargin,
             tradeDeadline: block.timestamp + _tradeDuration,
-            state: TradeState.Created
+            state: TradeState.Created,
+            sellerFunded: false,
+            buyerFunded: false
         });
         
         emit TradeCreated(tradeId, _buyer, _seller, _cryptoAmount);
@@ -143,35 +149,67 @@ contract MultiTradeEscrow {
     /**
      * @dev Seller funds the trade with crypto amount and collateral
      */
-    function fundTrade(uint256 _tradeId) 
+    function sellerFundTrade(uint256 _tradeId) 
         external 
         payable 
-        onlyOwner() 
-        inState(_tradeId, TradeState.Created) 
+        onlySeller(_tradeId)
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
+        require(trade.state == TradeState.Created || trade.state == TradeState.BuyerFunded, "Invalid state for seller funding");
+        require(!trade.sellerFunded, "Seller already funded");
         require(msg.value == trade.sellerTotalDeposit, "Incorrect amount sent");
         
-        trade.state = TradeState.Funded;
-        emit TradeFunded(_tradeId, trade.cryptoAmount, trade.sellerTotalDeposit);
+        trade.sellerFunded = true;
+        
+        if (trade.state == TradeState.Created) {
+            trade.state = TradeState.SellerFunded;
+        } else if (trade.state == TradeState.BuyerFunded) {
+            trade.state = TradeState.FullyFunded;
+            emit TradeFullyFunded(_tradeId);
+        }
+        
+        emit SellerFunded(_tradeId, trade.sellerTotalDeposit);
     }
     
     /**
-     * @dev Buyer confirms receipt of goods/services
+     * @dev Buyer funds the trade with collateral
      */
-    function confirmTrade(uint256 _tradeId) 
+    function buyerFundTrade(uint256 _tradeId) 
         external 
         payable 
-        onlyOwner() 
-        inState(_tradeId, TradeState.Funded) 
+        onlyBuyer(_tradeId)
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
-        require(msg.value >= trade.buyerCollateral, "Buyer collateral required");
+        require(trade.state == TradeState.Created || trade.state == TradeState.SellerFunded, "Invalid state for buyer funding");
+        require(!trade.buyerFunded, "Buyer already funded");
+        require(msg.value >= trade.buyerCollateral, "Insufficient collateral");
         
-        trade.state = TradeState.BuyerConfirmed;
-        emit TradeConfirmed(_tradeId);
+        trade.buyerFunded = true;
+        
+        if (trade.state == TradeState.Created) {
+            trade.state = TradeState.BuyerFunded;
+        } else if (trade.state == TradeState.SellerFunded) {
+            trade.state = TradeState.FullyFunded;
+            emit TradeFullyFunded(_tradeId);
+        }
+        
+        emit BuyerFunded(_tradeId, msg.value);
+    }
+    
+    /**
+     * @dev Execute the trade (can be called by buyer to confirm receipt)
+     */
+    function executeTrade(uint256 _tradeId) 
+        external 
+        onlyOwner()
+        inState(_tradeId, TradeState.FullyFunded) 
+        tradeExists(_tradeId) 
+    {
+        Trade storage trade = trades[_tradeId];
+        trade.state = TradeState.Executed;
+        emit TradeExecuted(_tradeId);
         
         // Auto-complete the trade
         _completeTrade(_tradeId);
@@ -182,11 +220,12 @@ contract MultiTradeEscrow {
      */
     function disputeTrade(uint256 _tradeId) 
         external 
-        onlyOwner() 
-        inState(_tradeId, TradeState.Funded) 
+        onlyTradeParticipant(_tradeId)
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
+        require(trade.state == TradeState.FullyFunded || trade.state == TradeState.Executed, "Invalid state for dispute");
+        
         trade.state = TradeState.Disputed;
         emit TradeDisputed(_tradeId, msg.sender);
     }
@@ -260,20 +299,25 @@ contract MultiTradeEscrow {
         }
         require(
             trade.state == TradeState.Created || 
-            trade.state == TradeState.Funded, 
+            trade.state == TradeState.SellerFunded || 
+            trade.state == TradeState.BuyerFunded || 
+            trade.state == TradeState.FullyFunded, 
             "Cannot cancel in current state"
         );
         
-        if (trade.state == TradeState.Funded) {
-            // Return funds to seller
-            payable(trade.seller).transfer(trade.cryptoAmount + trade.sellerCollateral);
+        // Return funds to respective parties
+        if (trade.sellerFunded) {
+            payable(trade.seller).transfer(trade.sellerTotalDeposit);
+        }
+        if (trade.buyerFunded) {
+            payable(trade.buyer).transfer(trade.buyerCollateral);
         }
         
         trade.state = TradeState.Cancelled;
         emit TradeCancelled(_tradeId);
     }
 
-    function cancelTrade(uint256 _tradeId, bool _forceCancel) external tradeExists(_tradeId) {
+    function cancelTrade(uint256 _tradeId, bool _forceCancel) external onlyOwner tradeExists(_tradeId) {
         _cancelTrade(_tradeId, _forceCancel);
     }
 
@@ -284,13 +328,14 @@ contract MultiTradeEscrow {
             Trade storage trade = trades[i];
             
             if(block.timestamp > trade.tradeDeadline && 
-            trade.state != TradeState.Cancelled) {  
+            trade.state != TradeState.Cancelled && 
+            trade.state != TradeState.Completed) {  
                 _cancelTrade(trade.id, false);
             }
         }
     }
 
-    function forceCancelTrade(uint256 _tradeId) external tradeExists(_tradeId) {
+    function forceCancelTrade(uint256 _tradeId) external onlyOwner tradeExists(_tradeId) {
         _cancelTrade(_tradeId, true);
     }
     
@@ -332,7 +377,9 @@ contract MultiTradeEscrow {
         uint256 feeRate,
         uint256 profitMargin,
         uint256 tradeDeadline,
-        TradeState state
+        TradeState state,
+        bool sellerFunded,
+        bool buyerFunded
     ) {
         Trade storage trade = trades[_tradeId];
         return (
@@ -346,7 +393,9 @@ contract MultiTradeEscrow {
             trade.feeRate,
             trade.profitMargin,
             trade.tradeDeadline,
-            trade.state
+            trade.state,
+            trade.sellerFunded,
+            trade.buyerFunded
         );
     }
     

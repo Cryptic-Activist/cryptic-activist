@@ -219,7 +219,6 @@ const useBlockchain = () => {
           localStorage.removeItem(CHAIN_STORAGE_KEY);
 
           connect({ connector, chainId: DEFAULT_CHAIN_ID });
-          toggleModal('blockchain');
           return;
         }
 

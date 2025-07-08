@@ -86,12 +86,12 @@ const CreateOfferPaymentMethod: FC<CreateOfferPaymentMethodProps> = ({
             />
           </section>
           <section className={stylesCore.horizontalGroup}>
-            <h2 className={stylesCore.groupHeading}>Choose Cryptocurrency</h2>
-            <Selector type="cryptocurrency" hasLabel={false} />
-          </section>
-          <section className={stylesCore.horizontalGroup}>
             <h2 className={stylesCore.groupHeading}>Choose Chain</h2>
             <Selector type="chain" hasLabel={false} />
+          </section>
+          <section className={stylesCore.horizontalGroup}>
+            <h2 className={stylesCore.groupHeading}>Choose Cryptocurrency</h2>
+            <Selector type="cryptocurrency" hasLabel={false} />
           </section>
           {createOffer?.cryptocurrency && (
             <section className={stylesCore.horizontalGroup}>

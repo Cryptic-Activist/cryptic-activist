@@ -10,6 +10,7 @@ export type TradeProps = {
   ref: any;
   toggleModal: (modal: Modal) => void;
   vendorHasEnoughFunds: boolean;
+  fundTrade: () => Promise<void>;
 };
 
 export type ActionButtonsProps = {
@@ -19,4 +20,5 @@ export type ActionButtonsProps = {
   setAsCanceled: any;
   replace: any;
   toggleModal: (modal: Modal) => void;
+  fundTrade: () => Promise<void>;
 };

@@ -31,6 +31,21 @@ export type TradeDispute = {
   createdAt: string;
 };
 
+export type TradeEscrowDetails = {
+  id: string;
+  arbitratorWallet: string;
+  buyerWallet: string;
+  sellerWallet: string;
+  feeRate: number;
+  profitMargin: number;
+  tradeDurationInSeconds: number;
+  tradeAmountInWei: string;
+  buyerCollateralInWei: string;
+  sellerCollateralInWei: string;
+  sellerTotalFundInWei: string;
+  blockchainTradeId: string;
+};
+
 export type UserLanguage = {
   language: {
     name: string;
@@ -117,6 +132,10 @@ export type Trade = {
     vendorWalletAddress?: string;
     chat?: Chat;
     tradeDispute?: TradeDispute;
+    vendorRejectedFunding?: boolean;
+    traderRejectedFunding?: boolean;
+    buyerId?: string;
+    sellerId?: string;
   };
 };
 
@@ -146,8 +165,13 @@ export type TradeStore = {
     blockchainTransactionHash?: string;
     traderWalletAddress?: string;
     vendorWalletAddress?: string;
+    vendorRejectedFunding?: boolean;
+    traderRejectedFunding?: boolean;
+    buyerId?: string;
+    sellerId?: string;
     chat?: Chat;
     tradeDispute?: TradeDispute;
+    tradeEscrowDetails?: TradeEscrowDetails;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
     resetTrade: () => void;
@@ -181,6 +205,11 @@ export type TradeSetter = {
   vendorWalletAddress?: string;
   chat?: Chat;
   tradeDispute?: TradeDispute;
+  tradeEscrowDetails?: TradeEscrowDetails;
+  vendorRejectedFunding?: boolean;
+  traderRejectedFunding?: boolean;
+  buyerId?: string;
+  sellerId?: string;
 };
 
 export type Value = TradeSetter;

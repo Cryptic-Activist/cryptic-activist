@@ -27,19 +27,20 @@ export interface MultiTradeEscrowInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "autoCancelTrades"
+      | "buyerFundTrade"
       | "cancelTrade"
-      | "confirmTrade"
       | "createTrade"
       | "defaultFeeRate"
       | "defaultProfitMargin"
       | "disputeTrade"
+      | "executeTrade"
       | "forceCancelTrade"
-      | "fundTrade"
       | "getContractBalance"
       | "getTrade"
       | "owner"
       | "platformWallet"
       | "resolveDispute"
+      | "sellerFundTrade"
       | "tradeCount"
       | "trades"
       | "updateDefaultFeeRate"
@@ -50,12 +51,14 @@ export interface MultiTradeEscrowInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "ArbitrationResolved"
+      | "BuyerFunded"
+      | "SellerFunded"
       | "TradeCancelled"
       | "TradeCompleted"
-      | "TradeConfirmed"
       | "TradeCreated"
       | "TradeDisputed"
-      | "TradeFunded"
+      | "TradeExecuted"
+      | "TradeFullyFunded"
   ): EventFragment;
 
   encodeFunctionData(
@@ -63,12 +66,12 @@ export interface MultiTradeEscrowInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "cancelTrade",
-    values: [BigNumberish, boolean]
+    functionFragment: "buyerFundTrade",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "confirmTrade",
-    values: [BigNumberish]
+    functionFragment: "cancelTrade",
+    values: [BigNumberish, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "createTrade",
@@ -98,11 +101,11 @@ export interface MultiTradeEscrowInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "forceCancelTrade",
+    functionFragment: "executeTrade",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "fundTrade",
+    functionFragment: "forceCancelTrade",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -121,6 +124,10 @@ export interface MultiTradeEscrowInterface extends Interface {
   encodeFunctionData(
     functionFragment: "resolveDispute",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sellerFundTrade",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "tradeCount",
@@ -148,11 +155,11 @@ export interface MultiTradeEscrowInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "cancelTrade",
+    functionFragment: "buyerFundTrade",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "confirmTrade",
+    functionFragment: "cancelTrade",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -172,10 +179,13 @@ export interface MultiTradeEscrowInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "executeTrade",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "forceCancelTrade",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "fundTrade", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getContractBalance",
     data: BytesLike
@@ -188,6 +198,10 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "resolveDispute",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "sellerFundTrade",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "tradeCount", data: BytesLike): Result;
@@ -231,6 +245,32 @@ export namespace ArbitrationResolvedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace BuyerFundedEvent {
+  export type InputTuple = [tradeId: BigNumberish, collateral: BigNumberish];
+  export type OutputTuple = [tradeId: bigint, collateral: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
+    collateral: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace SellerFundedEvent {
+  export type InputTuple = [tradeId: BigNumberish, amount: BigNumberish];
+  export type OutputTuple = [tradeId: bigint, amount: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace TradeCancelledEvent {
   export type InputTuple = [tradeId: BigNumberish];
   export type OutputTuple = [tradeId: bigint];
@@ -244,18 +284,6 @@ export namespace TradeCancelledEvent {
 }
 
 export namespace TradeCompletedEvent {
-  export type InputTuple = [tradeId: BigNumberish];
-  export type OutputTuple = [tradeId: bigint];
-  export interface OutputObject {
-    tradeId: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace TradeConfirmedEvent {
   export type InputTuple = [tradeId: BigNumberish];
   export type OutputTuple = [tradeId: bigint];
   export interface OutputObject {
@@ -305,21 +333,23 @@ export namespace TradeDisputedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace TradeFundedEvent {
-  export type InputTuple = [
-    tradeId: BigNumberish,
-    amount: BigNumberish,
-    sellerCollateral: BigNumberish
-  ];
-  export type OutputTuple = [
-    tradeId: bigint,
-    amount: bigint,
-    sellerCollateral: bigint
-  ];
+export namespace TradeExecutedEvent {
+  export type InputTuple = [tradeId: BigNumberish];
+  export type OutputTuple = [tradeId: bigint];
   export interface OutputObject {
     tradeId: bigint;
-    amount: bigint;
-    sellerCollateral: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TradeFullyFundedEvent {
+  export type InputTuple = [tradeId: BigNumberish];
+  export type OutputTuple = [tradeId: bigint];
+  export interface OutputObject {
+    tradeId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -372,16 +402,16 @@ export interface MultiTradeEscrow extends BaseContract {
 
   autoCancelTrades: TypedContractMethod<[], [void], "nonpayable">;
 
+  buyerFundTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "payable"
+  >;
+
   cancelTrade: TypedContractMethod<
     [_tradeId: BigNumberish, _forceCancel: boolean],
     [void],
     "nonpayable"
-  >;
-
-  confirmTrade: TypedContractMethod<
-    [_tradeId: BigNumberish],
-    [void],
-    "payable"
   >;
 
   createTrade: TypedContractMethod<
@@ -411,13 +441,17 @@ export interface MultiTradeEscrow extends BaseContract {
     "nonpayable"
   >;
 
-  forceCancelTrade: TypedContractMethod<
+  executeTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  fundTrade: TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+  forceCancelTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   getContractBalance: TypedContractMethod<[], [bigint], "view">;
 
@@ -435,7 +469,9 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
-        bigint
+        bigint,
+        boolean,
+        boolean
       ] & {
         buyer: string;
         seller: string;
@@ -448,6 +484,8 @@ export interface MultiTradeEscrow extends BaseContract {
         profitMargin: bigint;
         tradeDeadline: bigint;
         state: bigint;
+        sellerFunded: boolean;
+        buyerFunded: boolean;
       }
     ],
     "view"
@@ -461,6 +499,12 @@ export interface MultiTradeEscrow extends BaseContract {
     [_tradeId: BigNumberish, buyerPercentage: BigNumberish],
     [void],
     "nonpayable"
+  >;
+
+  sellerFundTrade: TypedContractMethod<
+    [_tradeId: BigNumberish],
+    [void],
+    "payable"
   >;
 
   tradeCount: TypedContractMethod<[], [bigint], "view">;
@@ -480,7 +524,9 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
-        bigint
+        bigint,
+        boolean,
+        boolean
       ] & {
         id: bigint;
         buyer: string;
@@ -494,6 +540,8 @@ export interface MultiTradeEscrow extends BaseContract {
         profitMargin: bigint;
         tradeDeadline: bigint;
         state: bigint;
+        sellerFunded: boolean;
+        buyerFunded: boolean;
       }
     ],
     "view"
@@ -525,15 +573,15 @@ export interface MultiTradeEscrow extends BaseContract {
     nameOrSignature: "autoCancelTrades"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "buyerFundTrade"
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+  getFunction(
     nameOrSignature: "cancelTrade"
   ): TypedContractMethod<
     [_tradeId: BigNumberish, _forceCancel: boolean],
     [void],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "confirmTrade"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
   getFunction(
     nameOrSignature: "createTrade"
   ): TypedContractMethod<
@@ -562,11 +610,11 @@ export interface MultiTradeEscrow extends BaseContract {
     nameOrSignature: "disputeTrade"
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "forceCancelTrade"
+    nameOrSignature: "executeTrade"
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "fundTrade"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+    nameOrSignature: "forceCancelTrade"
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "getContractBalance"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -586,7 +634,9 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
-        bigint
+        bigint,
+        boolean,
+        boolean
       ] & {
         buyer: string;
         seller: string;
@@ -599,6 +649,8 @@ export interface MultiTradeEscrow extends BaseContract {
         profitMargin: bigint;
         tradeDeadline: bigint;
         state: bigint;
+        sellerFunded: boolean;
+        buyerFunded: boolean;
       }
     ],
     "view"
@@ -616,6 +668,9 @@ export interface MultiTradeEscrow extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "sellerFundTrade"
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
   getFunction(
     nameOrSignature: "tradeCount"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -636,7 +691,9 @@ export interface MultiTradeEscrow extends BaseContract {
         bigint,
         bigint,
         bigint,
-        bigint
+        bigint,
+        boolean,
+        boolean
       ] & {
         id: bigint;
         buyer: string;
@@ -650,6 +707,8 @@ export interface MultiTradeEscrow extends BaseContract {
         profitMargin: bigint;
         tradeDeadline: bigint;
         state: bigint;
+        sellerFunded: boolean;
+        buyerFunded: boolean;
       }
     ],
     "view"
@@ -680,6 +739,20 @@ export interface MultiTradeEscrow extends BaseContract {
     ArbitrationResolvedEvent.OutputObject
   >;
   getEvent(
+    key: "BuyerFunded"
+  ): TypedContractEvent<
+    BuyerFundedEvent.InputTuple,
+    BuyerFundedEvent.OutputTuple,
+    BuyerFundedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SellerFunded"
+  ): TypedContractEvent<
+    SellerFundedEvent.InputTuple,
+    SellerFundedEvent.OutputTuple,
+    SellerFundedEvent.OutputObject
+  >;
+  getEvent(
     key: "TradeCancelled"
   ): TypedContractEvent<
     TradeCancelledEvent.InputTuple,
@@ -692,13 +765,6 @@ export interface MultiTradeEscrow extends BaseContract {
     TradeCompletedEvent.InputTuple,
     TradeCompletedEvent.OutputTuple,
     TradeCompletedEvent.OutputObject
-  >;
-  getEvent(
-    key: "TradeConfirmed"
-  ): TypedContractEvent<
-    TradeConfirmedEvent.InputTuple,
-    TradeConfirmedEvent.OutputTuple,
-    TradeConfirmedEvent.OutputObject
   >;
   getEvent(
     key: "TradeCreated"
@@ -715,11 +781,18 @@ export interface MultiTradeEscrow extends BaseContract {
     TradeDisputedEvent.OutputObject
   >;
   getEvent(
-    key: "TradeFunded"
+    key: "TradeExecuted"
   ): TypedContractEvent<
-    TradeFundedEvent.InputTuple,
-    TradeFundedEvent.OutputTuple,
-    TradeFundedEvent.OutputObject
+    TradeExecutedEvent.InputTuple,
+    TradeExecutedEvent.OutputTuple,
+    TradeExecutedEvent.OutputObject
+  >;
+  getEvent(
+    key: "TradeFullyFunded"
+  ): TypedContractEvent<
+    TradeFullyFundedEvent.InputTuple,
+    TradeFullyFundedEvent.OutputTuple,
+    TradeFullyFundedEvent.OutputObject
   >;
 
   filters: {
@@ -732,6 +805,28 @@ export interface MultiTradeEscrow extends BaseContract {
       ArbitrationResolvedEvent.InputTuple,
       ArbitrationResolvedEvent.OutputTuple,
       ArbitrationResolvedEvent.OutputObject
+    >;
+
+    "BuyerFunded(uint256,uint256)": TypedContractEvent<
+      BuyerFundedEvent.InputTuple,
+      BuyerFundedEvent.OutputTuple,
+      BuyerFundedEvent.OutputObject
+    >;
+    BuyerFunded: TypedContractEvent<
+      BuyerFundedEvent.InputTuple,
+      BuyerFundedEvent.OutputTuple,
+      BuyerFundedEvent.OutputObject
+    >;
+
+    "SellerFunded(uint256,uint256)": TypedContractEvent<
+      SellerFundedEvent.InputTuple,
+      SellerFundedEvent.OutputTuple,
+      SellerFundedEvent.OutputObject
+    >;
+    SellerFunded: TypedContractEvent<
+      SellerFundedEvent.InputTuple,
+      SellerFundedEvent.OutputTuple,
+      SellerFundedEvent.OutputObject
     >;
 
     "TradeCancelled(uint256)": TypedContractEvent<
@@ -756,17 +851,6 @@ export interface MultiTradeEscrow extends BaseContract {
       TradeCompletedEvent.OutputObject
     >;
 
-    "TradeConfirmed(uint256)": TypedContractEvent<
-      TradeConfirmedEvent.InputTuple,
-      TradeConfirmedEvent.OutputTuple,
-      TradeConfirmedEvent.OutputObject
-    >;
-    TradeConfirmed: TypedContractEvent<
-      TradeConfirmedEvent.InputTuple,
-      TradeConfirmedEvent.OutputTuple,
-      TradeConfirmedEvent.OutputObject
-    >;
-
     "TradeCreated(uint256,address,address,uint256)": TypedContractEvent<
       TradeCreatedEvent.InputTuple,
       TradeCreatedEvent.OutputTuple,
@@ -789,15 +873,26 @@ export interface MultiTradeEscrow extends BaseContract {
       TradeDisputedEvent.OutputObject
     >;
 
-    "TradeFunded(uint256,uint256,uint256)": TypedContractEvent<
-      TradeFundedEvent.InputTuple,
-      TradeFundedEvent.OutputTuple,
-      TradeFundedEvent.OutputObject
+    "TradeExecuted(uint256)": TypedContractEvent<
+      TradeExecutedEvent.InputTuple,
+      TradeExecutedEvent.OutputTuple,
+      TradeExecutedEvent.OutputObject
     >;
-    TradeFunded: TypedContractEvent<
-      TradeFundedEvent.InputTuple,
-      TradeFundedEvent.OutputTuple,
-      TradeFundedEvent.OutputObject
+    TradeExecuted: TypedContractEvent<
+      TradeExecutedEvent.InputTuple,
+      TradeExecutedEvent.OutputTuple,
+      TradeExecutedEvent.OutputObject
+    >;
+
+    "TradeFullyFunded(uint256)": TypedContractEvent<
+      TradeFullyFundedEvent.InputTuple,
+      TradeFullyFundedEvent.OutputTuple,
+      TradeFullyFundedEvent.OutputObject
+    >;
+    TradeFullyFunded: TypedContractEvent<
+      TradeFullyFundedEvent.InputTuple,
+      TradeFullyFundedEvent.OutputTuple,
+      TradeFullyFundedEvent.OutputObject
     >;
   };
 }

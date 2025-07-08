@@ -483,44 +483,73 @@ enum TradeStatus {
   FAILED // Trade failed due to an error or issue
 }
 
+model TradeEscrowDetails {
+  id                        String  @id @default(uuid())
+  arbitratorWallet          String
+  buyerWallet               String
+  sellerWallet              String
+  feeRate                   Float
+  profitMargin              Float
+  tradeDurationInSeconds    Int
+  tradeAmountInWei          String
+  buyerCollateralInWei      String
+  sellerCollateralInWei     String
+  sellerTotalFundInWei      String
+  blockchainTradeId         String // Trade ID on the blockchain
+  blockchainTransactionHash String? // Hash of the transaction on the blockchain
+  trade                     Trade[]
+
+  @@map("trade_escrow_details")
+}
+
 model Trade {
-  id                        String          @id @default(uuid())
-  paymentReceipt            PaymentReceipt? @relation(fields: [paymentReceiptId], references: [id])
+  id                        String              @id @default(uuid())
+  paymentReceipt            PaymentReceipt?     @relation(fields: [paymentReceiptId], references: [id])
   paymentReceiptId          String?
-  vendor                    User            @relation("vendorTrade", fields: [vendorId], references: [id])
+  vendor                    User                @relation("vendorTrade", fields: [vendorId], references: [id])
   vendorId                  String
   vendorWalletAddress       String?
-  trader                    User            @relation("traderTrade", fields: [traderId], references: [id])
+  trader                    User                @relation("traderTrade", fields: [traderId], references: [id])
   traderId                  String
   traderWalletAddress       String
-  offer                     Offer           @relation("tradeOffer", fields: [offerId], references: [id])
+  buyer                     User                @relation("buyerTrade", fields: [buyerId], references: [id])
+  buyerId                   String
+  seller                    User                @relation("sellerTrade", fields: [sellerId], references: [id])
+  sellerId                  String
+  offer                     Offer               @relation("tradeOffer", fields: [offerId], references: [id])
   offerId                   String
-  cryptocurrency            Cryptocurrency  @relation("trade", fields: [cryptocurrencyId], references: [id])
+  cryptocurrency            Cryptocurrency      @relation("trade", fields: [cryptocurrencyId], references: [id])
   cryptocurrencyId          String
-  fiat                      Fiat            @relation("trade", fields: [fiatId], references: [id])
+  fiat                      Fiat                @relation("trade", fields: [fiatId], references: [id])
   fiatId                    String
   paymentMethodId           String
-  paymentMethod             PaymentMethod   @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod             PaymentMethod       @relation(fields: [paymentMethodId], references: [id])
   chat                      Chat?
   cryptocurrencyAmount      Float
   fiatAmount                Float
-  exchangeRate              Decimal         @db.Decimal(30, 10)
-  startedAt                 DateTime        @default(now()) @db.Timestamp()
-  endedAt                   DateTime?       @db.Timestamp()
-  expiredAt                 DateTime?       @db.Timestamp() // Time when the trade should be considered expired
-  disputedAt                DateTime?       @db.Timestamp() // Time when the trade should be considered expired
+  exchangeRate              Decimal             @db.Decimal(30, 10)
+  startedAt                 DateTime            @default(now()) @db.Timestamp()
+  endedAt                   DateTime?           @db.Timestamp()
+  expiredAt                 DateTime?           @db.Timestamp() // Time when the trade should be considered expired
+  disputedAt                DateTime?           @db.Timestamp() // Time when the trade should be considered expired
   status                    TradeStatus
-  paidAt                    DateTime?       @db.Timestamp()
-  fundedAt                  DateTime?       @db.Timestamp()
-  paymentConfirmedAt        DateTime?       @db.Timestamp()
-  escrowReleasedAt          DateTime?       @db.Timestamp()
+  paidAt                    DateTime?           @db.Timestamp()
+  fundedAt                  DateTime?           @db.Timestamp()
+  vendorRejectedFunding     Boolean             @default(false) @db.Boolean
+  traderRejectedFunding     Boolean             @default(false) @db.Boolean
+  sellerfundedAt            DateTime?           @db.Timestamp()
+  buyerfundedAt             DateTime?           @db.Timestamp()
+  paymentConfirmedAt        DateTime?           @db.Timestamp()
+  escrowReleasedAt          DateTime?           @db.Timestamp()
   blockchainTradeId         BigInt? // Trade ID on the blockchain
   blockchainTransactionHash String? // Hash of the transaction on the blockchain
-  deletedAt                 DateTime?       @db.Timestamp()
-  createdAt                 DateTime?       @default(now()) @db.Timestamp()
-  updatedAt                 DateTime?       @updatedAt @db.Timestamp()
-  feedback                  Feedback?       @relation("tradeFeedback")
+  deletedAt                 DateTime?           @db.Timestamp()
+  createdAt                 DateTime?           @default(now()) @db.Timestamp()
+  updatedAt                 DateTime?           @updatedAt @db.Timestamp()
+  feedback                  Feedback?           @relation("tradeFeedback")
   tradeDispute              TradeDispute?
+  tradeEscrowDetailsId      String?
+  tradeEscrowDetails        TradeEscrowDetails? @relation(fields: [tradeEscrowDetailsId], references: [id])
 
   @@map("trades")
 }
@@ -824,6 +853,8 @@ model User {
   feedbackTrader         Feedback[]               @relation("feedbackTrader")
   tradeVendor            Trade[]                  @relation("vendorTrade")
   tradeTrader            Trade[]                  @relation("traderTrade")
+  tradeBuyer             Trade[]                  @relation("buyerTrade")
+  tradeSeller            Trade[]                  @relation("sellerTrade")
   tier                   Tier?                    @relation(fields: [tierId], references: [id])
   tierId                 String?
   premiumPurchase        PremiumPurchase[]

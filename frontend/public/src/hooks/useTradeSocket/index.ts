@@ -8,9 +8,11 @@ import {
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
+import { buyerFundTrade, sellerFundTrade } from '@/services/ethers/escrow';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
+import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
 import { useApp } from '@/hooks';
@@ -24,8 +26,8 @@ const useTradeSocket = ({
   onSetPaid,
   onSetCanceled,
   onSetPaymentConfirmed,
-  onSetTradeCreated,
   onSetDisputed,
+  refetchTrade,
 }: UseSocketParams) => {
   const { addToast } = useApp();
 
@@ -42,6 +44,8 @@ const useTradeSocket = ({
 
   const [vendorHasEnoughFunds, _setVendorHasEnoughFunds] = useState(true);
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
+
+  const hasFundedRef = useRef(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -70,7 +74,7 @@ const useTradeSocket = ({
     }
   };
 
-  const setAsPaymentConfirmed = (params: SetAsPaidParams) => {
+  const setAsPaymentConfirmed = async (params: SetAsPaidParams) => {
     if (socket) {
       socket.emit('trade_set_payment_confirmed', { ...params, chatId });
     }
@@ -79,6 +83,56 @@ const useTradeSocket = ({
   const setAsDisputed = (params: SetAsDisputedParams) => {
     if (socket) {
       socket.emit('trade_set_disputed', { ...params, chatId });
+    }
+  };
+
+  const fundTradeAsSeller = async () => {
+    if (socket && trade?.tradeEscrowDetails) {
+      const tx = await sellerFundTrade(
+        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+        BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei)
+      );
+
+      if (tx.error) {
+        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+          socket.emit('blockchaion_seller_fund_trade_rejected', {
+            chatId,
+            senderId: user?.id,
+          });
+          return;
+        }
+      }
+
+      addToast('info', 'Trade was funded by the seller', 8000);
+      socket.emit('blockchain_seller_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
+    }
+  };
+
+  const fundTradeAsBuyer = async () => {
+    if (socket && trade?.tradeEscrowDetails) {
+      const tx = await buyerFundTrade(
+        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+        BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei)
+      );
+
+      if (tx.error) {
+        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+          socket.emit('blockchaion_seller_fund_trade_rejected', {
+            chatId,
+            senderId: user?.id,
+          });
+          return;
+        }
+      }
+
+      addToast('info', 'Trade was funded by the buyer', 8000);
+      socket.emit('blockchain_buyer_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
     }
   };
 
@@ -92,72 +146,6 @@ const useTradeSocket = ({
 
       const vendorWalletAddress =
         user.id === trade.vendor?.id ? walletAddress : undefined;
-
-      // if (
-      //   trade?.cryptocurrencyAmount &&
-      //   blockchain?.balance?.value &&
-      //   blockchain?.balance?.decimals &&
-      //   app.settings?.depositPerTradePercent &&
-      //   trade?.offer?.offerType
-      // ) {
-      //   // Vendor
-      //   if (user.id === trade.vendor?.id) {
-      //     let hasEnoughVendor = false;
-      //     if (trade.offer?.offerType === 'buy') {
-      //       hasEnoughVendor = hasEnoughBalance(
-      //         trade.cryptocurrencyAmount,
-      //         blockchain?.balance?.value,
-      //         blockchain?.balance?.decimals,
-      //         app.settings?.depositPerTradePercent,
-      //         'sell'
-      //       );
-      //     } else if (trade.offer?.offerType === 'sell') {
-      //       hasEnoughVendor = hasEnoughBalance(
-      //         trade.cryptocurrencyAmount,
-      //         blockchain?.balance?.value,
-      //         blockchain?.balance?.decimals,
-      //         app.settings?.depositPerTradePercent,
-      //         'buy'
-      //       );
-      //     }
-
-      //     console.log({ hasEnoughVendor });
-
-      //     if (!hasEnoughVendor) {
-      //       setVendorHasEnoughFunds(false);
-      //       return;
-      //     }
-      //   }
-      //   // Trader
-      //   if (user.id === trade.trader?.id) {
-      //     console.log('Trader...');
-      //     let hasEnoughTrader = false;
-      //     if (trade.offer?.offerType === 'buy') {
-      //       hasEnoughTrader = hasEnoughBalance(
-      //         trade.cryptocurrencyAmount,
-      //         blockchain?.balance?.value,
-      //         blockchain?.balance?.decimals,
-      //         app.settings?.depositPerTradePercent,
-      //         'buy'
-      //       );
-      //     } else if (trade.offer?.offerType === 'sell') {
-      //       hasEnoughTrader = hasEnoughBalance(
-      //         trade.cryptocurrencyAmount,
-      //         blockchain?.balance?.value,
-      //         blockchain?.balance?.decimals,
-      //         app.settings?.depositPerTradePercent,
-      //         'sell'
-      //       );
-      //     }
-
-      //     if (!hasEnoughTrader) {
-      //       setTraderHasEnoughFunds(false);
-      //       return;
-      //     }
-      //   }
-      // }
-
-      console.log('continuing');
 
       // Join room
       socket.emit('join_room', {
@@ -204,6 +192,7 @@ const useTradeSocket = ({
       });
 
       socket.on('trade_funded_success', (data) => {
+        refetchTrade();
         if (data.fundedAt) {
           // @ts-ignore
           trade.setTradeValue(
@@ -273,9 +262,101 @@ const useTradeSocket = ({
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 
-      socket.on('blockchain_trade_created', (_payload) => {
-        onSetTradeCreated();
-        // setMessages((prevMessages) => [...prevMessages, message]);
+      socket.on('blockchaion_seller_fund_trade_rejected_success', () => {
+        refetchTrade();
+      });
+
+      socket.on('blockchaion_buyer_fund_trade_rejected_success', () => {
+        refetchTrade();
+      });
+
+      socket.on('blockchain_trade_created', async (payload) => {
+        const sellerId =
+          trade.offer?.offerType === 'buy'
+            ? trade.vendor?.id
+            : trade.trader?.id;
+        const buyerId =
+          trade.offer?.offerType === 'buy'
+            ? trade.trader?.id
+            : trade.vendor?.id;
+
+        if (hasFundedRef.current) return;
+
+        hasFundedRef.current = true;
+
+        const data = JSON.parse(payload);
+
+        try {
+          const mapped = [
+            { type: 'seller', id: sellerId },
+            { type: 'buyer', id: buyerId },
+          ].map(async (u) => {
+            if (u.type === 'seller' && u.id === user.id) {
+              const tx = await sellerFundTrade(
+                data.blockchainTradeId,
+                BigInt(data.sellerTotalDeposit)
+              );
+
+              if (tx.error) {
+                if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+                  socket.emit('blockchaion_seller_fund_trade_rejected', {
+                    chatId,
+                    senderId: user.id,
+                  });
+                  return;
+                }
+              }
+
+              return tx;
+            }
+            if (u.type === 'buyer' && u.id === user.id) {
+              const tx = await buyerFundTrade(
+                data.blockchainTradeId,
+                BigInt(data.buyerCollateral)
+              );
+
+              if (tx.error) {
+                if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+                  socket.emit('blockchaion_buyer_fund_trade_rejected', {
+                    chatId,
+                    senderId: user.id,
+                  });
+                  return;
+                }
+              }
+
+              return tx;
+            }
+          });
+
+          const [sellerTx, buyerTx] = await Promise.all(mapped);
+
+          if (sellerTx) {
+            socket.emit('blockchain_seller_funded_trade', {
+              chatId: trade.chat?.id,
+              senderId: user.id,
+            });
+          }
+
+          if (buyerTx) {
+            socket.emit('blockchain_buyer_funded_trade', {
+              chatId: trade.chat?.id,
+              senderId: user.id,
+            });
+          }
+        } catch (_err) {
+          hasFundedRef.current = false; // Optional: allow retry on error
+          addToast('error', 'Funding transaction failed', 8000);
+          return;
+        }
+      });
+
+      socket.on('blockchain_buyer_funded_trade_success', (_data) => {
+        refetchTrade();
+      });
+
+      socket.on('blockchain_seller_funded_trade_success', (_data) => {
+        refetchTrade();
       });
 
       socket.on('timer:update', (data) => {
@@ -349,6 +430,8 @@ const useTradeSocket = ({
     setAsCanceled,
     setAsPaymentConfirmed,
     setAsDisputed,
+    fundTradeAsBuyer,
+    fundTradeAsSeller,
   };
 };
 

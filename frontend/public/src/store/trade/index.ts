@@ -33,6 +33,11 @@ export const useTradeSlice: StateCreator<
     chat: undefined,
     createdAt: undefined,
     tradeDispute: undefined,
+    tradeEscrowDetails: undefined,
+    traderWalletAddress: undefined,
+    vendorWalletAddress: undefined,
+    vendorRejectedFunding: undefined,
+    traderRejectedFunding: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
@@ -59,6 +64,12 @@ export const useTradeSlice: StateCreator<
               trader: params.trader ?? trade.trader,
               vendor: params.vendor ?? trade.vendor,
               chat: params.chat ?? trade.chat,
+              buyerId: params.buyerId ?? trade.buyerId,
+              sellerId: params.sellerId ?? trade.sellerId,
+              traderRejectedFunding:
+                params.traderRejectedFunding ?? trade.traderRejectedFunding,
+              vendorRejectedFunding:
+                params.vendorRejectedFunding ?? trade.vendorRejectedFunding,
               traderWalletAddress:
                 params.traderWalletAddress ?? trade.traderWalletAddress,
               vendorWalletAddress:
@@ -72,6 +83,8 @@ export const useTradeSlice: StateCreator<
                 trade.blockchainTransactionHash,
               createdAt: params.createdAt ?? trade.createdAt,
               tradeDispute: params.tradeDispute ?? trade.tradeDispute,
+              tradeEscrowDetails:
+                params.tradeEscrowDetails ?? trade.tradeEscrowDetails,
             },
           };
         },
@@ -115,6 +128,9 @@ export const useTradeSlice: StateCreator<
           traderWalletAddress: undefined,
           vendor: undefined,
           vendorWalletAddress: undefined,
+          tradeEscrowDetails: undefined,
+          vendorRejectedFunding: undefined,
+          traderRejectedFunding: undefined,
         },
         'trade/resetTrade'
       );

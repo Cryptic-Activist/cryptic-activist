@@ -7,7 +7,11 @@ import {
   TradeStatus,
 } from '@prisma/client';
 import { Request, Response, response } from 'express';
-import { cancelTrade, confirmTrade } from '@/services/blockchains/escrow';
+import {
+  cancelTrade,
+  confirmTrade,
+  executeTrade,
+} from '@/services/blockchains/escrow';
 import {
   createAccountReview,
   escalateDispute,
@@ -707,10 +711,8 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      const confirmedTrade = await confirmTrade(
-        dispute.trade.blockchainTradeId,
-        parseEther(dispute.trade?.cryptocurrencyAmount.toString()),
-      );
+      const executedTrade = await executeTrade(dispute.trade.blockchainTradeId);
+      console.log({ executedTrade });
     }
 
     res.status(200).json({
