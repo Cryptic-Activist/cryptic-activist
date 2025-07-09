@@ -1,6 +1,7 @@
 import { Modal } from '@/store/navigationBar/types';
 
 export type TradeProps = {
+  user?: any;
   trade: any;
   setAsPaymentConfirmed: any;
   setAsCanceled: any;
@@ -14,6 +15,7 @@ export type TradeProps = {
 };
 
 export type ActionButtonsProps = {
+  user?: any;
   trade: any;
   setAsPaymentConfirmed: any;
   setAsDisputed: any;

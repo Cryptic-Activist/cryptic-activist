@@ -537,8 +537,8 @@ model Trade {
   fundedAt                  DateTime?           @db.Timestamp()
   vendorRejectedFunding     Boolean             @default(false) @db.Boolean
   traderRejectedFunding     Boolean             @default(false) @db.Boolean
-  sellerfundedAt            DateTime?           @db.Timestamp()
-  buyerfundedAt             DateTime?           @db.Timestamp()
+  sellerFundedAt            DateTime?           @db.Timestamp()
+  buyerFundedAt             DateTime?           @db.Timestamp()
   paymentConfirmedAt        DateTime?           @db.Timestamp()
   escrowReleasedAt          DateTime?           @db.Timestamp()
   blockchainTradeId         BigInt? // Trade ID on the blockchain

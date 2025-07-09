@@ -54,7 +54,7 @@ export default class Trade {
                   id: true,
                   vendorId: true,
                   traderId: true,
-                  buyerfundedAt: true,
+                  buyerFundedAt: true,
                   offer: {
                     select: { offerType: true },
                   },
@@ -80,8 +80,8 @@ export default class Trade {
               // 3. Set rejection reset flags based on offer type
               const updateData: any = {
                 status: 'IN_PROGRESS',
-                sellerfundedAt: fundedAt,
-                fundedAt: trade.buyerfundedAt ? fundedAt : null,
+                sellerFundedAt: fundedAt,
+                fundedAt: trade.buyerFundedAt ? fundedAt : null,
               };
 
               if (trade.offer.offerType === 'buy') {
@@ -111,8 +111,6 @@ export default class Trade {
             this.io.to(chatId).emit('blockchain_seller_funded_trade_success', {
               fundedAt: result.fundedAt,
             });
-
-            console.log({ sellerFundedAt: result.fundedAt });
           } catch (err) {
             console.error('Transaction failed:', err);
             this.io.to(chatId).emit('blockchain_seller_funded_trade_error', {
@@ -143,7 +141,7 @@ export default class Trade {
                   id: true,
                   vendorId: true,
                   traderId: true,
-                  sellerfundedAt: true,
+                  sellerFundedAt: true,
                   offer: {
                     select: { offerType: true },
                   },
@@ -169,8 +167,8 @@ export default class Trade {
               // 3. Set rejection reset flags based on offer type
               const updateData: any = {
                 status: 'IN_PROGRESS',
-                buyerfundedAt: fundedAt,
-                fundedAt: trade.sellerfundedAt ? fundedAt : null,
+                buyerFundedAt: fundedAt,
+                fundedAt: trade.sellerFundedAt ? fundedAt : null,
               };
 
               if (trade.offer.offerType === 'sell') {

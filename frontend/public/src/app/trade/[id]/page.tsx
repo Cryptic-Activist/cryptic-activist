@@ -21,6 +21,7 @@ import {
 import styles from './page.module.scss';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
+  user,
   trade,
   replace,
   setAsCanceled,
@@ -28,11 +29,18 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   toggleModal,
   fundTrade,
 }) => {
+  const {
+    blockchain: { account },
+  } = useBlockchain();
+
   console.log({ trade });
+
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.vendorRejectedFunding &&
     !trade.traderRejectedFunding &&
+    trade.buyerFundedAt &&
+    trade.sellerFundedAt &&
     !trade.paymentConfirmedAt &&
     !trade.paidAt;
   const isRaiseADisputeVisible =
@@ -47,11 +55,26 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.escrowReleasedAt &&
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
-    !trade.disputedAt;
+    !trade.disputedAt &&
+    !trade.paidAt;
   const isTradeDetailsVisible =
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
+  const userFundedAt =
+    user?.id === trade?.sellerId ? trade.sellerFundedAt : trade.buyerFundedAt;
+
   const isFundTradeVisible =
-    trade.status === 'IN_PROGRESS' && trade.traderRejectedFunding;
+    trade.status === 'IN_PROGRESS' &&
+    !trade.fundedAt &&
+    (trade.traderRejectedFunding || userFundedAt);
+  const isFundTradeButtonActive =
+    account?.address === trade.traderWalletAddress;
+
+  console.log({
+    status: trade.status,
+    fundedAt: trade.fundedAt,
+    traderRejectedFunding: trade.traderRejectedFunding,
+    userFundedAt,
+  });
 
   return (
     <section className={styles.actionButtons}>
@@ -116,12 +139,15 @@ const ActionButtons: FC<ActionButtonsProps> = ({
       {isFundTradeVisible && (
         <Button
           fullWidth
-          theme="gradient"
+          theme={isFundTradeButtonActive ? 'gradient' : 'ghost'}
           padding="1rem"
           size={18}
           onClick={fundTrade}
+          isDisabled={!isFundTradeButtonActive}
         >
-          Funding trade
+          {isFundTradeButtonActive
+            ? 'Funding trade'
+            : 'You are using the wrong wallet'}
         </Button>
       )}
     </section>
@@ -129,6 +155,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 };
 
 const Trade: FC<TradeProps> = ({
+  user,
   replace,
   setAsCanceled,
   setAsDisputed,
@@ -385,6 +412,7 @@ const Trade: FC<TradeProps> = ({
         </ul>
       </section>
       <ActionButtons
+        user={user}
         trade={trade}
         replace={replace}
         setAsCanceled={setAsCanceled}
@@ -458,6 +486,7 @@ export default function TradePage() {
   return (
     <div className={styles.container}>
       <Trade
+        user={user}
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaid={setAsPaid}
