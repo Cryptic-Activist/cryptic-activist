@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SideBarProps } from './types';
 import { sidebarItems } from './data';
 import styles from './styles.module.scss';
+import { useAdmin } from '@/hooks';
 import { usePathname } from 'next/navigation';
 
 const Item: FC<SideBarProps> = ({ href, label, icon }) => {
@@ -26,18 +27,39 @@ const Item: FC<SideBarProps> = ({ href, label, icon }) => {
 };
 
 const SideBar = () => {
+	const { admin, hasRole } = useAdmin();
+	const isSuperAdmin = hasRole('SUPER_ADMIN');
+
+	console.log({ admin });
+
 	return (
 		<aside className={styles.aside}>
-			<ul className={styles.asideList}>
-				{sidebarItems.map((sidebarItem, index) => (
-					<Item
-						key={index}
-						href={sidebarItem.href}
-						label={sidebarItem.label}
-						icon={sidebarItem.icon}
-					/>
-				))}
-			</ul>
+			{admin.data?.id && (
+				<ul className={styles.asideList}>
+					{sidebarItems.map((sidebarItem, index) => {
+						console.log({ isSuperAdmin, sidebarItem });
+						if (isSuperAdmin && sidebarItem.superAdminOnly) {
+							return (
+								<Item
+									key={index}
+									href={sidebarItem.href}
+									label={sidebarItem.label}
+									icon={sidebarItem.icon}
+								/>
+							);
+						}
+
+						return (
+							<Item
+								key={index}
+								href={sidebarItem.href}
+								label={sidebarItem.label}
+								icon={sidebarItem.icon}
+							/>
+						);
+					})}
+				</ul>
+			)}
 		</aside>
 	);
 };

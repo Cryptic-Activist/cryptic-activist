@@ -67,6 +67,7 @@ model Admin {
   userWarning            UserWarning[]
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
+  smartContract          SmartContract[]
 
   @@map("admins")
 }
@@ -274,6 +275,7 @@ model Chain {
   // Relations
   offers               Offer[]               @relation("offer")
   cryptocurrencyChains CryptocurrencyChain[] @relation("chainCryptocurrency")
+  smartContract        SmartContract[]
 
   @@map("chains")
 }
@@ -471,6 +473,25 @@ model Tier {
   users       User[]
 
   @@map("tiers")
+}
+
+model SmartContract {
+  id           String   @id @default(uuid())
+  name         String // e.g., "EscrowContract"
+  address      String // Deployed contract address
+  chainId      String
+  chain        Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
+  version      String // Optional versioning (e.g., "v1.0.0")
+  deployedById String? // Admin or system user who deployed it
+  deployedBy   Admin?   @relation(fields: [deployedById], references: [id])
+  deploymentTx String? // Transaction hash
+  deployedAt   DateTime @default(now())
+  isActive     Boolean  @default(true) // Useful for versioned contracts
+  abiUrl       String
+  metadata     Json? // Arbitrary extra data (ABI, tags, etc.)
+
+  @@index([address])
+  @@map("smart_contracts")
 }
 
 enum TradeStatus {

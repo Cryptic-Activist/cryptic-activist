@@ -57,11 +57,19 @@ export const sidebarItems = [
 	{
 		href: '/admins',
 		label: 'Admins',
-		icon: 'FaUserShield'
+		icon: 'FaUserShield',
+		superAdminOnly: true
 	},
 	{
 		href: '/analytics',
 		label: 'Analytics',
-		icon: 'FaChartLine'
+		icon: 'FaChartLine',
+		superAdminOnly: true
+	},
+	{
+		href: '/smart-contracts',
+		label: 'Smart Contracts',
+		icon: 'FaLink',
+		superAdminOnly: true
 	}
 ];
