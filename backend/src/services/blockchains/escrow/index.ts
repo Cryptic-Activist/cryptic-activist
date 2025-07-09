@@ -1,18 +1,75 @@
 import {
+  DeployEscrowSmartContractParams,
+  InitTradeParams,
+  Token,
+} from './types';
+import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
-import { InitTradeParams, Token } from './types';
 import { Interface, ethers, parseEther } from 'ethers';
 
 import { Address } from './types';
-import escrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 
-const iface = new Interface(escrowArtifact.abi);
+const iface = new Interface(EscrowArtifact.abi);
+
+export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
+  try {
+    // Load environment variables
+    const RPC_URL = params.rpcUrl; // e.g. from Alchemy, Infura, etc.
+    const PRIVATE_KEY = ETHEREUM_DEPLOYER_PRIVATE_KEY;
+
+    if (!RPC_URL || !PRIVATE_KEY) {
+      throw new Error('Missing RPC_URL or PRIVATE_KEY in .env');
+    }
+
+    // Initialize provider and signer
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+    const deployerAddress = await wallet.getAddress();
+
+    // Check deployer balance
+    const balance = await provider.getBalance(deployerAddress);
+    console.log(`Account balance: ${ethers.formatEther(balance)} ETH`);
+
+    // Get Contract Factory and Deploy
+    const factory = new ethers.ContractFactory(
+      EscrowArtifact.abi,
+      EscrowArtifact.bytecode,
+      wallet,
+    );
+
+    const contract = await factory.deploy(
+      params.platformWallet,
+      params.defaultFeeRate,
+      params.defaultProfitMargin,
+    );
+
+    await contract.waitForDeployment();
+
+    const address = await contract.getAddress();
+
+    const deploymentTx = contract.deploymentTransaction();
+    const deploymentBlock = deploymentTx?.blockNumber;
+
+    return {
+      contractAddress: address,
+      deployerAddress,
+      deploymentHash: deploymentTx?.hash,
+      deploymentBlock,
+      deployedAt: new Date(),
+      abi: EscrowArtifact.abi,
+    };
+  } catch (error) {
+    throw new Error('Unable to deploy Escrow');
+  }
+};
 
 export const getProvider = () => {
   const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
@@ -29,7 +86,7 @@ export const getEscrowContract = () => {
   const signer = getSigner();
   return new ethers.Contract(
     ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    escrowArtifact.abi,
+    EscrowArtifact.abi,
     signer,
   );
 };

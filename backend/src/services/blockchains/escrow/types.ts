@@ -14,3 +14,10 @@ export type InitTradeParams = {
 };
 
 export type Token = 'chainlnik' | 'pol';
+
+export type DeployEscrowSmartContractParams = {
+  platformWallet: string;
+  defaultFeeRate: number;
+  defaultProfitMargin: number;
+  rpcUrl: string;
+};

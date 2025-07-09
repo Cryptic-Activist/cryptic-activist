@@ -476,19 +476,22 @@ model Tier {
 }
 
 model SmartContract {
-  id           String   @id @default(uuid())
-  name         String // e.g., "EscrowContract"
-  address      String // Deployed contract address
-  chainId      String
-  chain        Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
-  version      String // Optional versioning (e.g., "v1.0.0")
-  deployedById String? // Admin or system user who deployed it
-  deployedBy   Admin?   @relation(fields: [deployedById], references: [id])
-  deploymentTx String? // Transaction hash
-  deployedAt   DateTime @default(now())
-  isActive     Boolean  @default(true) // Useful for versioned contracts
-  abiUrl       String
-  metadata     Json? // Arbitrary extra data (ABI, tags, etc.)
+  id              String   @id @default(uuid())
+  name            String // e.g., "EscrowContract"
+  address         String // Deployed contract address
+  chainId         String
+  chain           Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
+  version         String // Optional versioning (e.g., "v1.0.0")
+  deployedById    String // Admin or system user who deployed it
+  deployedBy      Admin    @relation(fields: [deployedById], references: [id])
+  deployerAddress String
+  deploymentHash  String // Transaction hash
+  deploymentBlock String // Transaction block height
+  deployedAt      DateTime @default(now()) @db.Timestamp()
+  isActive        Boolean  @default(true) // Useful for versioned contracts
+  abiUrl          String
+
+  metadata Json? // Arbitrary extra data (ABI, tags, etc.)
 
   @@index([address])
   @@map("smart_contracts")
