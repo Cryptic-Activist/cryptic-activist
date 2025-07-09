@@ -56,15 +56,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
   const userFundedAt =
     user?.id === trade?.sellerId ? trade.sellerFundedAt : trade.buyerFundedAt;
-
-  // const vendorSeller = user?.id === trade?.sellerId;
-  // const vendorBuyer = user?.id === trade?.buyerId;
-  // console.log({ userFundedAt });
-
   const isFundTradeVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.fundedAt &&
-    (trade.vendorRejectedFunding || userFundedAt);
+    (trade.vendorRejectedFunding || !userFundedAt);
   const isFundTradeButtonActive =
     account?.address === trade.vendorWalletAddress;
 

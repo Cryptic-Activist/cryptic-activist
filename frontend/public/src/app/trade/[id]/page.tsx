@@ -61,11 +61,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
   const userFundedAt =
     user?.id === trade?.sellerId ? trade.sellerFundedAt : trade.buyerFundedAt;
-
   const isFundTradeVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.fundedAt &&
-    (trade.traderRejectedFunding || userFundedAt);
+    (trade.traderRejectedFunding || !userFundedAt);
   const isFundTradeButtonActive =
     account?.address === trade.traderWalletAddress;
 
@@ -74,6 +73,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     fundedAt: trade.fundedAt,
     traderRejectedFunding: trade.traderRejectedFunding,
     userFundedAt,
+    sellerId: trade?.sellerId,
+    userId: user?.id,
+    buyerFundedAt: trade.buyerFundedAt,
+    sellerFundedAt: trade?.sellerFundedAt,
   });
 
   return (
