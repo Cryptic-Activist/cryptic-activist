@@ -59,25 +59,33 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.paidAt;
   const isTradeDetailsVisible =
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
-  const userFundedAt =
-    user?.id === trade?.sellerId ? trade.sellerFundedAt : trade.buyerFundedAt;
+
+  const isUserSeller = user?.id === trade?.sellerId;
+  const userFundedAt = isUserSeller
+    ? trade.sellerFundedAt
+    : trade.buyerFundedAt;
   const isFundTradeVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.fundedAt &&
-    (trade.traderRejectedFunding || !userFundedAt);
+    (trade.traderRejectedFunding || userFundedAt === undefined);
+
+  console.log({
+    isUserSeller,
+    sellerFundedAt: trade?.sellerFundedAt,
+  });
   const isFundTradeButtonActive =
     account?.address === trade.traderWalletAddress;
 
-  console.log({
-    status: trade.status,
-    fundedAt: trade.fundedAt,
-    traderRejectedFunding: trade.traderRejectedFunding,
-    userFundedAt,
-    sellerId: trade?.sellerId,
-    userId: user?.id,
-    buyerFundedAt: trade.buyerFundedAt,
-    sellerFundedAt: trade?.sellerFundedAt,
-  });
+  // console.log({
+  //   status: trade.status,
+  //   fundedAt: trade.fundedAt,
+  //   traderRejectedFunding: trade.traderRejectedFunding,
+  //   userFundedAt,
+  //   sellerId: trade?.sellerId,
+  //   userId: user?.id,
+  //   buyerFundedAt: trade.buyerFundedAt,
+  //   sellerFundedAt: trade?.sellerFundedAt,
+  // });
 
   return (
     <section className={styles.actionButtons}>
