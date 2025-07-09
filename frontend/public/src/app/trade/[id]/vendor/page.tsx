@@ -2,7 +2,7 @@
 
 import { ActionButtonsProps, TradeProps } from './types';
 import { Button, Chat } from '@/components';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   convertNewlinesToBr,
   formatRemainingTime,
@@ -30,7 +30,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   fundTrade,
 }) => {
   const {
-    blockchain: { account },
+    blockchain: { account, chain },
   } = useBlockchain();
 
   const isSetPaymentReceivedVisible =
@@ -64,7 +64,8 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.fundedAt &&
     (trade.vendorRejectedFunding || userFundedAt === undefined);
   const isFundTradeButtonActive =
-    account?.address === trade.vendorWalletAddress;
+    account?.address === trade.vendorWalletAddress &&
+    chain?.id === trade?.offer?.chain?.chainId;
 
   return (
     <section className={styles.actionButtons}>
@@ -137,7 +138,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
         >
           {isFundTradeButtonActive
             ? 'Funding trade'
-            : 'You are using the wrong wallet'}
+            : `Your wallet must be connected to ${trade?.offer?.chain?.name} to fund the trade`}
         </Button>
       )}
     </section>
@@ -277,17 +278,6 @@ const Trade: FC<TradeProps> = ({
         <div className={styles.tradeSection}>
           <h2>Escrow Status</h2>
           <ul>
-            {(trade?.vendorRejectedFunding || trade?.traderRejectedFunding) && (
-              <li>
-                <strong>Escrow funding rejected by:</strong>
-                <span>{`${
-                  trade?.vendorRejectedFunding ? trade?.vendor?.username : ''
-                } - ${
-                  trade?.traderRejectedFunding ? trade?.trader?.username : ''
-                }`}</span>
-              </li>
-            )}
-
             <li>
               <strong>Funded:</strong>
               <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
@@ -416,7 +406,7 @@ const TradeVendor = () => {
     setTradeCreated,
     setDisputed,
   } = useTrade();
-  const { user, query } = useUser();
+  const { user } = useUser();
   const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
   const { replace } = useRouter();
@@ -449,33 +439,6 @@ const TradeVendor = () => {
     onSetDisputed: setDisputed,
     refetchTrade: queryTrade.refetch,
   });
-
-  useEffect(() => {
-    // if (query.isSuccess && !user.id) {
-    //   back();
-    //   return;
-    // }
-    // if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
-    //   back();
-    //   return;
-    // }
-    // if (!blockchain.account?.address) {
-    //   addToast('error', 'You must have a wallet connected to trade', 10000);
-    //   back();
-    //   return;
-    // }
-    // if (
-    //   trade.vendorWalletAddress &&
-    //   blockchain.account?.address !== trade.vendorWalletAddress
-    // ) {
-    //   addToast(
-    //     'error',
-    //     'The current connected wallet must be the same one used to create the offer',
-    //     10000
-    //   );
-    //   back();
-    // }
-  }, [trade.vendor?.id, user.id, query.isSuccess]);
 
   return (
     <div className={styles.container}>

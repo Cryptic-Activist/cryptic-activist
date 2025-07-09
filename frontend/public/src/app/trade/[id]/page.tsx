@@ -2,7 +2,7 @@
 
 import { ActionButtonsProps, TradeProps } from './types';
 import { Button, Chat } from '@/components';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   convertNewlinesToBr,
   formatRemainingTime,
@@ -30,7 +30,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   fundTrade,
 }) => {
   const {
-    blockchain: { account },
+    blockchain: { account, chain },
   } = useBlockchain();
 
   console.log({ trade });
@@ -68,24 +68,11 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     trade.status === 'IN_PROGRESS' &&
     !trade.fundedAt &&
     (trade.traderRejectedFunding || userFundedAt === undefined);
-
-  console.log({
-    isUserSeller,
-    sellerFundedAt: trade?.sellerFundedAt,
-  });
   const isFundTradeButtonActive =
-    account?.address === trade.traderWalletAddress;
+    account?.address === trade?.traderWalletAddress &&
+    chain?.id === trade?.offer?.chain?.chainId;
 
-  // console.log({
-  //   status: trade.status,
-  //   fundedAt: trade.fundedAt,
-  //   traderRejectedFunding: trade.traderRejectedFunding,
-  //   userFundedAt,
-  //   sellerId: trade?.sellerId,
-  //   userId: user?.id,
-  //   buyerFundedAt: trade.buyerFundedAt,
-  //   sellerFundedAt: trade?.sellerFundedAt,
-  // });
+  console.log({ chain, trade });
 
   return (
     <section className={styles.actionButtons}>
@@ -158,7 +145,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
         >
           {isFundTradeButtonActive
             ? 'Funding trade'
-            : 'You are using the wrong wallet'}
+            : `Your wallet must be connected to ${trade?.offer?.chain?.name} to fund the trade`}
         </Button>
       )}
     </section>
@@ -297,34 +284,10 @@ const Trade: FC<TradeProps> = ({
         <p>{trade?.instructions}</p>
       </section>
 
-      {/* <section className={styles.tradeSection}>
-          <h2>Payment Action</h2>
-          <ul>
-            <li>
-              After sending the payment, mark the trade as paid and upload your
-              proof.
-            </li>
-          </ul>
-          <button className="btn btn-primary">Mark as Paid</button>
-          <button className="btn btn-warning">Upload Payment Proof</button>
-          <button className="btn btn-danger">Cancel Trade</button>
-        </section> */}
-
       <section className={styles.tradeSectionRow}>
         <div className={styles.tradeSection}>
           <h2>Escrow Status</h2>
           <ul>
-            {(trade?.vendorRejectedFunding || trade?.traderRejectedFunding) && (
-              <li>
-                <strong>Escrow funding rejected by:</strong>
-                <span>{`${
-                  trade?.vendorRejectedFunding ? trade?.vendor?.username : ''
-                } - ${
-                  trade?.traderRejectedFunding ? trade?.trader?.username : ''
-                }`}</span>
-              </li>
-            )}
-
             <li>
               <strong>Funded:</strong>
               <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
@@ -446,7 +409,7 @@ export default function TradePage() {
     setTradeCreated,
     setDisputed,
   } = useTrade();
-  const { user, query } = useUser();
+  const { user } = useUser();
   const { replace } = useRouter();
   const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
@@ -476,23 +439,6 @@ export default function TradePage() {
     onSetDisputed: setDisputed,
     refetchTrade: queryTrade.refetch,
   });
-
-  // useEffect(() => {
-  //   if (trade.offer?.timeLimit) {
-  //     const miliseconds = trade.offer?.timeLimit * 1000 * 60;
-  //     startCountDown(miliseconds);
-  //   }
-  // }, [trade.offer?.timeLimit]);
-
-  useEffect(() => {
-    // if (query.isSuccess && !user.id) {
-    //   router.back();
-    //   return;
-    // }
-    // if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
-    //   router.back();
-    // }
-  }, [trade.trader?.id, user.id, query.isSuccess]);
 
   return (
     <div className={styles.container}>

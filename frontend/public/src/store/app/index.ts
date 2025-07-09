@@ -113,8 +113,6 @@ export const useAppSlice: StateCreator<
 
       const platformSettings = await getPublicSettings();
 
-      console.log({ platformSettings });
-
       setAppValue({ settings: platformSettings }, 'app/setSettings');
     },
   },
