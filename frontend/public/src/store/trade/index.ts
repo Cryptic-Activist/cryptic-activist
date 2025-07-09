@@ -38,6 +38,10 @@ export const useTradeSlice: StateCreator<
     vendorWalletAddress: undefined,
     vendorRejectedFunding: undefined,
     traderRejectedFunding: undefined,
+    buyerFundedAt: undefined,
+    sellerFundedAt: undefined,
+    buyerId: undefined,
+    sellerId: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
@@ -65,7 +69,9 @@ export const useTradeSlice: StateCreator<
               vendor: params.vendor ?? trade.vendor,
               chat: params.chat ?? trade.chat,
               buyerId: params.buyerId ?? trade.buyerId,
+              buyerFundedAt: params.buyerFundedAt ?? trade.buyerFundedAt,
               sellerId: params.sellerId ?? trade.sellerId,
+              sellerFundedAt: params.sellerFundedAt ?? trade.sellerFundedAt,
               traderRejectedFunding:
                 params.traderRejectedFunding ?? trade.traderRejectedFunding,
               vendorRejectedFunding:
@@ -131,6 +137,10 @@ export const useTradeSlice: StateCreator<
           tradeEscrowDetails: undefined,
           vendorRejectedFunding: undefined,
           traderRejectedFunding: undefined,
+          buyerFundedAt: undefined,
+          buyerId: undefined,
+          sellerFundedAt: undefined,
+          sellerId: undefined,
         },
         'trade/resetTrade'
       );

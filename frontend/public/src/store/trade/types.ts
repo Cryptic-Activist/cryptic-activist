@@ -136,6 +136,8 @@ export type Trade = {
     traderRejectedFunding?: boolean;
     buyerId?: string;
     sellerId?: string;
+    buyerFundedAt?: string;
+    sellerFundedAt?: string;
   };
 };
 
@@ -168,7 +170,9 @@ export type TradeStore = {
     vendorRejectedFunding?: boolean;
     traderRejectedFunding?: boolean;
     buyerId?: string;
+    buyerFundedAt?: string;
     sellerId?: string;
+    sellerFundedAt?: string;
     chat?: Chat;
     tradeDispute?: TradeDispute;
     tradeEscrowDetails?: TradeEscrowDetails;
@@ -209,7 +213,9 @@ export type TradeSetter = {
   vendorRejectedFunding?: boolean;
   traderRejectedFunding?: boolean;
   buyerId?: string;
+  buyerFundedAt?: string;
   sellerId?: string;
+  sellerFundedAt?: string;
 };
 
 export type Value = TradeSetter;

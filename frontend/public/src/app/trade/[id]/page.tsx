@@ -2,7 +2,7 @@
 
 import { ActionButtonsProps, TradeProps } from './types';
 import { Button, Chat } from '@/components';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   convertNewlinesToBr,
   formatRemainingTime,
@@ -21,6 +21,7 @@ import {
 import styles from './page.module.scss';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
+  user,
   trade,
   replace,
   setAsCanceled,
@@ -28,11 +29,18 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   toggleModal,
   fundTrade,
 }) => {
+  const {
+    blockchain: { account, chain },
+  } = useBlockchain();
+
   console.log({ trade });
+
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.vendorRejectedFunding &&
     !trade.traderRejectedFunding &&
+    trade.buyerFundedAt &&
+    trade.sellerFundedAt &&
     !trade.paymentConfirmedAt &&
     !trade.paidAt;
   const isRaiseADisputeVisible =
@@ -47,11 +55,24 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.escrowReleasedAt &&
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
-    !trade.disputedAt;
+    !trade.disputedAt &&
+    !trade.paidAt;
   const isTradeDetailsVisible =
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
+
+  const isUserSeller = user?.id === trade?.sellerId;
+  const userFundedAt = isUserSeller
+    ? trade.sellerFundedAt
+    : trade.buyerFundedAt;
   const isFundTradeVisible =
-    trade.status === 'IN_PROGRESS' && trade.traderRejectedFunding;
+    trade.status === 'IN_PROGRESS' &&
+    !trade.fundedAt &&
+    (trade.traderRejectedFunding || userFundedAt === undefined);
+  const isFundTradeButtonActive =
+    account?.address === trade?.traderWalletAddress &&
+    chain?.id === trade?.offer?.chain?.chainId;
+
+  console.log({ chain, trade });
 
   return (
     <section className={styles.actionButtons}>
@@ -116,12 +137,15 @@ const ActionButtons: FC<ActionButtonsProps> = ({
       {isFundTradeVisible && (
         <Button
           fullWidth
-          theme="gradient"
+          theme={isFundTradeButtonActive ? 'gradient' : 'ghost'}
           padding="1rem"
           size={18}
           onClick={fundTrade}
+          isDisabled={!isFundTradeButtonActive}
         >
-          Funding trade
+          {isFundTradeButtonActive
+            ? 'Funding trade'
+            : `Your wallet must be connected to ${trade?.offer?.chain?.name} to fund the trade`}
         </Button>
       )}
     </section>
@@ -129,6 +153,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 };
 
 const Trade: FC<TradeProps> = ({
+  user,
   replace,
   setAsCanceled,
   setAsDisputed,
@@ -259,34 +284,10 @@ const Trade: FC<TradeProps> = ({
         <p>{trade?.instructions}</p>
       </section>
 
-      {/* <section className={styles.tradeSection}>
-          <h2>Payment Action</h2>
-          <ul>
-            <li>
-              After sending the payment, mark the trade as paid and upload your
-              proof.
-            </li>
-          </ul>
-          <button className="btn btn-primary">Mark as Paid</button>
-          <button className="btn btn-warning">Upload Payment Proof</button>
-          <button className="btn btn-danger">Cancel Trade</button>
-        </section> */}
-
       <section className={styles.tradeSectionRow}>
         <div className={styles.tradeSection}>
           <h2>Escrow Status</h2>
           <ul>
-            {(trade?.vendorRejectedFunding || trade?.traderRejectedFunding) && (
-              <li>
-                <strong>Escrow funding rejected by:</strong>
-                <span>{`${
-                  trade?.vendorRejectedFunding ? trade?.vendor?.username : ''
-                } - ${
-                  trade?.traderRejectedFunding ? trade?.trader?.username : ''
-                }`}</span>
-              </li>
-            )}
-
             <li>
               <strong>Funded:</strong>
               <span>{`${trade?.fundedAt ? 'Yes' : 'No'}`}</span>
@@ -385,6 +386,7 @@ const Trade: FC<TradeProps> = ({
         </ul>
       </section>
       <ActionButtons
+        user={user}
         trade={trade}
         replace={replace}
         setAsCanceled={setAsCanceled}
@@ -407,7 +409,7 @@ export default function TradePage() {
     setTradeCreated,
     setDisputed,
   } = useTrade();
-  const { user, query } = useUser();
+  const { user } = useUser();
   const { replace } = useRouter();
   const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
@@ -438,26 +440,10 @@ export default function TradePage() {
     refetchTrade: queryTrade.refetch,
   });
 
-  // useEffect(() => {
-  //   if (trade.offer?.timeLimit) {
-  //     const miliseconds = trade.offer?.timeLimit * 1000 * 60;
-  //     startCountDown(miliseconds);
-  //   }
-  // }, [trade.offer?.timeLimit]);
-
-  useEffect(() => {
-    // if (query.isSuccess && !user.id) {
-    //   router.back();
-    //   return;
-    // }
-    // if (trade.trader?.id && user.id && trade.trader?.id !== user.id) {
-    //   router.back();
-    // }
-  }, [trade.trader?.id, user.id, query.isSuccess]);
-
   return (
     <div className={styles.container}>
       <Trade
+        user={user}
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaid={setAsPaid}

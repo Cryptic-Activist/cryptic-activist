@@ -184,7 +184,9 @@ export async function getTradeController(req: Request, res: Response) {
         traderRejectedFunding: true,
         vendorRejectedFunding: true,
         buyerId: true,
+        buyerFundedAt: true,
         sellerId: true,
+        sellerFundedAt: true,
         tradeDispute: {
           select: {
             createdAt: true,

@@ -2,7 +2,7 @@
 
 import { ActionButtonsProps, TradeProps } from './types';
 import { Button, Chat } from '@/components';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   convertNewlinesToBr,
   formatRemainingTime,
@@ -21,6 +21,7 @@ import {
 import styles from './page.module.scss';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
+  user,
   trade,
   replace,
   setAsCanceled,
@@ -28,6 +29,10 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   toggleModal,
   fundTrade,
 }) => {
+  const {
+    blockchain: { account, chain },
+  } = useBlockchain();
+
   const isSetPaymentReceivedVisible =
     !trade.dispitedAt &&
     trade.status === 'IN_PROGRESS' &&
@@ -45,11 +50,22 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.escrowReleasedAt &&
     !trade.expiredAt &&
     trade.status !== 'CANCELLED' &&
-    !trade.disputedAt;
+    !trade.disputedAt &&
+    !trade.paidAt;
   const isTradeDetailsVisible =
     trade.status !== 'PENDING' && trade.status !== 'IN_PROGRESS';
+
+  const isUserSeller = user?.id === trade?.sellerId;
+  const userFundedAt = isUserSeller
+    ? trade.sellerFundedAt
+    : trade.buyerFundedAt;
   const isFundTradeVisible =
-    trade.status === 'IN_PROGRESS' && trade.vendorRejectedFunding;
+    trade.status === 'IN_PROGRESS' &&
+    !trade.fundedAt &&
+    (trade.vendorRejectedFunding || userFundedAt === undefined);
+  const isFundTradeButtonActive =
+    account?.address === trade.vendorWalletAddress &&
+    chain?.id === trade?.offer?.chain?.chainId;
 
   return (
     <section className={styles.actionButtons}>
@@ -114,12 +130,15 @@ const ActionButtons: FC<ActionButtonsProps> = ({
       {isFundTradeVisible && (
         <Button
           fullWidth
-          theme="gradient"
+          theme={isFundTradeButtonActive ? 'gradient' : 'ghost'}
           padding="1rem"
           size={18}
           onClick={fundTrade}
+          isDisabled={!isFundTradeButtonActive}
         >
-          Funding trade
+          {isFundTradeButtonActive
+            ? 'Funding trade'
+            : `Your wallet must be connected to ${trade?.offer?.chain?.name} to fund the trade`}
         </Button>
       )}
     </section>
@@ -127,6 +146,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
 };
 
 const Trade: FC<TradeProps> = ({
+  user,
   trade,
   setAsCanceled,
   setAsDisputed,
@@ -362,6 +382,7 @@ const Trade: FC<TradeProps> = ({
       </section> */}
 
       <ActionButtons
+        user={user}
         trade={trade}
         replace={replace}
         setAsCanceled={setAsCanceled}
@@ -385,7 +406,7 @@ const TradeVendor = () => {
     setTradeCreated,
     setDisputed,
   } = useTrade();
-  const { user, query } = useUser();
+  const { user } = useUser();
   const { toggleModal } = useNavigationBar();
   const { blockchain } = useBlockchain();
   const { replace } = useRouter();
@@ -419,36 +440,10 @@ const TradeVendor = () => {
     refetchTrade: queryTrade.refetch,
   });
 
-  useEffect(() => {
-    // if (query.isSuccess && !user.id) {
-    //   back();
-    //   return;
-    // }
-    // if (trade.vendor?.id && user.id && trade.vendor?.id !== user.id) {
-    //   back();
-    //   return;
-    // }
-    // if (!blockchain.account?.address) {
-    //   addToast('error', 'You must have a wallet connected to trade', 10000);
-    //   back();
-    //   return;
-    // }
-    // if (
-    //   trade.vendorWalletAddress &&
-    //   blockchain.account?.address !== trade.vendorWalletAddress
-    // ) {
-    //   addToast(
-    //     'error',
-    //     'The current connected wallet must be the same one used to create the offer',
-    //     10000
-    //   );
-    //   back();
-    // }
-  }, [trade.vendor?.id, user.id, query.isSuccess]);
-
   return (
     <div className={styles.container}>
       <Trade
+        user={user}
         replace={replace}
         setAsCanceled={setAsCanceled}
         setAsPaymentConfirmed={setAsPaymentConfirmed}
