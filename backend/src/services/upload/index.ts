@@ -37,6 +37,9 @@ export const uploadFiles = async (
     const results = await Promise.all(
       (files as Express.Multer.File[]).map(async (file) => {
         const isPdf = file.mimetype === 'application/pdf';
+        const isJson = file.mimetype === 'application/json';
+        const skipProcessing = isPdf || isJson;
+
         const hash = crypto
           .createHash('sha256')
           .update(file.buffer)
@@ -44,21 +47,20 @@ export const uploadFiles = async (
           .slice(0, 12);
 
         // Get correct file extension
-        const ext = isPdf ? 'pdf' : 'webp';
+        const ext = isPdf ? 'pdf' : isJson ? 'json' : 'webp';
         const fileName = `${Date.now()}-${hash}.${ext}`;
-        const finalBuffer = isPdf
-          ? file.buffer // No processing for PDFs
+
+        const finalBuffer = skipProcessing
+          ? file.buffer
           : await sharp(file.buffer)
               .resize({ width: 720, withoutEnlargement: true })
               .webp({ quality: 20 })
-              .toFormat('webp', {
-                progressive: true,
-              })
+              .toFormat('webp', { progressive: true })
               .greyscale()
               .toBuffer();
 
         const size = finalBuffer.length;
-        const mimeType = isPdf ? file.mimetype : 'image/webp';
+        const mimeType = skipProcessing ? file.mimetype : 'image/webp';
 
         if (!IS_DEVELOPMENT) {
           // Upload to S3
@@ -66,7 +68,7 @@ export const uploadFiles = async (
             Bucket: process.env.AWS_S3_BUCKET_NAME!,
             Key: `${folder}/${fileName}`,
             Body: finalBuffer,
-            ContentType: file.mimetype,
+            ContentType: mimeType,
             ACL: 'public-read',
           };
 
@@ -81,8 +83,9 @@ export const uploadFiles = async (
         } else {
           // Save to local /uploads folder
           const localPath = path.join(__dirname, `../../uploads/${folder}`);
-          if (!fs.existsSync(localPath))
+          if (!fs.existsSync(localPath)) {
             fs.mkdirSync(localPath, { recursive: true });
+          }
 
           const filePath = path.join(localPath, fileName);
           fs.writeFileSync(filePath, finalBuffer);

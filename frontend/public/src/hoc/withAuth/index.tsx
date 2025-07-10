@@ -36,28 +36,36 @@ const withAuth = <P extends object>(
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-      const checkAuth = (): void => {
+      // Simple cookie existence check (no API calls)
+      const checkCookieExists = (): void => {
         try {
           const token = getCookie(cookieName);
 
-          if (token) {
+          if (token && isAuthenticated !== true) {
+            // Cookie exists and we're not authenticated yet
             setIsAuthenticated(true);
-          } else {
+          } else if (!token && isAuthenticated === true) {
+            // Cookie was deleted, user is no longer authenticated
+            setIsAuthenticated(false);
+          } else if (!token && isAuthenticated === null) {
+            // Initial state: no cookie found
             setIsAuthenticated(false);
           }
         } catch (error) {
-          console.error('Error checking authentication:', error);
+          console.error('Error checking cookie:', error);
           setIsAuthenticated(false);
         } finally {
-          setIsLoading(false);
+          if (isLoading) {
+            setIsLoading(false);
+          }
         }
       };
 
       // Initial check
-      checkAuth();
+      checkCookieExists();
 
-      // Set up interval to check cookie periodically
-      const interval = setInterval(checkAuth, checkInterval);
+      // Set up interval to only check cookie existence (no API calls)
+      const interval = setInterval(checkCookieExists, checkInterval);
 
       // Set up storage event listener for cross-tab logout
       const handleStorageChange = (e: StorageEvent) => {
@@ -151,7 +159,8 @@ export const withAuthAdvanced = <P extends object>(
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-      const checkAuth = async (): Promise<void> => {
+      // Initial authentication check with validation
+      const initialAuthCheck = async (): Promise<void> => {
         try {
           const token = getCookie(cookieName);
 
@@ -173,11 +182,25 @@ export const withAuthAdvanced = <P extends object>(
         }
       };
 
-      // Initial check
-      checkAuth();
+      // Simple cookie existence check (no API call)
+      const checkCookieExists = (): void => {
+        try {
+          const token = getCookie(cookieName);
+          if (!token && isAuthenticated === true) {
+            // Cookie was deleted, user is no longer authenticated
+            setIsAuthenticated(false);
+          }
+        } catch (error) {
+          console.error('Error checking cookie:', error);
+          setIsAuthenticated(false);
+        }
+      };
 
-      // Set up interval to check cookie periodically
-      const interval = setInterval(checkAuth, checkInterval);
+      // Initial check with validation
+      initialAuthCheck();
+
+      // Set up interval to only check cookie existence (no API calls)
+      const interval = setInterval(checkCookieExists, checkInterval);
 
       // Set up storage event listener for cross-tab logout
       const handleStorageChange = (e: StorageEvent) => {

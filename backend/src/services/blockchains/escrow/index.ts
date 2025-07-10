@@ -10,6 +10,7 @@ import {
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
 import { Interface, ethers, parseEther } from 'ethers';
+import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
@@ -23,8 +24,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
     // Load environment variables
     const RPC_URL = params.rpcUrl; // e.g. from Alchemy, Infura, etc.
     const PRIVATE_KEY = ETHEREUM_DEPLOYER_PRIVATE_KEY;
-
-    console.log({ RPC_URL, PRIVATE_KEY });
 
     if (!RPC_URL || !PRIVATE_KEY) {
       throw new Error('Missing RPC_URL or PRIVATE_KEY in .env');
@@ -58,13 +57,13 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
     const address = await contract.getAddress();
 
     const deploymentTx = contract.deploymentTransaction();
-    const deploymentBlock = deploymentTx?.blockNumber;
+    const deploymentBlockHeight = deploymentTx?.blockNumber;
 
     return {
       contractAddress: address,
       deployerAddress,
       deploymentHash: deploymentTx?.hash,
-      deploymentBlock,
+      deploymentBlockHeight,
       deployedAt: new Date(),
       abi: EscrowArtifact.abi,
     };
@@ -340,4 +339,38 @@ export const getCreateTradeDetails = async (trade: any) => {
     console.error('Error in getCreateTradeDetails:', error);
     return null;
   }
+};
+
+export const getNextEscrowVersion = async (
+  chainId: string,
+  releaseType: ReleaseType,
+) => {
+  const latest = await prisma.smartContract.findFirst({
+    where: {
+      chainId,
+      metadata: {
+        path: ['type'],
+        equals: 'Escrow',
+      },
+    },
+    orderBy: {
+      deployedAt: 'desc',
+    },
+    select: {
+      version: true,
+    },
+  });
+
+  if (!latest?.version) {
+    return 'v1.0.0';
+  }
+
+  const cleanVersion = latest.version.replace(/^v/, '');
+  const next = semver.inc(cleanVersion, releaseType);
+
+  if (!next) {
+    throw new Error(`Unable to bump version from ${latest.version}`);
+  }
+
+  return `v${next}`;
 };
