@@ -5,19 +5,15 @@ import type {
 } from './types';
 import React, { ComponentType, useEffect, useState } from 'react';
 
-// Utility function to get cookie value by name
+// ✅ Improved cookie parser
 const getCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift();
-    return cookieValue || null;
-  }
-  return null;
+  const cookies = document.cookie.split('; ');
+  const cookie = cookies.find((row) => row.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
 };
 
-// HOC to protect routes
-const withAuth = <P extends object>(
+// 🔐 HOC to protect routes
+export const withAuth = <P extends object>(
   WrappedComponent: ComponentType<P>,
   options: WithAuthOptions = {}
 ) => {
@@ -26,7 +22,7 @@ const withAuth = <P extends object>(
     cookieName = 'accessToken',
     loadingComponent = null,
     unauthorizedComponent = null,
-    checkInterval = 5000, // Default 5 seconds
+    checkInterval = 5000,
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -36,109 +32,85 @@ const withAuth = <P extends object>(
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-      // Simple cookie existence check (no API calls)
       const checkCookieExists = (): void => {
-        try {
-          const token = getCookie(cookieName);
+        const token = getCookie(cookieName);
 
-          if (token && isAuthenticated !== true) {
-            // Cookie exists and we're not authenticated yet
-            setIsAuthenticated(true);
-          } else if (!token && isAuthenticated === true) {
-            // Cookie was deleted, user is no longer authenticated
-            setIsAuthenticated(false);
-          } else if (!token && isAuthenticated === null) {
-            // Initial state: no cookie found
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
-          console.error('Error checking cookie:', error);
+        if (token && isAuthenticated !== true) {
+          setIsAuthenticated(true);
+        } else if (!token && isAuthenticated !== false) {
           setIsAuthenticated(false);
-        } finally {
-          if (isLoading) {
-            setIsLoading(false);
-          }
+
+          const currentPath = window.location.pathname + window.location.search;
+          sessionStorage.setItem('redirectPath', currentPath);
+          window.location.href = redirectTo;
         }
+
+        if (isLoading) setIsLoading(false);
       };
 
-      // Initial check
       checkCookieExists();
-
-      // Set up interval to only check cookie existence (no API calls)
       const interval = setInterval(checkCookieExists, checkInterval);
 
-      // Set up storage event listener for cross-tab logout
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'logout' && e.newValue === 'true') {
           setIsAuthenticated(false);
           localStorage.removeItem('logout');
+          window.location.href = redirectTo;
         }
       };
 
-      window.addEventListener('storage', handleStorageChange);
+      const handleVisibilityChange = () => {
+        if (!document.hidden) checkCookieExists();
+      };
 
-      // Cleanup
+      window.addEventListener('storage', handleStorageChange);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
       return () => {
         clearInterval(interval);
         window.removeEventListener('storage', handleStorageChange);
+        document.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange
+        );
       };
     }, []);
 
-    // Handle redirect for unauthenticated users
-    useEffect(() => {
-      if (isAuthenticated === false) {
-        // Store current location for redirect after login
-        const currentPath = window.location.pathname + window.location.search;
-        sessionStorage.setItem('redirectPath', currentPath);
-
-        // Redirect to login page
-        window.location.href = redirectTo;
-      }
-    }, [isAuthenticated]);
-
-    // Show loading component while checking authentication
     if (isLoading) {
-      return loadingComponent ? (
-        <>{loadingComponent}</>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
-          <div>Loading...</div>
-        </div>
+      return (
+        loadingComponent ?? (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100vh',
+            }}
+          >
+            <div>Loading...</div>
+          </div>
+        )
       );
     }
 
-    // Show unauthorized component if provided
     if (isAuthenticated === false && unauthorizedComponent) {
       return <>{unauthorizedComponent}</>;
     }
 
-    // Render the wrapped component if authenticated
     if (isAuthenticated === true) {
       return <WrappedComponent {...props} />;
     }
 
-    // Return null while redirecting
     return null;
   };
 
-  // Set display name for debugging
   AuthenticatedComponent.displayName = `withAuth(${
     WrappedComponent.displayName || WrappedComponent.name
   })`;
-
   return AuthenticatedComponent;
 };
 
-export default withAuth;
-
-// Advanced HOC with token validation
+// 🔐 Advanced HOC with async token validation
 export const withAuthAdvanced = <P extends object>(
   WrappedComponent: ComponentType<P>,
   options: WithAuthAdvancedOptions = {}
@@ -149,7 +121,7 @@ export const withAuthAdvanced = <P extends object>(
     validateToken = null,
     loadingComponent = null,
     unauthorizedComponent = null,
-    checkInterval = 5000, // Default 5 seconds
+    checkInterval = 5000,
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -159,88 +131,74 @@ export const withAuthAdvanced = <P extends object>(
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-      // Initial authentication check with validation
-      const initialAuthCheck = async (): Promise<void> => {
-        try {
-          const token = getCookie(cookieName);
+      const checkCookieExists = async (): Promise<void> => {
+        const token = getCookie(cookieName);
 
-          if (token) {
-            if (validateToken) {
-              const isValid = await validateToken(token);
-              setIsAuthenticated(isValid);
-            } else {
-              setIsAuthenticated(true);
+        if (token) {
+          if (validateToken) {
+            const isValid = await validateToken(token);
+            if (!isValid) {
+              setIsAuthenticated(false);
+              const currentPath =
+                window.location.pathname + window.location.search;
+              sessionStorage.setItem('redirectPath', currentPath);
+              window.location.href = redirectTo;
+              return;
             }
-          } else {
-            setIsAuthenticated(false);
           }
-        } catch (error) {
-          console.error('Error checking authentication:', error);
+          setIsAuthenticated(true);
+        } else if (isAuthenticated !== false) {
           setIsAuthenticated(false);
-        } finally {
-          setIsLoading(false);
+          const currentPath = window.location.pathname + window.location.search;
+          sessionStorage.setItem('redirectPath', currentPath);
+          window.location.href = redirectTo;
         }
+
+        if (isLoading) setIsLoading(false);
       };
 
-      // Simple cookie existence check (no API call)
-      const checkCookieExists = (): void => {
-        try {
-          const token = getCookie(cookieName);
-          if (!token && isAuthenticated === true) {
-            // Cookie was deleted, user is no longer authenticated
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
-          console.error('Error checking cookie:', error);
-          setIsAuthenticated(false);
-        }
-      };
-
-      // Initial check with validation
-      initialAuthCheck();
-
-      // Set up interval to only check cookie existence (no API calls)
+      checkCookieExists();
       const interval = setInterval(checkCookieExists, checkInterval);
 
-      // Set up storage event listener for cross-tab logout
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === 'logout' && e.newValue === 'true') {
           setIsAuthenticated(false);
           localStorage.removeItem('logout');
+          window.location.href = redirectTo;
         }
       };
 
-      window.addEventListener('storage', handleStorageChange);
+      const handleVisibilityChange = () => {
+        if (!document.hidden) checkCookieExists();
+      };
 
-      // Cleanup
+      window.addEventListener('storage', handleStorageChange);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
       return () => {
         clearInterval(interval);
         window.removeEventListener('storage', handleStorageChange);
+        document.removeEventListener(
+          'visibilitychange',
+          handleVisibilityChange
+        );
       };
     }, []);
 
-    useEffect(() => {
-      if (isAuthenticated === false) {
-        const currentPath = window.location.pathname + window.location.search;
-        sessionStorage.setItem('redirectPath', currentPath);
-        window.location.href = redirectTo;
-      }
-    }, [isAuthenticated]);
-
     if (isLoading) {
-      return loadingComponent ? (
-        <>{loadingComponent}</>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
-          <div>Loading...</div>
-        </div>
+      return (
+        loadingComponent ?? (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100vh',
+            }}
+          >
+            <div>Loading...</div>
+          </div>
+        )
       );
     }
 
@@ -258,35 +216,24 @@ export const withAuthAdvanced = <P extends object>(
   AuthenticatedComponent.displayName = `withAuthAdvanced(${
     WrappedComponent.displayName || WrappedComponent.name
   })`;
-
   return AuthenticatedComponent;
 };
 
-// Hook version for functional components
+// 🪝 Auth hook
 export const useAuth = (cookieName: string = 'authToken'): AuthHookResult => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const checkAuth = (): void => {
-      try {
-        const token = getCookie(cookieName);
-        setIsAuthenticated(!!token);
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
+    const checkAuth = () => {
+      const token = getCookie(cookieName);
+      setIsAuthenticated(!!token);
+      setIsLoading(false);
     };
 
-    // Initial check
     checkAuth();
+    const interval = setInterval(checkAuth, 5000);
 
-    // Set up interval to check cookie periodically
-    const interval = setInterval(checkAuth, 5000); // Check every 5 seconds
-
-    // Set up storage event listener for cross-tab logout
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'logout' && e.newValue === 'true') {
         setIsAuthenticated(false);
@@ -296,7 +243,6 @@ export const useAuth = (cookieName: string = 'authToken'): AuthHookResult => {
 
     window.addEventListener('storage', handleStorageChange);
 
-    // Cleanup
     return () => {
       clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
@@ -306,81 +252,20 @@ export const useAuth = (cookieName: string = 'authToken'): AuthHookResult => {
   return { isAuthenticated, isLoading };
 };
 
-// Utility functions for logout management
+// 🔓 Logout helpers
 export const logoutUser = (): void => {
-  // Clear all auth-related cookies
   document.cookie.split(';').forEach((cookie) => {
-    const eqPos = cookie.indexOf('=');
-    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+    const name = cookie.split('=')[0].trim();
     if (name.includes('auth') || name.includes('token')) {
       document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
     }
   });
 
-  // Trigger logout in all tabs
   localStorage.setItem('logout', 'true');
-
-  // Redirect to login
   window.location.href = '/login';
 };
 
-// Clear specific auth cookie
 export const clearAuthCookie = (cookieName: string): void => {
   document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-
-  // Trigger logout in all tabs
   localStorage.setItem('logout', 'true');
 };
-
-// Basic usage
-// interface DashboardProps {
-//   userId: string;
-//   theme: 'light' | 'dark';
-// }
-// const Dashboard: React.FC<DashboardProps> = ({ userId, theme }) => {
-//   return <div>Dashboard for {userId}</div>;
-// };
-// const ProtectedDashboard = withAuth(Dashboard);
-
-// With custom options
-// interface ProfileProps {
-//   username: string;
-//   email: string;
-// }
-// const Profile: React.FC<ProfileProps> = ({ username, email }) => {
-//   return <div>Profile: {username} - {email}</div>;
-// };
-// const ProtectedProfile = withAuth(Profile, {
-//   redirectTo: '/signin',
-//   cookieName: 'userToken',
-//   loadingComponent: <div>Custom loading...</div>,
-//   unauthorizedComponent: <div>Access denied</div>
-// });
-
-// Advanced usage with token validation
-// const AdminPanel: React.FC = () => {
-//   return <div>Admin Panel</div>;
-// };
-// const ProtectedAdmin = withAuthAdvanced(AdminPanel, {
-//   cookieName: 'adminToken',
-//   validateToken: async (token: string): Promise<boolean> => {
-//     try {
-//       const response = await fetch('/api/validate-token', {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       return response.ok;
-//     } catch {
-//       return false;
-//     }
-//   }
-// });
-
-// Using the hook in a functional component
-// const SomeComponent: React.FC = () => {
-//   const { isAuthenticated, isLoading } = useAuth('myAuthToken');
-//
-//   if (isLoading) return <div>Loading...</div>;
-//   if (!isAuthenticated) return <div>Please log in</div>;
-//
-//   return <div>Welcome, authenticated user!</div>;
-// };
