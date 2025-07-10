@@ -14,3 +14,5 @@ export { default as useRouter } from './useRouter';
 export { default as useDispute } from './useDispute';
 export { default as useKYCs } from './useKYCs';
 export { default as useKYC } from './useKYC';
+export { default as useSmartContractDeployment } from './useSmartContractDeployment';
+export { default as useChains } from './useChains';

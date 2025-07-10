@@ -5,14 +5,15 @@ import {
 
 import { Router } from 'express';
 import { deployEscrowSmartContract } from '@/controllers/blockchains/smart-contracts/escrow';
+import { getDeploymentStats } from '@/controllers/blockchains/smart-contracts/stats';
 
 const router = Router();
 
-router.post(
-  '/deploy',
+router.get(
+  '/:chainId/deployment',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
-  deployEscrowSmartContract,
+  getDeploymentStats,
 );
 
 export default router;
