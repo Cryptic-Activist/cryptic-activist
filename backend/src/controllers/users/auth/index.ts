@@ -945,3 +945,27 @@ export const disable2FA = async (req: Request, res: Response) => {
     return;
   }
 };
+
+export const validateWithAuthToken = async (req: Request, res: Response) => {
+  try {
+    const authorization = req.headers.authorization as string;
+
+    const token = authorization.split('Bearer ')[1];
+    const decoded = decodeToken(token);
+
+    if (!decoded) {
+      res.status(401).send({
+        isValid: false,
+      });
+      return;
+    }
+
+    res.status(200).json({ isValid: true });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      isValid: false,
+    });
+    return;
+  }
+};

@@ -3,6 +3,6 @@ import { deployEscrowSmartContract } from '@/controllers/blockchains/smart-contr
 
 const router = Router();
 
-router.get('/deploy', deployEscrowSmartContract);
+router.post('/deploy', deployEscrowSmartContract);
 
 export default router;

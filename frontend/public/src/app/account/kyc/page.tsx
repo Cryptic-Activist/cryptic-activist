@@ -12,6 +12,8 @@ import {
 import React from 'react';
 import styles from './page.module.scss';
 import { useKYC } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const KYCPage = () => {
   const {
@@ -427,4 +429,6 @@ const KYCPage = () => {
   );
 };
 
-export default KYCPage;
+export default withAuthAdvanced(KYCPage, {
+  validateToken: validateWithAuthToken,
+});

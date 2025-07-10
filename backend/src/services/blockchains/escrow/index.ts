@@ -24,6 +24,8 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
     const RPC_URL = params.rpcUrl; // e.g. from Alchemy, Infura, etc.
     const PRIVATE_KEY = ETHEREUM_DEPLOYER_PRIVATE_KEY;
 
+    console.log({ RPC_URL, PRIVATE_KEY });
+
     if (!RPC_URL || !PRIVATE_KEY) {
       throw new Error('Missing RPC_URL or PRIVATE_KEY in .env');
     }

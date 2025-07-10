@@ -9,6 +9,7 @@ import {
   resetPassword,
   resetPasswordRequest,
   resetPasswordVerifyToken,
+  validateWithAuthToken,
   verify2FA,
   verifyAccount,
   verifyPrivateKeys,
@@ -69,5 +70,7 @@ router.post('/2fa/generate', authenticateUser, generate2FA);
 router.post('/2fa/verify/:token', authenticateUser, verify2FA);
 
 router.put('/2fa/disable/:userId', authenticateUser, disable2FA);
+
+router.get('/validate/token', authenticateUser, validateWithAuthToken);
 
 export default router;
