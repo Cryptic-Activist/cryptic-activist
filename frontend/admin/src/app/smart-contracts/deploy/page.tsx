@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useChains, useSmartContractDeployment } from '@/hooks';
 
 import { DynamicIcon } from '@/components';
 import { getLocaleFullDateString } from '@/utils/date';
 import styles from './page.module.scss';
 import { useForm } from 'react-hook-form';
-import { useSmartContractDeployment } from '@/hooks';
 
 const SmartContractDeploymentPage = () => {
 	const {
@@ -19,6 +19,7 @@ const SmartContractDeploymentPage = () => {
 		onSubmit,
 		register
 	} = useSmartContractDeployment();
+	const { chains } = useChains();
 
 	return (
 		<div className={styles.container}>
@@ -94,16 +95,24 @@ const SmartContractDeploymentPage = () => {
 									<label className={styles.formLabel}>Chain</label>
 									<select
 										className={`${styles.formControl} ${
-											errors.defaultFeeRate ? styles.inputError : ''
+											errors.chainId ? styles.inputError : ''
 										}`}
+										{...register('chainId', {
+											required: 'Chain is required',
+											minLength: 2
+										})}
 									>
-										<option>Ethereum</option>
-										<option>Polygon</option>
+										<option value="">Select Chain</option>
+										{chains.data &&
+											chains.data?.length > 0 &&
+											chains.data?.map((chain) => (
+												<option value={chain.id}>{chain.name}</option>
+											))}
 									</select>
 
-									{errors.defaultFeeRate && (
+									{errors.chainId && (
 										<span className={styles.fieldError}>
-											{errors.defaultFeeRate.message}
+											{errors.chainId.message}
 										</span>
 									)}
 									<div className={styles.formHelp}>

@@ -60,7 +60,12 @@ const useSmartContractDeployment = () => {
 	});
 
 	const onSubmit = async (data: DeploymentFormData) => {
-		await deploymentMutation.mutateAsync(data);
+		if (admin?.data?.id) {
+			await deploymentMutation.mutateAsync({
+				...data,
+				adminId: admin?.data?.id
+			});
+		}
 	};
 
 	const handleReset = () => {
