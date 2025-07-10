@@ -74,7 +74,8 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({
       (request: any) => request?.requestedFromId === user?.id
     );
   const hasMoreEvidenceRequest =
-    moreEvidenceRequestFiltered.length > 0 &&
+    moreEvidenceRequestFiltered &&
+    moreEvidenceRequestFiltered?.length > 0 &&
     moreEvidenceRequestFiltered[0].submittedAt === null;
 
   return (

@@ -5,6 +5,8 @@ import { useFeedback, useUser } from '@/hooks';
 import React from 'react';
 import TradeDetailsPage from '.';
 import TradeDetailsPageSkeleton from './skeleton';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const TradeDetails = () => {
   const {
@@ -36,4 +38,6 @@ const TradeDetails = () => {
   );
 };
 
-export default TradeDetails;
+export default withAuthAdvanced(TradeDetails, {
+  validateToken: validateWithAuthToken,
+});

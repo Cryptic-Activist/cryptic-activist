@@ -3,6 +3,8 @@
 import { Button } from '@/components';
 import React from 'react';
 import { usePremium } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const PremiumPage = () => {
   const { subscribeToPremiumMutation } = usePremium();
@@ -20,4 +22,6 @@ const PremiumPage = () => {
   );
 };
 
-export default PremiumPage;
+export default withAuthAdvanced(PremiumPage, {
+  validateToken: validateWithAuthToken,
+});

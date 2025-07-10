@@ -4,8 +4,10 @@ import { PaymentMethod, TradeInstructions, TradePricing } from '@/layouts';
 import { useBlockchain, useCreateOffer, useDynamicTitle } from '@/hooks';
 
 import React from 'react';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
-export default function OfferCreatePage() {
+function OfferCreatePage() {
   const {
     createOffer,
     step,
@@ -60,3 +62,7 @@ export default function OfferCreatePage() {
     </>
   );
 }
+
+export default withAuthAdvanced(OfferCreatePage, {
+  validateToken: validateWithAuthToken,
+});

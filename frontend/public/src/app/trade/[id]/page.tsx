@@ -19,6 +19,8 @@ import {
 } from '@/hooks';
 
 import styles from './page.module.scss';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
   user,
@@ -399,7 +401,7 @@ const Trade: FC<TradeProps> = ({
   );
 };
 
-export default function TradePage() {
+function TradePage() {
   const {
     queryTrade,
     trade,
@@ -477,3 +479,7 @@ export default function TradePage() {
     </div>
   );
 }
+
+export default withAuthAdvanced(TradePage, {
+  validateToken: validateWithAuthToken,
+});

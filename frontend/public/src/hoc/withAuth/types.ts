@@ -1,8 +1,11 @@
+import type { ReactNode } from 'react';
+
 export interface WithAuthOptions {
   redirectTo?: string;
   cookieName?: string;
-  loadingComponent?: React.ReactNode;
-  unauthorizedComponent?: React.ReactNode;
+  loadingComponent?: ReactNode;
+  unauthorizedComponent?: ReactNode;
+  checkInterval?: number;
 }
 
 export interface WithAuthAdvancedOptions extends WithAuthOptions {

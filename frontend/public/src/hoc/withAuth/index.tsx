@@ -26,6 +26,7 @@ const withAuth = <P extends object>(
     cookieName = 'accessToken',
     loadingComponent = null,
     unauthorizedComponent = null,
+    checkInterval = 5000, // Default 5 seconds
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -52,7 +53,27 @@ const withAuth = <P extends object>(
         }
       };
 
+      // Initial check
       checkAuth();
+
+      // Set up interval to check cookie periodically
+      const interval = setInterval(checkAuth, checkInterval);
+
+      // Set up storage event listener for cross-tab logout
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'logout' && e.newValue === 'true') {
+          setIsAuthenticated(false);
+          localStorage.removeItem('logout');
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+
+      // Cleanup
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('storage', handleStorageChange);
+      };
     }, []);
 
     // Handle redirect for unauthenticated users
@@ -120,6 +141,7 @@ export const withAuthAdvanced = <P extends object>(
     validateToken = null,
     loadingComponent = null,
     unauthorizedComponent = null,
+    checkInterval = 5000, // Default 5 seconds
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -151,7 +173,27 @@ export const withAuthAdvanced = <P extends object>(
         }
       };
 
+      // Initial check
       checkAuth();
+
+      // Set up interval to check cookie periodically
+      const interval = setInterval(checkAuth, checkInterval);
+
+      // Set up storage event listener for cross-tab logout
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'logout' && e.newValue === 'true') {
+          setIsAuthenticated(false);
+          localStorage.removeItem('logout');
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+
+      // Cleanup
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('storage', handleStorageChange);
+      };
     }, []);
 
     useEffect(() => {
@@ -206,7 +248,6 @@ export const useAuth = (cookieName: string = 'authToken'): AuthHookResult => {
     const checkAuth = (): void => {
       try {
         const token = getCookie(cookieName);
-        console.log({ token });
         setIsAuthenticated(!!token);
       } catch (error) {
         console.error('Error checking authentication:', error);
@@ -216,13 +257,57 @@ export const useAuth = (cookieName: string = 'authToken'): AuthHookResult => {
       }
     };
 
+    // Initial check
     checkAuth();
+
+    // Set up interval to check cookie periodically
+    const interval = setInterval(checkAuth, 5000); // Check every 5 seconds
+
+    // Set up storage event listener for cross-tab logout
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'logout' && e.newValue === 'true') {
+        setIsAuthenticated(false);
+        localStorage.removeItem('logout');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [cookieName]);
 
   return { isAuthenticated, isLoading };
 };
 
-// Usage examples with TypeScript:
+// Utility functions for logout management
+export const logoutUser = (): void => {
+  // Clear all auth-related cookies
+  document.cookie.split(';').forEach((cookie) => {
+    const eqPos = cookie.indexOf('=');
+    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+    if (name.includes('auth') || name.includes('token')) {
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    }
+  });
+
+  // Trigger logout in all tabs
+  localStorage.setItem('logout', 'true');
+
+  // Redirect to login
+  window.location.href = '/login';
+};
+
+// Clear specific auth cookie
+export const clearAuthCookie = (cookieName: string): void => {
+  document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+
+  // Trigger logout in all tabs
+  localStorage.setItem('logout', 'true');
+};
 
 // Basic usage
 // interface DashboardProps {
