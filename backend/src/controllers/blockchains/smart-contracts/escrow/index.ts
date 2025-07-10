@@ -136,7 +136,7 @@ export const deployEscrowSmartContract = async (
 
     if (transactions.error || !transactions.deployed) {
       res.status(400).json({
-        error: 'Unable to deploy smart contract',
+        error: transactions.error,
       });
       return;
     }

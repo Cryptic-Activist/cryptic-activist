@@ -37,7 +37,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
 
     // Check deployer balance
     const balance = await provider.getBalance(deployerAddress);
-    console.log(`Account balance: ${ethers.formatEther(balance)} ETH`);
 
     // Get Contract Factory and Deploy
     const factory = new ethers.ContractFactory(
@@ -68,6 +67,7 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
       abi: EscrowArtifact.abi,
     };
   } catch (error) {
+    console.log(error);
     throw new Error('Unable to deploy Escrow');
   }
 };
