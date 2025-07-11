@@ -75,8 +75,6 @@ export const validateWithAuthToken = async () => {
       Authorization: bearerToken,
     });
 
-    console.log({ response });
-
     if (response.status !== 200) return false;
 
     return response.data.isValid;

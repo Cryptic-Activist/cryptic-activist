@@ -77,7 +77,7 @@ export const deployPremium = async (
       gasUsed: receipt?.gasUsed,
       gasPrice: receipt?.gasPrice,
       deployedAt: new Date(),
-      abi: PremiumArtifact.abi,
+      artifact: PremiumArtifact,
     };
   } catch (error) {
     console.log(error);

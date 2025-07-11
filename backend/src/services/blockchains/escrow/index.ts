@@ -118,7 +118,7 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
       gasUsed: receipt?.gasUsed,
       gasPrice: receipt?.gasPrice,
       deployedAt: new Date(),
-      abi: EscrowArtifact.abi,
+      artifact: EscrowArtifact,
     };
   } catch (error) {
     console.log(error);

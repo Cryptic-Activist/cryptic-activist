@@ -11,7 +11,7 @@ import { getNextSmartContractVersion } from '@/services/blockchains';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
-const convertABIToFile = (abi: any) => {
+const convertArtifactToFile = (abi: any) => {
   const abiJson = JSON.stringify(abi, null, 2);
   const abiBuffer = Buffer.from(abiJson);
 
@@ -93,7 +93,7 @@ export const deployEscrowSmartContract = async (
           rpcUrl: chain.rpcUrl,
         });
 
-        const file = convertABIToFile(deployed.abi);
+        const file = convertABIToFile(deployed.artifact);
         const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
           file,
         ]);

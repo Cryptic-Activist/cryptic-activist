@@ -35,8 +35,6 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     blockchain: { account, chain },
   } = useBlockchain();
 
-  console.log({ trade });
-
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
     !trade.vendorRejectedFunding &&
@@ -73,8 +71,6 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   const isFundTradeButtonActive =
     account?.address === trade?.traderWalletAddress &&
     chain?.id === trade?.offer?.chain?.chainId;
-
-  console.log({ chain, trade });
 
   return (
     <section className={styles.actionButtons}>

@@ -490,7 +490,7 @@ model SmartContract {
   gasPrice              BigInt?
   deployedAt            DateTime @default(now()) @db.Timestamp()
   isActive              Boolean  @default(true) // Useful for versioned contracts
-  abiUrl                String
+  artifactUrl           String
 
   metadata Json? // Arbitrary extra data (tags, etc.)
 

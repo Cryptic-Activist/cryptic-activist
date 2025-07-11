@@ -11,19 +11,23 @@ import { getBearerToken } from '@/utils';
 
 const iface = new Interface(EscrowArtifact.abi);
 
-const fetchABI = async () => {
-  const bearerToken = getBearerToken();
-  const response = await fetchGet(
-    BACKEND + '/blockchains/smart-contracts/escrow/abi',
-    { Authorization: bearerToken }
-  );
+const getArtifact = async () => {
+  try {
+    const bearerToken = getBearerToken();
+    const response = await fetchGet(
+      BACKEND + '/blockchains/smart-contracts/escrow/abi',
+      { Authorization: bearerToken }
+    );
 
-  if (response.status !== 200) {
+    if (response.status !== 200) {
+      return null;
+    }
+
+    return response.data;
+  } catch (error) {
+    console.log({ error });
     return null;
   }
-
-  const abiFile = JSON.parse(response.data);
-  return abiFile;
 };
 
 export const getProvider = () => {
@@ -49,18 +53,19 @@ export const getSigner = async () => {
 };
 
 export const getEscrowContract = async () => {
-  // TODO
-  // Fetch ABI as a JSON from backend
-  const abiFile = await fetchABI();
+  const artifact = await getArtifact();
 
-  console.log({ abiFile });
+  console.log({ artifact });
 
   const signer = await getSigner();
-  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abiFile, signer);
+  return new ethers.Contract(
+    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+    artifact.abi,
+    signer
+  );
 };
 
 export const decodeFunctionData = (receipt: any) => {
-  console.log({ receipt });
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
@@ -130,7 +135,6 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       message: 'Trade funded successfully',
     };
   } catch (error) {
-    console.log({ fundError: error });
     return {
       message: 'Error funding trade',
       error: error,

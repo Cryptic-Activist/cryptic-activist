@@ -79,7 +79,7 @@ export const deployPremiumSmartContract = async (
     //       rpcUrl: chain.rpcUrl,
     //     });
 
-    //     const file = convertABIToFile(deployed.abi);
+    //     const file = convertABIToFile(deployed);
     //     const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
     //       file,
     //     ]);
