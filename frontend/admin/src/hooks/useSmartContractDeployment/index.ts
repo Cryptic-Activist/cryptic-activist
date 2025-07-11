@@ -8,8 +8,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Chain } from '@/stores/chains/types';
 import { DeploySmartContractParams } from '@/services/smart-contracts/types';
-import type { DeploymentFormData } from './types';
+import type { DeploymentFormData } from './zod';
+import { deploymentFormSchema } from './zod';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const useSmartContractDeployment = () => {
 	const { admin } = useAdmin();
@@ -24,6 +26,7 @@ const useSmartContractDeployment = () => {
 		reset,
 		watch
 	} = useForm<DeploymentFormData>({
+		resolver: zodResolver(deploymentFormSchema),
 		defaultValues: {
 			type: '',
 			chainId: '',
@@ -58,6 +61,7 @@ const useSmartContractDeployment = () => {
 
 	const onSubmit = async (data: DeploymentFormData) => {
 		if (admin?.data?.id) {
+			console.log({ data });
 			await deploymentMutation.mutateAsync({
 				...data,
 				adminId: admin?.data?.id

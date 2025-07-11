@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
 import { useChains, useSmartContractDeployment } from '@/hooks';
 
 import { DynamicIcon } from '@/components';
+import React from 'react';
 import { getLocaleFullDateString } from '@/utils/date';
 import { humanizeCamelCase } from '@/utils';
 import styles from './page.module.scss';
-import { useForm } from 'react-hook-form';
 
 const SmartContractDeploymentPage = () => {
 	const {
@@ -134,10 +133,7 @@ const SmartContractDeploymentPage = () => {
 												className={`${styles.formControl} ${
 													errors.chainId ? styles.inputError : ''
 												}`}
-												{...register('chainId', {
-													required: 'Chain is required',
-													minLength: 2
-												})}
+												{...register('chainId')}
 											>
 												<option value="">Select Chain</option>
 												{chains.data &&
@@ -171,17 +167,7 @@ const SmartContractDeploymentPage = () => {
 												className={`${styles.formControl} ${
 													errors.defaultFeeRate ? styles.inputError : ''
 												}`}
-												{...register('defaultFeeRate', {
-													required: 'Fee rate is required',
-													min: {
-														value: 0,
-														message: 'Fee rate must be positive'
-													},
-													max: {
-														value: 100,
-														message: 'Fee rate cannot exceed 100%'
-													}
-												})}
+												{...register('defaultFeeRate')}
 											/>
 											{errors.defaultFeeRate && (
 												<span className={styles.fieldError}>
@@ -205,17 +191,7 @@ const SmartContractDeploymentPage = () => {
 												className={`${styles.formControl} ${
 													errors.defaultProfitMargin ? styles.inputError : ''
 												}`}
-												{...register('defaultProfitMargin', {
-													required: 'Profit margin is required',
-													min: {
-														value: 0,
-														message: 'Profit margin must be positive'
-													},
-													max: {
-														value: 100,
-														message: 'Profit margin cannot exceed 100%'
-													}
-												})}
+												{...register('defaultProfitMargin')}
 											/>
 											{errors.defaultProfitMargin && (
 												<span className={styles.fieldError}>
@@ -237,13 +213,7 @@ const SmartContractDeploymentPage = () => {
 												className={`${styles.formControl} ${
 													errors.platformWallet ? styles.inputError : ''
 												}`}
-												{...register('platformWallet', {
-													required: 'Platform wallet address is required',
-													pattern: {
-														value: /^0x[a-fA-F0-9]{40}$/,
-														message: 'Invalid Ethereum address format'
-													}
-												})}
+												{...register('platformWallet')}
 											/>
 											{errors.platformWallet && (
 												<span className={styles.fieldError}>
