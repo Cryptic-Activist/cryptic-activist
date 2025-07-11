@@ -49,3 +49,27 @@ export const deployEscrowSmartContract = async (
 
 	return response.data;
 };
+
+export const deployPremiumSmartContract = async (
+	params: DeploySmartContractParams
+) => {
+	const accessToken = getLocalStorage('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPost(
+		`${BACKEND}/blockchains/smart-contracts/premium/deploy`,
+		params,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};

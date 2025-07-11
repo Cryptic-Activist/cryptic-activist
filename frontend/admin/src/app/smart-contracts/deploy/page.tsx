@@ -9,24 +9,17 @@ import { humanizeCamelCase } from '@/utils';
 import styles from './page.module.scss';
 
 const SmartContractDeploymentPage = () => {
-	const {
-		errors,
-		watchedValues,
-		deploymentMutation,
-		deploymentStats,
-		handleReset,
-		handleSubmit,
-		onSubmit,
-		register
-	} = useSmartContractDeployment();
+	const { escrow, premium, deploymentStats, handleResetAllForms } =
+		useSmartContractDeployment();
 	const { chains } = useChains();
 
+	const chainId =
+		escrow.watchedValues.type === 'Escrow'
+			? escrow.watchedValues.chainId
+			: premium.watchedValues.chainId;
 	const currentChain =
-		chains.data &&
-		chains.data.length > 0 &&
-		watchedValues.chainId &&
-		watchedValues.chainId?.length > 0
-			? chains.data?.filter((chain) => chain.id === watchedValues.chainId)
+		chains.data && chains.data.length > 0 && chainId && chainId?.length > 0
+			? chains.data?.filter((chain) => chain.id === chainId)
 			: null;
 
 	return (
@@ -37,10 +30,14 @@ const SmartContractDeploymentPage = () => {
 				<div className={styles.statusRow}>
 					<span
 						className={`${styles.statusBadge} ${
-							styles[deploymentMutation.isPending ? 'PENDING' : 'READY']
+							styles[
+								escrow.deploymentEscrowMutation.isPending ? 'PENDING' : 'READY'
+							]
 						}`}
 					>
-						{deploymentMutation.isPending ? 'DEPLOYING' : 'READY TO DEPLOY'}
+						{escrow.deploymentEscrowMutation.isPending
+							? 'DEPLOYING'
+							: 'READY TO DEPLOY'}
 					</span>
 					<span className={styles.timeStamp}>
 						{deploymentStats.data?.lastDeployedSmartContract?.deployedAt
@@ -84,28 +81,34 @@ const SmartContractDeploymentPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>Contract Configuration</div>
 						<div className={styles.cardContent}>
-							{deploymentMutation.isSuccess && (
+							{escrow.deploymentEscrowMutation.isSuccess && (
 								<div className={styles.successMessage}>
 									<strong>✅ Deployment Successful!</strong> Your smart contract
 									has been deployed successfully.
 								</div>
 							)}
 
-							{deploymentMutation?.isError && (
+							{escrow.deploymentEscrowMutation?.isError && (
 								<div className={styles.errorMessage}>
 									<strong>❌ Deployment Failed:</strong>{' '}
-									{deploymentMutation.data}
+									{escrow.deploymentEscrowMutation.data}
 								</div>
 							)}
 
-							<form onSubmit={handleSubmit(onSubmit)}>
+							<form
+								onSubmit={
+									escrow.watchedValues.type === 'Escrow'
+										? escrow.handleSubmit(escrow.onSubmit)
+										: premium.handleSubmit(premium.onSubmit)
+								}
+							>
 								<div className={styles.formGroup}>
 									<label className={styles.formLabel}>Smart Contract</label>
 									<select
 										className={`${styles.formControl} ${
-											errors.type ? styles.inputError : ''
+											escrow.errors.type ? styles.inputError : ''
 										}`}
-										{...register('type', {
+										{...escrow.register('type', {
 											required: 'Smart Contract is required',
 											minLength: 2
 										})}
@@ -115,9 +118,9 @@ const SmartContractDeploymentPage = () => {
 										<option value="Premium">Premium Subscription</option>
 									</select>
 
-									{errors.type && (
+									{escrow.errors.type && (
 										<span className={styles.fieldError}>
-											{errors.type.message}
+											{escrow.errors.type.message}
 										</span>
 									)}
 									<div className={styles.formHelp}>
@@ -125,15 +128,15 @@ const SmartContractDeploymentPage = () => {
 									</div>
 								</div>
 
-								{watchedValues.type === 'Escrow' && (
+								{escrow.watchedValues.type === 'Escrow' && (
 									<>
 										<div className={styles.formGroup}>
 											<label className={styles.formLabel}>Chain</label>
 											<select
 												className={`${styles.formControl} ${
-													errors.chainId ? styles.inputError : ''
+													escrow.errors.chainId ? styles.inputError : ''
 												}`}
-												{...register('chainId')}
+												{...escrow.register('chainId')}
 											>
 												<option value="">Select Chain</option>
 												{chains.data &&
@@ -145,9 +148,9 @@ const SmartContractDeploymentPage = () => {
 													))}
 											</select>
 
-											{errors.chainId && (
+											{escrow.errors.chainId && (
 												<span className={styles.fieldError}>
-													{errors.chainId.message}
+													{escrow.errors.chainId.message}
 												</span>
 											)}
 											<div className={styles.formHelp}>
@@ -165,13 +168,13 @@ const SmartContractDeploymentPage = () => {
 												min="0"
 												max="100"
 												className={`${styles.formControl} ${
-													errors.defaultFeeRate ? styles.inputError : ''
+													escrow.errors.defaultFeeRate ? styles.inputError : ''
 												}`}
-												{...register('defaultFeeRate')}
+												{...escrow.register('defaultFeeRate')}
 											/>
-											{errors.defaultFeeRate && (
+											{escrow.errors.defaultFeeRate && (
 												<span className={styles.fieldError}>
-													{errors.defaultFeeRate.message}
+													{escrow.errors.defaultFeeRate.message}
 												</span>
 											)}
 											<div className={styles.formHelp}>
@@ -189,13 +192,15 @@ const SmartContractDeploymentPage = () => {
 												min="0"
 												max="100"
 												className={`${styles.formControl} ${
-													errors.defaultProfitMargin ? styles.inputError : ''
+													escrow.errors.defaultProfitMargin
+														? styles.inputError
+														: ''
 												}`}
-												{...register('defaultProfitMargin')}
+												{...escrow.register('defaultProfitMargin')}
 											/>
-											{errors.defaultProfitMargin && (
+											{escrow.errors.defaultProfitMargin && (
 												<span className={styles.fieldError}>
-													{errors.defaultProfitMargin.message}
+													{escrow.errors.defaultProfitMargin.message}
 												</span>
 											)}
 											<div className={styles.formHelp}>
@@ -211,13 +216,111 @@ const SmartContractDeploymentPage = () => {
 												type="text"
 												placeholder="0x..."
 												className={`${styles.formControl} ${
-													errors.platformWallet ? styles.inputError : ''
+													escrow.errors.platformWallet ? styles.inputError : ''
 												}`}
-												{...register('platformWallet')}
+												{...escrow.register('platformWallet')}
 											/>
-											{errors.platformWallet && (
+											{escrow.errors.platformWallet && (
 												<span className={styles.fieldError}>
-													{errors.platformWallet.message}
+													{escrow.errors.platformWallet.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												Ethereum address where platform fees will be collected
+											</div>
+										</div>
+									</>
+								)}
+
+								{escrow.watchedValues.type === 'Premium' && (
+									<>
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>Chain</label>
+											<select
+												className={`${styles.formControl} ${
+													premium.errors.chainId ? styles.inputError : ''
+												}`}
+												{...premium.register('chainId')}
+											>
+												<option value="">Select Chain</option>
+												{chains.data &&
+													chains.data?.length > 0 &&
+													chains.data?.map((chain) => (
+														<option key={chain.id} value={chain.id}>
+															{chain.name}
+														</option>
+													))}
+											</select>
+
+											{premium.errors.chainId && (
+												<span className={styles.fieldError}>
+													{premium.errors.chainId.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												The blockchain network to be deployed
+											</div>
+										</div>
+
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>Monthly Price</label>
+											<input
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												className={`${styles.formControl} ${
+													premium.errors.monthlyPrice ? styles.inputError : ''
+												}`}
+												{...premium.register('monthlyPrice')}
+											/>
+											{premium.errors.monthlyPrice && (
+												<span className={styles.fieldError}>
+													{premium.errors.monthlyPrice.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												Price for the Monthly Premium Account subscription
+											</div>
+										</div>
+
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>Yearly Price</label>
+											<input
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												className={`${styles.formControl} ${
+													premium.errors.yearlyPrice ? styles.inputError : ''
+												}`}
+												{...premium.register('yearlyPrice')}
+											/>
+											{premium.errors.yearlyPrice && (
+												<span className={styles.fieldError}>
+													{premium.errors.yearlyPrice.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												Price for the Yearly Premium Account subscription
+											</div>
+										</div>
+
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>
+												Platform Wallet Address
+											</label>
+											<input
+												type="text"
+												placeholder="0x..."
+												className={`${styles.formControl} ${
+													premium.errors.platformWallet ? styles.inputError : ''
+												}`}
+												{...premium.register('platformWallet')}
+											/>
+											{premium.errors.platformWallet && (
+												<span className={styles.fieldError}>
+													{premium.errors.platformWallet.message}
 												</span>
 											)}
 											<div className={styles.formHelp}>
@@ -231,9 +334,9 @@ const SmartContractDeploymentPage = () => {
 									<button
 										type="submit"
 										className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-										disabled={deploymentMutation.isPending}
+										disabled={escrow.deploymentEscrowMutation.isPending}
 									>
-										{deploymentMutation.isPending
+										{escrow.deploymentEscrowMutation.isPending
 											? 'Deploying Contract...'
 											: 'Deploy Smart Contract'}
 									</button>
@@ -241,8 +344,8 @@ const SmartContractDeploymentPage = () => {
 									<button
 										type="button"
 										className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
-										onClick={handleReset}
-										disabled={deploymentMutation.isPending}
+										onClick={handleResetAllForms}
+										disabled={escrow.deploymentEscrowMutation.isPending}
 									>
 										Reset Form
 									</button>
@@ -257,21 +360,35 @@ const SmartContractDeploymentPage = () => {
 						<div className={styles.cardContent}>
 							<div className={styles.configGrid}>
 								<div className={styles.configItem}>
-									<div className={styles.configLabel}>Fee Rate</div>
+									<div className={styles.configLabel}>
+										{escrow.watchedValues.type === 'Escrow'
+											? 'Fee Rate'
+											: 'Monthly Price'}
+									</div>
 									<div className={styles.configValue}>
-										{watchedValues.defaultFeeRate}%
+										{escrow.watchedValues.type === 'Escrow'
+											? `${escrow.watchedValues.defaultFeeRate}%`
+											: premium.watchedValues.monthlyPrice}
 									</div>
 								</div>
 								<div className={styles.configItem}>
-									<div className={styles.configLabel}>Profit Margin</div>
+									<div className={styles.configLabel}>
+										{escrow.watchedValues.type === 'Escrow'
+											? 'Fee Rate'
+											: 'Yearly Price'}
+									</div>
 									<div className={styles.configValue}>
-										{watchedValues.defaultProfitMargin}%
+										{escrow.watchedValues.type === 'Escrow'
+											? `${escrow.watchedValues.defaultProfitMargin}%`
+											: premium.watchedValues.yearlyPrice}
 									</div>
 								</div>
 								<div className={styles.configItem}>
 									<div className={styles.configLabel}>Platform Wallet</div>
 									<div className={styles.configValue}>
-										{watchedValues.platformWallet || 'Not set'}
+										{escrow.watchedValues.type === 'Escrow'
+											? escrow.watchedValues.platformWallet || 'Not set'
+											: premium.watchedValues.platformWallet || 'Not set'}
 									</div>
 								</div>
 								<div className={styles.configItem}>
@@ -288,7 +405,7 @@ const SmartContractDeploymentPage = () => {
 				{/* Right Column */}
 				<div className={styles.rightColumn}>
 					{/* Deployment Result */}
-					{deploymentMutation.data?.deployed && (
+					{escrow.deploymentEscrowMutation.data?.deployed && (
 						<div className={styles.card}>
 							<div className={styles.cardHeader}>Deployment Result</div>
 							<div className={styles.cardContent}>
@@ -298,7 +415,7 @@ const SmartContractDeploymentPage = () => {
 											Contract Address
 										</label>
 										<div className={styles.contractAddress}>
-											{deploymentMutation.data?.deployed?.address}
+											{escrow.deploymentEscrowMutation.data?.deployed?.address}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
@@ -306,7 +423,10 @@ const SmartContractDeploymentPage = () => {
 											Deployment Hash
 										</label>
 										<div className={styles.transactionHash}>
-											{deploymentMutation.data?.deployed?.deploymentHash}
+											{
+												escrow.deploymentEscrowMutation.data?.deployed
+													?.deploymentHash
+											}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
@@ -314,13 +434,16 @@ const SmartContractDeploymentPage = () => {
 											Block Number
 										</label>
 										<div className={styles.deploymentValue}>
-											{deploymentMutation.data?.deployed?.deploymentBlockHeight}
+											{
+												escrow.deploymentEscrowMutation.data?.deployed
+													?.deploymentBlockHeight
+											}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>Gas Used</label>
 										<div className={styles.deploymentValue}>
-											{deploymentMutation.data?.deployed?.gasUsed}
+											{escrow.deploymentEscrowMutation.data?.deployed?.gasUsed}
 										</div>
 									</div>
 								</div>

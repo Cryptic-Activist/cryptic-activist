@@ -1,5 +1,12 @@
 import {
+	DeploymentEscrowFormData,
+	DeploymentPremiumFormData,
+	deploymentEscrowFormSchema,
+	deploymentPremiumFormSchema
+} from './zod';
+import {
 	deployEscrowSmartContract,
+	deployPremiumSmartContract,
 	getDeploymentStats
 } from '@/services/smart-contracts';
 import { useAdmin, useChains } from '..';
@@ -8,8 +15,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Chain } from '@/stores/chains/types';
 import { DeploySmartContractParams } from '@/services/smart-contracts/types';
-import type { DeploymentFormData } from './zod';
-import { deploymentFormSchema } from './zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -20,13 +25,13 @@ const useSmartContractDeployment = () => {
 	const [selectedChain, setSelectedChain] = useState<Chain | null>(null);
 
 	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		reset,
-		watch
-	} = useForm<DeploymentFormData>({
-		resolver: zodResolver(deploymentFormSchema),
+		register: registerEscrow,
+		handleSubmit: handleSubmitEscrow,
+		formState: { errors: errorsEscrow },
+		reset: resetEscrow,
+		watch: watchEscrow
+	} = useForm<DeploymentEscrowFormData>({
+		resolver: zodResolver(deploymentEscrowFormSchema),
 		defaultValues: {
 			type: '',
 			chainId: '',
@@ -36,15 +41,33 @@ const useSmartContractDeployment = () => {
 		}
 	});
 
-	const watchedValues = watch();
+	const {
+		register: registerPremium,
+		handleSubmit: handleSubmitPremium,
+		formState: { errors: errorsPremium },
+		reset: resetPremium,
+		watch: watchPremium
+	} = useForm<DeploymentPremiumFormData>({
+		resolver: zodResolver(deploymentPremiumFormSchema),
+		defaultValues: {
+			type: '',
+			chainId: '',
+			monthlyPrice: 10,
+			yearlyPrice: 100,
+			platformWallet: ''
+		}
+	});
+
+	const watchedValuesEscrow = watchEscrow();
+	const watchedValuesPremium = watchPremium();
 
 	const deploymentStats = useMutation({
 		mutationKey: ['smartContractDeployment'],
 		mutationFn: getDeploymentStats
 	});
 
-	const deploymentMutation = useMutation({
-		mutationKey: ['smartContractDeployment'],
+	const deploymentEscrowMutation = useMutation({
+		mutationKey: ['escrowSmartContractDeployment'],
 		mutationFn: async (params: DeploySmartContractParams) => {
 			if (admin?.data?.id) {
 				const response = await deployEscrowSmartContract(params);
@@ -55,22 +78,57 @@ const useSmartContractDeployment = () => {
 			if (admin?.data?.id && selectedChain?.id) {
 				deploymentStats.mutate(selectedChain.id);
 			}
-			reset();
+			resetEscrow();
 		}
 	});
 
-	const onSubmit = async (data: DeploymentFormData) => {
+	const deploymentPremiumMutation = useMutation({
+		mutationKey: ['premiumSmartContractDeployment'],
+		mutationFn: async (params: DeploySmartContractParams) => {
+			if (admin?.data?.id) {
+				const response = await deployPremiumSmartContract(params);
+				return response;
+			}
+		},
+		onSuccess: () => {
+			if (admin?.data?.id && selectedChain?.id) {
+				deploymentStats.mutate(selectedChain.id);
+			}
+			resetPremium();
+		}
+	});
+
+	const onSubmitEscrow = async (data: DeploymentEscrowFormData) => {
 		if (admin?.data?.id) {
 			console.log({ data });
-			await deploymentMutation.mutateAsync({
+			await deploymentEscrowMutation.mutateAsync({
 				...data,
 				adminId: admin?.data?.id
 			});
 		}
 	};
 
-	const handleReset = () => {
-		reset();
+	const onSubmitPremium = async (data: DeploymentPremiumFormData) => {
+		if (admin?.data?.id) {
+			console.log({ data });
+			await deploymentPremiumMutation.mutateAsync({
+				...data,
+				adminId: admin?.data?.id
+			});
+		}
+	};
+
+	const handleResetEscrow = () => {
+		resetEscrow();
+	};
+
+	const handleResetPremium = () => {
+		resetPremium();
+	};
+
+	const handleResetAllForms = () => {
+		resetEscrow();
+		resetPremium();
 	};
 
 	useEffect(() => {
@@ -86,14 +144,26 @@ const useSmartContractDeployment = () => {
 	}, [chains.data]);
 
 	return {
-		watchedValues,
-		errors,
-		deploymentMutation,
 		deploymentStats,
-		onSubmit,
-		handleReset,
-		register,
-		handleSubmit
+		handleResetAllForms,
+		escrow: {
+			watchedValues: watchedValuesEscrow,
+			errors: errorsEscrow,
+			deploymentEscrowMutation,
+			onSubmit: onSubmitEscrow,
+			handleReset: handleResetEscrow,
+			register: registerEscrow,
+			handleSubmit: handleSubmitEscrow
+		},
+		premium: {
+			watchedValues: watchedValuesPremium,
+			errors: errorsPremium,
+			deploymentPremiumMutation,
+			onSubmit: onSubmitPremium,
+			handleReset: handleResetPremium,
+			register: registerPremium,
+			handleSubmit: handleSubmitPremium
+		}
 	};
 };
 
