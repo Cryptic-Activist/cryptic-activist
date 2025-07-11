@@ -101,128 +101,161 @@ const SmartContractDeploymentPage = () => {
 
 							<form onSubmit={handleSubmit(onSubmit)}>
 								<div className={styles.formGroup}>
-									<label className={styles.formLabel}>Chain</label>
+									<label className={styles.formLabel}>Smart Contract</label>
 									<select
 										className={`${styles.formControl} ${
-											errors.chainId ? styles.inputError : ''
+											errors.type ? styles.inputError : ''
 										}`}
-										{...register('chainId', {
-											required: 'Chain is required',
+										{...register('type', {
+											required: 'Smart Contract is required',
 											minLength: 2
 										})}
 									>
-										<option value="">Select Chain</option>
-										{chains.data &&
-											chains.data?.length > 0 &&
-											chains.data?.map((chain) => (
-												<option key={chain.id} value={chain.id}>
-													{chain.name}
-												</option>
-											))}
+										<option value="">Select Smart Contract</option>
+										<option value="Escrow">Escrow</option>
+										<option value="Premium">Premium Subscription</option>
 									</select>
 
-									{errors.chainId && (
+									{errors.type && (
 										<span className={styles.fieldError}>
-											{errors.chainId.message}
+											{errors.type.message}
 										</span>
 									)}
 									<div className={styles.formHelp}>
-										The blockchain network to be deployed
+										The smart contract to be deployed to the blockchain
 									</div>
 								</div>
 
-								<div className={styles.formGroup}>
-									<label className={styles.formLabel}>
-										Default Fee Rate (%)
-									</label>
-									<input
-										type="number"
-										step="0.01"
-										min="0"
-										max="100"
-										className={`${styles.formControl} ${
-											errors.defaultFeeRate ? styles.inputError : ''
-										}`}
-										{...register('defaultFeeRate', {
-											required: 'Fee rate is required',
-											min: { value: 0, message: 'Fee rate must be positive' },
-											max: {
-												value: 100,
-												message: 'Fee rate cannot exceed 100%'
-											}
-										})}
-									/>
-									{errors.defaultFeeRate && (
-										<span className={styles.fieldError}>
-											{errors.defaultFeeRate.message}
-										</span>
-									)}
-									<div className={styles.formHelp}>
-										The default fee rate charged on trades (0-100%)
-									</div>
-								</div>
+								{watchedValues.type === 'Escrow' && (
+									<>
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>Chain</label>
+											<select
+												className={`${styles.formControl} ${
+													errors.chainId ? styles.inputError : ''
+												}`}
+												{...register('chainId', {
+													required: 'Chain is required',
+													minLength: 2
+												})}
+											>
+												<option value="">Select Chain</option>
+												{chains.data &&
+													chains.data?.length > 0 &&
+													chains.data?.map((chain) => (
+														<option key={chain.id} value={chain.id}>
+															{chain.name}
+														</option>
+													))}
+											</select>
 
-								<div className={styles.formGroup}>
-									<label className={styles.formLabel}>
-										Default Profit Margin (%)
-									</label>
-									<input
-										type="number"
-										step="0.01"
-										min="0"
-										max="100"
-										className={`${styles.formControl} ${
-											errors.defaultProfitMargin ? styles.inputError : ''
-										}`}
-										{...register('defaultProfitMargin', {
-											required: 'Profit margin is required',
-											min: {
-												value: 0,
-												message: 'Profit margin must be positive'
-											},
-											max: {
-												value: 100,
-												message: 'Profit margin cannot exceed 100%'
-											}
-										})}
-									/>
-									{errors.defaultProfitMargin && (
-										<span className={styles.fieldError}>
-											{errors.defaultProfitMargin.message}
-										</span>
-									)}
-									<div className={styles.formHelp}>
-										The default profit margin for market makers (0-100%)
-									</div>
-								</div>
+											{errors.chainId && (
+												<span className={styles.fieldError}>
+													{errors.chainId.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												The blockchain network to be deployed
+											</div>
+										</div>
 
-								<div className={styles.formGroup}>
-									<label className={styles.formLabel}>
-										Platform Wallet Address
-									</label>
-									<input
-										type="text"
-										placeholder="0x..."
-										className={`${styles.formControl} ${
-											errors.platformWallet ? styles.inputError : ''
-										}`}
-										{...register('platformWallet', {
-											required: 'Platform wallet address is required',
-											pattern: {
-												value: /^0x[a-fA-F0-9]{40}$/,
-												message: 'Invalid Ethereum address format'
-											}
-										})}
-									/>
-									{errors.platformWallet && (
-										<span className={styles.fieldError}>
-											{errors.platformWallet.message}
-										</span>
-									)}
-									<div className={styles.formHelp}>
-										Ethereum address where platform fees will be collected
-									</div>
-								</div>
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>
+												Default Fee Rate (%)
+											</label>
+											<input
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												className={`${styles.formControl} ${
+													errors.defaultFeeRate ? styles.inputError : ''
+												}`}
+												{...register('defaultFeeRate', {
+													required: 'Fee rate is required',
+													min: {
+														value: 0,
+														message: 'Fee rate must be positive'
+													},
+													max: {
+														value: 100,
+														message: 'Fee rate cannot exceed 100%'
+													}
+												})}
+											/>
+											{errors.defaultFeeRate && (
+												<span className={styles.fieldError}>
+													{errors.defaultFeeRate.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												The default fee rate charged on trades (0-100%)
+											</div>
+										</div>
+
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>
+												Default Profit Margin (%)
+											</label>
+											<input
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												className={`${styles.formControl} ${
+													errors.defaultProfitMargin ? styles.inputError : ''
+												}`}
+												{...register('defaultProfitMargin', {
+													required: 'Profit margin is required',
+													min: {
+														value: 0,
+														message: 'Profit margin must be positive'
+													},
+													max: {
+														value: 100,
+														message: 'Profit margin cannot exceed 100%'
+													}
+												})}
+											/>
+											{errors.defaultProfitMargin && (
+												<span className={styles.fieldError}>
+													{errors.defaultProfitMargin.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												The default profit margin for market makers (0-100%)
+											</div>
+										</div>
+
+										<div className={styles.formGroup}>
+											<label className={styles.formLabel}>
+												Platform Wallet Address
+											</label>
+											<input
+												type="text"
+												placeholder="0x..."
+												className={`${styles.formControl} ${
+													errors.platformWallet ? styles.inputError : ''
+												}`}
+												{...register('platformWallet', {
+													required: 'Platform wallet address is required',
+													pattern: {
+														value: /^0x[a-fA-F0-9]{40}$/,
+														message: 'Invalid Ethereum address format'
+													}
+												})}
+											/>
+											{errors.platformWallet && (
+												<span className={styles.fieldError}>
+													{errors.platformWallet.message}
+												</span>
+											)}
+											<div className={styles.formHelp}>
+												Ethereum address where platform fees will be collected
+											</div>
+										</div>
+									</>
+								)}
 
 								<div className={styles.actionButtons}>
 									<button

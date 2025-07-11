@@ -25,6 +25,7 @@ const useSmartContractDeployment = () => {
 		watch
 	} = useForm<DeploymentFormData>({
 		defaultValues: {
+			type: '',
 			chainId: '',
 			defaultFeeRate: 0.5,
 			defaultProfitMargin: 2.0,
