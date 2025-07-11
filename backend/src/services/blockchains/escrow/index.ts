@@ -14,6 +14,7 @@ import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { convertSmartContractParams } from '@/utils/blockchain';
 import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 
@@ -47,22 +48,23 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
 
     const contract = await factory.deploy(
       params.platformWallet,
-      params.defaultFeeRate,
-      params.defaultProfitMargin,
+      convertSmartContractParams(params.defaultFeeRate),
+      convertSmartContractParams(params.defaultProfitMargin),
     );
 
     await contract.waitForDeployment();
 
-    const address = await contract.getAddress();
-
+    const contractAddress = await contract.getAddress();
     const deploymentTx = contract.deploymentTransaction();
-    const deploymentBlockHeight = deploymentTx?.blockNumber;
+    const receipt = await deploymentTx?.wait();
 
     return {
-      contractAddress: address,
+      contractAddress,
       deployerAddress,
       deploymentHash: deploymentTx?.hash,
-      deploymentBlockHeight,
+      deploymentBlockHeight: receipt?.blockNumber,
+      gasUsed: receipt?.gasUsed,
+      gasPrice: receipt?.gasPrice,
       deployedAt: new Date(),
       abi: EscrowArtifact.abi,
     };

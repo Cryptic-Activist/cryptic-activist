@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Request, Response, response } from 'express';
+import { formatBigInt, parseSafeResponse } from '@/utils/number';
 import {
   getBlockHeight,
   getCoinPrice,
@@ -59,7 +60,7 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
         cryptocurrencyChain?.chain?.rpcUrl,
       );
 
-      if (!blockHeight) {
+      if (blockHeight === undefined || blockHeight === null) {
         throw new Error('Unable to find current block height');
       }
 
@@ -70,30 +71,12 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
         maximumFractionDigits: 2,
       });
 
-      const formatterBlockHeight = Intl.NumberFormat('de-DE', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      });
-
       return {
         chain: cryptocurrencyChain?.chain,
-        gasPrice,
-        blockHeight: formatterBlockHeight.format(blockHeight),
+        gasPrice: gasPrice,
+        blockHeight: formatBigInt(blockHeight),
         price: formatterUSD.format(price),
       };
-    });
-
-    const currentContract = await prisma.smartContract.findFirst({
-      where: {
-        chainId: transactions?.chain.id,
-        isActive: true,
-      },
-      orderBy: {
-        deployedAt: 'desc',
-      },
-      select: {
-        version: true,
-      },
     });
 
     const lastDeployedSmartContract = await prisma.smartContract.findFirst({
@@ -106,7 +89,15 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
       select: {
         deployedAt: true,
         version: true,
-        name: true,
+        deploymentBlockHeight: true,
+        gasPrice: true,
+        gasUsed: true,
+        metadata: true,
+        chain: {
+          select: {
+            name: true,
+          },
+        },
         deployedBy: {
           select: {
             username: true,
@@ -115,13 +106,31 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
       },
     });
 
-    res
-      .status(200)
-      .json({
-        ...transactions,
-        ...(currentContract && { currentContract }),
-        ...(lastDeployedSmartContract && { lastDeployedSmartContract }),
-      });
+    if (!lastDeployedSmartContract) {
+      const response = parseSafeResponse(transactions);
+
+      res.status(200).json(response);
+      return;
+    }
+
+    const { deploymentBlockHeight, gasPrice, gasUsed, ...rest } =
+      lastDeployedSmartContract;
+
+    const convertedGasPrice = formatBigInt(gasPrice);
+    const convertedGasUsed = formatBigInt(gasUsed);
+    const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
+
+    const parsed = parseSafeResponse({
+      ...transactions,
+      lastDeployedSmartContract: {
+        gasPrice: convertedGasPrice,
+        gasUsed: convertedGasUsed,
+        deploymentBlockHeight: convertedDeploymentBlockHeight,
+        ...rest,
+      },
+    });
+
+    res.status(200).json(parsed);
   } catch (error) {
     console.log({ error });
     res.status(500).json({ error });

@@ -1,3 +1,5 @@
+import { bigint } from 'zod';
+
 export const formatNumberCompact = (value: number) => {
   if (value >= 1_000_000_000) {
     return (value / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
@@ -37,4 +39,21 @@ export const toBigIntSafe = (input: any) => {
     return BigInt(input.value);
 
   throw new Error('Invalid BigInt input: ' + JSON.stringify(input));
+};
+
+export const parseSafeResponse = (response: { [key: string]: any }) => {
+  const stringfied = JSON.stringify(response, (_, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  );
+  return JSON.parse(stringfied);
+};
+
+export const formatBigInt = (bigint?: bigint | number | null) => {
+  if (!bigint) return null;
+
+  const formatterBigInt = Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return formatterBigInt.format(bigint);
 };

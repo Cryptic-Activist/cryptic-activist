@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 import {
   deployEscrow,
-  getEscrowContract,
   getNextEscrowVersion,
 } from '@/services/blockchains/escrow';
+import { formatBigInt, parseSafeResponse } from '@/utils/number';
 
 import { Readable } from 'node:stream';
-import { ethers } from 'ethers';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
@@ -42,7 +41,6 @@ export const deployEscrowSmartContract = async (
       chainId,
       platformWallet,
       adminId,
-      metadata,
     } = req.body;
 
     const transactions = await prisma.$transaction(async (tx) => {
@@ -92,9 +90,10 @@ export const deployEscrowSmartContract = async (
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
         }
-        const disabledDeployments = tx.smartContract.updateMany({
+        const disabledDeployments = await tx.smartContract.updateMany({
           where: {
             chainId,
+            isActive: true,
             metadata: {
               path: ['type'],
               equals: 'Escrow',
@@ -121,9 +120,14 @@ export const deployEscrowSmartContract = async (
             chainId: chain.id,
             deployedById: admin.id,
             version: newVersion,
-            name: 'Escrow',
+            gasUsed: deployed.gasUsed,
+            gasPrice: deployed.gasPrice,
             metadata: {
               type: 'Escrow',
+              parameters: {
+                feeRate: defaultFeeRate,
+                profitMargin: defaultProfitMargin,
+              },
             },
           },
         });
@@ -141,7 +145,21 @@ export const deployEscrowSmartContract = async (
       return;
     }
 
-    res.status(200).json({ deployed: transactions.deployed });
+    const { gasPrice, gasUsed, deploymentBlockHeight, ...rest } =
+      transactions.deployed;
+
+    const convertedGasPrice = formatBigInt(gasPrice);
+    const convertedGasUsed = formatBigInt(gasUsed);
+    const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
+
+    res.status(200).json({
+      deployed: {
+        gasPrice: convertedGasPrice,
+        gasUsed: convertedGasUsed,
+        deploymentBlockHeight: convertedDeploymentBlockHeight,
+        ...rest,
+      },
+    });
   } catch (error) {
     console.log({ error });
     res.status(500).json({ error });

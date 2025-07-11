@@ -15,16 +15,6 @@ const useSmartContractDeployment = () => {
 	const { admin } = useAdmin();
 	const { chains } = useChains();
 
-	const [isDeploying, setIsDeploying] = useState(false);
-	const [deploymentResult, setDeploymentResult] = useState<{
-		success: boolean;
-		contractAddress?: string;
-		transactionHash?: string;
-		error?: string;
-	} | null>(null);
-	const [deploymentStatus, setDeploymentStatus] = useState<'PENDING' | 'READY'>(
-		'READY'
-	);
 	const [selectedChain, setSelectedChain] = useState<Chain | null>(null);
 
 	const {
@@ -56,6 +46,12 @@ const useSmartContractDeployment = () => {
 				const response = await deployEscrowSmartContract(params);
 				return response;
 			}
+		},
+		onSuccess: () => {
+			if (admin?.data?.id && selectedChain?.id) {
+				deploymentStats.mutate(selectedChain.id);
+			}
+			reset();
 		}
 	});
 
@@ -70,8 +66,6 @@ const useSmartContractDeployment = () => {
 
 	const handleReset = () => {
 		reset();
-		setDeploymentResult(null);
-		setDeploymentStatus('READY');
 	};
 
 	useEffect(() => {

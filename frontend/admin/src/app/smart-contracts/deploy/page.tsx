@@ -5,6 +5,7 @@ import { useChains, useSmartContractDeployment } from '@/hooks';
 
 import { DynamicIcon } from '@/components';
 import { getLocaleFullDateString } from '@/utils/date';
+import { humanizeCamelCase } from '@/utils';
 import styles from './page.module.scss';
 import { useForm } from 'react-hook-form';
 
@@ -21,6 +22,14 @@ const SmartContractDeploymentPage = () => {
 	} = useSmartContractDeployment();
 	const { chains } = useChains();
 
+	const currentChain =
+		chains.data &&
+		chains.data.length > 0 &&
+		watchedValues.chainId &&
+		watchedValues.chainId?.length > 0
+			? chains.data?.filter((chain) => chain.id === watchedValues.chainId)
+			: null;
+
 	return (
 		<div className={styles.container}>
 			{/* Header */}
@@ -35,9 +44,9 @@ const SmartContractDeploymentPage = () => {
 						{deploymentMutation.isPending ? 'DEPLOYING' : 'READY TO DEPLOY'}
 					</span>
 					<span className={styles.timeStamp}>
-						{deploymentStats.data?.lastDeployedSmartContract
+						{deploymentStats.data?.lastDeployedSmartContract?.deployedAt
 							? getLocaleFullDateString(
-									deploymentStats.data?.lastDeployedSmartContract
+									deploymentStats.data?.lastDeployedSmartContract?.deployedAt
 							  )
 							: 'No smart contract deployed yet'}
 					</span>
@@ -62,8 +71,8 @@ const SmartContractDeploymentPage = () => {
 					<div className={styles.metaInfoItem}>
 						<strong className={styles.metaInfoLabel}>Current Version:</strong>
 						<span className={styles.metaInfoValue}>
-							{deploymentStats.data?.currentVersion
-								? deploymentStats.data?.currentVersion
+							{deploymentStats.data?.lastDeployedSmartContract?.version
+								? deploymentStats.data?.lastDeployedSmartContract?.version
 								: 'Unavailable'}
 						</span>
 					</div>
@@ -106,7 +115,9 @@ const SmartContractDeploymentPage = () => {
 										{chains.data &&
 											chains.data?.length > 0 &&
 											chains.data?.map((chain) => (
-												<option value={chain.id}>{chain.name}</option>
+												<option key={chain.id} value={chain.id}>
+													{chain.name}
+												</option>
 											))}
 									</select>
 
@@ -262,7 +273,9 @@ const SmartContractDeploymentPage = () => {
 								</div>
 								<div className={styles.configItem}>
 									<div className={styles.configLabel}>Network</div>
-									<div className={styles.configValue}>Ethereum Mainnet</div>
+									<div className={styles.configValue}>
+										{currentChain ? currentChain[0].name : 'Not set'}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -272,7 +285,7 @@ const SmartContractDeploymentPage = () => {
 				{/* Right Column */}
 				<div className={styles.rightColumn}>
 					{/* Deployment Result */}
-					{deploymentMutation.data && (
+					{deploymentMutation.data?.deployed && (
 						<div className={styles.card}>
 							<div className={styles.cardHeader}>Deployment Result</div>
 							<div className={styles.cardContent}>
@@ -282,26 +295,30 @@ const SmartContractDeploymentPage = () => {
 											Contract Address
 										</label>
 										<div className={styles.contractAddress}>
-											{deploymentMutation.data.contractAddress}
+											{deploymentMutation.data?.deployed?.address}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>
-											Transaction Hash
+											Deployment Hash
 										</label>
 										<div className={styles.transactionHash}>
-											{deploymentMutation.data.transactionHash}
+											{deploymentMutation.data?.deployed?.deploymentHash}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>
 											Block Number
 										</label>
-										<div className={styles.deploymentValue}>18,645,392</div>
+										<div className={styles.deploymentValue}>
+											{deploymentMutation.data?.deployed?.deploymentBlockHeight}
+										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>Gas Used</label>
-										<div className={styles.deploymentValue}>2,456,789</div>
+										<div className={styles.deploymentValue}>
+											{deploymentMutation.data?.deployed?.gasUsed}
+										</div>
 									</div>
 								</div>
 							</div>
@@ -343,27 +360,21 @@ const SmartContractDeploymentPage = () => {
 						</div>
 					</div>
 
-					{/* Contract Features */}
+					{/* Contract Deployed */}
 					{deploymentStats.data?.lastDeployedSmartContract && (
 						<div className={styles.card}>
 							<div className={styles.cardHeader}>Contract Deployed</div>
 							<div className={styles.cardContent}>
 								<div className={styles.featureList}>
 									<div className={styles.deploymentDetail}>
-										<label className={styles.deploymentLabel}>Name</label>
-										<div className={styles.deploymentValue}>
-											{deploymentStats.data?.lastDeployedSmartContract.name}
-										</div>
-									</div>
-									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>
 											Deployed by
 										</label>
 										<div className={styles.deploymentValue}>
-											{
+											{deploymentStats.data?.lastDeployedSmartContract
+												.deployedBy?.username &&
 												deploymentStats.data?.lastDeployedSmartContract
-													.deployedBy?.username
-											}
+													.deployedBy?.username}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
@@ -371,18 +382,43 @@ const SmartContractDeploymentPage = () => {
 											Deployed At
 										</label>
 										<div className={styles.deploymentValue}>
-											{
-												deploymentStats.data?.lastDeployedSmartContract
-													.deployedAt
-											}
+											{deploymentStats.data?.lastDeployedSmartContract
+												?.deployedAt &&
+												getLocaleFullDateString(
+													deploymentStats.data?.lastDeployedSmartContract
+														?.deployedAt
+												)}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>Version</label>
 										<div className={styles.deploymentValue}>
-											{deploymentStats.data?.lastDeployedSmartContract.version}
+											{deploymentStats.data?.lastDeployedSmartContract?.version}
 										</div>
 									</div>
+									{deploymentStats.data?.lastDeployedSmartContract?.metadata
+										?.parameters && (
+										<>
+											<label className={styles.deploymentLabel}>
+												Parameters
+											</label>
+											<div className={styles.deploymentDetailRow}>
+												{Object.entries(
+													deploymentStats.data?.lastDeployedSmartContract
+														?.metadata?.parameters
+												).map(([key, value]: [string, any], index) => (
+													<div className={styles.deploymentDetail} key={index}>
+														<label className={styles.deploymentLabel}>
+															{humanizeCamelCase(key)}
+														</label>
+														<div className={styles.deploymentValue}>
+															{value}
+														</div>
+													</div>
+												))}
+											</div>
+										</>
+									)}
 								</div>
 							</div>
 						</div>

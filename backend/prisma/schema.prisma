@@ -477,7 +477,6 @@ model Tier {
 
 model SmartContract {
   id                    String   @id @default(uuid())
-  name                  String // e.g., "EscrowContract"
   address               String // Deployed contract address
   chainId               String
   chain                 Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
@@ -487,11 +486,13 @@ model SmartContract {
   deployerAddress       String
   deploymentHash        String? // Transaction hash
   deploymentBlockHeight BigInt? // Transaction block height
+  gasUsed               BigInt?
+  gasPrice              BigInt?
   deployedAt            DateTime @default(now()) @db.Timestamp()
   isActive              Boolean  @default(true) // Useful for versioned contracts
   abiUrl                String
 
-  metadata Json? // Arbitrary extra data (ABI, tags, etc.)
+  metadata Json? // Arbitrary extra data (tags, etc.)
 
   @@index([address])
   @@map("smart_contracts")
