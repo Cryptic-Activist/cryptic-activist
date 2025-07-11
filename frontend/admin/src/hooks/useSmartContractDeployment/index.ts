@@ -35,8 +35,8 @@ const useSmartContractDeployment = () => {
 		defaultValues: {
 			type: '',
 			chainId: '',
-			defaultFeeRate: 0.5,
-			defaultProfitMargin: 2.0,
+			defaultFeeRate: '0.5',
+			defaultProfitMargin: '2.0',
 			platformWallet: ''
 		}
 	});
@@ -52,8 +52,8 @@ const useSmartContractDeployment = () => {
 		defaultValues: {
 			type: '',
 			chainId: '',
-			monthlyPrice: 10,
-			yearlyPrice: 100,
+			monthlyPrice: '10',
+			yearlyPrice: '100',
 			platformWallet: ''
 		}
 	});

@@ -9,16 +9,71 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
-import { Interface, ethers, parseEther } from 'ethers';
+import { Interface, InterfaceAbi, ethers, parseEther } from 'ethers';
+import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
 
 const iface = new Interface(EscrowArtifact.abi);
+
+export const getProvider = () => {
+  const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
+  return provider;
+};
+
+export const getSigner = () => {
+  const provider = getProvider();
+  const signer = new ethers.Wallet(ETHEREUM_DEPLOYER_PRIVATE_KEY, provider);
+  return signer;
+};
+
+export const getEscrowABI = async () => {
+  const cacheKey = 'smartContracts:escrow';
+  let abiJson: any | null = null;
+
+  const cachedABI = await redisClient.get(cacheKey);
+
+  if (cachedABI) {
+    abiJson = JSON.parse(cachedABI);
+  } else {
+    const escrowSmartContract = await prisma.smartContract.findFirst({
+      where: {
+        isActive: true,
+        metadata: {
+          path: ['type'],
+          equals: 'Escrow',
+        },
+      },
+      select: {
+        abiUrl: true,
+      },
+    });
+
+    if (!escrowSmartContract) {
+      throw new Error('Unable to find Escrow ABI');
+    }
+
+    const response = await fetch(escrowSmartContract.abiUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ABI from ${escrowSmartContract.abiUrl}`);
+    }
+
+    abiJson = (await response.json()) as InterfaceAbi;
+    await redisClient.setEx(cacheKey, 20, JSON.stringify(abiJson));
+  }
+
+  return abiJson;
+};
+
+export const getEscrowContract = async () => {
+  const abi = await getEscrowABI();
+  const signer = getSigner();
+  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abi, signer);
+};
 
 export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
   try {
@@ -35,9 +90,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
     const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
     const deployerAddress = await wallet.getAddress();
-
-    // Check deployer balance
-    const balance = await provider.getBalance(deployerAddress);
 
     // Get Contract Factory and Deploy
     const factory = new ethers.ContractFactory(
@@ -72,26 +124,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
     console.log(error);
     throw new Error('Unable to deploy Escrow');
   }
-};
-
-export const getProvider = () => {
-  const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
-  return provider;
-};
-
-export const getSigner = () => {
-  const provider = getProvider();
-  const signer = new ethers.Wallet(ETHEREUM_DEPLOYER_PRIVATE_KEY, provider);
-  return signer;
-};
-
-export const getEscrowContract = () => {
-  const signer = getSigner();
-  return new ethers.Contract(
-    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    EscrowArtifact.abi,
-    signer,
-  );
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -144,7 +176,7 @@ export const decodeFunctionData = (receipt: any) => {
 
 export const createTrade = async (params: InitTradeParams) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
 
     const tx = await contract.createTrade(
       params.buyer,
@@ -177,7 +209,7 @@ export const createTrade = async (params: InitTradeParams) => {
 
 export const fundTrade = async (tradeId: number, value: bigint) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
 
     if (!contract) {
       return {
@@ -210,7 +242,7 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
 
 export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.confirmTrade(tradeId, {
       value,
@@ -229,7 +261,7 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
 
 export const executeTrade = async (tradeId: BigInt) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.executeTrade(tradeId);
     const receipt = await tx.wait();
@@ -249,21 +281,21 @@ export const executeTrade = async (tradeId: BigInt) => {
 };
 
 export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.cancelTrade(tradeId, forcedCancel);
   await tx.wait();
   return { message: 'Trade cancelled', txHash: tx.hash };
 };
 
 export const raiseDispute = async () => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.raiseDispute();
   await tx.wait();
   return { message: 'Dispute raised', txHash: tx.hash };
 };
 
 export const escalateDispute = async () => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.escalateDispute();
   await tx.wait();
   return {
@@ -276,14 +308,14 @@ export const resolveDispute = async (
   decision: boolean,
   penalizedParty: 0 | 1 | 2,
 ) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.resolveDispute(decision, penalizedParty);
   await tx.wait();
   return { message: 'Dispute resolved', txHash: tx.hash };
 };
 
 export const getTradeDetails = async (tradeId: bigint) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   // Buyer deposits require sending value along with the transaction.
   const tx = await contract.getTrade(tradeId);
   await tx.wait();
@@ -341,38 +373,4 @@ export const getCreateTradeDetails = async (trade: any) => {
     console.error('Error in getCreateTradeDetails:', error);
     return null;
   }
-};
-
-export const getNextEscrowVersion = async (
-  chainId: string,
-  releaseType: ReleaseType,
-) => {
-  const latest = await prisma.smartContract.findFirst({
-    where: {
-      chainId,
-      metadata: {
-        path: ['type'],
-        equals: 'Escrow',
-      },
-    },
-    orderBy: {
-      deployedAt: 'desc',
-    },
-    select: {
-      version: true,
-    },
-  });
-
-  if (!latest?.version) {
-    return 'v1.0.0';
-  }
-
-  const cleanVersion = latest.version.replace(/^v/, '');
-  const next = semver.inc(cleanVersion, releaseType);
-
-  if (!next) {
-    throw new Error(`Unable to bump version from ${latest.version}`);
-  }
-
-  return `v${next}`;
 };

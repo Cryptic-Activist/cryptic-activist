@@ -1,12 +1,30 @@
 import {
+  BACKEND,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/envs';
 import { Interface, ethers } from 'ethers';
 
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { fetchGet } from '@/services/axios';
+import { getBearerToken } from '@/utils';
 
 const iface = new Interface(EscrowArtifact.abi);
+
+const fetchABI = async () => {
+  const bearerToken = getBearerToken();
+  const response = await fetchGet(
+    BACKEND + '/blockchains/smart-contracts/escrow/abi',
+    { Authorization: bearerToken }
+  );
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  const abiFile = JSON.parse(response.data);
+  return abiFile;
+};
 
 export const getProvider = () => {
   if (typeof window !== 'undefined' && window.ethereum) {
@@ -31,12 +49,14 @@ export const getSigner = async () => {
 };
 
 export const getEscrowContract = async () => {
+  // TODO
+  // Fetch ABI as a JSON from backend
+  const abiFile = await fetchABI();
+
+  console.log({ abiFile });
+
   const signer = await getSigner();
-  return new ethers.Contract(
-    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    EscrowArtifact.abi,
-    signer
-  );
+  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abiFile, signer);
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -122,6 +142,8 @@ export const sellerFundTrade = async (tradeId: number, value: bigint) => {
   try {
     const contract = await getEscrowContract();
 
+    console.log({ contract });
+
     if (!contract) {
       return {
         error: 'Contract not found',
@@ -153,6 +175,8 @@ export const buyerFundTrade = async (tradeId: number, value: bigint) => {
   try {
     const contract = await getEscrowContract();
 
+    console.log({ contract });
+
     if (!contract) {
       return {
         error: 'Contract not found',
@@ -183,6 +207,13 @@ export const buyerFundTrade = async (tradeId: number, value: bigint) => {
 export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   try {
     const contract = await getEscrowContract();
+
+    if (!contract) {
+      return {
+        error: 'Contract not found',
+      };
+    }
+
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.confirmTrade(tradeId, {
       value,

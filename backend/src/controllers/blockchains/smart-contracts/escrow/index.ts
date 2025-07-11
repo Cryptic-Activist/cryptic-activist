@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import {
   deployEscrow,
-  getNextEscrowVersion,
+  getEscrowABI,
+  getEscrowContract,
 } from '@/services/blockchains/escrow';
 import { formatBigInt, parseSafeResponse } from '@/utils/number';
 
 import { Readable } from 'node:stream';
+import { getNextSmartContractVersion } from '@/services/blockchains';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
@@ -28,6 +30,15 @@ const convertABIToFile = (abi: any) => {
   };
 
   return multerFile;
+};
+
+export const getEscrowABIFile = async (req: Request, res: Response) => {
+  try {
+    const abi = await getEscrowABI();
+    res.status(200).json(abi);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 };
 
 export const deployEscrowSmartContract = async (
@@ -90,7 +101,8 @@ export const deployEscrowSmartContract = async (
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
         }
-        const disabledDeployments = await tx.smartContract.updateMany({
+
+        await tx.smartContract.updateMany({
           where: {
             chainId,
             isActive: true,
@@ -108,7 +120,11 @@ export const deployEscrowSmartContract = async (
         const deploymentBlockHeight = deployed.deploymentBlockHeight
           ? BigInt(deployed.deploymentBlockHeight)
           : null;
-        const newVersion = await getNextEscrowVersion(chain.id, 'patch');
+        const newVersion = await getNextSmartContractVersion(
+          'Escrow',
+          chain.id,
+          'patch',
+        );
 
         const newDeployment = await tx.smartContract.create({
           data: {
