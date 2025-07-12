@@ -15,6 +15,7 @@ import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
+import useABIs from '../useABIs';
 import { useApp } from '@/hooks';
 
 const useTradeSocket = ({
@@ -30,6 +31,9 @@ const useTradeSocket = ({
   refetchTrade,
 }: UseSocketParams) => {
   const { addToast } = useApp();
+  const {
+    abis: { escrow },
+  } = useABIs(false);
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -85,10 +89,11 @@ const useTradeSocket = ({
   };
 
   const fundTradeAsSeller = async () => {
-    if (socket && trade?.tradeEscrowDetails) {
+    if (socket && trade?.tradeEscrowDetails && escrow) {
       const tx = await sellerFundTrade(
         parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei)
+        BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei),
+        escrow
       );
 
       if (tx.error) {
@@ -114,10 +119,11 @@ const useTradeSocket = ({
   };
 
   const fundTradeAsBuyer = async () => {
-    if (socket && trade?.tradeEscrowDetails) {
+    if (socket && trade?.tradeEscrowDetails && escrow) {
       const tx = await buyerFundTrade(
         parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei)
+        BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei),
+        escrow
       );
 
       if (tx.error) {

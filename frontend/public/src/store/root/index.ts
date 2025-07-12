@@ -2,6 +2,7 @@ import { IS_DEVELOPMENT } from '@/constants';
 import { RootStore } from './types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useABIsSlice } from '@/store/abis';
 import { useAppSlice } from '@/store/app';
 import { useBlockchainSlice } from '@/store/blockchain';
 import { useChainSlice } from '../chain';
@@ -31,6 +32,7 @@ import { useVerifyAccountSlice } from '@/store/verifyAccount';
 export const useRootStore = create<RootStore>()(
   devtools(
     (set, get, store) => ({
+      ...useABIsSlice(set, get, store),
       ...useAppSlice(set, get, store),
       ...useBlockchainSlice(set, get, store),
       ...useChainsSlice(set, get, store),

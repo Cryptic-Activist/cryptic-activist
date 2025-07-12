@@ -5,6 +5,7 @@ import {
 } from '@/constants/envs';
 import { Interface, ethers } from 'ethers';
 
+import { ABI } from '@/store/abis/types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
@@ -12,7 +13,7 @@ import { getBearerToken } from '@/utils';
 
 const iface = new Interface(EscrowArtifact.abi);
 
-const getABI = async () => {
+export const getEscrowABI = async () => {
   try {
     const bearerToken = getBearerToken();
     const response = await fetchGet(
@@ -25,8 +26,7 @@ const getABI = async () => {
     }
 
     return response.data;
-  } catch (error) {
-    console.log({ error });
+  } catch (_error) {
     return null;
   }
 };
@@ -61,10 +61,8 @@ export const getSigner = async () => {
   }
 };
 
-export const getEscrowContract = async () => {
+export const getEscrowContract = async (abi: any) => {
   try {
-    const abi = await getABI();
-
     const signer = await getSigner();
     const contract = new ethers.Contract(
       ETHEREUM_ESCROW_CONTRACT_ADDRESS,
@@ -125,41 +123,13 @@ export const decodeFunctionData = (receipt: any) => {
   }
 };
 
-export const fundTrade = async (tradeId: number, value: bigint) => {
+export const sellerFundTrade = async (
+  tradeId: number,
+  value: bigint,
+  abi: ABI
+) => {
   try {
-    const contract = await getEscrowContract();
-
-    if (!contract) {
-      return {
-        error: {
-          code: TX_CODE.NO_CONTRACT_FOUND,
-        },
-      };
-    }
-
-    // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.fundTrade(tradeId, {
-      value,
-    });
-    const receipt = await tx.wait();
-    const decoded = decodeFunctionData(receipt);
-
-    return {
-      data: decoded,
-      txHash: tx.hash,
-      message: 'Trade funded successfully',
-    };
-  } catch (error) {
-    return {
-      message: 'Error funding trade',
-      error: error,
-    };
-  }
-};
-
-export const sellerFundTrade = async (tradeId: number, value: bigint) => {
-  try {
-    const contract = await getEscrowContract();
+    const contract = await getEscrowContract(abi);
 
     console.log({ contract });
 
@@ -192,9 +162,13 @@ export const sellerFundTrade = async (tradeId: number, value: bigint) => {
   }
 };
 
-export const buyerFundTrade = async (tradeId: number, value: bigint) => {
+export const buyerFundTrade = async (
+  tradeId: number,
+  value: bigint,
+  abi: ABI
+) => {
   try {
-    const contract = await getEscrowContract();
+    const contract = await getEscrowContract(abi);
 
     console.log({ contract });
 
@@ -226,73 +200,3 @@ export const buyerFundTrade = async (tradeId: number, value: bigint) => {
     };
   }
 };
-
-export const confirmTrade = async (tradeId: bigint, value: bigint) => {
-  try {
-    const contract = await getEscrowContract();
-
-    if (!contract) {
-      return {
-        error: {
-          code: TX_CODE.NO_CONTRACT_FOUND,
-        },
-      };
-    }
-
-    // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.confirmTrade(tradeId, {
-      value,
-    });
-    const receipt = await tx.wait();
-    const decoded = decodeFunctionData(receipt);
-
-    return { data: decoded, txHash: tx.hash, message: 'Trade confirmed' };
-  } catch (error) {
-    return {
-      message: 'Error confirming trade',
-      error: error,
-    };
-  }
-};
-
-// export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
-//   const contract = getEscrowContract();
-//   const tx = await contract.cancelTrade(tradeId, forcedCancel);
-//   await tx.wait();
-//   return { message: 'Trade cancelled', txHash: tx.hash };
-// };
-
-// export const raiseDispute = async () => {
-//   const contract = getEscrowContract();
-//   const tx = await contract.raiseDispute();
-//   await tx.wait();
-//   return { message: 'Dispute raised', txHash: tx.hash };
-// };
-
-// export const escalateDispute = async () => {
-//   const contract = getEscrowContract();
-//   const tx = await contract.escalateDispute();
-//   await tx.wait();
-//   return {
-//     message: 'Dispute escalated - trade cancelled',
-//     txHash: tx.hash,
-//   };
-// };
-
-// export const resolveDispute = async (
-//   decision: boolean,
-//   penalizedParty: 0 | 1 | 2
-// ) => {
-//   const contract = getEscrowContract();
-//   const tx = await contract.resolveDispute(decision, penalizedParty);
-//   await tx.wait();
-//   return { message: 'Dispute resolved', txHash: tx.hash };
-// };
-
-// export const getTradeDetails = async (tradeId: bigint) => {
-//   const contract = getEscrowContract();
-//   // Buyer deposits require sending value along with the transaction.
-//   const tx = await contract.getTrade(tradeId);
-//   await tx.wait();
-//   return { message: 'Trade details', txHash: tx.hash, details: tx };
-// };
