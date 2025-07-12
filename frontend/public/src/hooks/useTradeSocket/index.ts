@@ -99,6 +99,10 @@ const useTradeSocket = ({
           });
           return;
         }
+        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+          addToast('error', 'Unable to fund trade', 8000);
+          return;
+        }
       }
 
       addToast('info', 'Trade was funded by the seller', 8000);
@@ -122,6 +126,10 @@ const useTradeSocket = ({
             chatId,
             senderId: user?.id,
           });
+          return;
+        }
+        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+          addToast('error', 'Unable to fund trade', 8000);
           return;
         }
       }

@@ -114,7 +114,7 @@ export const deployPremiumSmartContract = async (
 
     //     const newDeployment = await tx.smartContract.create({
     //       data: {
-    //         abiUrl: abi.key,
+    //         artifactUrl: abi.key,
     //         address: deployed.contractAddress,
     //         deployerAddress: deployed.deployerAddress,
     //         deploymentBlockHeight: deploymentBlockHeight,

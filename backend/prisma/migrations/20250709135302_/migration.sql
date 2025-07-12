@@ -12,7 +12,7 @@ CREATE TABLE "smart_contracts" (
     "deploymentTx" TEXT,
     "deployedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "abiUrl" TEXT NOT NULL,
+    "artifactUrl" TEXT NOT NULL,
     "metadata" JSONB,
 
     CONSTRAINT "smart_contracts_pkey" PRIMARY KEY ("id")

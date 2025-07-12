@@ -3,6 +3,7 @@ import { fetchGet, fetchPost } from '../axios';
 
 import { Queries } from './types';
 import { getQueries } from '@/utils/axios';
+import { parseDurationToSeconds } from '@/utils/date';
 import { redisClient } from '../db';
 
 export const getCoinPrice = async (id: string, fiatSymbol: string) => {
@@ -25,7 +26,8 @@ export const getCoinPrice = async (id: string, fiatSymbol: string) => {
   const price = Object.values(crypto)[0];
 
   // Cache the crypto price from 60 seconds
-  await redisClient.setEx(chacheKey, 60, JSON.stringify(price));
+  const expiry = parseDurationToSeconds('1m');
+  await redisClient.setEx(chacheKey, expiry, JSON.stringify(price));
 
   return price;
 };

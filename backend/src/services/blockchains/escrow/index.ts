@@ -16,7 +16,9 @@ import semver, { ReleaseType } from 'semver';
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { convertSmartContractParams } from '@/utils/blockchain';
+import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
+import { parseDurationToSeconds } from '@/utils/date';
 
 const iface = new Interface(EscrowArtifact.abi);
 
@@ -49,7 +51,7 @@ export const getEscrowABI = async () => {
         },
       },
       select: {
-        abiUrl: true,
+        artifactUrl: true,
       },
     });
 
@@ -57,13 +59,16 @@ export const getEscrowABI = async () => {
       throw new Error('Unable to find Escrow ABI');
     }
 
-    const response = await fetch(escrowSmartContract.abiUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ABI from ${escrowSmartContract.abiUrl}`);
+    const response = await fetchGet(escrowSmartContract.artifactUrl);
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
+      );
     }
 
-    abiJson = (await response.json()) as InterfaceAbi;
-    await redisClient.setEx(cacheKey, 20, JSON.stringify(abiJson));
+    abiJson = await response.data.abi;
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
   }
 
   return abiJson;

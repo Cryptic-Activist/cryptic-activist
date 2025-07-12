@@ -6,12 +6,13 @@ import {
 import { Interface, ethers } from 'ethers';
 
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 
 const iface = new Interface(EscrowArtifact.abi);
 
-const getArtifact = async () => {
+const getABI = async () => {
   try {
     const bearerToken = getBearerToken();
     const response = await fetchGet(
@@ -31,38 +32,50 @@ const getArtifact = async () => {
 };
 
 export const getProvider = () => {
-  if (typeof window !== 'undefined' && window.ethereum) {
-    return new ethers.BrowserProvider(window.ethereum);
-  }
+  try {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      return new ethers.BrowserProvider(window.ethereum);
+    }
 
-  // Fallback: local hardhat or RPC provider
-  return new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
+    // Fallback: local hardhat or RPC provider
+    return new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
+  } catch (_error) {
+    throw new Error('Unable to get Provider');
+  }
 };
 
 export const getSigner = async () => {
-  const provider = getProvider();
+  try {
+    const provider = getProvider();
 
-  // If using BrowserProvider (MetaMask), get signer normally
-  if (provider instanceof ethers.BrowserProvider) {
-    await provider.send('eth_requestAccounts', []);
-    return await provider.getSigner();
+    // If using BrowserProvider (MetaMask), get signer normally
+    if (provider instanceof ethers.BrowserProvider) {
+      await provider.send('eth_requestAccounts', []);
+      return await provider.getSigner();
+    }
+
+    // If using JsonRpcProvider (e.g., localhost), fall back to account 0
+    return await provider.getSigner(0);
+  } catch (_error) {
+    throw new Error('Unable to get signer');
   }
-
-  // If using JsonRpcProvider (e.g., localhost), fall back to account 0
-  return await provider.getSigner(0);
 };
 
 export const getEscrowContract = async () => {
-  const artifact = await getArtifact();
+  try {
+    const abi = await getABI();
 
-  console.log({ artifact });
+    const signer = await getSigner();
+    const contract = new ethers.Contract(
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      abi,
+      signer
+    );
 
-  const signer = await getSigner();
-  return new ethers.Contract(
-    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    artifact.abi,
-    signer
-  );
+    return contract;
+  } catch (_error) {
+    return null;
+  }
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -118,7 +131,9 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
 
     if (!contract) {
       return {
-        error: 'Contract not found',
+        error: {
+          code: TX_CODE.NO_CONTRACT_FOUND,
+        },
       };
     }
 
@@ -150,7 +165,9 @@ export const sellerFundTrade = async (tradeId: number, value: bigint) => {
 
     if (!contract) {
       return {
-        error: 'Contract not found',
+        error: {
+          code: TX_CODE.NO_CONTRACT_FOUND,
+        },
       };
     }
 
@@ -183,7 +200,9 @@ export const buyerFundTrade = async (tradeId: number, value: bigint) => {
 
     if (!contract) {
       return {
-        error: 'Contract not found',
+        error: {
+          code: TX_CODE.NO_CONTRACT_FOUND,
+        },
       };
     }
 
@@ -214,7 +233,9 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
 
     if (!contract) {
       return {
-        error: 'Contract not found',
+        error: {
+          code: TX_CODE.NO_CONTRACT_FOUND,
+        },
       };
     }
 

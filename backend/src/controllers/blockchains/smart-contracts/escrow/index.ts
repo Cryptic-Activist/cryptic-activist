@@ -11,22 +11,22 @@ import { getNextSmartContractVersion } from '@/services/blockchains';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
-const convertArtifactToFile = (abi: any) => {
-  const abiJson = JSON.stringify(abi, null, 2);
-  const abiBuffer = Buffer.from(abiJson);
+const convertArtifactToFile = (artifact: any) => {
+  const artifactJson = JSON.stringify(artifact, null, 2);
+  const artifactBuffer = Buffer.from(artifactJson);
 
   const multerFile: Express.Multer.File = {
     fieldname: 'abi',
     originalname: 'EscrowABI.json',
     mimetype: 'application/json',
-    buffer: abiBuffer,
-    size: abiBuffer.length,
+    buffer: artifactBuffer,
+    size: artifactBuffer.length,
     // other properties you can stub or mock if needed:
     encoding: '7bit',
     destination: '',
     filename: 'EscrowABI.json',
     path: '',
-    stream: Readable.from(abiBuffer),
+    stream: Readable.from(artifactBuffer),
   };
 
   return multerFile;
@@ -93,7 +93,7 @@ export const deployEscrowSmartContract = async (
           rpcUrl: chain.rpcUrl,
         });
 
-        const file = convertABIToFile(deployed.artifact);
+        const file = convertArtifactToFile(deployed.artifact);
         const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
           file,
         ]);
@@ -116,7 +116,7 @@ export const deployEscrowSmartContract = async (
           },
         });
 
-        const abi = uploadedFiles.files[0];
+        const artifact = uploadedFiles.files[0];
         const deploymentBlockHeight = deployed.deploymentBlockHeight
           ? BigInt(deployed.deploymentBlockHeight)
           : null;
@@ -128,7 +128,7 @@ export const deployEscrowSmartContract = async (
 
         const newDeployment = await tx.smartContract.create({
           data: {
-            abiUrl: abi.key,
+            artifactUrl: artifact.key,
             address: deployed.contractAddress,
             deployerAddress: deployed.deployerAddress,
             deploymentBlockHeight: deploymentBlockHeight,
