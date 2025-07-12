@@ -17,8 +17,8 @@ const useUser = () => {
     user,
   } = useRootStore();
   const mutation = useMutation({
-    mutationFn: user.login,
     mutationKey: ['login'],
+    mutationFn: user.login,
     onSuccess: (data) => {
       if (data?.twoFactorEnabled) {
         toggleModal('login');

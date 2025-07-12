@@ -18,6 +18,12 @@ const main = async () => {
         isPrivate: false,
       },
       {
+        key: 'defaultTradeFeeRate',
+        type: 'NUMBER',
+        value: '0.025',
+        isPrivate: false,
+      },
+      {
         key: 'premiumPriceMonthly',
         type: 'NUMBER',
         value: '10',

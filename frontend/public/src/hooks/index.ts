@@ -30,3 +30,4 @@ export { default as useEditOffer } from './useEditOffer';
 export { default as useAccountSettings } from './useAccountSettings';
 export { default as useKYC } from './useKYC';
 export { default as usePremium } from './usePremium';
+export { default as useTiers } from './useTiers';

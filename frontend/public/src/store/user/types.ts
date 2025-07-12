@@ -33,7 +33,7 @@ type Names = {
   lastName?: string;
 };
 
-type Tier = {
+export type Tier = {
   id: string;
   name: string;
   description: string;

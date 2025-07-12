@@ -17,6 +17,7 @@ import {
   useNotificationSocket,
   useParams,
   usePaymentMethods,
+  useTiers,
   useUser,
 } from '@/hooks';
 
@@ -42,6 +43,7 @@ const InitialSettings = () => {
   const {} = useNotificationSocket({ user });
   const {} = useParams();
   const {} = useABIs();
+  const {} = useTiers();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
     const cryptocurrency = getCryptocurrency(params);

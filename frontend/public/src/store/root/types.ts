@@ -18,6 +18,7 @@ import type { PaymentMethodStore } from '../paymentMethod/types';
 import type { PaymentMethodsStore } from '../paymentMethods/types';
 import type { RegisterStore } from '../register/types';
 import type { ResetPasswordStore } from '../resetPassword/types';
+import type { TiersStore } from '../tiers/types';
 import type { TradeDetailsStore } from '../tradeDetails/types';
 import type { TradeStore } from '../trade/types';
 import type { TradesStore } from '../trades/types';
@@ -49,5 +50,6 @@ export type RootStore = ABIsStore &
   ResetPasswordStore &
   TradesStore &
   TradeDetailsStore &
+  TiersStore &
   VendorStore &
   MyOffersStore;

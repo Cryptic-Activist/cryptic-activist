@@ -24,10 +24,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
   try {
     const { period: periodRaw, userId, payerAddress } = req.body;
 
-    console.log({ periodRaw });
-
     const period = parsePeriod(periodRaw);
-
     // Check for active subscription of the same type
     const existing = await prisma.premiumPurchase.findFirst({
       where: {
@@ -102,7 +99,6 @@ export const changeToYearlyPremiumSubscription = async (
     const { userId, payerAddress } = req.body;
 
     const now = new Date();
-
     const activeMonthly = await prisma.premiumPurchase.findFirst({
       where: {
         userId,

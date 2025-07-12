@@ -131,8 +131,6 @@ export const sellerFundTrade = async (
   try {
     const contract = await getEscrowContract(abi);
 
-    console.log({ contract });
-
     if (!contract) {
       return {
         error: {
@@ -169,8 +167,6 @@ export const buyerFundTrade = async (
 ) => {
   try {
     const contract = await getEscrowContract(abi);
-
-    console.log({ contract });
 
     if (!contract) {
       return {

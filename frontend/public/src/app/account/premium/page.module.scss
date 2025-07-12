@@ -1,19 +1,522 @@
-.container {
-  width: 1400px;
-  margin: 0 auto;
+@use "../../../styles/globals.module.scss";
+
+// Variables
+$primary-color: #3b82f6;
+$primary-hover: #2563eb;
+$secondary-color: #6b7280;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$background-color: #f9fafb;
+$white: #ffffff;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+$blue-50: #eff6ff;
+$blue-100: #dbeafe;
+$blue-600: #2563eb;
+$blue-700: #1d4ed8;
+$blue-800: #1e40af;
+$green-50: #f0fdf4;
+$green-100: #dcfce7;
+$green-600: #16a34a;
+$green-800: #166534;
+$yellow-500: #eab308;
+$orange-500: #f97316;
+
+// Mixins
+@mixin flex-center {
   display: flex;
-  gap: 2rem;
-  padding: 1rem 0;
+  justify-content: center;
+  align-items: center;
 }
 
-@media (max-width: 850px) {
-  .container {
-    flex-direction: column;
+@mixin card-shadow {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+@mixin button-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+@mixin gradient-border {
+  background: linear-gradient(135deg, $yellow-500 0%, $orange-500 100%);
+}
+
+.wrapper {
+  background-color: $background-color;
+}
+
+// Base styles
+.container {
+  min-height: 100vh;
+  padding: 3rem 1rem;
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// Header styles
+.header {
+  text-align: center;
+  padding: 3rem 0;
+  width: 100%;
+  background: #4d3d0d;
+  background: linear-gradient(
+    90deg,
+    globals.$primary-darken-50 0%,
+    rgba(0, 0, 0, 1) 50%,
+    globals.$primary-darken-50 100%
+  );
+}
+
+.headerIcon {
+  @include flex-center;
+  margin-bottom: 1rem;
+}
+
+.crownIcon {
+  width: 3rem;
+  height: 3rem;
+  color: $yellow-500;
+}
+
+.headerTitle {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.headerSubtitle {
+  font-size: 1.25rem;
+  color: #fff;
+  max-width: 32rem;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+// Card styles
+.card {
+  background-color: $white;
+  border-radius: 0.5rem;
+  @include card-shadow;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid globals.$input-border-color;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: 1.5rem;
+}
+
+.cardTitleCenter {
+  @extend .cardTitle;
+  text-align: center;
+}
+
+// Tier benefits styles
+.tierGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tierCard {
+  border: 1px solid $gray-200;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: $primary-color;
   }
+}
+
+.tierHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.tierName {
+  font-weight: 600;
+  color: $gray-900;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.tierBadge {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  @include gradient-border;
+}
+
+.tierVolume {
+  font-size: 0.875rem;
+  color: $gray-600;
+  margin: 0.25rem 0;
+}
+
+.tierFee {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $success-color;
+  margin: 0;
+}
+
+.premiumBonus {
+  padding: 1rem;
+  background-color: $blue-50;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.premiumBonusText {
+  font-size: 0.875rem;
+  color: $blue-800;
+  margin: 0;
+}
+
+// Plan toggle styles
+.planToggle {
+  @include flex-center;
+  margin-bottom: 1.5rem;
+}
+
+.planToggleContainer {
+  background-color: $gray-100;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  display: flex;
+}
+
+.planToggleButton {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  @include button-transition;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: $gray-500;
+
+  &:hover {
+    color: $gray-700;
+  }
+
+  &.active {
+    background-color: $white;
+    color: $gray-900;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+// Plan card styles
+.planContainer {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.planCard {
+  border: 2px solid $primary-color;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, $blue-50 0%, #e0e7ff 100%);
+}
+
+.planHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.planName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $gray-900;
+  margin-bottom: 0.5rem;
+}
+
+.planPrice {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: $primary-color;
+  margin-bottom: 0.5rem;
+}
+
+.planPeriod {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: $gray-500;
+}
+
+.planSavings {
+  display: inline-block;
+  background-color: $green-100;
+  color: $green-800;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.planBilling {
+  font-size: 0.875rem;
+  color: $gray-600;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.subscribeButton {
+  width: 100%;
+  background-color: $primary-color;
+  color: $white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1.125rem;
+  border: none;
+  cursor: pointer;
+  @include button-transition;
+  margin-bottom: 1rem;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.processing {
+    opacity: 0.75;
+  }
+}
+
+.planDisclaimer {
+  font-size: 0.75rem;
+  color: $gray-500;
+  text-align: center;
+  margin: 0;
+}
+
+// Features styles
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.featureIconContainer {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  background-color: $blue-100;
+  border-radius: 0.5rem;
+  @include flex-center;
+  color: $primary-color;
+}
+
+.featureIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.featureContent {
+  flex: 1;
+}
+
+.featureTitle {
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+.featureDescription {
+  color: $gray-600;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+// Calculator styles
+.calculatorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.calculatorColumn {
+  flex: 1;
+}
+
+.calculatorTitle {
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.calculatorRows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.calculatorRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  padding: 0.25rem 0;
+
+  &.calculatorTotal {
+    font-weight: 600;
+    border-top: 1px solid $gray-200;
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  &.calculatorPremium {
+    color: $primary-color;
+  }
+
+  &.calculatorPremiumTotal {
+    color: $success-color;
+  }
+}
+
+.calculatorExample {
+  padding: 1rem;
+  background-color: $green-50;
+  border-radius: 0.5rem;
+}
+
+.calculatorExampleText {
+  font-size: 0.875rem;
+  color: $green-800;
+  margin: 0;
+}
+
+// FAQ styles
+.faqContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faqItem {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $gray-200;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.faqQuestion {
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.faqAnswer {
+  color: $gray-600;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
 }
 
 @media (max-width: 1500px) {
   .container {
     width: 90%;
+    margin: 0 auto;
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+
+  .headerTitle {
+    font-size: 1.875rem;
+  }
+
+  .headerSubtitle {
+    font-size: 1.125rem;
+  }
+
+  .tierGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .calculatorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .planToggleContainer {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .headerTitle {
+    font-size: 1.5rem;
+  }
+
+  .headerSubtitle {
+    font-size: 1rem;
+  }
+
+  .planPrice {
+    font-size: 1.875rem;
+  }
+
+  .feature {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .featureIconContainer {
+    margin-bottom: 0.5rem;
   }
 }

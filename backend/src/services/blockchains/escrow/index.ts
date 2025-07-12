@@ -360,6 +360,8 @@ export const getCreateTradeDetails = async (trade: any) => {
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
+    // const feeRate =
+
     return {
       buyerWallet: buyerWallet as Address,
       sellerWallet: sellerWallet as Address,
@@ -372,7 +374,7 @@ export const getCreateTradeDetails = async (trade: any) => {
 
       tradeDurationInSeconds,
       feeRate: 250,
-      profitMargin: 150,
+      profitMargin: 0,
     };
   } catch (error) {
     console.error('Error in getCreateTradeDetails:', error);
