@@ -12,6 +12,7 @@ import {
 } from '@/utils/generators/jwt';
 
 import QRCode from 'qrcode';
+import { TIER_VOLUME } from '@/constants';
 import bcrypt from 'bcryptjs';
 import buildAccountCreatedEmail from '@/services/email/templates/account-created';
 import { debug } from '@/utils/logger/logger';
@@ -212,7 +213,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
             requiredXP: true,
             discount: true,
             tradingFee: true,
-            minVolume: true,
+            volume: true,
           },
         },
         profileColor: true,
@@ -347,7 +348,7 @@ export const register = async (req: Request, res: Response) => {
         level: 0,
         tradingFee: 0.05,
         discount: 0,
-        minVolume: 0,
+        volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
     });

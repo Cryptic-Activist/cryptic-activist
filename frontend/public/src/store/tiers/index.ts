@@ -10,7 +10,7 @@ export const useTiersSlice: StateCreator<
   TiersStore
 > = (set, get) => ({
   tiers: {
-    data: undefined,
+    data: [],
     setTiersValue: (params, actionName = 'tiers/setValue') => {
       set(
         ({ tiers }) => ({

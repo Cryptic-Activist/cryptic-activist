@@ -10,9 +10,13 @@ import {
 } from 'react-icons/fa6';
 import React, { useState } from 'react';
 
+import { formatNumberCompact } from '@/utils/numbers';
 import styles from './page.module.scss';
+import { useTiers } from '@/hooks';
 
 const PremiumSubscription = () => {
+  const { tiers } = useTiers(false);
+
   const [selectedPlan, setSelectedPlan] = useState('annual');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -32,12 +36,12 @@ const PremiumSubscription = () => {
     },
   };
 
-  const currentTierBenefits = {
-    bronze: { discount: '0.10%', volume: '$0 - $10K' },
-    silver: { discount: '0.08%', volume: '$10K - $50K' },
-    gold: { discount: '0.06%', volume: '$50K - $200K' },
-    platinum: { discount: '0.04%', volume: '$200K+' },
-  };
+  // const currentTierBenefits = {
+  //   bronze: { discount: '0.10%', volume: '$0 - $10K' },
+  //   silver: { discount: '0.08%', volume: '$10K - $50K' },
+  //   gold: { discount: '0.06%', volume: '$50K - $200K' },
+  //   platinum: { discount: '0.04%', volume: '$200K+' },
+  // };
 
   const premiumFeatures = [
     {
@@ -69,6 +73,39 @@ const PremiumSubscription = () => {
     },
   ];
 
+  const formattedTiers = tiers.data.map(
+    ({ volume, tradingFee, ...rest }, index) => {
+      const isFirst = index === 0;
+      const isLast = index === tiers?.data.length - 1;
+      const tradingFeePercent = `${tradingFee * 100}%`;
+
+      if (isFirst) {
+        return {
+          ...rest,
+          tradingFee: tradingFeePercent,
+          volume: `0 - ${formatNumberCompact(volume)}`,
+        };
+      }
+      if (isLast) {
+        return {
+          ...rest,
+          tradingFee: tradingFeePercent,
+          volume: `${formatNumberCompact(volume)}+`,
+        };
+      }
+
+      const nextVolume = tiers.data[index + 1].volume;
+
+      return {
+        ...rest,
+        tradingFee: tradingFeePercent,
+        volume: `${formatNumberCompact(volume)} - ${formatNumberCompact(
+          nextVolume
+        )}`,
+      };
+    }
+  );
+
   const handleSubscribe = async () => {
     setIsProcessing(true);
     // Simulate API call
@@ -97,7 +134,17 @@ const PremiumSubscription = () => {
           <div className={styles.card}>
             <h2 className={styles.cardTitle}>Your Current Tier Benefits</h2>
             <div className={styles.tierGrid}>
-              {Object.entries(currentTierBenefits).map(([tier, benefits]) => (
+              {formattedTiers?.map((tier) => (
+                <div key={tier.id} className={styles.tierCard}>
+                  <div className={styles.tierHeader}>
+                    <h3 className={styles.tierName}>{tier.name}</h3>
+                    <div className={styles.tierBadge}></div>
+                  </div>
+                  <p className={styles.tierVolume}>Volume: {tier.volume}</p>
+                  <p className={styles.tierFee}>Fee: {tier.tradingFee}</p>
+                </div>
+              ))}
+              {/* {Object.entries(currentTierBenefits).map(([tier, benefits]) => (
                 <div key={tier} className={styles.tierCard}>
                   <div className={styles.tierHeader}>
                     <h3 className={styles.tierName}>{tier}</h3>
@@ -106,7 +153,7 @@ const PremiumSubscription = () => {
                   <p className={styles.tierVolume}>Volume: {benefits.volume}</p>
                   <p className={styles.tierFee}>Fee: {benefits.discount}</p>
                 </div>
-              ))}
+              ))} */}
             </div>
             <div className={styles.premiumBonus}>
               <p className={styles.premiumBonusText}>

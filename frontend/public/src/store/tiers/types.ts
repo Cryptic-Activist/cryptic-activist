@@ -1,25 +1,24 @@
 export type Tier = {
   id: string;
   name: string;
-  symbol: string;
-  country: string;
+  description: string;
+  level: number;
+  tradingFee: number;
+  discount: number;
+  volume: number;
+  requiredXP: number;
 };
 
 export type TiersStore = {
   tiers: {
-    data?: Tier[];
+    data: Tier[];
     setTiersValue: (value: Value, action?: `tiers/${string}`) => void;
     getTiers: (tiers: Value) => Promise<void>;
   };
 };
 
 export type TiersSetter = {
-  data: {
-    id: string;
-    name: string;
-    symbol: string;
-    country: string;
-  }[];
+  data: Tier[];
 };
 
 export type Value = TiersSetter;

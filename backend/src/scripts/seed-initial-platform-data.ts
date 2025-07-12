@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
-import { IS_DEVELOPMENT } from '@/constants';
+import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
+
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
@@ -48,7 +49,7 @@ const main = async () => {
         level: 0,
         tradingFee: 0.05,
         discount: 0,
-        minVolume: 0,
+        volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
       {
@@ -58,7 +59,7 @@ const main = async () => {
         level: 1,
         tradingFee: 0.05,
         discount: 0.05,
-        minVolume: 0,
+        volume: TIER_VOLUME.SILVER,
         requiredXP: 1000,
       },
       {
@@ -68,16 +69,16 @@ const main = async () => {
         level: 2,
         tradingFee: 0.05,
         discount: 0.1,
-        minVolume: 0,
+        volume: TIER_VOLUME.GOLD,
         requiredXP: 2500,
       },
       {
         name: 'Platinum',
-        description: 'Achieve 10,000 XPto join our exclusive Platinum tier.',
+        description: 'Achieve 10,000 XP to join our exclusive Platinum tier.',
         level: 3,
         tradingFee: 0.05,
         discount: 0.15,
-        minVolume: 0,
+        volume: TIER_VOLUME.PLATINUM,
         requiredXP: 5000,
       },
       {
@@ -87,7 +88,7 @@ const main = async () => {
         level: 4,
         tradingFee: 0.05,
         discount: 0.2,
-        minVolume: 0,
+        volume: TIER_VOLUME.DIAMOND,
         requiredXP: 10000,
       },
     ],
@@ -985,7 +986,7 @@ const main = async () => {
         level: 0,
         tradingFee: 0.05,
         discount: 0,
-        minVolume: 0,
+        volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
     });

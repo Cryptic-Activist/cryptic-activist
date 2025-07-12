@@ -468,7 +468,7 @@ model Tier {
   level       Int    @unique
   tradingFee  Float
   discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
-  minVolume   Float // Minimum trading volume to qualify for this tier
+  volume      Float // Minimum trading volume to qualify for this tier
   requiredXP  Int
   users       User[]
 
