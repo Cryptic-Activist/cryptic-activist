@@ -4,15 +4,15 @@ import {
 } from '@/middlewares/authorization';
 
 import { Router } from 'express';
-import { deployEscrowSmartContract } from '@/controllers/blockchains/smart-contracts/escrow';
+import { deployPremiumSmartContract } from '@/controllers/blockchains/smart-contracts/premium';
 
 const router = Router();
 
-router.get(
+router.post(
   '/deploy',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
-  deployEscrowSmartContract,
+  deployPremiumSmartContract,
 );
 
 export default router;

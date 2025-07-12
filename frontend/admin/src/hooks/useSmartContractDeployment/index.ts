@@ -46,7 +46,8 @@ const useSmartContractDeployment = () => {
 		handleSubmit: handleSubmitPremium,
 		formState: { errors: errorsPremium },
 		reset: resetPremium,
-		watch: watchPremium
+		watch: watchPremium,
+		setValue: setValuePremium
 	} = useForm<DeploymentPremiumFormData>({
 		resolver: zodResolver(deploymentPremiumFormSchema),
 		defaultValues: {
@@ -78,7 +79,7 @@ const useSmartContractDeployment = () => {
 			if (admin?.data?.id && selectedChain?.id) {
 				deploymentStats.mutate(selectedChain.id);
 			}
-			resetEscrow();
+			handleResetAllForms();
 		}
 	});
 
@@ -94,7 +95,7 @@ const useSmartContractDeployment = () => {
 			if (admin?.data?.id && selectedChain?.id) {
 				deploymentStats.mutate(selectedChain.id);
 			}
-			resetPremium();
+			handleResetAllForms();
 		}
 	});
 
@@ -142,6 +143,14 @@ const useSmartContractDeployment = () => {
 			setSelectedChain(chains.data[0]);
 		}
 	}, [chains.data]);
+
+	useEffect(() => {
+		if (watchedValuesEscrow.type === 'Premium') {
+			setValuePremium('type', watchedValuesEscrow.type);
+		}
+	}, [watchedValuesEscrow.type]);
+
+	console.log({ errorsPremium });
 
 	return {
 		deploymentStats,

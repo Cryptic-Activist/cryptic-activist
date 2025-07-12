@@ -368,7 +368,7 @@ const SmartContractDeploymentPage = () => {
 									<div className={styles.configValue}>
 										{escrow.watchedValues.type === 'Escrow'
 											? `${escrow.watchedValues.defaultFeeRate}%`
-											: premium.watchedValues.monthlyPrice}
+											: `${premium.watchedValues.monthlyPrice} USD`}
 									</div>
 								</div>
 								<div className={styles.configItem}>
@@ -380,7 +380,7 @@ const SmartContractDeploymentPage = () => {
 									<div className={styles.configValue}>
 										{escrow.watchedValues.type === 'Escrow'
 											? `${escrow.watchedValues.defaultProfitMargin}%`
-											: premium.watchedValues.yearlyPrice}
+											: `${premium.watchedValues.yearlyPrice} USD`}
 									</div>
 								</div>
 								<div className={styles.configItem}>
