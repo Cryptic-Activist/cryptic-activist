@@ -5,11 +5,11 @@ import {
 } from './zod';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { DefaultFields } from './types';
 import { getPlatformSettings } from '@/services/platformSettings';
 import { useAdmin } from '..';
-import { useQuery } from '@tanstack/react-query';
 import { useStore } from '@nanostores/react';
 
 const usePlatformSettings = () => {
@@ -66,6 +66,11 @@ const usePlatformSettings = () => {
 		enabled: !!admin?.data?.id
 	});
 
+	const updatePublicPlatformSettingsMutation = useMutation({
+		mutationKey: ['updatePublicPlatformSettings']
+		// mutationFn:
+	});
+
 	const appendPublicField = () => {
 		appendPublic(defaultFields);
 		setCurrentPublicIndex((prev) => {
@@ -88,6 +93,7 @@ const usePlatformSettings = () => {
 
 	const removePublicField = () => {
 		removePublic();
+		console.log('Removing');
 		setCurrentPublicIndex((prev) => {
 			if (prev > 0) {
 				return prev--;
@@ -127,7 +133,12 @@ const usePlatformSettings = () => {
 		removePublicField();
 		$platformSettings.public.forEach((field) => {
 			console.log({ field });
-			appendPublic({ key: field.key, value: field.value, type: field.type });
+			appendPublic({
+				key: field.key,
+				value: field.value,
+				type: field.type,
+				canBeDeleted: field.canBeDeleted
+			});
 			setCurrentPublicIndex((prev) => {
 				if (prev > 0) {
 					return prev++;
@@ -137,7 +148,12 @@ const usePlatformSettings = () => {
 		});
 		removePrivateField();
 		$platformSettings.private.forEach((field) => {
-			appendPrivate({ key: field.key, value: field.value, type: field.type });
+			appendPrivate({
+				key: field.key,
+				value: field.value,
+				type: field.type,
+				canBeDeleted: field.canBeDeleted
+			});
 			setCurrentPrivateIndex((prev) => {
 				if (prev > 0) {
 					return prev++;
@@ -164,7 +180,8 @@ const usePlatformSettings = () => {
 		onSubmitPrivate,
 		onSubmitPublic,
 		currentPrivateIndex,
-		currentPublicIndex
+		currentPublicIndex,
+		updatePublicPlatformSettingsMutation
 	};
 };
 

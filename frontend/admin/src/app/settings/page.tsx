@@ -26,7 +26,12 @@ const PlatformSettings = () => {
 		registerPrivate,
 		registerPublic,
 		currentPrivateIndex,
-		currentPublicIndex
+		currentPublicIndex,
+		appendPrivateField,
+		appendPublicField,
+		removePrivateField,
+		removePublicField,
+		updatePublicPlatformSettingsMutation
 	} = usePlatformSettings();
 
 	const chainId =
@@ -58,131 +63,102 @@ const PlatformSettings = () => {
 						<div className={styles.cardContent}>
 							<form onSubmit={handleSubmitPublic(onSubmitPublic)}>
 								{/* {fieldsPublic.pu} */}
-								{fieldsPublic.map((field) => (
+								{fieldsPublic.map((field, index) => (
 									<div className={styles.formGroup} key={field.id}>
 										<div className={styles.formRow}>
 											<div className={styles.formInputContainer}>
-												<label className={styles.formLabel}>Name</label>
+												<label className={styles.formLabel}>Key</label>
 												<input
 													type="text"
 													className={`${styles.formControl} ${
-														errorsPublic.defaultFeeRate ? styles.inputError : ''
+														errorsPublic.public &&
+														errorsPublic.public[index]?.key
+															? styles.inputError
+															: ''
 													}`}
-													{...registerPublic(
-														`public.${currentPublicIndex}.key`
-													)}
+													disabled={!field.canBeDeleted}
+													{...registerPublic(`public.${index}.key`)}
 													placeholder="Setting Name"
 												/>
 											</div>
 											<div className={styles.formInputContainer}>
-												<label className={styles.formLabel}>Type</label>
-												<select
+												<label className={styles.formLabel}>Value</label>
+												<input
+													type="text"
 													className={`${styles.formControl} ${
-														errorsPublic.chainId ? styles.inputError : ''
+														errorsPublic.public &&
+														errorsPublic.public[index]?.value
+															? styles.inputError
+															: ''
 													}`}
-													{...registerPublic(
-														`public.${currentPublicIndex}.type`
-													)}
-												>
-													<option value="STRING">String</option>
-													<option value="NUMBER">Number</option>
-													<option value="BOOLEAN">Boolean</option>
-												</select>
+													{...registerPublic(`public.${index}.value`)}
+													placeholder="Setting Name"
+												/>
+											</div>
+											<div className={styles.inputBtnContainer}>
+												<div className={styles.formInputContainer}>
+													<label className={styles.formLabel}>Type</label>
+													<select
+														className={`${styles.formControl} ${
+															errorsPublic.public &&
+															errorsPublic.public[index]?.type
+																? styles.inputError
+																: ''
+														}`}
+														disabled={!field.canBeDeleted}
+														{...registerPublic(`public.${index}.type`)}
+													>
+														<option value="STRING">String</option>
+														<option value="NUMBER">Number</option>
+														<option value="BOOLEAN">Boolean</option>
+													</select>
+												</div>
+												{field.canBeDeleted && (
+													<button
+														className={`${styles.btn} ${styles.btnDanger} ${styles.deleteBtn} `}
+													>
+														<DynamicIcon
+															iconName="FaTrash"
+															size={16}
+															color="#fff"
+														/>
+													</button>
+												)}
 											</div>
 										</div>
-										{errorsPublic.defaultFeeRate && (
+										{errorsPublic.public && errorsPublic.public[index]?.key && (
 											<span className={styles.fieldError}>
-												{errorsPublic.defaultFeeRate.message}
+												{errorsPublic.public[index].message}
 											</span>
 										)}
 									</div>
 								))}
 
-								{escrow.watchedValues.type === 'Escrow' && (
-									<>
-										<div className={styles.formGroup}>
-											<label className={styles.formLabel}>
-												Default Fee Rate (%)
-											</label>
-											<input
-												type="text"
-												step="0.01"
-												min="0"
-												max="100"
-												className={`${styles.formControl} ${
-													escrow.errors.defaultFeeRate ? styles.inputError : ''
-												}`}
-												{...escrow.register('defaultFeeRate')}
-											/>
-											{escrow.errors.defaultFeeRate && (
-												<span className={styles.fieldError}>
-													{escrow.errors.defaultFeeRate.message}
-												</span>
-											)}
-											<div className={styles.formHelp}>
-												The default fee rate charged on trades (0-100%)
-											</div>
-										</div>
-
-										<div className={styles.formGroup}>
-											<label className={styles.formLabel}>
-												Default Profit Margin (%)
-											</label>
-											<input
-												type="number"
-												step="0.01"
-												min="0"
-												max="100"
-												className={`${styles.formControl} ${
-													escrow.errors.defaultProfitMargin
-														? styles.inputError
-														: ''
-												}`}
-												{...escrow.register('defaultProfitMargin')}
-											/>
-											{escrow.errors.defaultProfitMargin && (
-												<span className={styles.fieldError}>
-													{escrow.errors.defaultProfitMargin.message}
-												</span>
-											)}
-											<div className={styles.formHelp}>
-												The default profit margin for market makers (0-100%)
-											</div>
-										</div>
-
-										<div className={styles.formGroup}>
-											<label className={styles.formLabel}>
-												Platform Wallet Address
-											</label>
-											<input
-												type="text"
-												placeholder="0x..."
-												className={`${styles.formControl} ${
-													escrow.errors.platformWallet ? styles.inputError : ''
-												}`}
-												{...escrow.register('platformWallet')}
-											/>
-											{escrow.errors.platformWallet && (
-												<span className={styles.fieldError}>
-													{escrow.errors.platformWallet.message}
-												</span>
-											)}
-											<div className={styles.formHelp}>
-												Ethereum address where platform fees will be collected
-											</div>
-										</div>
-									</>
-								)}
-
 								<div className={styles.actionButtons}>
 									<button
 										type="submit"
-										className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-										disabled={escrow.deploymentEscrowMutation.isPending}
+										className={`${styles.btn} ${styles.btnPrimary}`}
+										disabled={updatePublicPlatformSettingsMutation.isPending}
 									>
-										{escrow.deploymentEscrowMutation.isPending
+										{updatePublicPlatformSettingsMutation.isPending
 											? 'Updating Public Platform Settings...'
 											: 'Update Public Platform Settings'}
+									</button>
+									<button
+										type="button"
+										className={`${styles.btn}`}
+										disabled={updatePublicPlatformSettingsMutation.isPending}
+										onClick={appendPublicField}
+									>
+										<DynamicIcon iconName="FaPlus" size={16} />
+									</button>
+									<button
+										type="button"
+										className={`${styles.btn}`}
+										disabled={updatePublicPlatformSettingsMutation.isPending}
+										onClick={removePublicField}
+									>
+										<DynamicIcon iconName="FaMinus" size={16} />
 									</button>
 								</div>
 							</form>

@@ -1,7 +1,8 @@
 export type Setting = {
 	key: string;
-	value: string | number | boolean;
+	value: string;
 	type: 'STRING' | 'NUMBER' | 'BOOLEAN';
+	canBeDeleted: boolean;
 };
 
 export type TradesState = {
