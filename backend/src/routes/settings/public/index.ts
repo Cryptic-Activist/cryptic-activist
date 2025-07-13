@@ -2,16 +2,22 @@ import {
   authenticateAdmin,
   requireAdminRole,
 } from '@/middlewares/authorization';
+import {
+  getPublicPlatformSettings,
+  updatePublicPlatformSettings,
+} from '@/controllers/settings';
 
 import { Router } from 'express';
-import { getPublicPlatformSettings } from '@/controllers/settings';
 
 const router = Router();
 
 router.get('', getPublicPlatformSettings);
 
-router.post('/create', authenticateAdmin, requireAdminRole(['SUPER_ADMIN']));
-
-router.post('/update', authenticateAdmin, requireAdminRole(['SUPER_ADMIN']));
+router.put(
+  '/update',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  updatePublicPlatformSettings,
+);
 
 export default router;

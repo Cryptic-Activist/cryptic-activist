@@ -17,8 +17,12 @@ export const fetchPost = async (
 	return response;
 };
 
-export const fetchPut = async (endpoint: string, params: object) => {
-	const response = await axios.put(endpoint, params);
+export const fetchPut = async (
+	endpoint: string,
+	body?: object,
+	headers?: AxiosRequestHeaders | any
+) => {
+	const response = await axios.put(endpoint, body, { headers });
 	return response;
 };
 

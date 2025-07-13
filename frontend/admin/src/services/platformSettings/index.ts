@@ -1,5 +1,7 @@
+import { fetchGet, fetchPost, fetchPut } from '../axios';
+
 import { BACKEND } from '@/constants';
-import { fetchGet } from '../axios';
+import { DefaultFields } from '@/hooks/usePlatformSettings/types';
 import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 
@@ -12,6 +14,31 @@ export const getPlatformSettings = async () => {
 	const response = await fetchGet(`${BACKEND}/settings`, {
 		Authorization: getBearerToken(accessToken)
 	});
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const updatePlatformPublicSettings = async (
+	settings: DefaultFields[]
+) => {
+	const accessToken = getLocalStorage('accessToken');
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPut(
+		`${BACKEND}/settings/public/update`,
+		{
+			settings
+		},
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
 
 	if (response.status !== 200) {
 		return null;

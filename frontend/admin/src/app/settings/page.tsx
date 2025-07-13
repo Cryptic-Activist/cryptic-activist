@@ -34,17 +34,6 @@ const PlatformSettings = () => {
 		updatePublicPlatformSettingsMutation
 	} = usePlatformSettings();
 
-	const chainId =
-		escrow.watchedValues.type === 'Escrow'
-			? escrow.watchedValues.chainId
-			: premium.watchedValues.chainId;
-	const currentChain =
-		chains.data && chains.data.length > 0 && chainId && chainId?.length > 0
-			? chains.data?.filter((chain) => chain.id === chainId)
-			: null;
-
-	console.log({ errorsPublic });
-
 	return (
 		<div className={styles.container}>
 			{/* Header */}
@@ -116,6 +105,10 @@ const PlatformSettings = () => {
 												{field.canBeDeleted && (
 													<button
 														className={`${styles.btn} ${styles.btnDanger} ${styles.deleteBtn} `}
+														type="button"
+														onClick={() =>
+															removePublicField(index, field.canBeDeleted)
+														}
 													>
 														<DynamicIcon
 															iconName="FaTrash"
@@ -155,8 +148,16 @@ const PlatformSettings = () => {
 									<button
 										type="button"
 										className={`${styles.btn}`}
-										disabled={updatePublicPlatformSettingsMutation.isPending}
-										onClick={removePublicField}
+										disabled={
+											updatePublicPlatformSettingsMutation.isPending ||
+											!fieldsPublic[fieldsPublic?.length - 1]?.canBeDeleted
+										}
+										onClick={() =>
+											removePublicField(
+												fieldsPublic.length - 1,
+												fieldsPublic[fieldsPublic?.length - 1]?.canBeDeleted
+											)
+										}
 									>
 										<DynamicIcon iconName="FaMinus" size={16} />
 									</button>

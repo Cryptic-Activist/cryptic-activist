@@ -1,3 +1,7 @@
+import {
+	getPlatformSettings,
+	updatePlatformPublicSettings
+} from '@/services/platformSettings';
 import { platformSettings, setPlatformSettings } from '@/stores';
 import {
 	updatePrivatePlatformSettings,
@@ -8,7 +12,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { DefaultFields } from './types';
-import { getPlatformSettings } from '@/services/platformSettings';
 import { useAdmin } from '..';
 import { useStore } from '@nanostores/react';
 
@@ -23,7 +26,7 @@ const usePlatformSettings = () => {
 		key: '',
 		value: '',
 		type: 'STRING',
-		canBeDeleted: false
+		canBeDeleted: true
 	};
 
 	const {
@@ -67,8 +70,14 @@ const usePlatformSettings = () => {
 	});
 
 	const updatePublicPlatformSettingsMutation = useMutation({
-		mutationKey: ['updatePublicPlatformSettings']
-		// mutationFn:
+		mutationKey: ['updatePublicPlatformSettings'],
+		mutationFn: updatePlatformPublicSettings,
+		onSuccess: () => {
+			// removePublic();
+			// setCurrentPublicIndex(0);
+			// appendPublicField();
+			platformSettingsQuery.refetch();
+		}
 	});
 
 	const appendPublicField = () => {
@@ -91,9 +100,9 @@ const usePlatformSettings = () => {
 		});
 	};
 
-	const removePublicField = () => {
-		removePublic();
-		console.log('Removing');
+	const removePublicField = (index: number, canBeDeleted: boolean) => {
+		if (!canBeDeleted) return;
+		removePublic(index);
 		setCurrentPublicIndex((prev) => {
 			if (prev > 0) {
 				return prev--;
@@ -102,8 +111,9 @@ const usePlatformSettings = () => {
 		});
 	};
 
-	const removePrivateField = () => {
-		removePrivate();
+	const removePrivateField = (index: number, canBeDeleted: boolean) => {
+		if (!canBeDeleted) return;
+		removePrivate(index);
 		setCurrentPrivateIndex((prev) => {
 			if (prev > 0) {
 				return prev--;
@@ -112,8 +122,9 @@ const usePlatformSettings = () => {
 		});
 	};
 
-	const onSubmitPublic = (data: any) => {
+	const onSubmitPublic = async (data: any) => {
 		console.log({ data });
+		await updatePublicPlatformSettingsMutation.mutateAsync(data.public);
 	};
 
 	const onSubmitPrivate = (data: any) => {
@@ -130,7 +141,7 @@ const usePlatformSettings = () => {
 	}, [platformSettingsQuery.data]);
 
 	useEffect(() => {
-		removePublicField();
+		removePublicField(0, true);
 		$platformSettings.public.forEach((field) => {
 			console.log({ field });
 			appendPublic({
@@ -146,7 +157,8 @@ const usePlatformSettings = () => {
 				return prev;
 			});
 		});
-		removePrivateField();
+
+		removePrivateField(0, true);
 		$platformSettings.private.forEach((field) => {
 			appendPrivate({
 				key: field.key,
