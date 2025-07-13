@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
+import { getPublicSettings, getSetting } from '@/utils/settings';
 
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
@@ -39,6 +40,16 @@ const main = async () => {
     ],
   });
 
+  const defaultTradeFeeRateSetting = await prisma.platformSetting.findUnique({
+    where: {
+      key: 'defaultTradeFeeRate',
+    },
+    select: {
+      value: true,
+    },
+  });
+  const defaultTradeFeeRate = parseFloat(defaultTradeFeeRateSetting!.value);
+
   // Create tiers
   const tiers = await prisma.tier.createMany({
     data: [
@@ -47,7 +58,7 @@ const main = async () => {
         description:
           'Your starting tier. Earn XP by trading to unlock discounts.',
         level: 0,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0,
         volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
@@ -57,7 +68,7 @@ const main = async () => {
         description:
           'Reach 1,000 XP to move to Silver and enjoy a small discount.',
         level: 1,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.05,
         volume: TIER_VOLUME.SILVER,
         requiredXP: 1000,
@@ -67,7 +78,7 @@ const main = async () => {
         description:
           'When you accumulate 5,000 XP, you qualify for Gold discounts.',
         level: 2,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.1,
         volume: TIER_VOLUME.GOLD,
         requiredXP: 2500,
@@ -76,7 +87,7 @@ const main = async () => {
         name: 'Platinum',
         description: 'Achieve 10,000 XP to join our exclusive Platinum tier.',
         level: 3,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.15,
         volume: TIER_VOLUME.PLATINUM,
         requiredXP: 5000,
@@ -86,7 +97,7 @@ const main = async () => {
         description:
           'Once you hit 20,000 XP you become a Diamond member and get the highest fee discounts.',
         level: 4,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.2,
         volume: TIER_VOLUME.DIAMOND,
         requiredXP: 10000,

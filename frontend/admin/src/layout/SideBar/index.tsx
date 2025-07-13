@@ -30,14 +30,11 @@ const SideBar = () => {
 	const { admin, hasRole } = useAdmin();
 	const isSuperAdmin = hasRole('SUPER_ADMIN');
 
-	console.log({ admin });
-
 	return (
 		<aside className={styles.aside}>
 			{admin.data?.id && (
 				<ul className={styles.asideList}>
 					{sidebarItems.map((sidebarItem, index) => {
-						console.log({ isSuperAdmin, sidebarItem });
 						if (isSuperAdmin && sidebarItem.superAdminOnly) {
 							return (
 								<Item

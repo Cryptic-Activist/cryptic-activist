@@ -101,7 +101,6 @@ const useSmartContractDeployment = () => {
 
 	const onSubmitEscrow = async (data: DeploymentEscrowFormData) => {
 		if (admin?.data?.id) {
-			console.log({ data });
 			await deploymentEscrowMutation.mutateAsync({
 				...data,
 				adminId: admin?.data?.id
@@ -111,7 +110,6 @@ const useSmartContractDeployment = () => {
 
 	const onSubmitPremium = async (data: DeploymentPremiumFormData) => {
 		if (admin?.data?.id) {
-			console.log({ data });
 			await deploymentPremiumMutation.mutateAsync({
 				...data,
 				adminId: admin?.data?.id
@@ -149,8 +147,6 @@ const useSmartContractDeployment = () => {
 			setValuePremium('type', watchedValuesEscrow.type);
 		}
 	}, [watchedValuesEscrow.type]);
-
-	console.log({ errorsPremium });
 
 	return {
 		deploymentStats,

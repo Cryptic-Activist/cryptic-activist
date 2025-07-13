@@ -1,24 +1,30 @@
 'use client';
 
-import {
-  FaBolt,
-  FaChartLine,
-  FaCrown,
-  FaShield,
-  FaStar,
-  FaUsers,
-} from 'react-icons/fa6';
 import React, { useState } from 'react';
+import { useTiers, useUser } from '@/hooks';
 
+import { FaCrown } from 'react-icons/fa6';
 import { formatNumberCompact } from '@/utils/numbers';
 import styles from './page.module.scss';
-import { useTiers } from '@/hooks';
 
 const PremiumSubscription = () => {
   const { tiers } = useTiers(false);
+  const { user } = useUser();
 
   const [selectedPlan, setSelectedPlan] = useState('annual');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const baseFee = user.tier ? user?.tier?.tradingFee * 100 : 5;
+  const currentRate =
+    user.tier?.tradingFee !== undefined && user.tier?.discount !== undefined
+      ? baseFee - user.tier?.discount
+      : '';
+  // const premiumRate =
+  //   user.tier?.tradingFee !== undefined && user.tier?.discount !== undefined &&
+  //     ? user.tier?.tradingFee - user.tier?.discount
+  //     : '';
+
+  console.log({ user });
 
   const plans = {
     monthly: {
@@ -43,35 +49,35 @@ const PremiumSubscription = () => {
   //   platinum: { discount: '0.04%', volume: '$200K+' },
   // };
 
-  const premiumFeatures = [
-    {
-      icon: <FaChartLine className={styles.featureIcon} />,
-      title: 'Additional Fee Discount',
-      description:
-        'Get an extra 0.02% discount on all trades, stacking with your tier discount',
-    },
-    {
-      icon: <FaBolt className={styles.featureIcon} />,
-      title: 'Priority Support',
-      description: '24/7 dedicated support with response times under 1 hour',
-    },
-    {
-      icon: <FaShield className={styles.featureIcon} />,
-      title: 'Advanced Security',
-      description: 'Enhanced 2FA, transaction monitoring, and fraud protection',
-    },
-    {
-      icon: <FaUsers className={styles.featureIcon} />,
-      title: 'Exclusive Access',
-      description: 'Early access to new features, coins, and trading pairs',
-    },
-    {
-      icon: <FaStar className={styles.featureIcon} />,
-      title: 'Premium Analytics',
-      description:
-        'Advanced trading insights, market analysis, and portfolio tracking',
-    },
-  ];
+  // const premiumFeatures = [
+  //   {
+  //     icon: <FaChartLine className={styles.featureIcon} />,
+  //     title: 'Additional Fee Discount',
+  //     description:
+  //       'Get an extra 0.02% discount on all trades, stacking with your tier discount',
+  //   },
+  //   {
+  //     icon: <FaBolt className={styles.featureIcon} />,
+  //     title: 'Priority Support',
+  //     description: '24/7 dedicated support with response times under 1 hour',
+  //   },
+  //   {
+  //     icon: <FaShield className={styles.featureIcon} />,
+  //     title: 'Advanced Security',
+  //     description: 'Enhanced 2FA, transaction monitoring, and fraud protection',
+  //   },
+  //   {
+  //     icon: <FaUsers className={styles.featureIcon} />,
+  //     title: 'Exclusive Access',
+  //     description: 'Early access to new features, coins, and trading pairs',
+  //   },
+  //   {
+  //     icon: <FaStar className={styles.featureIcon} />,
+  //     title: 'Premium Analytics',
+  //     description:
+  //       'Advanced trading insights, market analysis, and portfolio tracking',
+  //   },
+  // ];
 
   const formattedTiers = tiers.data.map(
     ({ volume, tradingFee, ...rest }, index) => {
@@ -144,16 +150,6 @@ const PremiumSubscription = () => {
                   <p className={styles.tierFee}>Fee: {tier.tradingFee}</p>
                 </div>
               ))}
-              {/* {Object.entries(currentTierBenefits).map(([tier, benefits]) => (
-                <div key={tier} className={styles.tierCard}>
-                  <div className={styles.tierHeader}>
-                    <h3 className={styles.tierName}>{tier}</h3>
-                    <div className={styles.tierBadge}></div>
-                  </div>
-                  <p className={styles.tierVolume}>Volume: {benefits.volume}</p>
-                  <p className={styles.tierFee}>Fee: {benefits.discount}</p>
-                </div>
-              ))} */}
             </div>
             <div className={styles.premiumBonus}>
               <p className={styles.premiumBonusText}>
@@ -228,7 +224,7 @@ const PremiumSubscription = () => {
           </div>
 
           {/* Features */}
-          <div className={styles.card}>
+          {/* <div className={styles.card}>
             <h2 className={styles.cardTitleCenter}>Premium Features</h2>
             <div className={styles.featuresGrid}>
               {premiumFeatures.map((feature, index) => (
@@ -245,7 +241,7 @@ const PremiumSubscription = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Fee Calculator */}
           <div className={styles.card}>
@@ -253,22 +249,24 @@ const PremiumSubscription = () => {
             <div className={styles.calculatorGrid}>
               <div className={styles.calculatorColumn}>
                 <h3 className={styles.calculatorTitle}>
-                  Current Fees (Gold Tier Example)
+                  {`Current Fees (${user.tier?.name}) Tier`}
                 </h3>
                 <div className={styles.calculatorRows}>
                   <div className={styles.calculatorRow}>
                     <span>Base Fee:</span>
-                    <span>0.10%</span>
+                    <span>{`${baseFee}%`}</span>
                   </div>
                   <div className={styles.calculatorRow}>
                     <span>Tier Discount:</span>
-                    <span>-0.04%</span>
+                    <span>{`${
+                      user.tier?.discount && user.tier?.discount > 0 ? '-' : ''
+                    }${user.tier?.discount}%`}</span>
                   </div>
                   <div
                     className={`${styles.calculatorRow} ${styles.calculatorTotal}`}
                   >
                     <span>Current Rate:</span>
-                    <span>0.06%</span>
+                    <span>{`${currentRate}%`}</span>
                   </div>
                 </div>
               </div>
@@ -277,11 +275,13 @@ const PremiumSubscription = () => {
                 <div className={styles.calculatorRows}>
                   <div className={styles.calculatorRow}>
                     <span>Base Fee:</span>
-                    <span>0.10%</span>
+                    <span>{`${baseFee}%`}</span>
                   </div>
                   <div className={styles.calculatorRow}>
                     <span>Tier Discount:</span>
-                    <span>-0.04%</span>
+                    <span>{`${
+                      user.tier?.discount && user.tier?.discount > 0 ? '-' : ''
+                    }${user.tier?.discount}%`}</span>
                   </div>
                   <div
                     className={`${styles.calculatorRow} ${styles.calculatorPremium}`}

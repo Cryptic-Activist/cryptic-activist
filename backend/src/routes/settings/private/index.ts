@@ -4,11 +4,11 @@ import {
 } from '@/middlewares/authorization';
 
 import { Router } from 'express';
-import { getPublicPlatformSettings } from '@/controllers/settings';
+import { getPrivatePlatformSettings } from '@/controllers/settings';
 
 const router = Router();
 
-router.get('', getPublicPlatformSettings);
+router.get('', getPrivatePlatformSettings);
 
 router.post('/create', authenticateAdmin, requireAdminRole(['SUPER_ADMIN']));
 

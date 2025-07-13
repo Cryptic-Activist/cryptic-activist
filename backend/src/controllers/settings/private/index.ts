@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 
-import { getPublicSettings } from '@/utils/settings';
+import { getPrivateSettings } from '@/utils/settings';
 
-export const getPublicPlatformSettings = async (
+export const getPrivatePlatformSettings = async (
   _req: Request,
   res: Response,
 ) => {
   try {
-    const publicSettings = await getPublicSettings();
+    const privateSettings = await getPrivateSettings();
 
-    res.status(200).send(publicSettings);
+    res.status(200).send(privateSettings);
   } catch (err) {
     console.log(err);
     res.status(500).send({

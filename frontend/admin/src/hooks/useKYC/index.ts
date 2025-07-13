@@ -45,8 +45,6 @@ const useKYC = () => {
 		staleTime: 0
 	});
 
-	console.log({ kycQuery: kycQuery.data, $kyc });
-
 	const approveKYCMutation = useMutation({
 		mutationFn: async () => {
 			if (admin.data?.id) {

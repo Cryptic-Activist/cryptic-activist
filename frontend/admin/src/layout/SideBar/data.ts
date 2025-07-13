@@ -71,5 +71,11 @@ export const sidebarItems = [
 		label: 'Smart Contracts',
 		icon: 'FaLink',
 		superAdminOnly: true
+	},
+	{
+		href: '/settings',
+		label: 'Platform Settings',
+		icon: 'FaGears',
+		superAdminOnly: true
 	}
 ];

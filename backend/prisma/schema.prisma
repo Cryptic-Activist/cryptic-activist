@@ -971,13 +971,14 @@ enum SettingType {
 }
 
 model PlatformSetting {
-  id        String      @id @default(uuid())
-  key       String      @unique
-  value     String // Store as string, convert as needed
-  type      SettingType @default(STRING)
-  isPrivate Boolean     @default(true)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  key          String      @unique
+  value        String // Store as string, convert as needed
+  type         SettingType @default(STRING)
+  isPrivate    Boolean     @default(true)
+  canBeDeleted Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@map("platform_settings")
 }
