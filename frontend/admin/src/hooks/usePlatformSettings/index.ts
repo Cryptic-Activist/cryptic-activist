@@ -1,5 +1,6 @@
 import {
 	getPlatformSettings,
+	updatePlatformPrivateSettings,
 	updatePlatformPublicSettings
 } from '@/services/platformSettings';
 import { platformSettings, setPlatformSettings } from '@/stores';
@@ -26,14 +27,17 @@ const usePlatformSettings = () => {
 		key: '',
 		value: '',
 		type: 'STRING',
-		canBeDeleted: true
+		deletable: true,
+		canBeDeleted: true,
+		newField: true
 	};
 
 	const {
 		control: controlPublic,
 		register: registerPublic,
 		handleSubmit: handleSubmitPublic,
-		formState: { errors: errorsPublic }
+		formState: { errors: errorsPublic },
+		watch: watchPublic
 	} = useForm({
 		resolver: updatePublicPlatformSettings,
 		defaultValues: {
@@ -44,13 +48,17 @@ const usePlatformSettings = () => {
 		control: controlPrivate,
 		register: registerPrivate,
 		handleSubmit: handleSubmitPrivate,
-		formState: { errors: errorsPrivate }
+		formState: { errors: errorsPrivate },
+		watch: watchPrivate
 	} = useForm({
 		resolver: updatePrivatePlatformSettings,
 		defaultValues: {
 			private: [defaultFields]
 		}
 	});
+
+	const watchedPublic = watchPublic();
+	const watchedPrivate = watchPrivate();
 
 	const {
 		fields: fieldsPublic,
@@ -71,13 +79,12 @@ const usePlatformSettings = () => {
 
 	const updatePublicPlatformSettingsMutation = useMutation({
 		mutationKey: ['updatePublicPlatformSettings'],
-		mutationFn: updatePlatformPublicSettings,
-		onSuccess: () => {
-			// removePublic();
-			// setCurrentPublicIndex(0);
-			// appendPublicField();
-			platformSettingsQuery.refetch();
-		}
+		mutationFn: updatePlatformPublicSettings
+	});
+
+	const updatePrivatePlatformSettingsMutation = useMutation({
+		mutationKey: ['updatePrivatePlatformSettings'],
+		mutationFn: updatePlatformPrivateSettings
 	});
 
 	const appendPublicField = () => {
@@ -123,12 +130,11 @@ const usePlatformSettings = () => {
 	};
 
 	const onSubmitPublic = async (data: any) => {
-		console.log({ data });
 		await updatePublicPlatformSettingsMutation.mutateAsync(data.public);
 	};
 
-	const onSubmitPrivate = (data: any) => {
-		console.log({ data });
+	const onSubmitPrivate = async (data: any) => {
+		await updatePrivatePlatformSettingsMutation.mutateAsync(data.private);
 	};
 
 	useEffect(() => {
@@ -143,12 +149,13 @@ const usePlatformSettings = () => {
 	useEffect(() => {
 		removePublicField(0, true);
 		$platformSettings.public.forEach((field) => {
-			console.log({ field });
 			appendPublic({
 				key: field.key,
 				value: field.value,
 				type: field.type,
-				canBeDeleted: field.canBeDeleted
+				deletable: field.canBeDeleted,
+				canBeDeleted: field.canBeDeleted,
+				...(field.canBeDeleted && { newField: true })
 			});
 			setCurrentPublicIndex((prev) => {
 				if (prev > 0) {
@@ -164,7 +171,9 @@ const usePlatformSettings = () => {
 				key: field.key,
 				value: field.value,
 				type: field.type,
-				canBeDeleted: field.canBeDeleted
+				deletable: field.deletable,
+				canBeDeleted: field.canBeDeleted,
+				...(field.canBeDeleted && { newField: true })
 			});
 			setCurrentPrivateIndex((prev) => {
 				if (prev > 0) {
@@ -175,25 +184,34 @@ const usePlatformSettings = () => {
 		});
 	}, [$platformSettings]);
 
+	console.log({ errorsPublic });
+
 	return {
 		platformSettings: $platformSettings,
-		fieldsPrivate,
-		fieldsPublic,
-		errorsPublic,
-		errorsPrivate,
-		appendPublicField,
-		appendPrivateField,
-		removePublicField,
-		removePrivateField,
-		registerPrivate,
-		registerPublic,
-		handleSubmitPrivate,
-		handleSubmitPublic,
-		onSubmitPrivate,
-		onSubmitPublic,
-		currentPrivateIndex,
-		currentPublicIndex,
-		updatePublicPlatformSettingsMutation
+		publicForm: {
+			fields: fieldsPublic,
+			errors: errorsPublic,
+			currentIndex: currentPublicIndex,
+			watchedValues: watchedPublic,
+			appendField: appendPublicField,
+			removeField: removePublicField,
+			register: registerPublic,
+			handleSubmit: handleSubmitPublic,
+			onSubmit: onSubmitPublic,
+			updatePublicPlatformSettingsMutation
+		},
+		privateForm: {
+			fields: fieldsPrivate,
+			errors: errorsPrivate,
+			currentIndex: currentPrivateIndex,
+			watchedValues: watchedPrivate,
+			appendField: appendPrivateField,
+			removeField: removePrivateField,
+			register: registerPrivate,
+			handleSubmit: handleSubmitPrivate,
+			onSubmit: onSubmitPrivate,
+			updatePrivatePlatformSettingsMutation
+		}
 	};
 };
 

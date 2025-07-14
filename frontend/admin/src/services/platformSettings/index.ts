@@ -46,3 +46,28 @@ export const updatePlatformPublicSettings = async (
 
 	return response.data;
 };
+
+export const updatePlatformPrivateSettings = async (
+	settings: DefaultFields[]
+) => {
+	const accessToken = getLocalStorage('accessToken');
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchPut(
+		`${BACKEND}/settings/private/update`,
+		{
+			settings
+		},
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};

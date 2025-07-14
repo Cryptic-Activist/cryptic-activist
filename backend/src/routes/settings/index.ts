@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import privateSettings from './public';
+import privateSettings from './private';
 import publicSettings from './public';
 import settings from './settings';
 

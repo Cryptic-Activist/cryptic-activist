@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  label {
+    font-size: 1rem;
+    color: #000;
+    cursor: pointer;
+    text-align: left;
+  }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: 1px solid #000;
+  background-color: #fff;
+  border-radius: 0.3rem;
+  min-height: 1.2rem;
+  min-width: 1.2rem;
+  max-height: 1.2rem;
+  max-width: 1.2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.checked {
+  div {
+    width: 0.35rem;
+    height: 0.9rem;
+    border-bottom: 0.15rem solid #000;
+    border-right: 0.15rem solid #000;
+    transform: rotate(45deg) translate(-0.1rem, -0.1rem);
+  }
+}
+
+.noWrap {
+  white-space: nowrap;
+}

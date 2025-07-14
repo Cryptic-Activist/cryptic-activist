@@ -2,6 +2,7 @@ export type Setting = {
 	key: string;
 	value: string;
 	type: 'STRING' | 'NUMBER' | 'BOOLEAN';
+	deletable: boolean;
 	canBeDeleted: boolean;
 };
 

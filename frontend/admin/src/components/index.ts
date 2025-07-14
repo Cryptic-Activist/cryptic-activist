@@ -11,3 +11,4 @@ export { default as Pagination } from './Pagination';
 export { default as Viewer } from './Viewer';
 export { default as Tooltip } from './Tooltip';
 export { default as ActionCard } from './ActionCard';
+export { default as Checkbox } from './Checkbox';
