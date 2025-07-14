@@ -56,6 +56,10 @@ const PlatformSettings = () => {
 														<input
 															type="checkbox"
 															className={styles.checkbox}
+															{...(publicForm.watchedValues.public[index]
+																.value === 'false' && { checked: false })}
+															{...(publicForm.watchedValues.public[index]
+																.value === 'true' && { checked: true })}
 															{...publicForm.register(`public.${index}.value`)}
 														/>
 													</div>
@@ -215,6 +219,10 @@ const PlatformSettings = () => {
 														<input
 															type="checkbox"
 															className={styles.checkbox}
+															{...(publicForm.watchedValues.public[index]
+																.value === 'false' && { checked: false })}
+															{...(publicForm.watchedValues.public[index]
+																.value === 'true' && { checked: true })}
 															{...privateForm.register(
 																`private.${index}.value`
 															)}

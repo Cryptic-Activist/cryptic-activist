@@ -38,17 +38,23 @@ export const updatePrivatePlatformSettings = async (
       // Upsert incoming settings
       await Promise.all(
         settings.map((setting: any) => {
+          // Ensure value is stored as a string
+          const stringValue =
+            typeof setting.value === 'boolean'
+              ? setting.value.toString()
+              : String(setting.value);
+
           return tx.platformSetting.upsert({
             where: { key: setting.key },
             create: {
               key: setting.key,
-              value: setting.value,
+              value: stringValue,
               type: setting.type,
               canBeDeleted: setting.deletable,
               isPrivate: true,
             },
             update: {
-              value: setting.value,
+              value: stringValue,
               type: setting.type,
               canBeDeleted: setting.deletable,
               isPrivate: true,

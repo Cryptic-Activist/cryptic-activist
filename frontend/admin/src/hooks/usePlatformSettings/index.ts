@@ -184,7 +184,7 @@ const usePlatformSettings = () => {
 		});
 	}, [$platformSettings]);
 
-	console.log({ errorsPublic });
+	console.log({ errorsPrivate });
 
 	return {
 		platformSettings: $platformSettings,
