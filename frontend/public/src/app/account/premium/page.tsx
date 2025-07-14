@@ -15,68 +15,14 @@ const PremiumSubscription = () => {
     isProcessing,
     selectedPlan,
     user,
+    premiumDiscount,
     // setIsProcessing,
     setSelectedPlan,
-    handleSubscribe,
+    savingExample,
+    amountExample,
+    totalDiscountPremium,
+    plans,
   } = usePremium();
-
-  // const premiumRate =
-  //   user.tier?.tradingFee !== undefined && user.tier?.discount !== undefined &&
-  //     ? user.tier?.tradingFee - user.tier?.discount
-  //     : '';
-
-  const plans = {
-    monthly: {
-      price: 29.99,
-      period: 'month',
-      savings: null,
-      totalAnnual: 359.88,
-    },
-    annual: {
-      price: 19.99,
-      period: 'month',
-      savings: 33,
-      totalAnnual: 239.88,
-      billedAnnually: true,
-    },
-  };
-
-  // const currentTierBenefits = {
-  //   bronze: { discount: '0.10%', volume: '$0 - $10K' },
-  //   silver: { discount: '0.08%', volume: '$10K - $50K' },
-  //   gold: { discount: '0.06%', volume: '$50K - $200K' },
-  //   platinum: { discount: '0.04%', volume: '$200K+' },
-  // };
-
-  // const premiumFeatures = [
-  //   {
-  //     icon: <FaChartLine className={styles.featureIcon} />,
-  //     title: 'Additional Fee Discount',
-  //     description:
-  //       'Get an extra 0.02% discount on all trades, stacking with your tier discount',
-  //   },
-  //   {
-  //     icon: <FaBolt className={styles.featureIcon} />,
-  //     title: 'Priority Support',
-  //     description: '24/7 dedicated support with response times under 1 hour',
-  //   },
-  //   {
-  //     icon: <FaShield className={styles.featureIcon} />,
-  //     title: 'Advanced Security',
-  //     description: 'Enhanced 2FA, transaction monitoring, and fraud protection',
-  //   },
-  //   {
-  //     icon: <FaUsers className={styles.featureIcon} />,
-  //     title: 'Exclusive Access',
-  //     description: 'Early access to new features, coins, and trading pairs',
-  //   },
-  //   {
-  //     icon: <FaStar className={styles.featureIcon} />,
-  //     title: 'Premium Analytics',
-  //     description:
-  //       'Advanced trading insights, market analysis, and portfolio tracking',
-  //   },
-  // ];
 
   return (
     <div className={styles.wrapper}>
@@ -109,10 +55,12 @@ const PremiumSubscription = () => {
               ))}
             </div>
             <div className={styles.premiumBonus}>
-              <p className={styles.premiumBonusText}>
-                <strong>Premium Bonus:</strong> Add an extra 0.02% discount to
-                your current tier rate!
-              </p>
+              {premiumDiscount && typeof premiumDiscount === 'number' && (
+                <p className={styles.premiumBonusText}>
+                  <strong>Premium Bonus:</strong> Add an extra{' '}
+                  {premiumDiscount * 100}% discount to your current tier rate!
+                </p>
+              )}
             </div>
           </div>
 
@@ -164,7 +112,11 @@ const PremiumSubscription = () => {
                 </div>
 
                 <button
-                  onClick={handleSubscribe}
+                  // onClick={() =>
+                  //   subscribeToPremiumMutation.mutateAsync(
+                  //     selectedPlan === 'annual' ? 'YEARLY' : 'MONTHLY'
+                  //   )
+                  // }
                   disabled={isProcessing}
                   className={`${styles.subscribeButton} ${
                     isProcessing ? styles.processing : ''
@@ -244,22 +196,28 @@ const PremiumSubscription = () => {
                     className={`${styles.calculatorRow} ${styles.calculatorPremium}`}
                   >
                     <span>Premium Bonus:</span>
-                    <span>-0.02%</span>
+                    {premiumDiscount && (
+                      <span>{`-${premiumDiscount * 100}%`}</span>
+                    )}
                   </div>
                   <div
                     className={`${styles.calculatorRow} ${styles.calculatorTotal} ${styles.calculatorPremiumTotal}`}
                   >
                     <span>Premium Rate:</span>
-                    <span>0.04%</span>
+                    {totalDiscountPremium && (
+                      <span>{`${totalDiscountPremium * 100}%`}</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
             <div className={styles.calculatorExample}>
-              <p className={styles.calculatorExampleText}>
-                <strong>Savings Example:</strong> On a $10,000 trade, you save
-                $2 compared to your current rate!
-              </p>
+              {premiumDiscount && user.tier && (
+                <p className={styles.calculatorExampleText}>
+                  <strong>Savings Example:</strong>
+                  {` On a $${amountExample} trade, you save $${savingExample} compared to your current rate!`}
+                </p>
+              )}
             </div>
           </div>
 
