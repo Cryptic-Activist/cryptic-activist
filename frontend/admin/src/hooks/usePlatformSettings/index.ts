@@ -171,7 +171,7 @@ const usePlatformSettings = () => {
 				key: field.key,
 				value: field.value,
 				type: field.type,
-				deletable: field.deletable,
+				deletable: field.canBeDeleted,
 				canBeDeleted: field.canBeDeleted,
 				...(field.canBeDeleted && { newField: true })
 			});
