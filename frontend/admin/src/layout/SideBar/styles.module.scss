@@ -2,7 +2,7 @@
 
 .aside {
   height: 100%;
-  width: 15rem;
+  width: 16rem;
   background-color: theme.$sidebar-background;
   border-right: 1px solid #000;
   box-shadow:
@@ -18,6 +18,13 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.iconContainer {
+  display: flex;
+}
+.label {
+  display: flex;
 }
 
 .asideListItem {
@@ -43,4 +50,27 @@
 
 .asideListItemIsCurrentPage {
   background-color: rgba($color: theme.$sidebar-background-hover, $alpha: 1);
+}
+
+@media (max-width: 765px) {
+  .aside {
+    width: 3.5rem;
+    position: fixed;
+    z-index: 9;
+    &:hover {
+      width: 16rem;
+      .label {
+        display: flex;
+      }
+    }
+  }
+  .label {
+    display: none;
+  }
+}
+
+@media (max-height: 960px) {
+  .asideList {
+    padding-bottom: 6.5rem;
+  }
 }

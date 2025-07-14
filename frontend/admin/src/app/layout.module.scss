@@ -24,3 +24,9 @@
     background: #333;
   }
 }
+
+@media (max-width: 765px) {
+  .container {
+    padding-left: 4.5rem;
+  }
+}

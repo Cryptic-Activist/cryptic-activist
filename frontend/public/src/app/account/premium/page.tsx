@@ -1,30 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useTiers, useUser } from '@/hooks';
-
 import { FaCrown } from 'react-icons/fa6';
-import { formatNumberCompact } from '@/utils/numbers';
+import React from 'react';
 import styles from './page.module.scss';
+import { usePremium } from '@/hooks';
 
 const PremiumSubscription = () => {
-  const { tiers } = useTiers(false);
-  const { user } = useUser();
+  const {
+    baseFee,
+    currentRate,
+    // subscribeToPremiumMutation,
+    // tiers,
+    formattedTiers,
+    isProcessing,
+    selectedPlan,
+    user,
+    // setIsProcessing,
+    setSelectedPlan,
+    handleSubscribe,
+  } = usePremium();
 
-  const [selectedPlan, setSelectedPlan] = useState('annual');
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const baseFee = user.tier ? user?.tier?.tradingFee * 100 : 5;
-  const currentRate =
-    user.tier?.tradingFee !== undefined && user.tier?.discount !== undefined
-      ? baseFee - user.tier?.discount
-      : '';
   // const premiumRate =
   //   user.tier?.tradingFee !== undefined && user.tier?.discount !== undefined &&
   //     ? user.tier?.tradingFee - user.tier?.discount
   //     : '';
-
-  console.log({ user });
 
   const plans = {
     monthly: {
@@ -78,48 +77,6 @@ const PremiumSubscription = () => {
   //       'Advanced trading insights, market analysis, and portfolio tracking',
   //   },
   // ];
-
-  const formattedTiers = tiers.data.map(
-    ({ volume, tradingFee, ...rest }, index) => {
-      const isFirst = index === 0;
-      const isLast = index === tiers?.data.length - 1;
-      const tradingFeePercent = `${tradingFee * 100}%`;
-
-      if (isFirst) {
-        return {
-          ...rest,
-          tradingFee: tradingFeePercent,
-          volume: `0 - ${formatNumberCompact(volume)}`,
-        };
-      }
-      if (isLast) {
-        return {
-          ...rest,
-          tradingFee: tradingFeePercent,
-          volume: `${formatNumberCompact(volume)}+`,
-        };
-      }
-
-      const nextVolume = tiers.data[index + 1].volume;
-
-      return {
-        ...rest,
-        tradingFee: tradingFeePercent,
-        volume: `${formatNumberCompact(volume)} - ${formatNumberCompact(
-          nextVolume
-        )}`,
-      };
-    }
-  );
-
-  const handleSubscribe = async () => {
-    setIsProcessing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsProcessing(false);
-      alert('Premium subscription activated! Welcome to Premium.');
-    }, 2000);
-  };
 
   return (
     <div className={styles.wrapper}>

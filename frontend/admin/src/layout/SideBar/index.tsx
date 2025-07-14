@@ -19,8 +19,10 @@ const Item: FC<SideBarProps> = ({ href, label, icon }) => {
 			}`}
 		>
 			<Link href={href}>
-				{icon && <DynamicIcon iconName={icon} />}
-				<span>{label}</span>
+				<div className={styles.iconContainer}>
+					{icon && <DynamicIcon iconName={icon} size={24} />}
+				</div>
+				<span className={styles.label}>{label}</span>
 			</Link>
 		</li>
 	);

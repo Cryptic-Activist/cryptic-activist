@@ -37,6 +37,12 @@ const main = async () => {
         value: '100',
         isPrivate: false,
       },
+      {
+        key: 'premiumDiscount',
+        type: 'NUMBER',
+        value: '0.002',
+        isPrivate: false,
+      },
     ],
   });
 

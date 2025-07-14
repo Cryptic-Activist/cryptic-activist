@@ -46,7 +46,7 @@ export const sidebarItems = [
 	},
 	{
 		href: '/fiats',
-		label: 'fiats',
+		label: 'Fiats',
 		icon: 'FaDollarSign'
 	},
 	{
