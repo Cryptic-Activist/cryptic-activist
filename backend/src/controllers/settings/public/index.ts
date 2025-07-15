@@ -26,18 +26,14 @@ export const updatePublicPlatformSettings = async (
   try {
     const settings = req.body.settings;
 
-    console.log({ settings });
-
     const existingSettings = await prisma.platformSetting.findMany({
       where: { isPrivate: false },
     });
 
     const existingMap = new Map(existingSettings.map((s) => [s.key, s]));
-
     const incomingKeys = settings.map((s: any) => s.key);
 
     await prisma.$transaction(async (tx) => {
-      // Upsert or update settings
       await Promise.all(
         settings.map(async (setting: any) => {
           const existing = existingMap.get(setting.key);
@@ -48,35 +44,39 @@ export const updatePublicPlatformSettings = async (
               : String(setting.value);
 
           if (existing) {
-            // If not editable, skip update
+            // If not editable, skip the update
             if (!existing.isEditable) return;
 
-            const nextCanBeDeleted = existing.canBeDeleted
-              ? (setting.deletable ?? existing.canBeDeleted)
-              : false;
+            // Determine if isEditable should be downgraded
+            const nextIsEditable =
+              existing.isEditable && setting.isEditable === false
+                ? false
+                : existing.isEditable;
 
-            const nextIsEditable = existing.isEditable
-              ? (setting.isEditable ?? existing.isEditable)
-              : false;
+            // Determine if canBeDeleted should be downgraded
+            const nextCanBeDeleted =
+              existing.canBeDeleted && setting.deletable === false
+                ? false
+                : existing.canBeDeleted;
 
             await tx.platformSetting.update({
               where: { key: setting.key },
               data: {
                 value: stringValue,
                 type: setting.type,
-                canBeDeleted: nextCanBeDeleted,
                 isEditable: nextIsEditable,
+                canBeDeleted: nextCanBeDeleted,
               },
             });
           } else {
-            // Create new setting
+            // New setting — allow full control
             await tx.platformSetting.create({
               data: {
                 key: setting.key,
                 value: stringValue,
                 type: setting.type,
-                canBeDeleted: setting.deletable ?? false,
                 isEditable: setting.isEditable ?? true,
+                canBeDeleted: setting.deletable ?? false,
                 isPrivate: false,
               },
             });
@@ -84,16 +84,14 @@ export const updatePublicPlatformSettings = async (
         }),
       );
 
-      // Delete settings not in payload and deletable
+      // Delete keys missing from the payload if they are deletable
       const keysToDelete = existingSettings
         .filter((s) => !incomingKeys.includes(s.key) && s.canBeDeleted)
         .map((s) => s.key);
 
       if (keysToDelete.length > 0) {
         await tx.platformSetting.deleteMany({
-          where: {
-            key: { in: keysToDelete },
-          },
+          where: { key: { in: keysToDelete } },
         });
       }
     });
