@@ -79,6 +79,7 @@ export interface MultiTradeEscrowInterface extends Interface {
       AddressLike,
       AddressLike,
       AddressLike,
+      AddressLike,
       BigNumberish,
       BigNumberish,
       BigNumberish,
@@ -110,7 +111,7 @@ export interface MultiTradeEscrowInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getContractBalance",
-    values?: undefined
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getTrade",
@@ -405,7 +406,7 @@ export interface MultiTradeEscrow extends BaseContract {
   buyerFundTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [void],
-    "payable"
+    "nonpayable"
   >;
 
   cancelTrade: TypedContractMethod<
@@ -416,6 +417,7 @@ export interface MultiTradeEscrow extends BaseContract {
 
   createTrade: TypedContractMethod<
     [
+      _token: AddressLike,
       _buyer: AddressLike,
       _seller: AddressLike,
       _arbitrator: AddressLike,
@@ -453,12 +455,17 @@ export interface MultiTradeEscrow extends BaseContract {
     "nonpayable"
   >;
 
-  getContractBalance: TypedContractMethod<[], [bigint], "view">;
+  getContractBalance: TypedContractMethod<
+    [token: AddressLike],
+    [bigint],
+    "view"
+  >;
 
   getTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [
       [
+        string,
         string,
         string,
         string,
@@ -473,6 +480,7 @@ export interface MultiTradeEscrow extends BaseContract {
         boolean,
         boolean
       ] & {
+        token: string;
         buyer: string;
         seller: string;
         arbitrator: string;
@@ -504,7 +512,7 @@ export interface MultiTradeEscrow extends BaseContract {
   sellerFundTrade: TypedContractMethod<
     [_tradeId: BigNumberish],
     [void],
-    "payable"
+    "nonpayable"
   >;
 
   tradeCount: TypedContractMethod<[], [bigint], "view">;
@@ -514,6 +522,7 @@ export interface MultiTradeEscrow extends BaseContract {
     [
       [
         bigint,
+        string,
         string,
         string,
         string,
@@ -529,6 +538,7 @@ export interface MultiTradeEscrow extends BaseContract {
         boolean
       ] & {
         id: bigint;
+        token: string;
         buyer: string;
         seller: string;
         arbitrator: string;
@@ -574,7 +584,7 @@ export interface MultiTradeEscrow extends BaseContract {
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "buyerFundTrade"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "cancelTrade"
   ): TypedContractMethod<
@@ -586,6 +596,7 @@ export interface MultiTradeEscrow extends BaseContract {
     nameOrSignature: "createTrade"
   ): TypedContractMethod<
     [
+      _token: AddressLike,
       _buyer: AddressLike,
       _seller: AddressLike,
       _arbitrator: AddressLike,
@@ -617,13 +628,14 @@ export interface MultiTradeEscrow extends BaseContract {
   ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "getContractBalance"
-  ): TypedContractMethod<[], [bigint], "view">;
+  ): TypedContractMethod<[token: AddressLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "getTrade"
   ): TypedContractMethod<
     [_tradeId: BigNumberish],
     [
       [
+        string,
         string,
         string,
         string,
@@ -638,6 +650,7 @@ export interface MultiTradeEscrow extends BaseContract {
         boolean,
         boolean
       ] & {
+        token: string;
         buyer: string;
         seller: string;
         arbitrator: string;
@@ -670,7 +683,7 @@ export interface MultiTradeEscrow extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "sellerFundTrade"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "payable">;
+  ): TypedContractMethod<[_tradeId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "tradeCount"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -681,6 +694,7 @@ export interface MultiTradeEscrow extends BaseContract {
     [
       [
         bigint,
+        string,
         string,
         string,
         string,
@@ -696,6 +710,7 @@ export interface MultiTradeEscrow extends BaseContract {
         boolean
       ] & {
         id: bigint;
+        token: string;
         buyer: string;
         seller: string;
         arbitrator: string;
