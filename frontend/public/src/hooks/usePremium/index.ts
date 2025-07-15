@@ -5,12 +5,11 @@ import type {
   Period,
   PremiumPlans,
   PremiumSettings,
-  UsePremiumReturn,
 } from './types';
+import { changeSubscriptionTo, subscribeToPremium } from '@/services/premium';
 import { useEffect, useMemo, useState } from 'react';
 
 import { formatNumberCompact } from '@/utils/numbers';
-import { subscribeToPremium } from '@/services/premium';
 import useApp from '../useApp';
 import useBlockchain from '../useBlockchain';
 import { useMutation } from '@tanstack/react-query';
@@ -61,7 +60,7 @@ const formatVolumeRange = (
 };
 
 // Custom Hook
-const usePremium = (): UsePremiumReturn => {
+const usePremium = () => {
   // State
   const [selectedPlan, setSelectedPlan] = useState<Period>('YEARLY');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -200,6 +199,40 @@ const usePremium = (): UsePremiumReturn => {
     },
   });
 
+  const changePremiumSubscriptionMutation = useMutation({
+    mutationKey: ['changePremiumSubscription'],
+    mutationFn: async () => {
+      if (!user.id || !account?.address) {
+        throw new Error('User ID and account address are required');
+      }
+
+      setIsProcessing(true);
+
+      if (
+        !user?.premiumPurchase ||
+        (user?.premiumPurchase && user?.premiumPurchase.length === 0)
+      ) {
+        throw new Error('User not current subscribed');
+      }
+
+      try {
+        const response = await changeSubscriptionTo(
+          user.id,
+          user.premiumPurchase[0].period === 'MONTHLY' ? 'MONTHLY' : 'YEARLY',
+          account.address
+        );
+
+        return response;
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    onError: (error) => {
+      console.error('Subscription error:', error);
+      setIsProcessing(false);
+    },
+  });
+
   useEffect(() => {
     if (
       user.premiumPurchase &&
@@ -227,6 +260,8 @@ const usePremium = (): UsePremiumReturn => {
     totalDiscountPremium,
     plans,
     currentPremiumSubscription,
+    changePremiumSubscriptionMutation,
+    account,
   };
 };
 

@@ -3,5 +3,5 @@
 /* eslint-disable */
 import type * as premiumSubscriptionManagerSol from "./PremiumSubscriptionManager.sol";
 export type { premiumSubscriptionManagerSol };
-export type { MockERC20 } from "./MockERC20";
+export type { MockUSDC } from "./MockUSDC";
 export type { MultiTradeEscrow } from "./MultiTradeEscrow";

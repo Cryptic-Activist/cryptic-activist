@@ -47,7 +47,7 @@ const PlatformSettings = () => {
 															? styles.inputError
 															: ''
 													}`}
-													disabled={!field.canBeDeleted}
+													disabled={!field.canBeDeleted || !field.isEditable}
 													{...publicForm.register(`public.${index}.key`)}
 													placeholder="Setting Name"
 												/>
@@ -234,7 +234,7 @@ const PlatformSettings = () => {
 															? styles.inputError
 															: ''
 													}`}
-													disabled={!field.canBeDeleted}
+													disabled={!field.canBeDeleted || !field.isEditable}
 													{...privateForm.register(`private.${index}.key`)}
 													placeholder="Setting Name"
 												/>

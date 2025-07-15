@@ -29,6 +29,7 @@ export interface PremiumSettings {
 
 export interface UsePremiumReturn {
   subscribeToPremiumMutation: any;
+  changePremiumSubscriptionMutation: any;
   baseFee: number;
   currentRate: string;
   tiers: any;
