@@ -26,7 +26,7 @@ type Count = {
 
 type Premium = {
   period: 'MONTHLY' | 'YEARLY';
-};
+}[];
 
 type Names = {
   firstName?: string;
@@ -67,7 +67,7 @@ export type User = {
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
-  premium?: Premium;
+  premiumPurchase?: Premium;
   _count?: Count;
   setUserValue: (value: Value, actionName: `user/${string}`) => void;
   setUser: (user: Value) => void;
@@ -99,7 +99,7 @@ export type UserSetter = {
   kyc?: KYC[];
   xp?: number;
   tier?: Tier;
-  premium?: Premium;
+  premiumPurchase?: Premium;
   _count?: Count;
 };
 

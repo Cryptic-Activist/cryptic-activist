@@ -29,12 +29,14 @@ const main = async () => {
         key: 'premiumPriceMonthly',
         type: 'NUMBER',
         value: '10',
+        isEditable: false,
         isPrivate: false,
       },
       {
         key: 'premiumPriceYearly',
         type: 'NUMBER',
         value: '100',
+        isEditable: false,
         isPrivate: false,
       },
       {

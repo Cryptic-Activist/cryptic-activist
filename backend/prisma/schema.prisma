@@ -977,6 +977,7 @@ model PlatformSetting {
   type         SettingType @default(STRING)
   isPrivate    Boolean     @default(true)
   canBeDeleted Boolean     @default(false)
+  isEditable   Boolean     @default(true)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 

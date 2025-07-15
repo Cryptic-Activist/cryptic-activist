@@ -37,9 +37,10 @@ export const subscribePremium = async (req: Request, res: Response) => {
     });
 
     if (existing) {
-      return res.status(409).json({
+      res.status(409).json({
         error: `You already have an active subscription.`,
       });
+      return;
     }
 
     const scheduled = await prisma.premiumPurchase.findFirst({
@@ -51,9 +52,10 @@ export const subscribePremium = async (req: Request, res: Response) => {
     });
 
     if (scheduled) {
-      return res.status(409).json({
+      res.status(409).json({
         error: `You already have a pending ${period} subscription scheduled to activate.`,
       });
+      return;
     }
 
     const settingKey =

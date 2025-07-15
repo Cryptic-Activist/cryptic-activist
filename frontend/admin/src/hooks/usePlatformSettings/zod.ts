@@ -10,6 +10,7 @@ const UpdatePublicPlatformSettings = z.object({
 				type: z.enum(['STRING', 'NUMBER', 'BOOLEAN']),
 				deletable: z.boolean(),
 				canBeDeleted: z.boolean(),
+				isEditable: z.boolean(),
 				newField: z.boolean().optional()
 			})
 			.superRefine(({ type, value }, ctx) => {
@@ -62,6 +63,7 @@ const UpdatePrivatePlatformSettings = z.object({
 				type: z.enum(['STRING', 'NUMBER', 'BOOLEAN']),
 				deletable: z.boolean(),
 				canBeDeleted: z.boolean(),
+				isEditable: z.boolean(),
 				newField: z.boolean().optional()
 			})
 			.superRefine(({ type, value }, ctx) => {

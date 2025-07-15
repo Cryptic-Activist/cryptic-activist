@@ -35,9 +35,13 @@ const convertArtifactToFile = (artifact: any) => {
 export const getEscrowABIFile = async (req: Request, res: Response) => {
   try {
     const abi = await getEscrowABI();
+
+    console.log({ abi });
+
     res.status(200).json(abi);
   } catch (error) {
-    res.status(500).json(error);
+    console.log({ error });
+    res.status(400).json(error);
   }
 };
 

@@ -167,12 +167,8 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 // Main content layout
 .mainContent {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 24px;
-
-  @media (max-width: 1140px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .leftColumn {
@@ -258,13 +254,17 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
 .formRow {
   display: grid;
-  grid-template-columns: 1fr 0.5fr 0.5fr;
+  grid-template-columns: 1fr 0.5fr 0.3fr 5rem;
   gap: 0.25rem;
   width: 100%;
 }
 
+.formRowExtendedEditable {
+  grid-template-columns: 1fr 0.5fr 0.5fr;
+}
+
 .formRowExtended {
-  grid-template-columns: 1fr 0.5fr 0.35fr 0.5fr;
+  grid-template-columns: 1fr 0.5fr 0.3fr 5rem 5rem 2.5rem;
 }
 
 .inputBtnContainer {

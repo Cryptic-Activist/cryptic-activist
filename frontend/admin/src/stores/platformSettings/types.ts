@@ -4,6 +4,7 @@ export type Setting = {
 	type: 'STRING' | 'NUMBER' | 'BOOLEAN';
 	deletable: boolean;
 	canBeDeleted: boolean;
+	isEditable: boolean;
 };
 
 export type TradesState = {

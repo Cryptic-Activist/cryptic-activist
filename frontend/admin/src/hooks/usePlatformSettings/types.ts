@@ -4,5 +4,6 @@ export type DefaultFields = {
 	type: 'STRING' | 'NUMBER' | 'BOOLEAN';
 	deletable: boolean;
 	canBeDeleted: boolean;
+	isEditable: boolean;
 	newField?: boolean;
 };

@@ -14,6 +14,7 @@ export const getPlatformSettings = async (_req: Request, res: Response) => {
         value: true,
         type: true,
         canBeDeleted: true,
+        isEditable: true,
       },
     });
     const privateSettings = await prisma.platformSetting.findMany({
@@ -25,6 +26,7 @@ export const getPlatformSettings = async (_req: Request, res: Response) => {
         value: true,
         type: true,
         canBeDeleted: true,
+        isEditable: true,
       },
     });
 

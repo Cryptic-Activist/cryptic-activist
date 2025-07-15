@@ -1,6 +1,7 @@
 'use client';
 
 import { getEscrowABI } from '@/services/ethers/escrow';
+import { getPremiumABI } from '@/services/ethers/premium';
 import { useEffect } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useRootStore } from '@/store';
@@ -19,7 +20,7 @@ const useABIs = (enabled = true) => {
       },
       {
         queryKey: ['premiumAbi'],
-        queryFn: getEscrowABI,
+        queryFn: getPremiumABI,
         enabled: !!user.id && enabled,
       },
     ],

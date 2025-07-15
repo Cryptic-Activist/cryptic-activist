@@ -1,18 +1,21 @@
 import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
+  ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
   ETHEREUM_PREMIUM_CONTRACT_ADDRESS,
 } from '@/constants/env';
 import { Interface, ethers, parseEther } from 'ethers';
+import { prisma, redisClient } from '@/services/db';
 
 import { DeployPremiumSmartContractParams } from './types';
 import PremiumArtifact from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
 import { convertSmartContractParams } from '@/utils/blockchain';
+import { fetchGet } from '@/services/axios';
+import { parseDurationToSeconds } from '@/utils/date';
 
 const iface = new Interface(PremiumArtifact.abi);
 
 export const getProvider = () => {
-  console.log({ ETHEREUM_NETWORK_URL });
   const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
   return provider;
 };
@@ -23,13 +26,51 @@ export const getSigner = () => {
   return signer;
 };
 
-export const getPremiumContract = () => {
+export const getPremiumABI = async () => {
+  const cacheKey = 'smartContracts:premium';
+  let abiJson: any | null = null;
+
+  const cachedABI = await redisClient.get(cacheKey);
+
+  if (cachedABI) {
+    abiJson = JSON.parse(cachedABI);
+  } else {
+    const escrowSmartContract = await prisma.smartContract.findFirst({
+      where: {
+        isActive: true,
+        metadata: {
+          path: ['type'],
+          equals: 'Premium',
+        },
+      },
+      select: {
+        artifactUrl: true,
+      },
+    });
+
+    if (!escrowSmartContract) {
+      throw new Error('Unable to find Premium ABI');
+    }
+
+    const response = await fetchGet(escrowSmartContract.artifactUrl);
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
+      );
+    }
+
+    abiJson = await response.data.abi;
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
+  }
+
+  return abiJson;
+};
+
+export const getPremiumContract = async () => {
+  const abi = await getPremiumABI();
   const signer = getSigner();
-  return new ethers.Contract(
-    ETHEREUM_PREMIUM_CONTRACT_ADDRESS,
-    PremiumArtifact.abi,
-    signer,
-  );
+  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abi, signer);
 };
 
 export const deployPremium = async (

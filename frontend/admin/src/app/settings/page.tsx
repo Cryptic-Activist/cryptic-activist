@@ -31,6 +31,8 @@ const PlatformSettings = () => {
 										<div
 											className={`${styles.formRow} ${
 												field.newField ? styles.formRowExtended : ''
+											} ${
+												!field.isEditable ? styles.formRowExtendedEditable : ''
 											}`}
 										>
 											<div className={styles.formInputContainer}>
@@ -56,6 +58,10 @@ const PlatformSettings = () => {
 														<input
 															type="checkbox"
 															className={styles.checkbox}
+															disabled={
+																!publicForm.watchedValues.public[index]
+																	.isEditable
+															}
 															{...(publicForm.watchedValues.public[index]
 																.value === 'false' && { checked: false })}
 															{...(publicForm.watchedValues.public[index]
@@ -66,6 +72,9 @@ const PlatformSettings = () => {
 												) : (
 													<input
 														type="text"
+														disabled={
+															!publicForm.watchedValues.public[index].isEditable
+														}
 														className={`${styles.formControl} ${
 															publicForm.errors.public &&
 															publicForm.errors.public[index]?.value
@@ -77,6 +86,37 @@ const PlatformSettings = () => {
 													/>
 												)}
 											</div>
+											<div className={styles.formInputContainer}>
+												<label className={styles.formLabel}>Type</label>
+												<select
+													className={`${styles.formControl} ${
+														publicForm.errors.public &&
+														publicForm.errors.public[index]?.type
+															? styles.inputError
+															: ''
+													}`}
+													disabled={!field.canBeDeleted}
+													{...publicForm.register(`public.${index}.type`)}
+												>
+													<option value="STRING">String</option>
+													<option value="NUMBER">Number</option>
+													<option value="BOOLEAN">Boolean</option>
+												</select>
+											</div>
+											{field.isEditable && (
+												<div className={styles.formInputContainer}>
+													<label className={styles.formLabel}>Editable?</label>
+													<div className={styles.checkboxContainer}>
+														<input
+															type="checkbox"
+															className={styles.checkbox}
+															{...publicForm.register(
+																`public.${index}.isEditable`
+															)}
+														/>
+													</div>
+												</div>
+											)}
 											{field.canBeDeleted && (
 												<div className={styles.formInputContainer}>
 													<label className={styles.formLabel}>Deletable?</label>
@@ -92,23 +132,6 @@ const PlatformSettings = () => {
 												</div>
 											)}
 											<div className={styles.inputBtnContainer}>
-												<div className={styles.formInputContainer}>
-													<label className={styles.formLabel}>Type</label>
-													<select
-														className={`${styles.formControl} ${
-															publicForm.errors.public &&
-															publicForm.errors.public[index]?.type
-																? styles.inputError
-																: ''
-														}`}
-														disabled={!field.canBeDeleted}
-														{...publicForm.register(`public.${index}.type`)}
-													>
-														<option value="STRING">String</option>
-														<option value="NUMBER">Number</option>
-														<option value="BOOLEAN">Boolean</option>
-													</select>
-												</div>
 												{field.canBeDeleted && (
 													<button
 														className={`${styles.btn} ${styles.btnDanger} ${styles.deleteBtn} `}
@@ -194,6 +217,8 @@ const PlatformSettings = () => {
 										<div
 											className={`${styles.formRow} ${
 												field.newField ? styles.formRowExtended : ''
+											} ${
+												!field.isEditable ? styles.formRowExtendedEditable : ''
 											}`}
 										>
 											<div className={styles.formInputContainer}>
@@ -219,9 +244,13 @@ const PlatformSettings = () => {
 														<input
 															type="checkbox"
 															className={styles.checkbox}
-															{...(publicForm.watchedValues.public[index]
+															disabled={
+																!privateForm.watchedValues.private[index]
+																	.isEditable
+															}
+															{...(privateForm.watchedValues.private[index]
 																.value === 'false' && { checked: false })}
-															{...(publicForm.watchedValues.public[index]
+															{...(privateForm.watchedValues.private[index]
 																.value === 'true' && { checked: true })}
 															{...privateForm.register(
 																`private.${index}.value`
@@ -231,6 +260,10 @@ const PlatformSettings = () => {
 												) : (
 													<input
 														type="text"
+														disabled={
+															!privateForm.watchedValues.private[index]
+																.isEditable
+														}
 														className={`${styles.formControl} ${
 															privateForm.errors.private &&
 															privateForm.errors.private[index]?.value
@@ -242,6 +275,37 @@ const PlatformSettings = () => {
 													/>
 												)}
 											</div>
+											<div className={styles.formInputContainer}>
+												<label className={styles.formLabel}>Type</label>
+												<select
+													className={`${styles.formControl} ${
+														privateForm.errors.private &&
+														privateForm.errors.private[index]?.type
+															? styles.inputError
+															: ''
+													}`}
+													disabled={!field.canBeDeleted}
+													{...privateForm.register(`private.${index}.type`)}
+												>
+													<option value="STRING">String</option>
+													<option value="NUMBER">Number</option>
+													<option value="BOOLEAN">Boolean</option>
+												</select>
+											</div>
+											{field.isEditable && (
+												<div className={styles.formInputContainer}>
+													<label className={styles.formLabel}>Editable?</label>
+													<div className={styles.checkboxContainer}>
+														<input
+															type="checkbox"
+															className={styles.checkbox}
+															{...privateForm.register(
+																`private.${index}.isEditable`
+															)}
+														/>
+													</div>
+												</div>
+											)}
 											{field.canBeDeleted && (
 												<div className={styles.formInputContainer}>
 													<label className={styles.formLabel}>Deletable?</label>
@@ -257,23 +321,6 @@ const PlatformSettings = () => {
 												</div>
 											)}
 											<div className={styles.inputBtnContainer}>
-												<div className={styles.formInputContainer}>
-													<label className={styles.formLabel}>Type</label>
-													<select
-														className={`${styles.formControl} ${
-															privateForm.errors.private &&
-															privateForm.errors.private[index]?.type
-																? styles.inputError
-																: ''
-														}`}
-														disabled={!field.canBeDeleted}
-														{...privateForm.register(`private.${index}.type`)}
-													>
-														<option value="STRING">String</option>
-														<option value="NUMBER">Number</option>
-														<option value="BOOLEAN">Boolean</option>
-													</select>
-												</div>
 												{field.canBeDeleted && (
 													<button
 														className={`${styles.btn} ${styles.btnDanger} ${styles.deleteBtn} `}

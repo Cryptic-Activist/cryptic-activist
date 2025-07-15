@@ -5,6 +5,8 @@ import { deployPremium } from '@/services/blockchains/premium';
 import { ethers } from 'ethers';
 import { formatBigInt } from '@/utils/number';
 import { getNextSmartContractVersion } from '@/services/blockchains';
+import { getPremiumABI } from '@/services/blockchains/premium';
+import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
@@ -27,6 +29,19 @@ const convertABIToFile = (abi: any) => {
   };
 
   return multerFile;
+};
+
+export const getPremiumABIFile = async (req: Request, res: Response) => {
+  try {
+    const abi = await getPremiumABI();
+
+    console.log({ abi });
+
+    res.status(200).json(abi);
+  } catch (error) {
+    console.log({ error });
+    res.status(400).json(error);
+  }
 };
 
 export const deployPremiumSmartContract = async (
@@ -128,6 +143,24 @@ export const deployPremiumSmartContract = async (
                 yearlyPrice: yearlyPrice,
               },
             },
+          },
+        });
+
+        await tx.platformSetting.update({
+          where: {
+            key: 'premiumPriceMonthly',
+          },
+          data: {
+            value: monthlyPrice.toString(),
+          },
+        });
+
+        await tx.platformSetting.update({
+          where: {
+            key: 'premiumPriceYearly',
+          },
+          data: {
+            value: yearlyPrice.toString(),
           },
         });
 

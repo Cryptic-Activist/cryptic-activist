@@ -29,6 +29,7 @@ const usePlatformSettings = () => {
 		type: 'STRING',
 		deletable: true,
 		canBeDeleted: true,
+		isEditable: true,
 		newField: true
 	};
 
@@ -155,6 +156,7 @@ const usePlatformSettings = () => {
 				type: field.type,
 				deletable: field.canBeDeleted,
 				canBeDeleted: field.canBeDeleted,
+				isEditable: field.isEditable,
 				...(field.canBeDeleted && { newField: true })
 			});
 			setCurrentPublicIndex((prev) => {
@@ -173,6 +175,7 @@ const usePlatformSettings = () => {
 				type: field.type,
 				deletable: field.canBeDeleted,
 				canBeDeleted: field.canBeDeleted,
+				isEditable: field.isEditable,
 				...(field.canBeDeleted && { newField: true })
 			});
 			setCurrentPrivateIndex((prev) => {
