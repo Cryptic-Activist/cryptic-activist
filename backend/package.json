@@ -71,6 +71,7 @@
     "jsonwebtoken": "^9.0.2",
     "mailtrap": "^4.1.0",
     "mongoose": "^8.13.2",
+    "moralis": "^2.27.2",
     "multer": "^2.0.1",
     "node-cron": "^4.0.7",
     "nodemailer": "^6.10.1",

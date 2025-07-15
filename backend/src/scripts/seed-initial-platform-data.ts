@@ -485,14 +485,21 @@ const main = async () => {
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('hardhat-localnet')!,
-        contractAddress: '0x0000000000000000000000000000000000000000',
+        contractAddress: null,
+        isVerified: true,
+      },
+      // MockUSDC on Hardhat
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('hardhat-localnet')!,
+        contractAddress: '0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82',
         isVerified: true,
       },
       // Ethereum native on Ethereum
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('eth-mainnet')!,
-        contractAddress: '0x0000000000000000000000000000000000000000',
+        contractAddress: null,
         isVerified: true,
       },
       // Ethereum on other chains (wrapped/bridged)

@@ -3,7 +3,7 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/envs';
-import { Interface, ethers } from 'ethers';
+import { BrowserProvider, Interface, ethers } from 'ethers';
 
 import { ABI } from '@/store/abis/types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
@@ -196,3 +196,26 @@ export const buyerFundTrade = async (
     };
   }
 };
+
+export async function getWalletTokenBalances(
+  tokens: any[],
+  provider: BrowserProvider,
+  abi: any,
+  walletAddress: string
+) {
+  const signer = await provider.getSigner();
+
+  const balances = await Promise.all(
+    tokens.map(async (token) => {
+      const contract = new ethers.Contract(token.address, abi, signer);
+      const raw = await contract.balanceOf(walletAddress);
+      const formatted = ethers.formatUnits(raw, token.decimals);
+      return {
+        symbol: token.symbol,
+        balance: formatted,
+      };
+    })
+  );
+
+  return balances;
+}
