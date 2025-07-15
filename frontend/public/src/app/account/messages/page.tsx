@@ -10,6 +10,8 @@ import Pagination from '@/components/Pagination';
 import styles from './page.module.scss';
 import { timeSince } from '@/utils';
 import { useNotification } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const Message: FC<MessageProps> = ({ note }) => {
   const getNotification = () => {
@@ -120,4 +122,6 @@ const SystemMessages = () => {
   );
 };
 
-export default SystemMessages;
+export default withAuthAdvanced(SystemMessages, {
+  validateToken: validateWithAuthToken,
+});

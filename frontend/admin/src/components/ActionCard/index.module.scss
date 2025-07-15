@@ -1,0 +1,30 @@
+@use "../../styles/globals.module.scss";
+
+.statusCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 4px globals.$box-shadow-default-color;
+  background-color: #fff;
+  border: 1px solid #575757;
+}
+
+.statusCardHeader {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  .icon {
+    background-color: globals.$primary;
+    padding: 1rem;
+    border-radius: 100%;
+  }
+}
+
+.statusCardContent {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}

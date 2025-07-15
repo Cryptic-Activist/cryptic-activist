@@ -1,6 +1,9 @@
+import { ethers, toBigInt } from 'ethers';
+import { fetchGet, fetchPost } from '../axios';
+
 import { Queries } from './types';
-import { fetchGet } from '../axios';
 import { getQueries } from '@/utils/axios';
+import { parseDurationToSeconds } from '@/utils/date';
 import { redisClient } from '../db';
 
 export const getCoinPrice = async (id: string, fiatSymbol: string) => {
@@ -23,7 +26,8 @@ export const getCoinPrice = async (id: string, fiatSymbol: string) => {
   const price = Object.values(crypto)[0];
 
   // Cache the crypto price from 60 seconds
-  await redisClient.setEx(chacheKey, 60, JSON.stringify(price));
+  const expiry = parseDurationToSeconds('1m');
+  await redisClient.setEx(chacheKey, expiry, JSON.stringify(price));
 
   return price;
 };
@@ -51,4 +55,47 @@ export const getCoin = async (coingeckoId: string) => {
   }
 
   return response.data;
+};
+
+export const getGasPrice = async (rpcUrl: string) => {
+  try {
+    const response = await fetchPost(rpcUrl, {
+      jsonrpc: '2.0',
+      method: 'eth_gasPrice',
+      params: [],
+      id: 1,
+    });
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+    const weiHex = response.data.result;
+    const wei = toBigInt(weiHex);
+    const gwei = ethers.formatUnits(wei, 'gwei');
+    return `${parseFloat(gwei).toFixed(2)} Gwei`;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getBlockHeight = async (rpcUrl: string) => {
+  try {
+    const response = await fetchPost(rpcUrl, {
+      jsonrpc: '2.0',
+      method: 'eth_blockNumber',
+      params: [],
+      id: 1,
+    });
+
+    if (response.status !== 200) {
+      return null;
+    }
+
+    const blockNumberHex = response.data.result; // e.g. "0x10d4f" (hex string)
+    const blockNumber = parseInt(blockNumberHex, 16); // convert hex to decimal number
+    return blockNumber;
+  } catch (error) {
+    return null;
+  }
 };

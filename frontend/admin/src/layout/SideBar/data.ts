@@ -46,7 +46,7 @@ export const sidebarItems = [
 	},
 	{
 		href: '/fiats',
-		label: 'fiats',
+		label: 'Fiats',
 		icon: 'FaDollarSign'
 	},
 	{
@@ -57,11 +57,25 @@ export const sidebarItems = [
 	{
 		href: '/admins',
 		label: 'Admins',
-		icon: 'FaUserShield'
+		icon: 'FaUserShield',
+		superAdminOnly: true
 	},
 	{
 		href: '/analytics',
 		label: 'Analytics',
-		icon: 'FaChartLine'
+		icon: 'FaChartLine',
+		superAdminOnly: true
+	},
+	{
+		href: '/smart-contracts',
+		label: 'Smart Contracts',
+		icon: 'FaLink',
+		superAdminOnly: true
+	},
+	{
+		href: '/settings',
+		label: 'Platform Settings',
+		icon: 'FaGears',
+		superAdminOnly: true
 	}
 ];

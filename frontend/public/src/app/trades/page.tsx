@@ -10,6 +10,8 @@ import Pagination from '@/components/Pagination';
 import { TradeItemProps } from './types';
 import styles from './page.module.scss';
 import { useTrades } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
   const getTrade = () => {
@@ -29,8 +31,6 @@ const TradeItem: FC<TradeItemProps> = ({ trade, as }) => {
   };
 
   const tradeObj = getTrade();
-
-  console.log({ tradeObj, trade });
 
   return (
     <div
@@ -243,4 +243,6 @@ const TradesPage = () => {
   );
 };
 
-export default TradesPage;
+export default withAuthAdvanced(TradesPage, {
+  validateToken: validateWithAuthToken,
+});

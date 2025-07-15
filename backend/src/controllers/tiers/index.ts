@@ -21,7 +21,7 @@ export const createTier = async (req: Request, res: Response) => {
         level,
         tradingFee,
         discount,
-        minVolume,
+        volume: minVolume,
         requiredXP,
       },
       update: {},
@@ -31,7 +31,7 @@ export const createTier = async (req: Request, res: Response) => {
         level,
         tradingFee,
         discount,
-        minVolume,
+        volume: minVolume,
         requiredXP,
       },
     });
@@ -54,6 +54,7 @@ export const getTiers = async (_req: Request, res: Response) => {
 
     res.status(200).send(tiers);
   } catch (err) {
+    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });

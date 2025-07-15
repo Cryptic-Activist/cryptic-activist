@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SideBarProps } from './types';
 import { sidebarItems } from './data';
 import styles from './styles.module.scss';
+import { useAdmin } from '@/hooks';
 import { usePathname } from 'next/navigation';
 
 const Item: FC<SideBarProps> = ({ href, label, icon }) => {
@@ -18,26 +19,46 @@ const Item: FC<SideBarProps> = ({ href, label, icon }) => {
 			}`}
 		>
 			<Link href={href}>
-				{icon && <DynamicIcon iconName={icon} />}
-				<span>{label}</span>
+				<div className={styles.iconContainer}>
+					{icon && <DynamicIcon iconName={icon} size={24} />}
+				</div>
+				<span className={styles.label}>{label}</span>
 			</Link>
 		</li>
 	);
 };
 
 const SideBar = () => {
+	const { admin, hasRole } = useAdmin();
+	const isSuperAdmin = hasRole('SUPER_ADMIN');
+
 	return (
 		<aside className={styles.aside}>
-			<ul className={styles.asideList}>
-				{sidebarItems.map((sidebarItem, index) => (
-					<Item
-						key={index}
-						href={sidebarItem.href}
-						label={sidebarItem.label}
-						icon={sidebarItem.icon}
-					/>
-				))}
-			</ul>
+			{admin.data?.id && (
+				<ul className={styles.asideList}>
+					{sidebarItems.map((sidebarItem, index) => {
+						if (isSuperAdmin && sidebarItem.superAdminOnly) {
+							return (
+								<Item
+									key={index}
+									href={sidebarItem.href}
+									label={sidebarItem.label}
+									icon={sidebarItem.icon}
+								/>
+							);
+						}
+
+						return (
+							<Item
+								key={index}
+								href={sidebarItem.href}
+								label={sidebarItem.label}
+								icon={sidebarItem.icon}
+							/>
+						);
+					})}
+				</ul>
+			)}
 		</aside>
 	);
 };

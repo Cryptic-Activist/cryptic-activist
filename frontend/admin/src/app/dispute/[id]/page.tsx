@@ -149,14 +149,12 @@ const DisputeDetailsPage = () => {
 							<div className={styles.userRole}>{role}</div>
 						</div>
 						{winner?.id && winner?.id === user?.id && (
-							<span
-								className={`${styles.statusBadge} ${styles.statusResolved}`}
-							>
+							<span className={`${styles.statusBadge} ${styles.RESOLVED}`}>
 								Winner
 							</span>
 						)}
 						{loser?.id && loser?.id === user?.id && (
-							<span className={`${styles.statusBadge} ${styles.priorityHigh}`}>
+							<span className={`${styles.statusBadge} ${styles.ESCALATED}`}>
 								Loser
 							</span>
 						)}

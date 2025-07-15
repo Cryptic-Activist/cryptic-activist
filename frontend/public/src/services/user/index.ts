@@ -1,6 +1,6 @@
 import { GetUserInfoReturn, Login2FAParams, LoginParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
-import { getCookie, removeCookie } from '@/utils';
+import { getBearerToken, getCookie, removeCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
 
@@ -65,5 +65,20 @@ export const decodeAccessToken = async () => {
     removeCookie('refreshToken');
 
     return null;
+  }
+};
+
+export const validateWithAuthToken = async () => {
+  try {
+    const bearerToken = getBearerToken();
+    const response = await fetchGet(`${BACKEND}/users/auth/validate/token`, {
+      Authorization: bearerToken,
+    });
+
+    if (response.status !== 200) return false;
+
+    return response.data.isValid;
+  } catch (_err) {
+    return false;
   }
 };

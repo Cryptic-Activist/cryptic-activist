@@ -26,9 +26,7 @@ type Defaults = {
   amount?: number;
 };
 
-type Settings = {
-  depositPerTradePercent?: number;
-};
+type Settings = { [key: string]: string | number | boolean };
 
 export type CurrentPrice = number;
 export type IsCheckIsMobileParams = {

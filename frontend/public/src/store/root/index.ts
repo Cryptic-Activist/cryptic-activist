@@ -2,6 +2,7 @@ import { IS_DEVELOPMENT } from '@/constants';
 import { RootStore } from './types';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useABIsSlice } from '@/store/abis';
 import { useAppSlice } from '@/store/app';
 import { useBlockchainSlice } from '@/store/blockchain';
 import { useChainSlice } from '../chain';
@@ -21,6 +22,7 @@ import { usePaymentMethodSlice } from '@/store/paymentMethod';
 import { usePaymentMethodsSlice } from '@/store/paymentMethods';
 import { useRegisterSlice } from '@/store/register';
 import { useResetPasswordSlice } from '@/store/resetPassword';
+import { useTiersSlice } from '@/store/tiers';
 import { useTradeDetailsSlice } from '@/store/tradeDetails';
 import { useTradeSlice } from '@/store/trade';
 import { useTradesSlice } from '@/store/trades';
@@ -31,6 +33,7 @@ import { useVerifyAccountSlice } from '@/store/verifyAccount';
 export const useRootStore = create<RootStore>()(
   devtools(
     (set, get, store) => ({
+      ...useABIsSlice(set, get, store),
       ...useAppSlice(set, get, store),
       ...useBlockchainSlice(set, get, store),
       ...useChainsSlice(set, get, store),
@@ -53,6 +56,7 @@ export const useRootStore = create<RootStore>()(
       ...useTradeSlice(set, get, store),
       ...useTradeDetailsSlice(set, get, store),
       ...useTradesSlice(set, get, store),
+      ...useTiersSlice(set, get, store),
       ...useNotificationsSlice(set, get, store),
       ...useVendorSlice(set, get, store),
       ...useMyOffersSlice(set, get, store),

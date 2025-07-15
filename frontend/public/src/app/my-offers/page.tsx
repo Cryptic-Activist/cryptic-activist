@@ -16,6 +16,8 @@ import Pagination from '@/components/Pagination';
 import { Type } from '@/store/app/types';
 import { filters } from './data';
 import styles from './page.module.scss';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const MyOfferItem: FC<MyOfferItemProps> = ({ offer, onDeleteOffer }) => {
   return (
@@ -175,4 +177,6 @@ const MyOffers = () => {
   );
 };
 
-export default MyOffers;
+export default withAuthAdvanced(MyOffers, {
+  validateToken: validateWithAuthToken,
+});

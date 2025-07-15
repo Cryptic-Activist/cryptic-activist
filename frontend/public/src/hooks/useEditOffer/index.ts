@@ -89,8 +89,8 @@ const useEditOffer = () => {
     setValueForm('instructions', value);
   };
 
-  const onSubmit = (data: any) => {
-    console.log({ data });
+  const onSubmit = (_data: any) => {
+    // console.log({ data });
   };
 
   useEffect(() => {

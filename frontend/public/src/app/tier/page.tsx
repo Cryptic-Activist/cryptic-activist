@@ -1,15 +1,11 @@
 'use client';
 
 import { formatNumber } from '@/utils';
-import { getAllTiers } from '@/services/tiers';
 import styles from './page.module.scss';
-import { useQuery } from '@tanstack/react-query';
+import { useTiers } from '@/hooks';
 
 const TierSystemPage = () => {
-  const { data } = useQuery({
-    queryKey: ['tierSystem'],
-    queryFn: getAllTiers,
-  });
+  const { tiers } = useTiers(false);
 
   return (
     <div className={styles.container}>
@@ -30,7 +26,7 @@ const TierSystemPage = () => {
           tier, you&apos;ll receive increased discounts on trading fees:
         </p>
         <ol className={styles.stepsList}>
-          {data?.map((tier: any) => (
+          {tiers.data?.map((tier: any) => (
             <li key={tier.id}>
               <strong>{tier.name}:</strong> {tier.description}
             </li>
@@ -49,7 +45,7 @@ const TierSystemPage = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.map((tier: any, index: number) => {
+            {tiers.data?.map((tier: any, index: number) => {
               const discountPercent = parseInt(
                 (tier.discount * 100).toString()
               );

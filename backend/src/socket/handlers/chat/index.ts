@@ -252,7 +252,6 @@ export default class Chat {
                 });
 
               if (!tradeEscrowDetails) {
-                console.log({ blockchainTradeId: tradeCreated.data });
                 const tradeEscrowDetails =
                   await prisma.tradeEscrowDetails.create({
                     data: {

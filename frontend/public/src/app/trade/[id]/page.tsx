@@ -19,6 +19,8 @@ import {
 } from '@/hooks';
 
 import styles from './page.module.scss';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
   user,
@@ -32,8 +34,6 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   const {
     blockchain: { account, chain },
   } = useBlockchain();
-
-  console.log({ trade });
 
   const isSetAsPaidVisible =
     trade.status === 'IN_PROGRESS' &&
@@ -71,8 +71,6 @@ const ActionButtons: FC<ActionButtonsProps> = ({
   const isFundTradeButtonActive =
     account?.address === trade?.traderWalletAddress &&
     chain?.id === trade?.offer?.chain?.chainId;
-
-  console.log({ chain, trade });
 
   return (
     <section className={styles.actionButtons}>
@@ -399,7 +397,7 @@ const Trade: FC<TradeProps> = ({
   );
 };
 
-export default function TradePage() {
+function TradePage() {
   const {
     queryTrade,
     trade,
@@ -477,3 +475,7 @@ export default function TradePage() {
     </div>
   );
 }
+
+export default withAuthAdvanced(TradePage, {
+  validateToken: validateWithAuthToken,
+});

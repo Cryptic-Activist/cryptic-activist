@@ -1,18 +1,26 @@
 import {
+  DeployEscrowSmartContractParams,
+  InitTradeParams,
+  Token,
+} from './types';
+import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
-import { InitTradeParams, Token } from './types';
-import { Interface, ethers, parseEther } from 'ethers';
+import { Interface, InterfaceAbi, ethers, parseEther } from 'ethers';
+import { prisma, redisClient } from '@/services/db';
+import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
-import escrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { convertSmartContractParams } from '@/utils/blockchain';
+import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
+import { parseDurationToSeconds } from '@/utils/date';
 
-const iface = new Interface(escrowArtifact.abi);
+const iface = new Interface(EscrowArtifact.abi);
 
 export const getProvider = () => {
   const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
@@ -25,13 +33,102 @@ export const getSigner = () => {
   return signer;
 };
 
-export const getEscrowContract = () => {
+export const getEscrowABI = async () => {
+  const cacheKey = 'smartContracts:escrow';
+  let abiJson: any | null = null;
+
+  const cachedABI = await redisClient.get(cacheKey);
+
+  if (cachedABI) {
+    abiJson = JSON.parse(cachedABI);
+  } else {
+    const escrowSmartContract = await prisma.smartContract.findFirst({
+      where: {
+        isActive: true,
+        metadata: {
+          path: ['type'],
+          equals: 'Escrow',
+        },
+      },
+      select: {
+        artifactUrl: true,
+      },
+    });
+
+    if (!escrowSmartContract) {
+      throw new Error('Unable to find Escrow ABI');
+    }
+
+    const response = await fetchGet(escrowSmartContract.artifactUrl);
+    if (response.status !== 200) {
+      throw new Error(
+        `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
+      );
+    }
+
+    abiJson = await response.data.abi;
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
+  }
+
+  return abiJson;
+};
+
+export const getEscrowContract = async () => {
+  const abi = await getEscrowABI();
   const signer = getSigner();
-  return new ethers.Contract(
-    ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-    escrowArtifact.abi,
-    signer,
-  );
+  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abi, signer);
+};
+
+export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
+  try {
+    // Load environment variables
+    const RPC_URL = params.rpcUrl; // e.g. from Alchemy, Infura, etc.
+    const PRIVATE_KEY = ETHEREUM_DEPLOYER_PRIVATE_KEY;
+
+    if (!RPC_URL || !PRIVATE_KEY) {
+      throw new Error('Missing RPC_URL or PRIVATE_KEY in .env');
+    }
+
+    // Initialize provider and signer
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+    const deployerAddress = await wallet.getAddress();
+
+    // Get Contract Factory and Deploy
+    const factory = new ethers.ContractFactory(
+      EscrowArtifact.abi,
+      EscrowArtifact.bytecode,
+      wallet,
+    );
+
+    const contract = await factory.deploy(
+      params.platformWallet,
+      convertSmartContractParams(params.defaultFeeRate),
+      convertSmartContractParams(params.defaultProfitMargin),
+    );
+
+    await contract.waitForDeployment();
+
+    const contractAddress = await contract.getAddress();
+    const deploymentTx = contract.deploymentTransaction();
+    const receipt = await deploymentTx?.wait();
+
+    return {
+      contractAddress,
+      deployerAddress,
+      deploymentHash: deploymentTx?.hash,
+      deploymentBlockHeight: receipt?.blockNumber,
+      gasUsed: receipt?.gasUsed,
+      gasPrice: receipt?.gasPrice,
+      deployedAt: new Date(),
+      artifact: EscrowArtifact,
+    };
+  } catch (error) {
+    console.log(error);
+    throw new Error('Unable to deploy Escrow');
+  }
 };
 
 export const decodeFunctionData = (receipt: any) => {
@@ -84,7 +181,7 @@ export const decodeFunctionData = (receipt: any) => {
 
 export const createTrade = async (params: InitTradeParams) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
 
     const tx = await contract.createTrade(
       params.buyer,
@@ -117,7 +214,7 @@ export const createTrade = async (params: InitTradeParams) => {
 
 export const fundTrade = async (tradeId: number, value: bigint) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
 
     if (!contract) {
       return {
@@ -150,7 +247,7 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
 
 export const confirmTrade = async (tradeId: bigint, value: bigint) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.confirmTrade(tradeId, {
       value,
@@ -169,7 +266,7 @@ export const confirmTrade = async (tradeId: bigint, value: bigint) => {
 
 export const executeTrade = async (tradeId: BigInt) => {
   try {
-    const contract = getEscrowContract();
+    const contract = await getEscrowContract();
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.executeTrade(tradeId);
     const receipt = await tx.wait();
@@ -189,21 +286,21 @@ export const executeTrade = async (tradeId: BigInt) => {
 };
 
 export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.cancelTrade(tradeId, forcedCancel);
   await tx.wait();
   return { message: 'Trade cancelled', txHash: tx.hash };
 };
 
 export const raiseDispute = async () => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.raiseDispute();
   await tx.wait();
   return { message: 'Dispute raised', txHash: tx.hash };
 };
 
 export const escalateDispute = async () => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.escalateDispute();
   await tx.wait();
   return {
@@ -216,14 +313,14 @@ export const resolveDispute = async (
   decision: boolean,
   penalizedParty: 0 | 1 | 2,
 ) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   const tx = await contract.resolveDispute(decision, penalizedParty);
   await tx.wait();
   return { message: 'Dispute resolved', txHash: tx.hash };
 };
 
 export const getTradeDetails = async (tradeId: bigint) => {
-  const contract = getEscrowContract();
+  const contract = await getEscrowContract();
   // Buyer deposits require sending value along with the transaction.
   const tx = await contract.getTrade(tradeId);
   await tx.wait();
@@ -263,6 +360,8 @@ export const getCreateTradeDetails = async (trade: any) => {
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
+    // const feeRate =
+
     return {
       buyerWallet: buyerWallet as Address,
       sellerWallet: sellerWallet as Address,
@@ -275,7 +374,7 @@ export const getCreateTradeDetails = async (trade: any) => {
 
       tradeDurationInSeconds,
       feeRate: 250,
-      profitMargin: 150,
+      profitMargin: 0,
     };
   } catch (error) {
     console.error('Error in getCreateTradeDetails:', error);

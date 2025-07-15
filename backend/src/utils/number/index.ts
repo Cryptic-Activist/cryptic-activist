@@ -38,3 +38,20 @@ export const toBigIntSafe = (input: any) => {
 
   throw new Error('Invalid BigInt input: ' + JSON.stringify(input));
 };
+
+export const parseSafeResponse = (response: { [key: string]: any }) => {
+  const stringfied = JSON.stringify(response, (_, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  );
+  return JSON.parse(stringfied);
+};
+
+export const formatBigInt = (bigint?: bigint | number | null) => {
+  if (!bigint) return null;
+
+  const formatterBigInt = Intl.NumberFormat('de-DE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return formatterBigInt.format(bigint);
+};

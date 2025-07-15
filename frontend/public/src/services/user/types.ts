@@ -1,3 +1,5 @@
+import { Tier } from '@/store/user/types';
+
 type Language = {
   id: string;
   name: string;
@@ -38,6 +40,9 @@ export type GetUserInfoReturn = {
   userLanguage?: any[];
   lastLoginAt: string;
   referralCode: string;
+  xp?: number;
+  tier?: Tier;
+  twoFactorEnabled?: boolean;
   kyc?: any;
   _count: any;
 };

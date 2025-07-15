@@ -9,8 +9,10 @@ import { getNextTier } from '@/services/tiers';
 import styles from './index.module.scss';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
-export default function RewardsPage() {
+function RewardsPage() {
   const { user } = useUser();
   const [wasCopied, setWasCopied] = useState(false);
   const sharableLink = `${APP_URL}?referral=${user.referralCode}`;
@@ -124,3 +126,7 @@ export default function RewardsPage() {
     </div>
   );
 }
+
+export default withAuthAdvanced(RewardsPage, {
+  validateToken: validateWithAuthToken,
+});

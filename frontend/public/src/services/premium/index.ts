@@ -24,3 +24,29 @@ export const subscribeToPremium = async (
 
   return response.data;
 };
+
+export const changeSubscriptionTo = async (
+  userId: any,
+  period: Period,
+  wallet: Wallet
+) => {
+  // const bearerToken = getBearerToken();
+
+  console.log({ userId, period, wallet });
+
+  // const;
+
+  // const response = await fetchPost(
+  //   `${BACKEND}/premium/subscribe`,
+  //   {
+  //     userId,
+  //     period,
+  //     payerAddress: wallet,
+  //   },
+  //   { Authorization: bearerToken }
+  // );
+
+  // if (response.status !== 200) return null;
+
+  // return response.data;
+};

@@ -24,10 +24,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
   try {
     const { period: periodRaw, userId, payerAddress } = req.body;
 
-    console.log({ periodRaw });
-
     const period = parsePeriod(periodRaw);
-
     // Check for active subscription of the same type
     const existing = await prisma.premiumPurchase.findFirst({
       where: {
@@ -40,9 +37,10 @@ export const subscribePremium = async (req: Request, res: Response) => {
     });
 
     if (existing) {
-      return res.status(409).json({
+      res.status(409).json({
         error: `You already have an active subscription.`,
       });
+      return;
     }
 
     const scheduled = await prisma.premiumPurchase.findFirst({
@@ -54,9 +52,10 @@ export const subscribePremium = async (req: Request, res: Response) => {
     });
 
     if (scheduled) {
-      return res.status(409).json({
+      res.status(409).json({
         error: `You already have a pending ${period} subscription scheduled to activate.`,
       });
+      return;
     }
 
     const settingKey =
@@ -102,7 +101,6 @@ export const changeToYearlyPremiumSubscription = async (
     const { userId, payerAddress } = req.body;
 
     const now = new Date();
-
     const activeMonthly = await prisma.premiumPurchase.findFirst({
       where: {
         userId,
@@ -114,9 +112,10 @@ export const changeToYearlyPremiumSubscription = async (
     });
 
     if (!activeMonthly) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'No active monthly subscription found.',
       });
+      return;
     }
 
     const alreadyScheduledYearly = await prisma.premiumPurchase.findFirst({
@@ -128,9 +127,10 @@ export const changeToYearlyPremiumSubscription = async (
     });
 
     if (alreadyScheduledYearly) {
-      return res.status(409).json({
+      res.status(409).json({
         error: 'You already have a scheduled yearly subscription.',
       });
+      return;
     }
 
     const yearlyPrice = await getSetting('premiumPriceYearly');
@@ -153,13 +153,15 @@ export const changeToYearlyPremiumSubscription = async (
       },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       ok: true,
       scheduledStart: startsAt,
     });
+    return;
   } catch (err) {
     console.error({ err });
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
+    return;
   }
 };
 
@@ -183,9 +185,10 @@ export const changeToMonthlyPremiumSubscription = async (
     });
 
     if (!activeYearly) {
-      return res.status(400).json({
+      res.status(400).json({
         error: 'No active yearly subscription found.',
       });
+      return;
     }
 
     const alreadyScheduledMonthly = await prisma.premiumPurchase.findFirst({
@@ -197,9 +200,10 @@ export const changeToMonthlyPremiumSubscription = async (
     });
 
     if (alreadyScheduledMonthly) {
-      return res.status(409).json({
+      res.status(409).json({
         error: 'You already have a scheduled monthly subscription.',
       });
+      return;
     }
 
     const monthlyPrice = await getSetting('premiumPriceMonthly');
@@ -222,12 +226,14 @@ export const changeToMonthlyPremiumSubscription = async (
       },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       ok: true,
       scheduledStart: startsAt,
     });
+    return;
   } catch (err) {
     console.error({ err });
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
+    return;
   }
 };

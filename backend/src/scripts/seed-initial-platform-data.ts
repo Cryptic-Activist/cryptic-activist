@@ -1,6 +1,8 @@
 import 'dotenv/config';
 
-import { IS_DEVELOPMENT } from '@/constants';
+import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
+import { getPublicSettings, getSetting } from '@/utils/settings';
+
 import bcrypt from 'bcryptjs';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
@@ -18,19 +20,43 @@ const main = async () => {
         isPrivate: false,
       },
       {
+        key: 'defaultTradeFeeRate',
+        type: 'NUMBER',
+        value: '0.025',
+        isPrivate: false,
+      },
+      {
         key: 'premiumPriceMonthly',
         type: 'NUMBER',
         value: '10',
+        isEditable: false,
         isPrivate: false,
       },
       {
         key: 'premiumPriceYearly',
         type: 'NUMBER',
         value: '100',
+        isEditable: false,
+        isPrivate: false,
+      },
+      {
+        key: 'premiumDiscount',
+        type: 'NUMBER',
+        value: '0.002',
         isPrivate: false,
       },
     ],
   });
+
+  const defaultTradeFeeRateSetting = await prisma.platformSetting.findUnique({
+    where: {
+      key: 'defaultTradeFeeRate',
+    },
+    select: {
+      value: true,
+    },
+  });
+  const defaultTradeFeeRate = parseFloat(defaultTradeFeeRateSetting!.value);
 
   // Create tiers
   const tiers = await prisma.tier.createMany({
@@ -40,9 +66,9 @@ const main = async () => {
         description:
           'Your starting tier. Earn XP by trading to unlock discounts.',
         level: 0,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0,
-        minVolume: 0,
+        volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
       {
@@ -50,9 +76,9 @@ const main = async () => {
         description:
           'Reach 1,000 XP to move to Silver and enjoy a small discount.',
         level: 1,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.05,
-        minVolume: 0,
+        volume: TIER_VOLUME.SILVER,
         requiredXP: 1000,
       },
       {
@@ -60,18 +86,18 @@ const main = async () => {
         description:
           'When you accumulate 5,000 XP, you qualify for Gold discounts.',
         level: 2,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.1,
-        minVolume: 0,
+        volume: TIER_VOLUME.GOLD,
         requiredXP: 2500,
       },
       {
         name: 'Platinum',
-        description: 'Achieve 10,000 XPto join our exclusive Platinum tier.',
+        description: 'Achieve 10,000 XP to join our exclusive Platinum tier.',
         level: 3,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.15,
-        minVolume: 0,
+        volume: TIER_VOLUME.PLATINUM,
         requiredXP: 5000,
       },
       {
@@ -79,9 +105,9 @@ const main = async () => {
         description:
           'Once you hit 20,000 XP you become a Diamond member and get the highest fee discounts.',
         level: 4,
-        tradingFee: 0.05,
+        tradingFee: defaultTradeFeeRate,
         discount: 0.2,
-        minVolume: 0,
+        volume: TIER_VOLUME.DIAMOND,
         requiredXP: 10000,
       },
     ],
@@ -128,7 +154,7 @@ const main = async () => {
       name: 'Hardhat',
       symbol: 'ETH',
       chainId: 1337,
-      rpcUrl: 'http://localhost:8545',
+      rpcUrl: 'http://host.docker.internal:8545',
       explorerUrl: '',
       nativeCurrency: 'ETH',
       isTestnet: true,
@@ -459,14 +485,21 @@ const main = async () => {
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('hardhat-localnet')!,
-        contractAddress: '0x0000000000000000000000000000000000000000',
+        contractAddress: null,
+        isVerified: true,
+      },
+      // MockUSDC on Hardhat
+      {
+        cryptocurrencyId: cryptoMap.get('usd-coin')!,
+        chainId: chainMap.get('hardhat-localnet')!,
+        contractAddress: '0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82',
         isVerified: true,
       },
       // Ethereum native on Ethereum
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
         chainId: chainMap.get('eth-mainnet')!,
-        contractAddress: '0x0000000000000000000000000000000000000000',
+        contractAddress: null,
         isVerified: true,
       },
       // Ethereum on other chains (wrapped/bridged)
@@ -979,7 +1012,7 @@ const main = async () => {
         level: 0,
         tradingFee: 0.05,
         discount: 0,
-        minVolume: 0,
+        volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
     });

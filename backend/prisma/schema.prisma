@@ -67,6 +67,7 @@ model Admin {
   userWarning            UserWarning[]
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
+  smartContract          SmartContract[]
 
   @@map("admins")
 }
@@ -274,6 +275,7 @@ model Chain {
   // Relations
   offers               Offer[]               @relation("offer")
   cryptocurrencyChains CryptocurrencyChain[] @relation("chainCryptocurrency")
+  smartContract        SmartContract[]
 
   @@map("chains")
 }
@@ -466,11 +468,34 @@ model Tier {
   level       Int    @unique
   tradingFee  Float
   discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
-  minVolume   Float // Minimum trading volume to qualify for this tier
+  volume      Float // Minimum trading volume to qualify for this tier
   requiredXP  Int
   users       User[]
 
   @@map("tiers")
+}
+
+model SmartContract {
+  id                    String   @id @default(uuid())
+  address               String // Deployed contract address
+  chainId               String
+  chain                 Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
+  version               String // Optional versioning (e.g., "v1.0.0")
+  deployedById          String // Admin or system user who deployed it
+  deployedBy            Admin    @relation(fields: [deployedById], references: [id])
+  deployerAddress       String
+  deploymentHash        String? // Transaction hash
+  deploymentBlockHeight BigInt? // Transaction block height
+  gasUsed               BigInt?
+  gasPrice              BigInt?
+  deployedAt            DateTime @default(now()) @db.Timestamp()
+  isActive              Boolean  @default(true) // Useful for versioned contracts
+  artifactUrl           String
+
+  metadata Json? // Arbitrary extra data (tags, etc.)
+
+  @@index([address])
+  @@map("smart_contracts")
 }
 
 enum TradeStatus {
@@ -946,13 +971,15 @@ enum SettingType {
 }
 
 model PlatformSetting {
-  id        String      @id @default(uuid())
-  key       String      @unique
-  value     String // Store as string, convert as needed
-  type      SettingType @default(STRING)
-  isPrivate Boolean     @default(true)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  key          String      @unique
+  value        String // Store as string, convert as needed
+  type         SettingType @default(STRING)
+  isPrivate    Boolean     @default(true)
+  canBeDeleted Boolean     @default(false)
+  isEditable   Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@map("platform_settings")
 }

@@ -1,3 +1,5 @@
+import { ParseDurantionToSecondsParam } from './type';
+
 export const getExpiresAt = (duration: string) => {
   const durationRegex = /^(\d+)([smhdw])$/i;
   const match = duration.match(durationRegex);
@@ -153,4 +155,31 @@ export const toUTCDateOnly = (isoDateStr: string): Date => {
   return new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
   );
+};
+
+export const parseDurationToSeconds = (input: ParseDurantionToSecondsParam) => {
+  const match = input.match(/^(\d+)([smhdwMy])$/);
+  if (!match) {
+    throw new Error('Invalid duration format. Use format like 2d, 1w, 2m.');
+  }
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+
+  const unitToSeconds: Record<string, number> = {
+    s: 1, // seconds
+    m: 60, // minutes
+    h: 3600, // hours
+    d: 86400, // days
+    w: 604800, // weeks
+    M: 2592000, // months (approximate, 30 days)
+    y: 31536000, // years (365 days)
+  };
+
+  const multiplier = unitToSeconds[unit];
+  if (!multiplier) {
+    throw new Error(`Unsupported time unit: ${unit}`);
+  }
+
+  return value * multiplier;
 };

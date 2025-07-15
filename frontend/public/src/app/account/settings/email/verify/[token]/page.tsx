@@ -5,6 +5,8 @@ import React, { useEffect } from 'react';
 import { updateEmail } from '@/services/user/settings';
 import { useQuery } from '@tanstack/react-query';
 import { useURL } from '@/hooks';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const AccountSettingsEmailVerify = () => {
   const { params } = useURL();
@@ -34,4 +36,6 @@ const AccountSettingsEmailVerify = () => {
   return <div>Verifying email change request...</div>;
 };
 
-export default AccountSettingsEmailVerify;
+export default withAuthAdvanced(AccountSettingsEmailVerify, {
+  validateToken: validateWithAuthToken,
+});

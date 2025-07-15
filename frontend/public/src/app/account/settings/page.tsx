@@ -7,6 +7,8 @@ import { FaPlus } from 'react-icons/fa6';
 import { Input } from '@/components/forms';
 import React from 'react';
 import styles from './page.module.scss';
+import { validateWithAuthToken } from '@/services/user';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const AccountSettings = () => {
   const {
@@ -163,28 +165,26 @@ const AccountSettings = () => {
             Subscribe to a Premium acount now and reduce the amount of fees you
             can on each trade.
           </p>
-          {user.id && !user.isPremium && (
-            <Button
-              href="/account/premium"
-              size={16}
-              padding="1rem"
-              theme="gradient"
-              fullWidth
-            >
-              Subscribe to Premium
-            </Button>
-          )}
-          {user.id && user.isPremium && (
-            <Button
-              href="/account/premium/change"
-              size={16}
-              padding="1rem"
-              theme="gradient"
-              fullWidth
-            >
-              Change or Cancel your Premium account
-            </Button>
-          )}
+
+          <Button
+            href="/account/premium"
+            size={16}
+            padding="1rem"
+            theme="gradient"
+            fullWidth
+          >
+            <>
+              {user.id &&
+                (!user.premiumPurchase ||
+                  (user.premiumPurchase &&
+                    user.premiumPurchase.length === 0)) &&
+                'Subscribe to Premium'}
+              {user.id &&
+                user.premiumPurchase &&
+                user.premiumPurchase.length > 0 &&
+                'Change or Cancel your Premium account'}
+            </>
+          </Button>
         </section>
 
         {/* Additional Account Settings can be added here */}
@@ -193,4 +193,6 @@ const AccountSettings = () => {
   );
 };
 
-export default AccountSettings;
+export default withAuthAdvanced(AccountSettings, {
+  validateToken: validateWithAuthToken,
+});
