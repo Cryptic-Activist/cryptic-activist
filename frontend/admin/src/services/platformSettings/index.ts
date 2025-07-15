@@ -30,6 +30,8 @@ export const updatePlatformPublicSettings = async (
 		return null;
 	}
 
+	console.log({ settings });
+
 	const response = await fetchPut(
 		`${BACKEND}/settings/public/update`,
 		{

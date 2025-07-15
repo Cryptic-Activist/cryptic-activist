@@ -8,6 +8,8 @@ import usePlatformSettings from '@/hooks/usePlatformSettings';
 const PlatformSettings = () => {
 	const { publicForm, privateForm } = usePlatformSettings();
 
+	console.log({ valuePublic: publicForm.watchedValues });
+
 	return (
 		<div className={styles.container}>
 			{/* Header */}
@@ -25,7 +27,7 @@ const PlatformSettings = () => {
 						<div className={styles.cardHeader}>Public Settings</div>
 						<div className={styles.cardContent}>
 							<form onSubmit={publicForm.handleSubmit(publicForm.onSubmit)}>
-								{/* {fieldsPublic.pu} */}
+								{publicForm.fields.length === 0 && 'No Settings Yet'}
 								{publicForm.fields.map((field, index) => (
 									<div className={styles.formGroup} key={field.id}>
 										<div
@@ -95,7 +97,7 @@ const PlatformSettings = () => {
 															? styles.inputError
 															: ''
 													}`}
-													disabled={!field.canBeDeleted}
+													disabled={!field.canBeDeleted || !field.isEditable}
 													{...publicForm.register(`public.${index}.type`)}
 												>
 													<option value="STRING">String</option>
@@ -212,6 +214,7 @@ const PlatformSettings = () => {
 						<div className={styles.cardHeader}>Private Settings</div>
 						<div className={styles.cardContent}>
 							<form onSubmit={privateForm.handleSubmit(privateForm.onSubmit)}>
+								{privateForm.fields.length === 0 && 'No Settings Yet'}
 								{privateForm.fields.map((field, index) => (
 									<div className={styles.formGroup} key={field.id}>
 										<div
@@ -284,7 +287,7 @@ const PlatformSettings = () => {
 															? styles.inputError
 															: ''
 													}`}
-													disabled={!field.canBeDeleted}
+													disabled={!field.canBeDeleted || !field.isEditable}
 													{...privateForm.register(`private.${index}.type`)}
 												>
 													<option value="STRING">String</option>

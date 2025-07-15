@@ -32,38 +32,59 @@ export const updatePrivatePlatformSettings = async (
       where: { isPrivate: true },
     });
 
+    const existingMap = new Map(existingSettings.map((s) => [s.key, s]));
+
     const incomingKeys = settings.map((s: any) => s.key);
 
     await prisma.$transaction(async (tx) => {
-      // Upsert incoming settings
+      // Upsert or update settings
       await Promise.all(
-        settings.map((setting: any) => {
-          // Ensure value is stored as a string
+        settings.map(async (setting: any) => {
+          const existing = existingMap.get(setting.key);
+
           const stringValue =
             typeof setting.value === 'boolean'
               ? setting.value.toString()
               : String(setting.value);
 
-          return tx.platformSetting.upsert({
-            where: { key: setting.key },
-            create: {
-              key: setting.key,
-              value: stringValue,
-              type: setting.type,
-              canBeDeleted: setting.deletable,
-              isPrivate: true,
-            },
-            update: {
-              value: stringValue,
-              type: setting.type,
-              canBeDeleted: setting.deletable,
-              isPrivate: true,
-            },
-          });
+          if (existing) {
+            // If not editable, skip update
+            if (!existing.isEditable) return;
+
+            const nextCanBeDeleted = existing.canBeDeleted
+              ? (setting.deletable ?? existing.canBeDeleted)
+              : false;
+
+            const nextIsEditable = existing.isEditable
+              ? (setting.isEditable ?? existing.isEditable)
+              : false;
+
+            await tx.platformSetting.update({
+              where: { key: setting.key },
+              data: {
+                value: stringValue,
+                type: setting.type,
+                canBeDeleted: nextCanBeDeleted,
+                isEditable: nextIsEditable,
+              },
+            });
+          } else {
+            // Create new setting
+            await tx.platformSetting.create({
+              data: {
+                key: setting.key,
+                value: stringValue,
+                type: setting.type,
+                canBeDeleted: setting.deletable ?? false,
+                isEditable: setting.isEditable ?? true,
+                isPrivate: true,
+              },
+            });
+          }
         }),
       );
 
-      // Delete settings not included in payload, if deletable
+      // Delete settings not in payload and deletable
       const keysToDelete = existingSettings
         .filter((s) => !incomingKeys.includes(s.key) && s.canBeDeleted)
         .map((s) => s.key);
