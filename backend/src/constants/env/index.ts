@@ -65,4 +65,4 @@ export const SETTINGS_CACHE_TTL_SECONDS = parseInt(
   process.env.SETTINGS_CACHE_TTL_SECONDS as string,
 );
 
-export const MORALIS_API = process.env.MORALIS_API as string;
+export const MORALIS_API_KEY = process.env.MORALIS_API_KEY as string;

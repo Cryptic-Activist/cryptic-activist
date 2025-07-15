@@ -8,6 +8,7 @@ frontend-admin
 !/libraries/cryptic-utils
 
 **/dev.*.env
+!/envs/sample/dev.*.env
 **/prod.*.env
 
 /nginx/logs/*.log
