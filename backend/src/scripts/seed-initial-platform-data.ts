@@ -3,11 +3,16 @@ import 'dotenv/config';
 import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
 import { getPublicSettings, getSetting } from '@/utils/settings';
 
+import { ETHERSCAN_API_KEY } from '@/constants/env';
 import bcrypt from 'bcryptjs';
+import { convertABIToFile } from '@/controllers/blockchains/smart-contracts/premium';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
+import { getABI } from '@/services/blockchains/wallet';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
+import { rateLimitedMap } from '@/utils/timer';
+import { uploadFiles } from '@/services/upload';
 
 const main = async () => {
   // Create General Platform Settings
@@ -290,20 +295,20 @@ const main = async () => {
       logoUrl:
         'https://altcoinsbox.com/base-logo-download-coinbase-base-logo.png', // Base
     },
-    {
-      name: 'Optimism Sepolia',
-      symbol: 'ETH',
-      chainId: 11155420,
-      rpcUrl: 'https://sepolia.optimism.io',
-      explorerUrl: 'https://sepolia-optimism.etherscan.io',
-      nativeCurrency: 'ETH',
-      isTestnet: true,
-      isActive: true,
-      description: 'Optimism testnet',
-      tempId: 'optimism-sepolia-testnet',
-      logoUrl:
-        'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
-    },
+    // {
+    //   name: 'Optimism Sepolia',
+    //   symbol: 'POL',
+    //   chainId: 11155420,
+    //   rpcUrl: 'https://sepolia.optimism.io',
+    //   explorerUrl: 'https://sepolia-optimism.etherscan.io',
+    //   nativeCurrency: 'ETH',
+    //   isTestnet: true,
+    //   isActive: true,
+    //   description: 'Optimism testnet',
+    //   tempId: 'optimism-sepolia-testnet',
+    //   logoUrl:
+    //     'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
+    // },
   ];
 
   await prisma.chain.createMany({
@@ -345,12 +350,13 @@ const main = async () => {
 
   const cryptocurrencyData = [
     {
-      coingeckoId: 'ethereum',
-      name: 'Ethereum',
-      symbol: 'ETH',
+      coingeckoId: 'weth',
+      name: 'Wrapped Ethereum',
+      symbol: 'WETH',
       image:
-        'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1696501628',
+        'https://assets.coingecko.com/coins/images/2518/standard/weth.png?1696503332',
     },
+
     {
       coingeckoId: 'polygon-ecosystem-token',
       name: 'POL (ex-MATIC)',
@@ -472,597 +478,590 @@ const main = async () => {
     },
   ];
 
-  await prisma.$transaction(async (tx) => {
-    // Create cryptocurrencies
-    await tx.cryptocurrency.createMany({
-      data: cryptocurrencyData,
-    });
+  await prisma.$transaction(
+    async (tx) => {
+      // Create cryptocurrencies
+      await tx.cryptocurrency.createMany({
+        data: cryptocurrencyData,
+      });
 
-    // Fetch the created cryptocurrencies to get their generated IDs
-    const createdCryptos = await tx.cryptocurrency.findMany({
-      where: {
-        coingeckoId: {
-          in: cryptocurrencyData.map((c) => c.coingeckoId),
+      // Fetch the created cryptocurrencies to get their generated IDs
+      const createdCryptos = await tx.cryptocurrency.findMany({
+        where: {
+          coingeckoId: {
+            in: cryptocurrencyData.map((c) => c.coingeckoId),
+          },
         },
-      },
-    });
+      });
 
-    const cryptoMap = new Map(
-      createdCryptos.map((crypto) => [crypto.coingeckoId, crypto.id]),
-    );
+      const cryptoMap = new Map(
+        createdCryptos.map((crypto) => [crypto.coingeckoId, crypto.id]),
+      );
 
-    // Fetch the created chains to get their generated IDs
-    const createdChains = await tx.chain.findMany({
-      where: {
-        chainId: {
-          in: chainData.map((c) => c.chainId),
+      // Fetch the created chains to get their generated IDs
+      const createdChains = await tx.chain.findMany({
+        where: {
+          chainId: {
+            in: chainData.map((c) => c.chainId),
+          },
         },
-      },
-    });
+      });
 
-    const chainMap = new Map(
-      createdChains.map((chain) => [
-        chainData.find((d) => d.chainId === chain.chainId)?.tempId,
-        chain.id,
-      ]),
-    );
+      const chainMap = new Map(
+        createdChains.map((chain) => [
+          chainData.find((d) => d.chainId === chain.chainId)?.tempId,
+          chain.id,
+        ]),
+      );
 
-    // Create cryptocurrency-chain relationships
-    const cryptocurrencyChainData = [
-      // Ethereum native on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('ethereum'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: null,
-        isVerified: true,
-      },
-      // POL on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6',
-        isVerified: true,
-      },
-      // USDT on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-        isVerified: true,
-      },
-      // USDC on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        isVerified: true,
-      },
-      // WBTC on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-        isVerified: true,
-      },
-      // LINK on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
-        isVerified: true,
-      },
-      // UNI on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('uniswap'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-        isVerified: true,
-      },
-      // SHIB on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('shiba-inu'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
-        isVerified: true,
-      },
-      // AAVE on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('aave'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
-        isVerified: true,
-      },
-      // ARB on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('arbitrum'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
-        isVerified: true,
-      },
-      // RNDR on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('render-token'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x6De037ef9aD2725EB40118Bb1702EBb27e4Aeb24',
-        isVerified: true,
-      },
-      // IMX on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('immutable-x'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0xF57e7e7C23978C3cAEC3C3548E3D615c346e79fF',
-        isVerified: true,
-      },
-      // LDO on Ethereum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('lido-dao'),
-        chainId: chainMap.get('eth-mainnet'),
-        contractAddress: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32',
-        isVerified: true,
-      },
-      // POL native on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0x0000000000000000000000000000000000001010',
-        isVerified: true,
-      },
-      // USDC on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
-        isVerified: true,
-      },
-      // USDT on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-        isVerified: true,
-      },
-      // LINK on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
-        isVerified: true,
-      },
-      // UNI on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('uniswap'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0xb33EaAd8d922B1083446DC23f610c2567fB5180f',
-        isVerified: true,
-      },
-      // AAVE on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('aave'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0xD6DF932A45C0f255f85145f286eA0b292B21C90B',
-        isVerified: true,
-      },
-      // CRV on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('curve-dao-token'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0x172370d5Cd63279eFa6d502DAB29171933a610AF',
-        isVerified: true,
-      },
-      // NEXO on Polygon Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('nexo'),
-        chainId: chainMap.get('polygon-mainnet'),
-        contractAddress: '0x41b3966B4FF7b427969ddf5da3627d6AEAE9a48E',
-        isVerified: true,
-      },
-      // ARB native on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('arbitrum'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0x912CE59144191C1204E64559FE8253a0e49E6548',
-        isVerified: true,
-      },
-      // USDC on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-        isVerified: true,
-      },
-      // LINK on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4',
-        isVerified: true,
-      },
-      // UNI on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('uniswap'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0',
-        isVerified: true,
-      },
-      // AAVE on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('aave'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0xba5DdD1f9d7F570dc94a51479a000E3BCE967196',
-        isVerified: true,
-      },
-      // CRV on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('curve-dao-token'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0x11cDb42B0EB46D95f990BeDD4695A6e3fA034978',
-        isVerified: true,
-      },
-      // CAKE on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('pancakeswap'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0x1b896893dfc86bb67Cf57767298b9073D2c1bA2c',
-        isVerified: true,
-      },
-      // SUSHI on Arbitrum Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('sushi'),
-        chainId: chainMap.get('arbitrum-one'),
-        contractAddress: '0xd4d42F0b6DEF4CE0383636770eF773390d85c61A',
-        isVerified: true,
-      },
-      // OP native on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('optimism'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0x4200000000000000000000000000000000000042',
-        isVerified: true,
-      },
-      // USDC on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
-        isVerified: true,
-      },
-      // LINK on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6',
-        isVerified: true,
-      },
-      // CRV on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('curve-dao-token'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0x0994206dfE8De6Ec6920FF4D779B0d950605Fb53',
-        isVerified: true,
-      },
-      // LDO on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('lido-dao'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0xFdb794692724153d1488CcdBE0C56c252596735F',
-        isVerified: true,
-      },
-      // UNI on Optimism Mainnet
-      {
-        cryptocurrencyId: cryptoMap.get('uniswap'),
-        chainId: chainMap.get('optimism-mainnet'),
-        contractAddress: '0x6fd9d7AD17242c41f7131d257212c54A0e816691',
-        isVerified: true,
-      },
-      // Ethereum native on Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('ethereum'),
-        chainId: chainMap.get('sepolia-testnet'),
-        contractAddress: null,
-        isVerified: true,
-      },
-      // USDC on Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('sepolia-testnet'),
-        contractAddress: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-        isVerified: true,
-      },
-      // USDT on Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('sepolia-testnet'),
-        contractAddress: '0xaA8E23Fb4C70490F1d1d38f3CE4aC3a91BF4f8d6',
-        isVerified: true,
-      },
-      // LINK on Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('sepolia-testnet'),
-        contractAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-        isVerified: true,
-      },
-      // POL native on Amoy
-      {
-        cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
-        chainId: chainMap.get('amoy-testnet'),
-        contractAddress: '0x0000000000000000000000000000000000001010',
-        isVerified: true,
-      },
-      // USDC on Amoy
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('amoy-testnet'),
-        contractAddress: '0x41E94Eb019C0762f9BFCf9Fb1C3F2A4BDE9cF3b3',
-        isVerified: true,
-      },
-      // USDT on Amoy
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('amoy-testnet'),
-        contractAddress: '0xF3A5f0b3B7f9F9c7E4cF1A2D9bA3D3D6E3cF9A1E',
-        isVerified: true,
-      },
-      // LINK on Amoy
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('amoy-testnet'),
-        contractAddress: '0x0Fd9e8d3aF1aaee056EB9e802c3A762a667b1904',
-        isVerified: true,
-      },
-      // Ethereum native on Arbitrum Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('ethereum'),
-        chainId: chainMap.get('arbitrum-sepolia-testnet'),
-        contractAddress: null,
-        isVerified: true,
-      },
-      // USDC on Arbitrum Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('arbitrum-sepolia-testnet'),
-        contractAddress: '0x75faf114eafb1BDbe6EF2B5aF9DD00806f533B00',
-        isVerified: true,
-      },
-      // USDT on Arbitrum Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('arbitrum-sepolia-testnet'),
-        contractAddress: '0x2B3F838B7D6C5B6c1a8bF3D6D6e2F5B7A9eD9e4B',
-        isVerified: true,
-      },
-      // LINK on Arbitrum Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('arbitrum-sepolia-testnet'),
-        contractAddress: '0xb1D4538B4571d411F07960EF2838Ce337FE1E80E',
-        isVerified: true,
-      },
-      // Ethereum native on Optimism Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('ethereum'),
-        chainId: chainMap.get('optimism-sepolia-testnet'),
-        contractAddress: null,
-        isVerified: true,
-      },
-      // USDC on Optimism Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin'),
-        chainId: chainMap.get('optimism-sepolia-testnet'),
-        contractAddress: '0x5fd84259d66Cd3FF6Ec2Bdb64A44F26F4B85F17C',
-        isVerified: true,
-      },
-      // USDT on Optimism Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('tether'),
-        chainId: chainMap.get('optimism-sepolia-testnet'),
-        contractAddress: '0x9C2b7188d6f1B6a2E9cE8C8e6A6D6E1B6C6E6D6B',
-        isVerified: true,
-      },
-      // LINK on Optimism Sepolia
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink'),
-        chainId: chainMap.get('optimism-sepolia-testnet'),
-        contractAddress: '0x1622bF67e6e5747b81866FE0b85178a93C7F86b6',
-        isVerified: true,
-      },
-    ];
+      // Create cryptocurrency-chain relationships
+      const cryptocurrencyChainData = [
+        // Wrapped Ethereum on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('weth'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          isVerified: true,
+        },
+        // POL on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x455e53CBB86018Ac2B8092FdCd39d8444aFFC3F6',
+          isVerified: true,
+        },
+        // USDT on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('tether'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+          isVerified: true,
+        },
+        // USDC on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('usd-coin'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          isVerified: true,
+        },
+        // WBTC on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('wrapped-bitcoin'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+          isVerified: true,
+        },
+        // LINK on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+          isVerified: true,
+        },
+        // UNI on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('uniswap'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
+          isVerified: true,
+        },
+        // SHIB on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('shiba-inu'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+          isVerified: true,
+        },
+        // AAVE on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('aave'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
+          isVerified: true,
+        },
+        // ARB on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('arbitrum'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1',
+          isVerified: true,
+        },
+        // RNDR on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('render-token'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x6De037ef9aD2725EB40118Bb1702EBb27e4Aeb24',
+          isVerified: true,
+        },
+        // IMX on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('immutable-x'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0xF57e7e7C23978C3cAEC3C3548E3D615c346e79fF',
+          isVerified: true,
+        },
+        // LDO on Ethereum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('lido-dao'),
+          chainId: chainMap.get('eth-mainnet'),
+          contractAddress: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32',
+          isVerified: true,
+        },
 
-    await tx.cryptocurrencyChain.createMany({
-      data: cryptocurrencyChainData,
-    });
+        // Polygon Mainnet
+        // POL native on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0x0000000000000000000000000000000000001010',
+          isVerified: true,
+        },
+        // USDC on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('usd-coin'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+          isVerified: true,
+        },
+        // LINK on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
+          isVerified: true,
+        },
+        // UNI on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('uniswap'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0xb33EaAd8d922B1083446DC23f610c2567fB5180f',
+          isVerified: true,
+        },
+        // AAVE on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('aave'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0xD6DF932A45C0f255f85145f286eA0b292B21C90B',
+          isVerified: true,
+        },
+        // CRV on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('curve-dao-token'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0x172370d5Cd63279eFa6d502DAB29171933a610AF',
+          isVerified: true,
+        },
+        // NEXO on Polygon Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('nexo'),
+          chainId: chainMap.get('polygon-mainnet'),
+          contractAddress: '0x41b3966B4FF7b427969ddf5da3627d6AEAE9a48E',
+          isVerified: true,
+        },
 
-    // Create first trader user
-    const traderPassword = 'password';
-    const generatedSalt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(traderPassword, generatedSalt);
-    const privateKeysArrObj = await generatePrivateKeysBip39();
-    const profileColor = getRandomHighContrastColor();
+        // Arbitrum Mainnet
+        // ARB native on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('arbitrum'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0x912CE59144191C1204E64559FE8253a0e49E6548',
+          isVerified: true,
+        },
+        // USDC on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('usd-coin'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+          isVerified: true,
+        },
+        // LINK on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4',
+          isVerified: true,
+        },
+        // UNI on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('uniswap'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0',
+          isVerified: true,
+        },
+        // AAVE on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('aave'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0xba5DdD1f9d7F570dc94a51479a000E3BCE967196',
+          isVerified: true,
+        },
+        // CRV on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('curve-dao-token'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0x11cDb42B0EB46D95f990BeDD4695A6e3fA034978',
+          isVerified: true,
+        },
+        // CAKE on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('pancakeswap'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0x1b896893dfc86bb67Cf57767298b9073D2c1bA2c',
+          isVerified: true,
+        },
+        // SUSHI on Arbitrum Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('sushi'),
+          chainId: chainMap.get('arbitrum-one'),
+          contractAddress: '0xd4d42F0b6DEF4CE0383636770eF773390d85c61A',
+          isVerified: true,
+        },
 
-    const tierBronze = await tx.tier.findFirst({
-      where: {
-        level: 0,
-      },
-    });
+        // Optimisn Mainnet
+        // OP native on Optimism Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('optimism'),
+          chainId: chainMap.get('optimism-mainnet'),
+          contractAddress: '0x4200000000000000000000000000000000000042',
+          isVerified: true,
+        },
+        // LINK on Optimism Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('optimism-mainnet'),
+          contractAddress: '0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6',
+          isVerified: true,
+        },
+        // CRV on Optimism Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('curve-dao-token'),
+          chainId: chainMap.get('optimism-mainnet'),
+          contractAddress: '0x0994206dfE8De6Ec6920FF4D779B0d950605Fb53',
+          isVerified: true,
+        },
+        // LDO on Optimism Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('lido-dao'),
+          chainId: chainMap.get('optimism-mainnet'),
+          contractAddress: '0xFdb794692724153d1488CcdBE0C56c252596735F',
+          isVerified: true,
+        },
+        // UNI on Optimism Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('uniswap'),
+          chainId: chainMap.get('optimism-mainnet'),
+          contractAddress: '0x6fd9d7AD17242c41f7131d257212c54A0e816691',
+          isVerified: true,
+        },
+        // Etherem Sepolia Testnet
+        // Ethereum native on Sepolia
+        {
+          cryptocurrencyId: cryptoMap.get('weth'),
+          chainId: chainMap.get('sepolia-testnet'),
+          contractAddress: '0xb16F35c0Ae2912430DAc15764477E179D9B9EbEa',
+          isVerified: true,
+        },
+        // LINK on Sepolia
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('sepolia-testnet'),
+          contractAddress: '0x6B904451abABB342D2b787C5126C6361dD815246',
+          isVerified: true,
+        },
+        // POL native on Amoy
+        {
+          cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
+          chainId: chainMap.get('amoy-testnet'),
+          contractAddress: '0xFcB3E963ae85Ae70B884C2FcE183E77969CD038e',
+          isVerified: true,
+        },
+        // LINK on Amoy
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('amoy-testnet'),
+          contractAddress: '0x0247E0c5141f7FFC4a522c62b048DC9C340041d5',
+          isVerified: true,
+        },
+        // Ethereum native on Arbitrum Sepolia
+        {
+          cryptocurrencyId: cryptoMap.get('weth'),
+          chainId: chainMap.get('arbitrum-sepolia-testnet'),
+          contractAddress: '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73',
+          isVerified: true,
+        },
+        // LINK on Arbitrum Sepolia
+        {
+          cryptocurrencyId: cryptoMap.get('chainlink'),
+          chainId: chainMap.get('arbitrum-sepolia-testnet'),
+          contractAddress: '0x143E1dAE4F018ff86051a01D44a1B49B13704056',
+          isVerified: true,
+        },
+        // // OP native on Optimism Sepolia
+        // {
+        //   cryptocurrencyId: cryptoMap.get('optimism'),
+        //   chainId: chainMap.get('optimism-sepolia-testnet'),
+        //   contractAddress: '0x62c021e584702C40D0c14923ba6934791a8DaaD3',
+        //   isVerified: true,
+        // },
+        // // LINK on Optimism Sepolia
+        // {
+        //   cryptocurrencyId: cryptoMap.get('chainlink'),
+        //   chainId: chainMap.get('optimism-sepolia-testnet'),
+        //   contractAddress: '0xE4aB69C077896252FAFBD49EFD26B5D171A32410',
+        //   isVerified: true,
+        // },
+      ];
 
-    const language = await tx.language.upsert({
-      where: { name: 'English' },
-      update: {},
-      create: { name: 'English' },
-    });
+      cryptocurrencyChainData.forEach((cc) => {
+        if (!cc.cryptocurrencyId) {
+          console.log({ cc });
+        }
+      });
 
-    const newTrader = await tx.user.create({
-      data: {
-        firstName: 'Trader',
-        lastName: 'Example',
-        username: 'trader-example',
-        email: 'trade@example.com',
-        password: hash,
-        privateKeys: privateKeysArrObj.encryptedPrivateKeys,
-        profileColor,
-        tierId: tierBronze?.id,
-        isVerified: true,
-      },
-    });
+      await tx.cryptocurrencyChain.createMany({
+        // @ts-ignore
+        data: cryptocurrencyChainData,
+      });
 
-    await tx.userLanguage.create({
-      data: { languageId: language.id, userId: newTrader.id },
-    });
+      const allCryptocurrencyChainData = await tx.cryptocurrencyChain.findMany({
+        select: {
+          contractAddress: true,
+          cryptocurrency: true,
+          abiUrl: true,
+          chainId: true,
+          createdAt: true,
+          cryptocurrencyId: true,
+          id: true,
+          isVerified: true,
+          chain: true,
+        },
+      });
 
-    // Create first vendor user
-    const vendorPassword = 'password';
-    const vendorGeneratedSalt = await bcrypt.genSalt(10);
-    const vendorHash = await bcrypt.hash(vendorPassword, vendorGeneratedSalt);
-    const vendorPrivateKeysArrObj = await generatePrivateKeysBip39();
-    const vendorProfileColor = getRandomHighContrastColor();
+      const mapped = await rateLimitedMap(
+        allCryptocurrencyChainData,
+        async (cryptoChain) => {
+          if (cryptoChain.chain && cryptoChain.contractAddress) {
+            const response = await getABI({
+              apiKey: '3H3TGHHQ923ZUJXWIPW97K6DKMDF29AP1C',
+              chainId: cryptoChain.chain.chainId.toString(),
+              contractAddress: cryptoChain.contractAddress,
+              crypto: cryptoChain.cryptocurrency,
+            });
+            return { abi: response?.abi, ...cryptoChain };
+          }
+        },
+        2, // 2 calls per second
+      );
 
-    const vendorTier = await tx.tier.upsert({
-      where: {
-        name: 'Bronze',
-      },
-      update: {},
-      create: {
-        name: 'Bronze',
-        description:
-          'Your starting tier. Earn XP by trading to unlock discounts',
-        level: 0,
-        tradingFee: 0.05,
-        discount: 0,
-        volume: TIER_VOLUME.BRONZE,
-        requiredXP: 0,
-      },
-    });
+      const promised = await Promise.all(mapped);
 
-    const newVendor = await tx.user.create({
-      data: {
-        firstName: 'Vendor',
-        lastName: 'Example',
-        username: 'vendor-example',
-        email: 'vendor@example.com',
-        password: vendorHash,
-        privateKeys: vendorPrivateKeysArrObj.encryptedPrivateKeys,
-        profileColor: vendorProfileColor,
-        tierId: vendorTier.id,
-        isVerified: true,
-      },
-    });
+      const uploadReady = promised.map(async (up) => {
+        if (up && up.abi) {
+          // console.log({ up });
+          const file = convertABIToFile(up.abi);
 
-    await tx.userLanguage.create({
-      data: { languageId: language.id, userId: newVendor.id },
-    });
+          console.log({ file });
+          // const uploaded = await await uploadFiles('/abis');
+        }
+      });
 
-    // Get references for offer creation
-    const crypto = await tx.cryptocurrency.findFirst({
-      where: {
-        coingeckoId: 'polygon-ecosystem-token',
-      },
-    });
-    const fiat = await tx.fiat.findFirst({
-      where: {
-        symbol: 'USD',
-      },
-    });
-    const paymentMethod = await tx.paymentMethod.findFirst({
-      where: {
-        name: 'SEPA',
-      },
-    });
+      // Create first trader user
+      const traderPassword = 'password';
+      const generatedSalt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(traderPassword, generatedSalt);
+      const privateKeysArrObj = await generatePrivateKeysBip39();
+      const profileColor = getRandomHighContrastColor();
 
-    const ethChain = await tx.chain.findFirst({
-      where: {
-        chainId: IS_DEVELOPMENT ? 80002 : 137,
-      },
-      select: {
-        id: true,
-      },
-    });
+      const tierBronze = await tx.tier.findFirst({
+        where: {
+          level: 0,
+        },
+      });
 
-    const paymentDetails = await tx.paymentDetails.create({
-      data: {
-        instructions: 'IBAN: DE28601202008775653297',
-        paymentMethodId: paymentMethod!.id,
-        userId: newTrader.id,
-      },
-    });
+      const language = await tx.language.upsert({
+        where: { name: 'English' },
+        update: {},
+        create: { name: 'English' },
+      });
 
-    // Create first trader offer with chain support
-    const newTraderOffer = await tx.offer.create({
-      data: {
-        instructions: 'Some instructions',
-        label: 'ETH/USD Sell Offer',
-        tags: ['tags', 'eth', 'test', 'seed', 'ethereum'],
-        vendorId: newTrader.id,
-        cryptocurrencyId: crypto!.id,
-        fiatId: fiat!.id,
-        chainId: ethChain!.id,
-        limitMax: 1000000,
-        limitMin: 1500,
-        listAt: 5.6,
-        offerType: 'sell',
-        paymentDetailsId: paymentDetails.id,
-        pricingType: 'market',
-        terms: 'Fast and secure ETH trading on Ethereum mainnet',
-        timeLimit: 60 * 60,
-        vendorWalletAddress: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
-        paymentMethodId: paymentMethod!.id,
-      },
-    });
-
-    // Create first vendor offer with chain support
-    const newVendorOffer = await tx.offer.create({
-      data: {
-        instructions: 'Professional trading service',
-        label: 'ETH/USD Pro Sell',
-        tags: ['professional', 'eth', 'verified', 'ethereum'],
-        vendorId: newVendor.id,
-        cryptocurrencyId: crypto!.id,
-        fiatId: fiat!.id,
-        chainId: ethChain!.id,
-        limitMax: 1000000,
-        limitMin: 1500,
-        listAt: 5.6,
-        offerType: 'sell',
-        paymentDetailsId: paymentDetails.id,
-        pricingType: 'market',
-        terms: 'Professional ETH trading with guaranteed execution',
-        timeLimit: 60 * 60,
-        vendorWalletAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-        paymentMethodId: paymentMethod!.id,
-      },
-    });
-
-    // Create additional offers for different chains and cryptocurrencies
-    const polygonChain = await tx.chain.findFirst({
-      where: { id: 'polygon-mainnet' },
-    });
-    const usdtCrypto = await tx.cryptocurrency.findFirst({
-      where: { coingeckoId: 'tether' },
-    });
-
-    if (polygonChain && usdtCrypto) {
-      const polygonOffer = await tx.offer.create({
+      const newTrader = await tx.user.create({
         data: {
-          instructions: 'Fast USDT trading on Polygon',
-          label: 'USDT/USD Polygon',
-          tags: ['usdt', 'polygon', 'stablecoin', 'low-fees'],
-          vendorId: newVendor.id,
-          cryptocurrencyId: usdtCrypto.id,
+          firstName: 'Trader',
+          lastName: 'Example',
+          username: 'trader-example',
+          email: 'trade@example.com',
+          password: hash,
+          privateKeys: privateKeysArrObj.encryptedPrivateKeys,
+          profileColor,
+          tierId: tierBronze?.id,
+          isVerified: true,
+        },
+      });
+
+      await tx.userLanguage.create({
+        data: { languageId: language.id, userId: newTrader.id },
+      });
+
+      // Create first vendor user
+      const vendorPassword = 'password';
+      const vendorGeneratedSalt = await bcrypt.genSalt(10);
+      const vendorHash = await bcrypt.hash(vendorPassword, vendorGeneratedSalt);
+      const vendorPrivateKeysArrObj = await generatePrivateKeysBip39();
+      const vendorProfileColor = getRandomHighContrastColor();
+
+      const vendorTier = await tx.tier.upsert({
+        where: {
+          name: 'Bronze',
+        },
+        update: {},
+        create: {
+          name: 'Bronze',
+          description:
+            'Your starting tier. Earn XP by trading to unlock discounts',
+          level: 0,
+          tradingFee: 0.05,
+          discount: 0,
+          volume: TIER_VOLUME.BRONZE,
+          requiredXP: 0,
+        },
+      });
+
+      const newVendor = await tx.user.create({
+        data: {
+          firstName: 'Vendor',
+          lastName: 'Example',
+          username: 'vendor-example',
+          email: 'vendor@example.com',
+          password: vendorHash,
+          privateKeys: vendorPrivateKeysArrObj.encryptedPrivateKeys,
+          profileColor: vendorProfileColor,
+          tierId: vendorTier.id,
+          isVerified: true,
+        },
+      });
+
+      await tx.userLanguage.create({
+        data: { languageId: language.id, userId: newVendor.id },
+      });
+
+      // Get references for offer creation
+      const crypto = await tx.cryptocurrency.findFirst({
+        where: {
+          coingeckoId: 'polygon-ecosystem-token',
+        },
+      });
+      const fiat = await tx.fiat.findFirst({
+        where: {
+          symbol: 'USD',
+        },
+      });
+      const paymentMethod = await tx.paymentMethod.findFirst({
+        where: {
+          name: 'SEPA',
+        },
+      });
+
+      const ethChain = await tx.chain.findFirst({
+        where: {
+          chainId: IS_DEVELOPMENT ? 80002 : 137,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const paymentDetails = await tx.paymentDetails.create({
+        data: {
+          instructions: 'IBAN: DE28601202008775653297',
+          paymentMethodId: paymentMethod!.id,
+          userId: newTrader.id,
+        },
+      });
+
+      // Create first trader offer with chain support
+      const newTraderOffer = await tx.offer.create({
+        data: {
+          instructions: 'Some instructions',
+          label: 'ETH/USD Sell Offer',
+          tags: ['tags', 'eth', 'test', 'seed', 'ethereum'],
+          vendorId: newTrader.id,
+          cryptocurrencyId: crypto!.id,
           fiatId: fiat!.id,
-          chainId: polygonChain.id,
-          limitMax: 50000,
-          limitMin: 100,
-          listAt: 0.1,
-          offerType: 'buy',
+          chainId: ethChain!.id,
+          limitMax: 1000000,
+          limitMin: 1500,
+          listAt: 5.6,
+          offerType: 'sell',
           paymentDetailsId: paymentDetails.id,
-          pricingType: 'fixed',
-          terms: 'Low-cost USDT trading on Polygon network',
-          timeLimit: 30 * 60,
-          vendorWalletAddress: '0x742d35Cc6634C0532925a3b8D0b4E19f95c3c8c3',
+          pricingType: 'market',
+          terms: 'Fast and secure ETH trading on Ethereum mainnet',
+          timeLimit: 60 * 60,
+          vendorWalletAddress: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
           paymentMethodId: paymentMethod!.id,
         },
       });
-    }
-  });
+
+      // Create first vendor offer with chain support
+      const newVendorOffer = await tx.offer.create({
+        data: {
+          instructions: 'Professional trading service',
+          label: 'ETH/USD Pro Sell',
+          tags: ['professional', 'eth', 'verified', 'ethereum'],
+          vendorId: newVendor.id,
+          cryptocurrencyId: crypto!.id,
+          fiatId: fiat!.id,
+          chainId: ethChain!.id,
+          limitMax: 1000000,
+          limitMin: 1500,
+          listAt: 5.6,
+          offerType: 'sell',
+          paymentDetailsId: paymentDetails.id,
+          pricingType: 'market',
+          terms: 'Professional ETH trading with guaranteed execution',
+          timeLimit: 60 * 60,
+          vendorWalletAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          paymentMethodId: paymentMethod!.id,
+        },
+      });
+
+      // Create additional offers for different chains and cryptocurrencies
+      const polygonChain = await tx.chain.findFirst({
+        where: { id: 'polygon-mainnet' },
+      });
+      const usdtCrypto = await tx.cryptocurrency.findFirst({
+        where: { coingeckoId: 'tether' },
+      });
+
+      if (polygonChain && usdtCrypto) {
+        const polygonOffer = await tx.offer.create({
+          data: {
+            instructions: 'Fast USDT trading on Polygon',
+            label: 'USDT/USD Polygon',
+            tags: ['usdt', 'polygon', 'stablecoin', 'low-fees'],
+            vendorId: newVendor.id,
+            cryptocurrencyId: usdtCrypto.id,
+            fiatId: fiat!.id,
+            chainId: polygonChain.id,
+            limitMax: 50000,
+            limitMin: 100,
+            listAt: 0.1,
+            offerType: 'buy',
+            paymentDetailsId: paymentDetails.id,
+            pricingType: 'fixed',
+            terms: 'Low-cost USDT trading on Polygon network',
+            timeLimit: 30 * 60,
+            vendorWalletAddress: '0x742d35Cc6634C0532925a3b8D0b4E19f95c3c8c3',
+            paymentMethodId: paymentMethod!.id,
+          },
+        });
+      }
+    },
+    {
+      // Increase transaction timeout to 30 seconds (30000 ms)
+      timeout: 30000,
+      maxWait: 30000, // Optional: time to wait for a connection from the pool
+    },
+  );
 
   process.exit(0);
 };

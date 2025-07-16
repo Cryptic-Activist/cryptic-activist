@@ -124,6 +124,7 @@ CREATE TABLE "cryptocurrency_chains" (
     "contractAddress" VARCHAR(200),
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "abiUrl" TEXT,
 
     CONSTRAINT "cryptocurrency_chains_pkey" PRIMARY KEY ("id")
 );
@@ -370,10 +371,49 @@ CREATE TABLE "tiers" (
     "level" INTEGER NOT NULL,
     "tradingFee" DOUBLE PRECISION NOT NULL,
     "discount" DOUBLE PRECISION NOT NULL,
-    "minVolume" DOUBLE PRECISION NOT NULL,
+    "volume" DOUBLE PRECISION NOT NULL,
     "requiredXP" INTEGER NOT NULL,
 
     CONSTRAINT "tiers_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "smart_contracts" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "chainId" TEXT NOT NULL,
+    "version" TEXT NOT NULL,
+    "deployedById" TEXT NOT NULL,
+    "deployerAddress" TEXT NOT NULL,
+    "deploymentHash" TEXT,
+    "deploymentBlockHeight" BIGINT,
+    "gasUsed" BIGINT,
+    "gasPrice" BIGINT,
+    "deployedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "artifactUrl" TEXT NOT NULL,
+    "metadata" JSONB,
+
+    CONSTRAINT "smart_contracts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "trade_escrow_details" (
+    "id" TEXT NOT NULL,
+    "arbitratorWallet" TEXT NOT NULL,
+    "buyerWallet" TEXT NOT NULL,
+    "sellerWallet" TEXT NOT NULL,
+    "feeRate" DOUBLE PRECISION NOT NULL,
+    "profitMargin" DOUBLE PRECISION NOT NULL,
+    "tradeDurationInSeconds" INTEGER NOT NULL,
+    "tradeAmountInWei" TEXT NOT NULL,
+    "buyerCollateralInWei" TEXT NOT NULL,
+    "sellerCollateralInWei" TEXT NOT NULL,
+    "sellerTotalFundInWei" TEXT NOT NULL,
+    "blockchainTradeId" TEXT NOT NULL,
+    "blockchainTransactionHash" TEXT,
+
+    CONSTRAINT "trade_escrow_details_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -384,6 +424,8 @@ CREATE TABLE "trades" (
     "vendorWalletAddress" TEXT,
     "traderId" TEXT NOT NULL,
     "traderWalletAddress" TEXT NOT NULL,
+    "buyerId" TEXT NOT NULL,
+    "sellerId" TEXT NOT NULL,
     "offerId" TEXT NOT NULL,
     "cryptocurrencyId" TEXT NOT NULL,
     "fiatId" TEXT NOT NULL,
@@ -398,6 +440,10 @@ CREATE TABLE "trades" (
     "status" "TradeStatus" NOT NULL,
     "paidAt" TIMESTAMP,
     "fundedAt" TIMESTAMP,
+    "vendorRejectedFunding" BOOLEAN NOT NULL DEFAULT false,
+    "traderRejectedFunding" BOOLEAN NOT NULL DEFAULT false,
+    "sellerFundedAt" TIMESTAMP,
+    "buyerFundedAt" TIMESTAMP,
     "paymentConfirmedAt" TIMESTAMP,
     "escrowReleasedAt" TIMESTAMP,
     "blockchainTradeId" BIGINT,
@@ -405,6 +451,7 @@ CREATE TABLE "trades" (
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
+    "tradeEscrowDetailsId" TEXT,
 
     CONSTRAINT "trades_pkey" PRIMARY KEY ("id")
 );
@@ -638,6 +685,8 @@ CREATE TABLE "platform_settings" (
     "value" TEXT NOT NULL,
     "type" "SettingType" NOT NULL DEFAULT 'STRING',
     "isPrivate" BOOLEAN NOT NULL DEFAULT true,
+    "canBeDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "isEditable" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -723,6 +772,9 @@ CREATE UNIQUE INDEX "tiers_name_key" ON "tiers"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tiers_level_key" ON "tiers"("level");
+
+-- CreateIndex
+CREATE INDEX "smart_contracts_address_idx" ON "smart_contracts"("address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "dispute_evidences_fileId_key" ON "dispute_evidences"("fileId");
@@ -860,6 +912,12 @@ ALTER TABLE "referrals" ADD CONSTRAINT "referrals_refereeId_fkey" FOREIGN KEY ("
 ALTER TABLE "system_messages" ADD CONSTRAINT "system_messages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_chainId_fkey" FOREIGN KEY ("chainId") REFERENCES "chains"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_deployedById_fkey" FOREIGN KEY ("deployedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentReceiptId_fkey" FOREIGN KEY ("paymentReceiptId") REFERENCES "payment_receipts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -867,6 +925,12 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_vendorId_fkey" FOREIGN KEY ("vendorI
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_offerId_fkey" FOREIGN KEY ("offerId") REFERENCES "offers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -879,6 +943,9 @@ ALTER TABLE "trades" ADD CONSTRAINT "trades_fiatId_fkey" FOREIGN KEY ("fiatId") 
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentMethodId_fkey" FOREIGN KEY ("paymentMethodId") REFERENCES "payment_methods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_tradeEscrowDetailsId_fkey" FOREIGN KEY ("tradeEscrowDetailsId") REFERENCES "trade_escrow_details"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "dispute_party_notes" ADD CONSTRAINT "dispute_party_notes_disputeId_fkey" FOREIGN KEY ("disputeId") REFERENCES "trade_disputes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

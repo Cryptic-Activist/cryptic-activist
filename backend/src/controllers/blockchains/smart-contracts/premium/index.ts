@@ -10,7 +10,7 @@ import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
-const convertABIToFile = (abi: any) => {
+export const convertABIToFile = (abi: any) => {
   const abiJson = JSON.stringify(abi, null, 2);
   const abiBuffer = Buffer.from(abiJson);
 
