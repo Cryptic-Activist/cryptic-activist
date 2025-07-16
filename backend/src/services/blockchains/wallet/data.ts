@@ -1,6 +1,7 @@
 export const curatedTokenAddresses = {
   ethereumMainnet: [
     '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
+    '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // WBTC
     '0x514910771AF9Ca656af840dff83E8264EcF986CA', // Chainlink
     '0x2AF5D2aD76741191D15Dfe7bF6aC92d4Bd912Ca3', // LEO
     '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', // Shiba Inu
