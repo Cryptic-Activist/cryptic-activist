@@ -20,7 +20,6 @@ export const getABI = async ({
   try {
     const response = await fetchGet(url);
 
-    console.log({ responseData: response.data });
     if (response.data.status === '1') {
       return {
         abi: JSON.parse(response.data.result),

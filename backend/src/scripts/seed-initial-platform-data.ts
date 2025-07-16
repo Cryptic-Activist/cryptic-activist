@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
 import { getPublicSettings, getSetting } from '@/utils/settings';
+import { upload, uploadFiles } from '@/services/upload';
 
 import { ETHERSCAN_API_KEY } from '@/constants/env';
 import bcrypt from 'bcryptjs';
@@ -12,7 +13,6 @@ import { getABI } from '@/services/blockchains/wallet';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
 import { rateLimitedMap } from '@/utils/timer';
-import { uploadFiles } from '@/services/upload';
 
 const main = async () => {
   // Create General Platform Settings
@@ -212,20 +212,6 @@ const main = async () => {
         'https://assets.coingecko.com/coins/images/16547/large/photo_2023-03-29_21.47.00.jpeg', // Arbitrum
     },
     {
-      name: 'Base',
-      symbol: 'BASE',
-      chainId: 8453,
-      rpcUrl: 'https://mainnet.base.org',
-      explorerUrl: 'https://basescan.org',
-      nativeCurrency: 'ETH',
-      isTestnet: false,
-      isActive: true,
-      description: 'Base Layer 2 by Coinbase',
-      tempId: 'base-mainnet',
-      logoUrl:
-        'https://altcoinsbox.com/base-logo-download-coinbase-base-logo.png', // Base
-    },
-    {
       name: 'Optimism',
       symbol: 'OP',
       chainId: 10,
@@ -281,34 +267,6 @@ const main = async () => {
       logoUrl:
         'https://assets.coingecko.com/coins/images/16547/large/photo_2023-03-29_21.47.00.jpeg', // Arbitrum
     },
-    {
-      name: 'Base Sepolia',
-      symbol: 'ETH',
-      chainId: 84532,
-      rpcUrl: 'https://sepolia.base.org',
-      explorerUrl: 'https://sepolia.basescan.org',
-      nativeCurrency: 'ETH',
-      isTestnet: true,
-      isActive: true,
-      description: 'Base testnet',
-      tempId: 'base-sepolia-testnet',
-      logoUrl:
-        'https://altcoinsbox.com/base-logo-download-coinbase-base-logo.png', // Base
-    },
-    // {
-    //   name: 'Optimism Sepolia',
-    //   symbol: 'POL',
-    //   chainId: 11155420,
-    //   rpcUrl: 'https://sepolia.optimism.io',
-    //   explorerUrl: 'https://sepolia-optimism.etherscan.io',
-    //   nativeCurrency: 'ETH',
-    //   isTestnet: true,
-    //   isActive: true,
-    //   description: 'Optimism testnet',
-    //   tempId: 'optimism-sepolia-testnet',
-    //   logoUrl:
-    //     'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
-    // },
   ];
 
   await prisma.chain.createMany({
@@ -350,13 +308,19 @@ const main = async () => {
 
   const cryptocurrencyData = [
     {
+      coingeckoId: 'ethereum',
+      name: 'Ethereum',
+      symbol: 'ETH',
+      image:
+        'https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628',
+    },
+    {
       coingeckoId: 'weth',
       name: 'Wrapped Ethereum',
       symbol: 'WETH',
       image:
         'https://assets.coingecko.com/coins/images/2518/standard/weth.png?1696503332',
     },
-
     {
       coingeckoId: 'polygon-ecosystem-token',
       name: 'POL (ex-MATIC)',
@@ -516,6 +480,13 @@ const main = async () => {
 
       // Create cryptocurrency-chain relationships
       const cryptocurrencyChainData = [
+        //  Ethereum on Hardhat Mainnet
+        {
+          cryptocurrencyId: cryptoMap.get('ethereum'),
+          chainId: chainMap.get('hardhat-localnet'),
+          contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          isVerified: true,
+        },
         // Wrapped Ethereum on Ethereum Mainnet
         {
           cryptocurrencyId: cryptoMap.get('weth'),
@@ -837,6 +808,8 @@ const main = async () => {
         },
       });
 
+      console.log('Fetching ERC20 Token ABI...');
+
       const mapped = await rateLimitedMap(
         allCryptocurrencyChainData,
         async (cryptoChain) => {
@@ -849,21 +822,41 @@ const main = async () => {
             });
             return { abi: response?.abi, ...cryptoChain };
           }
+          return { abi: null, ...cryptoChain };
         },
-        2, // 2 calls per second
+        4, // 2 calls per second
       );
 
       const promised = await Promise.all(mapped);
 
       const uploadReady = promised.map(async (up) => {
         if (up && up.abi) {
-          // console.log({ up });
           const file = convertABIToFile(up.abi);
+          const uploaded = await uploadFiles(
+            `abis/${up.chainId}/${up.cryptocurrencyId}`,
+            [file],
+          );
 
-          console.log({ file });
-          // const uploaded = await await uploadFiles('/abis');
+          if (uploaded.files) {
+            await tx.cryptocurrencyChain.update({
+              where: {
+                id: up.id,
+              },
+              data: {
+                abiUrl: uploaded.files[0].key,
+              },
+            });
+            return { ...up, abiUrl: uploaded.files[0].key };
+          }
+
+          return up;
         }
+        return up;
       });
+
+      const promisedUploaded = await Promise.all(uploadReady);
+
+      console.log({ promisedUploaded });
 
       // Create first trader user
       const traderPassword = 'password';

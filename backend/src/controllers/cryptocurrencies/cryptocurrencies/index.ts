@@ -163,6 +163,7 @@ export const getSupportedTokens = async (req: Request, res: Response) => {
         chain: true,
         contractAddress: true,
         cryptocurrency: true,
+        abiUrl: true,
       },
     });
     res.status(200).json(filters);
