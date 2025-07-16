@@ -235,20 +235,6 @@ const main = async () => {
         'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
     },
     {
-      name: 'BNB Smart Chain',
-      symbol: 'BNB',
-      chainId: 56,
-      rpcUrl: 'https://bsc-dataseed.binance.org',
-      explorerUrl: 'https://bscscan.com',
-      nativeCurrency: 'BNB',
-      isTestnet: false,
-      isActive: true,
-      description: 'BNB Smart Chain',
-      tempId: 'bsc-mainnet',
-      logoUrl:
-        'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', // BNB
-    },
-    {
       name: 'Sepolia',
       symbol: 'ETH',
       chainId: 11155111,
@@ -318,20 +304,6 @@ const main = async () => {
       logoUrl:
         'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', // Optimism
     },
-    {
-      name: 'BNB Smart Chain Testnet',
-      symbol: 'tBNB',
-      chainId: 97,
-      rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-      explorerUrl: 'https://testnet.bscscan.com',
-      nativeCurrency: 'tBNB',
-      isTestnet: true,
-      isActive: true,
-      description: 'BNB Smart Chain testnet',
-      tempId: 'bsc-testnet',
-      logoUrl:
-        'https://assets.coingecko.com/coins/images/825/large/binance-coin-logo.png', // BNB
-    },
   ];
 
   await prisma.chain.createMany({
@@ -399,13 +371,6 @@ const main = async () => {
       symbol: 'USDC',
       image:
         'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1696506694',
-    },
-    {
-      coingeckoId: 'binancecoin',
-      name: 'BNB',
-      symbol: 'BNB',
-      image:
-        'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1696501970',
     },
     {
       coingeckoId: 'wrapped-bitcoin',
@@ -532,7 +497,7 @@ const main = async () => {
       {
         cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token')!,
         chainId: chainMap.get('polygon-mainnet')!,
-        contractAddress: null,
+        contractAddress: '0x0000000000000000000000000000000000001010',
         isVerified: true,
       },
       // POL on Ethereum (as ERC-20)
@@ -560,12 +525,6 @@ const main = async () => {
         cryptocurrencyId: cryptoMap.get('tether')!,
         chainId: chainMap.get('arbitrum-one')!,
         contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-        isVerified: true,
-      },
-      {
-        cryptocurrencyId: cryptoMap.get('tether')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0x55d398326f99059fF775485246999027B3197955',
         isVerified: true,
       },
       {
@@ -606,14 +565,6 @@ const main = async () => {
         contractAddress: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
         isVerified: true,
       },
-
-      // BNB native on BSC
-      {
-        cryptocurrencyId: cryptoMap.get('binancecoin')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: null,
-        isVerified: true,
-      },
       // WBTC on multiple chains
       {
         cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
@@ -645,12 +596,6 @@ const main = async () => {
         contractAddress: '0x4200000000000000000000000000000000000006', // Base's native wrapped ETH, using as placeholder for WBTC
         isVerified: true,
       },
-      {
-        cryptocurrencyId: cryptoMap.get('wrapped-bitcoin')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2E599',
-        isVerified: true,
-      },
       // LINK on multiple chains
       {
         cryptocurrencyId: cryptoMap.get('chainlink')!,
@@ -661,7 +606,7 @@ const main = async () => {
       {
         cryptocurrencyId: cryptoMap.get('chainlink')!,
         chainId: chainMap.get('polygon-mainnet')!,
-        contractAddress: '0x53E0bca35eC356BD5d012E3EfB623cbE',
+        contractAddress: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
         isVerified: true,
       },
       {
@@ -682,12 +627,6 @@ const main = async () => {
         contractAddress: '0x50c5725949A6F0c72E6C4a641',
         isVerified: true,
       },
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0xF8A0B97F727688c073B13F2F6f',
-        isVerified: true,
-      },
       // UNI on multiple chains
       {
         cryptocurrencyId: cryptoMap.get('uniswap')!,
@@ -698,7 +637,7 @@ const main = async () => {
       {
         cryptocurrencyId: cryptoMap.get('uniswap')!,
         chainId: chainMap.get('polygon-mainnet')!,
-        contractAddress: '0xb33EaAd8d148367429683a40777',
+        contractAddress: '0xb33EaAd8d922B1083446DC23f610c2567fB5180f',
         isVerified: true,
       },
       {
@@ -717,12 +656,6 @@ const main = async () => {
         cryptocurrencyId: cryptoMap.get('uniswap')!,
         chainId: chainMap.get('base-mainnet')!,
         contractAddress: '0x3352C68262930072A79876000000000000000000',
-        isVerified: true,
-      },
-      {
-        cryptocurrencyId: cryptoMap.get('uniswap')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2E599',
         isVerified: true,
       },
       // DAI on multiple chains
@@ -756,12 +689,6 @@ const main = async () => {
         contractAddress: '0x50c5725949A6F0c72E6C4a641',
         isVerified: true,
       },
-      {
-        cryptocurrencyId: cryptoMap.get('dai')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0x1AF3F329E8fb127C',
-        isVerified: true,
-      },
       // SHIB on multiple chains
       {
         cryptocurrencyId: cryptoMap.get('shiba-inu')!,
@@ -793,13 +720,6 @@ const main = async () => {
         contractAddress: '0x6f8a06447Ff3A9825f7b45595275C026',
         isVerified: true,
       },
-      {
-        cryptocurrencyId: cryptoMap.get('shiba-inu')!,
-        chainId: chainMap.get('bsc-mainnet')!,
-        contractAddress: '0x2859e4544C4b',
-        isVerified: true,
-      },
-
       // Testnet Data
       {
         cryptocurrencyId: cryptoMap.get('ethereum')!,
@@ -825,7 +745,6 @@ const main = async () => {
         contractAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
         isVerified: true,
       },
-
       {
         cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token')!,
         chainId: chainMap.get('amoy-testnet')!,
@@ -923,31 +842,6 @@ const main = async () => {
         cryptocurrencyId: cryptoMap.get('chainlink')!,
         chainId: chainMap.get('optimism-sepolia-testnet')!,
         contractAddress: '0x1622bF67e6e5747b81866FE0b85178a93C7F8892',
-        isVerified: true,
-      },
-
-      {
-        cryptocurrencyId: cryptoMap.get('binancecoin')!,
-        chainId: chainMap.get('bsc-testnet')!,
-        contractAddress: null, // Native token
-        isVerified: true,
-      },
-      {
-        cryptocurrencyId: cryptoMap.get('usd-coin')!,
-        chainId: chainMap.get('bsc-testnet')!,
-        contractAddress: '0x645445525442ce44444445454545451425451254',
-        isVerified: true,
-      },
-      {
-        cryptocurrencyId: cryptoMap.get('tether')!,
-        chainId: chainMap.get('bsc-testnet')!,
-        contractAddress: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
-        isVerified: true,
-      },
-      {
-        cryptocurrencyId: cryptoMap.get('chainlink')!,
-        chainId: chainMap.get('bsc-testnet')!,
-        contractAddress: '0x84b9B710E0A3435169E121020536f12414b2A381',
         isVerified: true,
       },
     ];

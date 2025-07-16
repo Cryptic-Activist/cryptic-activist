@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
+import { getABI, getABIs } from '@/services/blockchains/wallet';
 
 import { IS_DEVELOPMENT } from '@/constants';
-import { getWalletBalances } from '@/services/blockchains/wallet';
 import { prisma } from '@/services/db';
 
 export const connectWallet = async (req: Request, res: Response) => {
@@ -37,31 +37,11 @@ export const getSupportedChains = async (_req: Request, res: Response) => {
   }
 };
 
-export const getWalletBalancesController = async (
-  req: Request,
-  res: Response,
-) => {
+export const saveABIs = async (req: Request, res: Response) => {
   try {
-    const chainId = req.params.chainId as string;
-    const walletAddress = req.params.walletAddress as string;
+    const abis = await getABIs();
 
-    const chain = await prisma.chain.findUnique({
-      where: {
-        chainId: parseInt(chainId),
-      },
-      select: {
-        chainId: true,
-      },
-    });
-
-    if (!chain) {
-      res.status(400).json({ error: 'Unable to find chain' });
-      return;
-    }
-
-    const balances = await getWalletBalances(walletAddress, chainId);
-
-    res.status(200).json(balances);
+    res.status(200).json({ abis });
   } catch (error) {
     console.log({ error });
     res.status(500).json({ error });

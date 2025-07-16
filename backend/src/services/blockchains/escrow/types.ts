@@ -1,6 +1,7 @@
 export type Address = `0x${string}`;
 
 export type InitTradeParams = {
+  erc20TokenAddress: Address;
   buyer: Address;
   seller: Address;
   arbitrator: Address;

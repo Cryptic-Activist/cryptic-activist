@@ -7,6 +7,7 @@ import {
 } from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
 
+import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
@@ -210,7 +211,11 @@ export default class Chat {
                 },
               ]);
 
+              const erc20TokenAddress =
+                '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' as Address;
+
               const createTradeObj = {
+                erc20TokenAddress: erc20TokenAddress,
                 arbitrator: createTradeDetails.arbitratorWallet,
                 buyer: createTradeDetails.buyerWallet,
                 seller: createTradeDetails.sellerWallet,
@@ -226,6 +231,7 @@ export default class Chat {
               const tradeCreated = await createTrade(createTradeObj);
 
               if (tradeCreated.error) {
+                console.log({ errorCreation: tradeCreated.error });
                 await prisma.trade.update({
                   where: { id: trade.id },
                   data: {

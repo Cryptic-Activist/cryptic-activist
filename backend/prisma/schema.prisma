@@ -107,6 +107,7 @@ model CryptocurrencyChain {
   contractAddress  String?        @db.VarChar(200) // Contract address on this specific chain
   isVerified       Boolean        @default(false) @db.Boolean // Whether the token is verified on this chain
   createdAt        DateTime       @default(now()) @db.Timestamp()
+  abiUrl           String?
 
   @@unique([cryptocurrencyId, chainId])
   @@map("cryptocurrency_chains")

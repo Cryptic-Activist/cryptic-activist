@@ -174,6 +174,7 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (_error) {
+      console.log({ _error });
       continue;
     }
   }
@@ -181,9 +182,11 @@ export const decodeFunctionData = (receipt: any) => {
 
 export const createTrade = async (params: InitTradeParams) => {
   try {
+    console.log({ params });
     const contract = await getEscrowContract();
 
     const tx = await contract.createTrade(
+      params.erc20TokenAddress,
       params.buyer,
       params.seller,
       params.arbitrator,
@@ -205,6 +208,7 @@ export const createTrade = async (params: InitTradeParams) => {
       message: 'Trade created successfully',
     };
   } catch (error) {
+    console.log({ error });
     return {
       message: 'Error creating trade',
       error: error,

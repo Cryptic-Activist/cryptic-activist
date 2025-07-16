@@ -1,7 +1,7 @@
 import {
   connectWallet,
   getSupportedChains,
-  getWalletBalancesController,
+  saveABIs,
 } from '@/controllers/blockchains/wallet';
 
 import { Router } from 'express';
@@ -12,6 +12,6 @@ router.post('/connect', connectWallet);
 
 router.get('/supported/chains', getSupportedChains);
 
-router.get('/:walletAddress/:chainId/balance', getWalletBalancesController);
+router.post('/abis', saveABIs);
 
 export default router;
