@@ -15,6 +15,7 @@ import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { MockUSDC } from '@/contracts';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
@@ -289,6 +290,69 @@ export const executeTrade = async (tradeId: BigInt) => {
   }
 };
 
+export const getMockUSDCBalances = async ({
+  buyer,
+  arbitrator,
+  seller,
+  mockUSDCAddress,
+}: {
+  buyer: string;
+  seller: string;
+  arbitrator: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockUSDC.abi,
+      signer,
+    );
+
+    const buyerBalance = await tokenContract.balanceOf(buyer);
+    const sellerBalance = await tokenContract.balanceOf(seller);
+    const arbitratorBalance = await tokenContract.balanceOf(arbitrator);
+
+    return { buyerBalance, sellerBalance, arbitratorBalance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getTokenAllowance = async ({
+  address,
+  mockUSDCAddress,
+}: {
+  address: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockUSDC.abi,
+      signer,
+    );
+
+    const allowance = await tokenContract.allowance(
+      address,
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+    );
+
+    return { allowance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
 export const approveToken = async (
   tokenAddress: string,
   tokenABI: any,
@@ -303,7 +367,6 @@ export const approveToken = async (
       amount,
     );
     const receipt = await tx.wait();
-    console.log({ receipt });
     return {
       message: 'Token approved!',
       receipt,
@@ -406,7 +469,7 @@ export const getCreateTradeDetails = async (trade: any) => {
 
       tradeDurationInSeconds,
       feeRate: 250,
-      profitMargin: 0,
+      profitMargin: 150,
     };
   } catch (error) {
     console.error('Error in getCreateTradeDetails:', error);

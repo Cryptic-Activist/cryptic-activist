@@ -35,8 +35,6 @@ export const getPremiumABIFile = async (req: Request, res: Response) => {
   try {
     const abi = await getPremiumABI();
 
-    console.log({ abi });
-
     res.status(200).json(abi);
   } catch (error) {
     console.log({ error });

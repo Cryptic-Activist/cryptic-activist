@@ -5,6 +5,7 @@ import {
   createTrade,
   fundTrade,
   getCreateTradeDetails,
+  getMockUSDCBalances,
 } from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
 
@@ -242,8 +243,11 @@ export default class Chat {
                 return;
               }
 
+              const erc20TokenAddress =
+                '0x998abeb3E57409262aE5b751f60747921B33613E' as Address;
+
               const approved = await approveToken(
-                token?.contractAddress,
+                erc20TokenAddress,
                 MockUSDC.abi,
                 trade.cryptocurrencyAmount.toString(),
               );
@@ -255,10 +259,14 @@ export default class Chat {
                 return;
               }
 
-              console.log({ approved });
+              const balances = await getMockUSDCBalances({
+                arbitrator: createTradeDetails.arbitratorWallet,
+                buyer: createTradeDetails.buyerWallet,
+                seller: createTradeDetails.sellerWallet,
+                mockUSDCAddress: erc20TokenAddress,
+              });
 
-              const erc20TokenAddress =
-                '0x851356ae760d987E095750cCeb3bC6014560891C' as Address;
+              console.log({ balances });
 
               const createTradeObj = {
                 erc20TokenAddress: erc20TokenAddress,
@@ -275,6 +283,8 @@ export default class Chat {
               };
 
               const tradeCreated = await createTrade(createTradeObj);
+
+              console.log({ tradeCreated });
 
               if (tradeCreated.error) {
                 console.log({ errorCreation: tradeCreated.error });

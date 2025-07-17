@@ -30,7 +30,7 @@ async function main() {
     usdcContractAddress
   );
 
-  const amount = hre.ethers.parseUnits("10000000", 6);
+  const amount = hre.ethers.parseUnits("100000000000000", 6);
   const mapped = targetAddresses.map(async (address) => {
     const tx = await MockUSDC.mint(address, amount);
     const receipt = await tx.wait();

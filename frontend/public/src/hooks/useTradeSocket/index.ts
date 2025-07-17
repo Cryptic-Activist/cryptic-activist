@@ -8,15 +8,24 @@ import {
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
-import { buyerFundTrade, sellerFundTrade } from '@/services/ethers/escrow';
+import {
+  approveToken,
+  buyerFundTrade,
+  getMockUSDCBalance,
+  getTokenAllowance,
+  sellerFundTrade,
+} from '@/services/ethers/escrow';
 import { useEffect, useRef, useState } from 'react';
 
+import { MockUSDC } from '@/contracts';
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
 import useABIs from '../useABIs';
 import { useApp } from '@/hooks';
+
+const erc20TokenAddress = '0x998abeb3E57409262aE5b751f60747921B33613E';
 
 const useTradeSocket = ({
   chatId,
@@ -89,62 +98,161 @@ const useTradeSocket = ({
   };
 
   const fundTradeAsSeller = async () => {
-    if (socket && trade?.tradeEscrowDetails && escrow) {
-      const tx = await sellerFundTrade(
-        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei),
-        escrow
+    if (
+      socket &&
+      trade?.tradeEscrowDetails &&
+      escrow &&
+      trade.cryptocurrencyAmount &&
+      trade.traderWalletAddress &&
+      trade.vendorWalletAddress &&
+      trade.offer &&
+      trade.offer.offerType
+    ) {
+      const approved = await approveToken(
+        erc20TokenAddress,
+        MockUSDC.abi,
+        trade.tradeEscrowDetails?.sellerTotalFundInWei
       );
 
-      if (tx.error) {
-        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-          socket.emit('blockchaion_seller_fund_trade_rejected', {
-            chatId,
-            senderId: user?.id,
-          });
-          return;
-        }
-        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-          addToast('error', 'Unable to fund trade', 8000);
-          return;
-        }
+      console.log({ approved });
+
+      if (approved.error) {
+        console.log(approved.error);
+        return;
       }
 
-      addToast('info', 'Trade was funded by the seller', 8000);
-      socket.emit('blockchain_seller_funded_trade', {
-        chatId: trade.chat?.id,
-        senderId: user?.id,
-      });
+      if (approved.message === 'Token approved!') {
+        const isBuyOffer = trade.offer.offerType === 'buy';
+
+        const sellerWallet = isBuyOffer
+          ? trade.vendorWalletAddress
+          : trade.traderWalletAddress;
+
+        const allowance = await getTokenAllowance({
+          address: sellerWallet,
+          mockUSDCAddress: erc20TokenAddress,
+        });
+
+        console.log({ allowance });
+
+        const balance = await getMockUSDCBalance({
+          address: sellerWallet,
+          mockUSDCAddress: erc20TokenAddress,
+        });
+
+        console.log({ balance });
+
+        // if (
+        //   allowance.allowance.lt(trade.tradeEscrowDetails?.sellerTotalFundInWei)
+        // ) {
+        //   console.log('Unsuffient allowance');
+        //   return;
+        // }
+
+        const tx = await sellerFundTrade(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei),
+          escrow
+        );
+
+        console.log({ tx });
+
+        // if (tx.error) {
+        //   if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+        //     socket.emit('blockchaion_seller_fund_trade_rejected', {
+        //       chatId,
+        //       senderId: user?.id,
+        //     });
+        //     return;
+        //   }
+        //   if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+        //     addToast('error', 'Unable to fund trade', 8000);
+        //     return;
+        //   }
+        // }
+
+        // addToast('info', 'Trade was funded by the seller', 8000);
+        // socket.emit('blockchain_seller_funded_trade', {
+        //   chatId: trade.chat?.id,
+        //   senderId: user?.id,
+        // });
+      }
     }
   };
 
   const fundTradeAsBuyer = async () => {
-    if (socket && trade?.tradeEscrowDetails && escrow) {
-      const tx = await buyerFundTrade(
-        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei),
-        escrow
+    if (
+      socket &&
+      trade?.tradeEscrowDetails &&
+      escrow &&
+      trade.cryptocurrencyAmount &&
+      trade.traderWalletAddress &&
+      trade.vendorWalletAddress &&
+      trade.offer &&
+      trade.offer.offerType
+    ) {
+      const approved = await approveToken(
+        erc20TokenAddress,
+        MockUSDC.abi,
+        trade.tradeEscrowDetails?.buyerCollateralInWei
       );
 
-      if (tx.error) {
-        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-          socket.emit('blockchaion_seller_fund_trade_rejected', {
-            chatId,
-            senderId: user?.id,
-          });
-          return;
-        }
-        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-          addToast('error', 'Unable to fund trade', 8000);
-          return;
-        }
+      console.log({ approved });
+
+      if (approved.error) {
+        console.log(approved.error);
+        return;
       }
 
-      addToast('info', 'Trade was funded by the buyer', 8000);
-      socket.emit('blockchain_buyer_funded_trade', {
-        chatId: trade.chat?.id,
-        senderId: user?.id,
-      });
+      if (approved.message === 'Token approved!') {
+        const isBuyOffer = trade.offer.offerType === 'buy';
+
+        const buyerWallet = isBuyOffer
+          ? trade.traderWalletAddress
+          : trade.vendorWalletAddress;
+
+        console.log({ buyerWallet });
+
+        const allowance = await getTokenAllowance({
+          address: buyerWallet,
+          mockUSDCAddress: erc20TokenAddress,
+        });
+
+        console.log({ allowance });
+
+        const balance = await getMockUSDCBalance({
+          address: buyerWallet,
+          mockUSDCAddress: erc20TokenAddress,
+        });
+
+        console.log({ balance });
+
+        const tx = await buyerFundTrade(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei),
+          escrow
+        );
+        console.log({ tx });
+
+        // if (tx.error) {
+        //   if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+        //     socket.emit('blockchaion_seller_fund_trade_rejected', {
+        //       chatId,
+        //       senderId: user?.id,
+        //     });
+        //     return;
+        //   }
+        //   if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+        //     addToast('error', 'Unable to fund trade', 8000);
+        //     return;
+        //   }
+        // }
+        // addToast('info', 'Trade was funded by the buyer', 8000);
+        // socket.emit('blockchain_buyer_funded_trade', {
+        //   chatId: trade.chat?.id,
+        //   senderId: user?.id,
+        // });
+      }
     }
   };
 

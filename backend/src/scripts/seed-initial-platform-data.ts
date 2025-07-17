@@ -493,7 +493,7 @@ const main = async () => {
         {
           cryptocurrencyId: cryptoMap.get('usd-coin'),
           chainId: chainMap.get('hardhat-localnet'),
-          contractAddress: '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0',
+          contractAddress: '0x851356ae760d987E095750cCeb3bC6014560891C',
           isVerified: true,
         },
         // Wrapped Ethereum on Ethereum Mainnet
