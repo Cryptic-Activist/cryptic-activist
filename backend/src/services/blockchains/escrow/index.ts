@@ -289,6 +289,33 @@ export const executeTrade = async (tradeId: BigInt) => {
   }
 };
 
+export const approveToken = async (
+  tokenAddress: string,
+  tokenABI: any,
+  amountToApprove: string,
+) => {
+  try {
+    const signer = getSigner();
+    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+    const amount = parseEther(amountToApprove);
+    const tx = await tokenContract.approve(
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      amount,
+    );
+    const receipt = await tx.wait();
+    console.log({ receipt });
+    return {
+      message: 'Token approved!',
+    };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Token Approval failed',
+      error: error,
+    };
+  }
+};
+
 export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
   const contract = await getEscrowContract();
   const tx = await contract.cancelTrade(tradeId, forcedCancel);

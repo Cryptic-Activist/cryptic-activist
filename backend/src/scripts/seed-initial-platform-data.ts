@@ -7,11 +7,13 @@ import { upload, uploadFiles } from '@/services/upload';
 import { ETHERSCAN_API_KEY } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { convertABIToFile } from '@/controllers/blockchains/smart-contracts/premium';
+import { exec } from 'child_process';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { getABI } from '@/services/blockchains/wallet';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { prisma } from '../services/db';
+import { promisify } from 'util';
 import { rateLimitedMap } from '@/utils/timer';
 
 const main = async () => {
@@ -487,6 +489,13 @@ const main = async () => {
           contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
           isVerified: true,
         },
+        // Mock USDC on Hardhat
+        {
+          cryptocurrencyId: cryptoMap.get('usd-coin'),
+          chainId: chainMap.get('hardhat-localnet'),
+          contractAddress: '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0',
+          isVerified: true,
+        },
         // Wrapped Ethereum on Ethereum Mainnet
         {
           cryptocurrencyId: cryptoMap.get('weth'),
@@ -857,6 +866,8 @@ const main = async () => {
       const promisedUploaded = await Promise.all(uploadReady);
 
       console.log({ promisedUploaded });
+
+      // await runShellScript();
 
       // Create first trader user
       const traderPassword = 'password';

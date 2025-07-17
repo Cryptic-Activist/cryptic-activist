@@ -1,6 +1,7 @@
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
+  approveToken,
   createTrade,
   fundTrade,
   getCreateTradeDetails,
@@ -9,6 +10,7 @@ import { prisma, redisClient } from '@/services/db';
 
 import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
+import { MockUSDC } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
 
@@ -77,6 +79,11 @@ export default class Chat {
                 select: {
                   timeLimit: true,
                   offerType: true,
+                  chain: {
+                    select: {
+                      chainId: true,
+                    },
+                  },
                 },
               },
             },
@@ -213,6 +220,38 @@ export default class Chat {
 
               const erc20TokenAddress =
                 '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' as Address;
+
+              const token = await prisma.cryptocurrencyChain.findFirst({
+                where: {
+                  cryptocurrency: {
+                    coingeckoId: 'usd-coin',
+                  },
+                  chain: {
+                    chainId: trade.offer.chain.chainId,
+                  },
+                },
+                select: {
+                  abiUrl: true,
+                  contractAddress: true,
+                },
+              });
+
+              console.log({ token });
+
+              if (!token || !token.contractAddress) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Failed to approve token. Token not found.',
+                });
+                return;
+              }
+
+              const approved = await approveToken(
+                token?.contractAddress,
+                MockUSDC.abi,
+                trade.cryptocurrencyAmount.toString(),
+              );
+
+              console.log({ approved });
 
               const createTradeObj = {
                 erc20TokenAddress: erc20TokenAddress,

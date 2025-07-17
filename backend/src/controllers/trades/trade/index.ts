@@ -228,6 +228,11 @@ export async function getTradeController(req: Request, res: Response) {
             name: true,
             symbol: true,
             image: true,
+            chains: {
+              select: {
+                abiUrl: true,
+              },
+            },
           },
         },
         fiat: {

@@ -3,8 +3,6 @@ import "dotenv/config";
 
 import { HardhatUserConfig } from "hardhat/config";
 
-console.log({ processL: process.env.PLATFORM_WALLET_PRIVATE_KEY });
-
 const config: HardhatUserConfig = {
   sourcify: {
     enabled: true,
