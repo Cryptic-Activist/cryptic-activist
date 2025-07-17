@@ -306,6 +306,7 @@ export const approveToken = async (
     console.log({ receipt });
     return {
       message: 'Token approved!',
+      receipt,
     };
   } catch (error) {
     console.log({ error });

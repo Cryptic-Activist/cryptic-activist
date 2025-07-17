@@ -218,9 +218,6 @@ export default class Chat {
                 },
               ]);
 
-              const erc20TokenAddress =
-                '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' as Address;
-
               const token = await prisma.cryptocurrencyChain.findFirst({
                 where: {
                   cryptocurrency: {
@@ -251,7 +248,17 @@ export default class Chat {
                 trade.cryptocurrencyAmount.toString(),
               );
 
+              if (approved.error) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Failed to approve token',
+                });
+                return;
+              }
+
               console.log({ approved });
+
+              const erc20TokenAddress =
+                '0x851356ae760d987E095750cCeb3bC6014560891C' as Address;
 
               const createTradeObj = {
                 erc20TokenAddress: erc20TokenAddress,
