@@ -16,6 +16,7 @@ import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { MockToken } from '@/contracts';
 import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
+import { floatToStringWithoutDot } from '@/utils/blockchain';
 import { getBearerToken } from '@/utils';
 
 const iface = new Interface(EscrowArtifact.abi);
@@ -287,16 +288,18 @@ export const getTokenAllowance = async ({
 export const approveToken = async (
   tokenAddress: string,
   tokenABI: any,
-  amountToApprove: string
+  amountToApprove: string,
+  decimals: number
 ) => {
   try {
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
 
-    console.log({ amountToApprove });
+    const parsedAmountToApprove = floatToStringWithoutDot(amountToApprove);
+    console.log({ parsedAmountToApprove });
     const tx = await tokenContract.approve(
       ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      parseUnits('234', 6)
+      parsedAmountToApprove
     );
     const receipt = await tx.wait();
     return {

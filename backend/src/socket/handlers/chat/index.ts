@@ -343,10 +343,12 @@ export default class Chat {
                       buyerCollateral: createTradeDetails.buyerCollateral,
                       buyerWallet: createTradeDetails.buyerWallet,
                       tradeAmount: createTradeDetails.tradeAmount,
-                      feeRate: new Decimal(createTradeDetails.feeRate),
+                      feeRate: new Decimal(createTradeDetails.feeRate).div(
+                        10000,
+                      ),
                       profitMargin: new Decimal(
                         createTradeDetails.profitMargin,
-                      ),
+                      ).div(10000),
                       sellerWallet: createTradeDetails.sellerWallet,
                       sellerCollateral: createTradeDetails.sellerCollateral,
                       sellerTotalFund: createTradeDetails.sellerTotalFund,

@@ -30,3 +30,7 @@ export const isSupportedChain = (
 ): boolean => {
   return id != null && supportedChainIds.some((chain) => chain.chainId === id);
 };
+
+export const floatToStringWithoutDot = (num: string) => {
+  return num.toString().replace('.', '');
+};

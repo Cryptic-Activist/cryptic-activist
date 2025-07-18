@@ -110,10 +110,16 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
+      console.log({ tradeEscrowDetails: trade.tradeEscrowDetails });
+      const decimals = await getTokenDecimals({
+        tokenAddress: erc20TokenAddress,
+      });
+
       const approved = await approveToken(
         erc20TokenAddress,
         MockToken.abi,
-        trade.tradeEscrowDetails?.sellerTotalFundInWei
+        trade.tradeEscrowDetails?.sellerTotalFund,
+        6
       );
 
       console.log({ approved });
@@ -122,10 +128,6 @@ const useTradeSocket = ({
         console.log(approved.error);
         return;
       }
-
-      const decimals = await getTokenDecimals({
-        tokenAddress: erc20TokenAddress,
-      });
 
       console.log({ decimals });
 
@@ -151,14 +153,14 @@ const useTradeSocket = ({
         console.log({ balance });
 
         // if (
-        //   allowance.allowance.lt(trade.tradeEscrowDetails?.sellerTotalFundInWei)
+        //   allowance.allowance.lt(trade.tradeEscrowDetails?.sellerTotalFund)
         // ) {
         //   console.log('Unsuffient allowance');
         //   return;
         // }
 
         const fundingAmount = parseUnits(
-          BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei).toString(),
+          BigInt(trade.tradeEscrowDetails?.sellerTotalFund).toString(),
           decimals.decimals
         );
 
@@ -166,7 +168,7 @@ const useTradeSocket = ({
 
         const tx = await sellerFundTrade(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei),
+          BigInt(trade.tradeEscrowDetails?.sellerTotalFund),
           escrow
         );
 
@@ -206,10 +208,15 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
+      const decimals = await getTokenDecimals({
+        tokenAddress: erc20TokenAddress,
+      });
+
       const approved = await approveToken(
         erc20TokenAddress,
         MockToken.abi,
-        trade.tradeEscrowDetails.buyerCollateralInWei
+        trade.tradeEscrowDetails.buyerCollateral,
+        decimals.decimals
       );
 
       console.log({ approved });
@@ -244,7 +251,7 @@ const useTradeSocket = ({
 
         const tx = await buyerFundTrade(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei),
+          BigInt(trade.tradeEscrowDetails?.buyerCollateral),
           escrow
         );
         console.log({ tx });
