@@ -18,7 +18,11 @@ const HowMuch: FC<HowMuchProps> = ({
   onSubmit,
   blockchain,
   mutationStartTrade,
-  createTrade: { cryptocurrencyAmount, isTradingAvailable },
+  createTrade: {
+    cryptocurrencyAmount,
+    isTradingAvailable,
+    minimumBalanceRequired,
+  },
   isLoggedIn,
 }) => {
   const [submitButtonLabel, setSubmitButtonLabel] = useState('');
@@ -144,16 +148,10 @@ const HowMuch: FC<HowMuchProps> = ({
                   cryptocurrencyAmount &&
                   blockchain.balance?.value &&
                   app.settings?.depositPerTradePercent &&
-                  offer.offerType ? (
+                  offer.offerType &&
+                  minimumBalanceRequired ? (
                     <div className={styles.willReceive}>
-                      <span>
-                        {getRequiredBalance(
-                          cryptocurrencyAmount,
-                          blockchain.balance.decimals,
-                          app.settings?.depositPerTradePercent,
-                          offer.offerType
-                        )}
-                      </span>
+                      <span>{minimumBalanceRequired}</span>
                       <strong>
                         {toUpperCase(offer.cryptocurrency?.symbol)}
                       </strong>

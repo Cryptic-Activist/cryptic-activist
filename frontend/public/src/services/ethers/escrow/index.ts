@@ -16,8 +16,8 @@ import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { MockToken } from '@/contracts';
 import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
-import { floatToStringWithoutDot } from '@/utils/blockchain';
 import { getBearerToken } from '@/utils';
+import { toTokenUnits } from '@/utils/blockchain';
 
 const iface = new Interface(EscrowArtifact.abi);
 
@@ -295,11 +295,15 @@ export const approveToken = async (
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
 
-    const parsedAmountToApprove = floatToStringWithoutDot(amountToApprove);
-    console.log({ parsedAmountToApprove });
+    console.log({ amountToApprove, decimals });
+
+    console.log({ amountToApprove });
+
+    const converted = toTokenUnits(amountToApprove, decimals);
+
     const tx = await tokenContract.approve(
       ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      parsedAmountToApprove
+      converted
     );
     const receipt = await tx.wait();
     return {
@@ -330,12 +334,8 @@ export const getTokenDecimals = async ({
 
     const decimals = await tokenContract.decimals();
 
-    return { decimals };
+    return Number(decimals);
   } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
+    return null;
   }
 };

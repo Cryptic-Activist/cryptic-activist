@@ -20,5 +20,6 @@ export type HowMuchProps = {
     fiatAmount: number;
     receivingFiatAmount?: number | null;
     isTradingAvailable: boolean;
+    minimumBalanceRequired?: number;
   };
 };

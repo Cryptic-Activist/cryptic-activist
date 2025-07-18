@@ -34,6 +34,8 @@ const useOffer = () => {
   const [receivingFiatAmount, setReceivingFiatAmount] = useState<number | null>(
     null
   );
+  const [minimumBalanceRequired, setMinimumBalanceRequired] =
+    useState<number>();
   const [isTradingAvailable, setIsTradingAvailable] = useState(false);
 
   const mutationCurrentTradingFee = useMutation({
@@ -43,6 +45,7 @@ const useOffer = () => {
     onSuccess: (data) => {
       setReceivingFiatAmount(data.finalFiatAmount);
       setCryptocurrencyAmount(data.finalCryptoAmount);
+      setMinimumBalanceRequired(data.requiredBalance);
     },
   });
   const queryOffer = useQuery({
@@ -154,7 +157,8 @@ const useOffer = () => {
       offer.cryptocurrency?.id &&
       offer.fiat?.id &&
       fiatAmount &&
-      localCurrentPrice
+      localCurrentPrice &&
+      offer.id
     ) {
       mutationCurrentTradingFee.mutate({
         cryptocurrencyId: offer.cryptocurrency.id,
@@ -162,6 +166,8 @@ const useOffer = () => {
         fiatId: offer.fiat.id,
         userId: user.id,
         currentPrice: localCurrentPrice,
+        offerId: offer.id,
+        decimals: 6,
       });
     }
   }, [
@@ -232,6 +238,7 @@ const useOffer = () => {
     localCurrentPrice,
     createTrade: {
       cryptocurrencyAmount,
+      minimumBalanceRequired,
       fiatAmount,
       receivingFiatAmount,
       isTradingAvailable,

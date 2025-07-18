@@ -24,6 +24,7 @@ import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
+import { toTokenUnits } from '@/utils/blockchain';
 import useABIs from '../useABIs';
 import { useApp } from '@/hooks';
 
@@ -115,11 +116,18 @@ const useTradeSocket = ({
         tokenAddress: erc20TokenAddress,
       });
 
+      console.log({ decimals });
+
+      if (!decimals) {
+        addToast('error', 'Unable to fetch token decimals', 8000);
+        return;
+      }
+
       const approved = await approveToken(
         erc20TokenAddress,
         MockToken.abi,
         trade.tradeEscrowDetails?.sellerTotalFund,
-        6
+        decimals
       );
 
       console.log({ approved });

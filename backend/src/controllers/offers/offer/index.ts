@@ -33,10 +33,11 @@ export const createOfferController = async (req: Request, res: Response) => {
       });
 
       if (!existingPaymentDetails) {
-        return res.status(404).send({
+        res.status(404).send({
           status_code: 404,
           errors: ['Payment details not found'],
         });
+        return;
       }
 
       paymentDetailsId = existingPaymentDetails.id;

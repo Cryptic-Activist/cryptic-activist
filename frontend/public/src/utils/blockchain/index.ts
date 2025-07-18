@@ -1,4 +1,6 @@
+import { BigNumberish } from 'ethers';
 import { Connector } from 'wagmi';
+import Decimal from 'decimal.js';
 
 export const getChainNameById = (id: number) => {
   switch (id) {
@@ -34,3 +36,20 @@ export const isSupportedChain = (
 export const floatToStringWithoutDot = (num: string) => {
   return num.toString().replace('.', '');
 };
+
+export function toTokenUnits(
+  amount: string | number,
+  decimals: number
+): BigNumberish {
+  const decimalAmount = new Decimal(amount);
+
+  console.log({ decimalAmount, decimals });
+
+  // Round down to specified decimals
+  const rounded = decimalAmount.toDecimalPlaces(decimals, Decimal.ROUND_DOWN);
+
+  // Convert to base units
+  const baseUnits = rounded.times(new Decimal(10).pow(decimals)).toFixed(0);
+
+  return BigInt(baseUnits);
+}
