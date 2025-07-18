@@ -1,13 +1,14 @@
+import { Decimal } from '@prisma/client/runtime/library';
 import { DisputeSeverity, DisputeType } from '@prisma/client';
 
 export type PriorityInput = {
-  fiatAmount: number;
+  fiatAmount: Decimal;
   disputeCreatedAt: Date;
   tradeCreatedAt: Date;
 };
 
 export type CalculateSlaDueDate = (trade: {
-  fiatAmount: number;
+  fiatAmount: Decimal;
   paymentMethod: {
     isRisky: boolean;
   };
@@ -15,7 +16,7 @@ export type CalculateSlaDueDate = (trade: {
 }) => Date;
 
 export type DetermineSeverity = (trade: {
-  fiatAmount: number;
+  fiatAmount: Decimal;
   type: DisputeType;
   paymentMethod: {
     isRisky: boolean;

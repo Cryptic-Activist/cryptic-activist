@@ -20,11 +20,11 @@ import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
+import { Decimal } from '@/services/db';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { MockToken } from '@/contracts';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
-import { Decimal } from '@/services/db';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
 
@@ -472,18 +472,6 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
     });
 
     if (!offer) return null;
-
-    const depositRate = (await getSetting('depositPerTradePercent')) ?? 0.25;
-
-    const isBuyOffer = offer.offerType === 'buy';
-
-    const buyerWallet = isBuyOffer
-      ? trade.traderWalletAddress
-      : trade.vendorWalletAddress;
-
-    const sellerWallet = isBuyOffer
-      ? trade.vendorWalletAddress
-      : trade.traderWalletAddress;
 
     const tradeAmount = new Decimal(trade.cryptocurrencyAmount);
     const depositRate = new Decimal(
