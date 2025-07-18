@@ -1,3 +1,4 @@
+import { Decimal, prisma } from '@/services/db';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -17,7 +18,6 @@ import {
   executeTrade,
   raiseDispute,
 } from '@/services/blockchains/escrow';
-import { prisma, redisClient } from '@/services/db';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
@@ -749,13 +749,13 @@ export default class Trade {
             },
           });
           const severity = determineSeverity({
-            fiatAmount: chat.trade.fiatAmount,
+            fiatAmount: new Decimal(chat.trade.fiatAmount),
             paymentMethod: chat.trade.paymentMethod,
             type,
             isRepeatedOffender: loserDisputesCount > 0,
           });
           const slaDueAt = calculateSlaDueDate({
-            fiatAmount: chat.trade.fiatAmount,
+            fiatAmount: new Decimal(chat.trade.fiatAmount),
             paymentMethod: chat.trade.paymentMethod,
             vendorTrustScore: chat.trade.vendor.trustScore,
           });

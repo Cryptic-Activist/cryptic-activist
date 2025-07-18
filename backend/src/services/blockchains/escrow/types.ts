@@ -1,6 +1,9 @@
+import { Decimal } from '@prisma/client/runtime/library';
+
 export type Address = `0x${string}`;
 
 export type InitTradeParams = {
+  erc20TokenAddress: Address;
   buyer: Address;
   seller: Address;
   arbitrator: Address;

@@ -1,6 +1,8 @@
 import { CalculateSlaDueDate, DetermineSeverity } from './types';
 import { DisputePriority, DisputeSeverity } from '@prisma/client';
 
+import { Decimal } from '@/services/db';
+
 const severityRank: Record<DisputeSeverity, number> = {
   LOW: 0,
   MEDIUM: 1,
@@ -24,12 +26,12 @@ export const determineSeverity: DetermineSeverity = (
   let severity: DisputeSeverity = DisputeSeverity.MEDIUM;
 
   // High value trades
-  if (fiatAmount >= 1000) {
+  if (fiatAmount.gte(1000)) {
     severity = DisputeSeverity.HIGH;
   }
 
   // Extremely high value
-  if (fiatAmount >= 5000) {
+  if (fiatAmount.gte(5000)) {
     severity = DisputeSeverity.CRITICAL;
   }
 
@@ -96,11 +98,11 @@ export const calculateSlaDueDate: CalculateSlaDueDate = (trade) => {
   let slaHours = 24; // Base SLA for normal trades
 
   // Urgency based on fiat amount
-  if (trade.fiatAmount >= 2000) {
+  if (trade.fiatAmount.gte(2000)) {
     slaHours = 12; // High-value → moderate urgency
-  } else if (trade.fiatAmount >= 1000) {
+  } else if (trade.fiatAmount.gte(1000)) {
     slaHours = 16;
-  } else if (trade.fiatAmount >= 250) {
+  } else if (trade.fiatAmount.gte(250)) {
     slaHours = 20;
   }
 

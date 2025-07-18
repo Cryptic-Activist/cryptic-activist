@@ -39,10 +39,10 @@ export type TradeEscrowDetails = {
   feeRate: number;
   profitMargin: number;
   tradeDurationInSeconds: number;
-  tradeAmountInWei: string;
-  buyerCollateralInWei: string;
-  sellerCollateralInWei: string;
-  sellerTotalFundInWei: string;
+  tradeAmount: string;
+  buyerCollateral: string;
+  sellerCollateral: string;
+  sellerTotalFund: string;
   blockchainTradeId: string;
 };
 

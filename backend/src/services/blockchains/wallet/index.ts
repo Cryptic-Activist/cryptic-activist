@@ -1,30 +1,35 @@
-import { MORALIS_API_KEY } from '@/constants/env';
-import Moralis from 'moralis';
+import { ETHERSCAN_API_KEY } from '@/constants/env';
+import { fetchGet } from '@/services/axios';
+import { response } from 'express';
 
-export async function initMoralis() {
-  await Moralis.start({
-    apiKey: MORALIS_API_KEY,
-  });
-}
+export const getABI = async ({
+  chainId,
+  contractAddress,
+  crypto,
+  apiKey = ETHERSCAN_API_KEY,
+}: {
+  chainId: string;
+  crypto: any;
+  contractAddress: string;
+  apiKey: string;
+}) => {
+  const endpointUrl = 'https://api.etherscan.io/v2';
 
-export async function getWalletBalances(
-  address: string,
-  chain: string = 'eth',
-) {
-  await initMoralis();
+  const url = `${endpointUrl}/api?chainid=${chainId}&module=contract&action=getabi&address=${contractAddress}&apikey=${apiKey}`;
 
-  const nativeBalance = await Moralis.EvmApi.balance.getNativeBalance({
-    address,
-    chain, // e.g., 'eth', '0x89' for Polygon
-  });
+  try {
+    const response = await fetchGet(url);
 
-  const tokenBalances = await Moralis.EvmApi.token.getWalletTokenBalances({
-    address,
-    chain,
-  });
-
-  return {
-    native: nativeBalance.raw,
-    tokens: tokenBalances.raw,
-  };
-}
+    if (response.data.status === '1') {
+      return {
+        abi: JSON.parse(response.data.result),
+        chainId: chainId,
+      };
+    } else {
+      throw new Error(response.data.message || 'Failed to fetch ABI');
+    }
+  } catch (error) {
+    // console.log({ error });
+    return null;
+  }
+};

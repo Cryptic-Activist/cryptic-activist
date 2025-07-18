@@ -36,8 +36,6 @@ export const getEscrowABIFile = async (req: Request, res: Response) => {
   try {
     const abi = await getEscrowABI();
 
-    console.log({ abi });
-
     res.status(200).json(abi);
   } catch (error) {
     console.log({ error });

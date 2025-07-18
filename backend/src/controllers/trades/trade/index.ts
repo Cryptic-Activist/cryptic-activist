@@ -1,3 +1,4 @@
+import { Decimal, prisma } from '@/services/db';
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
@@ -5,8 +6,8 @@ import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { getCoinPrice } from '@/services/coinGecko';
+import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
-import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -57,13 +58,13 @@ export async function createTradeController(req: Request, res: Response) {
           offerId: body.offerId,
           cryptocurrencyId: body.cryptocurrencyId,
           fiatId: body.fiatId,
-          cryptocurrencyAmount: body.cryptocurrencyAmount,
-          fiatAmount: body.fiatAmount,
+          cryptocurrencyAmount: new Decimal(body.cryptocurrencyAmount),
+          fiatAmount: new Decimal(body.fiatAmount),
           status: 'PENDING',
           startedAt: new Date(),
           paymentMethodId: body.paymentMethodId,
           traderWalletAddress: body.traderWalletAddress,
-          exchangeRate: exchangeRate,
+          exchangeRate: new Decimal(exchangeRate),
           buyerId,
           sellerId,
         },
@@ -228,6 +229,11 @@ export async function getTradeController(req: Request, res: Response) {
             name: true,
             symbol: true,
             image: true,
+            chains: {
+              select: {
+                abiUrl: true,
+              },
+            },
           },
         },
         fiat: {
@@ -323,11 +329,18 @@ export const calculateReceivingAmount = async (
   res: Response,
 ) => {
   try {
-    const { userId, cryptocurrencyId, fiatId, fiatAmount, currentPrice } =
-      req.query;
+    const {
+      userId,
+      cryptocurrencyId,
+      fiatId,
+      fiatAmount,
+      currentPrice,
+      offerId,
+      decimals,
+    } = req.query;
 
-    const parsedFiatAmount = parseFloat(fiatAmount);
-    const parsedCurrentPrice = parseFloat(currentPrice);
+    const parsedFiatAmount = new Decimal(fiatAmount);
+    const parsedCurrentPrice = new Decimal(currentPrice);
 
     const user = await prisma.user.findFirst({
       where: { id: userId as string },
@@ -338,6 +351,18 @@ export const calculateReceivingAmount = async (
     });
 
     if (!user) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
+    }
+
+    const offer = await prisma.offer.findFirst({
+      where: { id: offerId as string },
+      select: {
+        offerType: true,
+      },
+    });
+
+    if (!offer) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
       return;
     }
@@ -373,25 +398,55 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    let feeRate = tier?.tradingFee! - tier?.discount!;
+    let feeRate = tier.tradingFee.minus(tier?.discount ?? 0);
 
     const isPremium = await isUserPremium(user.id);
 
     if (isPremium) {
-      feeRate -= DEFAULT_PREMIUM_DISCOUNT;
+      const premiumDiscount = new Decimal(DEFAULT_PREMIUM_DISCOUNT);
+      feeRate = feeRate.minus(premiumDiscount);
     }
 
-    const tradingFee = parsedFiatAmount * feeRate;
-    const finalFiatAmount = parsedFiatAmount - tradingFee;
+    const tradingFee = parsedFiatAmount.times(feeRate);
+    const finalFiatAmount = parsedFiatAmount.minus(tradingFee);
+    const parsedDecimals = parseInt(decimals);
 
-    const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
+    // Calculate crypto amount
+    const finalCryptoAmount = finalFiatAmount
+      .dividedBy(parsedCurrentPrice)
+      .toDecimalPlaces(parsedDecimals);
+
+    let multiplier = 0;
+    const depositPerTradePercent = await getSetting('depositPerTradePercent');
+
+    if (!depositPerTradePercent) {
+      res.status(400).send({ error: ['Deposit per trade percent not set'] });
+      return;
+    }
+
+    console.log({ offerType: offer.offerType });
+
+    if (offer.offerType === 'buy') {
+      // Buyer needs only the deposit percentage (e.g., 20%)
+      multiplier = depositPerTradePercent; // e.g., 0.2 → 2000
+    } else {
+      // Seller needs 100% + deposit percentage (e.g., 120%)
+      multiplier = 1 + depositPerTradePercent; // e.g., 1.2 → 12000
+    }
+
+    console.log({ multiplier, depositPerTradePercent });
+
+    const requiredBalance = finalCryptoAmount
+      .times(multiplier)
+      .toDecimalPlaces(parsedDecimals);
 
     res.status(200).send({
-      fiatAmount,
-      tradingFee,
-      finalFiatAmount,
-      currentPrice,
-      finalCryptoAmount: parseFloat(finalCryptoAmount),
+      fiatAmount: parsedFiatAmount.toString(),
+      tradingFee: tradingFee.toString(),
+      finalFiatAmount: finalFiatAmount.toString(),
+      currentPrice: parsedCurrentPrice.toString(),
+      finalCryptoAmount: finalCryptoAmount.toNumber(),
+      requiredBalance: requiredBalance.toNumber(),
     });
     return;
   } catch (err) {

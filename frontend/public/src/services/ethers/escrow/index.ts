@@ -3,13 +3,21 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/envs';
-import { BrowserProvider, Interface, ethers } from 'ethers';
+import {
+  BrowserProvider,
+  Interface,
+  ethers,
+  parseEther,
+  parseUnits,
+} from 'ethers';
 
 import { ABI } from '@/store/abis/types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { MockToken } from '@/contracts';
 import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
 import { getBearerToken } from '@/utils';
+import { toTokenUnits } from '@/utils/blockchain';
 
 const iface = new Interface(EscrowArtifact.abi);
 
@@ -140,14 +148,14 @@ export const sellerFundTrade = async (
     }
 
     // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.sellerFundTrade(tradeId, {
-      value,
-    });
+    const tx = await contract.sellerFundTrade(tradeId);
+
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
     return {
       tx,
+      receipt,
       data: decoded,
       txHash: tx.hash,
       message: 'Seller funded the trade successfully',
@@ -177,14 +185,14 @@ export const buyerFundTrade = async (
     }
 
     // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.buyerFundTrade(tradeId, {
-      value,
-    });
+    const tx = await contract.buyerFundTrade(tradeId);
+
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
     return {
       tx,
+      receipt,
       data: decoded,
       txHash: tx.hash,
       message: 'Seller funded the trade successfully',
@@ -219,3 +227,111 @@ export async function getWalletTokenBalances(
 
   return balances;
 }
+
+export const getMockUSDCBalance = async ({
+  address,
+  mockUSDCAddress,
+}: {
+  address: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockToken.abi,
+      signer
+    );
+
+    const balance = await tokenContract.balanceOf(address);
+
+    return { balance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getTokenAllowance = async ({
+  address,
+  mockUSDCAddress,
+}: {
+  address: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockToken.abi,
+      signer
+    );
+
+    const allowance = await tokenContract.allowance(
+      address,
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS
+    );
+
+    return { allowance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const approveToken = async (
+  tokenAddress: string,
+  tokenABI: any,
+  amountToApprove: bigint,
+  decimals: number
+) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+    console.log({ amountToApprove, decimals });
+
+    const tx = await tokenContract.approve(
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      amountToApprove
+    );
+    const receipt = await tx.wait();
+    return {
+      message: 'Token approved!',
+      receipt,
+    };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Token Approval failed',
+      error: error,
+    };
+  }
+};
+
+export const getTokenDecimals = async ({
+  tokenAddress,
+}: {
+  tokenAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      MockToken.abi,
+      signer
+    );
+
+    const decimals = await tokenContract.decimals();
+
+    return Number(decimals);
+  } catch (error) {
+    return null;
+  }
+};

@@ -107,6 +107,7 @@ model CryptocurrencyChain {
   contractAddress  String?        @db.VarChar(200) // Contract address on this specific chain
   isVerified       Boolean        @default(false) @db.Boolean // Whether the token is verified on this chain
   createdAt        DateTime       @default(now()) @db.Timestamp()
+  abiUrl           String?
 
   @@unique([cryptocurrencyId, chainId])
   @@map("cryptocurrency_chains")
@@ -284,14 +285,14 @@ model Offer {
   id                  String          @id @default(uuid())
   offerType           String
   pricingType         String
-  listAt              Float
-  limitMin            Float
-  limitMax            Float
+  listAt              Decimal         @db.Decimal(30, 10)
+  limitMin            Decimal         @db.Decimal(30, 10)
+  limitMax            Decimal         @db.Decimal(30, 10)
   timeLimit           Int
   tags                String[]
   label               String
   terms               String
-  averageTradeSpeed   Float?
+  averageTradeSpeed   Int?
   instructions        String
   kycOnly             Boolean         @default(false) @db.Boolean
   chain               Chain           @relation("offer", fields: [chainId], references: [id], onDelete: Restrict, onUpdate: Cascade)
@@ -386,7 +387,7 @@ model PremiumPurchase {
   id                        String                @id @default(cuid())
   userId                    String
   payerAddress              String
-  expectedAmount            Decimal               @db.Decimal()
+  expectedAmount            Decimal               @db.Decimal(30, 10)
   status                    PremiumPurchaseStatus
   period                    PremiumPeriod
   // blockchainTransactionHash String                @unique
@@ -462,13 +463,13 @@ model SystemMessage {
 }
 
 model Tier {
-  id          String @id @default(uuid())
-  name        String @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String
-  level       Int    @unique
-  tradingFee  Float
-  discount    Float // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
-  volume      Float // Minimum trading volume to qualify for this tier
+  level       Int     @unique
+  tradingFee  Decimal @db.Decimal(10, 8)
+  discount    Decimal @db.Decimal(10, 8) // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
+  volume      Decimal @db.Decimal(30, 10) // Minimum trading volume to qualify for this tier
   requiredXP  Int
   users       User[]
 
@@ -513,13 +514,13 @@ model TradeEscrowDetails {
   arbitratorWallet          String
   buyerWallet               String
   sellerWallet              String
-  feeRate                   Float
-  profitMargin              Float
+  feeRate                   Decimal @db.Decimal(10, 8)
+  profitMargin              Decimal @db.Decimal(10, 8)
   tradeDurationInSeconds    Int
-  tradeAmountInWei          String
-  buyerCollateralInWei      String
-  sellerCollateralInWei     String
-  sellerTotalFundInWei      String
+  tradeAmount               Decimal @db.Decimal(38, 18)
+  buyerCollateral           Decimal @db.Decimal(38, 18)
+  sellerCollateral          Decimal @db.Decimal(38, 18)
+  sellerTotalFund           Decimal @db.Decimal(38, 18)
   blockchainTradeId         String // Trade ID on the blockchain
   blockchainTransactionHash String? // Hash of the transaction on the blockchain
   trade                     Trade[]
@@ -550,8 +551,8 @@ model Trade {
   paymentMethodId           String
   paymentMethod             PaymentMethod       @relation(fields: [paymentMethodId], references: [id])
   chat                      Chat?
-  cryptocurrencyAmount      Float
-  fiatAmount                Float
+  cryptocurrencyAmount      Decimal             @db.Decimal(38, 18)
+  fiatAmount                Decimal             @db.Decimal(30, 10)
   exchangeRate              Decimal             @db.Decimal(30, 10)
   startedAt                 DateTime            @default(now()) @db.Timestamp()
   endedAt                   DateTime?           @db.Timestamp()

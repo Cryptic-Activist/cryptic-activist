@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '@/services/db';
 
 export const createTier = async (req: Request, res: Response) => {
@@ -19,9 +20,9 @@ export const createTier = async (req: Request, res: Response) => {
         name,
         description,
         level,
-        tradingFee,
-        discount,
-        volume: minVolume,
+        tradingFee: new Decimal(tradingFee),
+        discount: new Decimal(discount),
+        volume: new Decimal(minVolume),
         requiredXP,
       },
       update: {},
@@ -29,9 +30,9 @@ export const createTier = async (req: Request, res: Response) => {
         name,
         description,
         level,
-        tradingFee,
-        discount,
-        volume: minVolume,
+        tradingFee: new Decimal(tradingFee),
+        discount: new Decimal(discount),
+        volume: new Decimal(minVolume),
         requiredXP,
       },
     });

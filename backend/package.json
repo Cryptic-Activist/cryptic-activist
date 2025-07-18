@@ -53,6 +53,7 @@
     "typescript-eslint": "^8.25.0"
   },
   "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.27.2",
     "@prisma/client": "^6.6.0",
     "@sentry/cli": "^2.45.0",
     "@sentry/node": "^9.17.0",

@@ -9,13 +9,24 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
-import { Interface, InterfaceAbi, ethers, parseEther } from 'ethers';
+import {
+  Interface,
+  InterfaceAbi,
+  ethers,
+  parseEther,
+  parseUnits,
+} from 'ethers';
+import {
+  convertSmartContractParams,
+  parseEthersUnits,
+} from '@/utils/blockchain';
 import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
+import { Decimal } from '@/services/db';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
-import { convertSmartContractParams } from '@/utils/blockchain';
+import { MockToken } from '@/contracts';
 import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
@@ -174,6 +185,7 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (_error) {
+      console.log({ _error });
       continue;
     }
   }
@@ -181,9 +193,11 @@ export const decodeFunctionData = (receipt: any) => {
 
 export const createTrade = async (params: InitTradeParams) => {
   try {
+    console.log({ params });
     const contract = await getEscrowContract();
 
     const tx = await contract.createTrade(
+      params.erc20TokenAddress,
       params.buyer,
       params.seller,
       params.arbitrator,
@@ -205,6 +219,7 @@ export const createTrade = async (params: InitTradeParams) => {
       message: 'Trade created successfully',
     };
   } catch (error) {
+    console.log({ error });
     return {
       message: 'Error creating trade',
       error: error,
@@ -285,6 +300,121 @@ export const executeTrade = async (tradeId: BigInt) => {
   }
 };
 
+export const getTokenDecimals = async ({
+  tokenAddress,
+}: {
+  tokenAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      MockToken.abi,
+      signer,
+    );
+
+    const decimals = await tokenContract.decimals();
+
+    return { decimals };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getMockUSDCBalances = async ({
+  buyer,
+  arbitrator,
+  seller,
+  mockUSDCAddress,
+}: {
+  buyer: string;
+  seller: string;
+  arbitrator: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockToken.abi,
+      signer,
+    );
+
+    const buyerBalance = await tokenContract.balanceOf(buyer);
+    const sellerBalance = await tokenContract.balanceOf(seller);
+    const arbitratorBalance = await tokenContract.balanceOf(arbitrator);
+
+    return { buyerBalance, sellerBalance, arbitratorBalance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getTokenAllowance = async ({
+  address,
+  mockUSDCAddress,
+}: {
+  address: string;
+  mockUSDCAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      mockUSDCAddress,
+      MockToken.abi,
+      signer,
+    );
+
+    const allowance = await tokenContract.allowance(
+      address,
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+    );
+
+    return { allowance };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const approveToken = async (
+  tokenAddress: string,
+  tokenABI: any,
+  amountToApprove: string,
+) => {
+  try {
+    const signer = getSigner();
+    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+    const amount = parseEther(amountToApprove);
+    const tx = await tokenContract.approve(
+      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      amount,
+    );
+    const receipt = await tx.wait();
+    return {
+      message: 'Token approved!',
+      receipt,
+    };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Token Approval failed',
+      error: error,
+    };
+  }
+};
+
 export const cancelTrade = async (tradeId: bigint, forcedCancel = false) => {
   const contract = await getEscrowContract();
   const tx = await contract.cancelTrade(tradeId, forcedCancel);
@@ -327,8 +457,18 @@ export const getTradeDetails = async (tradeId: bigint) => {
   return { message: 'Trade details', txHash: tx.hash, details: tx };
 };
 
-export const getCreateTradeDetails = async (trade: any) => {
+export const getCreateTradeDetails = async (trade: any, decimals: number) => {
   try {
+    // TODO:
+    // Replace every Float from Prisma Schema with Decimal and make
+    // the appropriate changes to the new data type.
+    //
+    // TODO:
+    // Stop storing the amount and crypto value in WEI
+    // Instead store them in Prisma Decimal type and only convert
+    // them to WEI when needed.
+
+    const decimalInt = parseInt(decimals.toString());
     const offer = await prisma.offer.findFirst({
       where: { id: trade.offerId },
       select: { timeLimit: true, offerType: true },
@@ -336,7 +476,10 @@ export const getCreateTradeDetails = async (trade: any) => {
 
     if (!offer) return null;
 
-    const depositRate = (await getSetting('depositPerTradePercent')) ?? 0.25;
+    const tradeAmount = new Decimal(trade.cryptocurrencyAmount);
+    const depositRate = new Decimal(
+      (await getSetting('depositPerTradePercent')) ?? 0.25,
+    );
 
     const isBuyOffer = offer.offerType === 'buy';
 
@@ -348,24 +491,36 @@ export const getCreateTradeDetails = async (trade: any) => {
       ? trade.vendorWalletAddress
       : trade.traderWalletAddress;
 
-    const tradeAmount = trade.cryptocurrencyAmount;
-    const buyerCollateral = tradeAmount * depositRate;
-    const sellerCollateral = tradeAmount * depositRate;
-    const sellerTotalFund = tradeAmount + sellerCollateral;
+    const buyerCollateral = tradeAmount.mul(depositRate);
+    const sellerCollateral = tradeAmount.mul(depositRate);
+    const sellerTotalFund = tradeAmount.add(sellerCollateral);
 
-    const tradeAmountInWei = parseEther(tradeAmount.toString());
-    const buyerCollateralInWei = parseEther(buyerCollateral.toString());
-    const sellerCollateralInWei = parseEther(sellerCollateral.toString());
-    const sellerTotalFundInWei = parseEther(sellerTotalFund.toString());
+    const tradeAmountInWei = parseEthersUnits(tradeAmount, decimalInt);
+    const buyerCollateralInWei = parseEthersUnits(buyerCollateral, decimalInt);
+    const sellerCollateralInWei = parseEthersUnits(
+      sellerCollateral,
+      decimalInt,
+    );
+    const sellerTotalFundInWei = parseEthersUnits(sellerTotalFund, decimalInt);
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
-    // const feeRate =
+    console.log({
+      tradeAmountInWei,
+      buyerCollateralInWei,
+      sellerCollateralInWei,
+      sellerTotalFundInWei,
+    });
 
     return {
       buyerWallet: buyerWallet as Address,
       sellerWallet: sellerWallet as Address,
       arbitratorWallet: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+
+      tradeAmount,
+      buyerCollateral,
+      sellerCollateral,
+      sellerTotalFund,
 
       tradeAmountInWei,
       buyerCollateralInWei,
@@ -374,7 +529,7 @@ export const getCreateTradeDetails = async (trade: any) => {
 
       tradeDurationInSeconds,
       feeRate: 250,
-      profitMargin: 0,
+      profitMargin: 150,
     };
   } catch (error) {
     console.error('Error in getCreateTradeDetails:', error);

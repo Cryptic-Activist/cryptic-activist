@@ -4,4 +4,6 @@ export type CalculateReceivingAmountQueries = {
   fiatId: string;
   fiatAmount: string;
   currentPrice: string;
+  offerId: string;
+  decimals: string;
 };

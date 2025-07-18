@@ -336,21 +336,8 @@ export const register = async (req: Request, res: Response) => {
     const privateKeysArrObj = await generatePrivateKeysBip39();
     const profileColor = getRandomHighContrastColor();
 
-    const tier = await prisma.tier.upsert({
-      where: {
-        name: 'Bronze',
-      },
-      update: {},
-      create: {
-        name: 'Bronze',
-        description:
-          'Your starting tier. Earn XP by trading to unlock discounts',
-        level: 0,
-        tradingFee: 0.05,
-        discount: 0,
-        volume: TIER_VOLUME.BRONZE,
-        requiredXP: 0,
-      },
+    const tier = await prisma.tier.findUnique({
+      where: { level: 0 },
     });
 
     const existingEmail = await prisma.user.findFirst({
@@ -386,7 +373,7 @@ export const register = async (req: Request, res: Response) => {
         password: hash,
         privateKeys: privateKeysArrObj.encryptedPrivateKeys,
         profileColor,
-        tierId: tier.id,
+        tierId: tier!.id,
       },
     });
 

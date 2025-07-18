@@ -1,13 +1,18 @@
+import { Decimal, prisma, redisClient } from '@/services/db';
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
+  approveToken,
   createTrade,
   fundTrade,
   getCreateTradeDetails,
+  getMockUSDCBalances,
+  getTokenDecimals,
 } from '@/services/blockchains/escrow';
-import { prisma, redisClient } from '@/services/db';
 
+import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
+import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
 
@@ -76,6 +81,11 @@ export default class Chat {
                 select: {
                   timeLimit: true,
                   offerType: true,
+                  chain: {
+                    select: {
+                      chainId: true,
+                    },
+                  },
                 },
               },
             },
@@ -180,8 +190,19 @@ export default class Chat {
                 },
               ]);
 
-              const createTradeDetails =
-                await getCreateTradeDetails(updatedTrade);
+              const erc20TokenAddress =
+                '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as Address;
+
+              const tokenDecimals = await getTokenDecimals({
+                tokenAddress: erc20TokenAddress,
+              });
+
+              const createTradeDetails = await getCreateTradeDetails(
+                updatedTrade,
+                tokenDecimals.decimals,
+              );
+
+              console.log({ createTradeDetails });
 
               if (!createTradeDetails) {
                 const endedAt = new Date();
@@ -210,7 +231,52 @@ export default class Chat {
                 },
               ]);
 
+              const token = await prisma.cryptocurrencyChain.findFirst({
+                where: {
+                  cryptocurrency: {
+                    coingeckoId: 'usd-coin',
+                  },
+                  chain: {
+                    chainId: trade.offer.chain.chainId,
+                  },
+                },
+                select: {
+                  abiUrl: true,
+                  contractAddress: true,
+                },
+              });
+
+              console.log({ token });
+
+              if (!token || !token.contractAddress) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Failed to approve token. Token not found.',
+                });
+                return;
+              }
+
+              const approved = await approveToken(
+                erc20TokenAddress,
+                MockToken.abi,
+                trade.cryptocurrencyAmount.toString(),
+              );
+
+              if (approved.error) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Failed to approve token',
+                });
+                return;
+              }
+
+              const balances = await getMockUSDCBalances({
+                arbitrator: createTradeDetails.arbitratorWallet,
+                buyer: createTradeDetails.buyerWallet,
+                seller: createTradeDetails.sellerWallet,
+                mockUSDCAddress: erc20TokenAddress,
+              });
+
               const createTradeObj = {
+                erc20TokenAddress: erc20TokenAddress,
                 arbitrator: createTradeDetails.arbitratorWallet,
                 buyer: createTradeDetails.buyerWallet,
                 seller: createTradeDetails.sellerWallet,
@@ -223,9 +289,13 @@ export default class Chat {
                 sellerTotalDeposit: createTradeDetails.sellerTotalFundInWei,
               };
 
+              console.log({ createTradeObj });
               const tradeCreated = await createTrade(createTradeObj);
 
+              console.log({ tradeCreated });
+
               if (tradeCreated.error) {
+                console.log({ errorCreation: tradeCreated.error });
                 await prisma.trade.update({
                   where: { id: trade.id },
                   data: {
@@ -252,22 +322,36 @@ export default class Chat {
                 });
 
               if (!tradeEscrowDetails) {
+                console.log({
+                  arbitratorWallet: createTradeDetails.arbitratorWallet,
+                  buyerCollateral: createTradeDetails.buyerCollateral,
+                  buyerWallet: createTradeDetails.buyerWallet,
+                  tradeAmount: createTradeDetails.tradeAmount,
+                  feeRate: new Decimal(createTradeDetails.feeRate),
+                  profitMargin: new Decimal(createTradeDetails.profitMargin),
+                  sellerWallet: createTradeDetails.sellerWallet,
+                  sellerCollateral: createTradeDetails.sellerCollateral,
+                  sellerTotalFund: createTradeDetails.sellerTotalFund,
+                  tradeDurationInSeconds:
+                    createTradeDetails.tradeDurationInSeconds,
+                  blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+                });
                 const tradeEscrowDetails =
                   await prisma.tradeEscrowDetails.create({
                     data: {
                       arbitratorWallet: createTradeDetails.arbitratorWallet,
-                      buyerCollateralInWei:
-                        createTradeDetails.buyerCollateralInWei.toString(),
+                      buyerCollateral: createTradeDetails.buyerCollateral,
                       buyerWallet: createTradeDetails.buyerWallet,
-                      tradeAmountInWei:
-                        createTradeDetails.tradeAmountInWei.toString(),
-                      feeRate: createTradeDetails.feeRate,
-                      profitMargin: createTradeDetails.profitMargin,
+                      tradeAmount: createTradeDetails.tradeAmount,
+                      feeRate: new Decimal(createTradeDetails.feeRate).div(
+                        10000,
+                      ),
+                      profitMargin: new Decimal(
+                        createTradeDetails.profitMargin,
+                      ).div(10000),
                       sellerWallet: createTradeDetails.sellerWallet,
-                      sellerCollateralInWei:
-                        createTradeDetails.sellerCollateralInWei.toString(),
-                      sellerTotalFundInWei:
-                        createTradeDetails.sellerTotalFundInWei.toString(),
+                      sellerCollateral: createTradeDetails.sellerCollateral,
+                      sellerTotalFund: createTradeDetails.sellerTotalFund,
                       tradeDurationInSeconds:
                         createTradeDetails.tradeDurationInSeconds,
                       blockchainTradeId: tradeCreated.data?.tradeId.toString(),

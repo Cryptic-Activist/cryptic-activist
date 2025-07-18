@@ -3,8 +3,8 @@
 .container {
   border: 1px solid globals.$black;
   border-radius: 0.4em;
-  min-height: 50rem;
-  max-height: 60vh;
+  min-height: 80vh;
+  max-height: 80vh;
   box-shadow: 0px 0px 4px 1px globals.$box-shadow-default-color;
   display: grid;
   grid-template-rows: 3rem 1fr 4rem;
@@ -224,7 +224,7 @@
 
 @media (max-height: 930px) {
   .container {
-    min-height: 90vh;
-    max-height: 90vh;
+    min-height: 80vh;
+    max-height: 80vh;
   }
 }
