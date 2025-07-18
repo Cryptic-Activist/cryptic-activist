@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 
-export default async function main() {
+async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deployer:", deployer.address);
 
@@ -104,3 +104,5 @@ export default async function main() {
   console.log("Deployment info saved to:", deploymentFile);
   return deploymentInfo;
 }
+
+main();

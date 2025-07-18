@@ -22,8 +22,6 @@ export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
 export type { MockToken } from "./contracts/MockToken";
 export { MockToken__factory } from "./factories/contracts/MockToken__factory";
-export type { MockUSDC } from "./contracts/MockUSDC";
-export { MockUSDC__factory } from "./factories/contracts/MockUSDC__factory";
 export type { MultiTradeEscrow } from "./contracts/MultiTradeEscrow";
 export { MultiTradeEscrow__factory } from "./factories/contracts/MultiTradeEscrow__factory";
 export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager";

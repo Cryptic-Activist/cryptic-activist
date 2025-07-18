@@ -13,7 +13,10 @@ const config: HardhatUserConfig = {
     },
     amoy: {
       url: "https://rpc-amoy.polygon.technology",
-      accounts: [process.env.PLATFORM_WALLET_PRIVATE_KEY as string], // use dotenv to load this safely
+      // accounts: [process.env.PLATFORM_WALLET_PRIVATE_KEY as string], // use dotenv to load this safely
+      accounts: [
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+      ], // Replace with your private key
       chainId: 80002,
     },
   },
