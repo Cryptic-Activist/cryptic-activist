@@ -24,7 +24,7 @@ import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { MockToken } from '@/contracts';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
-import { floatToStringWithoutDot } from '@/utils/number';
+import { Decimal } from '@/services/db';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
 
@@ -485,25 +485,36 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
       ? trade.vendorWalletAddress
       : trade.traderWalletAddress;
 
-    const tradeAmount = trade.cryptocurrencyAmount;
-    const buyerCollateral = tradeAmount * depositRate;
-    const sellerCollateral = tradeAmount * depositRate;
-    const sellerTotalFund = tradeAmount + sellerCollateral;
-
-    const tradeAmountInWei = parseUnits(
-      floatToStringWithoutDot(tradeAmount),
-      decimalInt,
+    const tradeAmount = new Decimal(trade.cryptocurrencyAmount);
+    const depositRate = new Decimal(
+      (await getSetting('depositPerTradePercent')) ?? 0.25,
     );
+
+    const isBuyOffer = offer.offerType === 'buy';
+
+    const buyerWallet = isBuyOffer
+      ? trade.traderWalletAddress
+      : trade.vendorWalletAddress;
+
+    const sellerWallet = isBuyOffer
+      ? trade.vendorWalletAddress
+      : trade.traderWalletAddress;
+
+    const buyerCollateral = tradeAmount.mul(depositRate);
+    const sellerCollateral = tradeAmount.mul(depositRate);
+    const sellerTotalFund = tradeAmount.add(sellerCollateral);
+
+    const tradeAmountInWei = parseUnits(tradeAmount.toString(), decimalInt);
     const buyerCollateralInWei = parseUnits(
-      floatToStringWithoutDot(buyerCollateral),
+      buyerCollateral.toString(),
       decimalInt,
     );
     const sellerCollateralInWei = parseUnits(
-      floatToStringWithoutDot(sellerCollateral),
+      sellerCollateral.toString(),
       decimalInt,
     );
     const sellerTotalFundInWei = parseUnits(
-      floatToStringWithoutDot(sellerTotalFund),
+      sellerTotalFund.toString(),
       decimalInt,
     );
 

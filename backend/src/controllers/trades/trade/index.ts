@@ -378,21 +378,21 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    let feeRate = tier.tradingFee.minus(tier?.discount!);
+    let feeRate = tier.tradingFee.minus(tier?.discount ?? 0);
 
     const isPremium = await isUserPremium(user.id);
 
     if (isPremium) {
       const premiumDiscount = new Decimal(DEFAULT_PREMIUM_DISCOUNT);
-      feeRate = feeRate.sub(premiumDiscount);
+      feeRate = feeRate.minus(premiumDiscount);
     }
 
-    const tradingFee = parsedFiatAmount.mul(feeRate);
-    const finalFiatAmount = parsedFiatAmount.sub(tradingFee);
+    const tradingFee = parsedFiatAmount.times(feeRate);
+    const finalFiatAmount = parsedFiatAmount.minus(tradingFee);
 
     // Calculate crypto amount
     const finalCryptoAmount = finalFiatAmount
-      .div(parsedCurrentPrice)
+      .dividedBy(parsedCurrentPrice)
       .toDecimalPlaces(8);
 
     res.status(200).send({
@@ -400,7 +400,7 @@ export const calculateReceivingAmount = async (
       tradingFee: tradingFee.toString(),
       finalFiatAmount: finalFiatAmount.toString(),
       currentPrice: parsedCurrentPrice.toString(),
-      finalCryptoAmount: parseFloat(finalCryptoAmount.toString()),
+      finalCryptoAmount: finalCryptoAmount.toNumber(),
     });
     return;
   } catch (err) {

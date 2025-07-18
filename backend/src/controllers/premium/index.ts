@@ -78,7 +78,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
         userId,
         payerAddress,
         period,
-        expectedAmount: new Decimal(expectedAmount),
+        expectedAmount: new Decimal(expectedAmount ?? 0),
         blockchainTransactionHash,
         status: 'COMPLETED',
         startsAt: now,

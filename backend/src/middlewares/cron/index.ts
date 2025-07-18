@@ -174,7 +174,7 @@ export const chargeRecurringPremiums = async () => {
             status: 'SCHEDULED',
             startsAt,
             expiresAt,
-            expectedAmount: new Decimal(expectedAmount),
+            expectedAmount: new Decimal(expectedAmount ?? 0),
             blockchainTransactionHash: '0xRECURRING_PLACEHOLDER', // to be replaced when on-chain
           },
         });

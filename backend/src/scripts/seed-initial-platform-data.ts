@@ -63,7 +63,9 @@ const main = async () => {
       value: true,
     },
   });
-  const defaultTradeFeeRate = new Decimal(defaultTradeFeeRateSetting!.value);
+  const defaultTradeFeeRate = new Decimal(
+    defaultTradeFeeRateSetting?.value ?? '0.025',
+  );
 
   // Create tiers
   const tiers = await prisma.tier.createMany({
