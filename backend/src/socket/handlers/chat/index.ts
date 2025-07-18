@@ -1,3 +1,4 @@
+import { Decimal, prisma, redisClient } from '@/services/db';
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
@@ -8,7 +9,6 @@ import {
   getMockUSDCBalances,
   getTokenDecimals,
 } from '@/services/blockchains/escrow';
-import { prisma, redisClient } from '@/services/db';
 
 import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
@@ -326,18 +326,24 @@ export default class Chat {
                   await prisma.tradeEscrowDetails.create({
                     data: {
                       arbitratorWallet: createTradeDetails.arbitratorWallet,
-                      buyerCollateralInWei:
+                      buyerCollateral: new Decimal(
                         createTradeDetails.buyerCollateralInWei.toString(),
+                      ),
                       buyerWallet: createTradeDetails.buyerWallet,
-                      tradeAmountInWei:
+                      tradeAmount: new Decimal(
                         createTradeDetails.tradeAmountInWei.toString(),
-                      feeRate: createTradeDetails.feeRate,
-                      profitMargin: createTradeDetails.profitMargin,
+                      ),
+                      feeRate: new Decimal(createTradeDetails.feeRate),
+                      profitMargin: new Decimal(
+                        createTradeDetails.profitMargin,
+                      ),
                       sellerWallet: createTradeDetails.sellerWallet,
-                      sellerCollateralInWei:
+                      sellerCollateral: new Decimal(
                         createTradeDetails.sellerCollateralInWei.toString(),
-                      sellerTotalFundInWei:
+                      ),
+                      sellerTotalFund: new Decimal(
                         createTradeDetails.sellerTotalFundInWei.toString(),
+                      ),
                       tradeDurationInSeconds:
                         createTradeDetails.tradeDurationInSeconds,
                       blockchainTradeId: tradeCreated.data?.tradeId.toString(),

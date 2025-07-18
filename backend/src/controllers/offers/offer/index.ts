@@ -1,6 +1,5 @@
+import { Decimal, prisma } from '@/services/db/prisma';
 import { Request, Response } from 'express';
-
-import { prisma } from '@/services/db/prisma';
 
 export const createOfferController = async (req: Request, res: Response) => {
   try {
@@ -45,7 +44,14 @@ export const createOfferController = async (req: Request, res: Response) => {
 
     const timeLimitInSeconds = parseInt(timeLimit, 10) * 60;
     const newOffer = await prisma.offer.create({
-      data: { paymentDetailsId, timeLimit: timeLimitInSeconds, ...restBody },
+      data: {
+        ...restBody,
+        paymentDetailsId,
+        timeLimit: timeLimitInSeconds,
+        listAt: new Decimal(body.listAt),
+        limitMin: new Decimal(body.limitMin),
+        limitMax: new Decimal(body.limitMax),
+      },
     });
 
     res.status(200).send(newOffer);
