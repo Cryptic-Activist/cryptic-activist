@@ -467,8 +467,8 @@ model Tier {
   name        String  @unique
   description String
   level       Int     @unique
-  tradingFee  Decimal @db.Decimal(6, 5)
-  discount    Decimal @db.Decimal(6, 5) // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
+  tradingFee  Decimal @db.Decimal(10, 8)
+  discount    Decimal @db.Decimal(10, 8) // Base trading fee as a decimal (e.g., 0.001 for 0.1%)
   volume      Decimal @db.Decimal(30, 10) // Minimum trading volume to qualify for this tier
   requiredXP  Int
   users       User[]
@@ -514,8 +514,8 @@ model TradeEscrowDetails {
   arbitratorWallet          String
   buyerWallet               String
   sellerWallet              String
-  feeRate                   Decimal @db.Decimal(6, 5)
-  profitMargin              Decimal @db.Decimal(6, 5)
+  feeRate                   Decimal @db.Decimal(10, 8)
+  profitMargin              Decimal @db.Decimal(10, 8)
   tradeDurationInSeconds    Int
   tradeAmount               Decimal @db.Decimal(38, 18)
   buyerCollateral           Decimal @db.Decimal(38, 18)

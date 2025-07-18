@@ -16,6 +16,10 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers';
+import {
+  convertSmartContractParams,
+  parseEthersUnits,
+} from '@/utils/blockchain';
 import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
@@ -23,7 +27,6 @@ import { Address } from './types';
 import { Decimal } from '@/services/db';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
 import { MockToken } from '@/contracts';
-import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
@@ -492,25 +495,22 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
     const sellerCollateral = tradeAmount.mul(depositRate);
     const sellerTotalFund = tradeAmount.add(sellerCollateral);
 
-    const tradeAmountInWei = parseUnits(tradeAmount.toString(), decimalInt);
-    const buyerCollateralInWei = parseUnits(
-      buyerCollateral.toString(),
+    const tradeAmountInWei = parseEthersUnits(tradeAmount, decimalInt);
+    const buyerCollateralInWei = parseEthersUnits(buyerCollateral, decimalInt);
+    const sellerCollateralInWei = parseEthersUnits(
+      sellerCollateral,
       decimalInt,
     );
-    const sellerCollateralInWei = parseUnits(
-      sellerCollateral.toString(),
-      decimalInt,
-    );
-    const sellerTotalFundInWei = parseUnits(
-      sellerTotalFund.toString(),
-      decimalInt,
-    );
-
-    console.log({ sellerCollateralInWei, sellerCollateral });
+    const sellerTotalFundInWei = parseEthersUnits(sellerTotalFund, decimalInt);
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
-    // const feeRate =
+    console.log({
+      tradeAmountInWei,
+      buyerCollateralInWei,
+      sellerCollateralInWei,
+      sellerTotalFundInWei,
+    });
 
     return {
       buyerWallet: buyerWallet as Address,

@@ -27,7 +27,7 @@ import { scrollElement } from '@/utils';
 import useABIs from '../useABIs';
 import { useApp } from '@/hooks';
 
-const erc20TokenAddress = '0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c';
+const erc20TokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 
 const useTradeSocket = ({
   chatId,

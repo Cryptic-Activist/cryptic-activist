@@ -191,7 +191,7 @@ export default class Chat {
               ]);
 
               const erc20TokenAddress =
-                '0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c' as Address;
+                '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as Address;
 
               const tokenDecimals = await getTokenDecimals({
                 tokenAddress: erc20TokenAddress,
@@ -322,6 +322,20 @@ export default class Chat {
                 });
 
               if (!tradeEscrowDetails) {
+                console.log({
+                  arbitratorWallet: createTradeDetails.arbitratorWallet,
+                  buyerCollateral: createTradeDetails.buyerCollateral,
+                  buyerWallet: createTradeDetails.buyerWallet,
+                  tradeAmount: createTradeDetails.tradeAmount,
+                  feeRate: new Decimal(createTradeDetails.feeRate),
+                  profitMargin: new Decimal(createTradeDetails.profitMargin),
+                  sellerWallet: createTradeDetails.sellerWallet,
+                  sellerCollateral: createTradeDetails.sellerCollateral,
+                  sellerTotalFund: createTradeDetails.sellerTotalFund,
+                  tradeDurationInSeconds:
+                    createTradeDetails.tradeDurationInSeconds,
+                  blockchainTradeId: tradeCreated.data?.tradeId.toString(),
+                });
                 const tradeEscrowDetails =
                   await prisma.tradeEscrowDetails.create({
                     data: {
@@ -330,7 +344,9 @@ export default class Chat {
                       buyerWallet: createTradeDetails.buyerWallet,
                       tradeAmount: createTradeDetails.tradeAmount,
                       feeRate: new Decimal(createTradeDetails.feeRate),
-                      profitMargin: new Decimal(createTradeDetails.profitMargin),
+                      profitMargin: new Decimal(
+                        createTradeDetails.profitMargin,
+                      ),
                       sellerWallet: createTradeDetails.sellerWallet,
                       sellerCollateral: createTradeDetails.sellerCollateral,
                       sellerTotalFund: createTradeDetails.sellerTotalFund,
