@@ -3,5 +3,6 @@
 /* eslint-disable */
 import type * as premiumSubscriptionManagerSol from "./PremiumSubscriptionManager.sol";
 export type { premiumSubscriptionManagerSol };
+export type { MockToken } from "./MockToken";
 export type { MockUSDC } from "./MockUSDC";
 export type { MultiTradeEscrow } from "./MultiTradeEscrow";

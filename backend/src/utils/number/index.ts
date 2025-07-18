@@ -55,3 +55,7 @@ export const formatBigInt = (bigint?: bigint | number | null) => {
   });
   return formatterBigInt.format(bigint);
 };
+
+export const floatToStringWithoutDot = (num: number) => {
+  return num.toString().replace('.', '');
+};

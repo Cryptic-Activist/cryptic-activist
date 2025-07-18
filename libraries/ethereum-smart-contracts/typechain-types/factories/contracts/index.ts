@@ -2,5 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as premiumSubscriptionManagerSol from "./PremiumSubscriptionManager.sol";
+export { MockToken__factory } from "./MockToken__factory";
 export { MockUSDC__factory } from "./MockUSDC__factory";
 export { MultiTradeEscrow__factory } from "./MultiTradeEscrow__factory";

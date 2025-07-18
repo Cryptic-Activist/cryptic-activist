@@ -9,15 +9,22 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/env';
-import { Interface, InterfaceAbi, ethers, parseEther } from 'ethers';
+import {
+  Interface,
+  InterfaceAbi,
+  ethers,
+  parseEther,
+  parseUnits,
+} from 'ethers';
 import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
 import { Address } from './types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
-import { MockUSDC } from '@/contracts';
+import { MockToken } from '@/contracts';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
+import { floatToStringWithoutDot } from '@/utils/number';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
 
@@ -290,6 +297,31 @@ export const executeTrade = async (tradeId: BigInt) => {
   }
 };
 
+export const getTokenDecimals = async ({
+  tokenAddress,
+}: {
+  tokenAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      MockToken.abi,
+      signer,
+    );
+
+    const decimals = await tokenContract.decimals();
+
+    return { decimals };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
 export const getMockUSDCBalances = async ({
   buyer,
   arbitrator,
@@ -305,7 +337,7 @@ export const getMockUSDCBalances = async ({
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
       mockUSDCAddress,
-      MockUSDC.abi,
+      MockToken.abi,
       signer,
     );
 
@@ -334,7 +366,7 @@ export const getTokenAllowance = async ({
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
       mockUSDCAddress,
-      MockUSDC.abi,
+      MockToken.abi,
       signer,
     );
 
@@ -422,8 +454,18 @@ export const getTradeDetails = async (tradeId: bigint) => {
   return { message: 'Trade details', txHash: tx.hash, details: tx };
 };
 
-export const getCreateTradeDetails = async (trade: any) => {
+export const getCreateTradeDetails = async (trade: any, decimals: number) => {
   try {
+    // TODO:
+    // Replace every Float from Prisma Schema with Decimal and make
+    // the appropriate changes to the new data type.
+    //
+    // TODO:
+    // Stop storing the amount and crypto value in WEI
+    // Instead store them in Prisma Decimal type and only convert
+    // them to WEI when needed.
+
+    const decimalInt = parseInt(decimals.toString());
     const offer = await prisma.offer.findFirst({
       where: { id: trade.offerId },
       select: { timeLimit: true, offerType: true },
@@ -448,10 +490,24 @@ export const getCreateTradeDetails = async (trade: any) => {
     const sellerCollateral = tradeAmount * depositRate;
     const sellerTotalFund = tradeAmount + sellerCollateral;
 
-    const tradeAmountInWei = parseEther(tradeAmount.toString());
-    const buyerCollateralInWei = parseEther(buyerCollateral.toString());
-    const sellerCollateralInWei = parseEther(sellerCollateral.toString());
-    const sellerTotalFundInWei = parseEther(sellerTotalFund.toString());
+    const tradeAmountInWei = parseUnits(
+      floatToStringWithoutDot(tradeAmount),
+      decimalInt,
+    );
+    const buyerCollateralInWei = parseUnits(
+      floatToStringWithoutDot(buyerCollateral),
+      decimalInt,
+    );
+    const sellerCollateralInWei = parseUnits(
+      floatToStringWithoutDot(sellerCollateral),
+      decimalInt,
+    );
+    const sellerTotalFundInWei = parseUnits(
+      floatToStringWithoutDot(sellerTotalFund),
+      decimalInt,
+    );
+
+    console.log({ sellerCollateralInWei, sellerCollateral });
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 

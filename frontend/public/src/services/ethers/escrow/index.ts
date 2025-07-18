@@ -3,11 +3,17 @@ import {
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
   ETHEREUM_NETWORK_URL,
 } from '@/constants/envs';
-import { BrowserProvider, Interface, ethers, parseEther } from 'ethers';
+import {
+  BrowserProvider,
+  Interface,
+  ethers,
+  parseEther,
+  parseUnits,
+} from 'ethers';
 
 import { ABI } from '@/store/abis/types';
 import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
-import { MockUSDC } from '@/contracts';
+import { MockToken } from '@/contracts';
 import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
 import { getBearerToken } from '@/utils';
@@ -232,7 +238,7 @@ export const getMockUSDCBalance = async ({
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
       mockUSDCAddress,
-      MockUSDC.abi,
+      MockToken.abi,
       signer
     );
 
@@ -259,7 +265,7 @@ export const getTokenAllowance = async ({
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
       mockUSDCAddress,
-      MockUSDC.abi,
+      MockToken.abi,
       signer
     );
 
@@ -290,7 +296,7 @@ export const approveToken = async (
     console.log({ amountToApprove });
     const tx = await tokenContract.approve(
       ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      amountToApprove
+      parseUnits('234', 6)
     );
     const receipt = await tx.wait();
     return {
@@ -301,6 +307,31 @@ export const approveToken = async (
     console.log({ error });
     return {
       message: 'Token Approval failed',
+      error: error,
+    };
+  }
+};
+
+export const getTokenDecimals = async ({
+  tokenAddress,
+}: {
+  tokenAddress: string;
+}) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      MockToken.abi,
+      signer
+    );
+
+    const decimals = await tokenContract.decimals();
+
+    return { decimals };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
       error: error,
     };
   }

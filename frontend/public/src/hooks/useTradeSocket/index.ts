@@ -13,11 +13,13 @@ import {
   buyerFundTrade,
   getMockUSDCBalance,
   getTokenAllowance,
+  getTokenDecimals,
   sellerFundTrade,
 } from '@/services/ethers/escrow';
+import { parseEther, parseUnits } from 'ethers';
 import { useEffect, useRef, useState } from 'react';
 
-import { MockUSDC } from '@/contracts';
+import { MockToken } from '@/contracts';
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
@@ -25,7 +27,7 @@ import { scrollElement } from '@/utils';
 import useABIs from '../useABIs';
 import { useApp } from '@/hooks';
 
-const erc20TokenAddress = '0x998abeb3E57409262aE5b751f60747921B33613E';
+const erc20TokenAddress = '0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c';
 
 const useTradeSocket = ({
   chatId,
@@ -110,7 +112,7 @@ const useTradeSocket = ({
     ) {
       const approved = await approveToken(
         erc20TokenAddress,
-        MockUSDC.abi,
+        MockToken.abi,
         trade.tradeEscrowDetails?.sellerTotalFundInWei
       );
 
@@ -120,6 +122,12 @@ const useTradeSocket = ({
         console.log(approved.error);
         return;
       }
+
+      const decimals = await getTokenDecimals({
+        tokenAddress: erc20TokenAddress,
+      });
+
+      console.log({ decimals });
 
       if (approved.message === 'Token approved!') {
         const isBuyOffer = trade.offer.offerType === 'buy';
@@ -148,6 +156,13 @@ const useTradeSocket = ({
         //   console.log('Unsuffient allowance');
         //   return;
         // }
+
+        const fundingAmount = parseUnits(
+          BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei).toString(),
+          decimals.decimals
+        );
+
+        console.log({ fundingAmount });
 
         const tx = await sellerFundTrade(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
@@ -193,8 +208,8 @@ const useTradeSocket = ({
     ) {
       const approved = await approveToken(
         erc20TokenAddress,
-        MockUSDC.abi,
-        trade.tradeEscrowDetails?.buyerCollateralInWei
+        MockToken.abi,
+        trade.tradeEscrowDetails.buyerCollateralInWei
       );
 
       console.log({ approved });

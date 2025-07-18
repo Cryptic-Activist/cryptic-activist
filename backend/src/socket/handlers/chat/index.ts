@@ -6,12 +6,13 @@ import {
   fundTrade,
   getCreateTradeDetails,
   getMockUSDCBalances,
+  getTokenDecimals,
 } from '@/services/blockchains/escrow';
 import { prisma, redisClient } from '@/services/db';
 
 import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
-import { MockUSDC } from '@/contracts';
+import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
 
@@ -189,8 +190,19 @@ export default class Chat {
                 },
               ]);
 
-              const createTradeDetails =
-                await getCreateTradeDetails(updatedTrade);
+              const erc20TokenAddress =
+                '0xfaAddC93baf78e89DCf37bA67943E1bE8F37Bb8c' as Address;
+
+              const tokenDecimals = await getTokenDecimals({
+                tokenAddress: erc20TokenAddress,
+              });
+
+              const createTradeDetails = await getCreateTradeDetails(
+                updatedTrade,
+                tokenDecimals.decimals,
+              );
+
+              console.log({ createTradeDetails });
 
               if (!createTradeDetails) {
                 const endedAt = new Date();
@@ -243,12 +255,9 @@ export default class Chat {
                 return;
               }
 
-              const erc20TokenAddress =
-                '0x998abeb3E57409262aE5b751f60747921B33613E' as Address;
-
               const approved = await approveToken(
                 erc20TokenAddress,
-                MockUSDC.abi,
+                MockToken.abi,
                 trade.cryptocurrencyAmount.toString(),
               );
 
@@ -266,8 +275,6 @@ export default class Chat {
                 mockUSDCAddress: erc20TokenAddress,
               });
 
-              console.log({ balances });
-
               const createTradeObj = {
                 erc20TokenAddress: erc20TokenAddress,
                 arbitrator: createTradeDetails.arbitratorWallet,
@@ -282,6 +289,7 @@ export default class Chat {
                 sellerTotalDeposit: createTradeDetails.sellerTotalFundInWei,
               };
 
+              console.log({ createTradeObj });
               const tradeCreated = await createTrade(createTradeObj);
 
               console.log({ tradeCreated });
