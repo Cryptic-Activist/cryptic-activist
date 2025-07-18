@@ -266,17 +266,30 @@ export const getEditOffer = async (req: Request, res: Response) => {
 
 export const editOffer = async (req: Request, res: Response) => {
   try {
-    const ids = req.params;
-    const body = req.body;
+    const { offerId, userId } = req.params;
+    const { listAt, limitMin, limitMax, ...restOfBody } = req.body;
 
-    // const updateOffer = await prisma.offer.update({
-    //   where: {
-    //     id: id as unknown as string,
-    //   },
-    //   data: body,
-    // });
+    const dataToUpdate: any = { ...restOfBody };
 
-    res.status(200).send();
+    if (listAt !== undefined) {
+      dataToUpdate.listAt = new Decimal(listAt);
+    }
+    if (limitMin !== undefined) {
+      dataToUpdate.limitMin = new Decimal(limitMin);
+    }
+    if (limitMax !== undefined) {
+      dataToUpdate.limitMax = new Decimal(limitMax);
+    }
+
+    const updatedOffer = await prisma.offer.update({
+      where: {
+        id: offerId as unknown as string,
+        vendorId: userId,
+      },
+      data: dataToUpdate,
+    });
+
+    res.status(200).send(updatedOffer);
   } catch (err: any) {
     res.status(500).send({
       status_code: 500,

@@ -517,6 +517,11 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
       sellerWallet: sellerWallet as Address,
       arbitratorWallet: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
 
+      tradeAmount,
+      buyerCollateral,
+      sellerCollateral,
+      sellerTotalFund,
+
       tradeAmountInWei,
       buyerCollateralInWei,
       sellerCollateralInWei,

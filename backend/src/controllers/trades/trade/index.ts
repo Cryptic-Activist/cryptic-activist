@@ -63,7 +63,7 @@ export async function createTradeController(req: Request, res: Response) {
           startedAt: new Date(),
           paymentMethodId: body.paymentMethodId,
           traderWalletAddress: body.traderWalletAddress,
-          exchangeRate: exchangeRate,
+          exchangeRate: new Decimal(exchangeRate),
           buyerId,
           sellerId,
         },

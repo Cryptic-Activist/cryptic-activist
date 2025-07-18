@@ -326,24 +326,14 @@ export default class Chat {
                   await prisma.tradeEscrowDetails.create({
                     data: {
                       arbitratorWallet: createTradeDetails.arbitratorWallet,
-                      buyerCollateral: new Decimal(
-                        createTradeDetails.buyerCollateralInWei.toString(),
-                      ),
+                      buyerCollateral: createTradeDetails.buyerCollateral,
                       buyerWallet: createTradeDetails.buyerWallet,
-                      tradeAmount: new Decimal(
-                        createTradeDetails.tradeAmountInWei.toString(),
-                      ),
+                      tradeAmount: createTradeDetails.tradeAmount,
                       feeRate: new Decimal(createTradeDetails.feeRate),
-                      profitMargin: new Decimal(
-                        createTradeDetails.profitMargin,
-                      ),
+                      profitMargin: new Decimal(createTradeDetails.profitMargin),
                       sellerWallet: createTradeDetails.sellerWallet,
-                      sellerCollateral: new Decimal(
-                        createTradeDetails.sellerCollateralInWei.toString(),
-                      ),
-                      sellerTotalFund: new Decimal(
-                        createTradeDetails.sellerTotalFundInWei.toString(),
-                      ),
+                      sellerCollateral: createTradeDetails.sellerCollateral,
+                      sellerTotalFund: createTradeDetails.sellerTotalFund,
                       tradeDurationInSeconds:
                         createTradeDetails.tradeDurationInSeconds,
                       blockchainTradeId: tradeCreated.data?.tradeId.toString(),
