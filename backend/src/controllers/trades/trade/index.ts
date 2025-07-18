@@ -1,3 +1,4 @@
+import { Decimal, prisma } from '@/services/db';
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
@@ -6,7 +7,6 @@ import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { getCoinPrice } from '@/services/coinGecko';
 import { isUserPremium } from '@/utils/user';
-import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -331,8 +331,8 @@ export const calculateReceivingAmount = async (
     const { userId, cryptocurrencyId, fiatId, fiatAmount, currentPrice } =
       req.query;
 
-    const parsedFiatAmount = parseFloat(fiatAmount);
-    const parsedCurrentPrice = parseFloat(currentPrice);
+    const parsedFiatAmount = new Decimal(fiatAmount);
+    const parsedCurrentPrice = new Decimal(currentPrice);
 
     const user = await prisma.user.findFirst({
       where: { id: userId as string },
@@ -378,25 +378,29 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    let feeRate = tier?.tradingFee! - tier?.discount!;
+    let feeRate = tier.tradingFee.minus(tier?.discount!);
 
     const isPremium = await isUserPremium(user.id);
 
     if (isPremium) {
-      feeRate -= DEFAULT_PREMIUM_DISCOUNT;
+      const premiumDiscount = new Decimal(DEFAULT_PREMIUM_DISCOUNT);
+      feeRate = feeRate.sub(premiumDiscount);
     }
 
-    const tradingFee = parsedFiatAmount * feeRate;
-    const finalFiatAmount = parsedFiatAmount - tradingFee;
+    const tradingFee = parsedFiatAmount.mul(feeRate);
+    const finalFiatAmount = parsedFiatAmount.sub(tradingFee);
 
-    const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
+    // Calculate crypto amount
+    const finalCryptoAmount = finalFiatAmount
+      .div(parsedCurrentPrice)
+      .toDecimalPlaces(8);
 
     res.status(200).send({
-      fiatAmount,
-      tradingFee,
-      finalFiatAmount,
-      currentPrice,
-      finalCryptoAmount: parseFloat(finalCryptoAmount),
+      fiatAmount: parsedFiatAmount.toString(),
+      tradingFee: tradingFee.toString(),
+      finalFiatAmount: finalFiatAmount.toString(),
+      currentPrice: parsedCurrentPrice.toString(),
+      finalCryptoAmount: parseFloat(finalCryptoAmount.toString()),
     });
     return;
   } catch (err) {

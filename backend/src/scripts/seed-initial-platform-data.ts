@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { Decimal, prisma } from '../services/db';
 import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
 import { getPublicSettings, getSetting } from '@/utils/settings';
 import { upload, uploadFiles } from '@/services/upload';
@@ -12,7 +13,6 @@ import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { getABI } from '@/services/blockchains/wallet';
 import { getRandomHighContrastColor } from '@/utils/color';
-import { prisma } from '../services/db';
 import { promisify } from 'util';
 import { rateLimitedMap } from '@/utils/timer';
 
@@ -63,7 +63,7 @@ const main = async () => {
       value: true,
     },
   });
-  const defaultTradeFeeRate = parseFloat(defaultTradeFeeRateSetting!.value);
+  const defaultTradeFeeRate = new Decimal(defaultTradeFeeRateSetting!.value);
 
   // Create tiers
   const tiers = await prisma.tier.createMany({
@@ -74,7 +74,7 @@ const main = async () => {
           'Your starting tier. Earn XP by trading to unlock discounts.',
         level: 0,
         tradingFee: defaultTradeFeeRate,
-        discount: 0,
+        discount: new Decimal(0),
         volume: TIER_VOLUME.BRONZE,
         requiredXP: 0,
       },
@@ -84,7 +84,7 @@ const main = async () => {
           'Reach 1,000 XP to move to Silver and enjoy a small discount.',
         level: 1,
         tradingFee: defaultTradeFeeRate,
-        discount: 0.05,
+        discount: new Decimal(0.05),
         volume: TIER_VOLUME.SILVER,
         requiredXP: 1000,
       },
@@ -94,7 +94,7 @@ const main = async () => {
           'When you accumulate 5,000 XP, you qualify for Gold discounts.',
         level: 2,
         tradingFee: defaultTradeFeeRate,
-        discount: 0.1,
+        discount: new Decimal(0.1),
         volume: TIER_VOLUME.GOLD,
         requiredXP: 2500,
       },
@@ -103,7 +103,7 @@ const main = async () => {
         description: 'Achieve 10,000 XP to join our exclusive Platinum tier.',
         level: 3,
         tradingFee: defaultTradeFeeRate,
-        discount: 0.15,
+        discount: new Decimal(0.15),
         volume: TIER_VOLUME.PLATINUM,
         requiredXP: 5000,
       },
@@ -113,7 +113,7 @@ const main = async () => {
           'Once you hit 20,000 XP you become a Diamond member and get the highest fee discounts.',
         level: 4,
         tradingFee: defaultTradeFeeRate,
-        discount: 0.2,
+        discount: new Decimal(0.2),
         volume: TIER_VOLUME.DIAMOND,
         requiredXP: 10000,
       },
@@ -792,12 +792,6 @@ const main = async () => {
         // },
       ];
 
-      cryptocurrencyChainData.forEach((cc) => {
-        if (!cc.cryptocurrencyId) {
-          console.log({ cc });
-        }
-      });
-
       await tx.cryptocurrencyChain.createMany({
         // @ts-ignore
         data: cryptocurrencyChainData,
@@ -865,10 +859,6 @@ const main = async () => {
 
       const promisedUploaded = await Promise.all(uploadReady);
 
-      console.log({ promisedUploaded });
-
-      // await runShellScript();
-
       // Create first trader user
       const traderPassword = 'password';
       const generatedSalt = await bcrypt.genSalt(10);
@@ -913,20 +903,9 @@ const main = async () => {
       const vendorPrivateKeysArrObj = await generatePrivateKeysBip39();
       const vendorProfileColor = getRandomHighContrastColor();
 
-      const vendorTier = await tx.tier.upsert({
+      const vendorTier = await tx.tier.findUnique({
         where: {
-          name: 'Bronze',
-        },
-        update: {},
-        create: {
-          name: 'Bronze',
-          description:
-            'Your starting tier. Earn XP by trading to unlock discounts',
           level: 0,
-          tradingFee: 0.05,
-          discount: 0,
-          volume: TIER_VOLUME.BRONZE,
-          requiredXP: 0,
         },
       });
 
@@ -939,7 +918,7 @@ const main = async () => {
           password: vendorHash,
           privateKeys: vendorPrivateKeysArrObj.encryptedPrivateKeys,
           profileColor: vendorProfileColor,
-          tierId: vendorTier.id,
+          tierId: vendorTier!.id,
           isVerified: true,
         },
       });
@@ -992,9 +971,9 @@ const main = async () => {
           cryptocurrencyId: crypto!.id,
           fiatId: fiat!.id,
           chainId: ethChain!.id,
-          limitMax: 1000000,
-          limitMin: 1500,
-          listAt: 5.6,
+          limitMax: new Decimal(1000000),
+          limitMin: new Decimal(1500),
+          listAt: new Decimal(5.6),
           offerType: 'sell',
           paymentDetailsId: paymentDetails.id,
           pricingType: 'market',
@@ -1015,9 +994,9 @@ const main = async () => {
           cryptocurrencyId: crypto!.id,
           fiatId: fiat!.id,
           chainId: ethChain!.id,
-          limitMax: 1000000,
-          limitMin: 1500,
-          listAt: 5.6,
+          limitMax: new Decimal(1000000),
+          limitMin: new Decimal(1500),
+          listAt: new Decimal(5.6),
           offerType: 'sell',
           paymentDetailsId: paymentDetails.id,
           pricingType: 'market',
@@ -1046,9 +1025,9 @@ const main = async () => {
             cryptocurrencyId: usdtCrypto.id,
             fiatId: fiat!.id,
             chainId: polygonChain.id,
-            limitMax: 50000,
-            limitMin: 100,
-            listAt: 0.1,
+            limitMax: new Decimal(1000000),
+            limitMin: new Decimal(100),
+            listAt: new Decimal(0.1),
             offerType: 'buy',
             paymentDetailsId: paymentDetails.id,
             pricingType: 'fixed',

@@ -1,3 +1,4 @@
+import { Decimal, prisma } from '@/services/db';
 import { Request, Response } from 'express';
 import {
   getPremiumContract,
@@ -7,7 +8,6 @@ import {
 import { ETHEREUM_PREMIUM_CONTRACT_ADDRESS } from '@/constants/env';
 import { PremiumPeriod } from '@prisma/client';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
 
 function parsePeriod(period: string): PremiumPeriod {
   switch (period.toUpperCase()) {
@@ -78,7 +78,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
         userId,
         payerAddress,
         period,
-        expectedAmount,
+        expectedAmount: new Decimal(expectedAmount),
         blockchainTransactionHash,
         status: 'COMPLETED',
         startsAt: now,
@@ -146,7 +146,7 @@ export const changeToYearlyPremiumSubscription = async (
         payerAddress,
         period: 'YEARLY',
         status: 'SCHEDULED', // Marked for activation later
-        expectedAmount: yearlyPrice,
+        expectedAmount: new Decimal(yearlyPrice),
         blockchainTransactionHash,
         startsAt,
         expiresAt,
@@ -219,7 +219,7 @@ export const changeToMonthlyPremiumSubscription = async (
         payerAddress,
         period: 'MONTHLY',
         status: 'SCHEDULED', // Will be activated later
-        expectedAmount: monthlyPrice,
+        expectedAmount: new Decimal(monthlyPrice),
         blockchainTransactionHash,
         startsAt,
         expiresAt,
