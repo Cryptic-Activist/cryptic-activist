@@ -111,7 +111,6 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
-      console.log({ tradeEscrowDetails: trade.tradeEscrowDetails });
       const decimals = await getTokenDecimals({
         tokenAddress: erc20TokenAddress,
       });
@@ -123,10 +122,15 @@ const useTradeSocket = ({
         return;
       }
 
+      const baseUnits = toTokenUnits(
+        trade.tradeEscrowDetails?.sellerTotalFund,
+        decimals
+      );
+
       const approved = await approveToken(
         erc20TokenAddress,
         MockToken.abi,
-        trade.tradeEscrowDetails?.sellerTotalFund,
+        baseUnits,
         decimals
       );
 
@@ -167,16 +171,9 @@ const useTradeSocket = ({
         //   return;
         // }
 
-        const fundingAmount = parseUnits(
-          BigInt(trade.tradeEscrowDetails?.sellerTotalFund).toString(),
-          decimals.decimals
-        );
-
-        console.log({ fundingAmount });
-
         const tx = await sellerFundTrade(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          BigInt(trade.tradeEscrowDetails?.sellerTotalFund),
+          baseUnits,
           escrow
         );
 
@@ -220,11 +217,16 @@ const useTradeSocket = ({
         tokenAddress: erc20TokenAddress,
       });
 
+      if (!decimals) {
+        addToast('error', 'Unable to fetch token decimals', 8000);
+        return;
+      }
+
       const approved = await approveToken(
         erc20TokenAddress,
         MockToken.abi,
         trade.tradeEscrowDetails.buyerCollateral,
-        decimals.decimals
+        decimals
       );
 
       console.log({ approved });

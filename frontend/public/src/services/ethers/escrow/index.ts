@@ -288,7 +288,7 @@ export const getTokenAllowance = async ({
 export const approveToken = async (
   tokenAddress: string,
   tokenABI: any,
-  amountToApprove: string,
+  amountToApprove: bigint,
   decimals: number
 ) => {
   try {
@@ -297,13 +297,9 @@ export const approveToken = async (
 
     console.log({ amountToApprove, decimals });
 
-    console.log({ amountToApprove });
-
-    const converted = toTokenUnits(amountToApprove, decimals);
-
     const tx = await tokenContract.approve(
       ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      converted
+      amountToApprove
     );
     const receipt = await tx.wait();
     return {

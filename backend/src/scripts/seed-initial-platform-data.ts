@@ -16,6 +16,8 @@ import { getRandomHighContrastColor } from '@/utils/color';
 import { promisify } from 'util';
 import { rateLimitedMap } from '@/utils/timer';
 
+// import MockTokensDeployment from '../../../libraries/ethereum-smart-contracts/scripts/deploy.mock.token.hardhat'
+
 const main = async () => {
   // Create General Platform Settings
   const settings = await prisma.platformSetting.createMany({
