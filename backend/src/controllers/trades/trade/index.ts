@@ -230,6 +230,19 @@ export async function getTradeController(req: Request, res: Response) {
             symbol: true,
             image: true,
             chains: {
+              where: {
+                chain: {
+                  offers: {
+                    some: {
+                      trades: {
+                        some: {
+                          id,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               select: {
                 abiUrl: true,
               },

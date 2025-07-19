@@ -318,6 +318,7 @@ const useTradeSocket = ({
       // Handle existing room messages
       socket.on('trade_error', (payload) => {
         // back();
+        refetchTrade();
         addToast('error', payload.error, 10000);
       });
 

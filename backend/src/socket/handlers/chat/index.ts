@@ -88,6 +88,28 @@ export default class Chat {
                   },
                 },
               },
+              cryptocurrency: {
+                select: {
+                  chains: {
+                    where: {
+                      chain: {
+                        offers: {
+                          some: {
+                            trades: {
+                              some: {
+                                id: chat?.tradeId,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    select: {
+                      abiUrl: true,
+                    },
+                  },
+                },
+              },
             },
           });
 
@@ -189,6 +211,18 @@ export default class Chat {
                   message: 'Vendor has entered the chat',
                 },
               ]);
+
+              if (!trade.cryptocurrency.chains[0]?.abiUrl) {
+                await prisma.trade.update({
+                  where: { id: trade.id },
+                  data: { status: 'FAILED' },
+                });
+                await systemMessage.tradeFailed(trade.id);
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Cryptocurrency chain ABI URL not found',
+                });
+                return;
+              }
 
               const erc20TokenAddress =
                 '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as Address;

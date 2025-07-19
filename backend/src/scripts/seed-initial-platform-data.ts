@@ -780,20 +780,6 @@ const main = async () => {
           contractAddress: '0x143E1dAE4F018ff86051a01D44a1B49B13704056',
           isVerified: true,
         },
-        // // OP native on Optimism Sepolia
-        // {
-        //   cryptocurrencyId: cryptoMap.get('optimism'),
-        //   chainId: chainMap.get('optimism-sepolia-testnet'),
-        //   contractAddress: '0x62c021e584702C40D0c14923ba6934791a8DaaD3',
-        //   isVerified: true,
-        // },
-        // // LINK on Optimism Sepolia
-        // {
-        //   cryptocurrencyId: cryptoMap.get('chainlink'),
-        //   chainId: chainMap.get('optimism-sepolia-testnet'),
-        //   contractAddress: '0xE4aB69C077896252FAFBD49EFD26B5D171A32410',
-        //   isVerified: true,
-        // },
       ];
 
       await tx.cryptocurrencyChain.createMany({
