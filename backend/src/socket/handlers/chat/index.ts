@@ -106,12 +106,21 @@ export default class Chat {
                     },
                     select: {
                       abiUrl: true,
+                      contractAddress: true,
                     },
                   },
+                  //   where: {
+
+                  //   },
+                  //   select: {
+                  //     abiUrl: true,
+                  //   },
                 },
               },
             },
           });
+
+          console.log({ data: trade?.cryptocurrency.chains });
 
           if (!trade?.id) {
             this.io.to(chatId).emit('trade_error', {
@@ -211,6 +220,8 @@ export default class Chat {
                   message: 'Vendor has entered the chat',
                 },
               ]);
+
+              console.log({ crypto: trade.cryptocurrency });
 
               if (!trade.cryptocurrency.chains[0]?.abiUrl) {
                 await prisma.trade.update({

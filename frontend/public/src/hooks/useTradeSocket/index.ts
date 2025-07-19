@@ -19,7 +19,6 @@ import {
 import { parseEther, parseUnits } from 'ethers';
 import { useEffect, useRef, useState } from 'react';
 
-import { MockToken } from '@/contracts';
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
@@ -111,6 +110,8 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
+      console.log({ tradeABI: trade });
+
       const decimals = await getTokenDecimals({
         tokenAddress: erc20TokenAddress,
       });
@@ -129,7 +130,7 @@ const useTradeSocket = ({
 
       const approved = await approveToken(
         erc20TokenAddress,
-        MockToken.abi,
+        trade.abi,
         baseUnits,
         decimals
       );
@@ -213,6 +214,8 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
+      console.log({ tradeABI: trade.abi });
+
       const decimals = await getTokenDecimals({
         tokenAddress: erc20TokenAddress,
       });
@@ -229,7 +232,7 @@ const useTradeSocket = ({
 
       const approved = await approveToken(
         erc20TokenAddress,
-        MockToken.abi,
+        trade.abi,
         baseUnits,
         decimals
       );

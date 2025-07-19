@@ -42,6 +42,7 @@ export const useTradeSlice: StateCreator<
     sellerFundedAt: undefined,
     buyerId: undefined,
     sellerId: undefined,
+    abi: undefined,
     setTradeValue: (params, actionName = 'trade/setValue') => {
       set(
         ({ trade }) => {
@@ -91,6 +92,7 @@ export const useTradeSlice: StateCreator<
               tradeDispute: params.tradeDispute ?? trade.tradeDispute,
               tradeEscrowDetails:
                 params.tradeEscrowDetails ?? trade.tradeEscrowDetails,
+              abi: params.abi ?? trade.abi,
             },
           };
         },
@@ -141,6 +143,7 @@ export const useTradeSlice: StateCreator<
           buyerId: undefined,
           sellerFundedAt: undefined,
           sellerId: undefined,
+          abi: undefined,
         },
         'trade/resetTrade'
       );

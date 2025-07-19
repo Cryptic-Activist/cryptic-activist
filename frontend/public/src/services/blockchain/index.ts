@@ -57,3 +57,13 @@ export const getSupportedTokens = async (chainId: number) => {
 
   return response.data;
 };
+
+export const getABIContent = async (abiUrl: string) => {
+  const response = await fetchGet(abiUrl);
+
+  if (response.status !== 200) {
+    return null;
+  }
+
+  return response.data;
+};

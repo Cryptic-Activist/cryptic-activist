@@ -6,6 +6,7 @@ import {
   SetTradeCancelledParams,
 } from './types';
 
+import { getABIContent } from '@/services/blockchain';
 import { getTrade } from '@/services/trade';
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
@@ -35,8 +36,15 @@ const useTrade = () => {
   });
 
   useEffect(() => {
-    if (queryTrade.data) {
-      trade.setTrade(queryTrade.data);
+    if (queryTrade.data && queryTrade.data.cryptocurrency?.chains) {
+      console.log({ queryTradeData: queryTrade.data });
+      getABIContent(queryTrade.data.cryptocurrency?.chains[0]?.abiUrl).then(
+        (abiContent) => {
+          const tradeContent = { ...queryTrade.data, abi: abiContent };
+          console.log({ tradeContent });
+          trade.setTrade(tradeContent);
+        }
+      );
     }
   }, [queryTrade.data]);
 

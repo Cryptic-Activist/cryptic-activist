@@ -6,6 +6,7 @@ import { getPublicSettings, getSetting } from '@/utils/settings';
 import { upload, uploadFiles } from '@/services/upload';
 
 import { ETHERSCAN_API_KEY } from '@/constants/env';
+import MockToken from '@/contracts/escrow/artifacts/MockToken.json';
 import bcrypt from 'bcryptjs';
 import { convertABIToFile } from '@/controllers/blockchains/smart-contracts/premium';
 import { exec } from 'child_process';
@@ -486,6 +487,25 @@ const main = async () => {
 
       // Create cryptocurrency-chain relationships
       const cryptocurrencyChainData = [
+        // ...(IS_DEVELOPMENT
+        //   ? [
+        //       //  Ethereum on Hardhat Mainnet
+        //       {
+        //         cryptocurrencyId: cryptoMap.get('ethereum'),
+        //         chainId: chainMap.get('hardhat-localnet'),
+        //         contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        //         isVerified: true,
+        //       },
+        //       // Mock USDC on Hardhat
+        //       {
+        //         cryptocurrencyId: cryptoMap.get('usd-coin'),
+        //         chainId: chainMap.get('hardhat-localnet'),
+        //         contractAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+        //         isVerified: true,
+        //       },
+        //     ]
+        //   : []),
+
         //  Ethereum on Hardhat Mainnet
         {
           cryptocurrencyId: cryptoMap.get('ethereum'),
@@ -497,9 +517,10 @@ const main = async () => {
         {
           cryptocurrencyId: cryptoMap.get('usd-coin'),
           chainId: chainMap.get('hardhat-localnet'),
-          contractAddress: '0x851356ae760d987E095750cCeb3bC6014560891C',
+          contractAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
           isVerified: true,
         },
+
         // Wrapped Ethereum on Ethereum Mainnet
         {
           cryptocurrencyId: cryptoMap.get('weth'),
@@ -848,6 +869,49 @@ const main = async () => {
       });
 
       const promisedUploaded = await Promise.all(uploadReady);
+
+      // if (IS_DEVELOPMENT) {
+      // Update MockToken for testing purposes
+      const mockTokenCryptocurrencyChain =
+        await tx.cryptocurrencyChain.findFirst({
+          where: {
+            chainId: chainMap.get('hardhat-localnet'),
+            cryptocurrencyId: cryptoMap.get('usd-coin'),
+          },
+          select: {
+            id: true,
+            chainId: true,
+            cryptocurrencyId: true,
+            contractAddress: true,
+            abiUrl: true,
+          },
+        });
+
+      console.log({ mockTokenCryptocurrencyChain });
+
+      const abiFile = convertABIToFile(MockToken.abi);
+      const uploadedMockToken = await uploadFiles(
+        `abis/${mockTokenCryptocurrencyChain?.chainId}/${mockTokenCryptocurrencyChain?.cryptocurrencyId}`,
+        [abiFile],
+      );
+
+      if (uploadedMockToken.files) {
+        console.log({ uploadedMockToken: uploadedMockToken.files[0].key });
+        try {
+          const updatedMocked = await tx.cryptocurrencyChain.update({
+            where: {
+              id: mockTokenCryptocurrencyChain?.id,
+            },
+            data: {
+              abiUrl: uploadedMockToken.files[0].key,
+            },
+          });
+          console.log({ updatedMocked });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      // }
 
       // Create first trader user
       const traderPassword = 'password';
