@@ -41,8 +41,10 @@ export function toTokenUnits(
   amount: string | number,
   decimals: number
 ): bigint {
+  console.log({ amount, decimals });
   const decimalAmount = new Decimal(amount.toString());
   const rounded = decimalAmount.toDecimalPlaces(decimals, Decimal.ROUND_DOWN);
-  const baseUnits = rounded.times(new Decimal(10).pow(decimals)).toFixed(0);
+  const baseUnitsDecimal = rounded.times(new Decimal(10).pow(decimals));
+  const baseUnits = baseUnitsDecimal.times(1.5).toFixed(0);
   return BigInt(baseUnits);
 }
