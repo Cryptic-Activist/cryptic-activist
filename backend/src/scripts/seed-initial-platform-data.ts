@@ -322,13 +322,6 @@ const main = async () => {
         'https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628',
     },
     {
-      coingeckoId: 'weth',
-      name: 'Wrapped Ethereum',
-      symbol: 'WETH',
-      image:
-        'https://assets.coingecko.com/coins/images/2518/standard/weth.png?1696503332',
-    },
-    {
       coingeckoId: 'polygon-ecosystem-token',
       name: 'POL (ex-MATIC)',
       symbol: 'POL',
@@ -487,45 +480,29 @@ const main = async () => {
 
       // Create cryptocurrency-chain relationships
       const cryptocurrencyChainData = [
-        // ...(IS_DEVELOPMENT
-        //   ? [
-        //       //  Ethereum on Hardhat Mainnet
-        //       {
-        //         cryptocurrencyId: cryptoMap.get('ethereum'),
-        //         chainId: chainMap.get('hardhat-localnet'),
-        //         contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-        //         isVerified: true,
-        //       },
-        //       // Mock USDC on Hardhat
-        //       {
-        //         cryptocurrencyId: cryptoMap.get('usd-coin'),
-        //         chainId: chainMap.get('hardhat-localnet'),
-        //         contractAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-        //         isVerified: true,
-        //       },
-        //     ]
-        //   : []),
-
-        //  Ethereum on Hardhat Mainnet
+        ...(IS_DEVELOPMENT
+          ? [
+              //  Ethereum on Hardhat Mainnet
+              {
+                cryptocurrencyId: cryptoMap.get('ethereum'),
+                chainId: chainMap.get('hardhat-localnet'),
+                contractAddress: null,
+                isVerified: true,
+              },
+              // Mock USDC on Hardhat
+              {
+                cryptocurrencyId: cryptoMap.get('usd-coin'),
+                chainId: chainMap.get('hardhat-localnet'),
+                contractAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+                isVerified: true,
+              },
+            ]
+          : []),
+        // ETH on Ethereum Mainnet
         {
           cryptocurrencyId: cryptoMap.get('ethereum'),
-          chainId: chainMap.get('hardhat-localnet'),
-          contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-          isVerified: true,
-        },
-        // Mock USDC on Hardhat
-        {
-          cryptocurrencyId: cryptoMap.get('usd-coin'),
-          chainId: chainMap.get('hardhat-localnet'),
-          contractAddress: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-          isVerified: true,
-        },
-
-        // Wrapped Ethereum on Ethereum Mainnet
-        {
-          cryptocurrencyId: cryptoMap.get('weth'),
           chainId: chainMap.get('eth-mainnet'),
-          contractAddress: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+          contractAddress: null,
           isVerified: true,
         },
         // POL on Ethereum Mainnet
@@ -612,13 +589,12 @@ const main = async () => {
           contractAddress: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32',
           isVerified: true,
         },
-
         // Polygon Mainnet
         // POL native on Polygon Mainnet
         {
           cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
           chainId: chainMap.get('polygon-mainnet'),
-          contractAddress: '0x0000000000000000000000000000000000001010',
+          contractAddress: null,
           isVerified: true,
         },
         // USDC on Polygon Mainnet
@@ -663,13 +639,12 @@ const main = async () => {
           contractAddress: '0x41b3966B4FF7b427969ddf5da3627d6AEAE9a48E',
           isVerified: true,
         },
-
         // Arbitrum Mainnet
         // ARB native on Arbitrum Mainnet
         {
           cryptocurrencyId: cryptoMap.get('arbitrum'),
           chainId: chainMap.get('arbitrum-one'),
-          contractAddress: '0x912CE59144191C1204E64559FE8253a0e49E6548',
+          contractAddress: null,
           isVerified: true,
         },
         // USDC on Arbitrum Mainnet
@@ -721,13 +696,12 @@ const main = async () => {
           contractAddress: '0xd4d42F0b6DEF4CE0383636770eF773390d85c61A',
           isVerified: true,
         },
-
         // Optimisn Mainnet
         // OP native on Optimism Mainnet
         {
           cryptocurrencyId: cryptoMap.get('optimism'),
           chainId: chainMap.get('optimism-mainnet'),
-          contractAddress: '0x4200000000000000000000000000000000000042',
+          contractAddress: null,
           isVerified: true,
         },
         // LINK on Optimism Mainnet
@@ -758,49 +732,54 @@ const main = async () => {
           contractAddress: '0x6fd9d7AD17242c41f7131d257212c54A0e816691',
           isVerified: true,
         },
+        // Testnets
         // Etherem Sepolia Testnet
         // Ethereum native on Sepolia
-        {
-          cryptocurrencyId: cryptoMap.get('weth'),
-          chainId: chainMap.get('sepolia-testnet'),
-          contractAddress: '0xb16F35c0Ae2912430DAc15764477E179D9B9EbEa',
-          isVerified: true,
-        },
-        // LINK on Sepolia
-        {
-          cryptocurrencyId: cryptoMap.get('chainlink'),
-          chainId: chainMap.get('sepolia-testnet'),
-          contractAddress: '0x6B904451abABB342D2b787C5126C6361dD815246',
-          isVerified: true,
-        },
-        // POL native on Amoy
-        {
-          cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
-          chainId: chainMap.get('amoy-testnet'),
-          contractAddress: '0xFcB3E963ae85Ae70B884C2FcE183E77969CD038e',
-          isVerified: true,
-        },
-        // LINK on Amoy
-        {
-          cryptocurrencyId: cryptoMap.get('chainlink'),
-          chainId: chainMap.get('amoy-testnet'),
-          contractAddress: '0x0247E0c5141f7FFC4a522c62b048DC9C340041d5',
-          isVerified: true,
-        },
-        // Ethereum native on Arbitrum Sepolia
-        {
-          cryptocurrencyId: cryptoMap.get('weth'),
-          chainId: chainMap.get('arbitrum-sepolia-testnet'),
-          contractAddress: '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73',
-          isVerified: true,
-        },
-        // LINK on Arbitrum Sepolia
-        {
-          cryptocurrencyId: cryptoMap.get('chainlink'),
-          chainId: chainMap.get('arbitrum-sepolia-testnet'),
-          contractAddress: '0x143E1dAE4F018ff86051a01D44a1B49B13704056',
-          isVerified: true,
-        },
+        ...(IS_DEVELOPMENT
+          ? [
+              {
+                cryptocurrencyId: cryptoMap.get('ethereum'),
+                chainId: chainMap.get('sepolia-testnet'),
+                contractAddress: null,
+                isVerified: true,
+              },
+              // LINK on Sepolia
+              {
+                cryptocurrencyId: cryptoMap.get('chainlink'),
+                chainId: chainMap.get('sepolia-testnet'),
+                contractAddress: '0x6B904451abABB342D2b787C5126C6361dD815246',
+                isVerified: true,
+              },
+              // POL native on Amoy
+              {
+                cryptocurrencyId: cryptoMap.get('polygon-ecosystem-token'),
+                chainId: chainMap.get('amoy-testnet'),
+                contractAddress: null,
+                isVerified: true,
+              },
+              // LINK on Amoy
+              {
+                cryptocurrencyId: cryptoMap.get('chainlink'),
+                chainId: chainMap.get('amoy-testnet'),
+                contractAddress: '0x0247E0c5141f7FFC4a522c62b048DC9C340041d5',
+                isVerified: true,
+              },
+              // Arbitrum native on Arbitrum Sepolia
+              {
+                cryptocurrencyId: cryptoMap.get('arbitrum'),
+                chainId: chainMap.get('arbitrum-sepolia-testnet'),
+                contractAddress: null,
+                isVerified: true,
+              },
+              // LINK on Arbitrum Sepolia
+              {
+                cryptocurrencyId: cryptoMap.get('chainlink'),
+                chainId: chainMap.get('arbitrum-sepolia-testnet'),
+                contractAddress: '0x143E1dAE4F018ff86051a01D44a1B49B13704056',
+                isVerified: true,
+              },
+            ]
+          : []),
       ];
 
       await tx.cryptocurrencyChain.createMany({
@@ -870,35 +849,31 @@ const main = async () => {
 
       const promisedUploaded = await Promise.all(uploadReady);
 
-      // if (IS_DEVELOPMENT) {
-      // Update MockToken for testing purposes
-      const mockTokenCryptocurrencyChain =
-        await tx.cryptocurrencyChain.findFirst({
-          where: {
-            chainId: chainMap.get('hardhat-localnet'),
-            cryptocurrencyId: cryptoMap.get('usd-coin'),
-          },
-          select: {
-            id: true,
-            chainId: true,
-            cryptocurrencyId: true,
-            contractAddress: true,
-            abiUrl: true,
-          },
-        });
+      if (IS_DEVELOPMENT) {
+        // Update MockToken for testing purposes
+        const mockTokenCryptocurrencyChain =
+          await tx.cryptocurrencyChain.findFirst({
+            where: {
+              chainId: chainMap.get('hardhat-localnet'),
+              cryptocurrencyId: cryptoMap.get('usd-coin'),
+            },
+            select: {
+              id: true,
+              chainId: true,
+              cryptocurrencyId: true,
+              contractAddress: true,
+              abiUrl: true,
+            },
+          });
 
-      console.log({ mockTokenCryptocurrencyChain });
+        const abiFile = convertABIToFile(MockToken.abi);
+        const uploadedMockToken = await uploadFiles(
+          `abis/${mockTokenCryptocurrencyChain?.chainId}/${mockTokenCryptocurrencyChain?.cryptocurrencyId}`,
+          [abiFile],
+        );
 
-      const abiFile = convertABIToFile(MockToken.abi);
-      const uploadedMockToken = await uploadFiles(
-        `abis/${mockTokenCryptocurrencyChain?.chainId}/${mockTokenCryptocurrencyChain?.cryptocurrencyId}`,
-        [abiFile],
-      );
-
-      if (uploadedMockToken.files) {
-        console.log({ uploadedMockToken: uploadedMockToken.files[0].key });
-        try {
-          const updatedMocked = await tx.cryptocurrencyChain.update({
+        if (uploadedMockToken.files) {
+          await tx.cryptocurrencyChain.update({
             where: {
               id: mockTokenCryptocurrencyChain?.id,
             },
@@ -906,12 +881,8 @@ const main = async () => {
               abiUrl: uploadedMockToken.files[0].key,
             },
           });
-          console.log({ updatedMocked });
-        } catch (error) {
-          console.error(error);
         }
       }
-      // }
 
       // Create first trader user
       const traderPassword = 'password';

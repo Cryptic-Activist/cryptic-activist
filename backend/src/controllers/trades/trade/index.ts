@@ -311,6 +311,8 @@ export async function getTradeController(req: Request, res: Response) {
       },
     });
 
+    console.log({ trade });
+
     if (!trade) {
       res.status(204).send({ errors: ['Unable to retrieve trade'] });
       return;
