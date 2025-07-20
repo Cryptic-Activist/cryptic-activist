@@ -9,14 +9,23 @@ import {
   UseSocketParams,
 } from './types';
 import {
-  approveToken,
-  buyerFundTrade,
-  getMockUSDCBalance,
-  getTokenAllowance,
-  getTokenDecimals,
-  sellerFundTrade,
-} from '@/services/ethers/escrow';
+  approveToken as approveTokenERC20,
+  buyerFundTrade as buyerFundTradeERC20,
+  getMockUSDCBalance as getMockUSDCBalanceERC20,
+  getTokenAllowance as getTokenAllowanceERC20,
+  getTokenDecimals as getTokenDecimalsERC20,
+  sellerFundTrade as sellerFundTradeERC20,
+} from '@/services/ethers/escrow/erc20';
+import {
+  approveToken as approveTokenNative,
+  buyerFundTrade as buyerFundTradeNative,
+  getMockUSDCBalance as getMockUSDCBalanceNative,
+  getTokenAllowance as getTokenAllowanceNative,
+  getTokenDecimals as getTokenDecimalsNative,
+  sellerFundTrade as sellerFundTradeNative,
+} from '@/services/ethers/escrow/native';
 import { parseEther, parseUnits } from 'ethers';
+import { useApp, useContracts } from '@/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
@@ -24,8 +33,6 @@ import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
 import { toTokenUnits } from '@/utils/blockchain';
-import useABIs from '../useABIs';
-import { useApp } from '@/hooks';
 
 const erc20TokenAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
 
@@ -43,8 +50,8 @@ const useTradeSocket = ({
 }: UseSocketParams) => {
   const { addToast } = useApp();
   const {
-    abis: { escrow },
-  } = useABIs(false);
+    contracts: { escrow },
+  } = useContracts(false);
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -110,8 +117,6 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
-      console.log({ tradeABI: trade });
-
       const decimals = await getTokenDecimals({
         tokenAddress: erc20TokenAddress,
       });

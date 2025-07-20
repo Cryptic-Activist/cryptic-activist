@@ -6,15 +6,15 @@ import {
 import {
   deployEscrowERC20SmartContract,
   deployEscrowNativeTokenSmartContract,
-  getEscrowERC20ABIFile,
-  getEscrowNativeTokenABIFile,
+  getEscrowERC20Details,
+  getEscrowNativeTokenDetails,
 } from '@/controllers/blockchains/smart-contracts/escrow';
 
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/erc20/abi', authenticateUser, getEscrowERC20ABIFile);
+router.get('/erc20/details', authenticateUser, getEscrowERC20Details);
 
 router.post(
   '/erc20/deploy',
@@ -23,7 +23,7 @@ router.post(
   deployEscrowERC20SmartContract,
 );
 
-router.get('/native/abi', authenticateUser, getEscrowNativeTokenABIFile);
+router.get('/native/details', authenticateUser, getEscrowNativeTokenDetails);
 
 router.post(
   '/native/deploy',

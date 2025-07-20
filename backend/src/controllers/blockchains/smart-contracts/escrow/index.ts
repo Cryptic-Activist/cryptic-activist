@@ -35,25 +35,25 @@ const convertArtifactToFile = (artifact: any) => {
   return multerFile;
 };
 
-export const getEscrowERC20ABIFile = async (_req: Request, res: Response) => {
+export const getEscrowERC20Details = async (_req: Request, res: Response) => {
   try {
-    const abi = await getEscrowDetailsERC20();
+    const details = await getEscrowDetailsERC20();
 
-    res.status(200).json(abi.abi);
+    res.status(200).json(details);
   } catch (error) {
     console.log({ error });
     res.status(400).json(error);
   }
 };
 
-export const getEscrowNativeTokenABIFile = async (
+export const getEscrowNativeTokenDetails = async (
   _req: Request,
   res: Response,
 ) => {
   try {
-    const abi = await getEscrowDetailsNativeToken();
+    const details = await getEscrowDetailsNativeToken();
 
-    res.status(200).json(abi.abi);
+    res.status(200).json(details);
   } catch (error) {
     console.log({ error });
     res.status(400).json(error);

@@ -23,7 +23,7 @@ import {
 
 import { FiatParams } from '@/hooks/useFiats/types';
 import { Type } from '@/store/app/types';
-import useABIs from '@/hooks/useABIs';
+import useABIs from '@/hooks/useContracts';
 import { useEffect } from 'react';
 
 const InitialSettings = () => {

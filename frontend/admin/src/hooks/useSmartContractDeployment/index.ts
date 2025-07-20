@@ -5,7 +5,8 @@ import {
 	deploymentPremiumFormSchema
 } from './zod';
 import {
-	deployEscrowSmartContract,
+	deployEscrowERC20SmartContract,
+	deployEscrowNativeTokenSmartContract,
 	deployPremiumSmartContract,
 	getDeploymentStats
 } from '@/services/smart-contracts';
@@ -15,6 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Chain } from '@/stores/chains/types';
 import { DeploySmartContractParams } from '@/services/smart-contracts/types';
+import { errors } from 'decimal.js';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -61,17 +63,35 @@ const useSmartContractDeployment = () => {
 
 	const watchedValuesEscrow = watchEscrow();
 	const watchedValuesPremium = watchPremium();
+	console.log({ watchedValuesEscrow, errorsEscrow });
 
 	const deploymentStats = useMutation({
 		mutationKey: ['smartContractDeployment'],
 		mutationFn: getDeploymentStats
 	});
 
-	const deploymentEscrowMutation = useMutation({
-		mutationKey: ['escrowSmartContractDeployment'],
+	const deploymentEscrowERC20Mutation = useMutation({
+		mutationKey: ['escrowERC20SmartContractDeployment'],
 		mutationFn: async (params: DeploySmartContractParams) => {
 			if (admin?.data?.id) {
-				const response = await deployEscrowSmartContract(params);
+				const response = await deployEscrowERC20SmartContract(params);
+				return response;
+			}
+		},
+		onSuccess: () => {
+			if (admin?.data?.id && selectedChain?.id) {
+				deploymentStats.mutate(selectedChain.id);
+			}
+			handleResetAllForms();
+		}
+	});
+
+	const deploymentEscrowNativeTokenMutation = useMutation({
+		mutationKey: ['escrowNativeTokenSmartContractDeployment'],
+		mutationFn: async (params: DeploySmartContractParams) => {
+			console.log(params);
+			if (admin?.data?.id) {
+				const response = await deployEscrowNativeTokenSmartContract(params);
 				return response;
 			}
 		},
@@ -99,9 +119,18 @@ const useSmartContractDeployment = () => {
 		}
 	});
 
-	const onSubmitEscrow = async (data: DeploymentEscrowFormData) => {
+	const onSubmitEscrowERC20 = async (data: DeploymentEscrowFormData) => {
 		if (admin?.data?.id) {
-			await deploymentEscrowMutation.mutateAsync({
+			await deploymentEscrowERC20Mutation.mutateAsync({
+				...data,
+				adminId: admin?.data?.id
+			});
+		}
+	};
+
+	const onSubmitEscrowNativeToken = async (data: DeploymentEscrowFormData) => {
+		if (admin?.data?.id) {
+			await deploymentEscrowNativeTokenMutation.mutateAsync({
 				...data,
 				adminId: admin?.data?.id
 			});
@@ -154,8 +183,11 @@ const useSmartContractDeployment = () => {
 		escrow: {
 			watchedValues: watchedValuesEscrow,
 			errors: errorsEscrow,
-			deploymentEscrowMutation,
-			onSubmit: onSubmitEscrow,
+			deploymentEscrowERC20Mutation,
+			onSubmit:
+				watchedValuesEscrow.type === 'Escrow:ERC20'
+					? onSubmitEscrowERC20
+					: onSubmitEscrowNativeToken,
 			handleReset: handleResetEscrow,
 			register: registerEscrow,
 			handleSubmit: handleSubmitEscrow

@@ -31,11 +31,13 @@ const SmartContractDeploymentPage = () => {
 					<span
 						className={`${styles.statusBadge} ${
 							styles[
-								escrow.deploymentEscrowMutation.isPending ? 'PENDING' : 'READY'
+								escrow.deploymentEscrowERC20Mutation.isPending
+									? 'PENDING'
+									: 'READY'
 							]
 						}`}
 					>
-						{escrow.deploymentEscrowMutation.isPending
+						{escrow.deploymentEscrowERC20Mutation.isPending
 							? 'DEPLOYING'
 							: 'READY TO DEPLOY'}
 					</span>
@@ -81,23 +83,23 @@ const SmartContractDeploymentPage = () => {
 					<div className={styles.card}>
 						<div className={styles.cardHeader}>Contract Configuration</div>
 						<div className={styles.cardContent}>
-							{escrow.deploymentEscrowMutation.isSuccess && (
+							{escrow.deploymentEscrowERC20Mutation.isSuccess && (
 								<div className={styles.successMessage}>
 									<strong>✅ Deployment Successful!</strong> Your smart contract
 									has been deployed successfully.
 								</div>
 							)}
 
-							{escrow.deploymentEscrowMutation?.isError && (
+							{escrow.deploymentEscrowERC20Mutation?.isError && (
 								<div className={styles.errorMessage}>
 									<strong>❌ Deployment Failed:</strong>{' '}
-									{escrow.deploymentEscrowMutation.data}
+									{escrow.deploymentEscrowERC20Mutation.data}
 								</div>
 							)}
 
 							<form
 								onSubmit={
-									escrow.watchedValues.type === 'Escrow'
+									escrow.watchedValues.type.includes('Escrow')
 										? escrow.handleSubmit(escrow.onSubmit)
 										: premium.handleSubmit(premium.onSubmit)
 								}
@@ -115,10 +117,10 @@ const SmartContractDeploymentPage = () => {
 									>
 										<option value="">Select Smart Contract</option>
 										<option value="Escrow:NativeToken">
-											{'Escrow (Native Token'}
+											{'Escrow (Native Token)'}
 										</option>
 										<option value="Escrow:ERC20">
-											{'Escrow (ERC20 Token'}
+											{'Escrow (ERC20 Token)'}
 										</option>
 										<option value="Premium">Premium Subscription</option>
 									</select>
@@ -133,7 +135,7 @@ const SmartContractDeploymentPage = () => {
 									</div>
 								</div>
 
-								{escrow.watchedValues.type === 'Escrow' && (
+								{escrow.watchedValues.type.includes('Escrow') && (
 									<>
 										<div className={styles.formGroup}>
 											<label className={styles.formLabel}>Chain</label>
@@ -339,9 +341,9 @@ const SmartContractDeploymentPage = () => {
 									<button
 										type="submit"
 										className={`${styles.btn} ${styles.btnPrimary} ${styles.fullWidth}`}
-										disabled={escrow.deploymentEscrowMutation.isPending}
+										disabled={escrow.deploymentEscrowERC20Mutation.isPending}
 									>
-										{escrow.deploymentEscrowMutation.isPending
+										{escrow.deploymentEscrowERC20Mutation.isPending
 											? 'Deploying Contract...'
 											: 'Deploy Smart Contract'}
 									</button>
@@ -350,7 +352,7 @@ const SmartContractDeploymentPage = () => {
 										type="button"
 										className={`${styles.btn} ${styles.btnSecondary} ${styles.fullWidth}`}
 										onClick={handleResetAllForms}
-										disabled={escrow.deploymentEscrowMutation.isPending}
+										disabled={escrow.deploymentEscrowERC20Mutation.isPending}
 									>
 										Reset Form
 									</button>
@@ -410,7 +412,7 @@ const SmartContractDeploymentPage = () => {
 				{/* Right Column */}
 				<div className={styles.rightColumn}>
 					{/* Deployment Result */}
-					{escrow.deploymentEscrowMutation.data?.deployed && (
+					{escrow.deploymentEscrowERC20Mutation.data?.deployed && (
 						<div className={styles.card}>
 							<div className={styles.cardHeader}>Deployment Result</div>
 							<div className={styles.cardContent}>
@@ -420,7 +422,10 @@ const SmartContractDeploymentPage = () => {
 											Contract Address
 										</label>
 										<div className={styles.contractAddress}>
-											{escrow.deploymentEscrowMutation.data?.deployed?.address}
+											{
+												escrow.deploymentEscrowERC20Mutation.data?.deployed
+													?.address
+											}
 										</div>
 									</div>
 									<div className={styles.deploymentDetail}>
@@ -429,7 +434,7 @@ const SmartContractDeploymentPage = () => {
 										</label>
 										<div className={styles.transactionHash}>
 											{
-												escrow.deploymentEscrowMutation.data?.deployed
+												escrow.deploymentEscrowERC20Mutation.data?.deployed
 													?.deploymentHash
 											}
 										</div>
@@ -440,7 +445,7 @@ const SmartContractDeploymentPage = () => {
 										</label>
 										<div className={styles.deploymentValue}>
 											{
-												escrow.deploymentEscrowMutation.data?.deployed
+												escrow.deploymentEscrowERC20Mutation.data?.deployed
 													?.deploymentBlockHeight
 											}
 										</div>
@@ -448,7 +453,10 @@ const SmartContractDeploymentPage = () => {
 									<div className={styles.deploymentDetail}>
 										<label className={styles.deploymentLabel}>Gas Used</label>
 										<div className={styles.deploymentValue}>
-											{escrow.deploymentEscrowMutation.data?.deployed?.gasUsed}
+											{
+												escrow.deploymentEscrowERC20Mutation.data?.deployed
+													?.gasUsed
+											}
 										</div>
 									</div>
 								</div>

@@ -1,8 +1,4 @@
-import {
-  BACKEND,
-  ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-  ETHEREUM_NETWORK_URL,
-} from '@/constants/envs';
+import { BACKEND, ETHEREUM_NETWORK_URL } from '@/constants/envs';
 import {
   BrowserProvider,
   Interface,
@@ -11,21 +7,21 @@ import {
   parseUnits,
 } from 'ethers';
 
-import { ABI } from '@/store/abis/types';
-import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import { Contract } from '@/store/contracts/types';
+import EscrowArtifact from '@/contracts/escrow/artifacts/NativeTokenEscrow.json';
 import { MockToken } from '@/contracts';
-import { TX_CODE } from './types';
+import { TX_CODE } from '../types';
 import { fetchGet } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 import { toTokenUnits } from '@/utils/blockchain';
 
 const iface = new Interface(EscrowArtifact.abi);
 
-export const getEscrowABI = async () => {
+export const getEscrowDetails = async () => {
   try {
     const bearerToken = getBearerToken();
     const response = await fetchGet(
-      BACKEND + '/blockchains/smart-contracts/escrow/abi',
+      BACKEND + '/blockchains/smart-contracts/escrow/native/details',
       { Authorization: bearerToken }
     );
 
@@ -69,12 +65,12 @@ export const getSigner = async () => {
   }
 };
 
-export const getEscrowContract = async (abi: any) => {
+export const getEscrowContract = async (contractDetails: any) => {
   try {
     const signer = await getSigner();
     const contract = new ethers.Contract(
-      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      abi,
+      contractDetails.address,
+      contractDetails.abi,
       signer
     );
 
@@ -134,10 +130,10 @@ export const decodeFunctionData = (receipt: any) => {
 export const sellerFundTrade = async (
   tradeId: number,
   value: bigint,
-  abi: ABI
+  contractDetails: any
 ) => {
   try {
-    const contract = await getEscrowContract(abi);
+    const contract = await getEscrowContract(contractDetails);
 
     if (!contract) {
       return {
@@ -148,7 +144,7 @@ export const sellerFundTrade = async (
     }
 
     // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.sellerFundTrade(tradeId);
+    const tx = await contract.sellerFundTrade(tradeId, { value });
 
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
@@ -171,10 +167,10 @@ export const sellerFundTrade = async (
 export const buyerFundTrade = async (
   tradeId: number,
   value: bigint,
-  abi: ABI
+  contractDetails: any
 ) => {
   try {
-    const contract = await getEscrowContract(abi);
+    const contract = await getEscrowContract(contractDetails);
 
     if (!contract) {
       return {
@@ -185,7 +181,7 @@ export const buyerFundTrade = async (
     }
 
     // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.buyerFundTrade(tradeId);
+    const tx = await contract.buyerFundTrade(tradeId, { value });
 
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
@@ -202,136 +198,5 @@ export const buyerFundTrade = async (
       message: 'Error buyer funding trade',
       error: error,
     };
-  }
-};
-
-export async function getWalletTokenBalances(
-  tokens: any[],
-  provider: BrowserProvider,
-  abi: any,
-  walletAddress: string
-) {
-  const signer = await provider.getSigner();
-
-  const balances = await Promise.all(
-    tokens.map(async (token) => {
-      const contract = new ethers.Contract(token.address, abi, signer);
-      const raw = await contract.balanceOf(walletAddress);
-      const formatted = ethers.formatUnits(raw, token.decimals);
-      return {
-        symbol: token.symbol,
-        balance: formatted,
-      };
-    })
-  );
-
-  return balances;
-}
-
-export const getMockUSDCBalance = async ({
-  address,
-  mockUSDCAddress,
-}: {
-  address: string;
-  mockUSDCAddress: string;
-}) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(
-      mockUSDCAddress,
-      MockToken.abi,
-      signer
-    );
-
-    const balance = await tokenContract.balanceOf(address);
-
-    return { balance };
-  } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
-  }
-};
-
-export const getTokenAllowance = async ({
-  address,
-  mockUSDCAddress,
-}: {
-  address: string;
-  mockUSDCAddress: string;
-}) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(
-      mockUSDCAddress,
-      MockToken.abi,
-      signer
-    );
-
-    const allowance = await tokenContract.allowance(
-      address,
-      ETHEREUM_ESCROW_CONTRACT_ADDRESS
-    );
-
-    return { allowance };
-  } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
-  }
-};
-
-export const approveToken = async (
-  tokenAddress: string,
-  tokenABI: any,
-  amountToApprove: bigint,
-  decimals: number
-) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
-
-    console.log({ amountToApprove, decimals });
-
-    const tx = await tokenContract.approve(
-      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
-      amountToApprove
-    );
-    const receipt = await tx.wait();
-    return {
-      message: 'Token approved!',
-      receipt,
-    };
-  } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Token Approval failed',
-      error: error,
-    };
-  }
-};
-
-export const getTokenDecimals = async ({
-  tokenAddress,
-}: {
-  tokenAddress: string;
-}) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(
-      tokenAddress,
-      MockToken.abi,
-      signer
-    );
-
-    const decimals = await tokenContract.decimals();
-
-    return Number(decimals);
-  } catch (error) {
-    return null;
   }
 };
