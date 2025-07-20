@@ -4,11 +4,9 @@ import type { JoinParams, JoinRoomParams } from './types';
 import {
   approveToken,
   createTrade,
-  fundTrade,
   getCreateTradeDetails,
-  getMockUSDCBalances,
   getTokenDecimals,
-} from '@/services/blockchains/escrow';
+} from '@/services/blockchains/escrow/erc20';
 
 import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
@@ -120,7 +118,7 @@ export default class Chat {
             },
           });
 
-          console.log({ data: trade?.cryptocurrency.chains });
+          // console.log({ data: trade?.cryptocurrency.chains });
 
           if (!trade?.id) {
             this.io.to(chatId).emit('trade_error', {
@@ -312,13 +310,6 @@ export default class Chat {
                 });
                 return;
               }
-
-              const balances = await getMockUSDCBalances({
-                arbitrator: createTradeDetails.arbitratorWallet,
-                buyer: createTradeDetails.buyerWallet,
-                seller: createTradeDetails.sellerWallet,
-                mockUSDCAddress: erc20TokenAddress,
-              });
 
               const createTradeObj = {
                 erc20TokenAddress: erc20TokenAddress,

@@ -2,7 +2,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  console.log("Starting deployment of MultiTradeEscrow contract...");
+  console.log("Starting deployment of NativeTokenEscrow contract...");
 
   // Get deployer account
   const [deployer] = await hre.ethers.getSigners();
@@ -20,10 +20,10 @@ async function main() {
   };
 
   // Deploy the contract
-  const MultiTradeEscrow = await hre.ethers.getContractFactory(
-    "MultiTradeEscrow"
+  const NativeTokenEscrow = await hre.ethers.getContractFactory(
+    "NativeTokenEscrow"
   );
-  const escrow = await MultiTradeEscrow.deploy(
+  const escrow = await NativeTokenEscrow.deploy(
     params.platformWallet,
     params.defaultFeeRate,
     params.defaultProfitMargin
@@ -32,7 +32,7 @@ async function main() {
   await escrow.waitForDeployment();
   const escrowAddress = await escrow.getAddress();
   console.log(
-    `MultiTradeEscrow deployed to (contract address): ${escrowAddress}`
+    `NativeTokenEscrow deployed to (contract address): ${escrowAddress}`
   );
 
   // Verify contract on Etherscan (if on supported network)

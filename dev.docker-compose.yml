@@ -99,6 +99,8 @@ services:
       - "8545:8545"
     networks:
       - app-network
+    env_file:
+      - envs/dev.hardhat.env
 
   backend:
     container_name: backend

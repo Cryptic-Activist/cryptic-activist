@@ -7,11 +7,7 @@ import {
   TradeStatus,
 } from '@prisma/client';
 import { Request, Response, response } from 'express';
-import {
-  cancelTrade,
-  confirmTrade,
-  executeTrade,
-} from '@/services/blockchains/escrow';
+import { cancelTrade, executeTrade } from '@/services/blockchains/escrow/erc20';
 import {
   createAccountReview,
   escalateDispute,
@@ -393,8 +389,6 @@ export async function addResolutionDecision(req: Request, res: Response) {
       logAdminAction,
     } = req.body;
 
-    console.log(req.body);
-
     const dispute = await prisma.tradeDispute.findUnique({
       where: {
         id: disputeId,
@@ -438,7 +432,6 @@ export async function addResolutionDecision(req: Request, res: Response) {
     });
 
     if (logAdminAction) {
-      console.log('logging admin activity');
       const disputeAuditLog = await prisma.disputeAuditLog.create({
         data: {
           action: 'DECISION_MADE',
@@ -451,7 +444,6 @@ export async function addResolutionDecision(req: Request, res: Response) {
     if (notifyBothUsers) {
       const systemMessage = new SystemMessage();
       await systemMessage.tradeDisputeResolution(dispute.trade.id);
-      console.log('notifying both users');
     }
 
     // const disputeResolutionTypes = Object.keys(DisputeResolutionType).map(

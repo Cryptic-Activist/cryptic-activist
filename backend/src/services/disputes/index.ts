@@ -1,4 +1,4 @@
-import { cancelTrade } from '../blockchains/escrow';
+import { cancelTrade } from '../blockchains/escrow/erc20';
 import { getRandomSeniorSuperAdmin } from '../admin';
 import { prisma } from '../db';
 

@@ -114,7 +114,12 @@ const SmartContractDeploymentPage = () => {
 										})}
 									>
 										<option value="">Select Smart Contract</option>
-										<option value="Escrow">Escrow</option>
+										<option value="Escrow:NativeToken">
+											{'Escrow (Native Token'}
+										</option>
+										<option value="Escrow:ERC20">
+											{'Escrow (ERC20 Token'}
+										</option>
 										<option value="Premium">Premium Subscription</option>
 									</select>
 

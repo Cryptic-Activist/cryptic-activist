@@ -1,4 +1,4 @@
-import { Decimal } from '@prisma/client/runtime/library';
+import { Contract } from 'ethers';
 
 export type Address = `0x${string}`;
 
@@ -23,4 +23,9 @@ export type DeployEscrowSmartContractParams = {
   defaultFeeRate: number;
   defaultProfitMargin: number;
   rpcUrl: string;
+};
+
+export type ContractDetails = {
+  abi: any | null;
+  address: string | null;
 };

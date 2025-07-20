@@ -14,10 +14,9 @@ import {
 } from '@/utils/disputes';
 import {
   cancelTrade,
-  confirmTrade,
   executeTrade,
   raiseDispute,
-} from '@/services/blockchains/escrow';
+} from '@/services/blockchains/escrow/erc20';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';

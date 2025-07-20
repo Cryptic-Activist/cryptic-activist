@@ -70,8 +70,6 @@ export async function createTradeController(req: Request, res: Response) {
         },
       });
 
-      console.log({ newTrade: newTrade.id });
-
       const newChat = await tx.chat.create({
         data: {
           tradeId: newTrade.id,
@@ -245,6 +243,7 @@ export async function getTradeController(req: Request, res: Response) {
               },
               select: {
                 abiUrl: true,
+                contractAddress: true,
               },
             },
           },
@@ -310,8 +309,6 @@ export async function getTradeController(req: Request, res: Response) {
         },
       },
     });
-
-    console.log({ trade });
 
     if (!trade) {
       res.status(204).send({ errors: ['Unable to retrieve trade'] });
@@ -439,8 +436,6 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    console.log({ offerType: offer.offerType });
-
     if (offer.offerType === 'buy') {
       // Buyer needs only the deposit percentage (e.g., 20%)
       multiplier = depositPerTradePercent; // e.g., 0.2 → 2000
@@ -448,8 +443,6 @@ export const calculateReceivingAmount = async (
       // Seller needs 100% + deposit percentage (e.g., 120%)
       multiplier = 1 + depositPerTradePercent; // e.g., 1.2 → 12000
     }
-
-    console.log({ multiplier, depositPerTradePercent });
 
     const requiredBalance = finalCryptoAmount
       .times(multiplier)
@@ -643,23 +636,6 @@ export async function leaveFeedback(req: Request, res: Response) {
       });
       return;
     }
-
-    console.log(
-      JSON.stringify({
-        data: {
-          // either connect by relation…
-          trader: {
-            connect: { id: trade.trader.id },
-          },
-          trade: {
-            connect: { id: trade.id },
-          },
-          message,
-          type: type,
-        },
-      }),
-      2,
-    );
 
     const newFeedback = await prisma.feedback.create({
       data: {

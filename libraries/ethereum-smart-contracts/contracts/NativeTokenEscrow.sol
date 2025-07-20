@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MultiTradeEscrow {
+contract NativeTokenEscrow {
     address public platformWallet;
     address public owner;
     
@@ -16,7 +15,6 @@ contract MultiTradeEscrow {
     
     struct Trade {
         uint256 id;
-        IERC20 token;
         address buyer;
         address seller;
         address arbitrator;
@@ -102,7 +100,6 @@ contract MultiTradeEscrow {
      * @dev Create a new trade between buyer and seller
      */
     function createTrade(
-        IERC20 _token,
         address _buyer,
         address _seller,
         address _arbitrator,
@@ -114,7 +111,6 @@ contract MultiTradeEscrow {
         uint256 _feeRate,
         uint256 _profitMargin
     ) public returns (uint256) {
-        require(address(_token) != address(0), "Invalid token address");
         require(_buyer != address(0) && _seller != address(0) && _arbitrator != address(0), "Invalid addresses");
         require(_cryptoAmount > 0, "Amount must be greater than 0");
         
@@ -131,7 +127,6 @@ contract MultiTradeEscrow {
         
         trades[tradeId] = Trade({
             id: tradeId,
-            token: _token,
             buyer: _buyer,
             seller: _seller,
             arbitrator: _arbitrator,
@@ -156,14 +151,14 @@ contract MultiTradeEscrow {
      */
     function sellerFundTrade(uint256 _tradeId) 
         external 
+        payable 
         onlySeller(_tradeId)
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
         require(trade.state == TradeState.Created || trade.state == TradeState.BuyerFunded, "Invalid state for seller funding");
         require(!trade.sellerFunded, "Seller already funded");
-
-        trade.token.transferFrom(msg.sender, address(this), trade.sellerTotalDeposit);
+        require(msg.value == trade.sellerTotalDeposit, "Incorrect amount sent");
         
         trade.sellerFunded = true;
         
@@ -182,14 +177,14 @@ contract MultiTradeEscrow {
      */
     function buyerFundTrade(uint256 _tradeId) 
         external 
+        payable 
         onlyBuyer(_tradeId)
         tradeExists(_tradeId) 
     {
         Trade storage trade = trades[_tradeId];
         require(trade.state == TradeState.Created || trade.state == TradeState.SellerFunded, "Invalid state for buyer funding");
         require(!trade.buyerFunded, "Buyer already funded");
-
-        trade.token.transferFrom(msg.sender, address(this), trade.buyerCollateral);
+        require(msg.value >= trade.buyerCollateral, "Insufficient collateral");
         
         trade.buyerFunded = true;
         
@@ -200,7 +195,7 @@ contract MultiTradeEscrow {
             emit TradeFullyFunded(_tradeId);
         }
         
-        emit BuyerFunded(_tradeId, trade.buyerCollateral);
+        emit BuyerFunded(_tradeId, msg.value);
     }
     
     /**
@@ -263,9 +258,9 @@ contract MultiTradeEscrow {
         sellerAmount += trade.sellerCollateral;
         
         // Transfer funds
-        trade.token.transfer(platformWallet, totalPlatformAmount);
-        trade.token.transfer(trade.buyer, buyerAmount);
-        trade.token.transfer(trade.seller, sellerAmount);
+        payable(platformWallet).transfer(totalPlatformAmount);
+        payable(trade.buyer).transfer(buyerAmount);
+        payable(trade.seller).transfer(sellerAmount);
         
         trade.state = TradeState.Completed;
         emit ArbitrationResolved(_tradeId, buyerPercentage > 50 ? trade.buyer : trade.seller, buyerAmount, sellerAmount);
@@ -285,9 +280,9 @@ contract MultiTradeEscrow {
         uint256 buyerAmount = trade.cryptoAmount + trade.buyerCollateral - totalPlatformAmount;
 
         // Transfer funds
-        trade.token.transfer(platformWallet, totalPlatformAmount);
-        trade.token.transfer(trade.seller, sellerAmount);
-        trade.token.transfer(trade.buyer, buyerAmount);
+        payable(platformWallet).transfer(totalPlatformAmount);
+        payable(trade.seller).transfer(sellerAmount);
+        payable(trade.buyer).transfer(buyerAmount);
         
         trade.state = TradeState.Completed;
         emit TradeCompleted(_tradeId);
@@ -312,10 +307,10 @@ contract MultiTradeEscrow {
         
         // Return funds to respective parties
         if (trade.sellerFunded) {
-            trade.token.transfer(trade.seller, trade.sellerTotalDeposit);
+            payable(trade.seller).transfer(trade.sellerTotalDeposit);
         }
         if (trade.buyerFunded) {
-            trade.token.transfer(trade.buyer, trade.buyerCollateral);
+            payable(trade.buyer).transfer(trade.buyerCollateral);
         }
         
         trade.state = TradeState.Cancelled;
@@ -372,7 +367,6 @@ contract MultiTradeEscrow {
      * @dev Get trade details
      */
     function getTrade(uint256 _tradeId) external view tradeExists(_tradeId) returns (
-        address token,
         address buyer,
         address seller,
         address arbitrator,
@@ -389,7 +383,6 @@ contract MultiTradeEscrow {
     ) {
         Trade storage trade = trades[_tradeId];
         return (
-            address(trade.token),
             trade.buyer,
             trade.seller,
             trade.arbitrator,
@@ -409,7 +402,7 @@ contract MultiTradeEscrow {
     /**
      * @dev Get contract balance
      */
-    function getContractBalance(IERC20 token) public view returns (uint256) {
-        return token.balanceOf(address(this));
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }

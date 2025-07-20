@@ -2,7 +2,7 @@ import { Decimal, prisma } from '@/services/db';
 
 import SystemMessage from '@/services/systemMessage';
 import { autoLiftExpiredSuspensions } from '@/services/moderation';
-import { cancelTrade } from '@/services/blockchains/escrow';
+import { cancelTrade } from '@/services/blockchains/escrow/erc20';
 import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';

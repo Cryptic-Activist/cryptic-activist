@@ -1,8 +1,9 @@
 import {
+  Address,
+  ContractDetails,
   DeployEscrowSmartContractParams,
   InitTradeParams,
-  Token,
-} from './types';
+} from '../types';
 import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
@@ -23,15 +24,14 @@ import {
 import { prisma, redisClient } from '@/services/db';
 import semver, { ReleaseType } from 'semver';
 
-import { Address } from './types';
 import { Decimal } from '@/services/db';
-import EscrowArtifact from '@/contracts/escrow/artifacts/MultiTradeEscrow.json';
+import EscrowArtifact from '@/contracts/escrow/artifacts/NativeTokenEscrow.json';
 import { MockToken } from '@/contracts';
 import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
 
-const iface = new Interface(EscrowArtifact.abi);
+const ifaceNativeTokenEscrow = new Interface(EscrowArtifact.abi);
 
 export const getProvider = () => {
   const provider = new ethers.JsonRpcProvider(ETHEREUM_NETWORK_URL);
@@ -44,51 +44,65 @@ export const getSigner = () => {
   return signer;
 };
 
-export const getEscrowABI = async () => {
-  const cacheKey = 'smartContracts:escrow';
-  let abiJson: any | null = null;
+export const getEscrowDetails = async () => {
+  const cacheKey = 'smartContracts:escrow:native';
+  let details: ContractDetails = { abi: null, address: null };
 
-  const cachedABI = await redisClient.get(cacheKey);
+  const cachedDetails = await redisClient.get(cacheKey);
 
-  if (cachedABI) {
-    abiJson = JSON.parse(cachedABI);
+  if (cachedDetails) {
+    const parsedCachedDetails = JSON.parse(cachedDetails);
+    details = {
+      abi: parsedCachedDetails.abi,
+      address: parsedCachedDetails.address,
+    };
   } else {
     const escrowSmartContract = await prisma.smartContract.findFirst({
       where: {
         isActive: true,
         metadata: {
           path: ['type'],
-          equals: 'Escrow',
+          equals: 'Escrow:NativeToken',
         },
       },
       select: {
         artifactUrl: true,
+        address: true,
       },
     });
 
     if (!escrowSmartContract) {
-      throw new Error('Unable to find Escrow ABI');
+      throw new Error('Unable to find Escrow Details');
     }
 
     const response = await fetchGet(escrowSmartContract.artifactUrl);
+
     if (response.status !== 200) {
       throw new Error(
         `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
       );
     }
 
-    abiJson = await response.data.abi;
+    details = {
+      abi: response.data.abi,
+      address: escrowSmartContract.address as Address,
+    };
     const expiry = parseDurationToSeconds('1w');
-    await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
   }
 
-  return abiJson;
+  return details;
 };
 
 export const getEscrowContract = async () => {
-  const abi = await getEscrowABI();
+  const details = await getEscrowDetails();
+
+  if (!details.abi || !details.address) {
+    throw new Error('Escrow contract details are not available');
+  }
+
   const signer = getSigner();
-  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abi, signer);
+  return new ethers.Contract(details.address, details.abi, signer);
 };
 
 export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
@@ -146,7 +160,7 @@ export const decodeFunctionData = (receipt: any) => {
   console.log({ receipt });
   for (const log of receipt.logs) {
     try {
-      const parsedLog = iface.parseLog(log);
+      const parsedLog = ifaceNativeTokenEscrow.parseLog(log);
       if (parsedLog) {
         switch (parsedLog.name) {
           case 'TradeCreated': {
@@ -197,7 +211,6 @@ export const createTrade = async (params: InitTradeParams) => {
     const contract = await getEscrowContract();
 
     const tx = await contract.createTrade(
-      params.erc20TokenAddress,
       params.buyer,
       params.seller,
       params.arbitrator,
@@ -260,25 +273,6 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
   }
 };
 
-export const confirmTrade = async (tradeId: bigint, value: bigint) => {
-  try {
-    const contract = await getEscrowContract();
-    // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.confirmTrade(tradeId, {
-      value,
-    });
-    const receipt = await tx.wait();
-    const decoded = decodeFunctionData(receipt);
-
-    return { data: decoded, txHash: tx.hash, message: 'Trade confirmed' };
-  } catch (error) {
-    return {
-      message: 'Error confirming trade',
-      error: error,
-    };
-  }
-};
-
 export const executeTrade = async (tradeId: BigInt) => {
   try {
     const contract = await getEscrowContract();
@@ -316,39 +310,6 @@ export const getTokenDecimals = async ({
     const decimals = await tokenContract.decimals();
 
     return { decimals };
-  } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
-  }
-};
-
-export const getMockUSDCBalances = async ({
-  buyer,
-  arbitrator,
-  seller,
-  mockUSDCAddress,
-}: {
-  buyer: string;
-  seller: string;
-  arbitrator: string;
-  mockUSDCAddress: string;
-}) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(
-      mockUSDCAddress,
-      MockToken.abi,
-      signer,
-    );
-
-    const buyerBalance = await tokenContract.balanceOf(buyer);
-    const sellerBalance = await tokenContract.balanceOf(seller);
-    const arbitratorBalance = await tokenContract.balanceOf(arbitrator);
-
-    return { buyerBalance, sellerBalance, arbitratorBalance };
   } catch (error) {
     console.log({ error });
     return {
