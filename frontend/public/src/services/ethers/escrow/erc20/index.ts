@@ -1,6 +1,7 @@
 import {
   ApproveTokenParams,
   GetTokenAllowanceParams,
+  GetTokenBalanceParams,
   GetTokenDecimalsParams,
   TX_CODE,
 } from '../types';
@@ -205,33 +206,6 @@ export const buyerFundTrade = async (tradeId: number, contractDetails: any) => {
   }
 };
 
-export const getMockUSDCBalance = async ({
-  address,
-  mockUSDCAddress,
-}: {
-  address: string;
-  mockUSDCAddress: string;
-}) => {
-  try {
-    const signer = await getSigner();
-    const tokenContract = new ethers.Contract(
-      mockUSDCAddress,
-      MockToken.abi,
-      signer
-    );
-
-    const balance = await tokenContract.balanceOf(address);
-
-    return { balance };
-  } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
-  }
-};
-
 export const getTokenAllowance = async ({
   escrowContractDetails,
   tokenContractDetails,
@@ -253,6 +227,30 @@ export const getTokenAllowance = async ({
     return { allowance };
   } catch (error) {
     console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getTokenBalance = async ({
+  tokenContractDetails,
+}: GetTokenBalanceParams) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer
+    );
+
+    const signerAddress = await signer.getAddress();
+
+    const balance = await tokenContract.balanceOf(signerAddress);
+
+    return { balance };
+  } catch (error) {
     return {
       message: 'Unable to check balances',
       error: error,

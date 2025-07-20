@@ -5,6 +5,7 @@ import { CalculateReceivingAmountQueries } from './types';
 import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
+import { fetchGet } from '@/services/axios';
 import { getCoinPrice } from '@/services/coinGecko';
 import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
@@ -223,6 +224,7 @@ export async function getTradeController(req: Request, res: Response) {
         },
         cryptocurrency: {
           select: {
+            id: true,
             coingeckoId: true,
             name: true,
             symbol: true,
@@ -327,7 +329,32 @@ export async function getTradeController(req: Request, res: Response) {
       return;
     }
 
-    res.status(200).send({ ...trade, chat });
+    const cryptocurrencyChain = await prisma.cryptocurrencyChain.findFirst({
+      where: {
+        cryptocurrencyId: trade.cryptocurrency.id,
+        chainId: trade.offer.chain.id,
+      },
+      select: {
+        abiUrl: true,
+        contractAddress: true,
+      },
+    });
+
+    let token: { [key: string]: any } = {
+      address: cryptocurrencyChain?.contractAddress,
+      abi: [],
+    };
+
+    if (cryptocurrencyChain?.abiUrl && cryptocurrencyChain?.contractAddress) {
+      try {
+        const response = await fetchGet(cryptocurrencyChain?.abiUrl);
+        token.abi = response.data;
+      } catch (error) {
+        console.error('Error fetching ABI:', error);
+      }
+    }
+
+    res.status(200).send({ ...trade, chat, token });
   } catch (err) {
     console.log({ err });
     res.status(500).send({

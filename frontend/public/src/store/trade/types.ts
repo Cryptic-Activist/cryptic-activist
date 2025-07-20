@@ -96,7 +96,10 @@ export type PaymentReceipt = {
   url: string;
 };
 
-export type ABI = { [key: string]: any };
+export type Token = {
+  address: string;
+  abi: { [key: string]: any };
+};
 
 export type Status =
   | 'PENDING'
@@ -140,7 +143,7 @@ export type Trade = {
     sellerId?: string;
     buyerFundedAt?: string;
     sellerFundedAt?: string;
-    abi?: ABI;
+    token?: Token;
   };
 };
 
@@ -179,7 +182,7 @@ export type TradeStore = {
     chat?: Chat;
     tradeDispute?: TradeDispute;
     tradeEscrowDetails?: TradeEscrowDetails;
-    abi?: ABI;
+    token?: Token;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
     resetTrade: () => void;
@@ -220,7 +223,7 @@ export type TradeSetter = {
   buyerFundedAt?: string;
   sellerId?: string;
   sellerFundedAt?: string;
-  abi?: ABI;
+  token?: Token;
 };
 
 export type Value = TradeSetter;

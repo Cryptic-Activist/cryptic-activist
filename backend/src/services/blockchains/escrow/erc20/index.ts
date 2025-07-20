@@ -45,7 +45,7 @@ export const getSigner = () => {
 };
 
 export const getEscrowDetails = async () => {
-  const cacheKey = 'smartContracts:escrow:native';
+  const cacheKey = 'smartContracts:escrow:erc20';
   let details: ContractDetails = { abi: null, address: null };
 
   const cachedDetails = await redisClient.get(cacheKey);

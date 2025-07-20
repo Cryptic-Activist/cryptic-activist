@@ -11,17 +11,13 @@ import {
 import {
   approveToken as approveTokenERC20,
   buyerFundTrade as buyerFundTradeERC20,
-  getMockUSDCBalance as getMockUSDCBalanceERC20,
   getTokenAllowance as getTokenAllowanceERC20,
+  getTokenBalance as getTokenBalanceERC20,
   getTokenDecimals as getTokenDecimalsERC20,
   sellerFundTrade as sellerFundTradeERC20,
 } from '@/services/ethers/escrow/erc20';
 import {
-  approveToken as approveTokenNative,
   buyerFundTrade as buyerFundTradeNative,
-  getMockUSDCBalance as getMockUSDCBalanceNative,
-  getTokenAllowance as getTokenAllowanceNative,
-  getTokenDecimals as getTokenDecimalsNative,
   sellerFundTrade as sellerFundTradeNative,
 } from '@/services/ethers/escrow/native';
 import { parseEther, parseUnits } from 'ethers';
@@ -53,6 +49,8 @@ const useTradeSocket = ({
     contracts: { escrow },
   } = useContracts(false);
 
+  console.log({ trade, escrow });
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [roomError, setRoomError] = useState<string | null>(null);
@@ -66,6 +64,7 @@ const useTradeSocket = ({
 
   const [vendorHasEnoughFunds, _setVendorHasEnoughFunds] = useState(true);
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
+  const [isERC20Trade, setIsERC20Trade] = useState(false);
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -117,73 +116,54 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
-      const decimals = await getTokenDecimals({
-        tokenAddress: erc20TokenAddress,
-      });
-
-      console.log({ decimals });
-
-      if (!decimals) {
-        addToast('error', 'Unable to fetch token decimals', 8000);
-        return;
-      }
-
-      const baseUnits = toTokenUnits(
-        trade.tradeEscrowDetails?.sellerTotalFund,
-        decimals
-      );
-
-      const approved = await approveToken(
-        erc20TokenAddress,
-        trade.abi,
-        baseUnits,
-        decimals
-      );
-
-      console.log({ baseUnits, approved });
-
-      if (approved.error) {
-        console.log(approved.error);
-        return;
-      }
-
-      console.log({ decimals });
-
-      if (approved.message === 'Token approved!') {
-        const isBuyOffer = trade.offer.offerType === 'buy';
-
-        const sellerWallet = isBuyOffer
-          ? trade.vendorWalletAddress
-          : trade.traderWalletAddress;
-
-        const allowance = await getTokenAllowance({
-          address: sellerWallet,
-          mockUSDCAddress: erc20TokenAddress,
+      if (isERC20Trade) {
+        const decimals = await getTokenDecimalsERC20({
+          tokenContractDetails: trade.token,
         });
 
-        console.log({ allowance });
+        if (!decimals) {
+          addToast('error', 'Unable to fetch token decimals', 8000);
+          return;
+        }
 
-        const balance = await getMockUSDCBalance({
-          address: sellerWallet,
-          mockUSDCAddress: erc20TokenAddress,
-        });
-
-        console.log({ balance });
-
-        // if (
-        //   allowance.allowance.lt(trade.tradeEscrowDetails?.sellerTotalFund)
-        // ) {
-        //   console.log('Unsuffient allowance');
-        //   return;
-        // }
-
-        const tx = await sellerFundTrade(
-          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          baseUnits,
-          escrow
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.sellerTotalFund,
+          decimals
         );
 
-        console.log({ tx });
+        const approved = await approveTokenERC20({
+          amount: baseUnits,
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ approved });
+
+        if (approved.error) {
+          addToast('error', 'Unable to approve token', 8000);
+          return;
+        }
+
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance, balance });
+
+        if (allowance.allowance.lt(balance.balance)) {
+          addToast('error', 'Insufficient token allowance', 8000);
+          return;
+        }
+
+        const tx = await sellerFundTradeERC20(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          escrow.erc20
+        );
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
@@ -198,13 +178,37 @@ const useTradeSocket = ({
             return;
           }
         }
+      } else {
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.sellerTotalFund,
+          18
+        );
+        const tx = await sellerFundTradeNative(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          baseUnits,
+          escrow.native
+        );
 
-        addToast('info', 'Trade was funded by the seller', 8000);
-        socket.emit('blockchain_seller_funded_trade', {
-          chatId: trade.chat?.id,
-          senderId: user?.id,
-        });
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
       }
+
+      addToast('info', 'Trade was funded by the seller', 8000);
+      socket.emit('blockchain_seller_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
     }
   };
 
@@ -219,63 +223,48 @@ const useTradeSocket = ({
       trade.offer &&
       trade.offer.offerType
     ) {
-      console.log({ tradeABI: trade.abi });
-
-      const decimals = await getTokenDecimals({
-        tokenAddress: erc20TokenAddress,
-      });
-
-      if (!decimals) {
-        addToast('error', 'Unable to fetch token decimals', 8000);
-        return;
-      }
-
-      const baseUnits = toTokenUnits(
-        trade.tradeEscrowDetails?.buyerCollateral,
-        decimals
-      );
-
-      const approved = await approveToken(
-        erc20TokenAddress,
-        trade.abi,
-        baseUnits,
-        decimals
-      );
-
-      console.log({ baseUnits, approved });
-
-      if (approved.error) {
-        console.log(approved.error);
-        return;
-      }
-
-      if (approved.message === 'Token approved!') {
-        const isBuyOffer = trade.offer.offerType === 'buy';
-
-        const buyerWallet = isBuyOffer
-          ? trade.traderWalletAddress
-          : trade.vendorWalletAddress;
-
-        console.log({ buyerWallet });
-
-        const allowance = await getTokenAllowance({
-          address: buyerWallet,
-          mockUSDCAddress: erc20TokenAddress,
+      if (isERC20Trade) {
+        const decimals = await getTokenDecimalsERC20({
+          tokenContractDetails: trade.token,
         });
 
-        console.log({ allowance });
+        if (!decimals) {
+          addToast('error', 'Unable to fetch token decimals', 8000);
+          return;
+        }
 
-        const balance = await getMockUSDCBalance({
-          address: buyerWallet,
-          mockUSDCAddress: erc20TokenAddress,
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.buyerCollateral,
+          decimals
+        );
+
+        const approved = await approveTokenERC20({
+          amount: baseUnits,
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
         });
 
-        console.log({ balance });
+        console.log({ approved });
 
-        const tx = await buyerFundTrade(
+        if (approved.error) {
+          addToast('error', 'Unable to approve token', 8000);
+          return;
+        }
+
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance, balance });
+
+        const tx = await buyerFundTradeERC20(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          baseUnits,
-          escrow
+          escrow.erc20
         );
         console.log({ tx });
 
@@ -292,12 +281,38 @@ const useTradeSocket = ({
             return;
           }
         }
-        addToast('info', 'Trade was funded by the buyer', 8000);
-        socket.emit('blockchain_buyer_funded_trade', {
-          chatId: trade.chat?.id,
-          senderId: user?.id,
-        });
+      } else {
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.buyerCollateral,
+          18
+        );
+
+        const tx = await buyerFundTradeNative(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          baseUnits,
+          escrow.native
+        );
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
       }
+
+      addToast('info', 'Trade was funded by the buyer', 8000);
+      socket.emit('blockchain_buyer_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
     }
   };
 
@@ -503,6 +518,15 @@ const useTradeSocket = ({
       setEscrowRelease(true);
     }
   }, [trade.escrowReleasedAt]);
+
+  useEffect(() => {
+    if (trade.token?.address || trade.token?.abi !== undefined) {
+      setIsERC20Trade(true);
+      return;
+    }
+  }, [trade.token]);
+
+  console.log({ isERC20Trade });
 
   return {
     messages,

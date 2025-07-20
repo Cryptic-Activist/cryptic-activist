@@ -19,7 +19,11 @@ export const useContractsSlice: StateCreator<
         ({ contracts }) => ({
           contracts: {
             ...contracts,
-            escrow: params.escrow ?? contracts.escrow,
+            escrow: {
+              ...(contracts.escrow ?? {}),
+              erc20: params.escrow?.erc20 ?? contracts.escrow?.erc20,
+              native: params.escrow?.native ?? contracts.escrow?.native,
+            },
             premium: params.premium ?? contracts.premium,
           },
         }),
@@ -29,6 +33,7 @@ export const useContractsSlice: StateCreator<
     },
     setEscrowNativeContract: (contract) => {
       const setValue = get().contracts.setContractsValue;
+      console.log({ contract });
       setValue(
         {
           escrow: {

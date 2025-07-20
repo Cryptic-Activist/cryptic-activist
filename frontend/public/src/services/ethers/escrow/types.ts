@@ -25,6 +25,10 @@ export type GetTokenAllowanceParams = {
   escrowContractDetails: any;
 };
 
+export type GetTokenBalanceParams = {
+  tokenContractDetails: any;
+};
+
 export type ApproveTokenParams = {
   tokenContractDetails: any;
   escrowContractDetails: any;
