@@ -213,6 +213,7 @@ export const getTokenAllowance = async ({
   try {
     const signer = await getSigner();
     const signerAddress = await signer.getAddress();
+    console.log({ signerAddress, tokenContractDetails });
     const tokenContract = new ethers.Contract(
       tokenContractDetails.address,
       tokenContractDetails.abi,
@@ -258,6 +259,63 @@ export const getTokenBalance = async ({
   }
 };
 
+// export const approveToken = async ({
+//   tokenContractDetails,
+//   escrowContractDetails,
+//   amount,
+// }: ApproveTokenParams) => {
+//   try {
+//     console.log({ tokenContractDetails, escrowContractDetails, amount });
+//     const signer = await getSigner();
+//     const tokenContract = new ethers.Contract(
+//       tokenContractDetails.address,
+//       tokenContractDetails.abi,
+//       signer
+//     );
+
+//     console.log({ tokenContract });
+
+//     const balance = await getTokenBalance({ tokenContractDetails });
+
+//     console.log({ balance });
+
+//     // let gasLimit;
+
+//     // try {
+//     //   gasLimit = await tokenContract.approve.estimateGas(
+//     //     escrowContractDetails.address,
+//     //     amount
+//     //   );
+//     //   gasLimit = gasLimit * BigInt(2); // add buffer
+//     // } catch {
+//     //   gasLimit = BigInt(100000); // fallback default
+//     // }
+
+//     console.log(escrowContractDetails.address, amount);
+//     const tx = await tokenContract.approve(
+//       escrowContractDetails.address,
+//       amount
+//       // {
+//       //   gasLimit: BigInt(100000 * 10000),
+//       // }
+//     );
+//     const receipt = await tx.wait();
+
+//     console.log({ tx, receipt });
+
+//     return {
+//       message: 'Token approved!',
+//       receipt,
+//     };
+//   } catch (error) {
+//     console.log({ error });
+//     return {
+//       message: 'Token Approval failed',
+//       error: error,
+//     };
+//   }
+// };
+
 export const approveToken = async ({
   tokenContractDetails,
   escrowContractDetails,
@@ -265,27 +323,27 @@ export const approveToken = async ({
 }: ApproveTokenParams) => {
   try {
     const signer = await getSigner();
+    console.log({
+      tokenAddress: tokenContractDetails.address,
+      tokenAbi: tokenContractDetails.abi,
+    });
     const tokenContract = new ethers.Contract(
       tokenContractDetails.address,
       tokenContractDetails.abi,
       signer
     );
+
     const tx = await tokenContract.approve(
       escrowContractDetails.address,
-      amount
+      amount,
+      { gasLimit: BigInt(1000000000) }
     );
-    const receipt = await tx.wait();
 
-    return {
-      message: 'Token approved!',
-      receipt,
-    };
+    const receipt = await tx.wait();
+    return { message: 'Token approved!', receipt };
   } catch (error) {
-    console.log({ error });
-    return {
-      message: 'Token Approval failed',
-      error: error,
-    };
+    console.error('Approval error:', error);
+    return { message: 'Token Approval failed', error };
   }
 };
 

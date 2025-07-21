@@ -133,6 +133,7 @@ export const sellerFundTrade = async (
   contractDetails: any
 ) => {
   try {
+    console.log({ tradeId, value, contractDetails });
     const contract = await getEscrowContract(contractDetails);
 
     if (!contract) {
@@ -157,6 +158,7 @@ export const sellerFundTrade = async (
       message: 'Seller funded the trade successfully',
     };
   } catch (error: any) {
+    console.log({ error });
     return {
       message: 'Error seller funding trade',
       error: error,
@@ -170,6 +172,7 @@ export const buyerFundTrade = async (
   contractDetails: any
 ) => {
   try {
+    console.log({ tradeId, value, contractDetails });
     const contract = await getEscrowContract(contractDetails);
 
     if (!contract) {
@@ -194,6 +197,7 @@ export const buyerFundTrade = async (
       message: 'Seller funded the trade successfully',
     };
   } catch (error: any) {
+    console.log({ error });
     return {
       message: 'Error buyer funding trade',
       error: error,

@@ -8,10 +8,12 @@ import {
   getEscrowDetails as getEscrowDetailsNativeToken,
 } from '@/services/blockchains/escrow/native';
 import { formatBigInt, parseSafeResponse } from '@/utils/number';
+import { prisma, redisClient } from '@/services/db';
 
+import { ContractDetails } from '@/services/blockchains/escrow/types';
 import { Readable } from 'node:stream';
 import { getNextSmartContractVersion } from '@/services/blockchains';
-import { prisma } from '@/services/db';
+import { parseDurationToSeconds } from '@/utils/date';
 import { uploadFiles } from '@/services/upload';
 
 const convertArtifactToFile = (artifact: any) => {
@@ -72,6 +74,8 @@ export const deployEscrowERC20SmartContract = async (
       platformWallet,
       adminId,
     } = req.body;
+
+    let details: ContractDetails = { abi: null, address: null };
 
     const transactions = await prisma.$transaction(async (tx) => {
       const admin = await tx.admin.findUnique({
@@ -167,6 +171,11 @@ export const deployEscrowERC20SmartContract = async (
           },
         });
 
+        details = {
+          abi: deployed.artifact.abi,
+          address: deployed.contractAddress,
+        };
+
         return { deployed: newDeployment };
       } catch (error) {
         return { error: 'Unable to process Escrow deployment' };
@@ -186,6 +195,11 @@ export const deployEscrowERC20SmartContract = async (
     const convertedGasPrice = formatBigInt(gasPrice);
     const convertedGasUsed = formatBigInt(gasUsed);
     const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
+
+    const cacheKey = 'smartContracts:escrow:erc20';
+    await redisClient.del(cacheKey);
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
 
     res.status(200).json({
       deployed: {
@@ -213,6 +227,8 @@ export const deployEscrowNativeTokenSmartContract = async (
       platformWallet,
       adminId,
     } = req.body;
+
+    let details: ContractDetails = { abi: null, address: null };
 
     const transactions = await prisma.$transaction(async (tx) => {
       const admin = await tx.admin.findUnique({
@@ -308,6 +324,11 @@ export const deployEscrowNativeTokenSmartContract = async (
           },
         });
 
+        details = {
+          abi: deployed.artifact.abi,
+          address: deployed.contractAddress,
+        };
+
         return { deployed: newDeployment };
       } catch (error) {
         return { error: 'Unable to process Escrow deployment' };
@@ -327,6 +348,11 @@ export const deployEscrowNativeTokenSmartContract = async (
     const convertedGasPrice = formatBigInt(gasPrice);
     const convertedGasUsed = formatBigInt(gasUsed);
     const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
+
+    const cacheKey = 'smartContracts:escrow:native';
+    await redisClient.del(cacheKey);
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
 
     res.status(200).json({
       deployed: {

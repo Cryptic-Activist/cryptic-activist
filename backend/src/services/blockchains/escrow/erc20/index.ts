@@ -503,15 +503,6 @@ export const getTradeDetails = async (tradeId: bigint) => {
 
 export const getCreateTradeDetails = async (trade: any, decimals: number) => {
   try {
-    // TODO:
-    // Replace every Float from Prisma Schema with Decimal and make
-    // the appropriate changes to the new data type.
-    //
-    // TODO:
-    // Stop storing the amount and crypto value in WEI
-    // Instead store them in Prisma Decimal type and only convert
-    // them to WEI when needed.
-
     const decimalInt = parseInt(decimals.toString());
     const offer = await prisma.offer.findFirst({
       where: { id: trade.offerId },
@@ -548,13 +539,6 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
     const sellerTotalFundInWei = parseEthersUnits(sellerTotalFund, decimalInt);
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
-
-    console.log({
-      tradeAmountInWei,
-      buyerCollateralInWei,
-      sellerCollateralInWei,
-      sellerTotalFundInWei,
-    });
 
     return {
       buyerWallet: buyerWallet as Address,

@@ -1,16 +1,20 @@
+import { Address, ContractDetails } from '@/services/blockchains/escrow/types';
 import { Decimal, prisma, redisClient } from '@/services/db';
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
   approveToken,
-  createTrade,
+  createTrade as createTradeERC20,
   getCreateTradeDetails,
   getEscrowDetails as getEscrowDetailsERC20,
   getTokenDecimals,
   getTokenDetails,
 } from '@/services/blockchains/escrow/erc20';
+import {
+  createTrade as createTradeNative,
+  getEscrowDetails as getEscrowDetailsNative,
+} from '@/services/blockchains/escrow/native';
 
-import { Address } from '@/services/blockchains/escrow/types';
 import ChatMessage from '@/models/ChatMessage';
 import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
@@ -216,26 +220,29 @@ export default class Chat {
                 },
               ]);
 
-              if (!trade.cryptocurrency.chains[0]?.abiUrl) {
-                await prisma.trade.update({
-                  where: { id: trade.id },
-                  data: { status: 'FAILED' },
-                });
-                await systemMessage.tradeFailed(trade.id);
-                this.io.to(chatId).emit('trade_error', {
-                  error: 'Cryptocurrency chain ABI URL not found',
-                });
-                return;
+              let isERC20TokenTrade = true;
+
+              if (
+                trade.cryptocurrency.chains[0]?.abiUrl === null &&
+                trade.cryptocurrency.chains[0]?.contractAddress === null
+              ) {
+                isERC20TokenTrade = false;
               }
 
-              const tokenContractDetails = await getTokenDetails(
-                trade.cryptocurrency.coingeckoId,
-                trade.offer.chain.id,
-              );
+              let tokenContractDetails;
 
-              const tokenDecimals = await getTokenDecimals({
-                tokenContractDetails,
-              });
+              if (isERC20TokenTrade) {
+                tokenContractDetails = await getTokenDetails(
+                  trade.cryptocurrency.coingeckoId,
+                  trade.offer.chain.id,
+                );
+              }
+
+              const tokenDecimals = isERC20TokenTrade
+                ? await getTokenDecimals({
+                    tokenContractDetails,
+                  })
+                : 18;
 
               if (!tokenDecimals) {
                 this.io.to(chatId).emit('trade_error', {
@@ -280,15 +287,21 @@ export default class Chat {
                 trade.cryptocurrencyAmount.toString(),
                 tokenDecimals,
               );
-              const escrowContractDetails = await getEscrowDetailsERC20();
 
-              console.log({ tokenContract: trade.cryptocurrency.chains[0] });
+              let escrowContractDetails: ContractDetails;
+
+              if (isERC20TokenTrade) {
+                escrowContractDetails = await getEscrowDetailsERC20();
+              } else {
+                escrowContractDetails = await getEscrowDetailsNative();
+              }
 
               if (
-                !escrowContractDetails.abi ||
-                !escrowContractDetails.address ||
-                !tokenContractDetails.abi ||
-                !tokenContractDetails.address
+                isERC20TokenTrade &&
+                (!escrowContractDetails.abi ||
+                  !escrowContractDetails.address ||
+                  !tokenContractDetails.abi ||
+                  !tokenContractDetails.address)
               ) {
                 this.io.to(chatId).emit('trade_error', {
                   error: 'Failed to get token approval parameters',
@@ -296,21 +309,25 @@ export default class Chat {
                 return;
               }
 
-              const approved = await approveToken({
-                amount: baseUnits,
-                escrowContractDetails: escrowContractDetails,
-                tokenContractDetails: tokenContractDetails,
-              });
-
-              if (approved.error) {
-                this.io.to(chatId).emit('trade_error', {
-                  error: 'Failed to approve token',
+              if (isERC20TokenTrade) {
+                const approved = await approveToken({
+                  amount: baseUnits,
+                  escrowContractDetails: escrowContractDetails,
+                  tokenContractDetails: tokenContractDetails,
                 });
-                return;
+
+                if (approved.error) {
+                  this.io.to(chatId).emit('trade_error', {
+                    error: 'Failed to approve token',
+                  });
+                  return;
+                }
               }
 
               const createTradeObj = {
-                erc20TokenAddress: tokenContractDetails.address,
+                ...(isERC20TokenTrade && {
+                  erc20TokenAddress: tokenContractDetails.address,
+                }),
                 arbitrator: createTradeDetails.arbitratorWallet,
                 buyer: createTradeDetails.buyerWallet,
                 seller: createTradeDetails.sellerWallet,
@@ -324,7 +341,15 @@ export default class Chat {
               };
 
               console.log({ createTradeObj });
-              const tradeCreated = await createTrade(createTradeObj);
+              let tradeCreated;
+
+              if (isERC20TokenTrade) {
+                // @ts-ignore
+                tradeCreated = await createTradeERC20(createTradeObj);
+              } else {
+                // @ts-ignore
+                tradeCreated = await createTradeNative(createTradeObj);
+              }
 
               console.log({ tradeCreated });
 
@@ -356,22 +381,6 @@ export default class Chat {
                 });
 
               if (!tradeEscrowDetails) {
-                console.log({
-                  arbitratorWallet: createTradeDetails.arbitratorWallet,
-                  buyerCollateral: createTradeDetails.buyerCollateral,
-                  buyerWallet: createTradeDetails.buyerWallet,
-                  tradeAmount: createTradeDetails.tradeAmount,
-                  feeRate: new Decimal(createTradeDetails.feeRate).div(10000),
-                  profitMargin: new Decimal(
-                    createTradeDetails.profitMargin,
-                  ).div(10000),
-                  sellerWallet: createTradeDetails.sellerWallet,
-                  sellerCollateral: createTradeDetails.sellerCollateral,
-                  sellerTotalFund: createTradeDetails.sellerTotalFund,
-                  tradeDurationInSeconds:
-                    createTradeDetails.tradeDurationInSeconds,
-                  blockchainTradeId: tradeCreated.data?.tradeId.toString(),
-                });
                 const tradeEscrowDetails =
                   await prisma.tradeEscrowDetails.create({
                     data: {
