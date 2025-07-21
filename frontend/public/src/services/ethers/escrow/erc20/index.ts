@@ -224,7 +224,7 @@ export const getTokenAllowance = async ({
       escrowContractDetails.address
     );
 
-    return { allowance };
+    return allowance;
   } catch (error) {
     console.log({ error });
     return {
@@ -270,20 +270,9 @@ export const approveToken = async ({
       tokenContractDetails.abi,
       signer
     );
-    const spenderAddress = escrowContractDetails.address;
-    const estimatedGas = await tokenContract.approve.estimateGas(
-      spenderAddress,
-      amount
-    );
-
-    console.log({ estimatedGas });
-
     const tx = await tokenContract.approve(
       escrowContractDetails.address,
-      amount,
-      {
-        gasLimit: estimatedGas,
-      }
+      amount
     );
     const receipt = await tx.wait();
 

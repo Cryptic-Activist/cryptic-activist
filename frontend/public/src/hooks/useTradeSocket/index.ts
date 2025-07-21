@@ -24,6 +24,7 @@ import { parseEther, parseUnits } from 'ethers';
 import { useApp, useContracts } from '@/hooks';
 import { useEffect, useRef, useState } from 'react';
 
+import { Console } from 'console';
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
@@ -48,8 +49,6 @@ const useTradeSocket = ({
   const {
     contracts: { escrow },
   } = useContracts(false);
-
-  console.log({ trade, escrow });
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -131,31 +130,34 @@ const useTradeSocket = ({
           decimals
         );
 
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance });
+
+        if (allowance.lt(baseUnits)) {
+          addToast('error', 'Insufficient token allowance', 8000);
+          return;
+        }
+
         const approved = await approveTokenERC20({
           amount: baseUnits,
           escrowContractDetails: escrow.erc20,
           tokenContractDetails: trade.token,
         });
 
-        console.log({ approved });
-
         if (approved.error) {
           addToast('error', 'Unable to approve token', 8000);
           return;
         }
 
-        const allowance = await getTokenAllowanceERC20({
-          escrowContractDetails: escrow.erc20,
-          tokenContractDetails: trade.token,
-        });
-
         const balance = await getTokenBalanceERC20({
           tokenContractDetails: trade.token,
         });
 
-        console.log({ allowance, balance });
-
-        if (allowance.allowance.lt(balance.balance)) {
+        if (allowance.lt(balance.balance)) {
           addToast('error', 'Insufficient token allowance', 8000);
           return;
         }
@@ -238,35 +240,37 @@ const useTradeSocket = ({
           decimals
         );
 
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance });
+
+        if (allowance.lt(baseUnits)) {
+          addToast('error', 'Insufficient token allowance', 8000);
+          return;
+        }
+
         const approved = await approveTokenERC20({
           amount: baseUnits,
           escrowContractDetails: escrow.erc20,
           tokenContractDetails: trade.token,
         });
 
-        console.log({ approved });
-
         if (approved.error) {
           addToast('error', 'Unable to approve token', 8000);
           return;
         }
 
-        const allowance = await getTokenAllowanceERC20({
-          escrowContractDetails: escrow.erc20,
-          tokenContractDetails: trade.token,
-        });
-
         const balance = await getTokenBalanceERC20({
           tokenContractDetails: trade.token,
         });
-
-        console.log({ allowance, balance });
 
         const tx = await buyerFundTradeERC20(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
           escrow.erc20
         );
-        console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
@@ -525,8 +529,6 @@ const useTradeSocket = ({
       return;
     }
   }, [trade.token]);
-
-  console.log({ isERC20Trade });
 
   return {
     messages,

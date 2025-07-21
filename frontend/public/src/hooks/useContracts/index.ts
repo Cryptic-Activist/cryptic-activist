@@ -32,8 +32,6 @@ const useContracts = (enabled = true) => {
     ],
   });
 
-  console.log({ escrowNativeDetails, escrowERC20Details });
-
   useEffect(() => {
     if (escrowNativeDetails.data) {
       contracts.setEscrowNativeContract(escrowNativeDetails.data);
