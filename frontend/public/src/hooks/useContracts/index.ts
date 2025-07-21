@@ -34,6 +34,7 @@ const useContracts = (enabled = true) => {
 
   useEffect(() => {
     if (escrowNativeDetails.data) {
+      console.log({ escrowNativeDetails });
       contracts.setEscrowNativeContract(escrowNativeDetails.data);
     }
   }, [escrowNativeDetails.data]);

@@ -28,11 +28,9 @@ import {
   parseEthersUnits,
 } from '@/utils/blockchain';
 import { prisma, redisClient } from '@/services/db';
-import semver, { ReleaseType } from 'semver';
 
 import { Decimal } from '@/services/db';
 import EscrowArtifact from '@/contracts/escrow/artifacts/ERC20Escrow.json';
-import { MockToken } from '@/contracts';
 import { fetchGet } from '@/services/axios';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
@@ -216,7 +214,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
-  console.log({ receipt });
   for (const log of receipt.logs) {
     try {
       const parsedLog = ifaceEscrow.parseLog(log);
@@ -266,8 +263,9 @@ export const decodeFunctionData = (receipt: any) => {
 
 export const createTrade = async (params: InitTradeParams) => {
   try {
-    console.log({ params });
     const contract = await getEscrowContract();
+
+    console.log(JSON.stringify(contract, null, 2));
 
     const tx = await contract.createTrade(
       params.erc20TokenAddress,
@@ -284,7 +282,6 @@ export const createTrade = async (params: InitTradeParams) => {
     );
 
     const receipt = await tx.wait();
-    console.log({ receipt });
     const decoded = decodeFunctionData(receipt);
 
     return {
@@ -433,6 +430,7 @@ export const approveToken = async ({
   escrowContractDetails,
   amount,
 }: ApproveTokenParams) => {
+  console.log({ tokenContractDetails, escrowContractDetails, amount });
   try {
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(

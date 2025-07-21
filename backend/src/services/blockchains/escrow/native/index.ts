@@ -157,7 +157,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
-  console.log({ receipt });
   for (const log of receipt.logs) {
     try {
       const parsedLog = ifaceNativeTokenEscrow.parseLog(log);

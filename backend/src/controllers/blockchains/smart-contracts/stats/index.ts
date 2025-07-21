@@ -6,8 +6,6 @@ import {
   getGasPrice,
 } from '@/services/coinGecko';
 
-import { ethers } from 'ethers';
-import { getEscrowContract } from '@/services/blockchains/escrow';
 import { prisma } from '@/services/db';
 
 export const getDeploymentStats = async (req: Request, res: Response) => {
@@ -59,6 +57,8 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
       const blockHeight = await getBlockHeight(
         cryptocurrencyChain?.chain?.rpcUrl,
       );
+
+      console.log({ rpc: cryptocurrencyChain?.chain?.rpcUrl });
 
       if (blockHeight === undefined || blockHeight === null) {
         throw new Error('Unable to find current block height');

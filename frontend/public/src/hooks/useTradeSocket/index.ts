@@ -138,50 +138,56 @@ const useTradeSocket = ({
           tokenContractDetails: trade.token,
         });
 
+        console.log({ approved });
+
         if (approved.error) {
           addToast('error', 'Unable to approve token', 8000);
           return;
         }
 
-        // const allowance = await getTokenAllowanceERC20({
-        //   escrowContractDetails: escrow.erc20,
-        //   tokenContractDetails: trade.token,
-        // });
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
 
-        // console.log({ allowance });
+        console.log({ allowance });
 
         // if (allowance.lt(baseUnits)) {
         //   addToast('error', 'Insufficient token allowance', 8000);
         //   return;
         // }
 
-        // const balance = await getTokenBalanceERC20({
-        //   tokenContractDetails: trade.token,
-        // });
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ balance });
 
         // // if (allowance.lt(balance.balance)) {
         // //   addToast('error', 'Insufficient token allowance', 8000);
         // //   return;
         // // }
 
-        // const tx = await sellerFundTradeERC20(
-        //   parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        //   escrow.erc20
-        // );
+        const tx = await sellerFundTradeERC20(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          escrow.erc20
+        );
 
-        // if (tx.error) {
-        //   if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-        //     socket.emit('blockchaion_seller_fund_trade_rejected', {
-        //       chatId,
-        //       senderId: user?.id,
-        //     });
-        //     return;
-        //   }
-        //   if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-        //     addToast('error', 'Unable to fund trade', 8000);
-        //     return;
-        //   }
-        // }
+        console.log({ tx });
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
       } else {
         const baseUnits = toTokenUnitsConvert(
           trade.tradeEscrowDetails?.sellerTotalFund,
@@ -212,11 +218,11 @@ const useTradeSocket = ({
         }
       }
 
-      // addToast('info', 'Trade was funded by the seller', 8000);
-      // socket.emit('blockchain_seller_funded_trade', {
-      //   chatId: trade.chat?.id,
-      //   senderId: user?.id,
-      // });
+      addToast('info', 'Trade was funded by the seller', 8000);
+      socket.emit('blockchain_seller_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
     }
   };
 
@@ -256,40 +262,42 @@ const useTradeSocket = ({
           addToast('error', 'Unable to approve token', 8000);
           return;
         }
-        // const allowance = await getTokenAllowanceERC20({
-        //   escrowContractDetails: escrow.erc20,
-        //   tokenContractDetails: trade.token,
-        // });
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
 
-        // console.log({ allowance });
+        console.log({ allowance });
 
         // if (allowance.lt(baseUnits)) {
         //   addToast('error', 'Insufficient token allowance', 8000);
         //   return;
         // }
 
-        // const balance = await getTokenBalanceERC20({
-        //   tokenContractDetails: trade.token,
-        // });
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
 
-        // const tx = await buyerFundTradeERC20(
-        //   parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        //   escrow.erc20
-        // );
+        const tx = await buyerFundTradeERC20(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          escrow.erc20
+        );
 
-        // if (tx.error) {
-        //   if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-        //     socket.emit('blockchaion_seller_fund_trade_rejected', {
-        //       chatId,
-        //       senderId: user?.id,
-        //     });
-        //     return;
-        //   }
-        //   if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-        //     addToast('error', 'Unable to fund trade', 8000);
-        //     return;
-        //   }
-        // }
+        console.log({ tx });
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
       } else {
         const baseUnits = toTokenUnitsConvert(
           trade.tradeEscrowDetails?.buyerCollateral,
@@ -301,9 +309,15 @@ const useTradeSocket = ({
           baseUnits,
         });
 
+        const test = parseEther(
+          trade.tradeEscrowDetails?.buyerCollateral.toString()
+        );
+
+        console.log({ test });
+
         const tx = await buyerFundTradeNative(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          parseEther(trade.tradeEscrowDetails?.buyerCollateral.toString()),
+          test,
           escrow.native
         );
 
@@ -322,11 +336,11 @@ const useTradeSocket = ({
         }
       }
 
-      // addToast('info', 'Trade was funded by the buyer', 8000);
-      // socket.emit('blockchain_buyer_funded_trade', {
-      //   chatId: trade.chat?.id,
-      //   senderId: user?.id,
-      // });
+      addToast('info', 'Trade was funded by the buyer', 8000);
+      socket.emit('blockchain_buyer_funded_trade', {
+        chatId: trade.chat?.id,
+        senderId: user?.id,
+      });
     }
   };
 
