@@ -5,6 +5,12 @@ import {
   InitTradeParams,
 } from '../types';
 import {
+  ApproveTokenParams,
+  GetTokenAllowanceParams,
+  GetTokenBalanceParams,
+  GetTokenDecimalsParams,
+} from './type';
+import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_ARBITRATOR_ADDRESS,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
@@ -42,6 +48,59 @@ export const getSigner = () => {
   const provider = getProvider();
   const signer = new ethers.Wallet(ETHEREUM_DEPLOYER_PRIVATE_KEY, provider);
   return signer;
+};
+
+export const getTokenDetails = async (coingeckoId: string, chainId: string) => {
+  const cacheKey = `smartContracts:erc20:tokens:${coingeckoId}`;
+  let details: ContractDetails = { abi: null, address: null };
+
+  const cachedDetails = await redisClient.get(cacheKey);
+
+  if (cachedDetails) {
+    const parsedCachedDetails = JSON.parse(cachedDetails);
+    details = {
+      abi: parsedCachedDetails.abi,
+      address: parsedCachedDetails.address,
+    };
+  } else {
+    const tokenSmartContract = await prisma.cryptocurrencyChain.findFirst({
+      where: {
+        chain: {
+          id: chainId,
+        },
+        cryptocurrency: {
+          coingeckoId,
+        },
+      },
+      select: {
+        abiUrl: true,
+        contractAddress: true,
+      },
+    });
+
+    if (
+      !tokenSmartContract ||
+      !tokenSmartContract.abiUrl ||
+      !tokenSmartContract.contractAddress
+    ) {
+      throw new Error('Unable to find Token Details');
+    }
+
+    const response = await fetchGet(tokenSmartContract.abiUrl);
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch ABI from ${tokenSmartContract.abiUrl}`);
+    }
+
+    details = {
+      abi: response.data,
+      address: tokenSmartContract.contractAddress,
+    };
+    const expiry = parseDurationToSeconds('1w');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
+  }
+
+  return details;
 };
 
 export const getEscrowDetails = async () => {
@@ -225,6 +284,7 @@ export const createTrade = async (params: InitTradeParams) => {
     );
 
     const receipt = await tx.wait();
+    console.log({ receipt });
     const decoded = decodeFunctionData(receipt);
 
     return {
@@ -296,48 +356,42 @@ export const executeTrade = async (tradeId: BigInt) => {
 };
 
 export const getTokenDecimals = async ({
-  tokenAddress,
-}: {
-  tokenAddress: string;
-}) => {
+  tokenContractDetails,
+}: GetTokenDecimalsParams) => {
   try {
+    console.log({ tokenContractDetails });
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
-      tokenAddress,
-      MockToken.abi,
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
       signer,
     );
 
     const decimals = await tokenContract.decimals();
 
-    return { decimals };
+    return Number(decimals);
   } catch (error) {
     console.log({ error });
-    return {
-      message: 'Unable to check balances',
-      error: error,
-    };
+    return null;
   }
 };
 
 export const getTokenAllowance = async ({
-  address,
-  mockUSDCAddress,
-}: {
-  address: string;
-  mockUSDCAddress: string;
-}) => {
+  escrowContractDetails,
+  tokenContractDetails,
+}: GetTokenAllowanceParams) => {
   try {
     const signer = await getSigner();
+    const signerAddress = await signer.getAddress();
     const tokenContract = new ethers.Contract(
-      mockUSDCAddress,
-      MockToken.abi,
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
       signer,
     );
 
     const allowance = await tokenContract.allowance(
-      address,
-      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      signerAddress,
+      escrowContractDetails.address,
     );
 
     return { allowance };
@@ -350,20 +404,48 @@ export const getTokenAllowance = async ({
   }
 };
 
-export const approveToken = async (
-  tokenAddress: string,
-  tokenABI: any,
-  amountToApprove: string,
-) => {
+export const getTokenBalance = async ({
+  tokenContractDetails,
+}: GetTokenBalanceParams) => {
   try {
-    const signer = getSigner();
-    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
-    const amount = parseEther(amountToApprove);
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer,
+    );
+
+    const signerAddress = await signer.getAddress();
+
+    const balance = await tokenContract.balanceOf(signerAddress);
+
+    return { balance };
+  } catch (error) {
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const approveToken = async ({
+  tokenContractDetails,
+  escrowContractDetails,
+  amount,
+}: ApproveTokenParams) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer,
+    );
     const tx = await tokenContract.approve(
-      ETHEREUM_ESCROW_CONTRACT_ADDRESS,
+      escrowContractDetails.address,
       amount,
     );
     const receipt = await tx.wait();
+
     return {
       message: 'Token approved!',
       receipt,

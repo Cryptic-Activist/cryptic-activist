@@ -5,7 +5,9 @@ import {
   approveToken,
   createTrade,
   getCreateTradeDetails,
+  getEscrowDetails as getEscrowDetailsERC20,
   getTokenDecimals,
+  getTokenDetails,
 } from '@/services/blockchains/escrow/erc20';
 
 import { Address } from '@/services/blockchains/escrow/types';
@@ -13,6 +15,7 @@ import ChatMessage from '@/models/ChatMessage';
 import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
+import { toTokenUnits } from '@/utils/blockchain';
 
 export default class Chat {
   private socket: Socket;
@@ -81,6 +84,7 @@ export default class Chat {
                   offerType: true,
                   chain: {
                     select: {
+                      id: true,
                       chainId: true,
                     },
                   },
@@ -88,6 +92,7 @@ export default class Chat {
               },
               cryptocurrency: {
                 select: {
+                  coingeckoId: true,
                   chains: {
                     where: {
                       chain: {
@@ -107,18 +112,10 @@ export default class Chat {
                       contractAddress: true,
                     },
                   },
-                  //   where: {
-
-                  //   },
-                  //   select: {
-                  //     abiUrl: true,
-                  //   },
                 },
               },
             },
           });
-
-          // console.log({ data: trade?.cryptocurrency.chains });
 
           if (!trade?.id) {
             this.io.to(chatId).emit('trade_error', {
@@ -219,8 +216,6 @@ export default class Chat {
                 },
               ]);
 
-              console.log({ crypto: trade.cryptocurrency });
-
               if (!trade.cryptocurrency.chains[0]?.abiUrl) {
                 await prisma.trade.update({
                   where: { id: trade.id },
@@ -233,19 +228,26 @@ export default class Chat {
                 return;
               }
 
-              const erc20TokenAddress =
-                '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as Address;
+              const tokenContractDetails = await getTokenDetails(
+                trade.cryptocurrency.coingeckoId,
+                trade.offer.chain.id,
+              );
 
               const tokenDecimals = await getTokenDecimals({
-                tokenAddress: erc20TokenAddress,
+                tokenContractDetails,
               });
+
+              if (!tokenDecimals) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Unable to find token decimals',
+                });
+                return;
+              }
 
               const createTradeDetails = await getCreateTradeDetails(
                 updatedTrade,
-                tokenDecimals.decimals,
+                tokenDecimals,
               );
-
-              console.log({ createTradeDetails });
 
               if (!createTradeDetails) {
                 const endedAt = new Date();
@@ -274,35 +276,31 @@ export default class Chat {
                 },
               ]);
 
-              const token = await prisma.cryptocurrencyChain.findFirst({
-                where: {
-                  cryptocurrency: {
-                    coingeckoId: 'usd-coin',
-                  },
-                  chain: {
-                    chainId: trade.offer.chain.chainId,
-                  },
-                },
-                select: {
-                  abiUrl: true,
-                  contractAddress: true,
-                },
-              });
+              const baseUnits = toTokenUnits(
+                trade.cryptocurrencyAmount.toString(),
+                tokenDecimals,
+              );
+              const escrowContractDetails = await getEscrowDetailsERC20();
 
-              console.log({ token });
+              console.log({ tokenContract: trade.cryptocurrency.chains[0] });
 
-              if (!token || !token.contractAddress) {
+              if (
+                !escrowContractDetails.abi ||
+                !escrowContractDetails.address ||
+                !tokenContractDetails.abi ||
+                !tokenContractDetails.address
+              ) {
                 this.io.to(chatId).emit('trade_error', {
-                  error: 'Failed to approve token. Token not found.',
+                  error: 'Failed to get token approval parameters',
                 });
                 return;
               }
 
-              const approved = await approveToken(
-                erc20TokenAddress,
-                MockToken.abi,
-                trade.cryptocurrencyAmount.toString(),
-              );
+              const approved = await approveToken({
+                amount: baseUnits,
+                escrowContractDetails: escrowContractDetails,
+                tokenContractDetails: tokenContractDetails,
+              });
 
               if (approved.error) {
                 this.io.to(chatId).emit('trade_error', {
@@ -312,7 +310,7 @@ export default class Chat {
               }
 
               const createTradeObj = {
-                erc20TokenAddress: erc20TokenAddress,
+                erc20TokenAddress: tokenContractDetails.address,
                 arbitrator: createTradeDetails.arbitratorWallet,
                 buyer: createTradeDetails.buyerWallet,
                 seller: createTradeDetails.sellerWallet,
@@ -363,8 +361,10 @@ export default class Chat {
                   buyerCollateral: createTradeDetails.buyerCollateral,
                   buyerWallet: createTradeDetails.buyerWallet,
                   tradeAmount: createTradeDetails.tradeAmount,
-                  feeRate: new Decimal(createTradeDetails.feeRate),
-                  profitMargin: new Decimal(createTradeDetails.profitMargin),
+                  feeRate: new Decimal(createTradeDetails.feeRate).div(10000),
+                  profitMargin: new Decimal(
+                    createTradeDetails.profitMargin,
+                  ).div(10000),
                   sellerWallet: createTradeDetails.sellerWallet,
                   sellerCollateral: createTradeDetails.sellerCollateral,
                   sellerTotalFund: createTradeDetails.sellerTotalFund,

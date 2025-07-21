@@ -270,9 +270,20 @@ export const approveToken = async ({
       tokenContractDetails.abi,
       signer
     );
+    const spenderAddress = escrowContractDetails.address;
+    const estimatedGas = await tokenContract.approve.estimateGas(
+      spenderAddress,
+      amount
+    );
+
+    console.log({ estimatedGas });
+
     const tx = await tokenContract.approve(
       escrowContractDetails.address,
-      amount
+      amount,
+      {
+        gasLimit: estimatedGas,
+      }
     );
     const receipt = await tx.wait();
 

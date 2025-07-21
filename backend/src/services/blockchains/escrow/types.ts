@@ -3,7 +3,7 @@ import { Contract } from 'ethers';
 export type Address = `0x${string}`;
 
 export type InitTradeParams = {
-  erc20TokenAddress: Address;
+  erc20TokenAddress: string;
   buyer: Address;
   seller: Address;
   arbitrator: Address;

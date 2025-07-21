@@ -15,18 +15,6 @@ const {
   OPTIMISM_SEPOLIA_RPC,
 } = process.env;
 
-console.log({
-  PRIVATE_KEY,
-  ETHEREUM_RPC,
-  SEPOLIA_RPC,
-  POLYGON_RPC,
-  AMOY_RPC,
-  ARBITRUM_RPC,
-  ARBITRUM_SEPOLIA_RPC,
-  OPTIMISM_RPC,
-  OPTIMISM_SEPOLIA_RPC,
-});
-
 const PRIVATE_KEY_STRING = PRIVATE_KEY as string;
 
 const config: HardhatUserConfig = {
