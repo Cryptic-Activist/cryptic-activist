@@ -16,6 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Chain } from '@/stores/chains/types';
 import { DeploySmartContractParams } from '@/services/smart-contracts/types';
+import { IS_DEVELOPMENT } from '@/constants';
 import { errors } from 'decimal.js';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -167,9 +168,17 @@ const useSmartContractDeployment = () => {
 
 	useEffect(() => {
 		if (chains.data && chains.data.length > 0) {
-			setSelectedChain(chains.data[0]);
+			const filtered = chains.data.filter((chain) => {
+				if (IS_DEVELOPMENT) {
+					return chain.name === 'Hardhat';
+				}
+				return chain.name === 'Polygon';
+			});
+			setSelectedChain(filtered[0]);
 		}
 	}, [chains.data]);
+
+	console.log({ chainsData: chains.data });
 
 	useEffect(() => {
 		if (watchedValuesEscrow.type === 'Premium') {

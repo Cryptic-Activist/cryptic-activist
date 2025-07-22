@@ -208,7 +208,6 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
       artifact: EscrowArtifact,
     };
   } catch (error) {
-    console.log(error);
     throw new Error('Unable to deploy Escrow');
   }
 };
@@ -255,7 +254,6 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (_error) {
-      console.log({ _error });
       continue;
     }
   }
@@ -264,8 +262,6 @@ export const decodeFunctionData = (receipt: any) => {
 export const createTrade = async (params: InitTradeParams) => {
   try {
     const contract = await getEscrowContract();
-
-    console.log(JSON.stringify(contract, null, 2));
 
     const tx = await contract.createTrade(
       params.erc20TokenAddress,
@@ -290,7 +286,6 @@ export const createTrade = async (params: InitTradeParams) => {
       message: 'Trade created successfully',
     };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Error creating trade',
       error: error,
@@ -308,8 +303,6 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       };
     }
 
-    console.log({ contract, tradeId, value });
-
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.fundTrade(tradeId, {
       value,
@@ -323,7 +316,6 @@ export const fundTrade = async (tradeId: number, value: bigint) => {
       message: 'Trade funded successfully',
     };
   } catch (error) {
-    console.log({ fundError: error });
     return {
       message: 'Error funding trade',
       error: error,
@@ -352,11 +344,31 @@ export const executeTrade = async (tradeId: BigInt) => {
   }
 };
 
+export const getTrade = async (tradeId: BigInt) => {
+  try {
+    const contract = await getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const tx = await contract.getTrade(tradeId);
+    const receipt = await tx.wait();
+    const decoded = decodeFunctionData(receipt);
+
+    return {
+      data: decoded,
+      txHash: tx.hash,
+      message: 'Trade executed successfully',
+    };
+  } catch (error) {
+    return {
+      message: 'Error executing trade',
+      error: error,
+    };
+  }
+};
+
 export const getTokenDecimals = async ({
   tokenContractDetails,
 }: GetTokenDecimalsParams) => {
   try {
-    console.log({ tokenContractDetails });
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
       tokenContractDetails.address,
@@ -368,7 +380,6 @@ export const getTokenDecimals = async ({
 
     return Number(decimals);
   } catch (error) {
-    console.log({ error });
     return null;
   }
 };
@@ -393,7 +404,6 @@ export const getTokenAllowance = async ({
 
     return { allowance };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Unable to check balances',
       error: error,
@@ -430,7 +440,6 @@ export const approveToken = async ({
   escrowContractDetails,
   amount,
 }: ApproveTokenParams) => {
-  console.log({ tokenContractDetails, escrowContractDetails, amount });
   try {
     const signer = await getSigner();
     const tokenContract = new ethers.Contract(
@@ -449,7 +458,6 @@ export const approveToken = async ({
       receipt,
     };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Token Approval failed',
       error: error,
@@ -558,7 +566,6 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
       profitMargin: 150,
     };
   } catch (error) {
-    console.error('Error in getCreateTradeDetails:', error);
     return null;
   }
 };

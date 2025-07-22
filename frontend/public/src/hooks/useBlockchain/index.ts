@@ -71,7 +71,6 @@ const useBlockchain = () => {
   };
 
   const handleSwitchChain = (switchChainId = DEFAULT_CHAIN_ID) => {
-    console.log({ switchChainId, chains });
     const chainToSwitch = chains.find((c) => c.id === switchChainId);
     if (switchChain && chainToSwitch) {
       switchChain({ chainId: chainToSwitch.id });

@@ -4,7 +4,6 @@ import {
 } from '@/middlewares/authorization';
 
 import { Router } from 'express';
-import { deployEscrowSmartContract } from '@/controllers/blockchains/smart-contracts/escrow';
 import { getDeploymentStats } from '@/controllers/blockchains/smart-contracts/stats';
 
 const router = Router();

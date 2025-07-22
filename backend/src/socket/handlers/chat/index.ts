@@ -340,7 +340,6 @@ export default class Chat {
                 sellerTotalDeposit: createTradeDetails.sellerTotalFundInWei,
               };
 
-              console.log({ createTradeObj });
               let tradeCreated;
 
               if (isERC20TokenTrade) {
@@ -351,10 +350,7 @@ export default class Chat {
                 tradeCreated = await createTradeNative(createTradeObj);
               }
 
-              console.log({ tradeCreated });
-
               if (tradeCreated.error) {
-                console.log({ errorCreation: tradeCreated.error });
                 await prisma.trade.update({
                   where: { id: trade.id },
                   data: {
@@ -452,7 +448,6 @@ export default class Chat {
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
-          console.log({ error });
           this.io.to(chatId).emit('trade_error', {
             error: 'Trade creation error',
           });

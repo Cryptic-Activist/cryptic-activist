@@ -189,19 +189,13 @@ const useTradeSocket = ({
           }
         }
       } else {
-        const baseUnits = toTokenUnitsConvert(
-          trade.tradeEscrowDetails?.sellerTotalFund,
-          18
-        );
-        console.log({
-          sellerTotalFund: trade.tradeEscrowDetails?.sellerTotalFund,
-          baseUnits,
-        });
         const tx = await sellerFundTradeNative(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
           parseEther(trade.tradeEscrowDetails?.sellerTotalFund.toString()),
           escrow.native
         );
+
+        // console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
@@ -269,11 +263,6 @@ const useTradeSocket = ({
 
         console.log({ allowance });
 
-        // if (allowance.lt(baseUnits)) {
-        //   addToast('error', 'Insufficient token allowance', 8000);
-        //   return;
-        // }
-
         const balance = await getTokenBalanceERC20({
           tokenContractDetails: trade.token,
         });
@@ -299,27 +288,13 @@ const useTradeSocket = ({
           }
         }
       } else {
-        const baseUnits = toTokenUnitsConvert(
-          trade.tradeEscrowDetails?.buyerCollateral,
-          18
-        );
-
-        console.log({
-          buyerCollateral: trade.tradeEscrowDetails?.buyerCollateral,
-          baseUnits,
-        });
-
-        const test = parseEther(
-          trade.tradeEscrowDetails?.buyerCollateral.toString()
-        );
-
-        console.log({ test });
-
         const tx = await buyerFundTradeNative(
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-          test,
+          parseEther(trade.tradeEscrowDetails?.buyerCollateral.toString()),
           escrow.native
         );
+
+        console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {

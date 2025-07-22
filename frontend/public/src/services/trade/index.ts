@@ -32,7 +32,6 @@ export const getCurrentTradingFee = async (
 
 export const getTrade = async (id: string) => {
   const bearerToken = getBearerToken();
-  console.log(`${BACKEND}/trades/trade/` + id);
   const response = await fetchGet(`${BACKEND}/trades/trade/` + id, {
     Authorization: bearerToken,
   });

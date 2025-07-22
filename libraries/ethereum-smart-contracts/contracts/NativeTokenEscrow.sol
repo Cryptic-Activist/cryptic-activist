@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract NativeTokenEscrow {
     address public platformWallet;
@@ -367,6 +368,7 @@ contract NativeTokenEscrow {
      * @dev Get trade details
      */
     function getTrade(uint256 _tradeId) external view tradeExists(_tradeId) returns (
+        uint256 id,
         address buyer,
         address seller,
         address arbitrator,
@@ -383,6 +385,7 @@ contract NativeTokenEscrow {
     ) {
         Trade storage trade = trades[_tradeId];
         return (
+            trade.id,
             trade.buyer,
             trade.seller,
             trade.arbitrator,

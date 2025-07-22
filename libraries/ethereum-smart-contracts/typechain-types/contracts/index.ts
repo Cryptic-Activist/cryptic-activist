@@ -5,5 +5,4 @@ import type * as premiumSubscriptionManagerSol from "./PremiumSubscriptionManage
 export type { premiumSubscriptionManagerSol };
 export type { ERC20Escrow } from "./ERC20Escrow";
 export type { MockToken } from "./MockToken";
-export type { MultiTradeEscrow } from "./MultiTradeEscrow";
 export type { NativeTokenEscrow } from "./NativeTokenEscrow";

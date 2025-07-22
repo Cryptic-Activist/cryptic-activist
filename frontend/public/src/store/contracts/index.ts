@@ -33,7 +33,6 @@ export const useContractsSlice: StateCreator<
     },
     setEscrowNativeContract: (contract) => {
       const setValue = get().contracts.setContractsValue;
-      console.log({ contract });
       setValue(
         {
           escrow: {

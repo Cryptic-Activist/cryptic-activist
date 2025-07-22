@@ -50,10 +50,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockToken__factory>;
     getContractFactory(
-      name: "MultiTradeEscrow",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.MultiTradeEscrow__factory>;
-    getContractFactory(
       name: "NativeTokenEscrow",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NativeTokenEscrow__factory>;
@@ -112,11 +108,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.MockToken>;
     getContractAt(
-      name: "MultiTradeEscrow",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.MultiTradeEscrow>;
-    getContractAt(
       name: "NativeTokenEscrow",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -168,10 +159,6 @@ declare module "hardhat/types/runtime" {
       name: "MockToken",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockToken>;
-    deployContract(
-      name: "MultiTradeEscrow",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MultiTradeEscrow>;
     deployContract(
       name: "NativeTokenEscrow",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -230,11 +217,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockToken>;
-    deployContract(
-      name: "MultiTradeEscrow",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.MultiTradeEscrow>;
     deployContract(
       name: "NativeTokenEscrow",
       args: any[],

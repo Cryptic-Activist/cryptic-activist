@@ -24,8 +24,6 @@ export type { ERC20Escrow } from "./contracts/ERC20Escrow";
 export { ERC20Escrow__factory } from "./factories/contracts/ERC20Escrow__factory";
 export type { MockToken } from "./contracts/MockToken";
 export { MockToken__factory } from "./factories/contracts/MockToken__factory";
-export type { MultiTradeEscrow } from "./contracts/MultiTradeEscrow";
-export { MultiTradeEscrow__factory } from "./factories/contracts/MultiTradeEscrow__factory";
 export type { NativeTokenEscrow } from "./contracts/NativeTokenEscrow";
 export { NativeTokenEscrow__factory } from "./factories/contracts/NativeTokenEscrow__factory";
 export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager";

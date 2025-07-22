@@ -4,5 +4,4 @@
 export * as premiumSubscriptionManagerSol from "./PremiumSubscriptionManager.sol";
 export { ERC20Escrow__factory } from "./ERC20Escrow__factory";
 export { MockToken__factory } from "./MockToken__factory";
-export { MultiTradeEscrow__factory } from "./MultiTradeEscrow__factory";
 export { NativeTokenEscrow__factory } from "./NativeTokenEscrow__factory";

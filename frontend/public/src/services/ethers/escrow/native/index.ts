@@ -87,9 +87,11 @@ export const getEscrowContract = async (contractDetails: any) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
+  console.log({ receipt });
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
+      console.log({ receipt, parsedLog });
       if (parsedLog) {
         switch (parsedLog.name) {
           case 'TradeCreated': {
@@ -128,6 +130,7 @@ export const decodeFunctionData = (receipt: any) => {
         }
       }
     } catch (_error) {
+      console.log({ _error });
       continue;
     }
   }
@@ -156,6 +159,7 @@ export const sellerFundTrade = async (
     });
 
     const receipt = await tx.wait();
+    console.log({ tx, receipt });
     const decoded = decodeFunctionData(receipt);
 
     return {
@@ -197,6 +201,8 @@ export const buyerFundTrade = async (
     });
 
     const receipt = await tx.wait();
+    console.log({ tx, receipt });
+
     const decoded = decodeFunctionData(receipt);
 
     return {

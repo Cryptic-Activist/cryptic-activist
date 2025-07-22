@@ -157,6 +157,7 @@ export const deployEscrow = async (params: DeployEscrowSmartContractParams) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
+  console.log({ receiptLogs: receipt.logs });
   for (const log of receipt.logs) {
     try {
       const parsedLog = ifaceNativeTokenEscrow.parseLog(log);
@@ -225,6 +226,8 @@ export const createTrade = async (params: InitTradeParams) => {
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
+    console.log({ receipt, decoded });
+
     return {
       data: decoded,
       txHash: tx.hash,
@@ -285,6 +288,36 @@ export const executeTrade = async (tradeId: BigInt) => {
       txHash: tx.hash,
       message: 'Trade executed successfully',
     };
+  } catch (error) {
+    return {
+      message: 'Error executing trade',
+      error: error,
+    };
+  }
+};
+
+export const getTrade = async (tradeId: BigInt) => {
+  try {
+    const contract = await getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const details = await contract.getTrade(tradeId);
+
+    return details;
+  } catch (error) {
+    return {
+      message: 'Error executing trade',
+      error: error,
+    };
+  }
+};
+
+export const getTradeBalance = async (tradeId: BigInt) => {
+  try {
+    const contract = await getEscrowContract();
+    // Buyer deposits require sending value along with the transaction.
+    const details = await contract.getTradeBalance(tradeId);
+
+    return details;
   } catch (error) {
     return {
       message: 'Error executing trade',
