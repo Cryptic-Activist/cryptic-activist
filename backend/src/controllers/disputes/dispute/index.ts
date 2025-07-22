@@ -7,7 +7,14 @@ import {
   TradeStatus,
 } from '@prisma/client';
 import { Request, Response, response } from 'express';
-import { cancelTrade, executeTrade } from '@/services/blockchains/escrow/erc20';
+import {
+  cancelTrade as cancelTradeERC20,
+  executeTrade as executeTradeERC20,
+} from '@/services/blockchains/escrow/erc20';
+import {
+  cancelTrade as cancelTradeNative,
+  executeTrade as executeTradeNative,
+} from '@/services/blockchains/escrow/native';
 import {
   createAccountReview,
   escalateDispute,
@@ -641,8 +648,22 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
     // Fetch dispute with related trade
     const dispute = await prisma.tradeDispute.findUnique({
       where: { id: disputeId },
-      include: {
-        trade: true,
+      select: {
+        tradeId: true,
+        trade: {
+          select: {
+            id: true,
+            status: true,
+            traderId: true,
+            vendorId: true,
+            blockchainTradeId: true,
+            cryptocurrency: {
+              select: {
+                chains: true,
+              },
+            },
+          },
+        },
         moderator: {
           select: {
             id: true,
@@ -703,7 +724,27 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      const executedTrade = await executeTrade(dispute.trade.blockchainTradeId);
+      let isERC20TokenTrade = true;
+
+      if (
+        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
+        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
+      ) {
+        isERC20TokenTrade = false;
+      }
+
+      let executedTrade;
+
+      if (isERC20TokenTrade) {
+        executedTrade = await executeTradeERC20(
+          dispute.trade.blockchainTradeId,
+        );
+      } else {
+        executedTrade = await executeTradeNative(
+          dispute.trade.blockchainTradeId,
+        );
+      }
+
       console.log({ executedTrade });
     }
 
@@ -724,7 +765,22 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
   try {
     const dispute = await prisma.tradeDispute.findUnique({
       where: { id: disputeId },
-      include: { trade: true },
+      select: {
+        tradeId: true,
+        status: true,
+        trade: {
+          select: {
+            blockchainTradeId: true,
+            vendorId: true,
+            traderId: true,
+            cryptocurrency: {
+              select: {
+                chains: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!dispute) {
@@ -793,11 +849,28 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      const canceledTrade = await cancelTrade(
-        dispute.trade.blockchainTradeId,
-        true,
-      );
-      console.log({ canceledTrade });
+      let isERC20TokenTrade = true;
+
+      if (
+        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
+        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
+      ) {
+        isERC20TokenTrade = false;
+      }
+
+      let canceledTrade;
+
+      if (isERC20TokenTrade) {
+        canceledTrade = await cancelTradeERC20(
+          dispute.trade.blockchainTradeId,
+          true,
+        );
+      } else {
+        canceledTrade = await cancelTradeNative(
+          dispute.trade.blockchainTradeId,
+          true,
+        );
+      }
     }
 
     res.status(200).json({
@@ -1074,7 +1147,23 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
   try {
     const dispute = await prisma.tradeDispute.findUnique({
       where: { id: disputeId },
-      include: { trade: true },
+      select: {
+        status: true,
+        tradeId: true,
+        moderatorId: true,
+        trade: {
+          select: {
+            traderId: true,
+            vendorId: true,
+            blockchainTradeId: true,
+            cryptocurrency: {
+              select: {
+                chains: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!dispute) {
@@ -1144,10 +1233,28 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      const canceledTrade = await cancelTrade(
-        dispute.trade.blockchainTradeId,
-        true,
-      );
+      let isERC20TokenTrade = true;
+
+      if (
+        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
+        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
+      ) {
+        isERC20TokenTrade = false;
+      }
+
+      let canceledTrade;
+
+      if (isERC20TokenTrade) {
+        canceledTrade = await cancelTradeERC20(
+          dispute.trade.blockchainTradeId,
+          true,
+        );
+      } else {
+        canceledTrade = await cancelTradeNative(
+          dispute.trade.blockchainTradeId,
+          true,
+        );
+      }
     }
 
     res.status(200).json({
