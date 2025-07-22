@@ -173,8 +173,6 @@ const useTradeSocket = ({
           escrow.erc20
         );
 
-        console.log({ tx });
-
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
             socket.emit('blockchaion_seller_fund_trade_rejected', {
@@ -194,8 +192,6 @@ const useTradeSocket = ({
           parseEther(trade.tradeEscrowDetails?.sellerTotalFund.toString()),
           escrow.native
         );
-
-        // console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {

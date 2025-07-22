@@ -87,7 +87,7 @@ export const getEscrowContract = async (contractDetails: any) => {
 };
 
 export const decodeFunctionData = (receipt: any) => {
-  console.log({ receipt });
+  console.log({ receiptLogs: receipt.logs });
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
