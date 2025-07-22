@@ -5,6 +5,7 @@ import {
   baseSepolia,
   bsc,
   bscTestnet,
+  goChain,
   localhost,
   mainnet,
   optimism,
@@ -15,7 +16,34 @@ import {
 } from 'wagmi/chains';
 import { createConfig, http } from 'wagmi';
 
+import { IS_DEVELOPMENT } from '@/constants';
 import { metaMask } from 'wagmi/connectors';
+
+const hardhat1337 = {
+  id: 31337,
+  name: 'Hardhat',
+  network: 'hardhat',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['http://localhost:8545'],
+    },
+    public: {
+      http: ['http://localhost:8545'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Localhost',
+      url: '',
+    },
+  },
+  testnet: true,
+};
 
 export const wagmiConfig = createConfig({
   chains: [
@@ -32,6 +60,7 @@ export const wagmiConfig = createConfig({
     baseSepolia,
     optimismSepolia,
     bscTestnet,
+    ...(IS_DEVELOPMENT ? [hardhat1337] : []),
   ],
   connectors: [metaMask()],
   transports: {
@@ -48,5 +77,6 @@ export const wagmiConfig = createConfig({
     [baseSepolia.id]: http(),
     [optimismSepolia.id]: http(),
     [bscTestnet.id]: http(),
+    ...(IS_DEVELOPMENT && { [hardhat1337.id]: http() }),
   },
 });

@@ -1,8 +1,8 @@
-import { ABIsStore } from '../abis/types';
 import type { AppStore } from '../app/types';
 import type { BlockchainStore } from '../blockchain/types';
 import { ChainStore } from '../chain/types';
 import { ChainsStore } from '../chains/types';
+import { ContractsStore } from '../contracts/types';
 import type { CreateOfferStore } from '../createOffer/types';
 import type { CryptocurrenciesStore } from '../cryptocurrencies/types';
 import type { CryptocurrencyStore } from '../cryptocurrency/types';
@@ -26,7 +26,7 @@ import type { UserStore } from '../user/types';
 import { VendorStore } from '../vendor/types';
 import type { VerifyAccountStore } from '../verifyAccount/types';
 
-export type RootStore = ABIsStore &
+export type RootStore = ContractsStore &
   AppStore &
   BlockchainStore &
   ChainsStore &

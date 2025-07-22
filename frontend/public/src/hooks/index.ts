@@ -31,3 +31,4 @@ export { default as useAccountSettings } from './useAccountSettings';
 export { default as useKYC } from './useKYC';
 export { default as usePremium } from './usePremium';
 export { default as useTiers } from './useTiers';
+export { default as useContracts } from './useContracts';

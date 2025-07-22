@@ -1,3 +1,4 @@
+import { Decimal, prisma } from '@/services/db';
 import { IO, Socket } from '../types';
 import {
   SetTradeAsCanceledParams,
@@ -12,12 +13,18 @@ import {
   mapPriorityScoreToLevel,
 } from '@/utils/disputes';
 import {
-  cancelTrade,
-  confirmTrade,
-  executeTrade,
-  raiseDispute,
-} from '@/services/blockchains/escrow';
-import { prisma, redisClient } from '@/services/db';
+  cancelTrade as cancelTradeERC20,
+  executeTrade as executeTradeERC20,
+  getTrade as getTradeERC20,
+  raiseDispute as raiseDisputeERC20,
+} from '@/services/blockchains/escrow/erc20';
+import {
+  cancelTrade as cancelTradeNative,
+  executeTrade as executeTradeNative,
+  getTradeBalance as getTradeBalanceNative,
+  getTrade as getTradeNative,
+  raiseDispute as raiseDisputeNative,
+} from '@/services/blockchains/escrow/native';
 import { sendEmailsTrade, updateAddXPTier } from './utils';
 
 import ChatMessage from '@/models/ChatMessage';
@@ -481,6 +488,11 @@ export default class Trade {
             cryptocurrencyAmount: true,
             vendorWalletAddress: true,
             traderWalletAddress: true,
+            cryptocurrency: {
+              select: {
+                chains: true,
+              },
+            },
             offer: {
               select: {
                 timeLimit: true,
@@ -491,11 +503,31 @@ export default class Trade {
         });
 
         if (trade?.blockchainTradeId?.toString()) {
-          const confirmedTrade = await executeTrade(trade?.blockchainTradeId);
+          let isERC20TokenTrade = true;
 
-          console.log({ confirmedTrade });
+          if (
+            trade.cryptocurrency.chains[0]?.abiUrl === null &&
+            trade.cryptocurrency.chains[0]?.contractAddress === null
+          ) {
+            isERC20TokenTrade = false;
+          }
 
-          if (confirmedTrade.error) {
+          let executedTrade;
+
+          if (isERC20TokenTrade) {
+            executedTrade = await executeTradeERC20(trade?.blockchainTradeId);
+          } else {
+            const details = await getTradeNative(trade?.blockchainTradeId);
+            console.log({ details });
+            const tradeBalance = await getTradeBalanceNative(
+              trade?.blockchainTradeId,
+            );
+            console.log({ tradeBalance });
+            executedTrade = await executeTradeNative(trade?.blockchainTradeId);
+            console.log({ executedTrade });
+          }
+
+          if (executedTrade.error) {
             this.io.to(chatId).emit('trade_set_payment_confirmed_error', {
               error: 'Unable to confirm trade',
             });
@@ -608,6 +640,7 @@ export default class Trade {
           select: {
             trade: {
               select: {
+                cryptocurrency: { select: { chains: true } },
                 blockchainTradeId: true,
               },
             },
@@ -621,10 +654,28 @@ export default class Trade {
           return;
         }
 
-        const canceledTrade = await cancelTrade(
-          chatObject?.trade.blockchainTradeId,
-          true,
-        );
+        let isERC20TokenTrade = true;
+
+        if (
+          chatObject.trade.cryptocurrency.chains[0]?.abiUrl === null &&
+          chatObject.trade.cryptocurrency.chains[0]?.contractAddress === null
+        ) {
+          isERC20TokenTrade = false;
+        }
+
+        let canceledTrade;
+
+        if (isERC20TokenTrade) {
+          canceledTrade = await cancelTradeERC20(
+            chatObject?.trade.blockchainTradeId,
+            true,
+          );
+        } else {
+          canceledTrade = await cancelTradeNative(
+            chatObject?.trade.blockchainTradeId,
+            true,
+          );
+        }
 
         if (canceledTrade.message !== 'Trade cancelled') {
           this.io.to(chatId).emit('trade_set_canceled_error', {
@@ -749,13 +800,13 @@ export default class Trade {
             },
           });
           const severity = determineSeverity({
-            fiatAmount: chat.trade.fiatAmount,
+            fiatAmount: new Decimal(chat.trade.fiatAmount),
             paymentMethod: chat.trade.paymentMethod,
             type,
             isRepeatedOffender: loserDisputesCount > 0,
           });
           const slaDueAt = calculateSlaDueDate({
-            fiatAmount: chat.trade.fiatAmount,
+            fiatAmount: new Decimal(chat.trade.fiatAmount),
             paymentMethod: chat.trade.paymentMethod,
             vendorTrustScore: chat.trade.vendor.trustScore,
           });

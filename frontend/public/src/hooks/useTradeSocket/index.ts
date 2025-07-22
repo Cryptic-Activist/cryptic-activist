@@ -8,15 +8,27 @@ import {
   SetAsPaidParams,
   UseSocketParams,
 } from './types';
-import { buyerFundTrade, sellerFundTrade } from '@/services/ethers/escrow';
+import {
+  approveToken as approveTokenERC20,
+  buyerFundTrade as buyerFundTradeERC20,
+  getTokenAllowance as getTokenAllowanceERC20,
+  getTokenBalance as getTokenBalanceERC20,
+  getTokenDecimals as getTokenDecimalsERC20,
+  sellerFundTrade as sellerFundTradeERC20,
+} from '@/services/ethers/escrow/erc20';
+import {
+  buyerFundTrade as buyerFundTradeNative,
+  sellerFundTrade as sellerFundTradeNative,
+} from '@/services/ethers/escrow/native';
+import { parseEther, parseUnits } from 'ethers';
+import { toTokenUnits, toTokenUnitsConvert } from '@/utils/blockchain';
+import { useApp, useContracts } from '@/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
 import { getSocket } from '@/services/socket';
 import { scrollElement } from '@/utils';
-import useABIs from '../useABIs';
-import { useApp } from '@/hooks';
 
 const useTradeSocket = ({
   chatId,
@@ -32,8 +44,8 @@ const useTradeSocket = ({
 }: UseSocketParams) => {
   const { addToast } = useApp();
   const {
-    abis: { escrow },
-  } = useABIs(false);
+    contracts: { escrow },
+  } = useContracts(false);
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -48,6 +60,9 @@ const useTradeSocket = ({
 
   const [vendorHasEnoughFunds, _setVendorHasEnoughFunds] = useState(true);
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
+  const [isERC20Trade, setIsERC20Trade] = useState(true);
+
+  // console.log({ isERC20Trade, tradeToken: trade.token });
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -89,24 +104,104 @@ const useTradeSocket = ({
   };
 
   const fundTradeAsSeller = async () => {
-    if (socket && trade?.tradeEscrowDetails && escrow) {
-      const tx = await sellerFundTrade(
-        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.sellerTotalFundInWei),
-        escrow
-      );
+    if (
+      socket &&
+      trade?.tradeEscrowDetails &&
+      escrow &&
+      trade.cryptocurrencyAmount &&
+      trade.traderWalletAddress &&
+      trade.vendorWalletAddress &&
+      trade.offer &&
+      trade.offer.offerType
+    ) {
+      if (isERC20Trade) {
+        const decimals = await getTokenDecimalsERC20({
+          tokenContractDetails: trade.token,
+        });
 
-      if (tx.error) {
-        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-          socket.emit('blockchaion_seller_fund_trade_rejected', {
-            chatId,
-            senderId: user?.id,
-          });
+        if (!decimals) {
+          addToast('error', 'Unable to fetch token decimals', 8000);
           return;
         }
-        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-          addToast('error', 'Unable to fund trade', 8000);
+
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.sellerTotalFund,
+          decimals
+        );
+
+        const approved = await approveTokenERC20({
+          amount: baseUnits,
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ approved });
+
+        if (approved.error) {
+          addToast('error', 'Unable to approve token', 8000);
           return;
+        }
+
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance });
+
+        // if (allowance.lt(baseUnits)) {
+        //   addToast('error', 'Insufficient token allowance', 8000);
+        //   return;
+        // }
+
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ balance });
+
+        // // if (allowance.lt(balance.balance)) {
+        // //   addToast('error', 'Insufficient token allowance', 8000);
+        // //   return;
+        // // }
+
+        const tx = await sellerFundTradeERC20(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          escrow.erc20
+        );
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
+      } else {
+        const tx = await sellerFundTradeNative(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          parseEther(trade.tradeEscrowDetails?.sellerTotalFund.toString()),
+          escrow.native
+        );
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
         }
       }
 
@@ -119,24 +214,93 @@ const useTradeSocket = ({
   };
 
   const fundTradeAsBuyer = async () => {
-    if (socket && trade?.tradeEscrowDetails && escrow) {
-      const tx = await buyerFundTrade(
-        parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
-        BigInt(trade.tradeEscrowDetails?.buyerCollateralInWei),
-        escrow
-      );
+    if (
+      socket &&
+      trade?.tradeEscrowDetails &&
+      escrow &&
+      trade.cryptocurrencyAmount &&
+      trade.traderWalletAddress &&
+      trade.vendorWalletAddress &&
+      trade.offer &&
+      trade.offer.offerType
+    ) {
+      if (isERC20Trade) {
+        const decimals = await getTokenDecimalsERC20({
+          tokenContractDetails: trade.token,
+        });
 
-      if (tx.error) {
-        if (tx.error.code === TX_CODE.ACTION_REJECTED) {
-          socket.emit('blockchaion_seller_fund_trade_rejected', {
-            chatId,
-            senderId: user?.id,
-          });
+        if (!decimals) {
+          addToast('error', 'Unable to fetch token decimals', 8000);
           return;
         }
-        if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
-          addToast('error', 'Unable to fund trade', 8000);
+
+        const baseUnits = toTokenUnits(
+          trade.tradeEscrowDetails?.buyerCollateral,
+          decimals
+        );
+
+        const approved = await approveTokenERC20({
+          amount: baseUnits,
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        if (approved.error) {
+          addToast('error', 'Unable to approve token', 8000);
           return;
+        }
+        const allowance = await getTokenAllowanceERC20({
+          escrowContractDetails: escrow.erc20,
+          tokenContractDetails: trade.token,
+        });
+
+        console.log({ allowance });
+
+        const balance = await getTokenBalanceERC20({
+          tokenContractDetails: trade.token,
+        });
+
+        const tx = await buyerFundTradeERC20(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          escrow.erc20
+        );
+
+        console.log({ tx });
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
+        }
+      } else {
+        const tx = await buyerFundTradeNative(
+          parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
+          parseEther(trade.tradeEscrowDetails?.buyerCollateral.toString()),
+          escrow.native
+        );
+
+        console.log({ tx });
+
+        if (tx.error) {
+          if (tx.error.code === TX_CODE.ACTION_REJECTED) {
+            socket.emit('blockchaion_seller_fund_trade_rejected', {
+              chatId,
+              senderId: user?.id,
+            });
+            return;
+          }
+          if (tx.error.code === TX_CODE.NO_CONTRACT_FOUND) {
+            addToast('error', 'Unable to fund trade', 8000);
+            return;
+          }
         }
       }
 
@@ -173,6 +337,7 @@ const useTradeSocket = ({
       // Handle existing room messages
       socket.on('trade_error', (payload) => {
         // back();
+        refetchTrade();
         addToast('error', payload.error, 10000);
       });
 
@@ -349,6 +514,13 @@ const useTradeSocket = ({
       setEscrowRelease(true);
     }
   }, [trade.escrowReleasedAt]);
+
+  useEffect(() => {
+    if (trade.token?.address === null || trade.token?.abi?.length === 0) {
+      setIsERC20Trade(false);
+      return;
+    }
+  }, [trade.token]);
 
   return {
     messages,

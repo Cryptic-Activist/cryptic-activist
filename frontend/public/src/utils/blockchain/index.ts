@@ -1,4 +1,6 @@
+import { BigNumberish } from 'ethers';
 import { Connector } from 'wagmi';
+import Decimal from 'decimal.js';
 
 export const getChainNameById = (id: number) => {
   switch (id) {
@@ -29,4 +31,32 @@ export const isSupportedChain = (
   supportedChainIds: { chainId: number }[]
 ): boolean => {
   return id != null && supportedChainIds.some((chain) => chain.chainId === id);
+};
+
+export const floatToStringWithoutDot = (num: string) => {
+  return num.toString().replace('.', '');
+};
+
+export const toTokenUnits = (
+  amount: string | number,
+  decimals: number
+): bigint => {
+  console.log({ amount, decimals });
+  const decimalAmount = new Decimal(amount.toString());
+  const rounded = decimalAmount.toDecimalPlaces(decimals, Decimal.ROUND_DOWN);
+  const baseUnitsDecimal = rounded.times(new Decimal(10).pow(decimals));
+  const baseUnits = baseUnitsDecimal.times(1.5).toFixed(0);
+  return BigInt(baseUnits);
+};
+
+export const toTokenUnitsConvert = (
+  amount: string | number,
+  decimals: number
+): bigint => {
+  console.log({ amount, decimals });
+  const decimalAmount = new Decimal(amount.toString());
+  const rounded = decimalAmount.toDecimalPlaces(decimals, Decimal.ROUND_DOWN);
+  const baseUnitsDecimal = rounded.times(new Decimal(10).pow(decimals));
+  const baseUnits = baseUnitsDecimal.toFixed(0);
+  return BigInt(baseUnits);
 };

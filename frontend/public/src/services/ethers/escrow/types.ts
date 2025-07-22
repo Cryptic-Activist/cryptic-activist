@@ -19,3 +19,22 @@ export const TX_CODE = {
   ACTION_REJECTED: 'ACTION_REJECTED',
   NO_CONTRACT_FOUND: 'NO_CONTRACT_FOUND',
 };
+
+export type GetTokenAllowanceParams = {
+  tokenContractDetails: any;
+  escrowContractDetails: any;
+};
+
+export type GetTokenBalanceParams = {
+  tokenContractDetails: any;
+};
+
+export type ApproveTokenParams = {
+  tokenContractDetails: any;
+  escrowContractDetails: any;
+  amount: bigint;
+};
+
+export type GetTokenDecimalsParams = {
+  tokenContractDetails: any;
+};

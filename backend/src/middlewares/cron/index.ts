@@ -1,11 +1,12 @@
+import { Decimal, prisma } from '@/services/db';
+
 import SystemMessage from '@/services/systemMessage';
 import { autoLiftExpiredSuspensions } from '@/services/moderation';
-import { cancelTrade } from '@/services/blockchains/escrow';
+import { cancelTrade } from '@/services/blockchains/escrow/erc20';
 import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
 
 export const expireTimer = async () => {
   cron.schedule('*/1 * * * *', async () => {
@@ -173,7 +174,7 @@ export const chargeRecurringPremiums = async () => {
             status: 'SCHEDULED',
             startsAt,
             expiresAt,
-            expectedAmount,
+            expectedAmount: new Decimal(expectedAmount ?? 0),
             blockchainTransactionHash: '0xRECURRING_PLACEHOLDER', // to be replaced when on-chain
           },
         });

@@ -23,12 +23,11 @@ const useTrade = () => {
     queryKey: ['trade', id],
     queryFn: async () => {
       if (id) {
-        trade.resetTrade();
         const data = await getTrade(id);
         return data;
       }
     },
-    enabled: !!user.id,
+    enabled: !!user.id && !!id,
     refetchOnMount: 'always',
     staleTime: 0,
     refetchOnWindowFocus: true,

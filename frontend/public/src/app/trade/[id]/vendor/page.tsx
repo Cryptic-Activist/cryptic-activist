@@ -139,7 +139,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
           isDisabled={!isFundTradeButtonActive}
         >
           {isFundTradeButtonActive
-            ? 'Funding trade'
+            ? 'Approve and Fund trade'
             : `Your wallet must be connected to ${trade?.offer?.chain?.name} to fund the trade`}
         </Button>
       )}

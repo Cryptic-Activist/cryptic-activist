@@ -3,7 +3,7 @@ import semver, { ReleaseType } from 'semver';
 import { prisma } from '../db';
 
 export const getNextSmartContractVersion = async (
-  type: 'Escrow' | 'Premium',
+  type: 'Escrow:NativeToken' | 'Escrow:ERC20' | 'Premium',
   chainId: string,
   releaseType: ReleaseType,
 ) => {

@@ -1,12 +1,14 @@
+import { Decimal, prisma } from '@/services/db';
 import { Request, Response } from 'express';
 
 import { CalculateReceivingAmountQueries } from './types';
 import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
+import { fetchGet } from '@/services/axios';
 import { getCoinPrice } from '@/services/coinGecko';
+import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
-import { prisma } from '@/services/db';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -57,19 +59,17 @@ export async function createTradeController(req: Request, res: Response) {
           offerId: body.offerId,
           cryptocurrencyId: body.cryptocurrencyId,
           fiatId: body.fiatId,
-          cryptocurrencyAmount: body.cryptocurrencyAmount,
-          fiatAmount: body.fiatAmount,
+          cryptocurrencyAmount: new Decimal(body.cryptocurrencyAmount),
+          fiatAmount: new Decimal(body.fiatAmount),
           status: 'PENDING',
           startedAt: new Date(),
           paymentMethodId: body.paymentMethodId,
           traderWalletAddress: body.traderWalletAddress,
-          exchangeRate: exchangeRate,
+          exchangeRate: new Decimal(exchangeRate),
           buyerId,
           sellerId,
         },
       });
-
-      console.log({ newTrade: newTrade.id });
 
       const newChat = await tx.chat.create({
         data: {
@@ -224,10 +224,30 @@ export async function getTradeController(req: Request, res: Response) {
         },
         cryptocurrency: {
           select: {
+            id: true,
             coingeckoId: true,
             name: true,
             symbol: true,
             image: true,
+            chains: {
+              where: {
+                chain: {
+                  offers: {
+                    some: {
+                      trades: {
+                        some: {
+                          id,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              select: {
+                abiUrl: true,
+                contractAddress: true,
+              },
+            },
           },
         },
         fiat: {
@@ -309,7 +329,32 @@ export async function getTradeController(req: Request, res: Response) {
       return;
     }
 
-    res.status(200).send({ ...trade, chat });
+    const cryptocurrencyChain = await prisma.cryptocurrencyChain.findFirst({
+      where: {
+        cryptocurrencyId: trade.cryptocurrency.id,
+        chainId: trade.offer.chain.id,
+      },
+      select: {
+        abiUrl: true,
+        contractAddress: true,
+      },
+    });
+
+    let token: { [key: string]: any } = {
+      address: cryptocurrencyChain?.contractAddress,
+      abi: [],
+    };
+
+    if (cryptocurrencyChain?.abiUrl && cryptocurrencyChain?.contractAddress) {
+      try {
+        const response = await fetchGet(cryptocurrencyChain?.abiUrl);
+        token.abi = response.data;
+      } catch (error) {
+        console.error('Error fetching ABI:', error);
+      }
+    }
+
+    res.status(200).send({ ...trade, chat, token });
   } catch (err) {
     console.log({ err });
     res.status(500).send({
@@ -323,11 +368,18 @@ export const calculateReceivingAmount = async (
   res: Response,
 ) => {
   try {
-    const { userId, cryptocurrencyId, fiatId, fiatAmount, currentPrice } =
-      req.query;
+    const {
+      userId,
+      cryptocurrencyId,
+      fiatId,
+      fiatAmount,
+      currentPrice,
+      offerId,
+      decimals,
+    } = req.query;
 
-    const parsedFiatAmount = parseFloat(fiatAmount);
-    const parsedCurrentPrice = parseFloat(currentPrice);
+    const parsedFiatAmount = new Decimal(fiatAmount);
+    const parsedCurrentPrice = new Decimal(currentPrice);
 
     const user = await prisma.user.findFirst({
       where: { id: userId as string },
@@ -338,6 +390,18 @@ export const calculateReceivingAmount = async (
     });
 
     if (!user) {
+      res.status(400).send({ error: ['Unable to calculate receiving amount'] });
+      return;
+    }
+
+    const offer = await prisma.offer.findFirst({
+      where: { id: offerId as string },
+      select: {
+        offerType: true,
+      },
+    });
+
+    if (!offer) {
       res.status(400).send({ error: ['Unable to calculate receiving amount'] });
       return;
     }
@@ -373,25 +437,51 @@ export const calculateReceivingAmount = async (
       return;
     }
 
-    let feeRate = tier?.tradingFee! - tier?.discount!;
+    let feeRate = tier.tradingFee.minus(tier?.discount ?? 0);
 
     const isPremium = await isUserPremium(user.id);
 
     if (isPremium) {
-      feeRate -= DEFAULT_PREMIUM_DISCOUNT;
+      const premiumDiscount = new Decimal(DEFAULT_PREMIUM_DISCOUNT);
+      feeRate = feeRate.minus(premiumDiscount);
     }
 
-    const tradingFee = parsedFiatAmount * feeRate;
-    const finalFiatAmount = parsedFiatAmount - tradingFee;
+    const tradingFee = parsedFiatAmount.times(feeRate);
+    const finalFiatAmount = parsedFiatAmount.minus(tradingFee);
+    const parsedDecimals = parseInt(decimals);
 
-    const finalCryptoAmount = (finalFiatAmount / parsedCurrentPrice).toFixed(8);
+    // Calculate crypto amount
+    const finalCryptoAmount = finalFiatAmount
+      .dividedBy(parsedCurrentPrice)
+      .toDecimalPlaces(parsedDecimals);
+
+    let multiplier = 0;
+    const depositPerTradePercent = await getSetting('depositPerTradePercent');
+
+    if (!depositPerTradePercent) {
+      res.status(400).send({ error: ['Deposit per trade percent not set'] });
+      return;
+    }
+
+    if (offer.offerType === 'buy') {
+      // Buyer needs only the deposit percentage (e.g., 20%)
+      multiplier = depositPerTradePercent; // e.g., 0.2 → 2000
+    } else {
+      // Seller needs 100% + deposit percentage (e.g., 120%)
+      multiplier = 1 + depositPerTradePercent; // e.g., 1.2 → 12000
+    }
+
+    const requiredBalance = finalCryptoAmount
+      .times(multiplier)
+      .toDecimalPlaces(parsedDecimals);
 
     res.status(200).send({
-      fiatAmount,
-      tradingFee,
-      finalFiatAmount,
-      currentPrice,
-      finalCryptoAmount: parseFloat(finalCryptoAmount),
+      fiatAmount: parsedFiatAmount.toString(),
+      tradingFee: tradingFee.toString(),
+      finalFiatAmount: finalFiatAmount.toString(),
+      currentPrice: parsedCurrentPrice.toString(),
+      finalCryptoAmount: finalCryptoAmount.toNumber(),
+      requiredBalance: requiredBalance.toNumber(),
     });
     return;
   } catch (err) {
@@ -573,23 +663,6 @@ export async function leaveFeedback(req: Request, res: Response) {
       });
       return;
     }
-
-    console.log(
-      JSON.stringify({
-        data: {
-          // either connect by relation…
-          trader: {
-            connect: { id: trade.trader.id },
-          },
-          trade: {
-            connect: { id: trade.id },
-          },
-          message,
-          type: type,
-        },
-      }),
-      2,
-    );
 
     const newFeedback = await prisma.feedback.create({
       data: {

@@ -636,8 +636,8 @@ export const getTotalTradeVolume = async (_req: Request, res: Response) => {
       },
     });
 
-    const current = currentVolume._sum.fiatAmount ?? 0;
-    const last = lastVolume._sum.fiatAmount ?? 0;
+    const current = currentVolume._sum.fiatAmount?.toNumber() ?? 0;
+    const last = lastVolume._sum.fiatAmount?.toNumber() ?? 0;
 
     const percentageChange = calculatePercentageChange(current, last);
 

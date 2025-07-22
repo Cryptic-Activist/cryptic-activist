@@ -22,7 +22,7 @@ export const withAuth = <P extends object>(
     cookieName = 'accessToken',
     loadingComponent = null,
     unauthorizedComponent = null,
-    checkInterval = 5000,
+    checkInterval = 1000000000,
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -121,7 +121,7 @@ export const withAuthAdvanced = <P extends object>(
     validateToken = null,
     loadingComponent = null,
     unauthorizedComponent = null,
-    checkInterval = 5000,
+    checkInterval = 1000000000,
   } = options;
 
   const AuthenticatedComponent: React.FC<P> = (props) => {

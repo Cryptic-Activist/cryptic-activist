@@ -1,15 +1,25 @@
+import { Address, ContractDetails } from '@/services/blockchains/escrow/types';
+import { Decimal, prisma, redisClient } from '@/services/db';
 import type { IO, Socket } from '../types';
 import type { JoinParams, JoinRoomParams } from './types';
 import {
-  createTrade,
-  fundTrade,
+  approveToken,
+  createTrade as createTradeERC20,
   getCreateTradeDetails,
-} from '@/services/blockchains/escrow';
-import { prisma, redisClient } from '@/services/db';
+  getEscrowDetails as getEscrowDetailsERC20,
+  getTokenDecimals,
+  getTokenDetails,
+} from '@/services/blockchains/escrow/erc20';
+import {
+  createTrade as createTradeNative,
+  getEscrowDetails as getEscrowDetailsNative,
+} from '@/services/blockchains/escrow/native';
 
 import ChatMessage from '@/models/ChatMessage';
+import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { getRemainingTime } from '@/utils/timer';
+import { toTokenUnits } from '@/utils/blockchain';
 
 export default class Chat {
   private socket: Socket;
@@ -76,6 +86,36 @@ export default class Chat {
                 select: {
                   timeLimit: true,
                   offerType: true,
+                  chain: {
+                    select: {
+                      id: true,
+                      chainId: true,
+                    },
+                  },
+                },
+              },
+              cryptocurrency: {
+                select: {
+                  coingeckoId: true,
+                  chains: {
+                    where: {
+                      chain: {
+                        offers: {
+                          some: {
+                            trades: {
+                              some: {
+                                id: chat?.tradeId,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                    select: {
+                      abiUrl: true,
+                      contractAddress: true,
+                    },
+                  },
                 },
               },
             },
@@ -180,8 +220,41 @@ export default class Chat {
                 },
               ]);
 
-              const createTradeDetails =
-                await getCreateTradeDetails(updatedTrade);
+              let isERC20TokenTrade = true;
+
+              if (
+                trade.cryptocurrency.chains[0]?.abiUrl === null &&
+                trade.cryptocurrency.chains[0]?.contractAddress === null
+              ) {
+                isERC20TokenTrade = false;
+              }
+
+              let tokenContractDetails;
+
+              if (isERC20TokenTrade) {
+                tokenContractDetails = await getTokenDetails(
+                  trade.cryptocurrency.coingeckoId,
+                  trade.offer.chain.id,
+                );
+              }
+
+              const tokenDecimals = isERC20TokenTrade
+                ? await getTokenDecimals({
+                    tokenContractDetails,
+                  })
+                : 18;
+
+              if (!tokenDecimals) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Unable to find token decimals',
+                });
+                return;
+              }
+
+              const createTradeDetails = await getCreateTradeDetails(
+                updatedTrade,
+                tokenDecimals,
+              );
 
               if (!createTradeDetails) {
                 const endedAt = new Date();
@@ -210,7 +283,51 @@ export default class Chat {
                 },
               ]);
 
+              const baseUnits = toTokenUnits(
+                trade.cryptocurrencyAmount.toString(),
+                tokenDecimals,
+              );
+
+              let escrowContractDetails: ContractDetails;
+
+              if (isERC20TokenTrade) {
+                escrowContractDetails = await getEscrowDetailsERC20();
+              } else {
+                escrowContractDetails = await getEscrowDetailsNative();
+              }
+
+              if (
+                isERC20TokenTrade &&
+                (!escrowContractDetails.abi ||
+                  !escrowContractDetails.address ||
+                  !tokenContractDetails.abi ||
+                  !tokenContractDetails.address)
+              ) {
+                this.io.to(chatId).emit('trade_error', {
+                  error: 'Failed to get token approval parameters',
+                });
+                return;
+              }
+
+              if (isERC20TokenTrade) {
+                const approved = await approveToken({
+                  amount: baseUnits,
+                  escrowContractDetails: escrowContractDetails,
+                  tokenContractDetails: tokenContractDetails,
+                });
+
+                if (approved.error) {
+                  this.io.to(chatId).emit('trade_error', {
+                    error: 'Failed to approve token',
+                  });
+                  return;
+                }
+              }
+
               const createTradeObj = {
+                ...(isERC20TokenTrade && {
+                  erc20TokenAddress: tokenContractDetails.address,
+                }),
                 arbitrator: createTradeDetails.arbitratorWallet,
                 buyer: createTradeDetails.buyerWallet,
                 seller: createTradeDetails.sellerWallet,
@@ -223,7 +340,15 @@ export default class Chat {
                 sellerTotalDeposit: createTradeDetails.sellerTotalFundInWei,
               };
 
-              const tradeCreated = await createTrade(createTradeObj);
+              let tradeCreated;
+
+              if (isERC20TokenTrade) {
+                // @ts-ignore
+                tradeCreated = await createTradeERC20(createTradeObj);
+              } else {
+                // @ts-ignore
+                tradeCreated = await createTradeNative(createTradeObj);
+              }
 
               if (tradeCreated.error) {
                 await prisma.trade.update({
@@ -256,18 +381,18 @@ export default class Chat {
                   await prisma.tradeEscrowDetails.create({
                     data: {
                       arbitratorWallet: createTradeDetails.arbitratorWallet,
-                      buyerCollateralInWei:
-                        createTradeDetails.buyerCollateralInWei.toString(),
+                      buyerCollateral: createTradeDetails.buyerCollateral,
                       buyerWallet: createTradeDetails.buyerWallet,
-                      tradeAmountInWei:
-                        createTradeDetails.tradeAmountInWei.toString(),
-                      feeRate: createTradeDetails.feeRate,
-                      profitMargin: createTradeDetails.profitMargin,
+                      tradeAmount: createTradeDetails.tradeAmount,
+                      feeRate: new Decimal(createTradeDetails.feeRate).div(
+                        10000,
+                      ),
+                      profitMargin: new Decimal(
+                        createTradeDetails.profitMargin,
+                      ).div(10000),
                       sellerWallet: createTradeDetails.sellerWallet,
-                      sellerCollateralInWei:
-                        createTradeDetails.sellerCollateralInWei.toString(),
-                      sellerTotalFundInWei:
-                        createTradeDetails.sellerTotalFundInWei.toString(),
+                      sellerCollateral: createTradeDetails.sellerCollateral,
+                      sellerTotalFund: createTradeDetails.sellerTotalFund,
                       tradeDurationInSeconds:
                         createTradeDetails.tradeDurationInSeconds,
                       blockchainTradeId: tradeCreated.data?.tradeId.toString(),
@@ -323,7 +448,6 @@ export default class Chat {
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
-          console.log({ error });
           this.io.to(chatId).emit('trade_error', {
             error: 'Trade creation error',
           });

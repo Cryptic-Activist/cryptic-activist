@@ -2,10 +2,8 @@ export type Chain = {
 	id?: string;
 	name?: string;
 	symbol?: string;
-	coingeckoId?: string;
-	logoUrl?: string;
 	chainId?: number;
-	description?: string;
+	rpcUrl?: string;
 };
 
 export type ChainsState = {

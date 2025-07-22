@@ -4,21 +4,32 @@ import {
   requireAdminRole,
 } from '@/middlewares/authorization';
 import {
-  deployEscrowSmartContract,
-  getEscrowABIFile,
+  deployEscrowERC20SmartContract,
+  deployEscrowNativeTokenSmartContract,
+  getEscrowERC20Details,
+  getEscrowNativeTokenDetails,
 } from '@/controllers/blockchains/smart-contracts/escrow';
 
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/abi', authenticateUser, getEscrowABIFile);
+router.get('/erc20/details', authenticateUser, getEscrowERC20Details);
 
 router.post(
-  '/deploy',
+  '/erc20/deploy',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
-  deployEscrowSmartContract,
+  deployEscrowERC20SmartContract,
+);
+
+router.get('/native/details', authenticateUser, getEscrowNativeTokenDetails);
+
+router.post(
+  '/native/deploy',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  deployEscrowNativeTokenSmartContract,
 );
 
 export default router;

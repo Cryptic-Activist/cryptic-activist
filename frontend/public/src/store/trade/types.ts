@@ -39,10 +39,10 @@ export type TradeEscrowDetails = {
   feeRate: number;
   profitMargin: number;
   tradeDurationInSeconds: number;
-  tradeAmountInWei: string;
-  buyerCollateralInWei: string;
-  sellerCollateralInWei: string;
-  sellerTotalFundInWei: string;
+  tradeAmount: string;
+  buyerCollateral: string;
+  sellerCollateral: string;
+  sellerTotalFund: string;
   blockchainTradeId: string;
 };
 
@@ -96,6 +96,11 @@ export type PaymentReceipt = {
   url: string;
 };
 
+export type Token = {
+  address: string;
+  abi: { [key: string]: any };
+};
+
 export type Status =
   | 'PENDING'
   | 'IN_PROGRESS'
@@ -138,6 +143,7 @@ export type Trade = {
     sellerId?: string;
     buyerFundedAt?: string;
     sellerFundedAt?: string;
+    token?: Token;
   };
 };
 
@@ -176,6 +182,7 @@ export type TradeStore = {
     chat?: Chat;
     tradeDispute?: TradeDispute;
     tradeEscrowDetails?: TradeEscrowDetails;
+    token?: Token;
     setTradeValue: (params: Value, actionName?: `trade/${string}`) => void;
     setTrade: (trade: Value) => void;
     resetTrade: () => void;
@@ -216,6 +223,7 @@ export type TradeSetter = {
   buyerFundedAt?: string;
   sellerId?: string;
   sellerFundedAt?: string;
+  token?: Token;
 };
 
 export type Value = TradeSetter;

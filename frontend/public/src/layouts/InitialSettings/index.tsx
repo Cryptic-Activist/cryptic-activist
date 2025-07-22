@@ -23,7 +23,7 @@ import {
 
 import { FiatParams } from '@/hooks/useFiats/types';
 import { Type } from '@/store/app/types';
-import useABIs from '@/hooks/useABIs';
+import useContracts from '@/hooks/useContracts';
 import { useEffect } from 'react';
 
 const InitialSettings = () => {
@@ -42,7 +42,7 @@ const InitialSettings = () => {
   const { user } = useUser();
   const {} = useNotificationSocket({ user });
   const {} = useParams();
-  const {} = useABIs();
+  const {} = useContracts();
   const {} = useTiers();
 
   const setDefaultCryptocurrency = (params: CryptocurrencyParams) => {
