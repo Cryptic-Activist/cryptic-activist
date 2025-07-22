@@ -68,15 +68,9 @@ export const getSigner = async () => {
 export const getEscrowContract = async (contractDetails: any) => {
   try {
     const signer = await getSigner();
-    // const contract = new ethers.Contract(
-    //   contractDetails.address,
-    //   contractDetails.abi,
-    //   signer
-    // );
-
     const contract = new ethers.Contract(
-      '0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9',
-      EscrowArtifact.abi,
+      contractDetails.address,
+      contractDetails.abi,
       signer
     );
 
@@ -155,11 +149,10 @@ export const sellerFundTrade = async (
 
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.sellerFundTrade(tradeId, {
-      value: value.toString(),
+      value,
     });
 
     const receipt = await tx.wait();
-    console.log({ tx, receipt });
     const decoded = decodeFunctionData(receipt);
 
     return {
@@ -197,12 +190,10 @@ export const buyerFundTrade = async (
 
     // Buyer deposits require sending value along with the transaction.
     const tx = await contract.buyerFundTrade(tradeId, {
-      value: value.toString(),
+      value,
     });
 
     const receipt = await tx.wait();
-    console.log({ tx, receipt });
-
     const decoded = decodeFunctionData(receipt);
 
     return {
