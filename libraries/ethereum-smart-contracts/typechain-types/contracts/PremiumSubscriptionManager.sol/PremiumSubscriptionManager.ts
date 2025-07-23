@@ -59,6 +59,7 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
       | "extendSubscription"
       | "getContractBalance"
       | "getPaymentHash"
+      | "getPlatformWallet"
       | "getSubscriptionDetails"
       | "getSubscriptionPrice"
       | "getTimeRemaining"
@@ -67,6 +68,7 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
       | "owner"
       | "pauseSubscriptions"
       | "paymentToken"
+      | "platformWallet"
       | "renewSubscription"
       | "renounceOwnership"
       | "subscribe"
@@ -74,6 +76,7 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
       | "subscriptions"
       | "transferOwnership"
       | "updatePaymentToken"
+      | "updatePlatformWallet"
       | "updatePrice"
       | "usedPaymentHashes"
       | "verifyPaymentHash"
@@ -85,6 +88,7 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
     nameOrSignatureOrTopic:
       | "OwnershipTransferred"
       | "PaymentTokenUpdated"
+      | "PlatformWalletUpdated"
       | "PriceUpdated"
       | "SubscriptionActivated"
       | "SubscriptionRenewed"
@@ -113,6 +117,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getPaymentHash",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPlatformWallet",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getSubscriptionDetails",
@@ -144,6 +152,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "platformWallet",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "renewSubscription",
     values: [BigNumberish]
   ): string;
@@ -169,6 +181,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "updatePaymentToken",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updatePlatformWallet",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -217,6 +233,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getPlatformWallet",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getSubscriptionDetails",
     data: BytesLike
   ): Result;
@@ -246,6 +266,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "platformWallet",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renewSubscription",
     data: BytesLike
   ): Result;
@@ -268,6 +292,10 @@ export interface PremiumSubscriptionManagerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "updatePaymentToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updatePlatformWallet",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -310,6 +338,18 @@ export namespace PaymentTokenUpdatedEvent {
   export type OutputTuple = [newToken: string];
   export interface OutputObject {
     newToken: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace PlatformWalletUpdatedEvent {
+  export type InputTuple = [newPlatformWallet: AddressLike];
+  export type OutputTuple = [newPlatformWallet: string];
+  export interface OutputObject {
+    newPlatformWallet: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -443,6 +483,8 @@ export interface PremiumSubscriptionManager extends BaseContract {
 
   getPaymentHash: TypedContractMethod<[user: AddressLike], [string], "view">;
 
+  getPlatformWallet: TypedContractMethod<[], [string], "view">;
+
   getSubscriptionDetails: TypedContractMethod<
     [user: AddressLike],
     [PremiumSubscriptionManager.SubscriptionStructOutput],
@@ -474,6 +516,8 @@ export interface PremiumSubscriptionManager extends BaseContract {
   pauseSubscriptions: TypedContractMethod<[], [void], "nonpayable">;
 
   paymentToken: TypedContractMethod<[], [string], "view">;
+
+  platformWallet: TypedContractMethod<[], [string], "view">;
 
   renewSubscription: TypedContractMethod<
     [planType: BigNumberish],
@@ -518,6 +562,12 @@ export interface PremiumSubscriptionManager extends BaseContract {
 
   updatePaymentToken: TypedContractMethod<
     [newToken: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  updatePlatformWallet: TypedContractMethod<
+    [newPlatformWallet: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -571,6 +621,9 @@ export interface PremiumSubscriptionManager extends BaseContract {
     nameOrSignature: "getPaymentHash"
   ): TypedContractMethod<[user: AddressLike], [string], "view">;
   getFunction(
+    nameOrSignature: "getPlatformWallet"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "getSubscriptionDetails"
   ): TypedContractMethod<
     [user: AddressLike],
@@ -597,6 +650,9 @@ export interface PremiumSubscriptionManager extends BaseContract {
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "paymentToken"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "platformWallet"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "renewSubscription"
@@ -632,6 +688,13 @@ export interface PremiumSubscriptionManager extends BaseContract {
   getFunction(
     nameOrSignature: "updatePaymentToken"
   ): TypedContractMethod<[newToken: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updatePlatformWallet"
+  ): TypedContractMethod<
+    [newPlatformWallet: AddressLike],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "updatePrice"
   ): TypedContractMethod<
@@ -669,6 +732,13 @@ export interface PremiumSubscriptionManager extends BaseContract {
     PaymentTokenUpdatedEvent.InputTuple,
     PaymentTokenUpdatedEvent.OutputTuple,
     PaymentTokenUpdatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "PlatformWalletUpdated"
+  ): TypedContractEvent<
+    PlatformWalletUpdatedEvent.InputTuple,
+    PlatformWalletUpdatedEvent.OutputTuple,
+    PlatformWalletUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "PriceUpdated"
@@ -713,6 +783,17 @@ export interface PremiumSubscriptionManager extends BaseContract {
       PaymentTokenUpdatedEvent.InputTuple,
       PaymentTokenUpdatedEvent.OutputTuple,
       PaymentTokenUpdatedEvent.OutputObject
+    >;
+
+    "PlatformWalletUpdated(address)": TypedContractEvent<
+      PlatformWalletUpdatedEvent.InputTuple,
+      PlatformWalletUpdatedEvent.OutputTuple,
+      PlatformWalletUpdatedEvent.OutputObject
+    >;
+    PlatformWalletUpdated: TypedContractEvent<
+      PlatformWalletUpdatedEvent.InputTuple,
+      PlatformWalletUpdatedEvent.OutputTuple,
+      PlatformWalletUpdatedEvent.OutputObject
     >;
 
     "PriceUpdated(uint8,uint256)": TypedContractEvent<

@@ -8,6 +8,7 @@ import { Interface, ethers, parseEther } from 'ethers';
 import { prisma, redisClient } from '@/services/db';
 
 import { DeployPremiumSmartContractParams } from './types';
+import { IS_DEVELOPMENT } from '@/constants';
 import PremiumArtifact from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
 import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
@@ -60,7 +61,7 @@ export const getPremiumABI = async () => {
     }
 
     abiJson = await response.data.abi;
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
   }
 
@@ -78,7 +79,7 @@ export const deployPremium = async (
 ) => {
   try {
     // Load environment variables
-    const RPC_URL = params.rpcUrl; // e.g. from Alchemy, Infura, etc.
+    const RPC_URL = params.chain.rpcUrl; // e.g. from Alchemy, Infura, etc.
     const PRIVATE_KEY = ETHEREUM_DEPLOYER_PRIVATE_KEY;
 
     if (!RPC_URL || !PRIVATE_KEY) {
@@ -98,7 +99,25 @@ export const deployPremium = async (
       wallet,
     );
 
+    const token = await prisma.cryptocurrencyChain.findFirst({
+      where: {
+        chain: { id: params.chain.id, isTestnet: IS_DEVELOPMENT },
+
+        cryptocurrency: {
+          coingeckoId: 'usd-coin',
+        },
+      },
+      select: {
+        contractAddress: true,
+      },
+    });
+
+    if (!token?.contractAddress) {
+      throw new Error("Couldn't find token contract address");
+    }
+
     const contract = await factory.deploy(
+      token?.contractAddress,
       params.platformWallet,
       ethers.parseUnits(params.monthlyPrice.toString()),
       ethers.parseUnits(params.yearlyPrice.toString()),

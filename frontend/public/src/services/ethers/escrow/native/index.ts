@@ -85,13 +85,9 @@ export const decodeFunctionData = (receipt: any) => {
   for (const log of receipt.logs) {
     try {
       const parsedLog = iface.parseLog(log);
-      console.log({ receipt, parsedLog });
       if (parsedLog) {
         switch (parsedLog.name) {
           case 'TradeCreated': {
-            return parsedLog.args.toObject();
-          }
-          case 'TradeFunded': {
             return parsedLog.args.toObject();
           }
           case 'SellerFunded': {
@@ -106,19 +102,16 @@ export const decodeFunctionData = (receipt: any) => {
           case 'TradeExecuted': {
             return parsedLog.args.toObject();
           }
-          case 'TradeConfirmed': {
-            return parsedLog.args.toObject();
-          }
           case 'TradeDisputed': {
-            return parsedLog.args.toObject();
-          }
-          case 'ArbitrationResolved': {
             return parsedLog.args.toObject();
           }
           case 'TradeCompleted': {
             return parsedLog.args.toObject();
           }
           case 'TradeCancelled': {
+            return parsedLog.args.toObject();
+          }
+          case 'ArbitrationResolved': {
             return parsedLog.args.toObject();
           }
         }

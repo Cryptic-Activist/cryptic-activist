@@ -13,7 +13,6 @@ export const toTokenUnits = (
   amount: string | number,
   decimals: number,
 ): bigint => {
-  console.log({ amount, decimals });
   const decimalAmount = new Decimal(amount.toString());
   const rounded = decimalAmount.toDecimalPlaces(decimals, Decimal.ROUND_DOWN);
   const baseUnitsDecimal = rounded.times(new Decimal(10).pow(decimals));

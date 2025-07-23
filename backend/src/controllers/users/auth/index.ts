@@ -449,8 +449,6 @@ export const register = async (req: Request, res: Response) => {
       publishedAccountCreated,
     ]);
 
-    console.log({ promised });
-
     res.status(201).send({
       privateKeys: privateKeysArrObj.privateKeys,
       firstName: user.firstName,
@@ -647,8 +645,6 @@ export const resetPasswordRequest = async (req: Request, res: Response) => {
       html: resetPasswordEmailBody,
       text: 'Reset your password',
     });
-
-    console.log('Email sent:', publishedResetPassword);
 
     res.status(200).send({
       ok: true,
@@ -884,8 +880,6 @@ export const verify2FA = async (req: Request, res: Response) => {
       html: twoFactorActivatedEmailBody,
       text: '2FA Activated',
     });
-
-    console.log({ publishedTwoFactorActivated });
 
     res.status(200).json({ success: true });
     return;

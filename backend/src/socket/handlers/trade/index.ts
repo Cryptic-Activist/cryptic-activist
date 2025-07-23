@@ -518,13 +518,10 @@ export default class Trade {
             executedTrade = await executeTradeERC20(trade?.blockchainTradeId);
           } else {
             const details = await getTradeNative(trade?.blockchainTradeId);
-            console.log({ details });
             const tradeBalance = await getTradeBalanceNative(
               trade?.blockchainTradeId,
             );
-            console.log({ tradeBalance });
             executedTrade = await executeTradeNative(trade?.blockchainTradeId);
-            console.log({ executedTrade });
           }
 
           if (executedTrade.error) {

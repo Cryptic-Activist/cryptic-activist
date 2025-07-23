@@ -81,8 +81,6 @@ export async function getVendor(req: Request, res: Response) {
       ...rest
     } = vendor;
 
-    console.log({ vendor });
-
     const userTradesCount = await prisma.trade.count({
       where: { vendorId: vendor.id },
     });

@@ -744,8 +744,6 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
           dispute.trade.blockchainTradeId,
         );
       }
-
-      console.log({ executedTrade });
     }
 
     res.status(200).json({
@@ -922,8 +920,6 @@ export async function requestMoreEvidences(req: Request, res: Response) {
       requestedFromId = dispute.trade.traderId;
     }
 
-    console.log({ requestedFrom, requestedFromId });
-
     const evidencesRequestedCount = await prisma.disputeEvidenceRequest.count({
       where: {
         disputeId: dispute.id,
@@ -982,8 +978,6 @@ export async function requestMoreEvidences(req: Request, res: Response) {
 export async function addMoreEvidences(req: Request, res: Response) {
   try {
     const { disputeId, evidences, userId } = req.body;
-
-    console.log({ disputeId, evidences, userId });
 
     const dispute = await prisma.tradeDispute.findUnique({
       where: { id: disputeId },
@@ -1122,8 +1116,6 @@ export async function escalateToSeniorAdmin(req: Request, res: Response) {
 export async function contactBothUsers(req: Request, res: Response) {
   try {
     const { actionForTrader, actionForVendor } = req.body;
-
-    console.log({ actionForTrader, actionForVendor });
 
     switch (actionForTrader) {
       case UserManagementActions.NO_ACTION: {

@@ -1,12 +1,12 @@
 {
   "network": "localhost",
-  "chainId": "1337",
-  "contractAddress": "0x0E801D84Fa97b50751Dbf25036d067dCf18858bF",
-  "paymentToken": "0x4826533B4897376654Bb4d4AD88B7faFD0C98528",
+  "chainId": "31337",
+  "contractAddress": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+  "paymentToken": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
   "owner": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "monthlyPrice": "10000000",
   "yearlyPrice": "100000000",
-  "deploymentHash": "0xa8a5694e765216b9a55eefc4e2e7c9af5bcbdff11113bfc809bae3e50436e556",
-  "deploymentBlock": 68,
-  "timestamp": "2025-07-08T12:49:06.585Z"
+  "deploymentHash": "0x0aaa6e59e4f023622f2919d0b7bc0a4f56add45844674fe39f030d48eb19ec17",
+  "deploymentBlock": 27,
+  "timestamp": "2025-07-23T06:28:29.709Z"
 }

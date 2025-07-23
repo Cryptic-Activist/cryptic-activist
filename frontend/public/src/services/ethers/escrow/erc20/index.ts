@@ -103,9 +103,6 @@ export const decodeFunctionData = (receipt: any) => {
           case 'TradeCreated': {
             return parsedLog.args.toObject();
           }
-          case 'TradeFunded': {
-            return parsedLog.args.toObject();
-          }
           case 'SellerFunded': {
             return parsedLog.args.toObject();
           }
@@ -118,19 +115,16 @@ export const decodeFunctionData = (receipt: any) => {
           case 'TradeExecuted': {
             return parsedLog.args.toObject();
           }
-          case 'TradeConfirmed': {
-            return parsedLog.args.toObject();
-          }
           case 'TradeDisputed': {
-            return parsedLog.args.toObject();
-          }
-          case 'ArbitrationResolved': {
             return parsedLog.args.toObject();
           }
           case 'TradeCompleted': {
             return parsedLog.args.toObject();
           }
           case 'TradeCancelled': {
+            return parsedLog.args.toObject();
+          }
+          case 'ArbitrationResolved': {
             return parsedLog.args.toObject();
           }
         }

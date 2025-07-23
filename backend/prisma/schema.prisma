@@ -774,6 +774,16 @@ model Trust {
   @@map("trusts")
 }
 
+model UserWallet {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  address   String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("user_wallet")
+}
+
 model UserStats {
   id              String    @id @default(uuid())
   userId          String    @unique
@@ -904,6 +914,7 @@ model User {
   totalWarnings          Int                      @default(0)
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
+  wallets                UserWallet[]
 
   @@index([username])
   @@map("users")

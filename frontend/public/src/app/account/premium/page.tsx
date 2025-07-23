@@ -364,15 +364,8 @@ const PremiumSubscription: React.FC = () => {
     currentPremiumSubscription,
     changePremiumSubscriptionMutation,
     account,
+    handleSubscribe,
   } = usePremium();
-
-  const handleSubscribe = () => {
-    // Subscription logic would go here
-    subscribeToPremiumMutation.mutateAsync(
-      selectedPlan === 'YEARLY' ? 'YEARLY' : 'MONTHLY'
-    );
-    console.log('Subscribe to:', selectedPlan);
-  };
 
   return (
     <div className={styles.wrapper}>

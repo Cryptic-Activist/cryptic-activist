@@ -86,7 +86,10 @@ export const deployPremiumSmartContract = async (
           monthlyPrice,
           yearlyPrice,
           platformWallet,
-          rpcUrl: chain.rpcUrl,
+          chain: {
+            id: chain.id,
+            rpcUrl: chain.rpcUrl,
+          },
         });
 
         const file = convertABIToFile(deployed.artifact);

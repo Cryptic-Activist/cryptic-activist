@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-// Simple ERC20 interface
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address to, uint256 amount) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract PremiumSubscriptionManager {
+contract PremiumSubscriptionManager is Ownable, ReentrancyGuard {
     
     // Subscription plans
     enum PlanType { MONTHLY, YEARLY }
@@ -43,66 +37,33 @@ contract PremiumSubscriptionManager {
     
     event PriceUpdated(PlanType planType, uint256 newPrice);
     event PaymentTokenUpdated(address newToken);
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event PlatformWalletUpdated(address newPlatformWallet);
     
     // State variables
     mapping(address => Subscription) public subscriptions;
     mapping(PlanType => uint256) public subscriptionPrices;
     
     IERC20 public paymentToken; // Token used for payments (e.g., USDC, USDT)
+    address public platformWallet; // Wallet where funds are withdrawn to
     uint256 public constant SECONDS_IN_MONTH = 30 days;
     uint256 public constant SECONDS_IN_YEAR = 365 days;
     
     // Mapping to track payment hashes to prevent replay attacks
     mapping(bytes32 => bool) public usedPaymentHashes;
     
-    // Owner management
-    address public owner;
-    
-    // Reentrancy guard
-    bool private locked;
-    
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
-        _;
-    }
-    
-    modifier nonReentrant() {
-        require(!locked, "Reentrant call");
-        locked = true;
-        _;
-        locked = false;
-    }
-    
     constructor(
         address _paymentToken,
+        address _platformWallet,
         uint256 _monthlyPrice,
         uint256 _yearlyPrice
-    ) {
-        owner = msg.sender;
+    ) Ownable(msg.sender) {
+        require(_paymentToken != address(0), "Payment token cannot be zero address");
+        require(_platformWallet != address(0), "Platform wallet cannot be zero address");
+        
         paymentToken = IERC20(_paymentToken);
+        platformWallet = _platformWallet;
         subscriptionPrices[PlanType.MONTHLY] = _monthlyPrice;
         subscriptionPrices[PlanType.YEARLY] = _yearlyPrice;
-        
-        emit OwnershipTransferred(address(0), msg.sender);
-    }
-    
-    /**
-     * @dev Transfer ownership to a new address
-     * @param newOwner The address to transfer ownership to
-     */
-    function transferOwnership(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "New owner cannot be zero address");
-        emit OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-    }
-    
-    /**
-     * @dev Renounce ownership (set owner to zero address)
-     */
-    function renounceOwnership() external onlyOwner {
-        emit OwnershipTransferred(owner, address(0));
-        owner = address(0);
     }
     
     /**
@@ -275,6 +236,14 @@ contract PremiumSubscriptionManager {
         return subscriptions[user].paymentCount > 0;
     }
     
+    /**
+     * @dev Get the current platform wallet address
+     * @return address The platform wallet address
+     */
+    function getPlatformWallet() external view returns (address) {
+        return platformWallet;
+    }
+    
     // Admin functions
     
     /**
@@ -298,21 +267,31 @@ contract PremiumSubscriptionManager {
     }
     
     /**
-     * @dev Withdraw collected payments (only owner)
+     * @dev Update platform wallet address (only owner)
+     * @param newPlatformWallet The new platform wallet address
+     */
+    function updatePlatformWallet(address newPlatformWallet) external onlyOwner {
+        require(newPlatformWallet != address(0), "Platform wallet cannot be zero address");
+        platformWallet = newPlatformWallet;
+        emit PlatformWalletUpdated(newPlatformWallet);
+    }
+    
+    /**
+     * @dev Withdraw collected payments to platform wallet (only owner)
      * @param amount The amount to withdraw
      */
     function withdrawPayments(uint256 amount) external onlyOwner {
         require(amount > 0, "Amount must be greater than 0");
-        require(paymentToken.transfer(owner, amount), "Withdrawal failed");
+        require(paymentToken.transfer(platformWallet, amount), "Withdrawal failed");
     }
     
     /**
-     * @dev Withdraw all collected payments (only owner)
+     * @dev Withdraw all collected payments to platform wallet (only owner)
      */
     function withdrawAllPayments() external onlyOwner {
         uint256 balance = paymentToken.balanceOf(address(this));
         require(balance > 0, "No tokens to withdraw");
-        require(paymentToken.transfer(owner, balance), "Withdrawal failed");
+        require(paymentToken.transfer(platformWallet, balance), "Withdrawal failed");
     }
     
     /**

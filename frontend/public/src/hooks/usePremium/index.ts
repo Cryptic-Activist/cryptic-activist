@@ -175,12 +175,14 @@ const usePremium = () => {
   // Subscription mutation
   const subscribeToPremiumMutation = useMutation({
     mutationKey: ['subscribePremium'],
-    mutationFn: async (period: Period) => {
+    mutationFn: async () => {
       if (!user.id || !account?.address) {
         throw new Error('User ID and account address are required');
       }
 
       setIsProcessing(true);
+
+      const period = selectedPlan === 'YEARLY' ? 'YEARLY' : 'MONTHLY';
 
       try {
         const response = await subscribeToPremium(
@@ -233,6 +235,17 @@ const usePremium = () => {
     },
   });
 
+  const handleSubscribe = async () => {
+    if (user.id) {
+      if (!currentPremiumSubscription) {
+        // await subscribeToPremiumMutation.mutateAsync();
+        console.log('Subscribe to:', selectedPlan);
+      } else {
+        // await changePremiumSubscriptionMutation.mutateAsync();
+      }
+    }
+  };
+
   useEffect(() => {
     if (
       user.premiumPurchase &&
@@ -262,6 +275,7 @@ const usePremium = () => {
     currentPremiumSubscription,
     changePremiumSubscriptionMutation,
     account,
+    handleSubscribe,
   };
 };
 

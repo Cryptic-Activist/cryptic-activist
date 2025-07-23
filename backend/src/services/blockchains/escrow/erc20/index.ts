@@ -94,7 +94,7 @@ export const getTokenDetails = async (coingeckoId: string, chainId: string) => {
       abi: response.data,
       address: tokenSmartContract.contractAddress,
     };
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
   }
 
@@ -144,7 +144,7 @@ export const getEscrowDetails = async () => {
       abi: response.data.abi,
       address: escrowSmartContract.address as Address,
     };
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
   }
 

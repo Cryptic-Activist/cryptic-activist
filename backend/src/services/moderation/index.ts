@@ -256,7 +256,6 @@ export const escalateDispute = async ({
   try {
     const newSeniorAdmin = await getRandomSeniorSuperAdmin(true);
 
-    console.log({ newSeniorAdmin });
     if (!newSeniorAdmin) return null;
 
     const transactions = await prisma.$transaction([
