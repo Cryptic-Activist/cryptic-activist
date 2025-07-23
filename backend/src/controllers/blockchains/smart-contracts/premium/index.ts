@@ -5,37 +5,37 @@ import { deployPremium } from '@/services/blockchains/premium';
 import { ethers } from 'ethers';
 import { formatBigInt } from '@/utils/number';
 import { getNextSmartContractVersion } from '@/services/blockchains';
-import { getPremiumABI } from '@/services/blockchains/premium';
+import { getPremiumDetails as getPremiumDetailsERC20 } from '@/services/blockchains/premium';
 import { getSetting } from '@/utils/settings';
 import { prisma } from '@/services/db';
 import { uploadFiles } from '@/services/upload';
 
-export const convertABIToFile = (abi: any) => {
-  const abiJson = JSON.stringify(abi, null, 2);
-  const abiBuffer = Buffer.from(abiJson);
+export const convertArtifactToFile = (artifact: any) => {
+  const artifactJson = JSON.stringify(artifact, null, 2);
+  const artifactBuffer = Buffer.from(artifactJson);
 
   const multerFile: Express.Multer.File = {
     fieldname: 'abi',
     originalname: 'PremiumABI.json',
     mimetype: 'application/json',
-    buffer: abiBuffer,
-    size: abiBuffer.length,
+    buffer: artifactBuffer,
+    size: artifactBuffer.length,
     // other properties you can stub or mock if needed:
     encoding: '7bit',
     destination: '',
     filename: 'PremiumABI.json',
     path: '',
-    stream: Readable.from(abiBuffer),
+    stream: Readable.from(artifactBuffer),
   };
 
   return multerFile;
 };
 
-export const getPremiumABIFile = async (req: Request, res: Response) => {
+export const getPremiumDetails = async (req: Request, res: Response) => {
   try {
-    const abi = await getPremiumABI();
+    const details = await getPremiumDetailsERC20();
 
-    res.status(200).json(abi);
+    res.status(200).json(details);
   } catch (error) {
     console.log({ error });
     res.status(400).json(error);
@@ -92,7 +92,7 @@ export const deployPremiumSmartContract = async (
           },
         });
 
-        const file = convertABIToFile(deployed.artifact);
+        const file = convertArtifactToFile(deployed.artifact);
         const uploadedFiles = await uploadFiles('smart-contracts/premium/', [
           file,
         ]);

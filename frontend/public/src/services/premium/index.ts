@@ -1,7 +1,8 @@
+import { fetchGet, fetchPost } from '@/services/axios';
+
 import { BACKEND } from '@/constants';
 import { Period } from '@/hooks/usePremium/types';
 import { Wallet } from '@/store/blockchain/types';
-import { fetchPost } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 
 export const subscribeToPremium = async (
@@ -49,4 +50,12 @@ export const changeSubscriptionTo = async (
   // if (response.status !== 200) return null;
 
   // return response.data;
+};
+
+export const getUsdcTokenABI = async (abiUrl: string) => {
+  const response = await fetchGet(abiUrl);
+
+  if (response.status !== 200) return null;
+
+  return response.data;
 };

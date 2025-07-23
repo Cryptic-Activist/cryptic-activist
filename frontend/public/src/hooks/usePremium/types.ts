@@ -1,3 +1,5 @@
+import { Token } from '@/store/blockchain/types';
+
 export type Period = 'MONTHLY' | 'YEARLY';
 
 // Types
@@ -46,3 +48,11 @@ export interface UsePremiumReturn {
   plans: PremiumPlans;
   currentPremiumSubscription?: Period;
 }
+
+export type ABI = { [key: string]: any };
+
+export type USDCToken = Token;
+export type USDCTokenDetails = {
+  abi: ABI | null;
+  address: string | null;
+};

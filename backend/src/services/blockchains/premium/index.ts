@@ -1,3 +1,4 @@
+import { Address, ContractDetails } from '../escrow/types';
 import {
   ETHEREUM_DEPLOYER_PRIVATE_KEY,
   ETHEREUM_ESCROW_CONTRACT_ADDRESS,
@@ -5,12 +6,12 @@ import {
   ETHEREUM_PREMIUM_CONTRACT_ADDRESS,
 } from '@/constants/env';
 import { Interface, ethers, parseEther } from 'ethers';
+import { convertSmartContractParams, toTokenUnits } from '@/utils/blockchain';
 import { prisma, redisClient } from '@/services/db';
 
 import { DeployPremiumSmartContractParams } from './types';
 import { IS_DEVELOPMENT } from '@/constants';
 import PremiumArtifact from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
-import { convertSmartContractParams } from '@/utils/blockchain';
 import { fetchGet } from '@/services/axios';
 import { parseDurationToSeconds } from '@/utils/date';
 
@@ -27,16 +28,20 @@ export const getSigner = () => {
   return signer;
 };
 
-export const getPremiumABI = async () => {
+export const getPremiumDetails = async () => {
   const cacheKey = 'smartContracts:premium';
-  let abiJson: any | null = null;
+  let details: ContractDetails = { abi: null, address: null };
 
-  const cachedABI = await redisClient.get(cacheKey);
+  const cachedDetails = await redisClient.get(cacheKey);
 
-  if (cachedABI) {
-    abiJson = JSON.parse(cachedABI);
+  if (cachedDetails) {
+    const parsedCachedDetails = JSON.parse(cachedDetails);
+    details = {
+      abi: parsedCachedDetails.abi,
+      address: parsedCachedDetails.address,
+    };
   } else {
-    const escrowSmartContract = await prisma.smartContract.findFirst({
+    const premiumSmartContract = await prisma.smartContract.findFirst({
       where: {
         isActive: true,
         metadata: {
@@ -46,32 +51,42 @@ export const getPremiumABI = async () => {
       },
       select: {
         artifactUrl: true,
+        address: true,
       },
     });
 
-    if (!escrowSmartContract) {
-      throw new Error('Unable to find Premium ABI');
+    if (!premiumSmartContract) {
+      throw new Error('Unable to find Premium Contract');
     }
 
-    const response = await fetchGet(escrowSmartContract.artifactUrl);
+    const response = await fetchGet(premiumSmartContract.artifactUrl);
+
     if (response.status !== 200) {
       throw new Error(
-        `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
+        `Failed to fetch ABI from ${premiumSmartContract.artifactUrl}`,
       );
     }
 
-    abiJson = await response.data.abi;
+    details = {
+      abi: response.data.abi,
+      address: premiumSmartContract.address as Address,
+    };
     const expiry = parseDurationToSeconds('1d');
-    await redisClient.setEx(cacheKey, expiry, JSON.stringify(abiJson));
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
   }
 
-  return abiJson;
+  return details;
 };
 
 export const getPremiumContract = async () => {
-  const abi = await getPremiumABI();
+  const details = await getPremiumDetails();
+
+  if (!details.abi || !details.address) {
+    throw new Error('Premium contract details are not available');
+  }
+
   const signer = getSigner();
-  return new ethers.Contract(ETHEREUM_ESCROW_CONTRACT_ADDRESS, abi, signer);
+  return new ethers.Contract(details.address, details.abi, signer);
 };
 
 export const deployPremium = async (
@@ -116,11 +131,14 @@ export const deployPremium = async (
       throw new Error("Couldn't find token contract address");
     }
 
+    const baseUnitsMonthlyPrice = toTokenUnits(params.monthlyPrice, 6);
+    const baseUnitsYearlyPrice = toTokenUnits(params.monthlyPrice, 6);
+
     const contract = await factory.deploy(
       token?.contractAddress,
       params.platformWallet,
-      ethers.parseUnits(params.monthlyPrice.toString()),
-      ethers.parseUnits(params.yearlyPrice.toString()),
+      baseUnitsMonthlyPrice,
+      baseUnitsYearlyPrice,
     );
 
     await contract.waitForDeployment();

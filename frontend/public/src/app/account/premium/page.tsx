@@ -88,6 +88,7 @@ const PlanCard: React.FC<{
   changePremiumSubscriptionMutation: any;
   userId?: string;
   wallet?: string;
+  usdcTokenDetails: any;
 }> = ({
   plan,
   // selectedPlan,
@@ -97,6 +98,7 @@ const PlanCard: React.FC<{
   changePremiumSubscriptionMutation,
   userId,
   wallet,
+  usdcTokenDetails,
 }) => {
   const periodLabel = plan.period === 'MONTHLY' ? 'month' : 'year';
   const isSubscribed =
@@ -108,15 +110,19 @@ const PlanCard: React.FC<{
     ? 'Processing...'
     : subscriptionLabel;
 
+  const isDisabled = isProcessing || isSubscribed || !usdcTokenDetails.abi;
+
   const handleSubscribe = async () => {
-    if (!currentPremiumSubscription) {
-      onSubscribe();
-    } else {
-      await changePremiumSubscriptionMutation.mutateAsync(
-        userId,
-        currentPremiumSubscription === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
-        wallet
-      );
+    if (!isDisabled) {
+      if (!currentPremiumSubscription) {
+        onSubscribe();
+      } else {
+        await changePremiumSubscriptionMutation.mutateAsync(
+          userId,
+          currentPremiumSubscription === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
+          wallet
+        );
+      }
     }
   };
 
@@ -140,7 +146,7 @@ const PlanCard: React.FC<{
 
       <button
         onClick={handleSubscribe}
-        disabled={isProcessing || isSubscribed}
+        disabled={isDisabled}
         className={`${styles.subscribeButton} ${
           isProcessing ? styles.processing : ''
         }`}
@@ -203,6 +209,7 @@ const PricingPlans: React.FC<{
   changePremiumSubscriptionMutation: any;
   userId?: string;
   wallet?: string;
+  usdcTokenDetails: any;
 }> = ({
   selectedPlan,
   plans,
@@ -213,6 +220,7 @@ const PricingPlans: React.FC<{
   changePremiumSubscriptionMutation,
   userId,
   wallet,
+  usdcTokenDetails,
 }) => (
   <div className={styles.card}>
     <h2 className={styles.cardTitleCenter}>Choose Your Plan</h2>
@@ -227,6 +235,7 @@ const PricingPlans: React.FC<{
         changePremiumSubscriptionMutation={changePremiumSubscriptionMutation}
         userId={userId}
         wallet={wallet}
+        usdcTokenDetails={usdcTokenDetails}
       />
     </div>
   </div>
@@ -365,6 +374,7 @@ const PremiumSubscription: React.FC = () => {
     changePremiumSubscriptionMutation,
     account,
     handleSubscribe,
+    usdcTokenDetails,
   } = usePremium();
 
   return (
@@ -391,6 +401,7 @@ const PremiumSubscription: React.FC = () => {
             }
             userId={user.id}
             wallet={account?.address}
+            usdcTokenDetails={usdcTokenDetails}
           />
 
           <FeeCalculator

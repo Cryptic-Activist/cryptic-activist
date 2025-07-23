@@ -5,14 +5,14 @@ import {
 } from '@/middlewares/authorization';
 import {
   deployPremiumSmartContract,
-  getPremiumABIFile,
+  getPremiumDetails,
 } from '@/controllers/blockchains/smart-contracts/premium';
 
 import { Router } from 'express';
 
 const router = Router();
 
-router.get('/abi', authenticateUser, getPremiumABIFile);
+router.get('/details', authenticateUser, getPremiumDetails);
 
 router.post(
   '/deploy',

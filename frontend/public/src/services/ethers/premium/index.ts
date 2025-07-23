@@ -1,9 +1,14 @@
+import {
+  ApproveTokenParams,
+  GetTokenAllowanceParams,
+  GetTokenBalanceParams,
+  TX_CODE,
+} from './types';
 import { BACKEND, ETHEREUM_NETWORK_URL } from '@/constants/envs';
 import { Interface, ethers } from 'ethers';
 
 import { Period } from '@/hooks/usePremium/types';
 import PremiumArtifact from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
-import { TX_CODE } from './types';
 import { fetchGet } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 
@@ -13,7 +18,7 @@ export const getPremiumABI = async () => {
   try {
     const bearerToken = getBearerToken();
     const response = await fetchGet(
-      BACKEND + '/blockchains/smart-contracts/premium/abi',
+      BACKEND + '/blockchains/smart-contracts/premium/details',
       { Authorization: bearerToken }
     );
 
@@ -79,29 +84,99 @@ export const getPremiumContract = async (contractDetails: any) => {
 export const decodeFunctionData = (receipt: any) => {
   for (const log of receipt.logs) {
     try {
+      console.log({ receiptLog: log });
       const parsedLog = iface.parseLog(log);
       if (parsedLog) {
-        switch (parsedLog.name) {
-          case 'SubscriptionActivated': {
-            return parsedLog.args.toObject();
-          }
-          case 'SubscriptionRenewed': {
-            return parsedLog.args.toObject();
-          }
-          case 'PriceUpdated': {
-            return parsedLog.args.toObject();
-          }
-          case 'PaymentTokenUpdated': {
-            return parsedLog.args.toObject();
-          }
-          case 'PlatformWalletUpdated': {
-            return parsedLog.args.toObject();
-          }
-        }
+        return parsedLog.args.toObject();
       }
     } catch (_error) {
+      console.log({ _error });
       continue;
     }
+  }
+};
+
+export const getTokenAllowance = async ({
+  premiumContractDetails,
+  tokenContractDetails,
+}: GetTokenAllowanceParams) => {
+  try {
+    const signer = await getSigner();
+    const signerAddress = await signer.getAddress();
+    console.log({ signerAddress, tokenContractDetails });
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer
+    );
+
+    const allowance = await tokenContract.allowance(
+      signerAddress,
+      premiumContractDetails.address
+    );
+
+    return allowance;
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const getTokenBalance = async ({
+  tokenContractDetails,
+}: GetTokenBalanceParams) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer
+    );
+
+    const signerAddress = await signer.getAddress();
+
+    const balance = await tokenContract.balanceOf(signerAddress);
+
+    return { balance };
+  } catch (error) {
+    return {
+      message: 'Unable to check balances',
+      error: error,
+    };
+  }
+};
+
+export const approveToken = async ({
+  tokenContractDetails,
+  premiumContractDetails,
+  amount,
+}: ApproveTokenParams) => {
+  try {
+    const signer = await getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenContractDetails.address,
+      tokenContractDetails.abi,
+      signer
+    );
+    const tx = await tokenContract.approve(
+      premiumContractDetails.address,
+      amount
+    );
+    const receipt = await tx.wait();
+
+    return {
+      message: 'Token approved!',
+      receipt,
+    };
+  } catch (error) {
+    console.log({ error });
+    return {
+      message: 'Token Approval failed',
+      error: error,
+    };
   }
 };
 
@@ -110,6 +185,7 @@ export const subscribeToPremium = async (
   period: Period
 ) => {
   try {
+    console.log({ contractDetails });
     const contract = await getPremiumContract(contractDetails);
 
     if (!contract) {
@@ -120,8 +196,13 @@ export const subscribeToPremium = async (
       };
     }
 
-    // Buyer deposits require sending value along with the transaction.
-    const tx = await contract.subscribe(period);
+    const periodParam = period === 'MONTHLY' ? BigInt(0) : BigInt(1);
+
+    const txPrice = await contract.getSubscriptionPrice(BigInt(0));
+
+    console.log({ txPrice: txPrice });
+
+    const tx = await contract.subscribe(periodParam);
 
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
@@ -137,8 +218,8 @@ export const subscribeToPremium = async (
     };
   } catch (error: any) {
     return {
-      message: 'Error seller funding trade',
-      error: error,
+      message: `Error subscribing to ${period} premium`,
+      error,
     };
   }
 };
