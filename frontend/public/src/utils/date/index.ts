@@ -146,6 +146,15 @@ export const getLocaleFullDateString = (date: Date) => {
   return `${month} ${day}${suffix}, ${year} - ${hours}:${minutes} ${timeZone}`;
 };
 
+export const getLocaleDateString = (date: Date) => {
+  const day = date.getDate();
+  const suffix = getOrdinalSuffix(day);
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+
+  return `${month} ${day}${suffix}, ${year}`;
+};
+
 export const getFutureDateByHours = (futureDate: Date): string => {
   const now = new Date();
   const diffMs = futureDate.getTime() - now.getTime();

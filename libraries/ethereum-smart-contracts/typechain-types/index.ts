@@ -28,5 +28,5 @@ export type { MockToken } from "./contracts/MockToken";
 export { MockToken__factory } from "./factories/contracts/MockToken__factory";
 export type { NativeTokenEscrow } from "./contracts/NativeTokenEscrow";
 export { NativeTokenEscrow__factory } from "./factories/contracts/NativeTokenEscrow__factory";
-export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager";
-export { PremiumSubscriptionManager__factory } from "./factories/contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager__factory";
+export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager";
+export { PremiumSubscriptionManager__factory } from "./factories/contracts/PremiumSubscriptionManager__factory";

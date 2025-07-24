@@ -21,6 +21,8 @@ export const subscribeToPremium = async (
     { Authorization: bearerToken }
   );
 
+  if (response.status === 409) return { error: response.data.error };
+
   if (response.status !== 200) return null;
 
   return response.data;
@@ -31,25 +33,21 @@ export const changeSubscriptionTo = async (
   period: Period,
   wallet: Wallet
 ) => {
-  // const bearerToken = getBearerToken();
+  const bearerToken = getBearerToken();
 
-  console.log({ userId, period, wallet });
+  const response = await fetchPost(
+    `${BACKEND}/premium/subscription/change/${period.toLowerCase()}`,
+    {
+      userId,
+      period,
+      payerAddress: wallet,
+    },
+    { Authorization: bearerToken }
+  );
 
-  // const;
+  if (response.status !== 200) return null;
 
-  // const response = await fetchPost(
-  //   `${BACKEND}/premium/subscribe`,
-  //   {
-  //     userId,
-  //     period,
-  //     payerAddress: wallet,
-  //   },
-  //   { Authorization: bearerToken }
-  // );
-
-  // if (response.status !== 200) return null;
-
-  // return response.data;
+  return response.data;
 };
 
 export const getUsdcTokenABI = async (abiUrl: string) => {

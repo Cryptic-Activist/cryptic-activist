@@ -390,8 +390,8 @@ model PremiumPurchase {
   expectedAmount            Decimal               @db.Decimal(30, 10)
   status                    PremiumPurchaseStatus
   period                    PremiumPeriod
-  // blockchainTransactionHash String                @unique
-  blockchainTransactionHash String
+  blockchainTransactionHash String                @unique
+  blockchainPaymentHash     String                @unique
   startsAt                  DateTime              @default(now())
   expiresAt                 DateTime
   deletedAt                 DateTime?             @db.Timestamp()

@@ -3,19 +3,22 @@
 import type {
   CalculatorRowProps,
   FaqItemProps,
+  FeeCalculatorProps,
+  PlanCardProps,
   PlanType,
+  PricingPlanProps,
   TierCardProps,
 } from './types';
-import { toCapitalize, toLowerCase } from '@/utils';
+import React, { FC, useEffect, useState } from 'react';
+import { getLocaleDateString, toCapitalize, toLowerCase } from '@/utils';
 
 import { FaCrown } from 'react-icons/fa6';
 import { Period } from '@/hooks/usePremium/types';
-import React from 'react';
 import styles from './page.module.scss';
 import { usePremium } from '@/hooks';
 
 // Component: Tier Card
-const TierCard: React.FC<TierCardProps> = ({ tier }) => (
+const TierCard: FC<TierCardProps> = ({ tier }) => (
   <div className={styles.tierCard}>
     <div className={styles.tierHeader}>
       <h3 className={styles.tierName}>{tier.name}</h3>
@@ -27,7 +30,7 @@ const TierCard: React.FC<TierCardProps> = ({ tier }) => (
 );
 
 // Component: Calculator Row
-const CalculatorRow: React.FC<CalculatorRowProps> = ({
+const CalculatorRow: FC<CalculatorRowProps> = ({
   label,
   value,
   isHighlighted = false,
@@ -44,7 +47,7 @@ const CalculatorRow: React.FC<CalculatorRowProps> = ({
 );
 
 // Component: FAQ Item
-const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => (
+const FaqItem: FC<FaqItemProps> = ({ question, answer }) => (
   <div className={styles.faqItem}>
     <h3 className={styles.faqQuestion}>{question}</h3>
     <p className={styles.faqAnswer}>{answer}</p>
@@ -52,7 +55,7 @@ const FaqItem: React.FC<FaqItemProps> = ({ question, answer }) => (
 );
 
 // Component: Plan Toggle
-const PlanToggle: React.FC<{
+const PlanToggle: FC<{
   selectedPlan: string;
   onPlanChange: (plan: Period) => void;
 }> = ({ selectedPlan, onPlanChange }) => (
@@ -79,49 +82,62 @@ const PlanToggle: React.FC<{
 );
 
 // Component: Plan Card
-const PlanCard: React.FC<{
-  plan: PlanType;
-  selectedPlan: string;
-  isProcessing: boolean;
-  onSubscribe: () => void;
-  currentPremiumSubscription?: Period;
-  changePremiumSubscriptionMutation: any;
-  userId?: string;
-  wallet?: string;
-  usdcTokenDetails: any;
-}> = ({
+const PlanCard: FC<PlanCardProps> = ({
   plan,
-  // selectedPlan,
   isProcessing,
   onSubscribe,
   currentPremiumSubscription,
   changePremiumSubscriptionMutation,
   userId,
   wallet,
+  scheduledPremiumSubscription,
   usdcTokenDetails,
+  subscribeToPremiumMutation,
+  handleChangeSubscription,
 }) => {
   const periodLabel = plan.period === 'MONTHLY' ? 'month' : 'year';
-  const isSubscribed =
-    currentPremiumSubscription && currentPremiumSubscription === plan.period;
+  let isSubscribed =
+    (currentPremiumSubscription &&
+      currentPremiumSubscription === plan.period) ||
+    subscribeToPremiumMutation.data?.ok;
+  const isScheduledPremiumSubscription =
+    scheduledPremiumSubscription !== currentPremiumSubscription;
+  const scheduledPremiumSubscriptionLabel = isScheduledPremiumSubscription
+    ? `Starts on ${getLocaleDateString(
+        new Date(scheduledPremiumSubscription?.startsAt ?? '')
+      )}`
+    : 'Subscribe Now';
   const subscriptionLabel = currentPremiumSubscription
-    ? `Change to ${toCapitalize(toLowerCase(plan.period))}`
+    ? scheduledPremiumSubscriptionLabel
     : 'Subscribe Now';
   const subscribeProcessing = isProcessing
     ? 'Processing...'
     : subscriptionLabel;
 
-  const isDisabled = isProcessing || isSubscribed || !usdcTokenDetails.abi;
+  const isDisabled =
+    isProcessing ||
+    isSubscribed ||
+    !usdcTokenDetails.abi ||
+    subscribeToPremiumMutation.data?.ok ||
+    isScheduledPremiumSubscription;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (subscribeToPremiumMutation?.data?.error) {
+      setErrorMessage(subscribeToPremiumMutation.data.error);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 8000);
+    }
+  }, [subscribeToPremiumMutation]);
 
   const handleSubscribe = async () => {
     if (!isDisabled) {
       if (!currentPremiumSubscription) {
         onSubscribe();
       } else {
-        await changePremiumSubscriptionMutation.mutateAsync(
-          userId,
-          currentPremiumSubscription === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
-          wallet
-        );
+        const changed = await handleChangeSubscription();
+        console.log({ changed });
       }
     }
   };
@@ -151,7 +167,11 @@ const PlanCard: React.FC<{
           isProcessing ? styles.processing : ''
         }`}
       >
-        {isSubscribed ? 'Subscribed' : subscribeProcessing}
+        {errorMessage
+          ? errorMessage
+          : isSubscribed
+          ? 'Subscribed'
+          : subscribeProcessing}
       </button>
 
       <p className={styles.planDisclaimer}>
@@ -162,7 +182,7 @@ const PlanCard: React.FC<{
 };
 
 // Component: Header Section
-const HeaderSection: React.FC = () => (
+const HeaderSection: FC = () => (
   <div className={styles.header}>
     <div className={styles.headerIcon}>
       <FaCrown className={styles.crownIcon} />
@@ -176,7 +196,7 @@ const HeaderSection: React.FC = () => (
 );
 
 // Component: Current Tier Benefits
-const CurrentTierBenefits: React.FC<{
+const CurrentTierBenefits: FC<{
   formattedTiers: any[];
   premiumDiscount: number | null;
 }> = ({ formattedTiers, premiumDiscount }) => (
@@ -199,28 +219,20 @@ const CurrentTierBenefits: React.FC<{
 );
 
 // Component: Pricing Plans
-const PricingPlans: React.FC<{
-  selectedPlan: string;
-  plans: Record<string, PlanType>;
-  isProcessing: boolean;
-  onPlanChange: (plan: Period) => void;
-  onSubscribe: () => void;
-  currentPremiumSubscription?: Period;
-  changePremiumSubscriptionMutation: any;
-  userId?: string;
-  wallet?: string;
-  usdcTokenDetails: any;
-}> = ({
+const PricingPlans: FC<PricingPlanProps> = ({
   selectedPlan,
   plans,
   isProcessing,
   onPlanChange,
   onSubscribe,
   currentPremiumSubscription,
+  scheduledPremiumSubscription,
   changePremiumSubscriptionMutation,
   userId,
   wallet,
   usdcTokenDetails,
+  subscribeToPremiumMutation,
+  handleChangeSubscription,
 }) => (
   <div className={styles.card}>
     <h2 className={styles.cardTitleCenter}>Choose Your Plan</h2>
@@ -236,21 +248,16 @@ const PricingPlans: React.FC<{
         userId={userId}
         wallet={wallet}
         usdcTokenDetails={usdcTokenDetails}
+        subscribeToPremiumMutation={subscribeToPremiumMutation}
+        handleChangeSubscription={handleChangeSubscription}
+        scheduledPremiumSubscription={scheduledPremiumSubscription}
       />
     </div>
   </div>
 );
 
 // Component: Fee Calculator
-const FeeCalculator: React.FC<{
-  user: any;
-  baseFee: number;
-  currentRate: string;
-  premiumDiscount: number | null;
-  totalDiscountPremium: number | null;
-  amountExample: number;
-  savingExample: number | null;
-}> = ({
+const FeeCalculator: FC<FeeCalculatorProps> = ({
   user,
   baseFee,
   currentRate,
@@ -323,7 +330,7 @@ const FeeCalculator: React.FC<{
 };
 
 // Component: FAQ Section
-const FaqSection: React.FC = () => {
+const FaqSection: FC = () => {
   const faqData = [
     {
       question: 'Can I cancel anytime?',
@@ -355,7 +362,7 @@ const FaqSection: React.FC = () => {
 };
 
 // Main Component
-const PremiumSubscription: React.FC = () => {
+const PremiumSubscription: FC = () => {
   const {
     baseFee,
     currentRate,
@@ -375,6 +382,8 @@ const PremiumSubscription: React.FC = () => {
     account,
     handleSubscribe,
     usdcTokenDetails,
+    handleChangeSubscription,
+    scheduledPremiumSubscription,
   } = usePremium();
 
   return (
@@ -402,6 +411,9 @@ const PremiumSubscription: React.FC = () => {
             userId={user.id}
             wallet={account?.address}
             usdcTokenDetails={usdcTokenDetails}
+            subscribeToPremiumMutation={subscribeToPremiumMutation}
+            handleChangeSubscription={handleChangeSubscription}
+            scheduledPremiumSubscription={scheduledPremiumSubscription}
           />
 
           <FeeCalculator

@@ -80,7 +80,7 @@ contract PremiumSubscriptionManager is Ownable, ReentrancyGuard {
         );
         
         // Generate payment hash for verification
-        bytes32 paymentHash = generatePaymentHash(msg.sender, planType, price, block.timestamp);
+        bytes32 paymentHash = generatePaymentHash(msg.sender, planType, price, block.timestamp, block.number);
         
         // Ensure hash hasn't been used before
         require(!usedPaymentHashes[paymentHash], "Payment hash already used");
@@ -124,7 +124,7 @@ contract PremiumSubscriptionManager is Ownable, ReentrancyGuard {
         );
         
         // Generate payment hash for verification
-        bytes32 paymentHash = generatePaymentHash(msg.sender, planType, price, block.timestamp);
+        bytes32 paymentHash = generatePaymentHash(msg.sender, planType, price, block.timestamp, block.number);
         
         // Ensure hash hasn't been used before
         require(!usedPaymentHashes[paymentHash], "Payment hash already used");
@@ -201,9 +201,10 @@ contract PremiumSubscriptionManager is Ownable, ReentrancyGuard {
         address user,
         PlanType planType,
         uint256 amount,
-        uint256 timestamp
+        uint256 timestamp,
+        uint256 blockHeight
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(user, planType, amount, timestamp));
+        return keccak256(abi.encodePacked(user, planType, amount, timestamp, blockHeight));
     }
     
     /**

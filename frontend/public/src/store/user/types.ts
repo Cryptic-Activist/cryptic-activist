@@ -26,6 +26,8 @@ type Count = {
 
 type Premium = {
   period: 'MONTHLY' | 'YEARLY';
+  status: 'COMPLETED' | 'SCHEDULED';
+  startsAt: string;
 }[];
 
 type Names = {

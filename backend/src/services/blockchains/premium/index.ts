@@ -5,7 +5,7 @@ import {
   ETHEREUM_NETWORK_URL,
   ETHEREUM_PREMIUM_CONTRACT_ADDRESS,
 } from '@/constants/env';
-import { Interface, ethers, parseEther } from 'ethers';
+import { Interface, ethers, formatUnits, parseEther, parseUnits } from 'ethers';
 import { convertSmartContractParams, toTokenUnits } from '@/utils/blockchain';
 import { prisma, redisClient } from '@/services/db';
 
@@ -117,7 +117,6 @@ export const deployPremium = async (
     const token = await prisma.cryptocurrencyChain.findFirst({
       where: {
         chain: { id: params.chain.id, isTestnet: IS_DEVELOPMENT },
-
         cryptocurrency: {
           coingeckoId: 'usd-coin',
         },
@@ -131,8 +130,10 @@ export const deployPremium = async (
       throw new Error("Couldn't find token contract address");
     }
 
-    const baseUnitsMonthlyPrice = toTokenUnits(params.monthlyPrice, 6);
-    const baseUnitsYearlyPrice = toTokenUnits(params.monthlyPrice, 6);
+    const baseUnitsMonthlyPrice = parseUnits(params.monthlyPrice.toString(), 6);
+    const baseUnitsYearlyPrice = parseUnits(params.monthlyPrice.toString(), 6);
+
+    console.log({ baseUnitsMonthlyPrice, baseUnitsYearlyPrice });
 
     const contract = await factory.deploy(
       token?.contractAddress,
@@ -160,5 +161,28 @@ export const deployPremium = async (
   } catch (error) {
     console.log(error);
     throw new Error('Unable to deploy Premium');
+  }
+};
+
+export const getContractBalance = async () => {
+  try {
+    const contract = await getPremiumContract();
+
+    if (!contract) {
+      return {
+        error: 'No Contract Found',
+      };
+    }
+
+    const tx = await contract.getContractBalance();
+
+    console.log({ tx });
+
+    return { balance: ethers.formatUnits(tx, 6) };
+  } catch (error: any) {
+    return {
+      message: `Error to get contract balance`,
+      error,
+    };
   }
 };

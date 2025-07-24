@@ -84,13 +84,27 @@ export const getPremiumContract = async (contractDetails: any) => {
 export const decodeFunctionData = (receipt: any) => {
   for (const log of receipt.logs) {
     try {
-      console.log({ receiptLog: log });
       const parsedLog = iface.parseLog(log);
       if (parsedLog) {
-        return parsedLog.args.toObject();
+        switch (parsedLog.name) {
+          case 'SubscriptionActivated': {
+            return parsedLog.args.toObject();
+          }
+          case 'SubscriptionRenewed': {
+            return parsedLog.args.toObject();
+          }
+          case 'PriceUpdated': {
+            return parsedLog.args.toObject();
+          }
+          case 'PaymentTokenUpdated': {
+            return parsedLog.args.toObject();
+          }
+          case 'PlatformWalletUpdated': {
+            return parsedLog.args.toObject();
+          }
+        }
       }
     } catch (_error) {
-      console.log({ _error });
       continue;
     }
   }
@@ -103,7 +117,6 @@ export const getTokenAllowance = async ({
   try {
     const signer = await getSigner();
     const signerAddress = await signer.getAddress();
-    console.log({ signerAddress, tokenContractDetails });
     const tokenContract = new ethers.Contract(
       tokenContractDetails.address,
       tokenContractDetails.abi,
@@ -185,7 +198,6 @@ export const subscribeToPremium = async (
   period: Period
 ) => {
   try {
-    console.log({ contractDetails });
     const contract = await getPremiumContract(contractDetails);
 
     if (!contract) {
@@ -198,23 +210,23 @@ export const subscribeToPremium = async (
 
     const periodParam = period === 'MONTHLY' ? BigInt(0) : BigInt(1);
 
-    const txPrice = await contract.getSubscriptionPrice(BigInt(0));
+    console.log({ periodParam });
 
-    console.log({ txPrice: txPrice });
+    const mon = await contract.getSubscriptionPrice(BigInt(0));
+    const yre = await contract.getSubscriptionPrice(BigInt(1));
+    console.log({ mon, yre });
 
     const tx = await contract.subscribe(periodParam);
 
     const receipt = await tx.wait();
     const decoded = decodeFunctionData(receipt);
 
-    console.log({ tx, receipt, decoded });
-
     return {
       tx,
       receipt,
       data: decoded,
       txHash: tx.hash,
-      message: 'Seller funded the trade successfully',
+      message: `Subscribed to ${period} successfully`,
     };
   } catch (error: any) {
     return {

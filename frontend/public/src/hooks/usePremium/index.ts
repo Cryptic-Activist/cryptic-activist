@@ -6,6 +6,7 @@ import type {
   Period,
   PremiumPlans,
   PremiumSettings,
+  ScheduledPremium,
   USDCToken,
   USDCTokenDetails,
 } from './types';
@@ -82,6 +83,8 @@ const usePremium = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [currentPremiumSubscription, setCurrentPremiumSubscription] =
     useState<Period>();
+  const [scheduledPremiumSubscription, setScheduledPremiumSubscription] =
+    useState<ScheduledPremium>();
   const [usdcToken, setUsdcToken] = useState<USDCToken>();
   const [usdcTokenDetails, setUsdcTokenDetails] = useState<USDCTokenDetails>({
     abi: null,
@@ -219,6 +222,7 @@ const usePremium = () => {
         }
 
         const amount = period === 'MONTHLY' ? monthlyPrice : yearlyPrice;
+        console.log({ amount, decimals });
         const baseUnits = toTokenUnits(amount, decimals);
         const approved = await approveToken({
           tokenContractDetails: usdcTokenDetails,
@@ -246,14 +250,17 @@ const usePremium = () => {
 
         console.log({ subscribedSmartContractResponse });
 
-        // console.log({ subscribedSmartContractResponse });
-
-        // const response = await subscribeToPremiumService(
-        //   user.id,
-        //   period,
-        //   account.address
-        // );
-        // return response;
+        if (
+          subscribedSmartContractResponse.data &&
+          subscribedSmartContractResponse.data?.paymentHash
+        ) {
+          const response = await subscribeToPremiumService(
+            user.id,
+            period,
+            account.address
+          );
+          return response;
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -280,14 +287,58 @@ const usePremium = () => {
         throw new Error('User not current subscribed');
       }
 
+      const period = selectedPlan === 'YEARLY' ? 'YEARLY' : 'MONTHLY';
+
       try {
-        const response = await changeSubscriptionTo(
-          user.id,
-          user.premiumPurchase[0].period === 'MONTHLY' ? 'MONTHLY' : 'YEARLY',
-          account.address
+        const decimals = await getTokenDecimals({
+          tokenContractDetails: usdcTokenDetails,
+        });
+
+        if (!decimals) {
+          throw new Error('Unable to get token decimals');
+        }
+
+        const amount = period === 'MONTHLY' ? monthlyPrice : yearlyPrice;
+        const baseUnits = toTokenUnits(amount, decimals);
+        console.log({ amount, baseUnits });
+        const approved = await approveToken({
+          tokenContractDetails: usdcTokenDetails,
+          premiumContractDetails: premium,
+          amount: baseUnits,
+        });
+
+        console.log({ approved });
+
+        if (!approved || approved.error) {
+          throw new Error('Unable to approve token');
+        }
+
+        const allowance = await getTokenAllowance({
+          premiumContractDetails: premium,
+          tokenContractDetails: usdcTokenDetails,
+        });
+
+        console.log({ allowance });
+
+        const subscribedSmartContractResponse = await subscribeToPremiumEthers(
+          premium,
+          period
         );
 
-        return response;
+        console.log({ subscribedSmartContractResponse });
+
+        if (
+          subscribedSmartContractResponse.data &&
+          subscribedSmartContractResponse.data?.paymentHash
+        ) {
+          const response = await changeSubscriptionTo(
+            user.id,
+            user.premiumPurchase[0].period === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
+            account.address
+          );
+
+          return response;
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -324,22 +375,32 @@ const usePremium = () => {
 
   const handleSubscribe = async () => {
     if (user.id) {
-      if (!currentPremiumSubscription) {
-        await subscribeToPremiumMutation.mutateAsync();
-        console.log('Subscribe to:', selectedPlan);
-      } else {
-        // await changePremiumSubscriptionMutation.mutateAsync();
-      }
+      await subscribeToPremiumMutation.mutateAsync();
+    }
+  };
+
+  const handleChangeSubscription = async () => {
+    if (user.id) {
+      const changed = await changePremiumSubscriptionMutation.mutateAsync();
+      return changed;
     }
   };
 
   useEffect(() => {
-    if (
-      user.premiumPurchase &&
-      user.premiumPurchase.length > 0 &&
-      user.premiumPurchase[0].period
-    ) {
-      setCurrentPremiumSubscription(user.premiumPurchase[0].period);
+    if (user.premiumPurchase && user.premiumPurchase.length > 0) {
+      const currentPremium = user.premiumPurchase.find(
+        (purchase) => purchase.status === 'COMPLETED'
+      );
+
+      if (currentPremium) {
+        setCurrentPremiumSubscription(currentPremium.period);
+      }
+      const scheduledPremium = user.premiumPurchase.find(
+        (purchase) => purchase.status === 'SCHEDULED'
+      );
+      if (scheduledPremium) {
+        setScheduledPremiumSubscription(scheduledPremium);
+      }
     }
   }, [user.premiumPurchase]);
 
@@ -366,8 +427,6 @@ const usePremium = () => {
     }
   }, [usdcTokenABIQuery.data]);
 
-  // console.log({ usdcTokenDetails });
-
   return {
     subscribeToPremiumMutation,
     baseFee,
@@ -389,6 +448,8 @@ const usePremium = () => {
     account,
     usdcTokenDetails,
     handleSubscribe,
+    handleChangeSubscription,
+    scheduledPremiumSubscription,
   };
 };
 

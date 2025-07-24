@@ -58,10 +58,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.NativeTokenEscrow__factory>;
     getContractFactory(
-      name: "IERC20",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20__factory>;
-    getContractFactory(
       name: "PremiumSubscriptionManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PremiumSubscriptionManager__factory>;
@@ -122,11 +118,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.NativeTokenEscrow>;
     getContractAt(
-      name: "IERC20",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC20>;
-    getContractAt(
       name: "PremiumSubscriptionManager",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -176,10 +167,6 @@ declare module "hardhat/types/runtime" {
       name: "NativeTokenEscrow",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.NativeTokenEscrow>;
-    deployContract(
-      name: "IERC20",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "PremiumSubscriptionManager",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -240,11 +227,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.NativeTokenEscrow>;
-    deployContract(
-      name: "IERC20",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC20>;
     deployContract(
       name: "PremiumSubscriptionManager",
       args: any[],

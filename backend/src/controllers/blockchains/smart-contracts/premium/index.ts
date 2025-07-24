@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
+import {
+  deployPremium,
+  getContractBalance,
+} from '@/services/blockchains/premium';
 
 import { Readable } from 'node:stream';
-import { deployPremium } from '@/services/blockchains/premium';
 import { ethers } from 'ethers';
 import { formatBigInt } from '@/utils/number';
 import { getNextSmartContractVersion } from '@/services/blockchains';
@@ -195,5 +198,19 @@ export const deployPremiumSmartContract = async (
     });
   } catch (error) {
     res.status(500).json({ error });
+  }
+};
+
+export const getPremiumSmartContractBalance = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const balance = await getContractBalance();
+
+    res.status(200).json(balance);
+  } catch (error) {
+    console.log({ error });
+    res.status(400).json(error);
   }
 };

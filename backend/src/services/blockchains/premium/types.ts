@@ -1,7 +1,7 @@
 export type DeployPremiumSmartContractParams = {
   platformWallet: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
+  monthlyPrice: string;
+  yearlyPrice: string;
   chain: {
     id: string;
     rpcUrl: string;

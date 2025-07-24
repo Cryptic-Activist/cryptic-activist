@@ -56,3 +56,8 @@ export type USDCTokenDetails = {
   abi: ABI | null;
   address: string | null;
 };
+
+export type ScheduledPremium = {
+  period: Period;
+  startsAt: string;
+};

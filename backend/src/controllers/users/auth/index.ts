@@ -190,8 +190,15 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
         twoFactorEnabled: true,
         referralCode: true,
         premiumPurchase: {
+          where: {
+            expiresAt: {
+              gt: new Date(),
+            },
+          },
           select: {
             period: true,
+            status: true,
+            startsAt: true,
           },
         },
         kyc: {
