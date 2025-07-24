@@ -5,15 +5,14 @@ import type {
   FaqItemProps,
   FeeCalculatorProps,
   PlanCardProps,
-  PlanType,
   PricingPlanProps,
   TierCardProps,
 } from './types';
 import React, { FC, useEffect, useState } from 'react';
-import { getLocaleDateString, toCapitalize, toLowerCase } from '@/utils';
 
 import { FaCrown } from 'react-icons/fa6';
 import { Period } from '@/hooks/usePremium/types';
+import { getLocaleDateString } from '@/utils';
 import styles from './page.module.scss';
 import { usePremium } from '@/hooks';
 
@@ -87,59 +86,54 @@ const PlanCard: FC<PlanCardProps> = ({
   isProcessing,
   onSubscribe,
   currentPremiumSubscription,
-  changePremiumSubscriptionMutation,
-  userId,
-  wallet,
   scheduledPremiumSubscription,
   usdcTokenDetails,
   subscribeToPremiumMutation,
   handleChangeSubscription,
 }) => {
-  const periodLabel = plan.period === 'MONTHLY' ? 'month' : 'year';
-  let isSubscribed =
-    (currentPremiumSubscription &&
-      currentPremiumSubscription === plan.period) ||
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const isSubscribed =
+    currentPremiumSubscription === plan.period ||
     subscribeToPremiumMutation.data?.ok;
-  const isScheduledPremiumSubscription =
-    scheduledPremiumSubscription !== currentPremiumSubscription;
-  const scheduledPremiumSubscriptionLabel = isScheduledPremiumSubscription
-    ? `Starts on ${getLocaleDateString(
-        new Date(scheduledPremiumSubscription?.startsAt ?? '')
-      )}`
-    : 'Subscribe Now';
-  const subscriptionLabel = currentPremiumSubscription
-    ? scheduledPremiumSubscriptionLabel
-    : 'Subscribe Now';
-  const subscribeProcessing = isProcessing
-    ? 'Processing...'
-    : subscriptionLabel;
+  const isDifferentSubscriptionScheduled =
+    scheduledPremiumSubscription &&
+    scheduledPremiumSubscription.period !== currentPremiumSubscription;
 
   const isDisabled =
     isProcessing ||
     isSubscribed ||
     !usdcTokenDetails.abi ||
-    subscribeToPremiumMutation.data?.ok ||
-    isScheduledPremiumSubscription;
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    (subscribeToPremiumMutation.data?.ok && !currentPremiumSubscription) ||
+    isDifferentSubscriptionScheduled;
 
   useEffect(() => {
     if (subscribeToPremiumMutation?.data?.error) {
       setErrorMessage(subscribeToPremiumMutation.data.error);
-      setTimeout(() => {
-        setErrorMessage(null);
-      }, 8000);
+      const timer = setTimeout(() => setErrorMessage(null), 8000);
+      return () => clearTimeout(timer);
     }
   }, [subscribeToPremiumMutation]);
 
-  const handleSubscribe = async () => {
-    if (!isDisabled) {
-      if (!currentPremiumSubscription) {
-        onSubscribe();
-      } else {
-        const changed = await handleChangeSubscription();
-        console.log({ changed });
-      }
+  const handleSubscribe = () => {
+    if (isDisabled) return;
+    if (currentPremiumSubscription) {
+      handleChangeSubscription();
+    } else {
+      onSubscribe();
     }
+  };
+
+  const getButtonLabel = () => {
+    if (errorMessage) return errorMessage;
+    if (isProcessing) return 'Processing...';
+    if (isSubscribed) return 'Subscribed';
+    if (isDifferentSubscriptionScheduled) {
+      return `Starts on ${getLocaleDateString(
+        new Date(scheduledPremiumSubscription.startsAt)
+      )}`;
+    }
+    return 'Subscribe Now';
   };
 
   return (
@@ -148,7 +142,9 @@ const PlanCard: FC<PlanCardProps> = ({
         <h3 className={styles.planName}>Premium</h3>
         <div className={styles.planPrice}>
           ${plan.price}
-          <span className={styles.planPeriod}>/{periodLabel}</span>
+          <span className={styles.planPeriod}>
+            /{plan.period === 'MONTHLY' ? 'month' : 'year'}
+          </span>
         </div>
         {plan.savings && (
           <div className={styles.planSavings}>Save {plan.savings}%</div>
@@ -167,11 +163,7 @@ const PlanCard: FC<PlanCardProps> = ({
           isProcessing ? styles.processing : ''
         }`}
       >
-        {errorMessage
-          ? errorMessage
-          : isSubscribed
-          ? 'Subscribed'
-          : subscribeProcessing}
+        {getButtonLabel()}
       </button>
 
       <p className={styles.planDisclaimer}>
@@ -227,11 +219,9 @@ const PricingPlans: FC<PricingPlanProps> = ({
   onSubscribe,
   currentPremiumSubscription,
   scheduledPremiumSubscription,
-  changePremiumSubscriptionMutation,
-  userId,
-  wallet,
   usdcTokenDetails,
   subscribeToPremiumMutation,
+  changePremiumSubscriptionMutation,
   handleChangeSubscription,
 }) => (
   <div className={styles.card}>
@@ -240,17 +230,15 @@ const PricingPlans: FC<PricingPlanProps> = ({
     <div className={styles.planContainer}>
       <PlanCard
         plan={plans[selectedPlan]}
-        selectedPlan={selectedPlan}
         isProcessing={isProcessing}
         onSubscribe={onSubscribe}
         currentPremiumSubscription={currentPremiumSubscription}
-        changePremiumSubscriptionMutation={changePremiumSubscriptionMutation}
-        userId={userId}
-        wallet={wallet}
         usdcTokenDetails={usdcTokenDetails}
         subscribeToPremiumMutation={subscribeToPremiumMutation}
         handleChangeSubscription={handleChangeSubscription}
         scheduledPremiumSubscription={scheduledPremiumSubscription}
+        selectedPlan={selectedPlan}
+        changePremiumSubscriptionMutation={changePremiumSubscriptionMutation}
       />
     </div>
   </div>
