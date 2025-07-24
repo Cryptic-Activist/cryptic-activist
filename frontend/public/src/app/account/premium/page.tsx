@@ -21,7 +21,9 @@ const TierCard: FC<TierCardProps> = ({ tier }) => (
   <div className={styles.tierCard}>
     <div className={styles.tierHeader}>
       <h3 className={styles.tierName}>{tier.name}</h3>
-      <div className={styles.tierBadge}></div>
+      <div
+        className={`${styles.tierBadge} ${styles[tier.name.toLowerCase()]}`}
+      ></div>
     </div>
     <p className={styles.tierVolume}>Volume: {tier.volume}</p>
     <p className={styles.tierFee}>Fee: {tier.tradingFee}</p>

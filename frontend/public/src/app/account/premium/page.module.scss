@@ -162,10 +162,29 @@ $orange-500: #f97316;
 }
 
 .tierBadge {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
-  @include gradient-border;
+}
+
+.bronze {
+  background-color: #cd7f32; /* Bronze */
+}
+
+.silver {
+  background-color: #c0c0c0; /* Silver */
+}
+
+.gold {
+  background-color: #ffd700; /* Gold */
+}
+
+.platinum {
+  background-color: #e5e4e2; /* Platinum (light silvery-white) */
+}
+
+.diamond {
+  background-color: #b9f2ff; /* Diamond (icy blue hue) */
 }
 
 .tierVolume {
