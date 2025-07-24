@@ -263,6 +263,7 @@ const usePremium = () => {
         }
       } finally {
         setIsProcessing(false);
+        window.location.reload();
       }
     },
     onError: (error) => {
@@ -341,6 +342,7 @@ const usePremium = () => {
         }
       } finally {
         setIsProcessing(false);
+        window.location.reload();
       }
     },
     onError: (error) => {
