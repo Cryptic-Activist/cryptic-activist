@@ -132,29 +132,27 @@ const Admins = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{admins.map((admin) => {
-								const roles = admin.roles.map((role) => role.role).join(', ');
-								return (
-									<tr key={admin.id}>
-										<td>{admin.firstName}</td>
-										<td>{admin.lastName}</td>
-										<td>{admin.username}</td>
-										<td>{admin.email}</td>
-										<td>{roles}</td>
-										<td>
-											<button
-												className={`${styles.btn} ${styles.btnSecondary}`}
-												onClick={() => openModal(admin)}
-											>
-												<DynamicIcon iconName="FaPen" size={16} />
-											</button>
-											<button
-												className={`${styles.btn} ${styles.btnDanger}`}
-												onClick={() => deleteAdminMutation.mutate(admin.id)}
-											>
-												<DynamicIcon iconName="FaTrash" size={16} />
-											</button>
-											{/* <button
+							{admins.map((admin) => (
+								<tr key={admin.id}>
+									<td>{admin.firstName}</td>
+									<td>{admin.lastName}</td>
+									<td>{admin.username}</td>
+									<td>{admin.email}</td>
+									<td>{admin.roles.join(', ')}</td>
+									<td>
+										<button
+											className={`${styles.btn} ${styles.btnSecondary}`}
+											onClick={() => openModal(admin)}
+										>
+											<DynamicIcon iconName="FaPen" size={16} />
+										</button>
+										<button
+											className={`${styles.btn} ${styles.btnDanger}`}
+											onClick={() => deleteAdminMutation.mutate(admin.id)}
+										>
+											<DynamicIcon iconName="FaTrash" size={16} />
+										</button>
+										{/* <button
 											className={`${styles.btn} ${styles.btnWarning}`}
 											onClick={() =>
 												updateAdminMutation.mutate({
@@ -168,18 +166,15 @@ const Admins = () => {
 												size={16}
 											/>
 										</button> */}
-											<button
-												className={`${styles.btn} ${styles.btnSuccess}`}
-												onClick={() =>
-													generatePasswordMutation.mutate(admin.id)
-												}
-											>
-												<DynamicIcon iconName="FaKey" size={16} />
-											</button>
-										</td>
-									</tr>
-								);
-							})}
+										<button
+											className={`${styles.btn} ${styles.btnSuccess}`}
+											onClick={() => generatePasswordMutation.mutate(admin.id)}
+										>
+											<DynamicIcon iconName="FaKey" size={16} />
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
 				</div>

@@ -125,7 +125,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
 }
 
 export const inviteAdmin = async (req: Request, res: Response) => {
-  const { firstName, lastName, username, email } = req.body;
+  const { firstName, lastName, username, email, roles } = req.body;
 
   console.log(req.body);
 
@@ -164,11 +164,7 @@ export const inviteAdmin = async (req: Request, res: Response) => {
           lastName,
           username: newUsername,
           email,
-          roles: {
-            create: {
-              role: [''],
-            },
-          },
+          roles,
         },
       });
 

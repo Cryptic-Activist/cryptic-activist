@@ -58,7 +58,12 @@ export const getAllAdmins = async (_req: Request, res: Response) => {
       },
     });
 
-    res.status(200).send(admins);
+    const mappedAdmins = admins.map((admin) => ({
+      ...admin,
+      roles: admin.roles.map((role) => role.role),
+    }));
+
+    res.status(200).send(mappedAdmins);
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
