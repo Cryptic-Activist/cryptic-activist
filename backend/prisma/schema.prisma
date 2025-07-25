@@ -445,6 +445,7 @@ enum SystemMessageType {
   SYSTEM_ERROR
   API_DOWNTIME
   USER_WARNING
+  PREMIUM_EXPIRY_WARNING
 }
 
 model SystemMessage {
