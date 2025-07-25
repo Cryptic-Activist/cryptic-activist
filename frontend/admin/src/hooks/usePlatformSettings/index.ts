@@ -38,7 +38,8 @@ const usePlatformSettings = () => {
 		register: registerPublic,
 		handleSubmit: handleSubmitPublic,
 		formState: { errors: errorsPublic },
-		watch: watchPublic
+		watch: watchPublic,
+		reset: resetPublic
 	} = useForm({
 		resolver: updatePublicPlatformSettings,
 		defaultValues: {
@@ -50,7 +51,8 @@ const usePlatformSettings = () => {
 		register: registerPrivate,
 		handleSubmit: handleSubmitPrivate,
 		formState: { errors: errorsPrivate },
-		watch: watchPrivate
+		watch: watchPrivate,
+		reset: resetPrivate
 	} = useForm({
 		resolver: updatePrivatePlatformSettings,
 		defaultValues: {
@@ -148,7 +150,7 @@ const usePlatformSettings = () => {
 	}, [platformSettingsQuery.data]);
 
 	useEffect(() => {
-		removePublicField(0, true);
+		resetPublic({ public: [] });
 		$platformSettings.public.forEach((field) => {
 			appendPublic({
 				key: field.key,
@@ -167,7 +169,7 @@ const usePlatformSettings = () => {
 			});
 		});
 
-		removePrivateField(0, true);
+		resetPrivate({ private: [] });
 		$platformSettings.private.forEach((field) => {
 			appendPrivate({
 				key: field.key,
@@ -199,7 +201,8 @@ const usePlatformSettings = () => {
 			register: registerPublic,
 			handleSubmit: handleSubmitPublic,
 			onSubmit: onSubmitPublic,
-			updatePublicPlatformSettingsMutation
+			updatePublicPlatformSettingsMutation,
+			reset: resetPublic
 		},
 		privateForm: {
 			fields: fieldsPrivate,
@@ -211,7 +214,8 @@ const usePlatformSettings = () => {
 			register: registerPrivate,
 			handleSubmit: handleSubmitPrivate,
 			onSubmit: onSubmitPrivate,
-			updatePrivatePlatformSettingsMutation
+			updatePrivatePlatformSettingsMutation,
+			reset: resetPrivate
 		}
 	};
 };

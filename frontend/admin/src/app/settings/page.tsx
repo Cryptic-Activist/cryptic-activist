@@ -1,12 +1,19 @@
 'use client';
 
 import { DynamicIcon } from '@/components';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from './page.module.scss';
 import usePlatformSettings from '@/hooks/usePlatformSettings';
 
 const PlatformSettings = () => {
 	const { publicForm, privateForm } = usePlatformSettings();
+
+	useEffect(() => {
+		return () => {
+			publicForm.reset();
+			privateForm.reset();
+		};
+	}, []);
 
 	return (
 		<div className={styles.container}>
