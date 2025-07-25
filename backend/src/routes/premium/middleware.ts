@@ -9,8 +9,6 @@ export const validateSubscribe = (
 ) => {
   const { body } = req;
 
-  console.log({ body });
-
   const validatedBody = SubscribeBody.safeParse(body);
 
   if (!validatedBody.success) {

@@ -230,7 +230,7 @@ const usePremium = () => {
           amount: baseUnits,
         });
 
-        console.log({ approved });
+        // console.log({ approved });
 
         if (!approved || approved.error) {
           throw new Error('Unable to approve token');
@@ -241,7 +241,7 @@ const usePremium = () => {
           tokenContractDetails: usdcTokenDetails,
         });
 
-        console.log({ allowance });
+        // console.log({ allowance });
 
         const subscribedSmartContractResponse = await subscribeToPremiumEthers(
           premium,
@@ -257,13 +257,14 @@ const usePremium = () => {
           const response = await subscribeToPremiumService(
             user.id,
             period,
-            account.address
+            account.address,
+            subscribedSmartContractResponse.data.paymentHash
           );
           return response;
         }
       } finally {
         setIsProcessing(false);
-        window.location.reload();
+        // window.location.reload();
       }
     },
     onError: (error) => {
@@ -335,14 +336,15 @@ const usePremium = () => {
           const response = await changeSubscriptionTo(
             user.id,
             user.premiumPurchase[0].period === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
-            account.address
+            account.address,
+            subscribedSmartContractResponse.data.paymentHash
           );
 
           return response;
         }
       } finally {
         setIsProcessing(false);
-        window.location.reload();
+        // window.location.reload();
       }
     },
     onError: (error) => {

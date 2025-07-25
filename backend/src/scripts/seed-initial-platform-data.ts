@@ -165,7 +165,7 @@ const main = async () => {
     {
       name: 'Hardhat',
       symbol: 'ETH',
-      chainId: 31337,
+      chainId: 1337,
       rpcUrl: 'http://host.docker.internal:8545',
       explorerUrl: '',
       nativeCurrency: 'ETH',

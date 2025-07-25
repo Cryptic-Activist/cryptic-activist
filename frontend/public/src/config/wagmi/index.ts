@@ -20,7 +20,7 @@ import { IS_DEVELOPMENT } from '@/constants';
 import { metaMask } from 'wagmi/connectors';
 
 const hardhat1337 = {
-  id: 31337,
+  id: 1337,
   name: 'Hardhat',
   network: 'hardhat',
   nativeCurrency: {

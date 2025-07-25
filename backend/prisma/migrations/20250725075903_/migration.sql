@@ -329,6 +329,7 @@ CREATE TABLE "premium_purchases" (
     "status" "PremiumPurchaseStatus" NOT NULL,
     "period" "PremiumPeriod" NOT NULL,
     "blockchainTransactionHash" TEXT NOT NULL,
+    "blockchainPaymentHash" TEXT NOT NULL,
     "startsAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP,
@@ -547,6 +548,16 @@ CREATE TABLE "trusts" (
 );
 
 -- CreateTable
+CREATE TABLE "user_wallet" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_wallet_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "user_stats" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -756,6 +767,12 @@ CREATE UNIQUE INDEX "chains_name_key" ON "chains"("name");
 CREATE UNIQUE INDEX "chains_chainId_key" ON "chains"("chainId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "premium_purchases_blockchainTransactionHash_key" ON "premium_purchases"("blockchainTransactionHash");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "premium_purchases_blockchainPaymentHash_key" ON "premium_purchases"("blockchainPaymentHash");
+
+-- CreateIndex
 CREATE INDEX "premium_purchases_userId_period_status_expiresAt_idx" ON "premium_purchases"("userId", "period", "status", "expiresAt");
 
 -- CreateIndex
@@ -790,6 +807,9 @@ CREATE INDEX "trade_disputes_status_priority_idx" ON "trade_disputes"("status", 
 
 -- CreateIndex
 CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "trustedId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_wallet_address_key" ON "user_wallet"("address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_stats_userId_key" ON "user_stats"("userId");
@@ -1000,6 +1020,9 @@ ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trusterId_fkey" FOREIGN KEY ("truste
 
 -- AddForeignKey
 ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trustedId_fkey" FOREIGN KEY ("trustedId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_wallet" ADD CONSTRAINT "user_wallet_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_stats" ADD CONSTRAINT "user_stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
