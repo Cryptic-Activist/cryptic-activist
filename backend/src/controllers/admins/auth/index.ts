@@ -6,7 +6,9 @@ import {
 } from '@/utils/generators/jwt';
 
 import { EMAIL_FROM } from '@/services/email';
+import { FRONTEND_ADMIN } from '@/constants/env';
 import bcrypt from 'bcryptjs';
+import { buildAdminInvitation } from '@/services/email/templates/invite-admin';
 import { generateRandomHash } from '@/utils/string';
 import { getExpiresAt } from '@/utils/date';
 import { prisma } from '@/services/db/prisma';
@@ -16,8 +18,6 @@ export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    const errors: string[] = [];
-
     const admin = await prisma.admin.findFirst({
       where: {
         username,
@@ -31,7 +31,14 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    bcrypt.compare(password, admin!.password, (compareError, isMatch) => {
+    if (!admin.password) {
+      res.status(400).send({
+        errors: ['Invalid credentials'],
+      });
+      return;
+    }
+
+    bcrypt.compare(password, admin.password, (compareError, isMatch) => {
       if (compareError) {
         res.status(500).send({
           errors: [compareError.message],
@@ -118,86 +125,96 @@ export async function loginDecodeToken(req: Request, res: Response) {
 }
 
 export const inviteAdmin = async (req: Request, res: Response) => {
-  const { names, username, email } = req.body;
+  const { firstName, lastName, username, email } = req.body;
+
+  console.log(req.body);
 
   try {
-    const existingEmail = await prisma.user.findFirst({
-      where: {
-        email,
-      },
-    });
-    if (existingEmail) {
-      res.status(400).send({
-        errors: ['Email already exists'],
-      });
-      return;
-    }
-
-    let newUsername = username;
-
-    const existingUsername = await prisma.user.findFirst({
-      where: {
-        username,
-      },
-    });
-
-    if (existingUsername) {
-      const hashUsername = generateRandomHash(6);
-      newUsername = `${username}-${hashUsername}`;
-    }
-
-    const admin = await prisma.admin.create({
-      data: {
-        firstName: names.firstName,
-        lastName: names.lastName,
-        username: newUsername,
-        email,
-      },
-    });
-
-    const expires = '30d';
-    const token = generateToken({
-      objectToTokenize: { userId: admin.id },
-      expiresIn: expires,
-    });
-    const expiresAt = getExpiresAt(expires);
-    const newToken = await prisma.token.create({
-      data: {
-        token,
-        expiresAt,
-        isUsed: false,
-      },
-    });
-
-    if (!newToken) {
-      res.status(500).send({
-        errors: ['Unable to create verification token'],
-      });
-      return;
-    }
-
-    const verifyAccountEmailBody = buildAdminInivitation(admin, token);
-    const publishedVerifyAccount = await publishToQueue('emails', {
-      from: EMAIL_FROM.ACCOUNT,
-      to: [
-        {
-          email: admin.email,
-          name: `${admin.firstName} ${admin.lastName}`,
+    await prisma.$transaction(async (tx) => {
+      const existingEmail = await tx.admin.findFirst({
+        where: {
+          email,
         },
-      ],
-      subject: 'Verify your account - Cryptic Activist Admin',
-      html: verifyAccountEmailBody,
-      text: 'Verify your account',
+      });
+      if (existingEmail) {
+        res.status(400).send({
+          errors: ['Email already exists'],
+        });
+        return;
+      }
+
+      let newUsername = username;
+
+      const existingUsername = await tx.admin.findFirst({
+        where: {
+          username,
+        },
+      });
+
+      console.log({ existingUsername });
+
+      if (existingUsername) {
+        const hashUsername = generateRandomHash(6);
+        newUsername = `${username}-${hashUsername}`;
+      }
+
+      const admin = await tx.admin.create({
+        data: {
+          firstName,
+          lastName,
+          username: newUsername,
+          email,
+          roles: {
+            create: {
+              role: [''],
+            },
+          },
+        },
+      });
+
+      const expires = '30d';
+      const token = generateToken({
+        objectToTokenize: { userId: admin.id },
+        expiresIn: expires,
+      });
+      const expiresAt = getExpiresAt(expires);
+      const newToken = await tx.token.create({
+        data: {
+          token,
+          expiresAt,
+          isUsed: false,
+        },
+      });
+
+      if (!newToken) {
+        res.status(500).send({
+          errors: ['Unable to create verification token'],
+        });
+        return;
+      }
+
+      const verifyAccountEmailBody = buildAdminInvitation(admin, token);
+      const publishedVerifyAccount = await publishToQueue('emails', {
+        from: EMAIL_FROM.ACCOUNT,
+        to: [
+          {
+            email: admin.email,
+            name: `${admin.firstName} ${admin.lastName}`,
+          },
+        ],
+        subject: 'Verify your account - Cryptic Activist Admin',
+        html: verifyAccountEmailBody,
+        text: 'Verify your account',
+      });
+
+      await Promise.all([publishedVerifyAccount]);
+
+      res.status(201).send({
+        ok: true,
+      });
     });
-
-    await Promise.all([publishedVerifyAccount]);
-
-    res.status(201).send({
-      ok: true,
-    });
-
-    return;
   } catch (err) {
+    console.log(err);
     res.status(500).send({
       errors: [err.message],
     });

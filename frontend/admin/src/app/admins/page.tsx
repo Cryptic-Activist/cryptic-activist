@@ -128,33 +128,33 @@ const Admins = () => {
 								<th>Username</th>
 								<th>Email</th>
 								<th>Roles</th>
-								<th>Status</th>
 								<th>Actions</th>
 							</tr>
 						</thead>
 						<tbody>
-							{admins.map((admin) => (
-								<tr key={admin.id}>
-									<td>{admin.firstName}</td>
-									<td>{admin.lastName}</td>
-									<td>{admin.username}</td>
-									<td>{admin.email}</td>
-									<td>{admin.roles.join(', ')}</td>
-									<td>{admin.active ? 'Active' : 'Inactive'}</td>
-									<td>
-										<button
-											className={`${styles.btn} ${styles.btnSecondary}`}
-											onClick={() => openModal(admin)}
-										>
-											<DynamicIcon iconName="FaEdit" size={16} />
-										</button>
-										<button
-											className={`${styles.btn} ${styles.btnDanger}`}
-											onClick={() => deleteAdminMutation.mutate(admin.id)}
-										>
-											<DynamicIcon iconName="FaTrash" size={16} />
-										</button>
-										<button
+							{admins.map((admin) => {
+								const roles = admin.roles.map((role) => role.role).join(', ');
+								return (
+									<tr key={admin.id}>
+										<td>{admin.firstName}</td>
+										<td>{admin.lastName}</td>
+										<td>{admin.username}</td>
+										<td>{admin.email}</td>
+										<td>{roles}</td>
+										<td>
+											<button
+												className={`${styles.btn} ${styles.btnSecondary}`}
+												onClick={() => openModal(admin)}
+											>
+												<DynamicIcon iconName="FaPen" size={16} />
+											</button>
+											<button
+												className={`${styles.btn} ${styles.btnDanger}`}
+												onClick={() => deleteAdminMutation.mutate(admin.id)}
+											>
+												<DynamicIcon iconName="FaTrash" size={16} />
+											</button>
+											{/* <button
 											className={`${styles.btn} ${styles.btnWarning}`}
 											onClick={() =>
 												updateAdminMutation.mutate({
@@ -167,16 +167,19 @@ const Admins = () => {
 												iconName={admin.active ? 'FaToggleOff' : 'FaToggleOn'}
 												size={16}
 											/>
-										</button>
-										<button
-											className={`${styles.btn} ${styles.btnSuccess}`}
-											onClick={() => generatePasswordMutation.mutate(admin.id)}
-										>
-											<DynamicIcon iconName="FaKey" size={16} />
-										</button>
-									</td>
-								</tr>
-							))}
+										</button> */}
+											<button
+												className={`${styles.btn} ${styles.btnSuccess}`}
+												onClick={() =>
+													generatePasswordMutation.mutate(admin.id)
+												}
+											>
+												<DynamicIcon iconName="FaKey" size={16} />
+											</button>
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>
@@ -209,6 +212,7 @@ const Admins = () => {
 									{...register('firstName')}
 									className={styles.formControl}
 									readOnly
+									disabled
 								/>
 								{errors.firstName && (
 									<span className={styles.fieldError}>
@@ -223,6 +227,7 @@ const Admins = () => {
 									{...register('lastName')}
 									className={styles.formControl}
 									readOnly
+									disabled
 								/>
 								{errors.lastName && (
 									<span className={styles.fieldError}>
@@ -237,6 +242,7 @@ const Admins = () => {
 									{...register('username')}
 									className={styles.formControl}
 									readOnly
+									disabled
 								/>
 								{errors.username && (
 									<span className={styles.fieldError}>

@@ -1,4 +1,8 @@
 import {
+  authenticateAdmin,
+  requireAdminRole,
+} from '@/middlewares/authorization';
+import {
   inviteAdmin,
   login,
   loginDecodeToken,
@@ -14,6 +18,11 @@ router.get('/login/decode/token/:accessToken', loginDecodeToken);
 
 router.post('/create', login);
 
-router.post('/invite', inviteAdmin);
+router.post(
+  '/invite',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  inviteAdmin,
+);
 
 export default router;

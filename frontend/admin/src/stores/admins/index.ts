@@ -1,3 +1,4 @@
+import { AdminRole } from '../admin/types';
 import { map } from 'nanostores';
 
 export type Role =
@@ -16,7 +17,7 @@ export interface Admin {
 	lastName: string;
 	username: string;
 	email: string;
-	roles: Role[];
+	roles: AdminRole[];
 	active: boolean;
 }
 

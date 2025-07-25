@@ -26,7 +26,10 @@ export const fetchPut = async (
 	return response;
 };
 
-export const fetchDelete = async (endpoint: string, params: object) => {
-	const response = await axios.delete(endpoint, params);
+export const fetchDelete = async (
+	endpoint: string,
+	headers?: AxiosRequestHeaders | any
+) => {
+	const response = await axios.delete(endpoint, { headers });
 	return response;
 };
