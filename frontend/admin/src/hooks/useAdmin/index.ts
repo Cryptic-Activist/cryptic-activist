@@ -33,6 +33,16 @@ const useUsers = () => {
 		return found?.length > 0;
 	};
 
+	const hasRoles = (roles: AdminRole[]) => {
+		const found = $admin?.data?.roles?.filter((userRole) => {
+			return roles.find((role) => userRole.role === role);
+		});
+
+		if (!found) return false;
+
+		return found?.length > 0;
+	};
+
 	useEffect(() => {
 		const decodeAccessToken = async () => {
 			await handleDecodeAccessToken();
@@ -49,7 +59,8 @@ const useUsers = () => {
 		handleDecodeAccessToken,
 		admin: $admin,
 		getRoles,
-		hasRole
+		hasRole,
+		hasRoles
 	};
 };
 

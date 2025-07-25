@@ -8,8 +8,6 @@ import usePlatformSettings from '@/hooks/usePlatformSettings';
 const PlatformSettings = () => {
 	const { publicForm, privateForm } = usePlatformSettings();
 
-	console.log({ valuePublic: publicForm.watchedValues });
-
 	return (
 		<div className={styles.container}>
 			{/* Header */}

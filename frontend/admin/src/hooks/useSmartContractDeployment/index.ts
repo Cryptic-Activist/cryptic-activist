@@ -64,7 +64,6 @@ const useSmartContractDeployment = () => {
 
 	const watchedValuesEscrow = watchEscrow();
 	const watchedValuesPremium = watchPremium();
-	console.log({ watchedValuesEscrow, errorsEscrow });
 
 	const deploymentStats = useMutation({
 		mutationKey: ['smartContractDeployment'],

@@ -29,15 +29,16 @@ const Item: FC<SideBarProps> = ({ href, label, icon }) => {
 };
 
 const SideBar = () => {
-	const { admin, hasRole } = useAdmin();
-	const isSuperAdmin = hasRole('SUPER_ADMIN');
+	const { admin, hasRoles } = useAdmin();
 
 	return (
 		<aside className={styles.aside}>
 			{admin.data?.id && (
 				<ul className={styles.asideList}>
 					{sidebarItems.map((sidebarItem, index) => {
-						if (isSuperAdmin && sidebarItem.superAdminOnly) {
+						const hasPermission = hasRoles(sidebarItem.roles);
+
+						if (hasPermission) {
 							return (
 								<Item
 									key={index}
@@ -47,15 +48,6 @@ const SideBar = () => {
 								/>
 							);
 						}
-
-						return (
-							<Item
-								key={index}
-								href={sidebarItem.href}
-								label={sidebarItem.label}
-								icon={sidebarItem.icon}
-							/>
-						);
 					})}
 				</ul>
 			)}
