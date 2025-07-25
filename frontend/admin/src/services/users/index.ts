@@ -1,6 +1,10 @@
-import { axiosInstance } from '@/utils/axios';
+import { BACKEND } from '@/constants';
+import { fetchGet } from '../axios';
 
-export const getRandomCredentials = async (): Promise<{ firstName: string; lastName: string; username: string }> => {
-	const response = await axiosInstance.get('/users/random/credentials');
+export const getRandomCredentials = async (): Promise<{
+	username: string;
+	names: string[];
+}> => {
+	const response = await fetchGet(BACKEND + '/users/random/credentials');
 	return response.data;
 };

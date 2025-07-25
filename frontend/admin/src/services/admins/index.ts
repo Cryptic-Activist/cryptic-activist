@@ -1,40 +1,29 @@
-import { axiosInstance } from '@/utils/axios';
 import { Admin, Role } from '@/stores/admins';
+import { CreateAdminParams, UpdateAdminParams } from './types';
+import { fetchDelete, fetchGet, fetchPost, fetchPut } from '@/services/axios';
+
+import { BACKEND } from '@/constants';
 
 export const getAdmins = async (): Promise<Admin[]> => {
-	const response = await axiosInstance.get('/admins');
+	const response = await fetchGet(BACKEND + '/admins');
 	return response.data;
 };
 
-export const createAdmin = async (data: {
-	firstName: string;
-	lastName: string;
-	username: string;
-	email: string;
-	roles: Role[];
-}): Promise<Admin> => {
-	const response = await axiosInstance.post('/admins', data);
+export const createAdmin = async (data: CreateAdminParams): Promise<Admin> => {
+	const response = await fetchPost(BACKEND + '/admins', data);
 	return response.data;
 };
 
-export const updateAdmin = async (data: {
-	id: string;
-	firstName: string;
-	lastName: string;
-	username: string;
-	email: string;
-	roles: Role[];
-	active: boolean;
-}): Promise<Admin> => {
-	const response = await axiosInstance.put(`/admins/${data.id}`, data);
+export const updateAdmin = async (data: UpdateAdminParams): Promise<Admin> => {
+	const response = await fetchPut(BACKEND + `/admins/${data.id}`, data);
 	return response.data;
 };
 
 export const deleteAdmin = async (id: string): Promise<void> => {
-	await axiosInstance.delete(`/admins/${id}`);
+	await fetchDelete(`/admins/${id}`, {});
 };
 
 export const generatePassword = async (id: string): Promise<string> => {
-	const response = await axiosInstance.post(`/admins/${id}/generate-password`);
+	const response = await fetchPost(BACKEND + `/admins/${id}/generate-password`);
 	return response.data.password;
 };

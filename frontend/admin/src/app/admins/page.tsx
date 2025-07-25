@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import { DynamicIcon } from '@/components';
 import { Role } from '@/stores/admins';
+import { SelectedAdmin } from './types';
 import styles from './page.module.scss';
 import useAdmins from '@/hooks/useAdmins';
 import { useForm } from 'react-hook-form';
@@ -29,7 +30,11 @@ const Admins = () => {
 		getRandomCredentialsMutation
 	} = useAdmins();
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedAdmin, setSelectedAdmin] = useState(null);
+	const [selectedAdmin, setSelectedAdmin] = useState<SelectedAdmin | null>(
+		null
+	);
+
+	console.log({ admins });
 
 	const {
 		register,
@@ -41,7 +46,9 @@ const Admins = () => {
 		resolver: zodResolver(schema)
 	});
 
-	const onSubmit = (data) => {
+	const onSubmit = (data: any) => {
+		console.log({ data, selectedAdmin });
+
 		if (selectedAdmin) {
 			updateAdminMutation.mutate({
 				...data,
@@ -51,7 +58,7 @@ const Admins = () => {
 		} else {
 			createAdminMutation.mutate(data);
 		}
-		closeModal();
+		// closeModal();
 	};
 
 	const openModal = (admin = null) => {
@@ -78,8 +85,9 @@ const Admins = () => {
 
 	const handleGenerateCredentials = async () => {
 		const credentials = await getRandomCredentialsMutation.mutateAsync();
-		setValue('firstName', credentials.firstName);
-		setValue('lastName', credentials.lastName);
+		console.log({ credentials });
+		setValue('firstName', credentials.names[0]);
+		setValue('lastName', credentials.names[1]);
 		setValue('username', credentials.username);
 	};
 
@@ -90,7 +98,6 @@ const Admins = () => {
 		'KYC_REVIEWER',
 		'MODERATOR',
 		'SENIOR_ADMIN',
-		'SUPER_ADMIN',
 		'SUPPORT_AGENT'
 	];
 
@@ -252,15 +259,18 @@ const Admins = () => {
 							</div>
 							<div className={styles.formGroup}>
 								<label className={styles.formLabel}>Roles</label>
-								<div className={styles.checkboxGroup}>
+								<div
+									className={`${styles.checkboxGroup} ${styles.rolesScrollContainer}`}
+								>
 									{roles.map((role) => (
 										<div key={role} className={styles.checkboxContainer}>
 											<input
 												type="checkbox"
 												value={role}
+												id={role}
 												{...register('roles')}
 											/>
-											<label>{role}</label>
+											<label htmlFor={role}>{role}</label>
 										</div>
 									))}
 								</div>
