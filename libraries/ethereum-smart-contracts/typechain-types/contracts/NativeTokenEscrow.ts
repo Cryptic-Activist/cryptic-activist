@@ -37,7 +37,6 @@ export interface NativeTokenEscrowInterface extends Interface {
       | "forceCancelTrade"
       | "getContractBalance"
       | "getTrade"
-      | "getTradeBalance"
       | "owner"
       | "platformWallet"
       | "resolveDispute"
@@ -117,10 +116,6 @@ export interface NativeTokenEscrowInterface extends Interface {
     functionFragment: "getTrade",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "getTradeBalance",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "platformWallet",
@@ -196,10 +191,6 @@ export interface NativeTokenEscrowInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getTrade", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getTradeBalance",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "platformWallet",
@@ -502,12 +493,6 @@ export interface NativeTokenEscrow extends BaseContract {
     "view"
   >;
 
-  getTradeBalance: TypedContractMethod<
-    [_tradeId: BigNumberish],
-    [bigint],
-    "view"
-  >;
-
   owner: TypedContractMethod<[], [string], "view">;
 
   platformWallet: TypedContractMethod<[], [string], "view">;
@@ -674,9 +659,6 @@ export interface NativeTokenEscrow extends BaseContract {
     ],
     "view"
   >;
-  getFunction(
-    nameOrSignature: "getTradeBalance"
-  ): TypedContractMethod<[_tradeId: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;

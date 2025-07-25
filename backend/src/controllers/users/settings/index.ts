@@ -16,8 +16,6 @@ export async function addSpokenLanguage(req: Request, res: Response) {
     const { id } = req.params;
     const { language } = req.body;
 
-    console.log({ id, language });
-
     const isLanguageAvailable =
       availableLanguages.filter((lang) => lang.includes(language)).length > 0;
 
@@ -29,8 +27,6 @@ export async function addSpokenLanguage(req: Request, res: Response) {
     }
 
     const associatedLanguage = await associateLanguage(id, language);
-
-    console.log({ associatedLanguage });
 
     if (!associatedLanguage) {
       res.status(400).send(associatedLanguage);
@@ -124,8 +120,6 @@ export async function requestEmailChange(req: Request, res: Response) {
       subject: 'Email Change Request - Cryptic Activist',
       html: buildChangeEmailRequestEmail(user, email, emailChangeToken),
     });
-
-    console.log({ publishedEmailChangeRequest });
 
     res.status(200).send({
       ok: true,

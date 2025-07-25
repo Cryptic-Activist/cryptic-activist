@@ -286,6 +286,7 @@ export default class Chat {
               const baseUnits = toTokenUnits(
                 trade.cryptocurrencyAmount.toString(),
                 tokenDecimals,
+                1.1,
               );
 
               let escrowContractDetails: ContractDetails;

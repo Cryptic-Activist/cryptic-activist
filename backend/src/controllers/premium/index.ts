@@ -22,7 +22,7 @@ function parsePeriod(period: string): PremiumPeriod {
 
 export const subscribePremium = async (req: Request, res: Response) => {
   try {
-    const { period: periodRaw, userId, payerAddress } = req.body;
+    const { period: periodRaw, userId, payerAddress, paymentHash } = req.body;
 
     const period = parsePeriod(periodRaw);
     // Check for active subscription of the same type
@@ -83,6 +83,7 @@ export const subscribePremium = async (req: Request, res: Response) => {
         status: 'COMPLETED',
         startsAt: now,
         expiresAt,
+        blockchainPaymentHash: paymentHash,
       },
     });
 
@@ -98,7 +99,7 @@ export const changeToYearlyPremiumSubscription = async (
   res: Response,
 ) => {
   try {
-    const { userId, payerAddress } = req.body;
+    const { userId, payerAddress, paymentHash } = req.body;
 
     const now = new Date();
     const activeMonthly = await prisma.premiumPurchase.findFirst({
@@ -150,6 +151,7 @@ export const changeToYearlyPremiumSubscription = async (
         blockchainTransactionHash,
         startsAt,
         expiresAt,
+        blockchainPaymentHash: paymentHash,
       },
     });
 
@@ -170,7 +172,7 @@ export const changeToMonthlyPremiumSubscription = async (
   res: Response,
 ) => {
   try {
-    const { userId, payerAddress } = req.body;
+    const { userId, payerAddress, paymentHash } = req.body;
 
     const now = new Date();
 
@@ -223,6 +225,7 @@ export const changeToMonthlyPremiumSubscription = async (
         blockchainTransactionHash,
         startsAt,
         expiresAt,
+        blockchainPaymentHash: paymentHash,
       },
     });
 

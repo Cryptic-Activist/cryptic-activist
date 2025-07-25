@@ -67,33 +67,33 @@ async function main() {
     networks: {
       // Ethereum Mainnet
       mainnet: {
-        usdc: "0xA0b86a33E6441935c477df1f2C2e6CD7E3F5e9a2",
-        usdt: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        dai: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        // usdc: "0xA0b86a33E6441935c477df1f2C2e6CD7E3F5e9a2",
+        // usdt: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        // dai: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
       },
       // Polygon
       polygon: {
-        usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-        usdt: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-        dai: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+        // usdc: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+        // usdt: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        // dai: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
       },
       // Arbitrum
       arbitrum: {
-        usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-        usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-        dai: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        // usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+        // usdt: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        // dai: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
       },
       // BSC
       bsc: {
-        usdc: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
-        usdt: "0x55d398326f99059fF775485246999027B3197955",
-        dai: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+        // usdc: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+        // usdt: "0x55d398326f99059fF775485246999027B3197955",
+        // dai: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
       },
       // Testnet addresses (using mock tokens or testnet versions)
       goerli: {
-        usdc: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F", // Goerli USDC
-        usdt: "0xC2C527C0CACF457746Bd31B2a698Fe89de2b6d49", // Goerli USDT
-        dai: "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844", // Goerli DAI
+        // usdc: "0x07865c6E87B9F70255377e024ace6630C1Eaa37F", // Goerli USDC
+        // usdt: "0xC2C527C0CACF457746Bd31B2a698Fe89de2b6d49", // Goerli USDT
+        // dai: "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844", // Goerli DAI
       },
       // Local/Hardhat - will deploy mock token
       localhost: {
@@ -119,46 +119,6 @@ async function main() {
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log(`Deployer balance: ${ethers.formatEther(balance)} ETH`);
 
-  let paymentTokenAddress;
-
-  // Handle token address based on network
-  if (networkName === "localhost" || networkName === "hardhat") {
-    // Deploy a mock ERC20 token for testing
-    console.log("Deploying mock USDC token for testing...");
-
-    const MockERC20 = await ethers.getContractFactory("MockERC20");
-    const mockToken = await MockERC20.deploy(
-      "Mock USDC",
-      "USDC",
-      6, // 6 decimals like real USDC
-      ethers.parseUnits("1000000", 6) // 1M tokens for testing
-    );
-    await mockToken.waitForDeployment();
-
-    paymentTokenAddress = mockToken.target ?? mockToken.address;
-    console.log(`Mock USDC deployed to: ${paymentTokenAddress}`);
-
-    // ✅ Add this check
-    if (!paymentTokenAddress || !ethers.isAddress(paymentTokenAddress)) {
-      throw new Error(`Invalid payment token address: ${paymentTokenAddress}`);
-    }
-
-    // Mint some tokens to deployer for testing
-    await mockToken.mint(deployer.address, ethers.parseUnits("10000", 6));
-    console.log("Minted 10,000 USDC to deployer for testing");
-  } else {
-    // Use real token addresses
-    const tokenAddresses = deployConfig.networks[networkName];
-    if (!tokenAddresses) {
-      throw new Error(
-        `Network ${networkName} not supported. Please add token addresses for this network.`
-      );
-    }
-
-    paymentTokenAddress = tokenAddresses.usdc; // Default to USDC
-    console.log(`Using USDC token at: ${paymentTokenAddress}`);
-  }
-
   // Deployment parameters
   const monthlyPrice = ethers.parseUnits("10", 6); // $10 monthly (6 decimals for USDC)
   const yearlyPrice = ethers.parseUnits("100", 6); // $100 yearly (6 decimals for USDC)
@@ -170,10 +130,14 @@ async function main() {
     `Yearly subscription price: $${ethers.formatUnits(yearlyPrice, 6)}`
   );
 
+  const paymentTokenAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+  const platformWallet = "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f";
+
   // Deploy the contract
   console.log("Deploying PremiumSubscriptionManager...");
   const contract = await PremiumSubscriptionManager.deploy(
     paymentTokenAddress,
+    platformWallet,
     monthlyPrice,
     yearlyPrice
   );

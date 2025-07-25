@@ -128,63 +128,24 @@ export const chargeRecurringPremiums = async () => {
     try {
       const now = new Date();
 
-      const expiredPremiums = await prisma.premiumPurchase.findMany({
+      const expiringPremiums = await prisma.premiumPurchase.findMany({
         where: {
           status: 'COMPLETED',
           expiresAt: {
-            lte: now,
+            lte: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
           },
         },
-        distinct: ['userId', 'period'], // avoid duplicating for same user/period
-        orderBy: {
-          expiresAt: 'desc',
+        include: {
+          user: true,
         },
       });
 
-      for (const premium of expiredPremiums) {
-        const alreadyScheduled = await prisma.premiumPurchase.findFirst({
-          where: {
-            userId: premium.userId,
-            status: 'SCHEDULED',
-            period: premium.period,
-          },
-        });
-
-        if (alreadyScheduled) {
-          continue; // skip if already scheduled
-        }
-
-        const settingKey =
-          premium.period === 'MONTHLY'
-            ? 'premiumPriceMonthly'
-            : 'premiumPriceYearly';
-
-        const expectedAmount = await getSetting(settingKey);
-        const startsAt = new Date(premium.expiresAt);
-        const expiresAt =
-          premium.period === 'MONTHLY'
-            ? new Date(startsAt.getTime() + 30 * 24 * 60 * 60 * 1000)
-            : new Date(startsAt.getTime() + 365 * 24 * 60 * 60 * 1000);
-
-        await prisma.premiumPurchase.create({
-          data: {
-            userId: premium.userId,
-            payerAddress: premium.payerAddress,
-            period: premium.period,
-            status: 'SCHEDULED',
-            startsAt,
-            expiresAt,
-            expectedAmount: new Decimal(expectedAmount ?? 0),
-            blockchainTransactionHash: '0xRECURRING_PLACEHOLDER', // to be replaced when on-chain
-          },
-        });
-
-        console.log(
-          `Scheduled recurring ${premium.period} premium for user ${premium.userId}`,
-        );
+      for (const premium of expiringPremiums) {
+        const systemMessage = new SystemMessage();
+        await systemMessage.premiumExpiryWarning(premium.user);
       }
     } catch (error) {
-      console.error('Error scheduling recurring premium charges:', error);
+      console.error('Error sending premium expiry warnings:', error);
     }
   });
 };

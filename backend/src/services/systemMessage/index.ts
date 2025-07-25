@@ -1,5 +1,6 @@
 import {
   EMAIL_FROM,
+  buildPremiumExpiryWarningEmail,
   buildTradeCancelledEmail,
   buildTradeDisputeMoreEvidencesRequestEmail,
   buildTradeDisputeResolvedEmail,
@@ -21,6 +22,45 @@ import { getIO } from '../socket';
 import { publishToQueue } from '../rabbitmq';
 
 export default class SystemMessage {
+  async premiumExpiryWarning(user: User) {
+    const premiumUrl = FRONTEND_PUBLIC + '/premium';
+    const message = `Your premium subscription is expiring soon. Please renew your subscription to continue enjoying premium benefits.`;
+    const newSystemMessage = await prisma.systemMessage.create({
+      data: {
+        type: 'PREMIUM_EXPIRY_WARNING',
+        userId: user.id,
+        url: premiumUrl,
+        message,
+      },
+    });
+
+    // Check if user is online via Redis
+    const userSocketId = await redisClient.hGet('onlineUsers', user.id);
+
+    const io = getIO();
+    if (userSocketId) {
+      // Deliver message in real time
+      io.to(userSocketId).emit('notification_system', {
+        message: newSystemMessage.message,
+      });
+    }
+
+    const premiumExpiryWarningEmailBody = buildPremiumExpiryWarningEmail(user);
+    await publishToQueue('emails', {
+      from: EMAIL_FROM.ACCOUNT,
+      to: [
+        {
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+        },
+      ],
+      subject: 'Premium subscription expiring soon - Cryptic Activist',
+      html: premiumExpiryWarningEmailBody,
+      text: 'Premium subscription expiring soon',
+    });
+
+    return true;
+  }
   async tradeStarted(tradeId: string) {
     const trade = await prisma.trade.findUnique({
       where: { id: tradeId },

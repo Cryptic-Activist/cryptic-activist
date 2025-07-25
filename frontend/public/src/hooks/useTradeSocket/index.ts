@@ -126,7 +126,8 @@ const useTradeSocket = ({
 
         const baseUnits = toTokenUnits(
           trade.tradeEscrowDetails?.sellerTotalFund,
-          decimals
+          decimals,
+          1.1
         );
 
         const approved = await approveTokenERC20({
@@ -236,7 +237,8 @@ const useTradeSocket = ({
 
         const baseUnits = toTokenUnits(
           trade.tradeEscrowDetails?.buyerCollateral,
-          decimals
+          decimals,
+          1.1
         );
 
         const approved = await approveTokenERC20({

@@ -68,6 +68,7 @@ model Admin {
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
   smartContract          SmartContract[]
+  wallets                AdminWallet[]
 
   @@map("admins")
 }
@@ -390,8 +391,8 @@ model PremiumPurchase {
   expectedAmount            Decimal               @db.Decimal(30, 10)
   status                    PremiumPurchaseStatus
   period                    PremiumPeriod
-  // blockchainTransactionHash String                @unique
-  blockchainTransactionHash String
+  blockchainTransactionHash String                @unique
+  blockchainPaymentHash     String                @unique
   startsAt                  DateTime              @default(now())
   expiresAt                 DateTime
   deletedAt                 DateTime?             @db.Timestamp()
@@ -445,6 +446,7 @@ enum SystemMessageType {
   SYSTEM_ERROR
   API_DOWNTIME
   USER_WARNING
+  PREMIUM_EXPIRY_WARNING
 }
 
 model SystemMessage {
@@ -904,6 +906,7 @@ model User {
   totalWarnings          Int                      @default(0)
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
+  wallets                UserWallet[]
 
   @@index([username])
   @@map("users")
@@ -983,4 +986,24 @@ model PlatformSetting {
   updatedAt    DateTime    @updatedAt
 
   @@map("platform_settings")
+}
+
+model UserWallet {
+  id        String   @id @default(uuid())
+  address   String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("user_wallets")
+}
+
+model AdminWallet {
+  id        String   @id @default(uuid())
+  address   String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("admin_wallets")
 }

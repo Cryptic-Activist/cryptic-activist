@@ -1,41 +1,46 @@
 import { Request, Response } from 'express';
+import {
+  deployPremium,
+  getContractBalance,
+} from '@/services/blockchains/premium';
+import { prisma, redisClient } from '@/services/db';
 
+import { ContractDetails } from '@/services/blockchains/escrow/types';
 import { Readable } from 'node:stream';
-import { deployPremium } from '@/services/blockchains/premium';
 import { ethers } from 'ethers';
 import { formatBigInt } from '@/utils/number';
 import { getNextSmartContractVersion } from '@/services/blockchains';
-import { getPremiumABI } from '@/services/blockchains/premium';
+import { getPremiumDetails as getPremiumDetailsERC20 } from '@/services/blockchains/premium';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
+import { parseDurationToSeconds } from '@/utils/date';
 import { uploadFiles } from '@/services/upload';
 
-export const convertABIToFile = (abi: any) => {
-  const abiJson = JSON.stringify(abi, null, 2);
-  const abiBuffer = Buffer.from(abiJson);
+export const convertArtifactToFile = (artifact: any) => {
+  const artifactJson = JSON.stringify(artifact, null, 2);
+  const artifactBuffer = Buffer.from(artifactJson);
 
   const multerFile: Express.Multer.File = {
     fieldname: 'abi',
     originalname: 'PremiumABI.json',
     mimetype: 'application/json',
-    buffer: abiBuffer,
-    size: abiBuffer.length,
+    buffer: artifactBuffer,
+    size: artifactBuffer.length,
     // other properties you can stub or mock if needed:
     encoding: '7bit',
     destination: '',
     filename: 'PremiumABI.json',
     path: '',
-    stream: Readable.from(abiBuffer),
+    stream: Readable.from(artifactBuffer),
   };
 
   return multerFile;
 };
 
-export const getPremiumABIFile = async (req: Request, res: Response) => {
+export const getPremiumDetails = async (req: Request, res: Response) => {
   try {
-    const abi = await getPremiumABI();
+    const details = await getPremiumDetailsERC20();
 
-    res.status(200).json(abi);
+    res.status(200).json(details);
   } catch (error) {
     console.log({ error });
     res.status(400).json(error);
@@ -49,6 +54,8 @@ export const deployPremiumSmartContract = async (
   try {
     const { monthlyPrice, yearlyPrice, chainId, platformWallet, adminId } =
       req.body;
+
+    let details: ContractDetails = { abi: null, address: null };
 
     const transactions = await prisma.$transaction(async (tx) => {
       const admin = await tx.admin.findUnique({
@@ -86,10 +93,13 @@ export const deployPremiumSmartContract = async (
           monthlyPrice,
           yearlyPrice,
           platformWallet,
-          rpcUrl: chain.rpcUrl,
+          chain: {
+            id: chain.id,
+            rpcUrl: chain.rpcUrl,
+          },
         });
 
-        const file = convertABIToFile(deployed.artifact);
+        const file = convertArtifactToFile(deployed.artifact);
         const uploadedFiles = await uploadFiles('smart-contracts/premium/', [
           file,
         ]);
@@ -144,6 +154,11 @@ export const deployPremiumSmartContract = async (
           },
         });
 
+        details = {
+          abi: deployed.artifact.abi,
+          address: deployed.contractAddress,
+        };
+
         await tx.platformSetting.update({
           where: {
             key: 'premiumPriceMonthly',
@@ -182,6 +197,11 @@ export const deployPremiumSmartContract = async (
     const convertedGasUsed = formatBigInt(gasUsed);
     const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
 
+    const cacheKey = 'smartContracts:premium';
+    await redisClient.del(cacheKey);
+    const expiry = parseDurationToSeconds('1d');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
+
     res.status(200).json({
       deployed: {
         gasPrice: convertedGasPrice,
@@ -192,5 +212,19 @@ export const deployPremiumSmartContract = async (
     });
   } catch (error) {
     res.status(500).json({ error });
+  }
+};
+
+export const getPremiumSmartContractBalance = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const balance = await getContractBalance();
+
+    res.status(200).json(balance);
+  } catch (error) {
+    console.log({ error });
+    res.status(400).json(error);
   }
 };

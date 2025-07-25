@@ -87,7 +87,7 @@ export const getEscrowDetails = async () => {
       abi: response.data.abi,
       address: escrowSmartContract.address as Address,
     };
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
   }
 

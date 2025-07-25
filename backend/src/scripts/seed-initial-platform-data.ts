@@ -8,7 +8,7 @@ import { upload, uploadFiles } from '@/services/upload';
 import { ETHERSCAN_API_KEY } from '@/constants/env';
 import MockToken from '@/contracts/escrow/artifacts/MockToken.json';
 import bcrypt from 'bcryptjs';
-import { convertABIToFile } from '@/controllers/blockchains/smart-contracts/premium';
+import { convertArtifactToFile } from '@/controllers/blockchains/smart-contracts/premium';
 import { exec } from 'child_process';
 import fiatsJson from '../../fiats.json';
 import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
@@ -165,7 +165,7 @@ const main = async () => {
     {
       name: 'Hardhat',
       symbol: 'ETH',
-      chainId: 31337,
+      chainId: 1337,
       rpcUrl: 'http://host.docker.internal:8545',
       explorerUrl: '',
       nativeCurrency: 'ETH',
@@ -824,7 +824,7 @@ const main = async () => {
 
       const uploadReady = promised.map(async (up) => {
         if (up && up.abi) {
-          const file = convertABIToFile(up.abi);
+          const file = convertArtifactToFile(up.abi);
           const uploaded = await uploadFiles(
             `abis/${up.chainId}/${up.cryptocurrencyId}`,
             [file],
@@ -866,7 +866,7 @@ const main = async () => {
             },
           });
 
-        const abiFile = convertABIToFile(MockToken.abi);
+        const abiFile = convertArtifactToFile(MockToken.abi);
         const uploadedMockToken = await uploadFiles(
           `abis/${mockTokenCryptocurrencyChain?.chainId}/${mockTokenCryptocurrencyChain?.cryptocurrencyId}`,
           [abiFile],

@@ -41,8 +41,6 @@ export const submitKYC = async (req: Request, res: Response) => {
       userId,
     } = req.body;
 
-    console.log({ reqBody: req.body });
-
     const transactions = await prisma.$transaction(async (tx) => {
       const uploadedFiles = await Promise.all(
         files.map(async (file: any) => {
@@ -89,8 +87,6 @@ export const submitKYC = async (req: Request, res: Response) => {
         },
       });
     });
-
-    console.log('KYC submitted successfully', transactions);
 
     res.status(200).json({ ok: true });
   } catch (err) {

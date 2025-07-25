@@ -12,8 +12,6 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
   try {
     const chainId = req.params.chainId as string;
 
-    console.log({ chainId });
-
     const transactions = await prisma.$transaction(async (tx) => {
       const cryptocurrencyChain = await tx.cryptocurrencyChain.findFirst({
         where: {
@@ -37,8 +35,6 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
         },
       });
 
-      console.log(JSON.stringify(cryptocurrencyChain, null, 2));
-
       if (!cryptocurrencyChain?.chain.rpcUrl) {
         throw new Error('Unable to find chain RPC URL');
       }
@@ -61,8 +57,6 @@ export const getDeploymentStats = async (req: Request, res: Response) => {
       const blockHeight = await getBlockHeight(
         cryptocurrencyChain?.chain?.rpcUrl,
       );
-
-      console.log({ rpc: cryptocurrencyChain?.chain?.rpcUrl });
 
       if (blockHeight === undefined || blockHeight === null) {
         throw new Error('Unable to find current block height');

@@ -198,7 +198,7 @@ export const deployEscrowERC20SmartContract = async (
 
     const cacheKey = 'smartContracts:escrow:erc20';
     await redisClient.del(cacheKey);
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
 
     res.status(200).json({
@@ -351,7 +351,7 @@ export const deployEscrowNativeTokenSmartContract = async (
 
     const cacheKey = 'smartContracts:escrow:native';
     await redisClient.del(cacheKey);
-    const expiry = parseDurationToSeconds('1w');
+    const expiry = parseDurationToSeconds('1d');
     await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
 
     res.status(200).json({

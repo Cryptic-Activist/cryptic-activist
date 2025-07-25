@@ -20,11 +20,13 @@ export type { IERC20Metadata } from "./@openzeppelin/contracts/token/ERC20/exten
 export { IERC20Metadata__factory } from "./factories/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata__factory";
 export type { IERC20 } from "./@openzeppelin/contracts/token/ERC20/IERC20";
 export { IERC20__factory } from "./factories/@openzeppelin/contracts/token/ERC20/IERC20__factory";
+export type { ReentrancyGuard } from "./@openzeppelin/contracts/utils/ReentrancyGuard";
+export { ReentrancyGuard__factory } from "./factories/@openzeppelin/contracts/utils/ReentrancyGuard__factory";
 export type { ERC20Escrow } from "./contracts/ERC20Escrow";
 export { ERC20Escrow__factory } from "./factories/contracts/ERC20Escrow__factory";
 export type { MockToken } from "./contracts/MockToken";
 export { MockToken__factory } from "./factories/contracts/MockToken__factory";
 export type { NativeTokenEscrow } from "./contracts/NativeTokenEscrow";
 export { NativeTokenEscrow__factory } from "./factories/contracts/NativeTokenEscrow__factory";
-export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager";
-export { PremiumSubscriptionManager__factory } from "./factories/contracts/PremiumSubscriptionManager.sol/PremiumSubscriptionManager__factory";
+export type { PremiumSubscriptionManager } from "./contracts/PremiumSubscriptionManager";
+export { PremiumSubscriptionManager__factory } from "./factories/contracts/PremiumSubscriptionManager__factory";

@@ -93,8 +93,6 @@ export const getNextTier = async (req: Request, res: Response) => {
       where: { requiredXP: { gt: user?.xp } },
     });
 
-    console.log({ user, tier });
-
     res.status(200).send(tier);
   } catch (err) {
     res.status(500).send({

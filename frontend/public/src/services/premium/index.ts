@@ -1,13 +1,15 @@
+import { fetchGet, fetchPost } from '@/services/axios';
+
 import { BACKEND } from '@/constants';
 import { Period } from '@/hooks/usePremium/types';
 import { Wallet } from '@/store/blockchain/types';
-import { fetchPost } from '@/services/axios';
 import { getBearerToken } from '@/utils';
 
 export const subscribeToPremium = async (
   userId: string,
   period: Period,
-  wallet: Wallet
+  wallet: Wallet,
+  paymentHash: string
 ) => {
   const bearerToken = getBearerToken();
   const response = await fetchPost(
@@ -16,9 +18,12 @@ export const subscribeToPremium = async (
       userId,
       period,
       payerAddress: wallet,
+      paymentHash,
     },
     { Authorization: bearerToken }
   );
+
+  if (response.status === 409) return { error: response.data.error };
 
   if (response.status !== 200) return null;
 
@@ -28,25 +33,31 @@ export const subscribeToPremium = async (
 export const changeSubscriptionTo = async (
   userId: any,
   period: Period,
-  wallet: Wallet
+  wallet: Wallet,
+  paymentHash: string
 ) => {
-  // const bearerToken = getBearerToken();
+  const bearerToken = getBearerToken();
 
-  console.log({ userId, period, wallet });
+  const response = await fetchPost(
+    `${BACKEND}/premium/subscription/change/${period.toLowerCase()}`,
+    {
+      userId,
+      period,
+      payerAddress: wallet,
+      paymentHash,
+    },
+    { Authorization: bearerToken }
+  );
 
-  // const;
+  if (response.status !== 200) return null;
 
-  // const response = await fetchPost(
-  //   `${BACKEND}/premium/subscribe`,
-  //   {
-  //     userId,
-  //     period,
-  //     payerAddress: wallet,
-  //   },
-  //   { Authorization: bearerToken }
-  // );
+  return response.data;
+};
 
-  // if (response.status !== 200) return null;
+export const getUsdcTokenABI = async (abiUrl: string) => {
+  const response = await fetchGet(abiUrl);
 
-  // return response.data;
+  if (response.status !== 200) return null;
+
+  return response.data;
 };
