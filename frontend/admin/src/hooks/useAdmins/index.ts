@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useStore } from '@nanostores/react';
 import { admins, setAdmins } from '@/stores/admins';
 import { getAdmins, createAdmin, updateAdmin, deleteAdmin, generatePassword } from '@/services/admins';
+import { getRandomCredentials } from '@/services/users';
 import { useEffect } from 'react';
 
 const useAdmins = () => {
@@ -41,6 +42,11 @@ const useAdmins = () => {
 		mutationFn: generatePassword
 	});
 
+	const getRandomCredentialsMutation = useMutation({
+		mutationKey: ['getRandomCredentials'],
+		mutationFn: getRandomCredentials
+	});
+
 	useEffect(() => {
 		if (adminsQuery.data) {
 			setAdmins(adminsQuery.data);
@@ -53,7 +59,8 @@ const useAdmins = () => {
 		createAdminMutation,
 		updateAdminMutation,
 		deleteAdminMutation,
-		generatePasswordMutation
+		generatePasswordMutation,
+		getRandomCredentialsMutation
 	};
 };
 

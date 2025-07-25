@@ -12,7 +12,9 @@ export type Role =
 
 export interface Admin {
 	id: string;
-	name: string;
+	firstName: string;
+	lastName: string;
+	username: string;
 	email: string;
 	roles: Role[];
 	active: boolean;

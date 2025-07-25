@@ -7,7 +7,9 @@ export const getAdmins = async (): Promise<Admin[]> => {
 };
 
 export const createAdmin = async (data: {
-	name: string;
+	firstName: string;
+	lastName: string;
+	username: string;
 	email: string;
 	roles: Role[];
 }): Promise<Admin> => {
@@ -17,7 +19,9 @@ export const createAdmin = async (data: {
 
 export const updateAdmin = async (data: {
 	id: string;
-	name: string;
+	firstName: string;
+	lastName: string;
+	username: string;
 	email: string;
 	roles: Role[];
 	active: boolean;

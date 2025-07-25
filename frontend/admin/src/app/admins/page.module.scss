@@ -26,8 +26,11 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   transition: all 0.2s ease;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     transform: translateY(-1px);
@@ -351,6 +354,9 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: transparent;
     border: none;
     cursor: pointer;
+    svg {
+      transform: rotate(45deg);
+    }
   }
 }
 
