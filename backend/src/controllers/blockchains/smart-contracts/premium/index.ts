@@ -3,14 +3,16 @@ import {
   deployPremium,
   getContractBalance,
 } from '@/services/blockchains/premium';
+import { prisma, redisClient } from '@/services/db';
 
+import { ContractDetails } from '@/services/blockchains/escrow/types';
 import { Readable } from 'node:stream';
 import { ethers } from 'ethers';
 import { formatBigInt } from '@/utils/number';
 import { getNextSmartContractVersion } from '@/services/blockchains';
 import { getPremiumDetails as getPremiumDetailsERC20 } from '@/services/blockchains/premium';
 import { getSetting } from '@/utils/settings';
-import { prisma } from '@/services/db';
+import { parseDurationToSeconds } from '@/utils/date';
 import { uploadFiles } from '@/services/upload';
 
 export const convertArtifactToFile = (artifact: any) => {
@@ -52,6 +54,8 @@ export const deployPremiumSmartContract = async (
   try {
     const { monthlyPrice, yearlyPrice, chainId, platformWallet, adminId } =
       req.body;
+
+    let details: ContractDetails = { abi: null, address: null };
 
     const transactions = await prisma.$transaction(async (tx) => {
       const admin = await tx.admin.findUnique({
@@ -150,6 +154,11 @@ export const deployPremiumSmartContract = async (
           },
         });
 
+        details = {
+          abi: deployed.artifact.abi,
+          address: deployed.contractAddress,
+        };
+
         await tx.platformSetting.update({
           where: {
             key: 'premiumPriceMonthly',
@@ -187,6 +196,11 @@ export const deployPremiumSmartContract = async (
     const convertedGasPrice = formatBigInt(gasPrice);
     const convertedGasUsed = formatBigInt(gasUsed);
     const convertedDeploymentBlockHeight = formatBigInt(deploymentBlockHeight);
+
+    const cacheKey = 'smartContracts:premium';
+    await redisClient.del(cacheKey);
+    const expiry = parseDurationToSeconds('1d');
+    await redisClient.setEx(cacheKey, expiry, JSON.stringify(details));
 
     res.status(200).json({
       deployed: {

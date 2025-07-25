@@ -222,8 +222,7 @@ const usePremium = () => {
         }
 
         const amount = period === 'MONTHLY' ? monthlyPrice : yearlyPrice;
-        console.log({ amount, decimals });
-        const baseUnits = toTokenUnits(amount, decimals);
+        const baseUnits = toTokenUnits(amount, decimals, 1.05);
         const approved = await approveToken({
           tokenContractDetails: usdcTokenDetails,
           premiumContractDetails: premium,
@@ -241,7 +240,7 @@ const usePremium = () => {
           tokenContractDetails: usdcTokenDetails,
         });
 
-        // console.log({ allowance });
+        console.log({ allowance });
 
         const subscribedSmartContractResponse = await subscribeToPremiumEthers(
           premium,
@@ -262,9 +261,11 @@ const usePremium = () => {
           );
           return response;
         }
+      } catch (error) {
+        throw new Error('Unable to subscribe');
       } finally {
         setIsProcessing(false);
-        // window.location.reload();
+        window.location.reload();
       }
     },
     onError: (error) => {
@@ -342,9 +343,11 @@ const usePremium = () => {
 
           return response;
         }
+      } catch (error) {
+        throw new Error('Unable to subscribe');
       } finally {
         setIsProcessing(false);
-        // window.location.reload();
+        window.location.reload();
       }
     },
     onError: (error) => {

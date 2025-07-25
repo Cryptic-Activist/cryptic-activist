@@ -210,14 +210,13 @@ export const subscribeToPremium = async (
 
     const periodParam = period === 'MONTHLY' ? BigInt(0) : BigInt(1);
 
-    // const mon = await contract.getSubscriptionPrice(BigInt(0));
-    // const yre = await contract.getSubscriptionPrice(BigInt(1));
-    // console.log({ mon, yre });
+    const mon = await contract.getSubscriptionPrice(BigInt(0));
+    const yre = await contract.getSubscriptionPrice(BigInt(1));
+    console.log({ mon, yre });
 
     const tx = await contract.subscribe(periodParam);
 
     const receipt = await tx.wait();
-    console.log({ receipt });
     const decoded = decodeFunctionData(receipt);
 
     return {
