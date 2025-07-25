@@ -68,6 +68,7 @@ model Admin {
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
   smartContract          SmartContract[]
+  wallets                AdminWallet[]
 
   @@map("admins")
 }
@@ -775,16 +776,6 @@ model Trust {
   @@map("trusts")
 }
 
-model UserWallet {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  address   String   @unique
-  createdAt DateTime @default(now())
-
-  @@map("user_wallet")
-}
-
 model UserStats {
   id              String    @id @default(uuid())
   userId          String    @unique
@@ -995,4 +986,24 @@ model PlatformSetting {
   updatedAt    DateTime    @updatedAt
 
   @@map("platform_settings")
+}
+
+model UserWallet {
+  id        String   @id @default(uuid())
+  address   String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("user_wallets")
+}
+
+model AdminWallet {
+  id        String   @id @default(uuid())
+  address   String   @unique
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("admin_wallets")
 }
