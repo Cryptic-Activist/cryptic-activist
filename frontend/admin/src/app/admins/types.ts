@@ -1,7 +1,11 @@
+import { Role } from '@/stores/admins';
+
 export type SelectedAdmin = {
+	id: string;
 	email: string;
 	firstName: string;
 	lastName: string;
 	username: string;
-	roles: string[];
+	roles: Role[];
+	isActive: boolean;
 };

@@ -57,6 +57,7 @@ model Admin {
   username               String                   @unique @db.VarChar(120)
   email                  String                   @unique @db.VarChar(120)
   password               String?
+  isActive               Boolean?                 @default(true) @db.Boolean
   isVerified             Boolean?                 @default(false) @db.Boolean
   twoFactorSecret        String?
   twoFactorEnabled       Boolean?                 @default(false) @db.Boolean

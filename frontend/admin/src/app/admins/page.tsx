@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { Admin } from '@/stores/admin/types';
 import { DynamicIcon } from '@/components';
 import { Role } from '@/stores/admins';
 import { SelectedAdmin } from './types';
@@ -34,8 +35,6 @@ const Admins = () => {
 		null
 	);
 
-	console.log({ admins });
-
 	const {
 		register,
 		handleSubmit,
@@ -52,8 +51,7 @@ const Admins = () => {
 		if (selectedAdmin) {
 			updateAdminMutation.mutate({
 				...data,
-				id: selectedAdmin.id,
-				active: selectedAdmin.active
+				id: selectedAdmin.id
 			});
 		} else {
 			const created = await createAdminMutation.mutateAsync(data);
@@ -63,7 +61,7 @@ const Admins = () => {
 		closeModal();
 	};
 
-	const openModal = (admin = null) => {
+	const openModal = (admin: SelectedAdmin | null = null) => {
 		setSelectedAdmin(admin);
 		if (admin) {
 			reset(admin);
@@ -143,7 +141,12 @@ const Admins = () => {
 									<td>
 										<button
 											className={`${styles.btn} ${styles.btnSecondary}`}
-											onClick={() => openModal(admin)}
+											onClick={() =>
+												openModal({
+													...admin,
+													roles: admin.roles
+												})
+											}
 										>
 											<DynamicIcon iconName="FaPen" size={16} />
 										</button>

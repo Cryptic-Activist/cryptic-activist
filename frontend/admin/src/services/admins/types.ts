@@ -15,5 +15,5 @@ export type UpdateAdminParams = {
 	username: string;
 	email: string;
 	roles: Role[];
-	active: boolean;
+	isActive: boolean;
 };
