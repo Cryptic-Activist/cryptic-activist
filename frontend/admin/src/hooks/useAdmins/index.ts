@@ -1,16 +1,32 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useStore } from '@nanostores/react';
 import { admins, setAdmins } from '@/stores/admins';
-import { getAdmins, createAdmin, updateAdmin, deleteAdmin, generatePassword } from '@/services/admins';
+import {
+	createAdmin,
+	deleteAdmin,
+	generatePassword,
+	getAdmins,
+	toggleAdminActivation,
+	updateAdmin
+} from '@/services/admins';
+import { useMutation, useQuery } from '@tanstack/react-query';
+
 import { getRandomCredentials } from '@/services/users';
+import { useAdmin } from '..';
 import { useEffect } from 'react';
+import { useStore } from '@nanostores/react';
 
 const useAdmins = () => {
+	const { admin } = useAdmin();
 	const $admins = useStore(admins);
 
 	const adminsQuery = useQuery({
 		queryKey: ['admins'],
-		queryFn: getAdmins
+		queryFn: async () => {
+			if (admin?.data?.id) {
+				const allAdmins = await getAdmins(admin?.data?.id);
+				return allAdmins;
+			}
+		},
+		enabled: !!admin.data?.id
 	});
 
 	const createAdminMutation = useMutation({
@@ -24,6 +40,14 @@ const useAdmins = () => {
 	const updateAdminMutation = useMutation({
 		mutationKey: ['updateAdmin'],
 		mutationFn: updateAdmin,
+		onSuccess: () => {
+			adminsQuery.refetch();
+		}
+	});
+
+	const toggleAdminActivationMutation = useMutation({
+		mutationKey: ['toggleAdminActivation'],
+		mutationFn: toggleAdminActivation,
 		onSuccess: () => {
 			adminsQuery.refetch();
 		}
@@ -60,7 +84,8 @@ const useAdmins = () => {
 		updateAdminMutation,
 		deleteAdminMutation,
 		generatePasswordMutation,
-		getRandomCredentialsMutation
+		getRandomCredentialsMutation,
+		toggleAdminActivationMutation
 	};
 };
 

@@ -5,14 +5,14 @@ import { getBearerToken2, getLocalStorage } from '@/utils/browser/storage';
 
 import { BACKEND } from '@/constants';
 
-export const getAdmins = async (): Promise<Admin[] | null> => {
+export const getAdmins = async (id: string): Promise<Admin[] | null> => {
 	const bearerToken = getBearerToken2();
 
 	if (!bearerToken) {
 		return null;
 	}
 
-	const response = await fetchGet(BACKEND + '/admins/all', {
+	const response = await fetchGet(BACKEND + `/admins/${id}/all`, {
 		Authorization: bearerToken
 	});
 
@@ -69,6 +69,32 @@ export const updateAdmin = async (
 	return response.data;
 };
 
+export const toggleAdminActivation = async (
+	data: UpdateAdminParams
+): Promise<Admin | null> => {
+	const bearerToken = getBearerToken2();
+
+	if (!bearerToken) {
+		return null;
+	}
+
+	const { id } = data;
+
+	const response = await fetchPut(
+		BACKEND + `/admins/auth/${id}/toggle/activation`,
+		{},
+		{
+			Authorization: bearerToken
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
 export const deleteAdmin = async (id: string): Promise<void | null> => {
 	const bearerToken = getBearerToken2();
 
@@ -76,7 +102,7 @@ export const deleteAdmin = async (id: string): Promise<void | null> => {
 		return null;
 	}
 
-	await fetchDelete(`/admins/${id}`, {
+	await fetchDelete(`/admins/auth/${id}`, {
 		Authorization: bearerToken
 	});
 };

@@ -301,7 +301,9 @@ export const updateAdmin = async (req: Request, res: Response) => {
 
       let finalRolesToRemove = rolesToRemove;
       if (superAdminRole && existingRoleIds.includes(superAdminRole.id)) {
-        finalRolesToRemove = rolesToRemove.filter(roleId => roleId !== superAdminRole.id);
+        finalRolesToRemove = rolesToRemove.filter(
+          (roleId) => roleId !== superAdminRole.id,
+        );
       }
 
       if (finalRolesToRemove.length > 0) {
@@ -323,6 +325,104 @@ export const updateAdmin = async (req: Request, res: Response) => {
           })),
         });
       }
+
+      return { ok: true };
+    });
+
+    if (!result.ok) {
+      res.status(400).send({
+        ok: true,
+      });
+    }
+
+    res.status(201).send({
+      ok: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const toggleAdminActivation = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const admin = await tx.admin.findUnique({
+        where: {
+          id,
+        },
+        select: { isActive: true },
+      });
+
+      if (!admin) {
+        throw new Error('Unable to find admin to update');
+      }
+
+      await tx.admin.update({
+        where: {
+          id,
+        },
+        data: {
+          isActive: !admin.isActive,
+        },
+        select: {
+          isActive: true,
+        },
+      });
+
+      return { ok: true };
+    });
+
+    if (!result.ok) {
+      res.status(400).send({
+        ok: true,
+      });
+    }
+
+    res.status(201).send({
+      ok: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const softDeleteAdmin = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const admin = await tx.admin.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!admin) {
+        throw new Error('Unable to find admin to update');
+      }
+
+      await tx.admin.update({
+        where: {
+          id,
+        },
+        data: {
+          isActive: false,
+          deletedAt: new Date(),
+        },
+        select: {
+          isActive: true,
+        },
+      });
 
       return { ok: true };
     });

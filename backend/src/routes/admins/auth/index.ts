@@ -6,6 +6,8 @@ import {
   inviteAdmin,
   login,
   loginDecodeToken,
+  softDeleteAdmin,
+  toggleAdminActivation,
   updateAdmin,
 } from '@/controllers/admins/auth';
 
@@ -24,6 +26,25 @@ router.post(
   inviteAdmin,
 );
 
-router.put('/:id', updateAdmin);
+router.put(
+  '/:id',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  updateAdmin,
+);
+
+router.delete(
+  '/:id',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  softDeleteAdmin,
+);
+
+router.put(
+  '/:id/toggle/activation',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  toggleAdminActivation,
+);
 
 export default router;

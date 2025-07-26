@@ -16,9 +16,9 @@ import { Router } from 'express';
 const router = Router();
 
 router.get(
-  '/all',
-  // authenticateAdmin,
-  // requireAdminRole(['SUPER_ADMIN']),
+  '/:id/all',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
   getAllAdmins,
 );
 

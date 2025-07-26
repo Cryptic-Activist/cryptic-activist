@@ -40,9 +40,14 @@ export const getRandomCredentials = async (_req: Request, res: Response) => {
   }
 };
 
-export const getAllAdmins = async (_req: Request, res: Response) => {
+export const getAllAdmins = async (req: Request, res: Response) => {
   try {
+    const { id } = req.params;
+
     const admins = await prisma.admin.findMany({
+      where: {
+        ...(id && { id: { notIn: [id] } }),
+      },
       select: {
         id: true,
         email: true,

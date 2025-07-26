@@ -28,7 +28,8 @@ const Admins = () => {
 		updateAdminMutation,
 		deleteAdminMutation,
 		generatePasswordMutation,
-		getRandomCredentialsMutation
+		getRandomCredentialsMutation,
+		toggleAdminActivationMutation
 	} = useAdmins();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [modalType, setModalType] = useState<'create' | 'edit'>('create');
@@ -159,20 +160,20 @@ const Admins = () => {
 										>
 											<DynamicIcon iconName="FaTrash" size={16} />
 										</button>
-										{/* <button
+										<button
 											className={`${styles.btn} ${styles.btnWarning}`}
 											onClick={() =>
-												updateAdminMutation.mutate({
+												toggleAdminActivationMutation.mutate({
 													...admin,
-													active: !admin.active
+													isActive: !admin.isActive
 												})
 											}
 										>
 											<DynamicIcon
-												iconName={admin.active ? 'FaToggleOff' : 'FaToggleOn'}
+												iconName={admin.isActive ? 'FaToggleOff' : 'FaToggleOn'}
 												size={16}
 											/>
-										</button> */}
+										</button>
 										<button
 											className={`${styles.btn} ${styles.btnSuccess}`}
 											onClick={() => generatePasswordMutation.mutate(admin.id)}
