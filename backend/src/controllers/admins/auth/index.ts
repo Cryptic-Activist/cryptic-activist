@@ -117,7 +117,13 @@ export async function loginDecodeToken(req: Request, res: Response) {
       return;
     }
 
-    res.status(200).send(admin);
+    res.status(200).send({
+      ...admin,
+      roles: admin.roles.map((r) => ({
+        id: r.adminRoles.id,
+        role: r.adminRoles.role,
+      })),
+    });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],
@@ -129,7 +135,7 @@ export const inviteAdmin = async (req: Request, res: Response) => {
   const { firstName, lastName, username, email, roles: rolesArray } = req.body;
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const transactions = await prisma.$transaction(async (tx) => {
       const existingEmail = await tx.admin.findFirst({
         where: {
           email,
@@ -224,9 +230,111 @@ export const inviteAdmin = async (req: Request, res: Response) => {
 
       await Promise.all([publishedVerifyAccount]);
 
-      res.status(201).send({
+      return { ok: true };
+    });
+
+    res.status(201).send({
+      ok: true,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const updateAdmin = async (req: Request, res: Response) => {
+  const { roles } = req.body;
+  const { id } = req.params;
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const admin = await tx.admin.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          roles: {
+            select: {
+              adminRolesId: true,
+            },
+          },
+        },
+      });
+
+      if (!admin) {
+        throw new Error('Unable to find admin to update');
+      }
+
+      const existingRoleIds = admin.roles.map((role) => role.adminRolesId);
+
+      const rolesToUpdate = await tx.adminRoles.findMany({
+        where: {
+          role: {
+            in: roles,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      const newRoleIds = rolesToUpdate.map((role) => role.id);
+
+      const rolesToAdd = newRoleIds.filter(
+        (roleId) => !existingRoleIds.includes(roleId),
+      );
+      const rolesToRemove = existingRoleIds.filter(
+        (roleId) => !newRoleIds.includes(roleId),
+      );
+
+      const superAdminRole = await tx.adminRoles.findFirst({
+        where: {
+          role: 'SENIOR_ADMIN',
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      let finalRolesToRemove = rolesToRemove;
+      if (superAdminRole && existingRoleIds.includes(superAdminRole.id)) {
+        finalRolesToRemove = rolesToRemove.filter(roleId => roleId !== superAdminRole.id);
+      }
+
+      if (finalRolesToRemove.length > 0) {
+        await tx.adminAdminRole.deleteMany({
+          where: {
+            adminId: id,
+            adminRolesId: {
+              in: finalRolesToRemove,
+            },
+          },
+        });
+      }
+
+      if (rolesToAdd.length > 0) {
+        await tx.adminAdminRole.createMany({
+          data: rolesToAdd.map((roleId) => ({
+            adminId: id,
+            adminRolesId: roleId,
+          })),
+        });
+      }
+
+      return { ok: true };
+    });
+
+    if (!result.ok) {
+      res.status(400).send({
         ok: true,
       });
+    }
+
+    res.status(201).send({
+      ok: true,
     });
   } catch (err) {
     console.log(err);

@@ -52,9 +52,15 @@ export const updateAdmin = async (
 		return null;
 	}
 
-	const response = await fetchPut(BACKEND + `/admins/${data.id}`, data, {
-		Authorization: bearerToken
-	});
+	const { roles, id } = data;
+
+	const response = await fetchPut(
+		BACKEND + `/admins/auth/${id}`,
+		{ roles },
+		{
+			Authorization: bearerToken
+		}
+	);
 
 	if (response.status !== 200) {
 		return null;

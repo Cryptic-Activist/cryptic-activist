@@ -31,6 +31,7 @@ const Admins = () => {
 		getRandomCredentialsMutation
 	} = useAdmins();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [modalType, setModalType] = useState<'create' | 'edit'>('create');
 	const [selectedAdmin, setSelectedAdmin] = useState<SelectedAdmin | null>(
 		null
 	);
@@ -64,8 +65,10 @@ const Admins = () => {
 	const openModal = (admin: SelectedAdmin | null = null) => {
 		setSelectedAdmin(admin);
 		if (admin) {
+			setModalType('edit');
 			reset(admin);
 		} else {
+			setModalType('create');
 			reset({
 				firstName: '',
 				lastName: '',
@@ -189,21 +192,24 @@ const Admins = () => {
 				<div className={styles.modal}>
 					<div className={styles.modalContent}>
 						<div className={styles.modalHeader}>
-							<h2>{selectedAdmin ? 'Edit Admin' : 'Create Admin'}</h2>
+							<h2>{modalType === 'edit' ? 'Edit Admin' : 'Create Admin'}</h2>
 							<button onClick={closeModal}>
 								<DynamicIcon iconName="FaPlus" size={16} />
 							</button>
 						</div>
 						<form onSubmit={handleSubmit(onSubmit)}>
-							<div className={styles.formGroup}>
-								<button
-									type="button"
-									className={`${styles.btn} ${styles.btnPrimary}`}
-									onClick={handleGenerateCredentials}
-								>
-									Generate Credentials
-								</button>
-							</div>
+							{modalType === 'create' && (
+								<div className={styles.formGroup}>
+									<button
+										type="button"
+										className={`${styles.btn} ${styles.btnPrimary}`}
+										onClick={handleGenerateCredentials}
+									>
+										Generate Credentials
+									</button>
+								</div>
+							)}
+
 							<div className={styles.formGroup}>
 								<label className={styles.formLabel}>First Name</label>
 								<input
@@ -255,6 +261,10 @@ const Admins = () => {
 									type="email"
 									{...register('email')}
 									className={styles.formControl}
+									{...(modalType === 'edit' && {
+										readOnly: true,
+										disabled: true
+									})}
 								/>
 								{errors.email && (
 									<span className={styles.fieldError}>

@@ -34,6 +34,7 @@ const useUsers = () => {
 	};
 
 	const hasRoles = (roles: AdminRole[]) => {
+		console.log({ roles: $admin.data?.roles });
 		const found = $admin?.data?.roles?.filter((userRole) => {
 			return roles.find((role) => userRole.role === role);
 		});

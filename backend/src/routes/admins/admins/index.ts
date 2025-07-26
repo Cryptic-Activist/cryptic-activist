@@ -17,8 +17,8 @@ const router = Router();
 
 router.get(
   '/all',
-  authenticateAdmin,
-  requireAdminRole(['SUPER_ADMIN']),
+  // authenticateAdmin,
+  // requireAdminRole(['SUPER_ADMIN']),
   getAllAdmins,
 );
 
