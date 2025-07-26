@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { generateRandomNames, slugifyStringLowerCase } from '@/utils/string';
 
 import { convertWhere } from '@/utils/object';
-import { mapAdmins } from '@/utils/map/admins';
 import { prisma } from '@/services/db/prisma';
 import { sanitize } from '@/utils/sanitizer';
 

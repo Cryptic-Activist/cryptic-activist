@@ -176,11 +176,13 @@ export const inviteAdmin = async (req: Request, res: Response) => {
           username: newUsername,
           email,
           roles: {
-            connect: {
-              adminId_adminRolesId: {
-                adminRolesId: roles.map((role) => ({ id: role.id })),
+            create: roles.map((role) => ({
+              adminRoles: {
+                connect: {
+                  id: role.id,
+                },
               },
-            },
+            })),
           },
         },
       });
