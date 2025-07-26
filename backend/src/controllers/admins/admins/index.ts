@@ -51,7 +51,7 @@ export const getAllAdmins = async (_req: Request, res: Response) => {
         lastName: true,
         roles: {
           select: {
-            role: true,
+            adminRoles: true,
           },
         },
         username: true,
@@ -60,7 +60,7 @@ export const getAllAdmins = async (_req: Request, res: Response) => {
 
     const mappedAdmins = admins.map((admin) => ({
       ...admin,
-      roles: admin.roles.map((role) => role.role),
+      roles: admin.roles.map((role) => role.adminRoles.role),
     }));
 
     res.status(200).send(mappedAdmins);

@@ -104,7 +104,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
         email: true,
         roles: {
           select: {
-            role: true,
+            adminRoles: true,
           },
         },
       },
@@ -176,7 +176,11 @@ export const inviteAdmin = async (req: Request, res: Response) => {
           username: newUsername,
           email,
           roles: {
-            connect: roles.map((role) => ({ id: role.id })),
+            connect: {
+              adminId_adminRolesId: {
+                adminRolesId: roles.map((role) => ({ id: role.id })),
+              },
+            },
           },
         },
       });

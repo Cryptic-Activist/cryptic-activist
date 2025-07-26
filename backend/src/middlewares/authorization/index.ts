@@ -88,12 +88,12 @@ export const authenticateAdmin = async (
       where: { id: decoded.userId },
       select: {
         id: true,
+        isVerified: true,
         roles: {
           select: {
-            role: true,
+            adminRoles: true,
           },
         },
-        isVerified: true,
       },
     });
 
@@ -112,7 +112,7 @@ export const authenticateAdmin = async (
     req.admin = {
       id: admin.id,
       roles: admin.roles.map((r) => ({
-        role: r.role,
+        role: r.adminRoles.role as Role,
       })),
     };
 
