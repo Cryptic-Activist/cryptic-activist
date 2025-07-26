@@ -46,7 +46,7 @@ const Admins = () => {
 		resolver: zodResolver(schema)
 	});
 
-	const onSubmit = (data: any) => {
+	const onSubmit = async (data: any) => {
 		console.log({ data, selectedAdmin });
 
 		if (selectedAdmin) {
@@ -56,9 +56,11 @@ const Admins = () => {
 				active: selectedAdmin.active
 			});
 		} else {
-			createAdminMutation.mutate(data);
+			const created = await createAdminMutation.mutateAsync(data);
+			console.log({ created });
 		}
-		// closeModal();
+		adminsQuery.refetch();
+		closeModal();
 	};
 
 	const openModal = (admin = null) => {
@@ -85,7 +87,6 @@ const Admins = () => {
 
 	const handleGenerateCredentials = async () => {
 		const credentials = await getRandomCredentialsMutation.mutateAsync();
-		console.log({ credentials });
 		setValue('firstName', credentials.names[0]);
 		setValue('lastName', credentials.names[1]);
 		setValue('username', credentials.username);

@@ -28,18 +28,6 @@ const main = async () => {
       email,
       password: hashedPassword,
       isVerified: true,
-      roles: {
-        create: [
-          { role: 'AUDITOR' },
-          { role: 'DISPUTE_MANAGER' },
-          { role: 'FINANCE_MANAGER' },
-          { role: 'KYC_REVIEWER' },
-          { role: 'MODERATOR' },
-          { role: 'SENIOR_ADMIN' },
-          { role: 'SUPER_ADMIN' },
-          { role: 'SUPPORT_AGENT' },
-        ],
-      },
     },
   });
 
@@ -66,9 +54,52 @@ const main = async () => {
       email: disputeManagerEmail,
       password: disputeManagerHashedPassword,
       isVerified: true,
-      roles: {
-        create: [{ role: 'DISPUTE_MANAGER' }],
+    },
+  });
+
+  await prisma.adminRoles.createMany({
+    data: [
+      {
+        role: 'AUDITOR',
       },
+      {
+        role: 'DISPUTE_MANAGER',
+      },
+      {
+        role: 'FINANCE_MANAGER',
+      },
+      {
+        role: 'KYC_REVIEWER',
+      },
+      {
+        role: 'MODERATOR',
+      },
+      {
+        role: 'SENIOR_ADMIN',
+      },
+      {
+        role: 'SUPER_ADMIN',
+      },
+      {
+        role: 'SUPPORT_AGENT',
+      },
+    ],
+  });
+
+  const roles = await prisma.adminRoles.findMany();
+
+  const filteredSuperAdmin = roles.find((role) => {
+    return role.role === 'SUPER_ADMIN';
+  });
+
+  if (!filteredSuperAdmin) {
+    throw new Error('SUPER_ADMIN role not found in adminRoles');
+  }
+
+  await prisma.adminAdminRole.create({
+    data: {
+      admin: { connect: { id: admin.id } },
+      adminRoles: { connect: { id: filteredSuperAdmin.id } },
     },
   });
 

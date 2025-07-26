@@ -9,6 +9,7 @@ import { EMAIL_FROM } from '@/services/email';
 import { FRONTEND_ADMIN } from '@/constants/env';
 import bcrypt from 'bcryptjs';
 import { buildAdminInvitation } from '@/services/email/templates/invite-admin';
+import e from 'cors';
 import { generateRandomHash } from '@/utils/string';
 import { getExpiresAt } from '@/utils/date';
 import { prisma } from '@/services/db/prisma';
@@ -125,9 +126,7 @@ export async function loginDecodeToken(req: Request, res: Response) {
 }
 
 export const inviteAdmin = async (req: Request, res: Response) => {
-  const { firstName, lastName, username, email, roles } = req.body;
-
-  console.log(req.body);
+  const { firstName, lastName, username, email, roles: rolesArray } = req.body;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -151,12 +150,24 @@ export const inviteAdmin = async (req: Request, res: Response) => {
         },
       });
 
-      console.log({ existingUsername });
-
       if (existingUsername) {
         const hashUsername = generateRandomHash(6);
         newUsername = `${username}-${hashUsername}`;
       }
+
+      const roles = await tx.adminRoles.findMany({
+        where: {
+          role: {
+            in: rolesArray,
+          },
+        },
+        select: {
+          id: true,
+          role: true,
+        },
+      });
+
+      console.log({ roles });
 
       const admin = await tx.admin.create({
         data: {
@@ -164,7 +175,9 @@ export const inviteAdmin = async (req: Request, res: Response) => {
           lastName,
           username: newUsername,
           email,
-          roles,
+          roles: {
+            connect: roles.map((role) => ({ id: role.id })),
+          },
         },
       });
 

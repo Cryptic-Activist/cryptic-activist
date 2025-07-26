@@ -17,7 +17,7 @@ CREATE TYPE "PremiumPurchaseStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', '
 CREATE TYPE "PremiumPeriod" AS ENUM ('MONTHLY', 'YEARLY');
 
 -- CreateEnum
-CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_DISPUTE_MORE_EVIDENCES', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING');
+CREATE TYPE "SystemMessageType" AS ENUM ('TRADE_STARTED', 'TRADE_COMPLETED', 'TRADE_CANCELLED', 'TRADE_CANCELLED_BY_MODERATOR', 'TRADE_DISPUTE_OPENED', 'TRADE_DISPUTE_RESOLVED', 'TRADE_DISPUTE_MORE_EVIDENCES', 'TRADE_EXPIRED', 'TRADE_FAILED', 'TRADE_NEW_MESSAGE', 'NEW_LOGIN', 'MAINTENANCE', 'SUSPICIOUS_ACTIVITY', 'PASSWORD_CHANGED', 'TWO_FA_ENABLED', 'TWO_FA_DISABLED', 'ACCOUNT_VERIFICATION_REQUIRED', 'ACCOUNT_SUSPENDED', 'REVIEW_RECEIVED', 'REVIEW_REMINDER', 'POLICY_UPDATE', 'FEATURE_ANNOUNCEMENT', 'PROMOTIONAL_OFFER', 'COMPLIANCE_NOTICE', 'SYSTEM_ERROR', 'API_DOWNTIME', 'USER_WARNING', 'PREMIUM_EXPIRY_WARNING');
 
 -- CreateEnum
 CREATE TYPE "TradeStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'EXPIRED', 'FAILED');
@@ -66,10 +66,17 @@ CREATE TABLE "accepted_cryptocurrencies" (
 );
 
 -- CreateTable
+CREATE TABLE "admin_admin_role" (
+    "adminId" TEXT NOT NULL,
+    "adminRolesId" TEXT NOT NULL,
+
+    CONSTRAINT "admin_admin_role_pkey" PRIMARY KEY ("adminId","adminRolesId")
+);
+
+-- CreateTable
 CREATE TABLE "admin_roles" (
     "id" TEXT NOT NULL,
     "role" "AdminRole" NOT NULL,
-    "adminId" TEXT NOT NULL,
 
     CONSTRAINT "admin_roles_pkey" PRIMARY KEY ("id")
 );
@@ -81,7 +88,7 @@ CREATE TABLE "admins" (
     "lastName" VARCHAR(50) NOT NULL,
     "username" VARCHAR(120) NOT NULL,
     "email" VARCHAR(120) NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "isVerified" BOOLEAN DEFAULT false,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN DEFAULT false,
@@ -548,16 +555,6 @@ CREATE TABLE "trusts" (
 );
 
 -- CreateTable
-CREATE TABLE "user_wallet" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "user_wallet_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "user_stats" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -705,6 +702,26 @@ CREATE TABLE "platform_settings" (
 );
 
 -- CreateTable
+CREATE TABLE "user_wallets" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_wallets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "admin_wallets" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "adminId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "admin_wallets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_DisputeEvidenceToDisputeEvidenceRequest" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -714,9 +731,6 @@ CREATE TABLE "_DisputeEvidenceToDisputeEvidenceRequest" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "accepted_cryptocurrencies_coingeckoId_key" ON "accepted_cryptocurrencies"("coingeckoId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "admin_roles_adminId_role_key" ON "admin_roles"("adminId", "role");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "admins_username_key" ON "admins"("username");
@@ -809,9 +823,6 @@ CREATE INDEX "trade_disputes_status_priority_idx" ON "trade_disputes"("status", 
 CREATE UNIQUE INDEX "trusts_trusterId_trustedId_key" ON "trusts"("trusterId", "trustedId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_wallet_address_key" ON "user_wallet"("address");
-
--- CreateIndex
 CREATE UNIQUE INDEX "user_stats_userId_key" ON "user_stats"("userId");
 
 -- CreateIndex
@@ -845,10 +856,19 @@ CREATE UNIQUE INDEX "tokens_id_token_key" ON "tokens"("id", "token");
 CREATE UNIQUE INDEX "platform_settings_key_key" ON "platform_settings"("key");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "user_wallets_address_key" ON "user_wallets"("address");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admin_wallets_address_key" ON "admin_wallets"("address");
+
+-- CreateIndex
 CREATE INDEX "_DisputeEvidenceToDisputeEvidenceRequest_B_index" ON "_DisputeEvidenceToDisputeEvidenceRequest"("B");
 
 -- AddForeignKey
-ALTER TABLE "admin_roles" ADD CONSTRAINT "admin_roles_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "admin_admin_role" ADD CONSTRAINT "admin_admin_role_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admin_admin_role" ADD CONSTRAINT "admin_admin_role_adminRolesId_fkey" FOREIGN KEY ("adminRolesId") REFERENCES "admin_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "blocks" ADD CONSTRAINT "blocks_blockerId_fkey" FOREIGN KEY ("blockerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1022,16 +1042,13 @@ ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trusterId_fkey" FOREIGN KEY ("truste
 ALTER TABLE "trusts" ADD CONSTRAINT "trusts_trustedId_fkey" FOREIGN KEY ("trustedId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_wallet" ADD CONSTRAINT "user_wallet_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "user_stats" ADD CONSTRAINT "user_stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_languageId_fkey" FOREIGN KEY ("languageId") REFERENCES "languages"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_languages" ADD CONSTRAINT "user_languages_languageId_fkey" FOREIGN KEY ("languageId") REFERENCES "languages"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_suspensions" ADD CONSTRAINT "user_suspensions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1080,6 +1097,12 @@ ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_reviewerId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "account_reviews" ADD CONSTRAINT "account_reviews_relatedDisputeId_fkey" FOREIGN KEY ("relatedDisputeId") REFERENCES "trade_disputes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_wallets" ADD CONSTRAINT "user_wallets_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "admin_wallets" ADD CONSTRAINT "admin_wallets_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_DisputeEvidenceToDisputeEvidenceRequest" ADD CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_A_fkey" FOREIGN KEY ("A") REFERENCES "dispute_evidences"("id") ON DELETE CASCADE ON UPDATE CASCADE;
