@@ -27,7 +27,9 @@ export const getRandomSeniorSuperAdmin = async (basicInfo = false) => {
     where: {
       roles: {
         some: {
-          role: 'SENIOR_ADMIN',
+          adminRoles: {
+            role: 'SENIOR_ADMIN',
+          },
         },
       },
     },
@@ -39,7 +41,9 @@ export const getRandomSeniorSuperAdmin = async (basicInfo = false) => {
     where: {
       roles: {
         some: {
-          role: 'SENIOR_ADMIN',
+          adminRoles: {
+            role: 'SENIOR_ADMIN',
+          },
         },
       },
     },

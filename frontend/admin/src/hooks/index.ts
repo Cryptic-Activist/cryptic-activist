@@ -16,3 +16,5 @@ export { default as useKYCs } from './useKYCs';
 export { default as useKYC } from './useKYC';
 export { default as useSmartContractDeployment } from './useSmartContractDeployment';
 export { default as useChains } from './useChains';
+export { default as useURL } from './useURL';
+export { default as useSetPassword } from './useSetPassword';

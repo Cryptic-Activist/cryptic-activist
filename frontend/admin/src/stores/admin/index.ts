@@ -14,6 +14,7 @@ import {
 	type LoginAdminParams,
 	type RegisterAdminParams
 } from './types';
+import { error } from 'console';
 
 export const admin = map<AdminState>({
 	loading: false,
@@ -33,6 +34,10 @@ const setter = (
 		fetched,
 		errors
 	});
+};
+
+const reset = () => {
+	setter(false, false, [], undefined);
 };
 
 const getToken = async (
@@ -140,4 +145,11 @@ export const handleRegisterAdmin = async (admin: RegisterAdminParams) => {
 	}
 
 	return true;
+};
+
+export const logout = () => {
+	removeLocalStorage('accessToken');
+	removeLocalStorage('refreshToken');
+
+	reset();
 };

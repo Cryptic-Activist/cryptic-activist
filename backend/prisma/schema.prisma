@@ -20,6 +20,16 @@ model AcceptedCryptocurrency {
   @@map("accepted_cryptocurrencies")
 }
 
+model AdminAdminRole {
+  admin        Admin      @relation(fields: [adminId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  adminId      String
+  adminRoles   AdminRoles @relation(fields: [adminRolesId], references: [id])
+  adminRolesId String
+
+  @@id([adminId, adminRolesId])
+  @@map("admin_admin_role")
+}
+
 enum AdminRole {
   SUPER_ADMIN // Full access: user management, trades, disputes, KYC, settings
   SENIOR_ADMIN // Handles escalated cases and oversees other admins
@@ -32,12 +42,11 @@ enum AdminRole {
 }
 
 model AdminRoles {
-  id      String    @id @default(uuid())
-  role    AdminRole
-  admin   Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId String
+  id             String           @id @default(uuid())
+  role           AdminRole
+  adminAdminRole AdminAdminRole[]
 
-  @@unique([adminId, role]) // Prevent duplicate roles per admin
+  // @@unique([adminId, role]) // Prevent duplicate roles per admin
   @@map("admin_roles")
 }
 
@@ -47,7 +56,8 @@ model Admin {
   lastName               String                   @db.VarChar(50)
   username               String                   @unique @db.VarChar(120)
   email                  String                   @unique @db.VarChar(120)
-  password               String
+  password               String?
+  isActive               Boolean?                 @default(true) @db.Boolean
   isVerified             Boolean?                 @default(false) @db.Boolean
   twoFactorSecret        String?
   twoFactorEnabled       Boolean?                 @default(false) @db.Boolean
@@ -58,7 +68,7 @@ model Admin {
   createdUsers           User[]                   @relation("userCreatedBy") // All users created by this admin
   updatedUsers           User[]                   @relation("userLastUpdatedBy") // All users updated by this admin
   tradeDispute           TradeDispute[]           @relation("moderatorTradeDispute")
-  roles                  AdminRoles[] // Many-to-many relation to roles
+  roles                  AdminAdminRole[]
   disputeAuditLog        DisputeAuditLog[]        @relation("disputeAuditLogChangedBy")
   disputePartyNote       DisputePartyNote[]       @relation("disputePartyNoteAddedBy")
   disputeEvidenceRequest DisputeEvidenceRequest[]
@@ -789,9 +799,9 @@ model UserStats {
 }
 
 model UserLanguage {
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   userId     String
-  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   languageId String
 
   @@id([userId, languageId])

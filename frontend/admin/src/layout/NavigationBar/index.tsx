@@ -5,9 +5,13 @@ import styles from './styles.module.scss';
 import { useAdmin } from '@/hooks';
 
 const NavigationBar = () => {
-	const { admin } = useAdmin();
+	const { admin, handleLogOut } = useAdmin();
 
 	const toggleLogin = () => {
+		openModal({ modal: 'login' });
+	};
+
+	const toggleUserTooltip = () => {
 		openModal({ modal: 'login' });
 	};
 
@@ -32,7 +36,7 @@ const NavigationBar = () => {
 					</li>
 					<li>
 						{isLoggedIn(admin.data) ? (
-							<button className={styles.userButton}>
+							<button className={styles.userButton} onClick={toggleUserTooltip}>
 								{admin.data?.firstName}
 							</button>
 						) : (
@@ -41,6 +45,11 @@ const NavigationBar = () => {
 							</button>
 						)}
 					</li>
+					{isLoggedIn(admin.data) && (
+						<button className={styles.menuItem} onClick={handleLogOut}>
+							Logout
+						</button>
+					)}
 				</ul>
 			</div>
 		</nav>
