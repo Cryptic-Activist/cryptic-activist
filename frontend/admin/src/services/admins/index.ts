@@ -102,7 +102,7 @@ export const deleteAdmin = async (id: string): Promise<void | null> => {
 		return null;
 	}
 
-	await fetchDelete(`/admins/auth/${id}`, {
+	await fetchDelete(BACKEND + `/admins/auth/${id}`, {
 		Authorization: bearerToken
 	});
 };

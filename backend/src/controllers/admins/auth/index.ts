@@ -92,9 +92,9 @@ export async function loginDecodeToken(req: Request, res: Response) {
       return;
     }
 
-    const admin = await prisma.admin.findFirst({
+    const admin = await prisma.admin.findUnique({
       where: {
-        id: decoded.id,
+        id: decoded.userId,
       },
       select: {
         id: true,

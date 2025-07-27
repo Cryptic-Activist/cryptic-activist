@@ -109,7 +109,7 @@ export const login2FAVerify = async (req: Request, res: Response) => {
   const { userId, token2FA } = req.body;
 
   try {
-    const user = await prisma.user.findFirst({ where: { id: userId } });
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
       res.status(400).send({
@@ -169,7 +169,7 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUnique({
       where: { id: decoded.userId as string },
       select: {
         _count: {

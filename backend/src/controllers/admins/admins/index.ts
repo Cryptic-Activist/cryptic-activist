@@ -47,6 +47,16 @@ export const getAllAdmins = async (req: Request, res: Response) => {
     const admins = await prisma.admin.findMany({
       where: {
         ...(id && { id: { notIn: [id] } }),
+        roles: {
+          every: {
+            NOT: {
+              adminRoles: {
+                role: 'SUPER_ADMIN',
+              },
+            },
+          },
+        },
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -59,6 +69,7 @@ export const getAllAdmins = async (req: Request, res: Response) => {
           },
         },
         username: true,
+        isActive: true,
       },
     });
 

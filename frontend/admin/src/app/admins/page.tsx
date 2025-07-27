@@ -1,123 +1,53 @@
 'use client';
 
+import { Button, DynamicIcon } from '@/components';
 import React, { useEffect, useState } from 'react';
 
 import { Admin } from '@/stores/admin/types';
-import { DynamicIcon } from '@/components';
 import { Role } from '@/stores/admins';
 import { SelectedAdmin } from './types';
+import { adminResolver } from './zod';
 import styles from './page.module.scss';
 import useAdmins from '@/hooks/useAdmins';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const schema = z.object({
-	firstName: z.string().min(1, 'First name is required'),
-	lastName: z.string().min(1, 'Last name is required'),
-	username: z.string().min(1, 'Username is required'),
-	email: z.string().email('Invalid email address'),
-	roles: z.array(z.string()).min(1, 'At least one role is required')
-});
 
 const Admins = () => {
 	const {
 		admins,
-		adminsQuery,
-		createAdminMutation,
-		updateAdminMutation,
 		deleteAdminMutation,
 		generatePasswordMutation,
-		getRandomCredentialsMutation,
-		toggleAdminActivationMutation
+		toggleAdminActivationMutation,
+		forms,
+		isModalOpen,
+		modalType,
+		handleGenerateCredentials,
+		onSubmit,
+		openModal,
+		closeModal,
+		roles,
+		selectedAdmin
 	} = useAdmins();
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [modalType, setModalType] = useState<'create' | 'edit'>('create');
-	const [selectedAdmin, setSelectedAdmin] = useState<SelectedAdmin | null>(
-		null
-	);
-
-	const {
-		register,
-		handleSubmit,
-		reset,
-		setValue,
-		formState: { errors }
-	} = useForm({
-		resolver: zodResolver(schema)
-	});
-
-	const onSubmit = async (data: any) => {
-		console.log({ data, selectedAdmin });
-
-		if (selectedAdmin) {
-			updateAdminMutation.mutate({
-				...data,
-				id: selectedAdmin.id
-			});
-		} else {
-			const created = await createAdminMutation.mutateAsync(data);
-			console.log({ created });
-		}
-		adminsQuery.refetch();
-		closeModal();
-	};
-
-	const openModal = (admin: SelectedAdmin | null = null) => {
-		setSelectedAdmin(admin);
-		if (admin) {
-			setModalType('edit');
-			reset(admin);
-		} else {
-			setModalType('create');
-			reset({
-				firstName: '',
-				lastName: '',
-				username: '',
-				email: '',
-				roles: []
-			});
-		}
-		setIsModalOpen(true);
-	};
-
-	const closeModal = () => {
-		setIsModalOpen(false);
-		setSelectedAdmin(null);
-		reset({ firstName: '', lastName: '', username: '', email: '', roles: [] });
-	};
-
-	const handleGenerateCredentials = async () => {
-		const credentials = await getRandomCredentialsMutation.mutateAsync();
-		setValue('firstName', credentials.names[0]);
-		setValue('lastName', credentials.names[1]);
-		setValue('username', credentials.username);
-	};
-
-	const roles: Role[] = [
-		'AUDITOR',
-		'DISPUTE_MANAGER',
-		'FINANCE_MANAGER',
-		'KYC_REVIEWER',
-		'MODERATOR',
-		'SENIOR_ADMIN',
-		'SUPPORT_AGENT'
-	];
 
 	return (
 		<div className={styles.container}>
 			{/* Header */}
-			<div className={styles.header}>
-				<h1 className={styles.pageTitle}>Admins</h1>
-				<p className={styles.metaInfoValue}>Create, Delete, Update admins</p>
-				<button
-					className={`${styles.btn} ${styles.btnPrimary}`}
-					onClick={() => openModal()}
-				>
-					<DynamicIcon iconName="FaPlus" size={16} color="#fff" />
-					Create Admin
-				</button>
-			</div>
+			<header className={styles.header}>
+				<div>
+					<h1 className={styles.pageTitle}>Admins</h1>
+					<p className={styles.metaInfoValue}>Create, Delete, Update admins</p>
+					<button
+						className={`${styles.btn} ${styles.btnPrimary}`}
+						onClick={() => openModal()}
+					>
+						<DynamicIcon iconName="FaPlus" size={16} color="#fff" />
+						Create Admin
+					</button>
+				</div>
+				<Button theme="primary">
+					<DynamicIcon iconName="FaTrash" size={16} color="#ffcd2b" />
+					<span>Delete Admins</span>
+				</Button>
+			</header>
 
 			{/* Admins Table */}
 			<div className={styles.card}>
@@ -135,54 +65,67 @@ const Admins = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{admins.map((admin) => (
-								<tr key={admin.id}>
-									<td>{admin.firstName}</td>
-									<td>{admin.lastName}</td>
-									<td>{admin.username}</td>
-									<td>{admin.email}</td>
-									<td>{admin.roles.join(', ')}</td>
-									<td>
-										<button
-											className={`${styles.btn} ${styles.btnSecondary}`}
-											onClick={() =>
-												openModal({
-													...admin,
-													roles: admin.roles
-												})
-											}
-										>
-											<DynamicIcon iconName="FaPen" size={16} />
-										</button>
-										<button
-											className={`${styles.btn} ${styles.btnDanger}`}
-											onClick={() => deleteAdminMutation.mutate(admin.id)}
-										>
-											<DynamicIcon iconName="FaTrash" size={16} />
-										</button>
-										<button
-											className={`${styles.btn} ${styles.btnWarning}`}
-											onClick={() =>
-												toggleAdminActivationMutation.mutate({
-													...admin,
-													isActive: !admin.isActive
-												})
-											}
-										>
-											<DynamicIcon
-												iconName={admin.isActive ? 'FaToggleOff' : 'FaToggleOn'}
-												size={16}
-											/>
-										</button>
-										<button
-											className={`${styles.btn} ${styles.btnSuccess}`}
-											onClick={() => generatePasswordMutation.mutate(admin.id)}
-										>
-											<DynamicIcon iconName="FaKey" size={16} />
-										</button>
-									</td>
-								</tr>
-							))}
+							{admins.map((admin) => {
+								const disabledStyle = !admin.isActive
+									? styles.disabledAdmin
+									: '';
+								return (
+									<tr key={admin.id} className={disabledStyle}>
+										<td>{admin.firstName}</td>
+										<td>{admin.lastName}</td>
+										<td>{admin.username}</td>
+										<td>{admin.email}</td>
+										<td>{admin.roles.join(', ')}</td>
+										<td className={styles.btns}>
+											<button
+												className={`${styles.btn} ${styles.btnSecondary}`}
+												onClick={() =>
+													openModal({
+														...admin,
+														roles: admin.roles
+													})
+												}
+											>
+												<DynamicIcon iconName="FaPen" size={16} />
+											</button>
+											{admin.isActive && (
+												<button
+													className={`${styles.btn} ${styles.btnDanger}`}
+													onClick={() => deleteAdminMutation.mutate(admin.id)}
+												>
+													<DynamicIcon iconName="FaTrash" size={16} />
+												</button>
+											)}
+											<button
+												className={`${styles.btn} ${styles.btnWarning}`}
+												onClick={() =>
+													toggleAdminActivationMutation.mutate({
+														...admin,
+														isActive: !admin.isActive
+													})
+												}
+											>
+												<DynamicIcon
+													iconName={
+														admin.isActive ? 'FaToggleOff' : 'FaToggleOn'
+													}
+													size={16}
+												/>
+											</button>
+											{admin.isActive && (
+												<button
+													className={`${styles.btn} ${styles.btnSuccess}`}
+													onClick={() =>
+														generatePasswordMutation.mutate(admin.id)
+													}
+												>
+													<DynamicIcon iconName="FaKey" size={16} />
+												</button>
+											)}
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>
@@ -198,7 +141,7 @@ const Admins = () => {
 								<DynamicIcon iconName="FaPlus" size={16} />
 							</button>
 						</div>
-						<form onSubmit={handleSubmit(onSubmit)}>
+						<form onSubmit={forms.handleSubmit(onSubmit)}>
 							{modalType === 'create' && (
 								<div className={styles.formGroup}>
 									<button
@@ -215,14 +158,14 @@ const Admins = () => {
 								<label className={styles.formLabel}>First Name</label>
 								<input
 									type="text"
-									{...register('firstName')}
+									{...forms.register('firstName')}
 									className={styles.formControl}
 									readOnly
 									disabled
 								/>
-								{errors.firstName && (
+								{forms.errors.firstName && (
 									<span className={styles.fieldError}>
-										{errors.firstName.message}
+										{forms.errors.firstName.message}
 									</span>
 								)}
 							</div>
@@ -230,14 +173,14 @@ const Admins = () => {
 								<label className={styles.formLabel}>Last Name</label>
 								<input
 									type="text"
-									{...register('lastName')}
+									{...forms.register('lastName')}
 									className={styles.formControl}
 									readOnly
 									disabled
 								/>
-								{errors.lastName && (
+								{forms.errors.lastName && (
 									<span className={styles.fieldError}>
-										{errors.lastName.message}
+										{forms.errors.lastName.message}
 									</span>
 								)}
 							</div>
@@ -245,14 +188,14 @@ const Admins = () => {
 								<label className={styles.formLabel}>Username</label>
 								<input
 									type="text"
-									{...register('username')}
+									{...forms.register('username')}
 									className={styles.formControl}
 									readOnly
 									disabled
 								/>
-								{errors.username && (
+								{forms.errors.username && (
 									<span className={styles.fieldError}>
-										{errors.username.message}
+										{forms.errors.username.message}
 									</span>
 								)}
 							</div>
@@ -260,16 +203,16 @@ const Admins = () => {
 								<label className={styles.formLabel}>Email</label>
 								<input
 									type="email"
-									{...register('email')}
+									{...forms.register('email')}
 									className={styles.formControl}
 									{...(modalType === 'edit' && {
 										readOnly: true,
 										disabled: true
 									})}
 								/>
-								{errors.email && (
+								{forms.errors.email && (
 									<span className={styles.fieldError}>
-										{errors.email.message}
+										{forms.errors.email.message}
 									</span>
 								)}
 							</div>
@@ -284,15 +227,15 @@ const Admins = () => {
 												type="checkbox"
 												value={role}
 												id={role}
-												{...register('roles')}
+												{...forms.register('roles')}
 											/>
 											<label htmlFor={role}>{role}</label>
 										</div>
 									))}
 								</div>
-								{errors.roles && (
+								{forms.errors.roles && (
 									<span className={styles.fieldError}>
-										{errors.roles.message}
+										{forms.errors.roles.message}
 									</span>
 								)}
 							</div>
