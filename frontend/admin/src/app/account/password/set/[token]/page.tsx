@@ -1,13 +1,14 @@
 'use client';
 
 import { Button, DynamicIcon } from '@/components';
-import React from 'react';
 
+import React from 'react';
 import styles from './page.module.scss';
 import useSetPassword from '@/hooks/useSetPassword';
 
 const SetPassword = () => {
-	const { form, setPasswordtokenQuery, setPasswordtokenMutation, onSubmit } = useSetPassword();
+	const { form, setPasswordtokenQuery, setPasswordtokenMutation, onSubmit } =
+		useSetPassword();
 
 	if (setPasswordtokenQuery.isPending) {
 		return (
@@ -60,6 +61,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
+										// @ts-ignore
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('password')}
@@ -75,6 +77,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
+										// @ts-ignore
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('confirmPassword')}
@@ -86,6 +89,7 @@ const SetPassword = () => {
 							className={`${styles.btn} ${styles.btnPrimary}`}
 							disabled={
 								setPasswordtokenMutation.isPending ||
+								// @ts-ignore
 								setPasswordtokenMutation.data?.ok
 							}
 						>
