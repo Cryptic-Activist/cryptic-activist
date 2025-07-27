@@ -6,7 +6,8 @@ import { useEffect } from 'react';
 import {
 	admin,
 	decodeAccessToken as handleDecodeAccessToken,
-	handleLoginAdmin
+	handleLoginAdmin,
+	logout
 } from '@/stores/admin';
 import { AdminRole, type CreateUserParams } from './types';
 
@@ -43,6 +44,10 @@ const useUsers = () => {
 		return found?.length > 0;
 	};
 
+	const handleLogOut = () => {
+		logout();
+	};
+
 	useEffect(() => {
 		const decodeAccessToken = async () => {
 			await handleDecodeAccessToken();
@@ -60,7 +65,8 @@ const useUsers = () => {
 		admin: $admin,
 		getRoles,
 		hasRole,
-		hasRoles
+		hasRoles,
+		handleLogOut
 	};
 };
 

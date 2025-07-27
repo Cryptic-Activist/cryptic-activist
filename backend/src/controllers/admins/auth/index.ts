@@ -544,7 +544,7 @@ export const setAdminPassword = async (req: Request, res: Response) => {
 
       const updatedPassword = await tx.admin.update({
         where: { id: admin.id },
-        data: { password: hash },
+        data: { password: hash, isVerified: true },
       });
 
       if (!updatedPassword) {
