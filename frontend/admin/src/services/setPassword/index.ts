@@ -1,7 +1,4 @@
-import {
-	UserResetPasswordParams,
-	UserResetPasswordRequestParams
-} from './types';
+import { AdminSetPasswordParams, AdminSetPasswordRequestParams } from './types';
 import { fetchGet, fetchPost } from '@/services/axios';
 
 import { BACKEND } from '@/constants';
@@ -21,7 +18,7 @@ export const validatePasswordSetToken = async (token: string) => {
 export const onSubmitAdminSetPassword = async ({
 	token,
 	...params
-}: UserResetPasswordParams) => {
+}: AdminSetPasswordParams) => {
 	const response = await fetchPost(
 		BACKEND + '/admins/auth/password/set/' + token,
 		{

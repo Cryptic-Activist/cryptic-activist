@@ -690,6 +690,20 @@ export const resetPasswordVerifyToken = async (req: Request, res: Response) => {
       return;
     }
 
+    const validToken = await prisma.token.findFirst({
+      where: {
+        token,
+        isUsed: false,
+      },
+    });
+
+    if (!validToken) {
+      res.status(404).send({
+        errors: ['Token is invalid'],
+      });
+      return;
+    }
+
     res.status(200).send({
       ok: true,
     });
@@ -731,6 +745,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     const existingToken = await prisma.token.findFirst({
       where: {
         token,
+        isUsed: false,
       },
       select: {
         id: true,

@@ -471,6 +471,20 @@ export const setAdminPasswordVerifyToken = async (
       return;
     }
 
+    const validToken = await prisma.token.findFirst({
+      where: {
+        token,
+        isUsed: false,
+      },
+    });
+
+    if (!validToken) {
+      res.status(404).send({
+        errors: ['Token is invalid'],
+      });
+      return;
+    }
+
     res.status(200).send({
       ok: true,
     });
@@ -512,6 +526,7 @@ export const setAdminPassword = async (req: Request, res: Response) => {
       const existingToken = await tx.token.findFirst({
         where: {
           token,
+          isUsed: false,
         },
         select: {
           id: true,
