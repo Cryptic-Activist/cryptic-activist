@@ -1,35 +1,55 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSetPassword, useURL } from '@/hooks';
+import { Button, DynamicIcon } from '@/components';
+import React from 'react';
 
-import { DynamicIcon } from '@/components';
 import styles from './page.module.scss';
-import { useQuery } from '@tanstack/react-query';
-import { validatePasswordSetToken } from '@/services/setPassword';
+import useSetPassword from '@/hooks/useSetPassword';
 
-const AdminAccountPasswordSetValidation = () => {
-	const { form, onSubmit, setPasswordtokenQuery, setPasswordtokenMutation } =
-		useSetPassword();
+const SetPassword = () => {
+	const { form, setPasswordtokenQuery, setPasswordtokenMutation, onSubmit } = useSetPassword();
 
-	const showVerifyingMessage = setPasswordtokenQuery.isPending;
-	const showErrorWhileVerifyingMessage = setPasswordtokenQuery.isError;
+	if (setPasswordtokenQuery.isPending) {
+		return (
+			<div className={styles.container}>
+				<div className={styles.card}>
+					<div className={styles.cardContent}>
+						<p>Verifying set password token...</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
-	console.log({ setPasswordtokenMutation });
+	if (setPasswordtokenQuery.isError) {
+		return (
+			<div className={styles.container}>
+				<div className={styles.card}>
+					<div className={styles.cardContent}>
+						<p>Some error has occurred. Request new token and try again.</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (setPasswordtokenMutation.isSuccess) {
+		return (
+			<div className={styles.container}>
+				<div className={styles.card}>
+					<div className={styles.cardContent}>
+						<p className={styles.successMessage}>Password set successfully!</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className={styles.container}>
 			<div className={styles.card}>
 				<div className={styles.cardHeader}>Set Your Password</div>
 				<div className={styles.cardContent}>
-					{setPasswordtokenQuery.isPending && (
-						<p>Verifying set password token...</p>
-					)}
-					{setPasswordtokenQuery.isError && (
-						<p>Some error has occurred. Request new token and try again.</p>
-					)}
-
-					{!setPasswordtokenMutation.isError}
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<div className={styles.formGroup}>
 							<div className={styles.formInputContainer}>
@@ -85,4 +105,4 @@ const AdminAccountPasswordSetValidation = () => {
 	);
 };
 
-export default AdminAccountPasswordSetValidation;
+export default SetPassword;
