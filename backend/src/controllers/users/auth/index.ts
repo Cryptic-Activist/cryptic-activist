@@ -728,21 +728,6 @@ export const resetPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const generatedSalt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, generatedSalt);
-
-    const updatedPassword = await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hash },
-    });
-
-    if (!updatedPassword) {
-      res.status(400).send({
-        errors: ['Unable to reset password'],
-      });
-      return;
-    }
-
     const existingToken = await prisma.token.findFirst({
       where: {
         token,
@@ -755,6 +740,21 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (!existingToken) {
       res.status(400).send({
         errors: ['Unable to find token'],
+      });
+      return;
+    }
+
+    const generatedSalt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, generatedSalt);
+
+    const updatedPassword = await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hash },
+    });
+
+    if (!updatedPassword) {
+      res.status(400).send({
+        errors: ['Unable to reset password'],
       });
       return;
     }

@@ -173,8 +173,6 @@ export const inviteAdmin = async (req: Request, res: Response) => {
         },
       });
 
-      console.log({ roles });
-
       const admin = await tx.admin.create({
         data: {
           firstName,
@@ -438,6 +436,135 @@ export const softDeleteAdmin = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.log(err);
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const setAdminPasswordVerifyToken = async (
+  req: Request,
+  res: Response,
+) => {
+  const { token } = req.params;
+
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+      });
+      return;
+    }
+
+    const admin = await prisma.admin.findFirst({
+      where: {
+        id: decoded.userId as string,
+      },
+    });
+
+    if (!admin) {
+      res.status(404).send({
+        errors: ['Admin not found'],
+      });
+      return;
+    }
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+    return;
+  }
+};
+
+export const setAdminPassword = async (req: Request, res: Response) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const decoded = decodeToken(token);
+    if (!decoded) {
+      res.status(401).send({
+        errors: ['Unable to decode the token'],
+      });
+      return;
+    }
+
+    const transaction = await prisma.$transaction(async (tx) => {
+      const admin = await tx.admin.findFirst({
+        where: {
+          id: decoded.userId as string,
+        },
+      });
+
+      if (!admin) {
+        return {
+          error: 'User not found',
+        };
+      }
+
+      const existingToken = await tx.token.findFirst({
+        where: {
+          token,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!existingToken) {
+        return {
+          error: 'Unable to find token',
+        };
+      }
+
+      const generatedSalt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, generatedSalt);
+
+      const updatedPassword = await tx.admin.update({
+        where: { id: admin.id },
+        data: { password: hash },
+      });
+
+      if (!updatedPassword) {
+        return {
+          error: 'Unable to reset password',
+        };
+      }
+
+      const invalidatedToken = await tx.token.update({
+        where: {
+          id: existingToken?.id,
+        },
+        data: {
+          isUsed: true,
+        },
+      });
+
+      if (!invalidatedToken) {
+        return {
+          error: 'Unable to invalidate token',
+        };
+      }
+    });
+
+    if (transaction?.error) {
+      res.status(400).json({ error: transaction.error });
+      return;
+    }
+
+    res.status(200).send({
+      ok: true,
+    });
+    return;
+  } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

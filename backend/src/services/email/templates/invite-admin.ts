@@ -1,6 +1,7 @@
 import { FRONTEND_ADMIN } from '@/constants/env';
 
 export const buildAdminInvitation = (admin: any, token: string) => {
+  const inviteUrl = `${FRONTEND_ADMIN}/account/password/set/${token}`;
   return `<body style="margin: 0; padding: 50px 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
   <table border="0" cellpadding="0" cellspacing="0" width="100%"
          style="max-width: 600px; margin: 0 auto;
@@ -47,7 +48,7 @@ export const buildAdminInvitation = (admin: any, token: string) => {
         </p>
         
         <p style="margin: 0 0 30px 0; text-align: center;">
-          <a href="${FRONTEND_ADMIN}/auth/set-password?token=${token}" target="_blank"
+          <a href="${inviteUrl}" target="_blank"
              style="display: inline-block; padding: 12px 24px; background-color: #ffd64d;
                     color: #000000; text-decoration: none; border-radius: 5px;
                     font-size: 16px; font-weight: bold;">

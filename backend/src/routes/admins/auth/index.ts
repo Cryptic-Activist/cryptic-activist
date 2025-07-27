@@ -6,6 +6,8 @@ import {
   inviteAdmin,
   login,
   loginDecodeToken,
+  setAdminPassword,
+  setAdminPasswordVerifyToken,
   softDeleteAdmin,
   toggleAdminActivation,
   updateAdmin,
@@ -25,6 +27,10 @@ router.post(
   requireAdminRole(['SUPER_ADMIN']),
   inviteAdmin,
 );
+
+router.get('/password/set/verify/:token', setAdminPasswordVerifyToken);
+
+router.post('/password/set/:token', setAdminPassword);
 
 router.put(
   '/:id',
