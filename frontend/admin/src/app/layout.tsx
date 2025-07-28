@@ -1,4 +1,3 @@
-import AuthWrapper from './AuthWrapper';
 import './global.css';
 
 import AllModals from '@/layout/modals/AllModals';
@@ -21,9 +20,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 					<NavigationBar />
 					<main className={layout.main}>
 						<SideBar />
-						<AuthWrapper>
-							<div className={layout.container}>{children}</div>
-						</AuthWrapper>
+						<div className={layout.container}>{children}</div>
 					</main>
 					<Footer />
 				</QueryProvider>

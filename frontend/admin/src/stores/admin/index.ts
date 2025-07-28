@@ -1,10 +1,10 @@
 import { BACKEND } from '@/constants/envs';
 import { fetchGet, fetchPost } from '@/services/axios';
 import {
-	getLocalStorage,
-	removeLocalStorage,
-	setLocalStorage
-} from '@/utils/browser/storage';
+	getCookie,
+	removeCookie,
+	setCookie
+} from '@/utils/browser/cookies';
 import { map } from 'nanostores';
 import {
 	type Admin,
@@ -14,7 +14,6 @@ import {
 	type LoginAdminParams,
 	type RegisterAdminParams
 } from './types';
-import { error } from 'console';
 
 export const admin = map<AdminState>({
 	loading: false,
@@ -75,12 +74,12 @@ const loginAdmin = async (adminData: LoginAdminParams) => {
 			return null;
 		}
 
-		if (getLocalStorage('accessToken') !== undefined) {
-			removeLocalStorage('accessToken');
+		if (getCookie('accessToken') !== undefined) {
+			removeCookie('accessToken');
 		}
 
-		setLocalStorage('accessToken', tokens.accessToken);
-		setLocalStorage('refreshToken', tokens.refreshToken);
+		setCookie('accessToken', tokens.accessToken, 1);
+		setCookie('refreshToken', tokens.refreshToken, 7);
 
 		const adminInfo = await getAdminInfoFromToken(tokens.accessToken);
 
@@ -94,7 +93,7 @@ const loginAdmin = async (adminData: LoginAdminParams) => {
 
 export const decodeAccessToken = async () => {
 	try {
-		const accessToken = getLocalStorage('accessToken');
+		const accessToken = getCookie('accessToken');
 
 		if (!accessToken) {
 			return null;
@@ -148,8 +147,8 @@ export const handleRegisterAdmin = async (admin: RegisterAdminParams) => {
 };
 
 export const logout = () => {
-	removeLocalStorage('accessToken');
-	removeLocalStorage('refreshToken');
+	removeCookie('accessToken');
+	removeCookie('refreshToken');
 
 	reset();
 };
