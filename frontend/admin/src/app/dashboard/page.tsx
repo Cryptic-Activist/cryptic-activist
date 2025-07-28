@@ -7,6 +7,7 @@ import React from 'react';
 import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
+import { validateWithAuthToken } from '@/services/admin';
 
 const Dashboard = () => {
 	const {
@@ -68,7 +69,8 @@ const Dashboard = () => {
 
 // export default Dashboard;
 
-export default withAuth(Dashboard, {
+export default withAuthAdvanced(Dashboard, {
+	validateToken: validateWithAuthToken,
 	roles: [
 		'AUDITOR',
 		'DISPUTE_MANAGER',
