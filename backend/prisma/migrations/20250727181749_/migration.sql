@@ -89,6 +89,7 @@ CREATE TABLE "admins" (
     "username" VARCHAR(120) NOT NULL,
     "email" VARCHAR(120) NOT NULL,
     "password" TEXT,
+    "isActive" BOOLEAN DEFAULT true,
     "isVerified" BOOLEAN DEFAULT false,
     "twoFactorSecret" TEXT,
     "twoFactorEnabled" BOOLEAN DEFAULT false,
