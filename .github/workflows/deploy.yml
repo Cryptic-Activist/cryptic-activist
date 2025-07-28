@@ -20,14 +20,15 @@ jobs:
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
+            set -e
             cd app
             
             # Check which nginx container is currently running
-            if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "nginx_blue.*Up"; then
+            if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_blue.*Up"; then
               echo "ACTIVE_COLOR=blue"
               echo "INACTIVE_COLOR=green"
               echo "Blue nginx is currently active"
-            elif docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "nginx_green.*Up"; then
+            elif docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_green.*Up"; then
               echo "ACTIVE_COLOR=green"
               echo "INACTIVE_COLOR=blue" 
               echo "Green nginx is currently active"
@@ -63,6 +64,7 @@ jobs:
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
+            set -e
             echo "🧹 Cleaning up Docker system..."
             docker system prune -a --volumes -f
             echo "✅ Docker system cleanup complete."
@@ -186,6 +188,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           command_timeout: 15m
           script: |
+            set -e
             cd app
             
             echo "🗄️ Deploying shared services (MongoDB, PostgreSQL, Redis, RabbitMQ)..."
@@ -258,6 +261,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           command_timeout: 30m
           script: |
+            set -e # Exit immediately if a command exits with a non-zero status.
             cd app
             
             echo "🚀 Starting deployment to ${{ env.INACTIVE_COLOR }} environment"
@@ -340,6 +344,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           command_timeout: 5m
           script: |
+            set -e
             cd app
             
             echo "🔄 Switching traffic from ${{ env.ACTIVE_COLOR }} to ${{ env.INACTIVE_COLOR }}..."
@@ -373,6 +378,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           command_timeout: 10m
           script: |
+            set -e
             cd app
             
             echo "🧹 Cleaning up old ${{ env.ACTIVE_COLOR }} environment..."
