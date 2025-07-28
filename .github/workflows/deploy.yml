@@ -56,6 +56,17 @@ jobs:
           echo "🔵 Active environment: $ACTIVE_COLOR"
           echo "🟢 Deploying to: $INACTIVE_COLOR"
 
+      - name: Clean up Docker system
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
+          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
+          script: |
+            echo "🧹 Cleaning up Docker system..."
+            docker system prune -a --volumes -f
+            echo "✅ Docker system cleanup complete."
+
       - name: Create environment files on server
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -64,6 +75,7 @@ jobs:
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           command_timeout: 10m
           script: |
+            set -e
             cd app
             mkdir -p envs
             
