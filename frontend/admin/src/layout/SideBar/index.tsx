@@ -1,3 +1,5 @@
+'use client';
+
 import { DynamicIcon } from '@/components';
 import { FC } from 'react';
 import Link from 'next/link';

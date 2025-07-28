@@ -1,9 +1,11 @@
 'use client';
 
-import { DynamicIcon } from '@/components';
 import React, { useEffect } from 'react';
+
+import { DynamicIcon } from '@/components';
 import styles from './page.module.scss';
 import usePlatformSettings from '@/hooks/usePlatformSettings';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const PlatformSettings = () => {
 	const { publicForm, privateForm } = usePlatformSettings();
@@ -408,4 +410,6 @@ const PlatformSettings = () => {
 	);
 };
 
-export default PlatformSettings;
+export default withAuthAdvanced(PlatformSettings, {
+	roles: ['SUPER_ADMIN']
+});

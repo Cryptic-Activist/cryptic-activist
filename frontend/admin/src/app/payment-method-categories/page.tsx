@@ -2,6 +2,7 @@
 
 import { PaymentMethodCategoriesList as List } from '@/components/lists';
 import { usePaymentMethodCategories } from '@/hooks';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const PaymentMethodCategories = () => {
 	const { paymentMethodCategories } = usePaymentMethodCategories(true);
@@ -9,4 +10,6 @@ const PaymentMethodCategories = () => {
 	return <List items={paymentMethodCategories.data} />;
 };
 
-export default PaymentMethodCategories;
+export default withAuthAdvanced(PaymentMethodCategories, {
+	roles: ['SUPER_ADMIN']
+});

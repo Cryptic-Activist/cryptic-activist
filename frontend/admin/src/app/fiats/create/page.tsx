@@ -7,6 +7,7 @@ import React from 'react';
 import page from './page.module.scss';
 import useFiats from '@/hooks/useFiats';
 import { useForm } from 'react-hook-form';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const UsersCreatePage = () => {
 	const { register, handleSubmit } = useForm();
@@ -50,4 +51,6 @@ const UsersCreatePage = () => {
 	);
 };
 
-export default UsersCreatePage;
+export default withAuthAdvanced(UsersCreatePage, {
+	roles: ['SUPER_ADMIN']
+});

@@ -1,3 +1,5 @@
+'use client';
+
 import { ApproveKYCParams, RejectKYCParams } from '@/services/kyc/types';
 import { approveKYC, getKYC, rejectKYC } from '@/services/kyc';
 import {

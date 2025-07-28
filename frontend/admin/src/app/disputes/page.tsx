@@ -5,6 +5,7 @@ import { useDisputes, useRouter } from '@/hooks';
 
 import React from 'react';
 import styles from './page.module.scss';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const Disputes = () => {
 	const {
@@ -117,4 +118,6 @@ const Disputes = () => {
 	);
 };
 
-export default Disputes;
+export default withAuthAdvanced(Disputes, {
+	roles: ['SUPER_ADMIN', 'DISPUTE_MANAGER', 'SENIOR_ADMIN']
+});

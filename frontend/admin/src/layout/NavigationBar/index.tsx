@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { isLoggedIn } from '@/utils/checks/admin';
 import { openModal } from '@/stores/navigationBar';

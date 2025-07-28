@@ -5,6 +5,7 @@ import { useDisputes, useKYCs, useRouter } from '@/hooks';
 
 import React from 'react';
 import styles from './page.module.scss';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const KYCsPage = () => {
 	const {
@@ -76,4 +77,6 @@ const KYCsPage = () => {
 	);
 };
 
-export default KYCsPage;
+export default withAuthAdvanced(KYCsPage, {
+	roles: ['KYC_REVIEWER', 'SUPER_ADMIN', 'SENIOR_ADMIN']
+});

@@ -18,6 +18,7 @@ import {
 import { useDispute, useKYC, useOutsideClick } from '@/hooks';
 
 import styles from './page.module.scss';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const KYCDetaisPage = () => {
 	const { $kyc, approveKYCMutation, rejectKYCMutation } = useKYC();
@@ -245,4 +246,6 @@ const KYCDetaisPage = () => {
 	);
 };
 
-export default KYCDetaisPage;
+export default withAuthAdvanced(KYCDetaisPage, {
+	roles: ['SUPER_ADMIN', 'KYC_REVIEWER', 'SENIOR_ADMIN']
+});

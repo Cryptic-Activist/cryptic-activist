@@ -14,6 +14,7 @@ import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';
 
 import styles from './page.module.scss';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
 const DisputeDetailsPage = () => {
 	const {
@@ -732,4 +733,6 @@ const DisputeDetailsPage = () => {
 	);
 };
 
-export default DisputeDetailsPage;
+export default withAuthAdvanced(DisputeDetailsPage, {
+	roles: ['SUPER_ADMIN', 'DISPUTE_MANAGER', 'SENIOR_ADMIN']
+});

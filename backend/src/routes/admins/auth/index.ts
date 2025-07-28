@@ -11,6 +11,7 @@ import {
   softDeleteAdmin,
   toggleAdminActivation,
   updateAdmin,
+  validateWithAuthToken,
 } from '@/controllers/admins/auth';
 
 import { Router } from 'express';
@@ -52,5 +53,7 @@ router.put(
   requireAdminRole(['SUPER_ADMIN']),
   toggleAdminActivation,
 );
+
+router.get('/validate/token', authenticateAdmin, validateWithAuthToken);
 
 export default router;
