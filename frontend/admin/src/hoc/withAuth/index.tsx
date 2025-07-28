@@ -5,6 +5,10 @@ import type {
 } from './types';
 import React, { ComponentType, useEffect, useState } from 'react';
 
+import { admin } from '@/stores/admin';
+import { useAdmin } from '@/hooks';
+import { useStore } from '@nanostores/react';
+
 // ✅ Improved cookie parser
 const getCookie = (name: string): string | null => {
 	const cookies = document.cookie.split('; ');
@@ -22,7 +26,8 @@ export const withAuth = <P extends object>(
 		cookieName = 'accessToken',
 		loadingComponent = null,
 		unauthorizedComponent = null,
-		checkInterval = 5000
+		checkInterval = 5000,
+		roles
 	} = options;
 
 	const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -30,26 +35,36 @@ export const withAuth = <P extends object>(
 			null
 		);
 		const [isLoading, setIsLoading] = useState<boolean>(true);
+		const { hasRoles, admin } = useAdmin();
 
 		useEffect(() => {
-			const checkCookieExists = (): void => {
+			const checkAuthStatus = (): void => {
 				const token = getCookie(cookieName);
 
-				if (token && isAuthenticated !== true) {
-					setIsAuthenticated(true);
-				} else if (!token && isAuthenticated !== false) {
-					setIsAuthenticated(false);
+				let hasRequiredRole = true;
+				if (roles && roles.length > 0) {
+					hasRequiredRole = hasRoles(roles);
+				}
 
-					const currentPath = window.location.pathname + window.location.search;
-					sessionStorage.setItem('redirectPath', currentPath);
-					window.location.href = redirectTo;
+				if (token && hasRequiredRole) {
+					if (isAuthenticated !== true) {
+						setIsAuthenticated(true);
+					}
+				} else {
+					if (isAuthenticated !== false) {
+						setIsAuthenticated(false);
+						const currentPath =
+							window.location.pathname + window.location.search;
+						sessionStorage.setItem('redirectPath', currentPath);
+						window.location.href = redirectTo;
+					}
 				}
 
 				if (isLoading) setIsLoading(false);
 			};
 
-			checkCookieExists();
-			const interval = setInterval(checkCookieExists, checkInterval);
+			checkAuthStatus();
+			const interval = setInterval(checkAuthStatus, checkInterval);
 
 			const handleStorageChange = (e: StorageEvent) => {
 				if (e.key === 'logout' && e.newValue === 'true') {
@@ -60,7 +75,7 @@ export const withAuth = <P extends object>(
 			};
 
 			const handleVisibilityChange = () => {
-				if (!document.hidden) checkCookieExists();
+				if (!document.hidden) checkAuthStatus();
 			};
 
 			window.addEventListener('storage', handleStorageChange);
@@ -74,7 +89,7 @@ export const withAuth = <P extends object>(
 					handleVisibilityChange
 				);
 			};
-		}, []);
+		}, [isAuthenticated, isLoading, roles, admin.data?.roles]);
 
 		if (isLoading) {
 			return (
@@ -121,7 +136,8 @@ export const withAuthAdvanced = <P extends object>(
 		validateToken = null,
 		loadingComponent = null,
 		unauthorizedComponent = null,
-		checkInterval = 5000
+		checkInterval = 5000,
+		roles
 	} = options;
 
 	const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -129,12 +145,18 @@ export const withAuthAdvanced = <P extends object>(
 			null
 		);
 		const [isLoading, setIsLoading] = useState<boolean>(true);
+		const { hasRoles, admin } = useAdmin();
 
 		useEffect(() => {
-			const checkCookieExists = async (): Promise<void> => {
+			const checkAuthStatus = async (): Promise<void> => {
 				const token = getCookie(cookieName);
 
-				if (token) {
+				let hasRequiredRole = true;
+				if (roles && roles.length > 0) {
+					hasRequiredRole = hasRoles(roles);
+				}
+
+				if (token && hasRequiredRole) {
 					if (validateToken) {
 						const isValid = await validateToken(token);
 						if (!isValid) {
@@ -147,18 +169,21 @@ export const withAuthAdvanced = <P extends object>(
 						}
 					}
 					setIsAuthenticated(true);
-				} else if (isAuthenticated !== false) {
-					setIsAuthenticated(false);
-					const currentPath = window.location.pathname + window.location.search;
-					sessionStorage.setItem('redirectPath', currentPath);
-					window.location.href = redirectTo;
+				} else {
+					if (isAuthenticated !== false) {
+						setIsAuthenticated(false);
+						const currentPath =
+							window.location.pathname + window.location.search;
+						sessionStorage.setItem('redirectPath', currentPath);
+						window.location.href = redirectTo;
+					}
 				}
 
 				if (isLoading) setIsLoading(false);
 			};
 
-			checkCookieExists();
-			const interval = setInterval(checkCookieExists, checkInterval);
+			checkAuthStatus();
+			const interval = setInterval(checkAuthStatus, checkInterval);
 
 			const handleStorageChange = (e: StorageEvent) => {
 				if (e.key === 'logout' && e.newValue === 'true') {
@@ -169,7 +194,7 @@ export const withAuthAdvanced = <P extends object>(
 			};
 
 			const handleVisibilityChange = () => {
-				if (!document.hidden) checkCookieExists();
+				if (!document.hidden) checkAuthStatus();
 			};
 
 			window.addEventListener('storage', handleStorageChange);
@@ -183,7 +208,7 @@ export const withAuthAdvanced = <P extends object>(
 					handleVisibilityChange
 				);
 			};
-		}, []);
+		}, [isAuthenticated, isLoading, roles, admin.data?.roles]);
 
 		if (isLoading) {
 			return (
