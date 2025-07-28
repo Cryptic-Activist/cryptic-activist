@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, StatusCard } from '@/components';
+import { withAuth, withAuthAdvanced } from '@/hoc/withAuth';
 
 import React from 'react';
 import { Table } from '@/components';
@@ -65,4 +66,17 @@ const Dashboard = () => {
 	);
 };
 
-export default Dashboard;
+// export default Dashboard;
+
+export default withAuth(Dashboard, {
+	roles: [
+		'AUDITOR',
+		'DISPUTE_MANAGER',
+		'FINANCE_MANAGER',
+		'KYC_REVIEWER',
+		'MODERATOR',
+		'SENIOR_ADMIN',
+		'SUPER_ADMIN',
+		'SUPPORT_AGENT'
+	]
+});

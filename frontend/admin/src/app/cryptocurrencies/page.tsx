@@ -2,11 +2,14 @@
 
 import { CryptocurrenciesList as List } from '@/components/lists';
 import useCryptocurrencies from '@/hooks/useCryptocurrencies';
+import { withAuthAdvanced } from '@/hoc/withAuth';
 
-const Users = () => {
+const Cryptocurrencies = () => {
 	const { cryptocurrencies } = useCryptocurrencies(true);
 
 	return <List items={cryptocurrencies.data} />;
 };
 
-export default Users;
+export default withAuthAdvanced(Cryptocurrencies, {
+	roles: ['SUPER_ADMIN']
+});

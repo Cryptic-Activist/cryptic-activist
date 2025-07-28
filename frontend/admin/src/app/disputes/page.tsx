@@ -119,5 +119,5 @@ const Disputes = () => {
 };
 
 export default withAuthAdvanced(Disputes, {
-	roles: ['SUPER_ADMIN']
+	roles: ['SUPER_ADMIN', 'DISPUTE_MANAGER', 'SENIOR_ADMIN']
 });

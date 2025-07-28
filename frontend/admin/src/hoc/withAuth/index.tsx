@@ -1,3 +1,5 @@
+'use client';
+
 import type {
 	AuthHookResult,
 	WithAuthAdvancedOptions,
@@ -156,6 +158,8 @@ export const withAuthAdvanced = <P extends object>(
 					hasRequiredRole = hasRoles(roles);
 				}
 
+				console.log({ token, hasRequiredRole });
+
 				if (token && hasRequiredRole) {
 					if (validateToken) {
 						const isValid = await validateToken(token);
@@ -170,6 +174,7 @@ export const withAuthAdvanced = <P extends object>(
 					}
 					setIsAuthenticated(true);
 				} else {
+					console.log({ isAuthenticated });
 					if (isAuthenticated !== false) {
 						setIsAuthenticated(false);
 						const currentPath =
