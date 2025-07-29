@@ -5,6 +5,6 @@ const TradeDispute = () => {
 	return <div>TradeDispute</div>;
 };
 
-export default withAuthAdvanced(TradeDispute, {
+export default withAuth(TradeDispute);
 	roles: ['DISPUTE_MANAGER', 'SUPER_ADMIN', 'SENIOR_ADMIN']
 });

@@ -6,7 +6,7 @@ import React from 'react';
 import TradeDetailsPage from '.';
 import TradeDetailsPageSkeleton from './skeleton';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const TradeDetails = () => {
   const {
@@ -38,6 +38,4 @@ const TradeDetails = () => {
   );
 };
 
-export default withAuthAdvanced(TradeDetails, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(TradeDetails);

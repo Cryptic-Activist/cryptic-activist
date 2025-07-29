@@ -10,6 +10,6 @@ const PaymentMethods = () => {
 	return <List items={paymentMethods.data} />;
 };
 
-export default withAuthAdvanced(PaymentMethods, {
+export default withAuth(PaymentMethods);
 	roles: ['SUPER_ADMIN']
 });

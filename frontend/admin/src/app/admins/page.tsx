@@ -265,6 +265,6 @@ const Admins = () => {
 
 // export default Admins;
 
-export default withAuthAdvanced(Admins, {
+export default withAuth(Admins);
 	roles: ['SUPER_ADMIN']
 });

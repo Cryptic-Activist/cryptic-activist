@@ -10,6 +10,6 @@ const Cryptocurrencies = () => {
 	return <List items={cryptocurrencies.data} />;
 };
 
-export default withAuthAdvanced(Cryptocurrencies, {
+export default withAuth(Cryptocurrencies);
 	roles: ['SUPER_ADMIN']
 });

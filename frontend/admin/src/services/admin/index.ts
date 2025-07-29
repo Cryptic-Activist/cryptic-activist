@@ -1,18 +1,10 @@
-import { BACKEND } from '@/constants';
-import { fetchGet } from '../axios';
-import { getBearerToken2 } from '@/utils/browser/storage';
+import api from '../api';
 
 export const validateWithAuthToken = async () => {
-	try {
-		const bearerToken = getBearerToken2();
-		const response = await fetchGet(`${BACKEND}/admins/auth/validate/token`, {
-			Authorization: bearerToken
-		});
-
-		if (response.status !== 200) return false;
-
-		return response.data.isValid;
-	} catch (_err) {
-		return false;
-	}
+  try {
+    const response = await api.get('/admins/auth/validate/token');
+    return response.status === 200;
+  } catch (_err) {
+    return false;
+  }
 };

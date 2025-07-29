@@ -109,6 +109,6 @@ const Trades = () => {
 	);
 };
 
-export default withAuthAdvanced(Trades, {
+export default withAuth(Trades);
 	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'DISPUTE_MANAGER']
 });

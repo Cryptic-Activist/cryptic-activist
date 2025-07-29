@@ -733,6 +733,6 @@ const DisputeDetailsPage = () => {
 	);
 };
 
-export default withAuthAdvanced(DisputeDetailsPage, {
+export default withAuth(DisputeDetailsPage);
 	roles: ['SUPER_ADMIN', 'DISPUTE_MANAGER', 'SENIOR_ADMIN']
 });

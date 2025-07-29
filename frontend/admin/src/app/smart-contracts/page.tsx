@@ -93,6 +93,6 @@ const SmartContracts = () => {
 	);
 };
 
-export default withAuthAdvanced(SmartContracts, {
+export default withAuth(SmartContracts);
 	roles: ['SUPER_ADMIN']
 });

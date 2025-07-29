@@ -20,7 +20,7 @@ import {
 
 import styles from './page.module.scss';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const ActionButtons: FC<ActionButtonsProps> = ({
   user,
@@ -481,6 +481,4 @@ const TradeVendor = () => {
   );
 };
 
-export default withAuthAdvanced(TradeVendor, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(TradeVendor);

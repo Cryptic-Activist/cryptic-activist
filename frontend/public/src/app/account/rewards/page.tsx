@@ -10,7 +10,7 @@ import styles from './index.module.scss';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '@/hooks';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 function RewardsPage() {
   const { user } = useUser();
@@ -127,6 +127,4 @@ function RewardsPage() {
   );
 }
 
-export default withAuthAdvanced(RewardsPage, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(RewardsPage);

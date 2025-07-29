@@ -51,6 +51,6 @@ const UsersCreatePage = () => {
 	);
 };
 
-export default withAuthAdvanced(UsersCreatePage, {
+export default withAuth(UsersCreatePage);
 	roles: ['SUPER_ADMIN']
 });

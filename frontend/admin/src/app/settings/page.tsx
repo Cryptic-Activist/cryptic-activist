@@ -410,6 +410,6 @@ const PlatformSettings = () => {
 	);
 };
 
-export default withAuthAdvanced(PlatformSettings, {
+export default withAuth(PlatformSettings);
 	roles: ['SUPER_ADMIN']
 });

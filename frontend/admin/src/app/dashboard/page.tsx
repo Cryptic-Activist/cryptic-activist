@@ -69,16 +69,4 @@ const Dashboard = () => {
 
 // export default Dashboard;
 
-export default withAuthAdvanced(Dashboard, {
-	validateToken: validateWithAuthToken,
-	roles: [
-		'AUDITOR',
-		'DISPUTE_MANAGER',
-		'FINANCE_MANAGER',
-		'KYC_REVIEWER',
-		'MODERATOR',
-		'SENIOR_ADMIN',
-		'SUPER_ADMIN',
-		'SUPPORT_AGENT'
-	]
-});
+export default withAuth(Dashboard);

@@ -11,6 +11,6 @@ const Users = () => {
 	return <List items={users.data} />;
 };
 
-export default withAuthAdvanced(Users, {
+export default withAuth(Users);
 	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN']
 });

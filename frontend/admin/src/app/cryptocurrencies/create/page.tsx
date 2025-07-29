@@ -62,6 +62,6 @@ const CryptocurrenciesCreatePage = () => {
 	);
 };
 
-export default withAuthAdvanced(CryptocurrenciesCreatePage, {
+export default withAuth(CryptocurrenciesCreatePage);
 	roles: ['SUPER_ADMIN']
 });

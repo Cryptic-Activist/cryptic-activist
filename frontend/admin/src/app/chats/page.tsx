@@ -5,6 +5,6 @@ const Chats = () => {
 	return <div>Chats</div>;
 };
 
-export default withAuthAdvanced(Chats, {
+export default withAuth(Chats);
 	roles: ['SUPER_ADMIN']
 });

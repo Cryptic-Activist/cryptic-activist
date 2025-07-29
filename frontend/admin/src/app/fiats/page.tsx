@@ -11,6 +11,6 @@ const Fiats = () => {
 	return <List items={fiats.data} />;
 };
 
-export default withAuthAdvanced(Fiats, {
+export default withAuth(Fiats);
 	roles: ['SUPER_ADMIN']
 });

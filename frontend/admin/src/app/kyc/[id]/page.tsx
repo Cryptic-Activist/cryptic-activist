@@ -246,6 +246,6 @@ const KYCDetaisPage = () => {
 	);
 };
 
-export default withAuthAdvanced(KYCDetaisPage, {
+export default withAuth(KYCDetaisPage);
 	roles: ['SUPER_ADMIN', 'KYC_REVIEWER', 'SENIOR_ADMIN']
 });

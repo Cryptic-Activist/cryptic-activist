@@ -109,4 +109,4 @@ const SetPassword = () => {
 	);
 };
 
-export default SetPassword;
+export default withAuth(SetPasswordPage);

@@ -5,6 +5,6 @@ const Offers = () => {
 	return <div>Offers</div>;
 };
 
-export default withAuthAdvanced(Offers, {
+export default withAuth(Offers);
 	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN']
 });

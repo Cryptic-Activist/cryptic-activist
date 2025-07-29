@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useURL } from '@/hooks';
 import { validatePasswordResetToken } from '@/services/resetPassword';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 function PasswordResetVerify() {
   const { params } = useURL();
@@ -39,6 +39,4 @@ function PasswordResetVerify() {
   return <div>Validating password reset request...</div>;
 }
 
-export default withAuthAdvanced(PasswordResetVerify, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(PasswordResetVerify);

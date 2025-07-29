@@ -12,7 +12,7 @@ import { useDynamicTitle, useUser } from '@/hooks';
 import { ProfileImageInfo } from '@/layouts';
 import styles from './index.module.scss';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 function Account() {
   const { user } = useUser();
@@ -40,6 +40,4 @@ function Account() {
   );
 }
 
-export default withAuthAdvanced(Account, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(Account);
