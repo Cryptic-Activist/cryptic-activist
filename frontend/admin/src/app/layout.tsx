@@ -2,6 +2,8 @@ import './global.css';
 
 import AllModals from '@/layout/modals/AllModals';
 import Footer from '@/layout/Footer';
+import Head from 'next/head';
+import { InitialSettings } from '@/layout';
 import { Montserrat } from 'next/font/google';
 import NavigationBar from '@/layout/NavigationBar';
 import { QueryProvider } from '@/components';
@@ -14,9 +16,13 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<html lang="en">
 			<head />
+			<Head>
+				<title>Admin | Cryptic Activist Catalog</title>
+			</Head>
 			<body className={montserrat.className}>
 				<QueryProvider>
 					<AllModals />
+					<InitialSettings />
 					<NavigationBar />
 					<main className={layout.main}>
 						<SideBar />

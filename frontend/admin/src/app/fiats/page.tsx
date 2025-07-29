@@ -3,7 +3,7 @@
 import { FiatsList as List } from '@/components/lists';
 import React from 'react';
 import useFiats from '@/hooks/useFiats';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const Fiats = () => {
 	const { fiats } = useFiats(true);
@@ -11,6 +11,6 @@ const Fiats = () => {
 	return <List items={fiats.data} />;
 };
 
-export default withAuthAdvanced(Fiats, {
-	roles: ['SUPER_ADMIN']
+export default withAuth(Fiats, {
+	roles: ['SUPER_ADMIN'],
 });

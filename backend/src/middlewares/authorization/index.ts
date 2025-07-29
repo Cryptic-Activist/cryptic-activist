@@ -25,7 +25,7 @@ export const authenticateUser = async (
 
     if (!decoded) {
       res.status(401).send({
-        errors: decoded,
+        errors: ['Invalid token'],
       });
       return;
     }
@@ -79,7 +79,7 @@ export const authenticateAdmin = async (
 
     if (!decoded) {
       res.status(401).send({
-        errors: decoded,
+        errors: ['Invalid token'],
       });
       return;
     }

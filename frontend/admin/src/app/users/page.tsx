@@ -3,7 +3,7 @@
 import { UsersList as List } from '@/components/lists';
 import React from 'react';
 import useUsers from '@/hooks/useUsers';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const Users = () => {
 	const { users } = useUsers(true);
@@ -11,6 +11,6 @@ const Users = () => {
 	return <List items={users.data} />;
 };
 
-export default withAuthAdvanced(Users, {
-	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN']
+export default withAuth(Users, {
+	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN'],
 });

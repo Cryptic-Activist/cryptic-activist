@@ -1,5 +1,5 @@
-import { AdminRole } from '@/hooks/useAdmin/types';
 import type { ReactNode } from 'react';
+import { Role } from '@/stores/admins';
 
 export interface WithAuthOptions {
 	redirectTo?: string;
@@ -7,7 +7,7 @@ export interface WithAuthOptions {
 	loadingComponent?: ReactNode;
 	unauthorizedComponent?: ReactNode;
 	checkInterval?: number;
-	roles?: AdminRole[];
+	roles?: Role[];
 }
 
 export interface WithAuthAdvancedOptions extends WithAuthOptions {

@@ -5,7 +5,7 @@ import { useBlockchain, useCreateOffer, useDynamicTitle } from '@/hooks';
 
 import React from 'react';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 function OfferCreatePage() {
   const {
@@ -63,6 +63,4 @@ function OfferCreatePage() {
   );
 }
 
-export default withAuthAdvanced(OfferCreatePage, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(OfferCreatePage);

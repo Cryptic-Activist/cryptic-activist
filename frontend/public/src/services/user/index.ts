@@ -3,82 +3,50 @@ import { fetchGet, fetchPost } from '../axios';
 import { getBearerToken, getCookie, removeCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
+import api from '../api';
 
 export const getUserToken = async ({
-  password,
   usernameOrEmail,
+  password,
 }: LoginParams) => {
-  const response = await fetchPost(BACKEND + '/users/auth/login', {
-    password,
+  const response = await api.post(BACKEND + '/users/auth/login', {
     usernameOrEmail,
+    password,
   });
-
-  if (response.status !== 200) return null;
-
   return response.data;
 };
 
 export const getUserToken2FA = async ({ userId, token2FA }: Login2FAParams) => {
-  const response = await fetchPost(BACKEND + '/users/auth/2fa/login', {
+  const response = await api.post(BACKEND + '/users/auth/2fa/login', {
     userId,
     token2FA,
   });
-
-  if (response.status !== 200) return null;
-
   return response.data;
 };
 
-export const getUserFromToken = async (
-  token: string
-): Promise<GetUserInfoReturn | null> => {
-  const response = await fetchGet(
-    `${BACKEND}/users/auth/login/decode/token/${token}`,
-    {
-      Authorization: `Bearer ${token}`,
-    }
+export const getUserFromToken = async (token: string) => {
+  const response = await api.get(
+    BACKEND + `/users/auth/login/decode/token/${token}`
   );
-
-  if (response.status !== 200) return null;
-
   return response.data;
 };
 
 export const decodeAccessToken = async () => {
+  const accessToken = getCookie('accessToken');
+
+  if (!accessToken) return null;
+
   try {
-    const accessToken = getCookie('accessToken');
-
-    if (!accessToken) return null;
-
     const userInfo = await getUserFromToken(accessToken);
-
-    if (!userInfo) {
-      removeCookie('accessToken');
-      removeCookie('refreshToken');
-
-      return null;
-    }
-
     return userInfo;
-  } catch (_err) {
+  } catch (error) {
     removeCookie('accessToken');
     removeCookie('refreshToken');
-
     return null;
   }
 };
 
 export const validateWithAuthToken = async () => {
-  try {
-    const bearerToken = getBearerToken();
-    const response = await fetchGet(`${BACKEND}/users/auth/validate/token`, {
-      Authorization: bearerToken,
-    });
-
-    if (response.status !== 200) return false;
-
-    return response.data.isValid;
-  } catch (_err) {
-    return false;
-  }
+  const response = await api.get(BACKEND + '/users/auth/validate/token');
+  return response.status === 200;
 };

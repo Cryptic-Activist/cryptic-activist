@@ -7,6 +7,7 @@ import { mapPaymentMethodCategories } from '@/utils/map/paymentMethodCategories'
 import page from './page.module.scss';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { withAuth } from '@/hoc/withAuth';
 
 const PaymentMethodsCreate = () => {
 	const { paymentMethodCategories } = usePaymentMethodCategories(true);
@@ -52,4 +53,6 @@ const PaymentMethodsCreate = () => {
 	);
 };
 
-export default PaymentMethodsCreate;
+export default withAuth(PaymentMethodsCreate, {
+	roles: ['SUPER_ADMIN']
+});

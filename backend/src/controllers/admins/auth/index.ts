@@ -39,7 +39,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    bcrypt.compare(password, admin.password, (compareError, isMatch) => {
+    bcrypt.compare(password, admin.password, async (compareError, isMatch) => {
       if (compareError) {
         res.status(500).send({
           errors: [compareError.message],
@@ -63,9 +63,12 @@ export const login = async (req: Request, res: Response) => {
 
       const accessToken: string = generateToken({
         objectToTokenize: { userId: admin!.id },
-        expiresIn: '1d',
       });
-      const refreshToken: string = generateRefreshToken(admin!.id);
+
+      const refreshToken: string = await generateRefreshToken(
+        admin!.id,
+        'admin',
+      );
 
       res.status(200).send({
         accessToken,
@@ -130,6 +133,59 @@ export async function loginDecodeToken(req: Request, res: Response) {
     });
   }
 }
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(401).json({ errors: ['Refresh token is required'] });
+      return;
+    }
+
+    const decoded = decodeToken(refreshToken);
+
+    if (!decoded) {
+      res.status(403).json({ errors: ['Invalid refresh token'] });
+      return;
+    }
+
+    const existingToken = await prisma.refreshToken.findFirst({
+      where: {
+        token: refreshToken,
+        isUsed: false,
+      },
+    });
+
+    if (!existingToken) {
+      res
+        .status(403)
+        .json({ errors: ['Refresh token not found or already used'] });
+      return;
+    }
+
+    await prisma.refreshToken.update({
+      where: {
+        id: existingToken.id,
+      },
+      data: {
+        isUsed: true,
+      },
+    });
+
+    const accessToken = generateToken({
+      objectToTokenize: { userId: decoded.userId },
+    });
+
+    const newRefreshToken = await generateRefreshToken(decoded.userId, 'admin');
+
+    res.json({ accessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    res.status(500).json({
+      errors: error,
+    });
+  }
+};
 
 export const inviteAdmin = async (req: Request, res: Response) => {
   const { firstName, lastName, username, email, roles: rolesArray } = req.body;
@@ -236,7 +292,7 @@ export const inviteAdmin = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).send({
+    res.status(500).json({
       errors: [err.message],
     });
     return;

@@ -8,7 +8,7 @@ import { Input } from '@/components/forms';
 import React from 'react';
 import styles from './page.module.scss';
 import { validateWithAuthToken } from '@/services/user';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const AccountSettings = () => {
   const {
@@ -193,6 +193,4 @@ const AccountSettings = () => {
   );
 };
 
-export default withAuthAdvanced(AccountSettings, {
-  validateToken: validateWithAuthToken,
-});
+export default withAuth(AccountSettings);

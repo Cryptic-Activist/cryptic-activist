@@ -101,6 +101,8 @@ export const useUserSlice: StateCreator<
         const setValue = get().user.setUserValue;
         const tokens = await getUserToken(params);
 
+        console.log({ tokens });
+
         if (!tokens) {
           throw Error('Unable to login');
         }
@@ -124,7 +126,7 @@ export const useUserSlice: StateCreator<
         setCookie({
           name: 'refreshToken',
           value: tokens.refreshToken,
-          expiresInHours: 2,
+          expiresInHours: 7,
         });
 
         const user = await getUserFromToken(tokens.accessToken);
@@ -158,7 +160,9 @@ export const useUserSlice: StateCreator<
           },
           'user/login'
         );
-      } catch (_err) {
+      } catch (error) {
+        const { resetUser } = get().user;
+        resetUser();
         removeCookie('accessToken');
         removeCookie('refreshToken');
         throw Error('Unable to login');
@@ -170,7 +174,6 @@ export const useUserSlice: StateCreator<
         const tokens = await getUserToken2FA(params);
 
         if (!tokens) {
-          // throw Error('Unable to login');
           return false;
         }
 
@@ -182,7 +185,7 @@ export const useUserSlice: StateCreator<
         setCookie({
           name: 'refreshToken',
           value: tokens.refreshToken,
-          expiresInHours: 2,
+          expiresInHours: 7,
         });
 
         const user = await getUserFromToken(tokens.accessToken);
@@ -190,7 +193,6 @@ export const useUserSlice: StateCreator<
         if (!user) {
           removeCookie('accessToken');
           removeCookie('refreshToken');
-          // throw Error('Unable to login');
           return false;
         }
 
@@ -215,11 +217,12 @@ export const useUserSlice: StateCreator<
         );
 
         return true;
-      } catch (_err) {
+      } catch (error) {
+        const { resetUser } = get().user;
+        resetUser();
         removeCookie('accessToken');
         removeCookie('refreshToken');
         return false;
-        // throw Error('Unable to login');
       }
     },
     logout: () => {

@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    bcrypt.compare(password, user!.password, (compareError, isMatch) => {
+    bcrypt.compare(password, user!.password, async (compareError, isMatch) => {
       if (compareError) {
         res.status(400).send({
           errors: [compareError.message],
@@ -80,9 +80,12 @@ export const login = async (req: Request, res: Response) => {
 
         const accessToken: string = generateToken({
           objectToTokenize: { userId: user!.id },
-          expiresIn: '1d',
         });
-        const refreshToken: string = generateRefreshToken(user!.id);
+
+        const refreshToken: string = await generateRefreshToken(
+          user!.id,
+          'user',
+        );
 
         res.status(200).send({
           accessToken,
@@ -141,7 +144,8 @@ export const login2FAVerify = async (req: Request, res: Response) => {
       objectToTokenize: { userId: user!.id },
       expiresIn: '1d',
     });
-    const refreshToken: string = generateRefreshToken(user!.id);
+
+    const refreshToken: string = await generateRefreshToken(user!.id, 'user');
 
     res.status(200).send({
       accessToken,
@@ -318,6 +322,57 @@ export const loginDecodeToken = async (req: Request, res: Response) => {
       errors: [err.message],
     });
     return;
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(401).json({ errors: ['Refresh token is required'] });
+      return;
+    }
+
+    const decoded = decodeToken(refreshToken);
+
+    if (!decoded) {
+      res.status(403).json({ errors: ['Invalid refresh token'] });
+      return;
+    }
+
+    const existingToken = await prisma.refreshToken.findFirst({
+      where: {
+        token: refreshToken,
+        isUsed: false,
+      },
+    });
+
+    if (!existingToken) {
+      res
+        .status(403)
+        .json({ errors: ['Refresh token not found or already used'] });
+      return;
+    }
+
+    await prisma.refreshToken.update({
+      where: {
+        id: existingToken.id,
+      },
+      data: {
+        isUsed: true,
+      },
+    });
+
+    const accessToken = generateToken({
+      objectToTokenize: { userId: decoded.userId },
+    });
+
+    const newRefreshToken = await generateRefreshToken(decoded.userId, 'user');
+
+    res.json({ accessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    res.status(500).json({ errors: error });
   }
 };
 

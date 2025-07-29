@@ -5,6 +5,7 @@ import { Input, Submit } from '@/components/form';
 import page from './page.module.scss';
 import { useForm } from 'react-hook-form';
 import { usePaymentMethodCategories } from '@/hooks';
+import { withAuth } from '@/hoc/withAuth';
 
 const PaymentMethodCategoriesPage = () => {
 	const { register, handleSubmit } = useForm();
@@ -35,4 +36,6 @@ const PaymentMethodCategoriesPage = () => {
 	);
 };
 
-export default PaymentMethodCategoriesPage;
+export default withAuth(PaymentMethodCategoriesPage, {
+	roles: ['SUPER_ADMIN']
+});

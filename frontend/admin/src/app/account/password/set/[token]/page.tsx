@@ -5,6 +5,7 @@ import { Button, DynamicIcon } from '@/components';
 import React from 'react';
 import styles from './page.module.scss';
 import useSetPassword from '@/hooks/useSetPassword';
+import { withAuth } from '@/hoc/withAuth';
 
 const SetPassword = () => {
 	const { form, setPasswordtokenQuery, setPasswordtokenMutation, onSubmit } =

@@ -1,10 +1,6 @@
 import { BACKEND } from '@/constants/envs';
 import { fetchGet, fetchPost } from '@/services/axios';
-import {
-	getCookie,
-	removeCookie,
-	setCookie
-} from '@/utils/browser/cookies';
+import { getCookie, removeCookie, setCookie } from '@/utils/browser/cookies';
 import { map } from 'nanostores';
 import {
 	type Admin,
@@ -39,30 +35,21 @@ const reset = () => {
 	setter(false, false, [], undefined);
 };
 
+import api from '@/services/api';
+
+export const setAdmin = (data: Admin) => {
+	setter(false, true, [], data);
+};
+
 const getToken = async (
 	adminData: LoginAdminParams
 ): Promise<GetTokensReturn | null> => {
-	const response = await fetchPost(`${BACKEND}/admins/auth/login`, adminData);
-
-	if (response.status !== 200) {
-		return null;
-	}
-
+	const response = await api.post('/admins/auth/login', adminData);
 	return response.data;
 };
 
-const getAdminInfoFromToken = async (
-	token: string
-): Promise<GetAdminInfoReturn | null> => {
-	const response = await fetchGet(
-		`${BACKEND}/admins/auth/login/decode/token/${token}`,
-		{ Authorization: `Bearer ${token}` }
-	);
-
-	if (response.status !== 200) {
-		return null;
-	}
-
+const getAdminInfoFromToken = async (token: string): Promise<Admin | null> => {
+	const response = await api.get(`/admins/auth/login/decode/token/${token}`);
 	return response.data;
 };
 
@@ -70,45 +57,60 @@ const loginAdmin = async (adminData: LoginAdminParams) => {
 	try {
 		const tokens = await getToken(adminData);
 
-		if (tokens == null) {
-			return null;
+		if (!tokens) {
+			return false;
 		}
 
-		if (getCookie('accessToken') !== undefined) {
-			removeCookie('accessToken');
-		}
-
-		setCookie('accessToken', tokens.accessToken, 1);
-		setCookie('refreshToken', tokens.refreshToken, 7);
+		setCookie({
+			name: 'accessToken',
+			value: tokens.accessToken,
+			expiresInHours: 1
+		});
+		setCookie({
+			name: 'refreshToken',
+			value: tokens.refreshToken,
+			expiresInHours: 7
+		});
 
 		const adminInfo = await getAdminInfoFromToken(tokens.accessToken);
 
-		if (adminInfo == null) {
-			return null;
+		if (!adminInfo) {
+			removeCookie('accessToken');
+			removeCookie('refreshToken');
+			return false;
 		}
 
-		return adminInfo;
-	} catch (err) {}
+		setter(false, true, [], {
+			id: adminInfo.id,
+			roles: adminInfo.roles,
+			createdAt: adminInfo.createdAt,
+			firstName: adminInfo.firstName,
+			lastName: adminInfo.lastName,
+			updatedAt: adminInfo.updatedAt,
+			username: adminInfo.username
+		});
+
+		return true;
+	} catch (error) {
+		removeCookie('accessToken');
+		removeCookie('refreshToken');
+		return false;
+	}
 };
 
 export const decodeAccessToken = async () => {
+	const accessToken = getCookie('accessToken');
+
+	if (!accessToken) return null;
+
 	try {
-		const accessToken = getCookie('accessToken');
-
-		if (!accessToken) {
-			return null;
-		}
-
 		const adminInfo = await getAdminInfoFromToken(accessToken);
-
-		if (adminInfo == null) {
-			return null;
-		}
-
-		setter(false, true, [], adminInfo);
-
 		return adminInfo;
-	} catch (err) {}
+	} catch (error) {
+		removeCookie('accessToken');
+		removeCookie('refreshToken');
+		return null;
+	}
 };
 
 const registerAdmin = async (
@@ -132,7 +134,7 @@ export const handleLoginAdmin = async (dataParams: LoginAdminParams) => {
 		return false;
 	}
 
-	setter(false, true, [], loggedIn);
+	// setter(false, true, [], loggedIn);
 	return true;
 };
 

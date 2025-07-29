@@ -5,16 +5,7 @@ export const sidebarItems: SideBarData[] = [
 		href: '/dashboard',
 		label: 'Dashboard',
 		icon: 'RxBarChart',
-		roles: [
-			'SUPER_ADMIN',
-			'SENIOR_ADMIN',
-			'MODERATOR',
-			'KYC_REVIEWER',
-			'DISPUTE_MANAGER',
-			'SUPPORT_AGENT',
-			'AUDITOR',
-			'FINANCE_MANAGER'
-		]
+		roles: ['SUPER_ADMIN', 'DISPUTE_MANAGER', 'SENIOR_ADMIN']
 	},
 	{
 		href: '/admins',

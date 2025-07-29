@@ -5,16 +5,33 @@ import { useEffect } from 'react';
 
 import {
 	admin,
+	decodeAccessToken,
 	decodeAccessToken as handleDecodeAccessToken,
 	handleLoginAdmin,
-	logout
+	logout,
+	setAdmin
 } from '@/stores/admin';
 import { AdminRole, type CreateUserParams } from './types';
+import { useQuery } from '@tanstack/react-query';
 
-let counter: number = 0;
-
-const useUsers = () => {
+const useAdmin = () => {
 	const $admin = useStore(admin);
+
+	const query = useQuery({
+		queryKey: ['login'],
+		queryFn: async () => {
+			const decoded = await decodeAccessToken();
+			console.log({ decoded });
+			if (decoded) {
+				setAdmin(decoded);
+				return $admin.data;
+			}
+			return null;
+		},
+		refetchOnMount: false,
+		refetchOnWindowFocus: false,
+		refetchOnReconnect: false
+	});
 
 	const loginAdmin = async (data: CreateUserParams) => {
 		const hasLoggedIn = await handleLoginAdmin(data);
@@ -48,17 +65,6 @@ const useUsers = () => {
 		logout();
 	};
 
-	useEffect(() => {
-		const decodeAccessToken = async () => {
-			await handleDecodeAccessToken();
-		};
-
-		if (counter === 0) {
-			const decoded = decodeAccessToken().catch();
-			counter += 1;
-		}
-	}, []);
-
 	return {
 		loginAdmin,
 		handleDecodeAccessToken,
@@ -66,8 +72,9 @@ const useUsers = () => {
 		getRoles,
 		hasRole,
 		hasRoles,
-		handleLogOut
+		handleLogOut,
+		query
 	};
 };
 
-export default useUsers;
+export default useAdmin;
