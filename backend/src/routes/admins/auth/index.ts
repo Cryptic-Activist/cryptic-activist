@@ -6,6 +6,7 @@ import {
   inviteAdmin,
   login,
   loginDecodeToken,
+  refresh,
   setAdminPassword,
   setAdminPasswordVerifyToken,
   softDeleteAdmin,
@@ -55,5 +56,7 @@ router.put(
 );
 
 router.get('/validate/token', authenticateAdmin, validateWithAuthToken);
+
+router.post('/refresh', refresh);
 
 export default router;

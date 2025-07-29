@@ -79,6 +79,7 @@ model Admin {
   accountReview          AccountReview[]
   smartContract          SmartContract[]
   wallets                AdminWallet[]
+  refreshTokens          RefreshToken[]
 
   @@map("admins")
 }
@@ -917,6 +918,7 @@ model User {
   userSuspensionLog      UserSuspensionLog[]
   accountReview          AccountReview[]
   wallets                UserWallet[]
+  refreshTokens          RefreshToken[]
 
   @@index([username])
   @@map("users")
@@ -975,6 +977,21 @@ model Token {
 
   @@unique([id, token])
   @@map("tokens")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  expiresAt DateTime  @db.Timestamptz
+  isUsed    Boolean   @default(false) @db.Boolean
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id])
+  adminId   String?
+  admin     Admin?    @relation(fields: [adminId], references: [id])
+  createdAt DateTime? @default(now()) @db.Timestamp()
+  updatedAt DateTime? @updatedAt @db.Timestamp()
+
+  @@map("refresh_tokens")
 }
 
 enum SettingType {

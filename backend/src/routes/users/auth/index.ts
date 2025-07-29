@@ -5,6 +5,7 @@ import {
   login,
   login2FAVerify,
   loginDecodeToken,
+  refresh,
   register,
   resetPassword,
   resetPasswordRequest,
@@ -72,5 +73,7 @@ router.post('/2fa/verify/:token', authenticateUser, verify2FA);
 router.put('/2fa/disable/:userId', authenticateUser, disable2FA);
 
 router.get('/validate/token', authenticateUser, validateWithAuthToken);
+
+router.post('/refresh', refresh);
 
 export default router;
