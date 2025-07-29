@@ -7,6 +7,7 @@ import React from 'react';
 import { getLocaleFullDateString } from '@/utils/date';
 import { humanizeCamelCase } from '@/utils';
 import styles from './page.module.scss';
+import { withAuth } from '@/hoc/withAuth';
 
 const SmartContractDeploymentPage = () => {
 	const { escrow, premium, deploymentStats, handleResetAllForms } =
@@ -568,4 +569,6 @@ const SmartContractDeploymentPage = () => {
 	);
 };
 
-export default SmartContractDeploymentPage;
+export default withAuth(SmartContractDeploymentPage, {
+	roles: ['SUPER_ADMIN']
+});

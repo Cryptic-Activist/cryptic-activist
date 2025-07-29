@@ -10,7 +10,7 @@ import { adminResolver } from './zod';
 import styles from './page.module.scss';
 import useAdmins from '@/hooks/useAdmins';
 import { useForm } from 'react-hook-form';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const Admins = () => {
 	const {
@@ -263,8 +263,6 @@ const Admins = () => {
 	);
 };
 
-// export default Admins;
-
-export default withAuth(Admins);
+export default withAuth(Admins, {
 	roles: ['SUPER_ADMIN']
 });

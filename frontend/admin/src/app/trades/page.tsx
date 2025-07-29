@@ -5,7 +5,7 @@ import { Button, StatusCard, Table, TradesFilters } from '@/components';
 import React from 'react';
 import styles from './page.module.scss';
 import { useTrades } from '@/hooks';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const Trades = () => {
 	const {
@@ -109,6 +109,6 @@ const Trades = () => {
 	);
 };
 
-export default withAuth(Trades);
+export default withAuth(Trades, {
 	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'DISPUTE_MANAGER']
 });

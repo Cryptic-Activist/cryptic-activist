@@ -1,6 +1,8 @@
-import { AuthHookResult, WithAuthOptions } from './types';
-import React, { ComponentType, useEffect, useState } from 'react';
+'use client';
 
+import React, { ComponentType } from 'react';
+
+import { WithAuthOptions } from './types';
 import { useAuth } from './useAuth';
 
 export const withAuth = <P extends object>(

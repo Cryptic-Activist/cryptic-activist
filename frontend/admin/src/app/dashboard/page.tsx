@@ -1,13 +1,13 @@
 'use client';
 
 import { Button, StatusCard } from '@/components';
-import { withAuth, withAuthAdvanced } from '@/hoc/withAuth';
 
 import React from 'react';
 import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
 import { validateWithAuthToken } from '@/services/admin';
+import { withAuth } from '@/hoc/withAuth';
 
 const Dashboard = () => {
 	const {
@@ -69,4 +69,6 @@ const Dashboard = () => {
 
 // export default Dashboard;
 
-export default withAuth(Dashboard);
+export default withAuth(Dashboard, {
+	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'MODERATOR', 'FINANCE_MANAGER']
+});

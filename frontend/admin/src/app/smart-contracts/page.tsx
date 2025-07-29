@@ -6,7 +6,7 @@ import React from 'react';
 import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const SmartContracts = () => {
 	const {
@@ -93,6 +93,6 @@ const SmartContracts = () => {
 	);
 };
 
-export default withAuth(SmartContracts);
+export default withAuth(SmartContracts, {
 	roles: ['SUPER_ADMIN']
 });

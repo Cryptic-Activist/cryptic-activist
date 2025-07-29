@@ -1,3 +1,5 @@
+'use client';
+
 import React, { ComponentType } from 'react';
 
 import { WithAuthOptions } from './types';
@@ -7,10 +9,14 @@ export const withAuth = <P extends object>(
 	WrappedComponent: ComponentType<P>,
 	options: WithAuthOptions = {}
 ) => {
-	const { redirectTo = '/?login=1', unauthorizedComponent = null } = options;
+	const {
+		redirectTo = '/login',
+		unauthorizedComponent = null,
+		roles = []
+	} = options;
 
 	const AuthenticatedComponent: React.FC<P> = (props) => {
-		const { isAuthenticated, isLoading } = useAuth();
+		const { isAuthenticated, isLoading } = useAuth(roles);
 
 		if (isLoading) {
 			return <div>Loading...</div>; // Or a spinner component

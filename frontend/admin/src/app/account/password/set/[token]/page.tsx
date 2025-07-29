@@ -5,6 +5,7 @@ import { Button, DynamicIcon } from '@/components';
 import React from 'react';
 import styles from './page.module.scss';
 import useSetPassword from '@/hooks/useSetPassword';
+import { withAuth } from '@/hoc/withAuth';
 
 const SetPassword = () => {
 	const { form, setPasswordtokenQuery, setPasswordtokenMutation, onSubmit } =
@@ -109,4 +110,6 @@ const SetPassword = () => {
 	);
 };
 
-export default withAuth(SetPasswordPage);
+export default withAuth(SetPassword, {
+	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'MODERATOR', 'FINANCE_MANAGER']
+});
