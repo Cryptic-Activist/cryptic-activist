@@ -16,6 +16,7 @@ const useUser = () => {
     navigationBar: { toggleModal },
     user,
   } = useRootStore();
+
   const mutation = useMutation({
     mutationKey: ['login'],
     mutationFn: user.login,
@@ -84,6 +85,7 @@ const useUser = () => {
 
   useEffect(() => {
     if (mutation.error || query.error) {
+      console.log('messa');
       addToast('error', 'Unable to login', 10000);
       setValue('usernameOrEmail', '');
       setValue('password', '');

@@ -3,6 +3,7 @@ import {
   useBlockchain,
   useNavigationBar,
   useNotification,
+  useRouter,
   useUser,
 } from '@/hooks';
 
@@ -17,6 +18,7 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
   const { toggleTooltip } = useNavigationBar();
   const { onDisconnectWallet } = useBlockchain();
   const { notifications } = useNotification();
+  const { replace } = useRouter();
   const {
     navigationBar: { resetNavigationBar },
   } = useRootStore();
@@ -25,6 +27,7 @@ const MenuList: FC<MenuListProps> = forwardRef(({ items }, ref: any) => {
     resetNavigationBar();
     onDisconnectWallet();
     logout();
+    replace('/');
   };
 
   const handleClick = (label: string) => {

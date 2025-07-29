@@ -94,6 +94,7 @@ const useSmartContractDeployment = () => {
 			console.log(params);
 			if (admin?.data?.id) {
 				const response = await deployEscrowNativeTokenSmartContract(params);
+				console.log({ response });
 				return response;
 			}
 		},

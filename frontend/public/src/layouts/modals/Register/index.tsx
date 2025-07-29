@@ -93,7 +93,7 @@ const Register = () => {
               label="First Name"
               placeholder={query.isPending ? '...' : 'First Name'}
               register={registerForm}
-              value={formValues.names.firstName}
+              // value={formValues.names.firstName}
             />
             <Input
               type="text"
@@ -104,7 +104,7 @@ const Register = () => {
               label="Last Name"
               placeholder={query.isPending ? '...' : 'Last Name'}
               register={registerForm}
-              value={formValues.names.lastName}
+              // value={formValues.names.lastName}
             />
             <Input
               type="text"
@@ -115,7 +115,7 @@ const Register = () => {
               label="Username"
               placeholder={query.isPending ? '...' : 'Username'}
               register={registerForm}
-              value={formValues.username}
+              // value={formValues.username}
             />
             <Input
               type="email"

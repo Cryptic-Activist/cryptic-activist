@@ -1,14 +1,15 @@
+import { getBearerToken, getCookie } from '@/utils';
+
 import { BACKEND } from '@/constants/envs';
 import { GetRecentTradesParams } from './types';
 import { fetchGet } from '../axios';
-import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 import { getQueries } from '@/utils/axios';
 
 export const getRecentTrades = async (params: GetRecentTradesParams) => {
 	const queries = getQueries(params);
 
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -24,7 +25,7 @@ export const getRecentTrades = async (params: GetRecentTradesParams) => {
 };
 
 export const getTotalUsers = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -40,7 +41,7 @@ export const getTotalUsers = async () => {
 };
 
 export const getTotalActiveOffers = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -56,7 +57,7 @@ export const getTotalActiveOffers = async () => {
 };
 
 export const getTotalTrades = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -72,7 +73,7 @@ export const getTotalTrades = async () => {
 };
 
 export const getTotalActiveTrades = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -88,7 +89,7 @@ export const getTotalActiveTrades = async () => {
 };
 
 export const getTotalCompletedTradesToday = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -104,7 +105,7 @@ export const getTotalCompletedTradesToday = async () => {
 };
 
 export const getTotalDisputedTrades = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -120,7 +121,7 @@ export const getTotalDisputedTrades = async () => {
 };
 
 export const getAverageTradeCompletionTime = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -136,7 +137,7 @@ export const getAverageTradeCompletionTime = async () => {
 };
 
 export const getTotalCompletedTrades = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -152,7 +153,7 @@ export const getTotalCompletedTrades = async () => {
 };
 
 export const getTotalTradeVolume = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;

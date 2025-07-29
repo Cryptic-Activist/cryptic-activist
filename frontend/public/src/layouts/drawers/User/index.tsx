@@ -1,7 +1,7 @@
 'use client';
 
 import React, { FC, useState } from 'react';
-import { useBlockchain, useNavigationBar, useUser } from '@/hooks';
+import { useBlockchain, useNavigationBar, useRouter, useUser } from '@/hooks';
 
 import { FaChevronRight } from 'react-icons/fa';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ const User: FC = () => {
   } = useNavigationBar();
   const { onDisconnectWallet, isWalletConnected } = useBlockchain();
   const { user, logout, isLoggedIn } = useUser();
+  const { replace } = useRouter();
 
   const walletStyle = isOpened ? styles.closed : styles.opened;
   const userStyle = isUserOpened ? styles.userContentListOpened : '';
@@ -40,6 +41,7 @@ const User: FC = () => {
     resetNavigationBar();
     onDisconnectWallet();
     logout();
+    replace('/');
   };
 
   const handleToggleLogin = () => {

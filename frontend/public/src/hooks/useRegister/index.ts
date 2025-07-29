@@ -43,24 +43,48 @@ const useRegister = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-    getValues,
-  } = useForm({ resolver: registerResolver });
+    watch,
+    reset,
+  } = useForm({
+    resolver: registerResolver,
+    defaultValues: {
+      confirmPassword: '',
+      email: '',
+      names: {
+        firstName: '',
+        lastName: '',
+      },
+      password: '',
+      referralCode: '',
+      username: '',
+    },
+  });
+
+  const watchedValues = watch();
+
+  console.log({ watchedValues, errors });
 
   const onSubmit: OnSubmit = async (data) => {
     const { confirmPassword, names, password, username, email, referralCode } =
       data;
-    mutation.mutateAsync({
-      confirmPassword,
-      password,
-      username,
-      referralCode,
-      email,
-      names,
+    console.log({ data });
+    const registered = await mutation.mutateAsync({
+      confirmPassword: watchedValues.confirmPassword,
+      password: watchedValues.password,
+      username: watchedValues.username,
+      referralCode: watchedValues.referralCode,
+      email: watchedValues.email,
+      names: watchedValues.names,
     });
+
+    if (registered) {
+      reset();
+    }
   };
 
   useEffect(() => {
     if (query.data) {
+      console.log({ queryData: query.data });
       setValue('names.firstName', query.data?.names[0]);
       setValue('names.lastName', query.data?.names[1]);
       setValue('username', query.data?.username);
@@ -105,14 +129,14 @@ const useRegister = () => {
     register,
     formValues: {
       names: {
-        firstName: getValues('names.firstName'),
-        lastName: getValues('names.lastName'),
+        firstName: watchedValues.names.firstName,
+        lastName: watchedValues.names.lastName,
       },
-      username: getValues('username'),
-      email: getValues('email'),
-      referralCode: getValues('referralCode'),
-      password: getValues('password'),
-      confirmPassword: getValues('confirmPassword'),
+      username: watchedValues.username,
+      email: watchedValues.email,
+      referralCode: watchedValues.referralCode,
+      password: watchedValues.password,
+      confirmPassword: watchedValues.confirmPassword,
     },
     timeLeftInSeconds,
   };

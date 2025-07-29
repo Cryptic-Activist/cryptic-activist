@@ -24,6 +24,7 @@ export const validateLogin = (
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();
@@ -60,6 +61,7 @@ export const validateRegister = (
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();
@@ -78,6 +80,7 @@ export const validatePasswordResetTokenRequest = (
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();
@@ -96,6 +99,7 @@ export const validatePrivateKeysRequest = (
     res.status(400).send({
       errors: validated.error,
     });
+    return;
   }
 
   next();

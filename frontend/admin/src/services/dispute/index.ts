@@ -10,14 +10,14 @@ import {
 	SubmitDisputeUserManagementActionsBody
 } from './types';
 import { fetchGet, fetchPost } from '../axios';
+import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
-import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 import { getQueries } from '@/utils/axios';
 
 export const getDispute = async (id: string) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -37,7 +37,7 @@ export const getDispute = async (id: string) => {
 export const getPreviousDisputePartyNote = async (
 	params: GetPreviousDisputePartyNoteParams
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -59,7 +59,7 @@ export const getPreviousDisputePartyNote = async (
 };
 
 export const addDisputePartyNote = async (body: AddDisputePartyNoteBody) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -81,7 +81,7 @@ export const addDisputePartyNote = async (body: AddDisputePartyNoteBody) => {
 };
 
 export const getDisputeResolutionTypes = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -104,7 +104,7 @@ export const getDisputeResolutionTypes = async () => {
 export const submitDisputeResolution = async (
 	params: SubmitDisputeResolutionBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -126,7 +126,7 @@ export const submitDisputeResolution = async (
 };
 
 export const getDisputeUserManagementActions = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -149,7 +149,7 @@ export const getDisputeUserManagementActions = async () => {
 export const submitDisputeUserManagementActions = async (
 	params: SubmitDisputeUserManagementActionsBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -173,7 +173,7 @@ export const submitDisputeUserManagementActions = async (
 export const submitResolveInTraderFavor = async (
 	params: ResolveInTraderFavorBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -197,7 +197,7 @@ export const submitResolveInTraderFavor = async (
 export const submitResolveInVendorFavor = async (
 	params: ResolveInVendorFavorBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -221,7 +221,7 @@ export const submitResolveInVendorFavor = async (
 export const submitCancelTradeByModerator = async (
 	params: CancelTradeByModeratorBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -245,7 +245,7 @@ export const submitCancelTradeByModerator = async (
 export const submitEscalateToSeniorAdmin = async (
 	params: EscalateToSeniorAdminBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -269,7 +269,7 @@ export const submitEscalateToSeniorAdmin = async (
 export const submitRequestMoreEvidences = async (
 	params: RequestMoreEvidencesBody
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;

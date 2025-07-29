@@ -1,10 +1,11 @@
+import { getBearerToken, getCookie } from '@/utils';
+
 import { BACKEND } from '@/constants';
 import { fetchGet } from '../axios';
-import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 
 export const getCryptocurenciesFilters = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;

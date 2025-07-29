@@ -1,12 +1,12 @@
 import { fetchGet, fetchPost } from '../axios';
+import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
 import { DeploySmartContractParams } from './types';
-import { getBearerToken } from '@/utils';
 import { getLocalStorage } from '@/utils/browser/storage';
 
 export const getDeploymentStats = async (chainId: string) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -29,7 +29,7 @@ export const getDeploymentStats = async (chainId: string) => {
 export const deployEscrowERC20SmartContract = async (
 	params: DeploySmartContractParams
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -53,7 +53,7 @@ export const deployEscrowERC20SmartContract = async (
 export const deployEscrowNativeTokenSmartContract = async (
 	params: DeploySmartContractParams
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -77,7 +77,7 @@ export const deployEscrowNativeTokenSmartContract = async (
 export const deployPremiumSmartContract = async (
 	params: DeploySmartContractParams
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
