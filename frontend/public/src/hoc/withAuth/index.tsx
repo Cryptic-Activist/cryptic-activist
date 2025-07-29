@@ -52,7 +52,7 @@ export const logoutUser = (): void => {
   });
 
   localStorage.setItem('logout', 'true');
-  window.location.href = '/login';
+  window.location.href = '/?login=1';
 };
 
 export const clearAuthCookie = (cookieName: string): void => {

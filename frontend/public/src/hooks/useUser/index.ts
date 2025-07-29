@@ -85,7 +85,6 @@ const useUser = () => {
 
   useEffect(() => {
     if (mutation.error || query.error) {
-      console.log('messa');
       addToast('error', 'Unable to login', 10000);
       setValue('usernameOrEmail', '');
       setValue('password', '');

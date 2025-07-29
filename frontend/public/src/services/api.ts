@@ -49,7 +49,6 @@ api.interceptors.response.use(
       } catch (error) {
         removeCookie('accessToken');
         removeCookie('refreshToken');
-        window.location.href = '/?login=1';
         return Promise.reject(error);
       }
     }
