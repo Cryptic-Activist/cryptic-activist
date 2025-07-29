@@ -12,7 +12,7 @@ export const withAuth = <P extends object>(
 	const {
 		redirectTo = '/login',
 		unauthorizedComponent = null,
-		roles = []
+		roles
 	} = options;
 
 	const AuthenticatedComponent: React.FC<P> = (props) => {
@@ -44,4 +44,22 @@ export const withAuth = <P extends object>(
 	})`;
 
 	return AuthenticatedComponent;
+};
+
+// 🔓 Logout helpers
+export const logoutUser = (): void => {
+	document.cookie.split(';').forEach((cookie) => {
+		const name = cookie.split('=')[0].trim();
+		if (name.includes('auth') || name.includes('token')) {
+			document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+		}
+	});
+
+	localStorage.setItem('logout', 'true');
+	window.location.href = '/login';
+};
+
+export const clearAuthCookie = (cookieName: string): void => {
+	document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+	localStorage.setItem('logout', 'true');
 };

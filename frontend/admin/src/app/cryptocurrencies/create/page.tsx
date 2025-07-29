@@ -7,7 +7,7 @@ import React from 'react';
 import page from './page.module.scss';
 import useCryptocurrencies from '@/hooks/useCryptocurrencies';
 import { useForm } from 'react-hook-form';
-import { withAuthAdvanced } from '@/hoc/withAuth';
+import { withAuth } from '@/hoc/withAuth';
 
 const CryptocurrenciesCreatePage = () => {
 	const { register, handleSubmit } = useForm();
@@ -62,6 +62,6 @@ const CryptocurrenciesCreatePage = () => {
 	);
 };
 
-export default withAuth(CryptocurrenciesCreatePage);
+export default withAuth(CryptocurrenciesCreatePage, {
 	roles: ['SUPER_ADMIN']
 });

@@ -37,6 +37,10 @@ const reset = () => {
 
 import api from '@/services/api';
 
+export const setAdmin = (data: Admin) => {
+	setter(false, true, [], data);
+};
+
 const getToken = async (
 	adminData: LoginAdminParams
 ): Promise<GetTokensReturn | null> => {

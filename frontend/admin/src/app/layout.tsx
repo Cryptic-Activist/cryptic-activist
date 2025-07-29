@@ -2,6 +2,7 @@ import './global.css';
 
 import AllModals from '@/layout/modals/AllModals';
 import Footer from '@/layout/Footer';
+import { InitialSettings } from '@/layout';
 import { Montserrat } from 'next/font/google';
 import NavigationBar from '@/layout/NavigationBar';
 import { QueryProvider } from '@/components';
@@ -17,6 +18,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 			<body className={montserrat.className}>
 				<QueryProvider>
 					<AllModals />
+					<InitialSettings />
 					<NavigationBar />
 					<main className={layout.main}>
 						<SideBar />

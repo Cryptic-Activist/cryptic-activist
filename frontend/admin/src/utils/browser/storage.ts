@@ -1,3 +1,5 @@
+import { getCookie } from './cookies';
+
 export const isClientSide = () => {
 	if (typeof window === 'undefined') return false;
 	return true;
@@ -31,7 +33,7 @@ export const removeLocalStorage = (key: string) => {
 export const getBearerToken = (token: string) => `Bearer ${token}`;
 
 export const getBearerToken2 = () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (accessToken === null) {
 		throw new Error('JWT not found');

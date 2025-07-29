@@ -110,6 +110,4 @@ const SetPassword = () => {
 	);
 };
 
-export default withAuth(SetPassword, {
-	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'MODERATOR', 'FINANCE_MANAGER']
-});
+export default SetPassword;
