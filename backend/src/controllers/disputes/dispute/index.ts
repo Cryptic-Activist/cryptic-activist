@@ -211,7 +211,7 @@ export async function getDisputeAdmin(req: Request, res: Response) {
 
     let query = ChatMessage.find(
       { chatId: dispute?.trade?.chat?.id, type: { $ne: 'info' } },
-      'createdAt from message type to',
+      'createdAt from message type to attachment',
     );
 
     query = query.sort('desc');

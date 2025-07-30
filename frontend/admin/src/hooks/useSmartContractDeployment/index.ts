@@ -94,6 +94,11 @@ const useSmartContractDeployment = () => {
 			console.log(params);
 			if (admin?.data?.id) {
 				const response = await deployEscrowNativeTokenSmartContract(params);
+
+				if (!response) {
+					throw new Error('Unable to deploy');
+				}
+
 				return response;
 			}
 		},
@@ -102,6 +107,9 @@ const useSmartContractDeployment = () => {
 				deploymentStats.mutate(selectedChain.id);
 			}
 			handleResetAllForms();
+		},
+		onError: (error) => {
+			console.log({ error });
 		}
 	});
 
@@ -178,8 +186,6 @@ const useSmartContractDeployment = () => {
 			setSelectedChain(filtered[0]);
 		}
 	}, [chains.data]);
-
-	console.log({ chainsData: chains.data });
 
 	useEffect(() => {
 		if (watchedValuesEscrow.type === 'Premium') {

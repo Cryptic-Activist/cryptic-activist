@@ -440,7 +440,7 @@ export default class Chat {
           // Send existing room messages
           let query = ChatMessage.find(
             { chatId },
-            'createdAt from message type to',
+            'createdAt from message type to attachment',
           );
           query = query.sort('desc');
           const chatMessages = await query.exec();

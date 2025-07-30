@@ -3,10 +3,12 @@ import mongoose, { Schema } from 'mongoose';
 import { IChatMessage } from './types';
 
 const AttachmentSchema: Schema = new Schema({
-  type: { type: String, required: true },
   name: { type: String, required: true },
   key: { type: String, required: true },
-  url: { type: String, required: true },
+  size: { type: Number, required: true },
+  mimeType: { type: String, required: true },
+  submittedAt: { type: Date, required: false },
+  deletedAt: { type: Date, required: false },
 });
 
 const ChatMessageSchema: Schema = new Schema(
@@ -18,10 +20,7 @@ const ChatMessageSchema: Schema = new Schema(
     message: { type: String, required: true },
     attachment: { type: AttachmentSchema, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export default mongoose.model<IChatMessage>(
-  'ChatMessage',
-  ChatMessageSchema
-);
+export default mongoose.model<IChatMessage>('ChatMessage', ChatMessageSchema);

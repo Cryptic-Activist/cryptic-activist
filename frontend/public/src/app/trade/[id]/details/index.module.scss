@@ -295,6 +295,22 @@ $border-radius: 0.5rem;
   white-space: pre-line;
 }
 
+.attachmentFile {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 5rem;
+  width: 5rem;
+  cursor: pointer;
+}
+
+.attachmentSender {
+  align-items: flex-end;
+}
+.attachmentReceiver {
+  align-items: flex-start;
+}
+
 .listItem {
   display: flex;
   flex-direction: column;

@@ -25,7 +25,7 @@ export const getChatHistory = async (req: Request, res: Response) => {
 
     let query = ChatMessage.find(
       { chatId: id },
-      'createdAt from message type to',
+      'createdAt from message type to attachment',
     );
 
     query = query.sort('desc');

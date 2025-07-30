@@ -16,21 +16,62 @@ export default class Message {
   async sendMessage() {
     this.socket.on(
       'send_message',
-      async ({ content: { from, message, to }, chatId }: SendMessageParams) => {
-        const chat = await prisma.chat.findFirst({
-          where: {
-            id: chatId,
-          },
-        });
+      async ({
+        content: { from, message, to, attachment },
+        chatId,
+      }: SendMessageParams) => {
+        try {
+          console.log({ message, attachment });
 
-        if (chat?.id) {
-          const newMessage = await ChatMessage.create({
-            chatId: chat.id,
-            from: from,
-            message,
-            to: to,
+          const chat = await prisma.chat.findFirst({
+            where: {
+              id: chatId,
+            },
           });
 
+          if (chat?.id) {
+            const newMessage = await ChatMessage.create({
+              chatId: chat.id,
+              from: from,
+              message,
+              to: to,
+              ...(attachment && {
+                type: 'attachment',
+                attachment: {
+                  key: attachment.key,
+                  size: attachment.size,
+                  name: attachment.fileName,
+                  mimeType: attachment.mimeType,
+                  submittedAt: new Date(),
+                },
+              }),
+            });
+
+            console.log({ newMessage });
+
+            // Check if recipient is online via Redis
+            const recipientSocketId = await redisClient.hGet(
+              'onlineTradingUsers',
+              to,
+            );
+
+            console.log({ recipientSocketId });
+            if (recipientSocketId) {
+              // Deliver message in real time
+              this.socket.to(chatId).emit('receive_message', {
+                from,
+                to,
+                createdAt: newMessage.createdAt,
+                message,
+                ...(attachment && {
+                  type: newMessage.type,
+                  attachment: newMessage.attachment,
+                }),
+              });
+            }
+          }
+        } catch (error) {
+          console.log({ error });
           // Check if recipient is online via Redis
           const recipientSocketId = await redisClient.hGet(
             'onlineTradingUsers',
@@ -38,11 +79,8 @@ export default class Message {
           );
           if (recipientSocketId) {
             // Deliver message in real time
-            this.socket.to(chatId).emit('receive_message', {
-              from,
-              to,
-              createdAt: newMessage.createdAt,
-              message,
+            this.socket.to(chatId).emit('receive_message_error', {
+              error: 'Unable to send message',
             });
           }
         }

@@ -1,9 +1,17 @@
+export type Attachment = {
+	size: number;
+	fileName: string;
+	key: string;
+	mimeType: string;
+};
+
 export type Message = {
 	createdAt: string;
 	from: string;
 	to: string;
 	message: string;
 	type?: string;
+	attachment?: Attachment;
 };
 
 export type File = {

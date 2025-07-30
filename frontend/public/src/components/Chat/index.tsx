@@ -1,7 +1,13 @@
 'use client';
 
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
-import { FaCircle, FaPaperPlane } from 'react-icons/fa6';
+import {
+  FaCircle,
+  FaPaperPlane,
+  FaPaperclip,
+  FaPlus,
+  FaXmark,
+} from 'react-icons/fa6';
 import React, {
   ChangeEvent,
   FC,
@@ -12,7 +18,10 @@ import React, {
 } from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
+import Image from 'next/image';
 import Link from 'next/link';
+import { UploadedFile } from '@/hooks/useTradeSocket/types';
+import Viewer from '../Viewer';
 import { formatTimestamp } from '@/utils';
 import styles from './index.module.scss';
 import { useOutsideClick } from '@/hooks';
@@ -100,51 +109,100 @@ const Content: FC<ContentProps> = ({
   sender,
   messages,
 }) => {
+  const [fileInView, setFileInView] = useState<any>(null);
+
+  const openViewer = (file: any) => {
+    setFileInView(file);
+  };
+
+  const closeViewer = () => {
+    setFileInView(null);
+  };
+
+  const viewerRef = useOutsideClick(closeViewer);
+
   return (
-    <ul className={styles.list}>
-      {messages.map((message, index) => {
-        const messageStyle =
-          sender?.id === message.from ? styles.sender : styles.receiver;
+    <>
+      {fileInView && (
+        <Viewer
+          onClose={closeViewer}
+          key={fileInView.key}
+          ref={viewerRef}
+          src={fileInView.key}
+        />
+      )}
+      <ul className={styles.list}>
+        {messages.map((message, index) => {
+          const isSender = sender?.id === message.from;
+          const messageStyle = isSender ? styles.sender : styles.receiver;
+          const attachmentStyle = isSender
+            ? styles.attachmentSender
+            : styles.attachmentReceiver;
 
-        const isInfoMessage = message.type === 'info';
+          const isInfoMessage = message.type === 'info';
 
-        if (isInfoMessage) {
+          if (isInfoMessage) {
+            return (
+              <li key={index} className={styles.listItemChatInfo}>
+                <p className={styles.infoMessage}>{message.message}</p>
+              </li>
+            );
+          }
+
+          console.log({ messageAttachment: message });
+
           return (
-            <li key={index} className={styles.listItemChatInfo}>
-              <p className={styles.infoMessage}>{message.message}</p>
+            <li
+              key={index}
+              className={`${styles.listItem} ${messageStyle} ${attachmentStyle}`}
+            >
+              {message.attachment && (
+                <div
+                  className={styles.attachmentFile}
+                  style={{
+                    backgroundImage: `url(${
+                      // @ts-ignore
+                      message.attachment.key
+                    })`,
+                  }}
+                  onClick={() => openViewer(message.attachment)}
+                />
+              )}
+              <div className={styles.message}>
+                <p>{message.message}</p>
+                <span className={styles.time}>
+                  {formatTimestamp(message.createdAt)}
+                </span>
+              </div>
             </li>
           );
-        }
-
-        return (
-          <li key={index} className={`${styles.listItem} ${messageStyle}`}>
-            <div className={styles.message}>
-              <p>{message.message}</p>
-              <span className={styles.time}>
-                {formatTimestamp(message.createdAt)}
-              </span>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+        })}
+      </ul>
+    </>
   );
 };
 
 const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSendMessage = () => {
-    if (message.length > 0) {
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > 0 || file) {
       sendMessage({
         content: {
           from: sender.id,
           to: receiver.id,
-          message,
+          message: trimmedMessage,
+          attachment: file,
           createdAt: Date(),
         },
       });
       setMessage('');
+      setFile(null);
+      setPreview(null);
     }
   };
 
@@ -163,23 +221,64 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
       return;
     }
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSendMessage();
-      e.currentTarget.focus();
-      e.currentTarget.setSelectionRange(0, 0);
     }
   };
 
-  useEffect(() => {
-    if (message === '\n') {
-      setMessage('');
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const blob = new Blob([selectedFile], { type: selectedFile.type });
+      const fileUrl = URL.createObjectURL(blob);
+      setPreview(fileUrl);
     }
-  }, [message]);
+  };
+
+  const handleClearAttachment = () => {
+    setFile(null);
+    setPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
-      {/* <button className={styles.button} title="Attachments">
+      {preview && (
+        <div className={styles.filePreview}>
+          <img
+            src={preview}
+            alt="File preview"
+            className={styles.previewImage}
+          />
+          <button
+            onClick={handleClearAttachment}
+            className={styles.clearButton}
+          >
+            <FaXmark />
+          </button>
+        </div>
+      )}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+      <button
+        className={styles.button}
+        title="Attachments"
+        onClick={handleAttachmentClick}
+        type="button"
+      >
         <FaPaperclip size={20} />
-      </button> */}
+      </button>
       <textarea
         className={styles.textarea}
         onChange={onChangeMessage}

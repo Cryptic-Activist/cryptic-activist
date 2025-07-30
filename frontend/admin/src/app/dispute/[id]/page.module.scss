@@ -508,6 +508,15 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 600;
 }
 
+.attachmentFile {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 5rem;
+  width: 5rem;
+  cursor: pointer;
+}
+
 // Buttons
 .btn {
   @include button-base;

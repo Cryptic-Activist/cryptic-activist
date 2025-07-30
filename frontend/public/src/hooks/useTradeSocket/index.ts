@@ -21,14 +21,17 @@ import {
   sellerFundTrade as sellerFundTradeNative,
 } from '@/services/ethers/escrow/native';
 import { parseEther, parseUnits } from 'ethers';
+import { processFileToUpload, scrollElement } from '@/utils';
 import { toTokenUnits, toTokenUnitsConvert } from '@/utils/blockchain';
 import { useApp, useContracts } from '@/hooks';
 import { useEffect, useRef, useState } from 'react';
 
 import { Socket } from 'socket.io-client';
 import { TX_CODE } from '@/services/ethers/escrow/types';
+import { UploadChatMessageFilesParams } from '@/services/uploads/types';
 import { getSocket } from '@/services/socket';
-import { scrollElement } from '@/utils';
+import { uploadChatMessageFiles } from '@/services/uploads';
+import { useMutation } from '@tanstack/react-query';
 
 const useTradeSocket = ({
   chatId,
@@ -62,7 +65,11 @@ const useTradeSocket = ({
   const [traderHasEnoughFunds, _setTraderHasEnoughFunds] = useState(true);
   const [isERC20Trade, setIsERC20Trade] = useState(true);
 
-  // console.log({ isERC20Trade, tradeToken: trade.token });
+  const uploadMessageFileMutation = useMutation({
+    mutationKey: ['uploadMessageFile'],
+    mutationFn: (params: UploadChatMessageFilesParams) =>
+      uploadChatMessageFiles(params),
+  });
 
   const onStatusChange = (status: ReceiverStatus) => {
     setReceiverStatus(status);
@@ -72,10 +79,34 @@ const useTradeSocket = ({
     setMessages((prevMessages) => [...prevMessages, message]);
   };
 
-  const sendMessage = (params: SendMessageParams) => {
+  const sendMessage = async (params: SendMessageParams) => {
     if (socket) {
-      socket.emit('send_message', { ...params, chatId });
-      appendMessage(params.content);
+      let messageContent: Message = { ...params.content };
+      if (params.content.attachment && chatId && user?.id) {
+        const formData = await processFileToUpload([
+          params.content.attachment as File,
+        ]);
+        const uploaded = await uploadMessageFileMutation.mutateAsync({
+          formData,
+          chatId,
+          userId: user.id,
+        });
+
+        if (uploaded.error) {
+          return;
+        }
+
+        messageContent.attachment = uploaded[0];
+        messageContent.type = 'attachment';
+
+        socket.emit('send_message', {
+          content: messageContent,
+          chatId,
+        });
+      } else {
+        socket.emit('send_message', { content: messageContent, chatId });
+      }
+      appendMessage(messageContent);
     }
   };
 
@@ -136,8 +167,6 @@ const useTradeSocket = ({
           tokenContractDetails: trade.token,
         });
 
-        console.log({ approved });
-
         if (approved.error) {
           addToast('error', 'Unable to approve token', 8000);
           return;
@@ -148,8 +177,6 @@ const useTradeSocket = ({
           tokenContractDetails: trade.token,
         });
 
-        console.log({ allowance });
-
         // if (allowance.lt(baseUnits)) {
         //   addToast('error', 'Insufficient token allowance', 8000);
         //   return;
@@ -158,8 +185,6 @@ const useTradeSocket = ({
         const balance = await getTokenBalanceERC20({
           tokenContractDetails: trade.token,
         });
-
-        console.log({ balance });
 
         // // if (allowance.lt(balance.balance)) {
         // //   addToast('error', 'Insufficient token allowance', 8000);
@@ -256,8 +281,6 @@ const useTradeSocket = ({
           tokenContractDetails: trade.token,
         });
 
-        console.log({ allowance });
-
         const balance = await getTokenBalanceERC20({
           tokenContractDetails: trade.token,
         });
@@ -266,8 +289,6 @@ const useTradeSocket = ({
           parseInt(trade?.tradeEscrowDetails?.blockchainTradeId, 10),
           escrow.erc20
         );
-
-        console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
@@ -288,8 +309,6 @@ const useTradeSocket = ({
           parseEther(trade.tradeEscrowDetails?.buyerCollateral.toString()),
           escrow.native
         );
-
-        console.log({ tx });
 
         if (tx.error) {
           if (tx.error.code === TX_CODE.ACTION_REJECTED) {
@@ -350,6 +369,7 @@ const useTradeSocket = ({
 
       // Listen for new messages
       socket.on('receive_message', (message: Message) => {
+        console.log({ ReceiveMessage: message });
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 

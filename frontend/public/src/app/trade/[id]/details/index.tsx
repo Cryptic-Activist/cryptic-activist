@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Viewer } from '@/components';
 import { FeedbackProps, TradeDetailsProps } from './types';
 import React, { FC, useState } from 'react';
 import {
@@ -11,12 +12,11 @@ import {
   getLocaleFullDateString,
   toUpperCase,
 } from '@/utils';
+import { useNavigationBar, useOutsideClick } from '@/hooks';
 
-import { Button } from '@/components';
 import { FileUploader } from '@/components/forms';
 import Image from 'next/image';
 import styles from './index.module.scss';
-import { useNavigationBar } from '@/hooks';
 
 const Feedback: FC<FeedbackProps> = ({ feedback, user }) => {
   const negativeStyle = feedback.type === 'NEGATIVE' ? styles.negative : '';
@@ -62,10 +62,21 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({
   const { toggleModal } = useNavigationBar();
 
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [fileInView, setFileInView] = useState<any>(null);
 
   const toggleChatView = () => {
     setIsChatOpen((prev) => !prev);
   };
+
+  const openViewer = (file: any) => {
+    setFileInView(file);
+  };
+
+  const closeViewer = () => {
+    setFileInView(null);
+  };
+
+  const viewerRef = useOutsideClick(closeViewer);
 
   const isUserTrader = user.id === tradeDetails.trader.id;
   const canLeaveFeedback = isUserTrader && !tradeDetails.feedback;
@@ -301,37 +312,62 @@ const TradeDetailsPage: FC<TradeDetailsProps> = ({
         <div className={styles.chatSection}>
           <h3 className={styles.sectionTitle}>Trade Chat</h3>
           {isChatOpen && chatMessages.length > 0 && (
-            <ul className={styles.list}>
-              {chatMessages.map((message: any, index: number) => {
-                const messageStyle =
-                  tradeDetails.trader?.id === message.from
+            <>
+              {fileInView && (
+                <Viewer
+                  onClose={closeViewer}
+                  key={fileInView.key}
+                  ref={viewerRef}
+                  src={fileInView.key}
+                />
+              )}
+              <ul className={styles.list}>
+                {chatMessages.map((message: any, index: number) => {
+                  const isSender = tradeDetails.trader?.id === message.from;
+                  const messageStyle = isSender
                     ? styles.sender
                     : styles.receiver;
-                const isInfoMessage = message.type === 'info';
+                  const isInfoMessage = message.type === 'info';
+                  const attachnmentStyle = isSender
+                    ? styles.attachmentSender
+                    : styles.aatachmentReceiver;
 
-                if (isInfoMessage) {
+                  if (isInfoMessage) {
+                    return (
+                      <li key={index} className={styles.listItemChatInfo}>
+                        <p className={styles.infoMessage}>{message.message}</p>
+                      </li>
+                    );
+                  }
+
                   return (
-                    <li key={index} className={styles.listItemChatInfo}>
-                      <p className={styles.infoMessage}>{message.message}</p>
+                    <li
+                      key={index}
+                      className={`${styles.listItem} ${messageStyle} ${attachnmentStyle}`}
+                    >
+                      {message.attachment && (
+                        <div
+                          className={styles.attachmentFile}
+                          style={{
+                            backgroundImage: `url(${
+                              // @ts-ignore
+                              message.attachment.key
+                            })`,
+                          }}
+                          onClick={() => openViewer(message.attachment)}
+                        />
+                      )}
+                      <div className={styles.message}>
+                        <p>{message.message}</p>
+                        <span className={styles.time}>
+                          {formatTimestamp(message.createdAt)}
+                        </span>
+                      </div>
                     </li>
                   );
-                }
-
-                return (
-                  <li
-                    key={index}
-                    className={`${styles.listItem} ${messageStyle}`}
-                  >
-                    <div className={styles.message}>
-                      <p>{message.message}</p>
-                      <span className={styles.time}>
-                        {formatTimestamp(message.createdAt)}
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                })}
+              </ul>
+            </>
           )}
           <button
             type="button"

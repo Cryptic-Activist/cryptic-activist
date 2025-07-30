@@ -1,14 +1,13 @@
 import { Filter, GetKYCsParams } from './types';
+import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
 import { fetchGet } from '../axios';
-import { getBearerToken } from '@/utils';
-import { getLocalStorage } from '@/utils/browser/storage';
 import { getQueries } from '@/utils/axios';
 
 export const getKYCs = async (params: GetKYCsParams) => {
 	const queries = getQueries(params);
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -29,7 +28,7 @@ export const getKYCs = async (params: GetKYCsParams) => {
 };
 
 export const getFilter = async (filter: Filter) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -50,7 +49,7 @@ export const getFilter = async (filter: Filter) => {
 };
 
 export const getTotalPendingKYC = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -66,7 +65,7 @@ export const getTotalPendingKYC = async () => {
 };
 
 export const getTotalApprovedKYC = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -82,7 +81,7 @@ export const getTotalApprovedKYC = async () => {
 };
 
 export const getTotalRejectedKYC = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -98,7 +97,7 @@ export const getTotalRejectedKYC = async () => {
 };
 
 export const getTotalKYCApplications = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
