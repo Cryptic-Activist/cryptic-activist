@@ -1,8 +1,8 @@
 export interface Attachment {
-  type: string;
-  name: string;
+  size: number;
+  fileName: string;
   key: string;
-  url: string;
+  mimeType: string;
 }
 
 export type MessageContent = {
@@ -10,7 +10,7 @@ export type MessageContent = {
   from: string;
   to: string;
   message: string;
-  attachment?: Attachment;
+  file?: Attachment | null;
   timestamp: string;
 };
 

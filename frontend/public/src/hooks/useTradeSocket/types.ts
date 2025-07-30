@@ -34,12 +34,19 @@ type User = {
   username: string;
 };
 
+export type UploadedFile = {
+  fileName: string;
+  key: string;
+  mimeType: string;
+  size: number;
+};
+
 export type Message = {
   from: string;
   to: string;
   type?: string;
   message: string;
-  attachment?: File | null;
+  file?: File | UploadedFile | null;
   createdAt: string;
 };
 

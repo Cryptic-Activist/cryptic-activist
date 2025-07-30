@@ -28,3 +28,4 @@ export { default as Checkbox } from './Checkbox';
 export { default as DynamicIcon } from './DynamicIcon';
 export * from './lists';
 export * from './offer';
+export { default as Viewer } from './Viewer';

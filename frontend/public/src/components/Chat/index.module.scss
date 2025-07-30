@@ -140,11 +140,20 @@
   gap: 0.1rem;
   width: fit-content;
   max-width: 70%;
+  align-items: flex-end;
   .message {
     border-radius: 0.4rem;
     padding: 0.4em;
     width: fit-content;
   }
+}
+
+.attachmentFile {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 5rem;
+  width: 5rem;
 }
 
 .listItemChatInfo {

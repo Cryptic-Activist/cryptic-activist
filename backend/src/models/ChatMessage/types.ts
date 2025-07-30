@@ -1,10 +1,12 @@
 import { Document } from 'mongoose';
 
 export interface Attachment {
-  type: string;
   name: string;
   key: string;
-  url: string;
+  size: number;
+  mimeType: string;
+  submittedAt: Date;
+  deletedAt: Date;
 }
 
 export interface IChatMessage extends Document {

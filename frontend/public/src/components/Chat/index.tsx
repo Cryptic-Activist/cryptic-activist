@@ -18,7 +18,10 @@ import React, {
 } from 'react';
 
 import { FaEllipsisV } from 'react-icons/fa';
+import Image from 'next/image';
 import Link from 'next/link';
+import { UploadedFile } from '@/hooks/useTradeSocket/types';
+import Viewer from '../Viewer';
 import { formatTimestamp } from '@/utils';
 import styles from './index.module.scss';
 import { useOutsideClick } from '@/hooks';
@@ -106,34 +109,68 @@ const Content: FC<ContentProps> = ({
   sender,
   messages,
 }) => {
+  const [fileInView, setFileInView] = useState<any>(null);
+
+  const openViewer = (file: any) => {
+    setFileInView(file);
+  };
+
+  const closeViewer = () => {
+    setFileInView(null);
+  };
+
+  const viewerRef = useOutsideClick(closeViewer);
+
   return (
-    <ul className={styles.list}>
-      {messages.map((message, index) => {
-        const messageStyle =
-          sender?.id === message.from ? styles.sender : styles.receiver;
+    <>
+      {fileInView && (
+        <Viewer
+          onClose={closeViewer}
+          key={fileInView.key}
+          ref={viewerRef}
+          src={fileInView.key}
+        />
+      )}
+      <ul className={styles.list}>
+        {messages.map((message, index) => {
+          const messageStyle =
+            sender?.id === message.from ? styles.sender : styles.receiver;
 
-        const isInfoMessage = message.type === 'info';
+          const isInfoMessage = message.type === 'info';
 
-        if (isInfoMessage) {
+          if (isInfoMessage) {
+            return (
+              <li key={index} className={styles.listItemChatInfo}>
+                <p className={styles.infoMessage}>{message.message}</p>
+              </li>
+            );
+          }
+
+          console.log({ messageAttachment: message });
+
           return (
-            <li key={index} className={styles.listItemChatInfo}>
-              <p className={styles.infoMessage}>{message.message}</p>
+            <li key={index} className={`${styles.listItem} ${messageStyle}`}>
+              {message.file && (
+                <div
+                  className={styles.attachmentFile}
+                  style={{
+                    // @ts-ignore
+                    backgroundImage: `url(${message.file.key})`,
+                  }}
+                  onClick={() => openViewer(message.file)}
+                />
+              )}
+              <div className={styles.message}>
+                <p>{message.message}</p>
+                <span className={styles.time}>
+                  {formatTimestamp(message.createdAt)}
+                </span>
+              </div>
             </li>
           );
-        }
-
-        return (
-          <li key={index} className={`${styles.listItem} ${messageStyle}`}>
-            <div className={styles.message}>
-              <p>{message.message}</p>
-              <span className={styles.time}>
-                {formatTimestamp(message.createdAt)}
-              </span>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+        })}
+      </ul>
+    </>
   );
 };
 
@@ -151,10 +188,11 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
           from: sender.id,
           to: receiver.id,
           message,
-          attachment: file,
+          file,
           createdAt: Date(),
         },
       });
+      // Maybe it should be better handled
       setMessage('');
       setFile(null);
       setPreview(null);
