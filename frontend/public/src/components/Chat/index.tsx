@@ -189,18 +189,17 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSendMessage = () => {
-    console.log({ message, file });
-    if (message.length > 0 || file) {
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > 0 || file) {
       sendMessage({
         content: {
           from: sender.id,
           to: receiver.id,
-          message,
+          message: trimmedMessage,
           attachment: file,
           createdAt: Date(),
         },
       });
-      // Maybe it should be better handled
       setMessage('');
       setFile(null);
       setPreview(null);
@@ -222,9 +221,8 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
       return;
     }
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSendMessage();
-      e.currentTarget.focus();
-      e.currentTarget.setSelectionRange(0, 0);
     }
   };
 
@@ -249,12 +247,6 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
       fileInputRef.current.value = '';
     }
   };
-
-  useEffect(() => {
-    if (message === '') {
-      setMessage('');
-    }
-  }, [message]);
 
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
