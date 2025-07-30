@@ -5,10 +5,10 @@ import { IChatMessage } from './types';
 const AttachmentSchema: Schema = new Schema({
   name: { type: String, required: true },
   key: { type: String, required: true },
-  size: { type: Number, require: true },
-  mimeType: { type: String, require: true },
-  submittedAt: { type: Date, require: false },
-  deletedAt: { type: Date, require: false },
+  size: { type: Number, required: true },
+  mimeType: { type: String, required: true },
+  submittedAt: { type: Date, required: false },
+  deletedAt: { type: Date, required: false },
 });
 
 const ChatMessageSchema: Schema = new Schema(

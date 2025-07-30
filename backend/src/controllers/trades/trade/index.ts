@@ -627,7 +627,7 @@ export async function getTradeDetails(req: Request, res: Response) {
 
     let query = ChatMessage.find(
       { chatId: tradeDetails.chat?.id },
-      'createdAt from message type to',
+      'createdAt from message type to attachment',
     );
 
     query = query.sort('desc');

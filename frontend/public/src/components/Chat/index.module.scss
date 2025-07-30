@@ -154,6 +154,14 @@
   background-size: cover;
   height: 5rem;
   width: 5rem;
+  cursor: pointer;
+}
+
+.attachmentSender {
+  align-items: flex-end;
+}
+.attachmentReceiver {
+  align-items: flex-start;
 }
 
 .listItemChatInfo {

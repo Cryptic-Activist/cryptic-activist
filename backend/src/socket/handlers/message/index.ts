@@ -17,11 +17,11 @@ export default class Message {
     this.socket.on(
       'send_message',
       async ({
-        content: { from, message, to, file },
+        content: { from, message, to, attachment },
         chatId,
       }: SendMessageParams) => {
         try {
-          console.log({ message, file });
+          console.log({ message, attachment });
 
           const chat = await prisma.chat.findFirst({
             where: {
@@ -35,13 +35,13 @@ export default class Message {
               from: from,
               message,
               to: to,
-              ...(file && {
-                type: 'file',
+              ...(attachment && {
+                type: 'attachment',
                 attachment: {
-                  key: file.key,
-                  size: file.size,
-                  name: file.fileName,
-                  mimeType: file.mimeType,
+                  key: attachment.key,
+                  size: attachment.size,
+                  name: attachment.fileName,
+                  mimeType: attachment.mimeType,
                   submittedAt: new Date(),
                 },
               }),
@@ -63,7 +63,7 @@ export default class Message {
                 to,
                 createdAt: newMessage.createdAt,
                 message,
-                ...(file && {
+                ...(attachment && {
                   type: newMessage.type,
                   attachment: newMessage.attachment,
                 }),

@@ -248,6 +248,15 @@ const DisputeDetailsPage = () => {
 							: ''}
 					</span>
 				</div>
+				{message.attachment && (
+					<div
+						onClick={() => openFileViewer(message?.attachment?.key!)}
+						className={styles.attachmentFile}
+						style={{
+							backgroundImage: `url(${message.attachment.key})`
+						}}
+					/>
+				)}
 				<div>{message.message}</div>
 			</div>
 		);

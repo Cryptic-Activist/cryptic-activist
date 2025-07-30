@@ -46,7 +46,7 @@ export type Message = {
   to: string;
   type?: string;
   message: string;
-  file?: File | UploadedFile | null;
+  attachment?: File | UploadedFile | null;
   createdAt: string;
 };
 

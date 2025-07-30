@@ -82,9 +82,9 @@ const useTradeSocket = ({
   const sendMessage = async (params: SendMessageParams) => {
     if (socket) {
       let messageContent: Message = { ...params.content };
-      if (params.content.file && chatId && user?.id) {
+      if (params.content.attachment && chatId && user?.id) {
         const formData = await processFileToUpload([
-          params.content.file as File,
+          params.content.attachment as File,
         ]);
         const uploaded = await uploadMessageFileMutation.mutateAsync({
           formData,
@@ -96,8 +96,8 @@ const useTradeSocket = ({
           return;
         }
 
-        messageContent.file = uploaded[0];
-        messageContent.type = 'file';
+        messageContent.attachment = uploaded[0];
+        messageContent.type = 'attachment';
 
         socket.emit('send_message', {
           content: messageContent,
@@ -369,7 +369,7 @@ const useTradeSocket = ({
 
       // Listen for new messages
       socket.on('receive_message', (message: Message) => {
-        console.log({ message });
+        console.log({ ReceiveMessage: message });
         setMessages((prevMessages) => [...prevMessages, message]);
       });
 

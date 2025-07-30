@@ -10,7 +10,7 @@ export type MessageContent = {
   from: string;
   to: string;
   message: string;
-  file?: Attachment | null;
+  attachment?: Attachment | null;
   timestamp: string;
 };
 

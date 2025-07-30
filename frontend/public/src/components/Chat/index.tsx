@@ -133,8 +133,11 @@ const Content: FC<ContentProps> = ({
       )}
       <ul className={styles.list}>
         {messages.map((message, index) => {
-          const messageStyle =
-            sender?.id === message.from ? styles.sender : styles.receiver;
+          const isSender = sender?.id === message.from;
+          const messageStyle = isSender ? styles.sender : styles.receiver;
+          const attachmentStyle = isSender
+            ? styles.attachmentSender
+            : styles.attachmentReceiver;
 
           const isInfoMessage = message.type === 'info';
 
@@ -149,15 +152,20 @@ const Content: FC<ContentProps> = ({
           console.log({ messageAttachment: message });
 
           return (
-            <li key={index} className={`${styles.listItem} ${messageStyle}`}>
-              {message.file && (
+            <li
+              key={index}
+              className={`${styles.listItem} ${messageStyle} ${attachmentStyle}`}
+            >
+              {message.attachment && (
                 <div
                   className={styles.attachmentFile}
                   style={{
-                    // @ts-ignore
-                    backgroundImage: `url(${message.file.key})`,
+                    backgroundImage: `url(${
+                      // @ts-ignore
+                      message.attachment.key
+                    })`,
                   }}
-                  onClick={() => openViewer(message.file)}
+                  onClick={() => openViewer(message.attachment)}
                 />
               )}
               <div className={styles.message}>
@@ -188,7 +196,7 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
           from: sender.id,
           to: receiver.id,
           message,
-          file,
+          attachment: file,
           createdAt: Date(),
         },
       });
