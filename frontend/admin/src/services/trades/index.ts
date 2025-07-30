@@ -1,8 +1,8 @@
+import { getBearerToken, getCookie } from '@/utils';
+
 import { BACKEND } from '@/constants';
 import { GetTradesParams } from './types';
 import { fetchGet } from '../axios';
-import { getBearerToken } from '@/utils';
-import { getLocalStorage } from '@/utils/browser/storage';
 import { getQueries } from '@/utils/axios';
 
 export const getTrades = async ({
@@ -19,7 +19,7 @@ export const getTrades = async ({
 		dateEnd: encodedDateEnd,
 		...rest
 	});
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;

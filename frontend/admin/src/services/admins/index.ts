@@ -1,9 +1,9 @@
-import { Admin, Role } from '@/stores/admins';
 import { CreateAdminParams, UpdateAdminParams } from './types';
 import { fetchDelete, fetchGet, fetchPost, fetchPut } from '@/services/axios';
-import { getBearerToken2, getLocalStorage } from '@/utils/browser/storage';
 
+import { Admin } from '@/stores/admins';
 import { BACKEND } from '@/constants';
+import { getBearerToken2 } from '@/utils/browser/storage';
 
 export const getAdmins = async (id: string): Promise<Admin[] | null> => {
 	const bearerToken = getBearerToken2();

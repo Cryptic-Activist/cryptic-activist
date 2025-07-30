@@ -1,12 +1,11 @@
 import { fetchGet, fetchPost, fetchPut } from '../axios';
+import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
 import { DefaultFields } from '@/hooks/usePlatformSettings/types';
-import { getBearerToken } from '@/utils';
-import { getLocalStorage } from '@/utils/browser/storage';
 
 export const getPlatformSettings = async () => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 	if (!accessToken) {
 		return null;
 	}
@@ -25,7 +24,7 @@ export const getPlatformSettings = async () => {
 export const updatePlatformPublicSettings = async (
 	settings: DefaultFields[]
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 	if (!accessToken) {
 		return null;
 	}
@@ -52,7 +51,7 @@ export const updatePlatformPublicSettings = async (
 export const updatePlatformPrivateSettings = async (
 	settings: DefaultFields[]
 ) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 	if (!accessToken) {
 		return null;
 	}

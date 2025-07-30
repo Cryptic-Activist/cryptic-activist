@@ -192,8 +192,8 @@
   display: flex;
   border-top: 1px solid globals.$black;
   display: grid;
-  // grid-template-columns: 4rem 1fr 4rem;
-  grid-template-columns: 1fr 4rem;
+  grid-template-columns: 4rem 1fr 4rem;
+  // grid-template-columns: 1fr 4rem;
   .button {
     background-color: transparent;
     border: none;

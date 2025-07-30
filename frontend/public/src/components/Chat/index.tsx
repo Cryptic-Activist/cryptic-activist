@@ -1,7 +1,7 @@
 'use client';
 
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
-import { FaCircle, FaPaperPlane } from 'react-icons/fa6';
+import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
 import React, {
   ChangeEvent,
   FC,
@@ -177,9 +177,9 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
 
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
-      {/* <button className={styles.button} title="Attachments">
+      <button className={styles.button} title="Attachments">
         <FaPaperclip size={20} />
-      </button> */}
+      </button>
       <textarea
         className={styles.textarea}
         onChange={onChangeMessage}

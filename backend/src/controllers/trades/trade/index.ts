@@ -475,6 +475,15 @@ export const calculateReceivingAmount = async (
       .times(multiplier)
       .toDecimalPlaces(parsedDecimals);
 
+    console.log({
+      fiatAmount: parsedFiatAmount.toString(),
+      tradingFee: tradingFee.toString(),
+      finalFiatAmount: finalFiatAmount.toString(),
+      currentPrice: parsedCurrentPrice.toString(),
+      finalCryptoAmount: finalCryptoAmount.toNumber(),
+      requiredBalance: requiredBalance.toNumber(),
+    });
+
     res.status(200).send({
       fiatAmount: parsedFiatAmount.toString(),
       tradingFee: tradingFee.toString(),

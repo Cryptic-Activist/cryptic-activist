@@ -1,12 +1,11 @@
 import { ApproveKYCParams, GetKYCParams, RejectKYCParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
+import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
-import { getBearerToken } from '@/utils';
-import { getLocalStorage } from '@/utils/browser/storage';
 
 export const getKYC = async (params: GetKYCParams) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -27,7 +26,7 @@ export const getKYC = async (params: GetKYCParams) => {
 };
 
 export const approveKYC = async (params: ApproveKYCParams) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
@@ -51,7 +50,7 @@ export const approveKYC = async (params: ApproveKYCParams) => {
 };
 
 export const rejectKYC = async (params: RejectKYCParams) => {
-	const accessToken = getLocalStorage('accessToken');
+	const accessToken = getCookie('accessToken');
 
 	if (!accessToken) {
 		return null;
