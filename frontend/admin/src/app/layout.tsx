@@ -1,6 +1,7 @@
 import './global.css';
 
 import AllModals from '@/layout/modals/AllModals';
+import BannerDisplay from '@/components/BannerDisplay';
 import Footer from '@/layout/Footer';
 import Head from 'next/head';
 import { InitialSettings } from '@/layout';
@@ -23,6 +24,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 				<QueryProvider>
 					<AllModals />
 					<InitialSettings />
+					<BannerDisplay />
 					<NavigationBar />
 					<main className={layout.main}>
 						<SideBar />

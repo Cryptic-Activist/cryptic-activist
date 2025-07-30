@@ -1034,3 +1034,17 @@ model AdminWallet {
 
   @@map("admin_wallets")
 }
+
+model Banner {
+  id            String   @id @default(uuid())
+  content       String   @db.Text
+  targetWebsite String
+  targetPage    String
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("banners")
+}

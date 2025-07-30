@@ -10,6 +10,7 @@ import {
 
 import AllDrawers from '@/layouts/drawers/AllDrawers';
 import { Analytics } from '@/components';
+import BannerDisplay from '@/components/BannerDisplay';
 import { QueryProvider } from '@/components';
 import { Roboto } from 'next/font/google';
 import styles from './layout.module.scss';
@@ -40,6 +41,7 @@ export default function RootLayout({
           <InitialSettings />
           <AllModals />
           <AllDrawers />
+          <BannerDisplay />
           <NavigationBar />
           <Toast />
           <main className={styles.main}>{children}</main>
