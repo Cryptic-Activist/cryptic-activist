@@ -193,6 +193,7 @@
   border-top: 1px solid globals.$black;
   display: grid;
   grid-template-columns: 4rem 1fr 4rem;
+  position: relative;
   // grid-template-columns: 1fr 4rem;
   .button {
     background-color: transparent;
@@ -219,6 +220,33 @@
     &:focus {
       outline: none;
     }
+  }
+}
+
+.filePreview {
+  position: absolute;
+  bottom: 4rem;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem;
+  background-color: globals.$white;
+  border-top: 1px solid globals.$black;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .previewImage {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: 0.4em;
+  }
+
+  .clearButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
   }
 }
 

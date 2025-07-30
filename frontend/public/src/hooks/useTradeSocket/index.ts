@@ -74,6 +74,7 @@ const useTradeSocket = ({
 
   const sendMessage = (params: SendMessageParams) => {
     if (socket) {
+      console.log({ params });
       socket.emit('send_message', { ...params, chatId });
       appendMessage(params.content);
     }

@@ -39,7 +39,7 @@ export type Message = {
   to: string;
   type?: string;
   message: string;
-  attachment?: Attachment;
+  attachment?: File | null;
   createdAt: string;
 };
 

@@ -1,7 +1,13 @@
 'use client';
 
 import { ChatProps, ContentProps, HeaderProps, InputsProps } from './types';
-import { FaCircle, FaPaperPlane, FaPaperclip } from 'react-icons/fa6';
+import {
+  FaCircle,
+  FaPaperPlane,
+  FaPaperclip,
+  FaPlus,
+  FaXmark,
+} from 'react-icons/fa6';
 import React, {
   ChangeEvent,
   FC,
@@ -133,18 +139,25 @@ const Content: FC<ContentProps> = ({
 
 const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
   const [message, setMessage] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSendMessage = () => {
-    if (message.length > 0) {
+    console.log({ message, file });
+    if (message.length > 0 || file) {
       sendMessage({
         content: {
           from: sender.id,
           to: receiver.id,
           message,
+          attachment: file,
           createdAt: Date(),
         },
       });
       setMessage('');
+      setFile(null);
+      setPreview(null);
     }
   };
 
@@ -169,15 +182,63 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
     }
   };
 
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const blob = new Blob([selectedFile], { type: selectedFile.type });
+      const fileUrl = URL.createObjectURL(blob);
+      setPreview(fileUrl);
+    }
+  };
+
+  const handleClearAttachment = () => {
+    setFile(null);
+    setPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   useEffect(() => {
-    if (message === '\n') {
+    if (message === '') {
       setMessage('');
     }
   }, [message]);
 
   return (
     <form className={styles.inputs} onSubmit={submitMessage}>
-      <button className={styles.button} title="Attachments">
+      {preview && (
+        <div className={styles.filePreview}>
+          <img
+            src={preview}
+            alt="File preview"
+            className={styles.previewImage}
+          />
+          <button
+            onClick={handleClearAttachment}
+            className={styles.clearButton}
+          >
+            <FaXmark />
+          </button>
+        </div>
+      )}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+      <button
+        className={styles.button}
+        title="Attachments"
+        onClick={handleAttachmentClick}
+        type="button"
+      >
         <FaPaperclip size={20} />
       </button>
       <textarea

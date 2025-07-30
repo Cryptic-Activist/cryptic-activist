@@ -17,6 +17,8 @@ export default class Message {
     this.socket.on(
       'send_message',
       async ({ content: { from, message, to }, chatId }: SendMessageParams) => {
+        console.log({ message });
+
         const chat = await prisma.chat.findFirst({
           where: {
             id: chatId,
