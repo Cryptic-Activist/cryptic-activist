@@ -29,7 +29,6 @@ export const getABI = async ({
       throw new Error(response.data.message || 'Failed to fetch ABI');
     }
   } catch (error) {
-    // console.log({ error });
     return null;
   }
 };

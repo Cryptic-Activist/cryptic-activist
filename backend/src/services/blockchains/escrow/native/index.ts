@@ -234,7 +234,6 @@ export const createTrade = async (params: InitTradeParams) => {
       message: 'Trade created successfully',
     };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Error creating trade',
       error: error,
@@ -343,7 +342,6 @@ export const getTokenDecimals = async ({
 
     return { decimals };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Unable to check balances',
       error: error,
@@ -373,7 +371,6 @@ export const getTokenAllowance = async ({
 
     return { allowance };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Unable to check balances',
       error: error,
@@ -400,7 +397,6 @@ export const approveToken = async (
       receipt,
     };
   } catch (error) {
-    console.log({ error });
     return {
       message: 'Token Approval failed',
       error: error,

@@ -24,8 +24,8 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 				<QueryProvider>
 					<AllModals />
 					<InitialSettings />
-					<BannerDisplay />
 					<NavigationBar />
+					<BannerDisplay />
 					<main className={layout.main}>
 						<SideBar />
 						<div className={layout.container}>{children}</div>

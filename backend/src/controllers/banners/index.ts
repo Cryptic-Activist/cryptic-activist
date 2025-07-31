@@ -20,7 +20,6 @@ export const createBanner = async (req: Request, res: Response) => {
     });
     res.status(201).json(banner);
   } catch (error: any) {
-    console.log({ error });
     res.status(500).json({ error: error.message });
   }
 };
@@ -69,7 +68,6 @@ export const updateBanner = async (req: Request, res: Response) => {
     });
     res.status(200).json(banner);
   } catch (error: any) {
-    console.log({ error });
     res.status(500).json({ error: error.message });
   }
 };
@@ -89,6 +87,8 @@ export const getDisplayBanners = async (req: Request, res: Response) => {
   try {
     const { targetWebsite, currentPage } = req.query;
 
+    console.log(req.query);
+
     const now = new Date();
     const banners = await prisma.banner.findMany({
       where: {
@@ -97,16 +97,21 @@ export const getDisplayBanners = async (req: Request, res: Response) => {
         startDate: {
           lte: now,
         },
-        endDate: {
-          gte: now,
-        },
+        OR: [
+          {
+            endDate: null,
+          },
+          {
+            endDate: {
+              gte: now,
+            },
+          },
+        ],
         pages: {
-          hasSome: [currentPage as string],
+          has: currentPage as string,
         },
       },
     });
-
-    console.log({ banners });
 
     res.status(200).json(banners);
   } catch (error: any) {

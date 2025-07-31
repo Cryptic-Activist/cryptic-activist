@@ -13,7 +13,7 @@ const BannersPage = () => {
 		<div className={styles.container}>
 			<div className={styles.header}>
 				<h1 className={styles.pageTitle}>Banners</h1>
-				<Link href="/banners/create">
+				<Link href="/banners/create" className={styles.link}>
 					<button className={`${styles.btn} ${styles.btnPrimary}`}>
 						Create Banner
 					</button>

@@ -71,7 +71,6 @@ export default class Message {
             }
           }
         } catch (error) {
-          console.log({ error });
           // Check if recipient is online via Redis
           const recipientSocketId = await redisClient.hGet(
             'onlineTradingUsers',

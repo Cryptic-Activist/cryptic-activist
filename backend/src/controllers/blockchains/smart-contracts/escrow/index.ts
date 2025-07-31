@@ -43,7 +43,6 @@ export const getEscrowERC20Details = async (_req: Request, res: Response) => {
 
     res.status(200).json(details);
   } catch (error) {
-    console.log({ error });
     res.status(400).json(error);
   }
 };
@@ -57,7 +56,6 @@ export const getEscrowNativeTokenDetails = async (
 
     res.status(200).json(details);
   } catch (error) {
-    console.log({ error });
     res.status(400).json(error);
   }
 };
@@ -210,7 +208,6 @@ export const deployEscrowERC20SmartContract = async (
       },
     });
   } catch (error) {
-    console.log({ error });
     res.status(500).json({ error });
   }
 };
@@ -363,7 +360,6 @@ export const deployEscrowNativeTokenSmartContract = async (
       },
     });
   } catch (error) {
-    console.log({ error });
     res.status(500).json({ error });
   }
 };

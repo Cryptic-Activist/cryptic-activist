@@ -1,6 +1,7 @@
 'use client';
 
 import { fetchBanners } from '@/services/banners';
+import styles from './index.module.scss';
 import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
@@ -33,11 +34,11 @@ const BannerDisplay = () => {
   const getBannerStyle = () => {
     switch (banner.type) {
       case 'WARNING':
-        return { backgroundColor: 'yellow', color: 'black' };
+        return styles.warning;
       case 'NEW_FEATURE':
-        return { backgroundColor: 'blue', color: 'white' };
+        return styles.newFeature;
       case 'ANNOUNCEMENT':
-        return { backgroundColor: 'green', color: 'white' };
+        return styles.announcement;
       default:
         return {};
     }
@@ -45,7 +46,7 @@ const BannerDisplay = () => {
 
   return (
     <div
-      style={getBannerStyle()}
+      className={`${styles.banner} ${getBannerStyle()}`}
       dangerouslySetInnerHTML={{ __html: banner.content }}
     />
   );

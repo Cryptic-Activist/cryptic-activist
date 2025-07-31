@@ -39,9 +39,9 @@ export default function RootLayout({
           <InitialSettings />
           <AllModals />
           <AllDrawers />
-          <BannerDisplay />
           <NavigationBar />
           <Toast />
+          <BannerDisplay />
           <main className={styles.main}>{children}</main>
           <Footer />
         </QueryProvider>
