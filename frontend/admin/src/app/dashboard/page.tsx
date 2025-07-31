@@ -67,8 +67,6 @@ const Dashboard = () => {
 	);
 };
 
-// export default Dashboard;
-
 export default withAuth(Dashboard, {
 	roles: ['SUPER_ADMIN', 'SENIOR_ADMIN', 'MODERATOR', 'FINANCE_MANAGER']
 });
