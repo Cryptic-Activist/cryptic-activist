@@ -1,4 +1,3 @@
-
 @use "../../styles/globals.module.scss";
 
 // Variables
@@ -94,6 +93,9 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   margin-bottom: 24px;
   box-shadow: 0 1px 4px globals.$box-shadow-default-color;
   border: 1px solid #c6c6c6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pageTitle {
@@ -106,15 +108,47 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 // Main content layout
 .mainContent {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
 }
 
-.form {
-    @include card-base;
-    box-shadow: 0 1px 4px globals.$box-shadow-default-color;
-    border: 1px solid #c6c6c6;
-    padding: 20px;
+// Card components
+.card {
+  @include card-base;
+  box-shadow: 0 1px 4px globals.$box-shadow-default-color;
+  border: 1px solid #c6c6c6;
+}
+
+.cardHeader {
+  background: $background-color;
+  padding: 16px 20px;
+  border-bottom: 1px solid $border-color;
+  font-weight: 600;
+  color: #374151;
+  font-size: 16px;
+}
+
+.cardContent {
+  padding: 20px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 12px 15px;
+    border: 1px solid $border-color;
+    text-align: left;
+  }
+
+  th {
+    background-color: $background-color;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+  }
 }
 
 // Form elements
@@ -181,6 +215,15 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
     &:hover:not(:disabled) {
       background: darken($secondary-color, 8%);
+    }
+  }
+
+  &.btnDanger {
+    background: $danger-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($danger-color, 8%);
     }
   }
 
