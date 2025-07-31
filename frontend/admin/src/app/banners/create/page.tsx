@@ -11,7 +11,8 @@ const CreateBannerPage = () => {
   const router = useRouter();
   const [content, setContent] = useState('');
   const [targetWebsite, setTargetWebsite] = useState('public');
-  const [targetPage, setTargetPage] = useState('/');
+  const [pages, setPages] = useState<string[]>([]);
+  const [type, setType] = useState('announcement');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isActive, setIsActive] = useState(true);
@@ -21,7 +22,7 @@ const CreateBannerPage = () => {
     await fetch('/banners', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, targetWebsite, targetPage, startDate, endDate, isActive }),
+      body: JSON.stringify({ content, targetWebsite, pages, type, startDate, endDate, isActive }),
     });
     router.push('/banners');
   };
@@ -44,13 +45,21 @@ const CreateBannerPage = () => {
           </select>
         </div>
         <div>
-          <label>Target Page</label>
-          <select value={targetPage} onChange={(e) => setTargetPage(e.target.value)}>
+          <label>Pages</label>
+          <select multiple value={pages} onChange={(e) => setPages(Array.from(e.target.selectedOptions, option => option.value))}>
             {routes.map((route) => (
               <option key={route.value} value={route.value}>
                 {route.label}
               </option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label>Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="announcement">Announcement</option>
+            <option value="warning">Warning</option>
+            <option value="new_feature">New Feature</option>
           </select>
         </div>
         <div>

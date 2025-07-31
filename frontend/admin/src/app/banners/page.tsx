@@ -32,7 +32,8 @@ const BannersPage = () => {
           <tr>
             <th>Content</th>
             <th>Target Website</th>
-            <th>Target Page</th>
+            <th>Pages</th>
+            <th>Type</th>
             <th>Start Date</th>
             <th>End Date</th>
             <th>Is Active</th>
@@ -44,7 +45,8 @@ const BannersPage = () => {
             <tr key={banner.id}>
               <td dangerouslySetInnerHTML={{ __html: banner.content }}></td>
               <td>{banner.targetWebsite}</td>
-              <td>{banner.targetPage}</td>
+              <td>{banner.pages.join(', ')}</td>
+              <td>{banner.type}</td>
               <td>{new Date(banner.startDate).toLocaleString()}</td>
               <td>{new Date(banner.endDate).toLocaleString()}</td>
               <td>{banner.isActive ? 'Yes' : 'No'}</td>

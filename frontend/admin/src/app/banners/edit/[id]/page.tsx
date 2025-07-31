@@ -2,37 +2,35 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { publicRoutes, adminRoutes } from '@/constants/routes';
 
-const EditBannerPage = () => {
+const EditBannerPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
-  const params = useParams();
   const { id } = params;
-
   const [content, setContent] = useState('');
   const [targetWebsite, setTargetWebsite] = useState('public');
-  const [targetPage, setTargetPage] = useState('/');
+  const [pages, setPages] = useState<string[]>([]);
+  const [type, setType] = useState('announcement');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      const fetchBanner = async () => {
-        const res = await fetch(`/banners/${id}`);
-        const data = await res.json();
-        setContent(data.content);
-        setTargetWebsite(data.targetWebsite);
-        setTargetPage(data.targetPage);
-        setStartDate(new Date(data.startDate).toISOString().slice(0, 16));
-        setEndDate(new Date(data.endDate).toISOString().slice(0, 16));
-        setIsActive(data.isActive);
-      };
-      fetchBanner();
-    }
+    const fetchBanner = async () => {
+      const res = await fetch(`/banners/${id}`);
+      const data = await res.json();
+      setContent(data.content);
+      setTargetWebsite(data.targetWebsite);
+      setPages(data.pages);
+      setType(data.type);
+      setStartDate(new Date(data.startDate).toISOString().slice(0, 16));
+      setEndDate(new Date(data.endDate).toISOString().slice(0, 16));
+      setIsActive(data.isActive);
+    };
+    fetchBanner();
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,7 +38,7 @@ const EditBannerPage = () => {
     await fetch(`/banners/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, targetWebsite, targetPage, startDate, endDate, isActive }),
+      body: JSON.stringify({ content, targetWebsite, pages, type, startDate, endDate, isActive }),
     });
     router.push('/banners');
   };
@@ -63,13 +61,21 @@ const EditBannerPage = () => {
           </select>
         </div>
         <div>
-          <label>Target Page</label>
-          <select value={targetPage} onChange={(e) => setTargetPage(e.target.value)}>
+          <label>Pages</label>
+          <select multiple value={pages} onChange={(e) => setPages(Array.from(e.target.selectedOptions, option => option.value))}>
             {routes.map((route) => (
               <option key={route.value} value={route.value}>
                 {route.label}
               </option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label>Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="announcement">Announcement</option>
+            <option value="warning">Warning</option>
+            <option value="new_feature">New Feature</option>
           </select>
         </div>
         <div>

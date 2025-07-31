@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 
 import { prisma } from '@/services/db';
+import { BannerSchema } from '@/dtos/banners';
 
 export const createBanner = async (req: Request, res: Response) => {
   try {
+    const bannerData = BannerSchema.parse(req.body);
     const banner = await prisma.banner.create({
-      data: req.body,
+      data: bannerData,
     });
     res.status(201).json(banner);
   } catch (error: any) {
@@ -41,7 +43,7 @@ export const getBannerById = async (req: Request, res: Response) => {
 export const updateBanner = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const data = req.body;
+    const data = BannerSchema.parse(req.body);
 
     const banner = await prisma.banner.update({ where: { id }, data });
     res.status(200).json(banner);
@@ -63,12 +65,11 @@ export const deleteBanner = async (req: Request, res: Response) => {
 
 export const getDisplayBanners = async (req: Request, res: Response) => {
   try {
-    const { targetWebsite, targetPage } = req.query;
+    const { targetWebsite, currentPage } = req.query;
 
     const now = new Date();
     const banners = await prisma.banner.findMany({
       where: {
-        targetPage: targetPage as string,
         targetWebsite: targetWebsite as string,
         isActive: true,
         startDate: {
@@ -76,6 +77,9 @@ export const getDisplayBanners = async (req: Request, res: Response) => {
         },
         endDate: {
           gte: now,
+        },
+        pages: {
+          has: currentPage as string,
         },
       },
     });

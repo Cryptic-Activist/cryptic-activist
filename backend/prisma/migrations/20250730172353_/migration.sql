@@ -55,6 +55,9 @@ CREATE TYPE "ModerationAction" AS ENUM ('SEND_WARNING', 'SUSPEND', 'ACCOUNT_REVI
 -- CreateEnum
 CREATE TYPE "SettingType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'JSON');
 
+-- CreateEnum
+CREATE TYPE "BannerType" AS ENUM ('warning', 'new_feature', 'announcement');
+
 -- CreateTable
 CREATE TABLE "accepted_cryptocurrencies" (
     "id" TEXT NOT NULL,
@@ -737,18 +740,19 @@ CREATE TABLE "admin_wallets" (
 );
 
 -- CreateTable
-CREATE TABLE "Banner" (
+CREATE TABLE "banners" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "targetWebsite" TEXT NOT NULL,
-    "targetPage" TEXT NOT NULL,
+    "pages" TEXT[],
+    "type" "BannerType" NOT NULL,
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Banner_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "banners_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
