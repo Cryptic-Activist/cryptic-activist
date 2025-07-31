@@ -12,18 +12,20 @@ import {
 } from '@/controllers/banners';
 
 import { Router } from 'express';
+import { validateCreateBanner } from './middleware';
 
 const router = Router();
 
 router.post(
-  '/',
+  '',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'SENIOR_ADMIN']),
+  validateCreateBanner,
   createBanner,
 );
 
 router.get(
-  '/',
+  '',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN', 'SENIOR_ADMIN']),
   getBanners,

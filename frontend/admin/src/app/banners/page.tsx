@@ -1,27 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
+import { DynamicIcon } from '@/components';
 import Link from 'next/link';
 import styles from './banners.module.scss';
+import { useBanner } from '@/hooks/useBanner';
 import { withAuth } from '@/hoc/withAuth';
 
 const BannersPage = () => {
-	const [banners, setBanners] = useState([]);
-
-	useEffect(() => {
-		const fetchBanners = async () => {
-			const res = await fetch('/banners');
-			const data = await res.json();
-			setBanners(data);
-		};
-		fetchBanners();
-	}, []);
-
-	const deleteBanner = async (id: string) => {
-		await fetch(`/banners/${id}`, { method: 'DELETE' });
-		setBanners(banners.filter((banner: any) => banner.id !== id));
-	};
+	const { banners, deleteBanner } = useBanner();
 
 	return (
 		<div className={styles.container}>
@@ -41,7 +27,6 @@ const BannersPage = () => {
 							<table className={styles.table}>
 								<thead>
 									<tr>
-										<th>Content</th>
 										<th>Target Website</th>
 										<th>Pages</th>
 										<th>Type</th>
@@ -52,30 +37,31 @@ const BannersPage = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{banners.map((banner: any) => (
+									{banners?.map((banner: any) => (
 										<tr key={banner.id}>
-											<td
-												dangerouslySetInnerHTML={{ __html: banner.content }}
-											></td>
 											<td>{banner.targetWebsite}</td>
 											<td>{banner.pages.join(', ')}</td>
 											<td>{banner.type}</td>
 											<td>{new Date(banner.startDate).toLocaleString()}</td>
-											<td>{new Date(banner.endDate).toLocaleString()}</td>
-											<td>{banner.isActive ? 'Yes' : 'No'}</td>
 											<td>
+												{banner.endDate
+													? new Date(banner.endDate).toLocaleString()
+													: '-'}
+											</td>
+											<td>{banner.isActive ? 'Yes' : 'No'}</td>
+											<td className={styles.btns}>
 												<Link href={`/banners/edit/${banner.id}`}>
 													<button
 														className={`${styles.btn} ${styles.btnSecondary}`}
 													>
-														Edit
+														<DynamicIcon iconName="FaPen" size={16} />
 													</button>
 												</Link>
 												<button
 													onClick={() => deleteBanner(banner.id)}
 													className={`${styles.btn} ${styles.btnDanger}`}
 												>
-													Delete
+													<DynamicIcon iconName="FaTrash" size={16} />
 												</button>
 											</td>
 										</tr>

@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
 
-import { prisma } from '@/services/db';
 import { BannerSchema } from '@/dtos/banners';
+import { prisma } from '@/services/db';
 
 export const createBanner = async (req: Request, res: Response) => {
   try {
-    const bannerData = BannerSchema.parse(req.body);
+    console.log(req.body);
     const banner = await prisma.banner.create({
-      data: bannerData,
+      data: req.body,
     });
     res.status(201).json(banner);
   } catch (error: any) {
+    console.log({ error });
     res.status(500).json({ error: error.message });
   }
 };
