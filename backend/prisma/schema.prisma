@@ -1053,8 +1053,9 @@ model Banner {
   isActive      Boolean    @default(true)
   publishedBy   Admin      @relation(fields: [publishedById], references: [id])
   publishedById String
+  deletedAt     DateTime?  @db.Timestamp()
   createdAt     DateTime   @default(now()) @db.Timestamp()
-  updatedAt     DateTime   @updatedAt
+  updatedAt     DateTime   @updatedAt @db.Timestamp()
 
   @@map("banners")
 }

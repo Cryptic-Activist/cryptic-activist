@@ -1,6 +1,6 @@
 'use client';
 
-import { createBanner, getBanners } from '@/services/banners';
+import { createBanner, deleteBanner, getBanners } from '@/services/banners';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { BACKEND } from '@/constants';
@@ -27,9 +27,10 @@ export const useBanner = () => {
 		}
 	});
 
-	const { mutate: deleteBanner } = useMutation({
+	const { mutate: deleteBannerMutation } = useMutation({
 		mutationFn: async (id: string) => {
-			await fetch(`/banners/${id}`, { method: 'DELETE' });
+			const response = await deleteBanner(id);
+			return response;
 		},
 		onSuccess: () => {
 			refetch();
@@ -66,7 +67,7 @@ export const useBanner = () => {
 		banners,
 		createBannerMutate,
 		isCreating,
-		deleteBanner,
+		deleteBannerMutation,
 		form,
 		onSubmit
 	};

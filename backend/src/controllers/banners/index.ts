@@ -26,7 +26,11 @@ export const createBanner = async (req: Request, res: Response) => {
 
 export const getBanners = async (_req: Request, res: Response) => {
   try {
-    const banners = await prisma.banner.findMany();
+    const banners = await prisma.banner.findMany({
+      where: {
+        deletedAt: null,
+      },
+    });
     res.status(200).json(banners);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -76,7 +80,12 @@ export const deleteBanner = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    await prisma.banner.delete({ where: { id } });
+    await prisma.banner.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
     res.status(204).send();
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -94,6 +103,7 @@ export const getDisplayBanners = async (req: Request, res: Response) => {
       where: {
         targetWebsite: targetWebsite as string,
         isActive: true,
+        deletedAt: null,
         startDate: {
           lte: now,
         },

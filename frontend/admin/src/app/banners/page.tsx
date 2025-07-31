@@ -7,7 +7,7 @@ import { useBanner } from '@/hooks/useBanner';
 import { withAuth } from '@/hoc/withAuth';
 
 const BannersPage = () => {
-	const { banners, deleteBanner } = useBanner();
+	const { banners, deleteBannerMutation } = useBanner();
 
 	return (
 		<div className={styles.container}>
@@ -58,7 +58,7 @@ const BannersPage = () => {
 													</button>
 												</Link>
 												<button
-													onClick={() => deleteBanner(banner.id)}
+													onClick={() => deleteBannerMutation(banner.id)}
 													className={`${styles.btn} ${styles.btnDanger}`}
 												>
 													<DynamicIcon iconName="FaTrash" size={16} />
