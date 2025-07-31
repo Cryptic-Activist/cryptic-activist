@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import RichTextEditor from '@/components/RichTextEditor';
 import { EditorState } from 'draft-js';
+
+import MultiSelect from '@/components/MultiSelect';
 import { publicRoutes, adminRoutes } from '@/constants/routes';
 
 import styles from '../banners.module.scss';
@@ -51,13 +53,7 @@ const CreateBannerPage = () => {
           </div>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Pages</label>
-            <select multiple className={styles.formControl} value={pages} onChange={(e) => { setPages(Array.from(e.target.selectedOptions, option => option.value)); }}>
-              {routes.map((route) => (
-                <option key={route.value} value={route.value}>
-                  {route.label}
-                </option>
-              ))}
-            </select>
+            <MultiSelect options={routes} selected={pages} onChange={setPages} />
           </div>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Type</label>
@@ -89,5 +85,6 @@ const CreateBannerPage = () => {
     </div>
   );
 };
+
 
 export default CreateBannerPage;
