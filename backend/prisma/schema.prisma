@@ -80,6 +80,7 @@ model Admin {
   smartContract          SmartContract[]
   wallets                AdminWallet[]
   refreshTokens          RefreshToken[]
+  banner                 Banner[]
 
   @@map("admins")
 }
@@ -1036,9 +1037,9 @@ model AdminWallet {
 }
 
 enum BannerType {
-  warning
-  new_feature
-  announcement
+  WARNING
+  NEW_FEATURE
+  ANNOUNCEMENT
 }
 
 model Banner {
@@ -1050,6 +1051,8 @@ model Banner {
   startDate     DateTime   @db.Timestamp()
   endDate       DateTime?  @db.Timestamp()
   isActive      Boolean    @default(true)
+  publishedBy   Admin      @relation(fields: [publishedById], references: [id])
+  publishedById String
   createdAt     DateTime   @default(now()) @db.Timestamp()
   updatedAt     DateTime   @updatedAt
 

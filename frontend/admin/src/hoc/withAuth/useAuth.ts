@@ -18,7 +18,6 @@ export const useAuth = (roles?: Role[]) => {
 				try {
 					const isValid = await validateWithAuthToken();
 
-					console.log({ adminRoles: admin.data?.roles, roles });
 					if (admin.data?.roles && roles) {
 						const hasRequiredRole = hasRoles(roles);
 
@@ -39,8 +38,6 @@ export const useAuth = (roles?: Role[]) => {
 
 		checkAuth();
 	}, [admin.data?.id]);
-
-	console.log({ isAuthenticated });
 
 	return { isAuthenticated, isLoading };
 };

@@ -56,7 +56,7 @@ CREATE TYPE "ModerationAction" AS ENUM ('SEND_WARNING', 'SUSPEND', 'ACCOUNT_REVI
 CREATE TYPE "SettingType" AS ENUM ('STRING', 'NUMBER', 'BOOLEAN', 'JSON');
 
 -- CreateEnum
-CREATE TYPE "BannerType" AS ENUM ('warning', 'new_feature', 'announcement');
+CREATE TYPE "BannerType" AS ENUM ('WARNING', 'NEW_FEATURE', 'ANNOUNCEMENT');
 
 -- CreateTable
 CREATE TABLE "accepted_cryptocurrencies" (
@@ -746,10 +746,11 @@ CREATE TABLE "banners" (
     "targetWebsite" TEXT NOT NULL,
     "pages" TEXT[],
     "type" "BannerType" NOT NULL,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    "startDate" TIMESTAMP NOT NULL,
+    "endDate" TIMESTAMP,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "adminId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "banners_pkey" PRIMARY KEY ("id")
@@ -1146,6 +1147,9 @@ ALTER TABLE "user_wallets" ADD CONSTRAINT "user_wallets_userId_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "admin_wallets" ADD CONSTRAINT "admin_wallets_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banners" ADD CONSTRAINT "banners_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_DisputeEvidenceToDisputeEvidenceRequest" ADD CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_A_fkey" FOREIGN KEY ("A") REFERENCES "dispute_evidences"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,13 +1,22 @@
 import { Request, Response } from 'express';
 
-import { BannerSchema } from '@/dtos/banners';
 import { prisma } from '@/services/db';
 
 export const createBanner = async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
+    const data = req.body;
+
     const banner = await prisma.banner.create({
-      data: req.body,
+      data: {
+        content: data.content,
+        isActive: data.isActive,
+        pages: data.pages,
+        startDate: data.startDate,
+        targetWebsite: data.targetWebsite,
+        type: data.type,
+        endDate: data.endDate ? data.endDate : null,
+        publishedById: data.adminId,
+      },
     });
     res.status(201).json(banner);
   } catch (error: any) {
@@ -44,11 +53,23 @@ export const getBannerById = async (req: Request, res: Response) => {
 export const updateBanner = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const data = BannerSchema.parse(req.body);
+    const data = req.body;
 
-    const banner = await prisma.banner.update({ where: { id }, data });
+    const banner = await prisma.banner.update({
+      where: { id },
+      data: {
+        content: data.content,
+        isActive: data.isActive,
+        pages: data.pages,
+        startDate: data.startDate,
+        targetWebsite: data.targetWebsite,
+        type: data.type,
+        endDate: data.endDate ? data.endDate : null,
+      },
+    });
     res.status(200).json(banner);
   } catch (error: any) {
+    console.log({ error });
     res.status(500).json({ error: error.message });
   }
 };
@@ -80,10 +101,12 @@ export const getDisplayBanners = async (req: Request, res: Response) => {
           gte: now,
         },
         pages: {
-          has: currentPage as string,
+          hasSome: [currentPage as string],
         },
       },
     });
+
+    console.log({ banners });
 
     res.status(200).json(banners);
   } catch (error: any) {

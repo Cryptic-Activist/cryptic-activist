@@ -1,25 +1,18 @@
 'use client';
 
+import { getBanner, updateBanner } from '@/services/banners';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { getBanner } from '@/services/banners';
+import { bannerEditResolver } from './zod';
+import { formatDatetimeLocal } from '@/utils/date';
 import useAdmin from '../useAdmin';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const bannerSchema = z.object({
-	content: z.string().min(1, 'Content is required'),
-	targetWebsite: z.string(),
-	pages: z.array(z.string()),
-	type: z.string(),
-	startDate: z.string(),
-	endDate: z.string(),
-	isActive: z.boolean()
-});
+import { useRouter } from 'next/navigation';
 
 export const useEditBanner = (id: string) => {
 	const { admin } = useAdmin();
+	const router = useRouter();
 
 	const { data: banner, refetch } = useQuery({
 		queryKey: ['banner', id],
@@ -27,56 +20,44 @@ export const useEditBanner = (id: string) => {
 			const response = await getBanner(id);
 			return response;
 		},
-		enabled: !!admin.data?.id
+		enabled: !!admin.data?.id,
+		staleTime: 0
 	});
 
-	const { mutate: updateBanner, isPending: isUpdating } = useMutation({
+	const { mutate: updateBannerMutation, isPending: isUpdating } = useMutation({
 		mutationFn: async (data: any) => {
-			const res = await fetch(`/banners/${id}`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(data)
-			});
-			return res.json();
+			const response = await updateBanner(id, data);
+			return response;
 		},
 		onSuccess: () => {
 			refetch();
 		}
 	});
 
-	if (banner?.startDate)
-		console.log({
-			defaultValues: {
-				...banner,
-				startDate: banner?.startDate
-					? new Date(banner.startDate).toISOString().slice(0, 16)
-					: '',
-				endDate: banner?.endDate
-					? new Date(banner.endDate).toISOString().slice(0, 16)
-					: ''
-			}
-		});
+	const onSubmit = (data: any) => {
+		if (admin.data?.id) {
+			updateBannerMutation(data, {
+				onSuccess: () => {
+					router.push('/banners');
+				}
+			});
+		}
+	};
 
 	const form = useForm({
-		resolver: zodResolver(bannerSchema),
+		resolver: bannerEditResolver,
 		defaultValues: {
 			...banner,
-			startDate: banner?.startDate
-				? new Date(banner.startDate).toISOString().slice(0, 16)
-				: '',
-			endDate: banner?.endDate
-				? new Date(banner.endDate).toISOString().slice(0, 16)
-				: ''
+			startDate: banner?.startDate ? formatDatetimeLocal(banner.startDate) : '',
+			endDate: banner?.endDate ? formatDatetimeLocal(banner.endDate) : ''
 		}
 	});
-	const watched = form.watch();
-
-	console.log({ watched });
 
 	return {
 		banner,
-		updateBanner,
+		updateBanner: updateBannerMutation,
 		isUpdating,
-		form
+		form,
+		onSubmit
 	};
 };

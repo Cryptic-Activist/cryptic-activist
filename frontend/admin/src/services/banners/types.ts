@@ -6,4 +6,5 @@ export type CreateBannerParams = {
 	pages: string[];
 	type: string;
 	targetWebsite: string;
+	adminId: string;
 };

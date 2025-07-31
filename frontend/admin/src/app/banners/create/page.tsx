@@ -12,8 +12,7 @@ import { useState } from 'react';
 import { withAuth } from '@/hoc/withAuth';
 
 const CreateBannerPage = () => {
-	const router = useRouter();
-	const { createBannerMutate, isCreating, form } = useBanner();
+	const { onSubmit, isCreating, form } = useBanner();
 	const {
 		register,
 		handleSubmit,
@@ -25,15 +24,6 @@ const CreateBannerPage = () => {
 
 	const targetWebsite = watch('targetWebsite');
 	const pages = watch('pages');
-
-	const onSubmit = (data: any) => {
-		console.log({ data });
-		createBannerMutate(data, {
-			onSuccess: () => {
-				router.push('/banners');
-			}
-		});
-	};
 
 	const routes = targetWebsite === 'public' ? publicRoutes : adminRoutes;
 
@@ -87,9 +77,9 @@ const CreateBannerPage = () => {
 					<div className={styles.formGroup}>
 						<label className={styles.formLabel}>Type</label>
 						<select className={styles.formControl} {...register('type')}>
-							<option value="announcement">Announcement</option>
-							<option value="warning">Warning</option>
-							<option value="new_feature">New Feature</option>
+							<option value="ANNOUNCEMENT">Announcement</option>
+							<option value="WARNING">Warning</option>
+							<option value="NEW_FEATURE">New Feature</option>
 						</select>
 					</div>
 					<div className={styles.formGroup}>

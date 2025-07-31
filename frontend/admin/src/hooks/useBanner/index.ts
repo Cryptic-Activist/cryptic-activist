@@ -6,12 +6,18 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { BACKEND } from '@/constants';
 import { bannerResolver } from './zod';
 import { fetchPost } from '@/services/axios';
+import useAdmin from '../useAdmin';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 
 export const useBanner = () => {
+	const router = useRouter();
+	const { admin } = useAdmin();
+
 	const { data: banners, refetch } = useQuery({
 		queryKey: ['banners'],
-		queryFn: getBanners
+		queryFn: getBanners,
+		enabled: !!admin?.data?.id
 	});
 
 	const { mutate: createBannerMutate, isPending: isCreating } = useMutation({
@@ -30,13 +36,26 @@ export const useBanner = () => {
 		}
 	});
 
+	const onSubmit = (data: any) => {
+		if (admin.data?.id) {
+			createBannerMutate(
+				{ ...data, adminId: admin.data?.id },
+				{
+					onSuccess: () => {
+						router.push('/banners');
+					}
+				}
+			);
+		}
+	};
+
 	const form = useForm({
 		resolver: bannerResolver,
 		defaultValues: {
 			content: '',
 			targetWebsite: 'public',
 			pages: [],
-			type: 'announcement',
+			type: 'ANNOUNCEMENT',
 			startDate: '',
 			endDate: '',
 			isActive: true
@@ -48,6 +67,7 @@ export const useBanner = () => {
 		createBannerMutate,
 		isCreating,
 		deleteBanner,
-		form
+		form,
+		onSubmit
 	};
 };

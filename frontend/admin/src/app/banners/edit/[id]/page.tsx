@@ -8,15 +8,15 @@ import { useParams, useRouter } from 'next/navigation';
 import MultiSelect from '@/components/MultiSelect';
 import React from 'react';
 import RichTextEditor from '@/components/RichTextEditor';
+import { formatDatetimeLocal } from '@/utils/date';
 import styles from '../../banners.module.scss';
 import { useEditBanner } from '@/hooks/useEditBanner';
 import { withAuth } from '@/hoc/withAuth';
 
 const EditBannerPage = () => {
 	const params = useParams();
-	const router = useRouter();
 	const id = params?.id as string;
-	const { banner, updateBanner, isUpdating, form } = useEditBanner(id);
+	const { banner, isUpdating, form, onSubmit } = useEditBanner(id);
 	const {
 		register,
 		handleSubmit,
@@ -37,17 +37,16 @@ const EditBannerPage = () => {
 				blocksFromHTML.entityMap
 			);
 			setEditorState(EditorState.createWithContent(state));
-			form.reset(banner);
+
+			const newStartDate = formatDatetimeLocal(banner.startDate);
+			const newEndDate = formatDatetimeLocal(banner.endDate);
+			form.reset({
+				...banner,
+				startDate: newStartDate,
+				endDate: banner.endDate ? newEndDate : ''
+			});
 		}
 	}, [banner, form]);
-
-	const onSubmit = (data: any) => {
-		updateBanner(data, {
-			onSuccess: () => {
-				router.push('/banners');
-			}
-		});
-	};
 
 	const routes = targetWebsite === 'public' ? publicRoutes : adminRoutes;
 
@@ -103,9 +102,9 @@ const EditBannerPage = () => {
 					<div className={styles.formGroup}>
 						<label className={styles.formLabel}>Type</label>
 						<select className={styles.formControl} {...register('type')}>
-							<option value="announcement">Announcement</option>
-							<option value="warning">Warning</option>
-							<option value="new_feature">New Feature</option>
+							<option value="ANNOUNCEMENT">Announcement</option>
+							<option value="WARNING">Warning</option>
+							<option value="NEW_FEATURE">New Feature</option>
 						</select>
 					</div>
 					<div className={styles.formGroup}>

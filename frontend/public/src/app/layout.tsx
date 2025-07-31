@@ -7,11 +7,9 @@ import {
   NavigationBar,
   Toast,
 } from '@/layouts';
+import { Analytics, BannerDisplay, QueryProvider } from '@/components';
 
 import AllDrawers from '@/layouts/drawers/AllDrawers';
-import { Analytics } from '@/components';
-import BannerDisplay from '@/components/BannerDisplay';
-import { QueryProvider } from '@/components';
 import { Roboto } from 'next/font/google';
 import styles from './layout.module.scss';
 

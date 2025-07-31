@@ -1,4 +1,4 @@
-import { fetchGet, fetchPost } from '../axios';
+import { fetchGet, fetchPost, fetchPut } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
@@ -69,4 +69,47 @@ export const getBanner = async (id: string) => {
 	}
 
 	return response.data;
+};
+
+export const updateBanner = async (id: string, data: CreateBannerParams) => {
+	const accessToken = getCookie('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const { startDate, endDate, ...rest } = data;
+
+	const isoStartDate = new Date(startDate).toISOString();
+	const isoEndDate = endDate ? new Date(endDate).toISOString() : undefined;
+
+	const response = await fetchPut(
+		`${BACKEND}/banners/${id}`,
+		{
+			...rest,
+			startDate: isoStartDate,
+			...(isoEndDate && { endDate: isoEndDate })
+		},
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};
+
+export const fetchBanners = async (pathname: string) => {
+	const response = await fetchGet(
+		`${BACKEND}/banners/display?targetWebsite=admin&currentPage=${pathname}`
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data && response.data?.length > 0 ? response.data[0] : null;
 };
