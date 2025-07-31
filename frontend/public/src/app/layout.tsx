@@ -7,10 +7,9 @@ import {
   NavigationBar,
   Toast,
 } from '@/layouts';
+import { Analytics, BannerDisplay, QueryProvider } from '@/components';
 
 import AllDrawers from '@/layouts/drawers/AllDrawers';
-import { Analytics } from '@/components';
-import { QueryProvider } from '@/components';
 import { Roboto } from 'next/font/google';
 import styles from './layout.module.scss';
 
@@ -42,6 +41,7 @@ export default function RootLayout({
           <AllDrawers />
           <NavigationBar />
           <Toast />
+          <BannerDisplay />
           <main className={styles.main}>{children}</main>
           <Footer />
         </QueryProvider>

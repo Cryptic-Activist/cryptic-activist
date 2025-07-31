@@ -80,6 +80,7 @@ model Admin {
   smartContract          SmartContract[]
   wallets                AdminWallet[]
   refreshTokens          RefreshToken[]
+  banner                 Banner[]
 
   @@map("admins")
 }
@@ -1033,4 +1034,27 @@ model AdminWallet {
   createdAt DateTime @default(now())
 
   @@map("admin_wallets")
+}
+
+enum BannerType {
+  WARNING
+  NEW_FEATURE
+  ANNOUNCEMENT
+}
+
+model Banner {
+  id            String     @id @default(uuid())
+  content       String     @db.Text
+  targetWebsite String
+  pages         String[]
+  type          BannerType
+  startDate     DateTime   @db.Timestamp()
+  endDate       DateTime?  @db.Timestamp()
+  isActive      Boolean    @default(true)
+  publishedBy   Admin      @relation(fields: [publishedById], references: [id])
+  publishedById String
+  createdAt     DateTime   @default(now()) @db.Timestamp()
+  updatedAt     DateTime   @updatedAt
+
+  @@map("banners")
 }

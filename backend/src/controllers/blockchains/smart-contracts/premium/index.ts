@@ -42,7 +42,6 @@ export const getPremiumDetails = async (req: Request, res: Response) => {
 
     res.status(200).json(details);
   } catch (error) {
-    console.log({ error });
     res.status(400).json(error);
   }
 };
@@ -224,7 +223,6 @@ export const getPremiumSmartContractBalance = async (
 
     res.status(200).json(balance);
   } catch (error) {
-    console.log({ error });
     res.status(400).json(error);
   }
 };

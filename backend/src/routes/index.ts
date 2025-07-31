@@ -3,6 +3,7 @@ import { Application, static as static_ } from 'express';
 import { IS_DEVELOPMENT } from '@/constants';
 import admins from './admins';
 import altcha from './altcha';
+import banners from './banners';
 import blockchains from './blockchains';
 import chats from './chats';
 import cryptocurrencies from './cryptocurrencies';
@@ -23,6 +24,7 @@ import vendors from './vendors';
 
 export default (app: Application): void => {
   app.use('/admins', admins);
+  app.use('/banners', banners);
   app.use('/chats', chats);
   app.use('/cryptocurrencies', cryptocurrencies);
   app.use('/disputes', disputes);

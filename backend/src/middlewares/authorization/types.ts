@@ -1,5 +1,6 @@
 export type Role =
   | 'SUPER_ADMIN'
+  | 'SENIOR_ADMIN'
   | 'MODERATOR'
   | 'KYC_REVIEWER'
   | 'DISPUTE_MANAGER'

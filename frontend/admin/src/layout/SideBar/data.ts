@@ -90,5 +90,11 @@ export const sidebarItems: SideBarData[] = [
 		label: 'Platform Settings',
 		icon: 'FaGears',
 		roles: ['SUPER_ADMIN']
+	},
+	{
+		href: '/banners',
+		label: 'Banners',
+		icon: 'FaFlag',
+		roles: ['SUPER_ADMIN']
 	}
 ];

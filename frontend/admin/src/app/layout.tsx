@@ -1,12 +1,13 @@
 import './global.css';
 
+import { BannerDisplay, QueryProvider } from '@/components';
+
 import AllModals from '@/layout/modals/AllModals';
 import Footer from '@/layout/Footer';
 import Head from 'next/head';
 import { InitialSettings } from '@/layout';
 import { Montserrat } from 'next/font/google';
 import NavigationBar from '@/layout/NavigationBar';
-import { QueryProvider } from '@/components';
 import SideBar from '@/layout/SideBar';
 import layout from './layout.module.scss';
 
@@ -24,6 +25,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 					<AllModals />
 					<InitialSettings />
 					<NavigationBar />
+					<BannerDisplay />
 					<main className={layout.main}>
 						<SideBar />
 						<div className={layout.container}>{children}</div>
