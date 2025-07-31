@@ -44,10 +44,34 @@ export const useEditBanner = (id: string) => {
 		}
 	});
 
+	if (banner?.startDate)
+		console.log({
+			defaultValues: {
+				...banner,
+				startDate: banner?.startDate
+					? new Date(banner.startDate).toISOString().slice(0, 16)
+					: '',
+				endDate: banner?.endDate
+					? new Date(banner.endDate).toISOString().slice(0, 16)
+					: ''
+			}
+		});
+
 	const form = useForm({
 		resolver: zodResolver(bannerSchema),
-		defaultValues: banner
+		defaultValues: {
+			...banner,
+			startDate: banner?.startDate
+				? new Date(banner.startDate).toISOString().slice(0, 16)
+				: '',
+			endDate: banner?.endDate
+				? new Date(banner.endDate).toISOString().slice(0, 16)
+				: ''
+		}
 	});
+	const watched = form.watch();
+
+	console.log({ watched });
 
 	return {
 		banner,

@@ -1047,10 +1047,10 @@ model Banner {
   targetWebsite String
   pages         String[]
   type          BannerType
-  startDate     DateTime
-  endDate       DateTime?
+  startDate     DateTime   @db.Timestamp()
+  endDate       DateTime?  @db.Timestamp()
   isActive      Boolean    @default(true)
-  createdAt     DateTime   @default(now())
+  createdAt     DateTime   @default(now()) @db.Timestamp()
   updatedAt     DateTime   @updatedAt
 
   @@map("banners")
