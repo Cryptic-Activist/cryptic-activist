@@ -52,3 +52,21 @@ export const getBanners = async () => {
 
 	return response.data;
 };
+
+export const getBanner = async (id: string) => {
+	const accessToken = getCookie('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(`${BACKEND}/banners/${id}`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};

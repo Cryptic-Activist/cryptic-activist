@@ -56,7 +56,7 @@ const CreateBannerPage = () => {
 								);
 							}}
 						/>
-						{errors.content && (
+						{errors.content?.message && (
 							<p className={styles.error}>{errors.content.message}</p>
 						)}
 					</div>
