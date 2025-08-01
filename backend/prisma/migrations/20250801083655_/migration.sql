@@ -272,7 +272,7 @@ CREATE TABLE "offers" (
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP,
     "vendorId" TEXT NOT NULL,
-    "vendorWalletAddress" TEXT NOT NULL,
+    "vendorWalletId" TEXT NOT NULL,
     "cryptocurrencyId" TEXT NOT NULL,
     "paymentMethodId" TEXT NOT NULL,
     "paymentDetailsId" TEXT NOT NULL,
@@ -396,7 +396,8 @@ CREATE TABLE "smart_contracts" (
     "chainId" TEXT NOT NULL,
     "version" TEXT NOT NULL,
     "deployedById" TEXT NOT NULL,
-    "deployerAddress" TEXT NOT NULL,
+    "deployerWalletId" TEXT NOT NULL,
+    "platformWalletId" TEXT NOT NULL,
     "deploymentHash" TEXT,
     "deploymentBlockHeight" BIGINT,
     "gasUsed" BIGINT,
@@ -412,9 +413,9 @@ CREATE TABLE "smart_contracts" (
 -- CreateTable
 CREATE TABLE "trade_escrow_details" (
     "id" TEXT NOT NULL,
-    "arbitratorWallet" TEXT NOT NULL,
-    "buyerWallet" TEXT NOT NULL,
-    "sellerWallet" TEXT NOT NULL,
+    "arbitratorWalletId" TEXT NOT NULL,
+    "buyerWalletId" TEXT NOT NULL,
+    "sellerWalletId" TEXT NOT NULL,
     "feeRate" DECIMAL(10,8) NOT NULL,
     "profitMargin" DECIMAL(10,8) NOT NULL,
     "tradeDurationInSeconds" INTEGER NOT NULL,
@@ -433,9 +434,9 @@ CREATE TABLE "trades" (
     "id" TEXT NOT NULL,
     "paymentReceiptId" TEXT,
     "vendorId" TEXT NOT NULL,
-    "vendorWalletAddress" TEXT,
+    "vendorWalletId" TEXT,
     "traderId" TEXT NOT NULL,
-    "traderWalletAddress" TEXT NOT NULL,
+    "traderWalletId" TEXT,
     "buyerId" TEXT NOT NULL,
     "sellerId" TEXT NOT NULL,
     "offerId" TEXT NOT NULL,
@@ -720,11 +721,20 @@ CREATE TABLE "platform_settings" (
 );
 
 -- CreateTable
-CREATE TABLE "user_wallets" (
+CREATE TABLE "wallets" (
     "id" TEXT NOT NULL,
     "address" TEXT NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "wallets_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_wallets" (
+    "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "walletId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "user_wallets_pkey" PRIMARY KEY ("id")
 );
@@ -732,9 +742,9 @@ CREATE TABLE "user_wallets" (
 -- CreateTable
 CREATE TABLE "admin_wallets" (
     "id" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
     "adminId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "walletId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "admin_wallets_pkey" PRIMARY KEY ("id")
 );
@@ -749,9 +759,10 @@ CREATE TABLE "banners" (
     "startDate" TIMESTAMP NOT NULL,
     "endDate" TIMESTAMP,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "adminId" TEXT NOT NULL,
+    "publishedById" TEXT NOT NULL,
+    "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP NOT NULL,
 
     CONSTRAINT "banners_pkey" PRIMARY KEY ("id")
 );
@@ -894,10 +905,13 @@ CREATE UNIQUE INDEX "refresh_tokens_token_key" ON "refresh_tokens"("token");
 CREATE UNIQUE INDEX "platform_settings_key_key" ON "platform_settings"("key");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_wallets_address_key" ON "user_wallets"("address");
+CREATE UNIQUE INDEX "wallets_address_key" ON "wallets"("address");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "admin_wallets_address_key" ON "admin_wallets"("address");
+CREATE UNIQUE INDEX "user_wallets_userId_walletId_key" ON "user_wallets"("userId", "walletId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "admin_wallets_adminId_walletId_key" ON "admin_wallets"("adminId", "walletId");
 
 -- CreateIndex
 CREATE INDEX "_DisputeEvidenceToDisputeEvidenceRequest_B_index" ON "_DisputeEvidenceToDisputeEvidenceRequest"("B");
@@ -957,6 +971,9 @@ ALTER TABLE "offers" ADD CONSTRAINT "offers_chainId_fkey" FOREIGN KEY ("chainId"
 ALTER TABLE "offers" ADD CONSTRAINT "offers_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "offers" ADD CONSTRAINT "offers_vendorWalletId_fkey" FOREIGN KEY ("vendorWalletId") REFERENCES "user_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "offers" ADD CONSTRAINT "offers_cryptocurrencyId_fkey" FOREIGN KEY ("cryptocurrencyId") REFERENCES "cryptocurrencies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -996,13 +1013,34 @@ ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_chainId_fkey" FORE
 ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_deployedById_fkey" FOREIGN KEY ("deployedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_deployerWalletId_fkey" FOREIGN KEY ("deployerWalletId") REFERENCES "admin_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "smart_contracts" ADD CONSTRAINT "smart_contracts_platformWalletId_fkey" FOREIGN KEY ("platformWalletId") REFERENCES "admin_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trade_escrow_details" ADD CONSTRAINT "trade_escrow_details_arbitratorWalletId_fkey" FOREIGN KEY ("arbitratorWalletId") REFERENCES "admin_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trade_escrow_details" ADD CONSTRAINT "trade_escrow_details_buyerWalletId_fkey" FOREIGN KEY ("buyerWalletId") REFERENCES "user_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trade_escrow_details" ADD CONSTRAINT "trade_escrow_details_sellerWalletId_fkey" FOREIGN KEY ("sellerWalletId") REFERENCES "user_wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_paymentReceiptId_fkey" FOREIGN KEY ("paymentReceiptId") REFERENCES "payment_receipts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_vendorId_fkey" FOREIGN KEY ("vendorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_vendorWalletId_fkey" FOREIGN KEY ("vendorWalletId") REFERENCES "user_wallets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "trades" ADD CONSTRAINT "trades_traderWalletId_fkey" FOREIGN KEY ("traderWalletId") REFERENCES "user_wallets"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "trades" ADD CONSTRAINT "trades_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -1146,10 +1184,16 @@ ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_adminId_fkey" FOREIG
 ALTER TABLE "user_wallets" ADD CONSTRAINT "user_wallets_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "user_wallets" ADD CONSTRAINT "user_wallets_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "admin_wallets" ADD CONSTRAINT "admin_wallets_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "banners" ADD CONSTRAINT "banners_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "admin_wallets" ADD CONSTRAINT "admin_wallets_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banners" ADD CONSTRAINT "banners_publishedById_fkey" FOREIGN KEY ("publishedById") REFERENCES "admins"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_DisputeEvidenceToDisputeEvidenceRequest" ADD CONSTRAINT "_DisputeEvidenceToDisputeEvidenceRequest_A_fkey" FOREIGN KEY ("A") REFERENCES "dispute_evidences"("id") ON DELETE CASCADE ON UPDATE CASCADE;

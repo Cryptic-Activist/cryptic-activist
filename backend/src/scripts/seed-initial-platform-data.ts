@@ -921,6 +921,25 @@ const main = async () => {
         data: { languageId: language.id, userId: newTrader.id },
       });
 
+      const newWallet1 = await tx.wallet.upsert({
+        where: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+        create: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+        update: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+      });
+
+      const traderWallet = await tx.userWallet.create({
+        data: {
+          userId: newTrader.id,
+          walletId: newWallet1.id,
+        },
+      });
+
       // Create first vendor user
       const vendorPassword = 'password';
       const vendorGeneratedSalt = await bcrypt.genSalt(10);
@@ -950,6 +969,25 @@ const main = async () => {
 
       await tx.userLanguage.create({
         data: { languageId: language.id, userId: newVendor.id },
+      });
+
+      const newWallet2 = await tx.wallet.upsert({
+        where: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+        create: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+        update: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+      });
+
+      const vendorWallet = await tx.userWallet.create({
+        data: {
+          userId: newVendor.id,
+          walletId: newWallet2.id,
+        },
       });
 
       // Get references for offer creation
@@ -986,13 +1024,6 @@ const main = async () => {
         },
       });
 
-      const traderWallet = await tx.userWallet.create({
-        data: {
-          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
-          userId: newTrader.id,
-        },
-      });
-
       // Create first trader offer with chain support
       const newTraderOffer = await tx.offer.create({
         data: {
@@ -1013,13 +1044,6 @@ const main = async () => {
           timeLimit: 60 * 60,
           vendorWalletId: traderWallet.id,
           paymentMethodId: paymentMethod!.id,
-        },
-      });
-
-      const vendorWallet = await tx.userWallet.create({
-        data: {
-          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
-          userId: newVendor.id,
         },
       });
 
