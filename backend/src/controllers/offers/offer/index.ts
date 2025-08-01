@@ -252,7 +252,7 @@ export const getEditOffer = async (req: Request, res: Response) => {
         tags: true,
         terms: true,
         timeLimit: true,
-        vendorWalletAddress: true,
+        vendorWallet: true,
       },
     });
 

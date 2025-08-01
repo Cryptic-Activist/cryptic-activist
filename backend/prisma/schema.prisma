@@ -295,36 +295,37 @@ model Chain {
 }
 
 model Offer {
-  id                  String          @id @default(uuid())
-  offerType           String
-  pricingType         String
-  listAt              Decimal         @db.Decimal(30, 10)
-  limitMin            Decimal         @db.Decimal(30, 10)
-  limitMax            Decimal         @db.Decimal(30, 10)
-  timeLimit           Int
-  tags                String[]
-  label               String
-  terms               String
-  averageTradeSpeed   Int?
-  instructions        String
-  kycOnly             Boolean         @default(false) @db.Boolean
-  chain               Chain           @relation("offer", fields: [chainId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  chainId             String
-  deletedAt           DateTime?       @db.Timestamp()
-  createdAt           DateTime?       @default(now()) @db.Timestamp()
-  updatedAt           DateTime?       @updatedAt @db.Timestamp()
-  vendor              User            @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
-  vendorId            String
-  vendorWalletAddress String
-  cryptocurrency      Cryptocurrency  @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  cryptocurrencyId    String
-  paymentMethod       PaymentMethod   @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  paymentMethodId     String
-  paymentDetails      PaymentDetails? @relation("offer", fields: [paymentDetailsId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  paymentDetailsId    String
-  fiat                Fiat            @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fiatId              String
-  trades              Trade[]         @relation("tradeOffer")
+  id                String          @id @default(uuid())
+  offerType         String
+  pricingType       String
+  listAt            Decimal         @db.Decimal(30, 10)
+  limitMin          Decimal         @db.Decimal(30, 10)
+  limitMax          Decimal         @db.Decimal(30, 10)
+  timeLimit         Int
+  tags              String[]
+  label             String
+  terms             String
+  averageTradeSpeed Int?
+  instructions      String
+  kycOnly           Boolean         @default(false) @db.Boolean
+  chain             Chain           @relation("offer", fields: [chainId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  chainId           String
+  deletedAt         DateTime?       @db.Timestamp()
+  createdAt         DateTime?       @default(now()) @db.Timestamp()
+  updatedAt         DateTime?       @updatedAt @db.Timestamp()
+  vendor            User            @relation("offer", fields: [vendorId], references: [id], onUpdate: Cascade)
+  vendorId          String
+  vendorWallet      UserWallet      @relation(fields: [vendorWalletId], references: [id])
+  vendorWalletId    String
+  cryptocurrency    Cryptocurrency  @relation("offer", fields: [cryptocurrencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  cryptocurrencyId  String
+  paymentMethod     PaymentMethod   @relation("offer", fields: [paymentMethodId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentMethodId   String
+  paymentDetails    PaymentDetails? @relation("offer", fields: [paymentDetailsId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  paymentDetailsId  String
+  fiat              Fiat            @relation("offer", fields: [fiatId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fiatId            String
+  trades            Trade[]         @relation("tradeOffer")
 
   @@map("offers")
 }
@@ -491,23 +492,23 @@ model Tier {
 }
 
 model SmartContract {
-  id                    String   @id @default(uuid())
+  id                    String      @id @default(uuid())
   address               String // Deployed contract address
   chainId               String
-  chain                 Chain    @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
+  chain                 Chain       @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
   version               String // Optional versioning (e.g., "v1.0.0")
   deployedById          String // Admin or system user who deployed it
-  deployedBy            Admin    @relation(fields: [deployedById], references: [id])
-  deployerAddress       String
+  deployedBy            Admin       @relation(fields: [deployedById], references: [id])
+  deployerWallet        AdminWallet @relation(fields: [deployerWalletId], references: [id])
+  deployerWalletId      String
   deploymentHash        String? // Transaction hash
   deploymentBlockHeight BigInt? // Transaction block height
   gasUsed               BigInt?
   gasPrice              BigInt?
-  deployedAt            DateTime @default(now()) @db.Timestamp()
-  isActive              Boolean  @default(true) // Useful for versioned contracts
+  deployedAt            DateTime    @default(now()) @db.Timestamp()
+  isActive              Boolean     @default(true) // Useful for versioned contracts
   artifactUrl           String
-
-  metadata Json? // Arbitrary extra data (tags, etc.)
+  metadata              Json? // Arbitrary extra data (tags, etc.)
 
   @@index([address])
   @@map("smart_contracts")
@@ -524,17 +525,20 @@ enum TradeStatus {
 }
 
 model TradeEscrowDetails {
-  id                        String  @id @default(uuid())
-  arbitratorWallet          String
-  buyerWallet               String
-  sellerWallet              String
-  feeRate                   Decimal @db.Decimal(10, 8)
-  profitMargin              Decimal @db.Decimal(10, 8)
+  id                        String      @id @default(uuid())
+  arbitratorWallet          AdminWallet @relation(fields: [arbitratorWalletId], references: [id])
+  arbitratorWalletId        String
+  buyerWallet               UserWallet  @relation("buyerWalletTradeEscrowDetails", fields: [buyerWalletId], references: [id])
+  buyerWalletId             String
+  sellerWallet              UserWallet  @relation("sellerWalletTradeEscrowDetails", fields: [sellerWalletId], references: [id])
+  sellerWalletId            String
+  feeRate                   Decimal     @db.Decimal(10, 8)
+  profitMargin              Decimal     @db.Decimal(10, 8)
   tradeDurationInSeconds    Int
-  tradeAmount               Decimal @db.Decimal(38, 18)
-  buyerCollateral           Decimal @db.Decimal(38, 18)
-  sellerCollateral          Decimal @db.Decimal(38, 18)
-  sellerTotalFund           Decimal @db.Decimal(38, 18)
+  tradeAmount               Decimal     @db.Decimal(38, 18)
+  buyerCollateral           Decimal     @db.Decimal(38, 18)
+  sellerCollateral          Decimal     @db.Decimal(38, 18)
+  sellerTotalFund           Decimal     @db.Decimal(38, 18)
   blockchainTradeId         String // Trade ID on the blockchain
   blockchainTransactionHash String? // Hash of the transaction on the blockchain
   trade                     Trade[]
@@ -548,10 +552,12 @@ model Trade {
   paymentReceiptId          String?
   vendor                    User                @relation("vendorTrade", fields: [vendorId], references: [id])
   vendorId                  String
-  vendorWalletAddress       String?
+  vendorWallet              UserWallet?         @relation("tradeVendorWallet", fields: [vendorWalletId], references: [id])
+  vendorWalletId            String?
   trader                    User                @relation("traderTrade", fields: [traderId], references: [id])
   traderId                  String
-  traderWalletAddress       String
+  traderWallet              UserWallet?         @relation("tradeTraderWallet", fields: [traderWalletId], references: [id])
+  traderWalletId            String?
   buyer                     User                @relation("buyerTrade", fields: [buyerId], references: [id])
   buyerId                   String
   seller                    User                @relation("sellerTrade", fields: [sellerId], references: [id])
@@ -1017,21 +1023,28 @@ model PlatformSetting {
 }
 
 model UserWallet {
-  id        String   @id @default(uuid())
-  address   String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  id                       String               @id @default(uuid())
+  address                  String               @unique
+  user                     User                 @relation(fields: [userId], references: [id])
+  userId                   String
+  createdAt                DateTime             @default(now()) @db.Timestamp()
+  offer                    Offer[]
+  buyerTradeEscrowDetails  TradeEscrowDetails[] @relation("buyerWalletTradeEscrowDetails")
+  sellerTradeEscrowDetails TradeEscrowDetails[] @relation("sellerWalletTradeEscrowDetails")
+  vendorTrade              Trade[]              @relation("tradeVendorWallet")
+  traderTrade              Trade[]              @relation("tradeTraderWallet")
 
   @@map("user_wallets")
 }
 
 model AdminWallet {
-  id        String   @id @default(uuid())
-  address   String   @unique
-  adminId   String
-  admin     Admin    @relation(fields: [adminId], references: [id])
-  createdAt DateTime @default(now())
+  id                 String               @id @default(uuid())
+  address            String               @unique
+  admin              Admin                @relation(fields: [adminId], references: [id])
+  adminId            String
+  createdAt          DateTime             @default(now()) @db.Timestamp()
+  tradeEscrowDetails TradeEscrowDetails[]
+  SmartContract      SmartContract[]
 
   @@map("admin_wallets")
 }

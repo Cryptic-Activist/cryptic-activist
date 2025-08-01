@@ -986,6 +986,13 @@ const main = async () => {
         },
       });
 
+      const traderWallet = await tx.userWallet.create({
+        data: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+          userId: newTrader.id,
+        },
+      });
+
       // Create first trader offer with chain support
       const newTraderOffer = await tx.offer.create({
         data: {
@@ -1004,8 +1011,15 @@ const main = async () => {
           pricingType: 'market',
           terms: 'Fast and secure ETH trading on Ethereum mainnet',
           timeLimit: 60 * 60,
-          vendorWalletAddress: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+          vendorWalletId: traderWallet.id,
           paymentMethodId: paymentMethod!.id,
+        },
+      });
+
+      const vendorWallet = await tx.userWallet.create({
+        data: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          userId: newVendor.id,
         },
       });
 
@@ -1027,7 +1041,7 @@ const main = async () => {
           pricingType: 'market',
           terms: 'Professional ETH trading with guaranteed execution',
           timeLimit: 60 * 60,
-          vendorWalletAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          vendorWalletId: vendorWallet.id,
           paymentMethodId: paymentMethod!.id,
         },
       });
@@ -1058,7 +1072,7 @@ const main = async () => {
             pricingType: 'fixed',
             terms: 'Low-cost USDT trading on Polygon network',
             timeLimit: 30 * 60,
-            vendorWalletAddress: '0x742d35Cc6634C0532925a3b8D0b4E19f95c3c8c3',
+            vendorWalletId: vendorWallet.id,
             paymentMethodId: paymentMethod!.id,
           },
         });
