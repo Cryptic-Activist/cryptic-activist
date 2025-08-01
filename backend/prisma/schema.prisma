@@ -1024,11 +1024,22 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+model Wallet {
+  id           String        @id @default(uuid())
+  address      String        @unique
+  createdAt    DateTime      @default(now()) @db.Timestamp()
+  userWallets  UserWallet[]
+  adminWallets AdminWallet[]
+
+  @@map("wallets")
+}
+
 model UserWallet {
   id                       String               @id @default(uuid())
-  address                  String               @unique
   user                     User                 @relation(fields: [userId], references: [id])
   userId                   String
+  wallet                   Wallet               @relation(fields: [walletId], references: [id])
+  walletId                 String
   createdAt                DateTime             @default(now()) @db.Timestamp()
   offer                    Offer[]
   buyerTradeEscrowDetails  TradeEscrowDetails[] @relation("buyerWalletTradeEscrowDetails")
@@ -1036,19 +1047,22 @@ model UserWallet {
   vendorTrade              Trade[]              @relation("tradeVendorWallet")
   traderTrade              Trade[]              @relation("tradeTraderWallet")
 
+  @@unique([userId, walletId])
   @@map("user_wallets")
 }
 
 model AdminWallet {
   id                          String               @id @default(uuid())
-  address                     String               @unique
   admin                       Admin                @relation(fields: [adminId], references: [id])
   adminId                     String
+  wallet                      Wallet               @relation(fields: [walletId], references: [id])
+  walletId                    String
   createdAt                   DateTime             @default(now()) @db.Timestamp()
   tradeEscrowDetails          TradeEscrowDetails[]
   smartContractDeployerWallet SmartContract[]      @relation("smartContractDeployerWallet")
   smartContractPlatformWallet SmartContract[]      @relation("smartContractPlatformWallet")
 
+  @@unique([adminId, walletId])
   @@map("admin_wallets")
 }
 
