@@ -499,8 +499,10 @@ model SmartContract {
   version               String // Optional versioning (e.g., "v1.0.0")
   deployedById          String // Admin or system user who deployed it
   deployedBy            Admin       @relation(fields: [deployedById], references: [id])
-  deployerWallet        AdminWallet @relation(fields: [deployerWalletId], references: [id])
+  deployerWallet        AdminWallet @relation("smartContractDeployerWallet", fields: [deployerWalletId], references: [id])
   deployerWalletId      String
+  platformWallet        AdminWallet @relation("smartContractPlatformWallet", fields: [platformWalletId], references: [id])
+  platformWalletId      String
   deploymentHash        String? // Transaction hash
   deploymentBlockHeight BigInt? // Transaction block height
   gasUsed               BigInt?
@@ -1038,13 +1040,14 @@ model UserWallet {
 }
 
 model AdminWallet {
-  id                 String               @id @default(uuid())
-  address            String               @unique
-  admin              Admin                @relation(fields: [adminId], references: [id])
-  adminId            String
-  createdAt          DateTime             @default(now()) @db.Timestamp()
-  tradeEscrowDetails TradeEscrowDetails[]
-  SmartContract      SmartContract[]
+  id                          String               @id @default(uuid())
+  address                     String               @unique
+  admin                       Admin                @relation(fields: [adminId], references: [id])
+  adminId                     String
+  createdAt                   DateTime             @default(now()) @db.Timestamp()
+  tradeEscrowDetails          TradeEscrowDetails[]
+  smartContractDeployerWallet SmartContract[]      @relation("smartContractDeployerWallet")
+  smartContractPlatformWallet SmartContract[]      @relation("smartContractPlatformWallet")
 
   @@map("admin_wallets")
 }

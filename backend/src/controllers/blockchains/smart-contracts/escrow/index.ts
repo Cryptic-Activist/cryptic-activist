@@ -69,7 +69,7 @@ export const deployEscrowERC20SmartContract = async (
       defaultFeeRate,
       defaultProfitMargin,
       chainId,
-      platformWallet,
+      platformWalletId,
       adminId,
     } = req.body;
 
@@ -106,11 +106,19 @@ export const deployEscrowERC20SmartContract = async (
         throw new Error('Chain RPC URL not found');
       }
 
+      const platformWallet = await tx.adminWallet.findUnique({
+        where: { id: platformWalletId },
+      });
+
+      if (!platformWallet) {
+        throw new Error('Unable to find platform wallet');
+      }
+
       try {
         const deployed = await deployEscrowERC20({
           defaultFeeRate,
           defaultProfitMargin,
-          platformWallet,
+          platformWallet: platformWallet.address,
           rpcUrl: chain.rpcUrl,
         });
 
@@ -122,6 +130,19 @@ export const deployEscrowERC20SmartContract = async (
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
         }
+
+        // const deployerWallet = await prisma.adminWallet.upsert({
+        //   where: {
+        //     address: deployed.deployerAddress,
+        //   },
+        //   create: {
+        //     address: deployed.deployerAddress,
+        //     adminId: admin.id
+        //   },
+        //   update: {
+        //     depl
+        //   }
+        // });
 
         await tx.smartContract.updateMany({
           where: {
