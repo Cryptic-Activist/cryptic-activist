@@ -6,6 +6,7 @@ import { Chat } from '@/socket/handlers';
 import ChatMessage from '@/models/ChatMessage';
 import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { fetchGet } from '@/services/axios';
+import { findOrCreateUserWallet } from '@/services/wallet';
 import { getCoinPrice } from '@/services/coinGecko';
 import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
@@ -52,6 +53,11 @@ export async function createTradeController(req: Request, res: Response) {
       const buyerId =
         offer?.offerType === 'sell' ? body.tradeId : offer?.vendorId;
 
+      const traderWallet = await findOrCreateUserWallet(
+        body.traderWalletAddress,
+        body.traderId,
+      );
+
       const newTrade = await tx.trade.create({
         data: {
           traderId: body.traderId,
@@ -64,7 +70,7 @@ export async function createTradeController(req: Request, res: Response) {
           status: 'PENDING',
           startedAt: new Date(),
           paymentMethodId: body.paymentMethodId,
-          traderWalletAddress: body.traderWalletAddress,
+          traderWalletId: traderWallet.id,
           exchangeRate: new Decimal(exchangeRate),
           buyerId,
           sellerId,
@@ -179,8 +185,24 @@ export async function getTradeController(req: Request, res: Response) {
         exchangeRate: true,
         createdAt: true,
         tradeEscrowDetails: true,
-        traderWalletAddress: true,
-        vendorWalletAddress: true,
+        traderWallet: {
+          select: {
+            wallet: {
+              select: {
+                address: true,
+              },
+            },
+          },
+        },
+        vendorWallet: {
+          select: {
+            wallet: {
+              select: {
+                address: true,
+              },
+            },
+          },
+        },
         traderRejectedFunding: true,
         vendorRejectedFunding: true,
         buyerId: true,

@@ -98,3 +98,24 @@ export const deployPremiumSmartContract = async (
 
 	return response.data;
 };
+
+export const getAdminArbitratorWallets = async (adminId: string) => {
+	const accessToken = getCookie('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchGet(
+		`${BACKEND}/blockchains/wallet/admin/${adminId}/arbitrator/wallets`,
+		{
+			Authorization: getBearerToken(accessToken)
+		}
+	);
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
+};

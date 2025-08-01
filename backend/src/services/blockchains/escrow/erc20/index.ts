@@ -6,6 +6,7 @@ import {
 } from '../types';
 import {
   ApproveTokenParams,
+  GetCreateTradeDetailsReturn,
   GetTokenAllowanceParams,
   GetTokenBalanceParams,
   GetTokenDecimalsParams,
@@ -27,6 +28,10 @@ import {
   convertSmartContractParams,
   parseEthersUnits,
 } from '@/utils/blockchain';
+import {
+  findOrCreateAdminWallet,
+  findOrCreateUserWallet,
+} from '@/services/wallet';
 import { prisma, redisClient } from '@/services/db';
 
 import { Decimal } from '@/services/db';
@@ -507,7 +512,10 @@ export const getTradeDetails = async (tradeId: bigint) => {
   return { message: 'Trade details', txHash: tx.hash, details: tx };
 };
 
-export const getCreateTradeDetails = async (trade: any, decimals: number) => {
+export const getCreateTradeDetails = async (
+  trade: any,
+  decimals: number,
+): Promise<GetCreateTradeDetailsReturn> => {
   try {
     const decimalInt = parseInt(decimals.toString());
     const offer = await prisma.offer.findFirst({
@@ -515,7 +523,12 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
       select: { timeLimit: true, offerType: true },
     });
 
-    if (!offer) return null;
+    if (!offer) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find offer',
+      };
+    }
 
     const tradeAmount = new Decimal(trade.cryptocurrencyAmount);
     const depositRate = new Decimal(
@@ -524,13 +537,9 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
 
     const isBuyOffer = offer.offerType === 'buy';
 
-    const buyerWallet = isBuyOffer
-      ? trade.traderWalletAddress
-      : trade.vendorWalletAddress;
+    const buyerWallet = isBuyOffer ? trade.traderWallet : trade.vendorWallet;
 
-    const sellerWallet = isBuyOffer
-      ? trade.vendorWalletAddress
-      : trade.traderWalletAddress;
+    const sellerWallet = isBuyOffer ? trade.vendorWallet : trade.traderWallet;
 
     const buyerCollateral = tradeAmount.mul(depositRate);
     const sellerCollateral = tradeAmount.mul(depositRate);
@@ -546,10 +555,43 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
+    const superAdmin = await prisma.admin.findFirst({
+      where: {
+        roles: {
+          some: {
+            adminRoles: {
+              role: 'SUPER_ADMIN',
+            },
+          },
+        },
+      },
+    });
+
+    if (!superAdmin) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find admin',
+      };
+    }
+
+    const arbitratorWallet = await prisma.adminWallet.findFirst({
+      where: {
+        adminId: superAdmin.id,
+        isArbitrator: true,
+      },
+    });
+
+    if (!arbitratorWallet) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find admin wallet',
+      };
+    }
+
     return {
-      buyerWallet: buyerWallet as Address,
-      sellerWallet: sellerWallet as Address,
-      arbitratorWallet: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+      buyerWallet,
+      sellerWallet,
+      arbitratorWallet,
 
       tradeAmount,
       buyerCollateral,
@@ -566,6 +608,9 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
       profitMargin: 150,
     };
   } catch (error) {
-    return null;
+    //@ts-ignore
+    return { error };
   }
 };
+
+export const isCreateTradeDetailsValid = (createTradeDetails: any) => {};

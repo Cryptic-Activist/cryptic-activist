@@ -32,6 +32,20 @@ const main = async () => {
       },
     });
 
+    const wallet = await tx.wallet.create({
+      data: {
+        address: '0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f',
+      },
+    });
+
+    await tx.adminWallet.create({
+      data: {
+        adminId: admin.id,
+        walletId: wallet.id,
+        isArbitrator: true,
+      },
+    });
+
     const disputeManagerEmail = 'dispute@manager.com';
     const disputeManagerPlainPassword = 'dispute';
     const disputeManagerHashedPassword = await bcrypt.hash(

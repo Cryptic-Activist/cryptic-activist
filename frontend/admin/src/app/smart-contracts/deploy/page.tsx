@@ -10,9 +10,16 @@ import styles from './page.module.scss';
 import { withAuth } from '@/hoc/withAuth';
 
 const SmartContractDeploymentPage = () => {
-	const { escrow, premium, deploymentStats, handleResetAllForms } =
-		useSmartContractDeployment();
+	const {
+		escrow,
+		premium,
+		deploymentStats,
+		handleResetAllForms,
+		superAdminArbitratorWallets
+	} = useSmartContractDeployment();
 	const { chains } = useChains();
+
+	console.log({ premium });
 
 	const chainId =
 		escrow.watchedValues.type === 'Escrow'
@@ -220,14 +227,24 @@ const SmartContractDeploymentPage = () => {
 											<label className={styles.formLabel}>
 												Platform Wallet Address
 											</label>
-											<input
-												type="text"
-												placeholder="0x..."
+											<select
 												className={`${styles.formControl} ${
 													escrow.errors.platformWallet ? styles.inputError : ''
 												}`}
 												{...escrow.register('platformWallet')}
-											/>
+											>
+												<option value="">Select Wallet</option>
+												{superAdminArbitratorWallets.data &&
+													superAdminArbitratorWallets.data?.length > 0 &&
+													superAdminArbitratorWallets.data?.map(
+														(wallet: any) => (
+															<option key={wallet.id} value={wallet.id}>
+																{wallet.wallet.address}
+															</option>
+														)
+													)}
+											</select>
+
 											{escrow.errors.platformWallet && (
 												<span className={styles.fieldError}>
 													{escrow.errors.platformWallet.message}
@@ -318,14 +335,24 @@ const SmartContractDeploymentPage = () => {
 											<label className={styles.formLabel}>
 												Platform Wallet Address
 											</label>
-											<input
-												type="text"
-												placeholder="0x..."
+											<select
 												className={`${styles.formControl} ${
 													premium.errors.platformWallet ? styles.inputError : ''
 												}`}
 												{...premium.register('platformWallet')}
-											/>
+											>
+												<option value="">Select Wallet</option>
+												{superAdminArbitratorWallets.data &&
+													superAdminArbitratorWallets.data?.length > 0 &&
+													superAdminArbitratorWallets.data?.map(
+														(wallet: any) => (
+															<option key={wallet.id} value={wallet.id}>
+																{wallet.wallet.address}
+															</option>
+														)
+													)}
+											</select>
+
 											{premium.errors.platformWallet && (
 												<span className={styles.fieldError}>
 													{premium.errors.platformWallet.message}

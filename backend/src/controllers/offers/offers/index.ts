@@ -334,7 +334,15 @@ export const getMyOffersPaginationController = async (
               name: true,
             },
           },
-          vendorWalletAddress: true,
+          vendorWallet: {
+            select: {
+              wallet: {
+                select: {
+                  address: true,
+                },
+              },
+            },
+          },
           cryptocurrency: {
             select: {
               id: true,

@@ -1053,6 +1053,7 @@ model UserWallet {
 
 model AdminWallet {
   id                          String               @id @default(uuid())
+  isArbitrator                Boolean              @default(false)
   admin                       Admin                @relation(fields: [adminId], references: [id])
   adminId                     String
   wallet                      Wallet               @relation(fields: [walletId], references: [id])

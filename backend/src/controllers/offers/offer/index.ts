@@ -5,57 +5,102 @@ export const createOfferController = async (req: Request, res: Response) => {
   try {
     const { body } = req;
 
-    const { paymentDetails, timeLimit, ...restBody } = body;
+    const { paymentDetails, timeLimit, vendorWalletAddress, ...restBody } =
+      body;
+
+    console.log({ body });
 
     let paymentDetailsId: string | null = null;
 
-    if (!paymentDetails?.id) {
-      const newPaymentDetails = await prisma.paymentDetails.create({
-        data: {
-          instructions: body.paymentDetails,
-          paymentMethodId: body.paymentMethodId,
-          userId: body.vendorId,
-        },
-        select: {
-          id: true,
-        },
-      });
-      paymentDetailsId = newPaymentDetails.id;
-    } else {
-      const existingPaymentDetails = await prisma.paymentDetails.findFirst({
-        where: {
-          id: paymentDetails.id,
-          userId: body.vendorId,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      if (!existingPaymentDetails) {
-        res.status(404).send({
-          status_code: 404,
-          errors: ['Payment details not found'],
+    const transactions = await prisma.$transaction(async (tx) => {
+      if (!paymentDetails?.id) {
+        const newPaymentDetails = await tx.paymentDetails.create({
+          data: {
+            instructions: body.paymentDetails,
+            paymentMethodId: body.paymentMethodId,
+            userId: body.vendorId,
+          },
+          select: {
+            id: true,
+          },
         });
-        return;
+        paymentDetailsId = newPaymentDetails.id;
+      } else {
+        const existingPaymentDetails = await tx.paymentDetails.findFirst({
+          where: {
+            id: paymentDetails.id,
+            userId: body.vendorId,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!existingPaymentDetails) {
+          return {
+            error: 'Payment details not found',
+          };
+        }
+
+        paymentDetailsId = existingPaymentDetails.id;
       }
 
-      paymentDetailsId = existingPaymentDetails.id;
-    }
+      let wallet = await tx.wallet.findFirst({
+        where: {
+          address: vendorWalletAddress,
+        },
+      });
 
-    const timeLimitInSeconds = parseInt(timeLimit, 10) * 60;
-    const newOffer = await prisma.offer.create({
-      data: {
-        ...restBody,
-        paymentDetailsId,
-        timeLimit: timeLimitInSeconds,
-        listAt: new Decimal(body.listAt),
-        limitMin: new Decimal(body.limitMin),
-        limitMax: new Decimal(body.limitMax),
-      },
+      if (!wallet) {
+        wallet = await tx.wallet.create({
+          data: {
+            address: vendorWalletAddress,
+          },
+        });
+      }
+
+      let vendorWallet = await tx.userWallet.findFirst({
+        where: {
+          userId: body.vendorId,
+          wallet: {
+            address: wallet.address,
+          },
+        },
+      });
+
+      if (!vendorWallet) {
+        vendorWallet = await tx.userWallet.create({
+          data: {
+            userId: body.vendorId,
+            walletId: wallet.id,
+          },
+        });
+      }
+
+      const timeLimitInSeconds = parseInt(timeLimit, 10) * 60;
+      const newOffer = await tx.offer.create({
+        data: {
+          ...restBody,
+          paymentDetailsId,
+          timeLimit: timeLimitInSeconds,
+          listAt: new Decimal(body.listAt),
+          limitMin: new Decimal(body.limitMin),
+          limitMax: new Decimal(body.limitMax),
+          vendorWalletId: vendorWallet.id,
+        },
+      });
+      return { newOffer };
     });
 
-    res.status(200).send(newOffer);
+    if (transactions.error) {
+      res.status(404).send({
+        status_code: 404,
+        errors: transactions.error,
+      });
+      return;
+    }
+
+    res.status(200).send(transactions.newOffer);
   } catch (err: any) {
     console.log(err);
     res.status(500).send({

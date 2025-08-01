@@ -486,8 +486,24 @@ export default class Trade {
             id: true,
             blockchainTradeId: true,
             cryptocurrencyAmount: true,
-            vendorWalletAddress: true,
-            traderWalletAddress: true,
+            vendorWallet: {
+              select: {
+                wallet: {
+                  select: {
+                    address: true,
+                  },
+                },
+              },
+            },
+            traderWallet: {
+              select: {
+                wallet: {
+                  select: {
+                    address: true,
+                  },
+                },
+              },
+            },
             cryptocurrency: {
               select: {
                 chains: true,

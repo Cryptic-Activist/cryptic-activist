@@ -25,3 +25,33 @@ export const getSupportedChains = async (_req: Request, res: Response) => {
     res.status(500).json({ error });
   }
 };
+
+export const getSuperAdminArbitratorWallets = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const adminId = req.params.adminId as string;
+
+    const adminWallets = await prisma.adminWallet.findMany({
+      where: {
+        adminId,
+        isArbitrator: true,
+      },
+      select: {
+        id: true,
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
+      },
+    });
+
+    console.log({ adminWallets });
+
+    res.status(200).json(adminWallets);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
