@@ -579,6 +579,14 @@ export const getCreateTradeDetails = async (
         adminId: superAdmin.id,
         isArbitrator: true,
       },
+      select: {
+        id: true,
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
+      },
     });
 
     if (!arbitratorWallet) {

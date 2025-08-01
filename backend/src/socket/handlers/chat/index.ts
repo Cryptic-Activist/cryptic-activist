@@ -228,6 +228,7 @@ export default class Chat {
                   cryptocurrencyAmount: true,
                   vendorWallet: {
                     select: {
+                      id: true,
                       wallet: {
                         select: {
                           address: true,
@@ -237,6 +238,7 @@ export default class Chat {
                   },
                   traderWallet: {
                     select: {
+                      id: true,
                       wallet: {
                         select: {
                           address: true,
@@ -299,6 +301,12 @@ export default class Chat {
                 updatedTrade,
                 tokenDecimals,
               );
+
+              console.log({
+                createTradeDetails,
+                createTradeDetailsBuyWallet:
+                  createTradeDetails.buyerWallet.wallet,
+              });
 
               // @ts-ignore
               if (createTradeDetails.error) {
@@ -495,6 +503,7 @@ export default class Chat {
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
+          console.log({ error });
           this.io.to(chatId).emit('trade_error', {
             error: 'Trade creation error',
           });
