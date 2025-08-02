@@ -9,7 +9,8 @@ export const subscribeToPremium = async (
   userId: string,
   period: Period,
   wallet: Wallet,
-  paymentHash: string
+  paymentHash: string,
+  txHash: string
 ) => {
   const bearerToken = getBearerToken();
   const response = await fetchPost(
@@ -19,6 +20,7 @@ export const subscribeToPremium = async (
       period,
       payerAddress: wallet,
       paymentHash,
+      txHash,
     },
     { Authorization: bearerToken }
   );
@@ -34,7 +36,8 @@ export const changeSubscriptionTo = async (
   userId: any,
   period: Period,
   wallet: Wallet,
-  paymentHash: string
+  paymentHash: string,
+  txHash: string
 ) => {
   const bearerToken = getBearerToken();
 
@@ -45,6 +48,7 @@ export const changeSubscriptionTo = async (
       period,
       payerAddress: wallet,
       paymentHash,
+      txHash,
     },
     { Authorization: bearerToken }
   );

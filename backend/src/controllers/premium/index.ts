@@ -7,6 +7,7 @@ import {
 
 import { ETHEREUM_PREMIUM_CONTRACT_ADDRESS } from '@/constants/env';
 import { PremiumPeriod } from '@prisma/client';
+import { findOrCreateUserWallet } from '@/services/wallet';
 import { getSetting } from '@/utils/settings';
 
 function parsePeriod(period: string): PremiumPeriod {
@@ -22,7 +23,13 @@ function parsePeriod(period: string): PremiumPeriod {
 
 export const subscribePremium = async (req: Request, res: Response) => {
   try {
-    const { period: periodRaw, userId, payerAddress, paymentHash } = req.body;
+    const {
+      period: periodRaw,
+      userId,
+      payerAddress,
+      paymentHash,
+      txHash,
+    } = req.body;
 
     const period = parsePeriod(periodRaw);
     // Check for active subscription of the same type
@@ -70,16 +77,15 @@ export const subscribePremium = async (req: Request, res: Response) => {
         ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
         : new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
-    const blockchainTransactionHash =
-      '0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0'; // Replace with actual hash
+    const userWallet = await findOrCreateUserWallet(payerAddress, userId);
 
     await prisma.premiumPurchase.create({
       data: {
         userId,
-        payerAddress,
+        payerWalletId: userWallet.id,
         period,
         expectedAmount: new Decimal(expectedAmount ?? 0),
-        blockchainTransactionHash,
+        blockchainTransactionHash: txHash,
         status: 'COMPLETED',
         startsAt: now,
         expiresAt,
@@ -99,7 +105,7 @@ export const changeToYearlyPremiumSubscription = async (
   res: Response,
 ) => {
   try {
-    const { userId, payerAddress, paymentHash } = req.body;
+    const { userId, payerAddress, paymentHash, txHash } = req.body;
 
     const now = new Date();
     const activeMonthly = await prisma.premiumPurchase.findFirst({
@@ -139,16 +145,16 @@ export const changeToYearlyPremiumSubscription = async (
     const startsAt = activeMonthly.expiresAt;
     const expiresAt = new Date(startsAt.getTime() + 365 * 24 * 60 * 60 * 1000);
 
-    const blockchainTransactionHash = '0xSCHEDULED_YEARLY_HASH'; // Replace with real hash
+    const userWallet = await findOrCreateUserWallet(payerAddress, userId);
 
     await prisma.premiumPurchase.create({
       data: {
         userId,
-        payerAddress,
+        payerWalletId: userWallet.id,
         period: 'YEARLY',
         status: 'SCHEDULED', // Marked for activation later
         expectedAmount: new Decimal(yearlyPrice),
-        blockchainTransactionHash,
+        blockchainTransactionHash: txHash,
         startsAt,
         expiresAt,
         blockchainPaymentHash: paymentHash,
@@ -172,7 +178,7 @@ export const changeToMonthlyPremiumSubscription = async (
   res: Response,
 ) => {
   try {
-    const { userId, payerAddress, paymentHash } = req.body;
+    const { userId, payerAddress, paymentHash, txHash } = req.body;
 
     const now = new Date();
 
@@ -213,16 +219,16 @@ export const changeToMonthlyPremiumSubscription = async (
     const startsAt = activeYearly.expiresAt;
     const expiresAt = new Date(startsAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    const blockchainTransactionHash = '0xSCHEDULED_MONTHLY_HASH'; // Replace with real hash
+    const userWallet = await findOrCreateUserWallet(payerAddress, userId);
 
     await prisma.premiumPurchase.create({
       data: {
         userId,
-        payerAddress,
+        payerWalletId: userWallet.id,
         period: 'MONTHLY',
         status: 'SCHEDULED', // Will be activated later
         expectedAmount: new Decimal(monthlyPrice),
-        blockchainTransactionHash,
+        blockchainTransactionHash: txHash,
         startsAt,
         expiresAt,
         blockchainPaymentHash: paymentHash,

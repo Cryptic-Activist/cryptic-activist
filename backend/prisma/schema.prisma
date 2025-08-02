@@ -400,7 +400,8 @@ enum PremiumPeriod {
 model PremiumPurchase {
   id                        String                @id @default(cuid())
   userId                    String
-  payerAddress              String
+  payerWallet               UserWallet            @relation(fields: [payerWalletId], references: [id])
+  payerWalletId             String
   expectedAmount            Decimal               @db.Decimal(30, 10)
   status                    PremiumPurchaseStatus
   period                    PremiumPeriod
@@ -1046,6 +1047,7 @@ model UserWallet {
   sellerTradeEscrowDetails TradeEscrowDetails[] @relation("sellerWalletTradeEscrowDetails")
   vendorTrade              Trade[]              @relation("tradeVendorWallet")
   traderTrade              Trade[]              @relation("tradeTraderWallet")
+  premiumPurchase          PremiumPurchase[]
 
   @@unique([userId, walletId])
   @@map("user_wallets")
