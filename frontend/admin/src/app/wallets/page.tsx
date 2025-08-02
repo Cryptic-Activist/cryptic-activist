@@ -3,21 +3,28 @@
 import React, { useState } from 'react';
 
 import styles from './page.module.scss';
-import { useWallet } from '@/hooks/useWallet/useWallet';
+import { useWallet } from '@/hooks/useWallet';
 import { withAuth } from '@/hoc/withAuth';
 
 const WalletsPage = () => {
-	const [isModalOpen, setIsModalOpen] = useState(false);
 	const {
 		userWallets,
 		adminWallets,
 		softDeleteAdminWalletMutation,
 		superAdmins,
-		createAdminWalletMutation
+		createAdminWalletMutation,
+		register,
+		handleSubmit,
+		errors,
+		onSubmit,
+		adminWalletsError,
+		isLoadingAdminWallets,
+		isLoadingUserWallets,
+		userWalletsError,
+		closeModal,
+		isModalOpen,
+		openModal
 	} = useWallet();
-
-	const openModal = () => setIsModalOpen(true);
-	const closeModal = () => setIsModalOpen(false);
 
 	return (
 		<div className={styles.container}>
@@ -107,10 +114,10 @@ const WalletsPage = () => {
 								&times;
 							</button>
 						</div>
-						<form>
+						<form onSubmit={handleSubmit(onSubmit)}>
 							<div className={styles.formGroup}>
 								<label className={styles.formLabel}>Admin</label>
-								<select className={styles.formControl}>
+								<select className={styles.formControl} {...register('adminId')}>
 									<option value="">Select Admin</option>
 									{superAdmins?.map((superAdmin: any) => (
 										<option value={superAdmin.id} key={superAdmin.id}>
@@ -118,6 +125,11 @@ const WalletsPage = () => {
 										</option>
 									))}
 								</select>
+								{errors.adminId && (
+									<span className={styles.fieldError}>
+										{errors.adminId.message}
+									</span>
+								)}
 							</div>
 							<div className={styles.formGroup}>
 								<label className={styles.formLabel}>Wallet Address</label>
@@ -125,7 +137,13 @@ const WalletsPage = () => {
 									type="text"
 									className={styles.formControl}
 									placeholder="Enter new wallet address"
+									{...register('walletAddress')}
 								/>
+								{errors.walletAddress && (
+									<span className={styles.fieldError}>
+										{errors.walletAddress.message}
+									</span>
+								)}
 							</div>
 							<button
 								type="submit"
@@ -133,6 +151,9 @@ const WalletsPage = () => {
 							>
 								Create Wallet
 							</button>
+							{createAdminWalletMutation.isError && (
+								<p>Error creating wallet</p>
+							)}
 						</form>
 					</div>
 				</div>

@@ -1,3 +1,6 @@
+'use client';
+
+import { CreateWalletFormValues, createWalletSchema } from './zod';
 import {
 	createAdminWallet,
 	getAdminWallets,
@@ -9,9 +12,26 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { CreateAdminWalletParams } from './types';
 import useAdmin from '../useAdmin';
+import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const useWallet = () => {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
 	const { admin } = useAdmin();
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset
+	} = useForm<CreateWalletFormValues>({
+		resolver: zodResolver(createWalletSchema)
+	});
+
+	const openModal = () => setIsModalOpen(true);
+	const closeModal = () => setIsModalOpen(false);
 
 	const { data: superAdmins } = useQuery({
 		queryKey: ['superAdmins'],
@@ -72,8 +92,14 @@ export const useWallet = () => {
 		},
 		onSuccess: () => {
 			refetchAdminWallets();
+			closeModal();
+			reset();
 		}
 	});
+
+	const onSubmit = (data: CreateWalletFormValues) => {
+		createAdminWalletMutation.mutate(data);
+	};
 
 	return {
 		userWallets,
@@ -84,6 +110,13 @@ export const useWallet = () => {
 		adminWalletsError,
 		softDeleteAdminWalletMutation,
 		superAdmins,
-		createAdminWalletMutation
+		createAdminWalletMutation,
+		register,
+		handleSubmit,
+		errors,
+		onSubmit,
+		isModalOpen,
+		closeModal,
+		openModal
 	};
 };

@@ -43,7 +43,7 @@ export const softDeleteAdminWallet = async (walletId: string) => {
 	}
 
 	const response = await fetchDelete(
-		BACKEND + `/blockchains/wallet/admin/wallets/${walletId}`,
+		BACKEND + `/blockchains/wallet/admin/wallet/${walletId}`,
 		{
 			Authorization: getBearerToken(accessToken)
 		}
@@ -62,7 +62,7 @@ export const createAdminWallet = async (
 	}
 
 	const response = await fetchPost(
-		BACKEND + `/blockchains/wallet/admin/wallets`,
+		BACKEND + `/blockchains/wallet/admin`,
 		{ adminId, walletAddress },
 		{
 			Authorization: getBearerToken(accessToken)

@@ -4,6 +4,7 @@ import {
 } from '@/middlewares/authorization';
 import {
   connectWallet,
+  createAdminWallet,
   getSuperAdminArbitratorWallets,
   getSupportedChains,
   getUserWallets,
@@ -39,11 +40,11 @@ router.get(
 );
 
 router.post(
-  '/admin/wallet/:walletId',
+  '/admin',
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
   validateCreateAdminWallet,
-  softDeleteAdminWallet,
+  createAdminWallet,
 );
 
 router.delete(

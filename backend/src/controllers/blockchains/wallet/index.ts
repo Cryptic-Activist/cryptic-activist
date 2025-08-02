@@ -122,6 +122,7 @@ export const createAdminWallet = async (req: Request, res: Response) => {
         data: {
           adminId,
           walletId: wallet.id,
+          isArbitrator: true,
         },
       });
     });
