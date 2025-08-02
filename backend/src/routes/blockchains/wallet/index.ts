@@ -7,10 +7,15 @@ import {
   getSuperAdminArbitratorWallets,
   getSupportedChains,
   getUserWallets,
+  softDeleteAdminWallet,
 } from '@/controllers/blockchains/wallet';
+import {
+  validateCreateAdminWallet,
+  validateGetAdminArbitratorWallet,
+  validateSoftDeleteAdminWallet,
+} from './middleware';
 
 import { Router } from 'express';
-import { validateGetAdminArbitratorWallet } from './middleware';
 
 const router = Router();
 
@@ -31,6 +36,22 @@ router.get(
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
   getUserWallets,
+);
+
+router.post(
+  '/admin/wallet/:walletId',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  validateCreateAdminWallet,
+  softDeleteAdminWallet,
+);
+
+router.delete(
+  '/admin/wallet/:walletId',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  validateSoftDeleteAdminWallet,
+  softDeleteAdminWallet,
 );
 
 export default router;

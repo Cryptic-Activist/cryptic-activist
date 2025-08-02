@@ -9,6 +9,7 @@ import {
   getAdminVerify,
   getAllAdmins,
   getRandomCredentials,
+  getSuperAdmins,
 } from '@/controllers/admins/admins';
 
 import { Router } from 'express';
@@ -20,6 +21,13 @@ router.get(
   authenticateAdmin,
   requireAdminRole(['SUPER_ADMIN']),
   getAllAdmins,
+);
+
+router.get(
+  '/super-admins',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getSuperAdmins,
 );
 
 export default router;

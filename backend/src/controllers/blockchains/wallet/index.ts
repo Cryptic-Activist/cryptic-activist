@@ -41,6 +41,11 @@ export const getSuperAdminArbitratorWallets = async (
       },
       select: {
         id: true,
+        admin: {
+          select: {
+            username: true,
+          },
+        },
         wallet: {
           select: {
             address: true,
@@ -51,7 +56,7 @@ export const getSuperAdminArbitratorWallets = async (
 
     res.status(200).json(adminWallets);
   } catch (error) {
-    res.status(400).json(error);
+    res.status(500).json(error);
   }
 };
 
@@ -75,6 +80,72 @@ export const getUserWallets = async (req: Request, res: Response) => {
     });
 
     res.status(200).json(usersWallet);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+export const createAdminWallet = async (req: Request, res: Response) => {
+  try {
+    const { walletAddress, adminId } = req.body;
+
+    await prisma.$transaction(async (tx) => {
+      const admin = await tx.admin.findUnique({
+        where: {
+          id: adminId,
+        },
+      });
+
+      if (!admin) {
+        throw new Error('Unable to find admin');
+      }
+
+      let wallet = await tx.wallet.findFirst({
+        where: {
+          address: walletAddress,
+        },
+        select: {
+          address: true,
+          id: true,
+        },
+      });
+
+      if (!wallet) {
+        wallet = await tx.wallet.create({
+          data: {
+            address: walletAddress,
+          },
+        });
+      }
+
+      await tx.adminWallet.create({
+        data: {
+          adminId,
+          walletId: wallet.id,
+        },
+      });
+    });
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
+
+export const softDeleteAdminWallet = async (req: Request, res: Response) => {
+  try {
+    const walletId = req.params.walletId as string;
+
+    await prisma.adminWallet.update({
+      where: {
+        id: walletId,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    res.status(200).json({ ok: true });
   } catch (error) {
     res.status(400).json(error);
   }

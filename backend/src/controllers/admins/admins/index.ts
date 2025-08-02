@@ -86,6 +86,35 @@ export const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
+export const getSuperAdmins = async (_req: Request, res: Response) => {
+  try {
+    const admins = await prisma.admin.findMany({
+      where: {
+        roles: {
+          some: {
+            adminRoles: {
+              role: 'SUPER_ADMIN',
+            },
+          },
+        },
+        isActive: true,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        username: true,
+        isActive: true,
+      },
+    });
+
+    res.status(200).send(admins);
+  } catch (err) {
+    res.status(500).send({
+      errors: [err.message],
+    });
+  }
+};
+
 export const getAdminController = async (req: Request, res: Response) => {
   try {
     // const { associations } = req.query;
