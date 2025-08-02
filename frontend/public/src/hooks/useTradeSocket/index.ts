@@ -140,8 +140,8 @@ const useTradeSocket = ({
       trade?.tradeEscrowDetails &&
       escrow &&
       trade.cryptocurrencyAmount &&
-      trade.traderWalletAddress &&
-      trade.vendorWalletAddress &&
+      trade.traderWallet?.wallet?.address &&
+      trade.vendorWallet?.wallet?.address &&
       trade.offer &&
       trade.offer.offerType
     ) {
@@ -245,8 +245,8 @@ const useTradeSocket = ({
       trade?.tradeEscrowDetails &&
       escrow &&
       trade.cryptocurrencyAmount &&
-      trade.traderWalletAddress &&
-      trade.vendorWalletAddress &&
+      trade.traderWallet?.wallet?.address &&
+      trade.vendorWallet?.wallet?.address &&
       trade.offer &&
       trade.offer.offerType
     ) {

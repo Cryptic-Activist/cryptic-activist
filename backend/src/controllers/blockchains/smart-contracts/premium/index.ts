@@ -51,7 +51,7 @@ export const deployPremiumSmartContract = async (
   res: Response,
 ) => {
   try {
-    const { monthlyPrice, yearlyPrice, chainId, platformWallet, adminId } =
+    const { monthlyPrice, yearlyPrice, chainId, platformWalletId, adminId } =
       req.body;
 
     let details: ContractDetails = { abi: null, address: null };
@@ -87,11 +87,23 @@ export const deployPremiumSmartContract = async (
         throw new Error('Chain RPC URL not found');
       }
 
+      const platformWallet = await tx.adminWallet.findFirst({
+        where: { walletId: platformWalletId, adminId: admin.id },
+        select: {
+          wallet: true,
+          id: true,
+        },
+      });
+
+      if (!platformWallet) {
+        throw new Error('Unable to find platform wallet');
+      }
+
       try {
         const deployed = await deployPremium({
           monthlyPrice,
           yearlyPrice,
-          platformWallet,
+          platformWallet: platformWallet.wallet.address,
           chain: {
             id: chain.id,
             rpcUrl: chain.rpcUrl,
@@ -105,6 +117,36 @@ export const deployPremiumSmartContract = async (
 
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
+        }
+
+        let newWallet = await tx.wallet.findFirst({
+          where: {
+            address: deployed.deployerAddress,
+          },
+        });
+
+        if (!newWallet) {
+          newWallet = await tx.wallet.create({
+            data: {
+              address: deployed.deployerAddress,
+            },
+          });
+        }
+
+        let deployerWallet = await tx.adminWallet.findFirst({
+          where: {
+            adminId: admin.id,
+            walletId: newWallet.id,
+          },
+        });
+
+        if (!deployerWallet) {
+          deployerWallet = await tx.adminWallet.create({
+            data: {
+              adminId: admin.id,
+              walletId: newWallet.id,
+            },
+          });
         }
 
         await tx.smartContract.updateMany({
@@ -135,7 +177,8 @@ export const deployPremiumSmartContract = async (
           data: {
             artifactUrl: artifact.key,
             address: deployed.contractAddress,
-            deployerAddress: deployed.deployerAddress,
+            deployerWalletId: deployerWallet.id,
+            platformWalletId: platformWallet.id,
             deploymentBlockHeight: deploymentBlockHeight,
             deploymentHash: deployed.deploymentHash,
             chainId: chain.id,

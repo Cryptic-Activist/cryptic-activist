@@ -448,22 +448,18 @@ export const getTradeDetails = async (tradeId: bigint) => {
 
 export const getCreateTradeDetails = async (trade: any, decimals: number) => {
   try {
-    // TODO:
-    // Replace every Float from Prisma Schema with Decimal and make
-    // the appropriate changes to the new data type.
-    //
-    // TODO:
-    // Stop storing the amount and crypto value in WEI
-    // Instead store them in Prisma Decimal type and only convert
-    // them to WEI when needed.
-
     const decimalInt = parseInt(decimals.toString());
     const offer = await prisma.offer.findFirst({
       where: { id: trade.offerId },
       select: { timeLimit: true, offerType: true },
     });
 
-    if (!offer) return null;
+    if (!offer) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find offer',
+      };
+    }
 
     const tradeAmount = new Decimal(trade.cryptocurrencyAmount);
     const depositRate = new Decimal(
@@ -472,13 +468,9 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
 
     const isBuyOffer = offer.offerType === 'buy';
 
-    const buyerWallet = isBuyOffer
-      ? trade.traderWalletAddress
-      : trade.vendorWalletAddress;
+    const buyerWallet = isBuyOffer ? trade.traderWallet : trade.vendorWallet;
 
-    const sellerWallet = isBuyOffer
-      ? trade.vendorWalletAddress
-      : trade.traderWalletAddress;
+    const sellerWallet = isBuyOffer ? trade.vendorWallet : trade.traderWallet;
 
     const buyerCollateral = tradeAmount.mul(depositRate);
     const sellerCollateral = tradeAmount.mul(depositRate);
@@ -494,17 +486,43 @@ export const getCreateTradeDetails = async (trade: any, decimals: number) => {
 
     const tradeDurationInSeconds = offer.timeLimit * 60;
 
-    console.log({
-      tradeAmountInWei,
-      buyerCollateralInWei,
-      sellerCollateralInWei,
-      sellerTotalFundInWei,
+    const superAdmin = await prisma.admin.findFirst({
+      where: {
+        roles: {
+          some: {
+            adminRoles: {
+              role: 'SUPER_ADMIN',
+            },
+          },
+        },
+      },
     });
 
+    if (!superAdmin) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find admin',
+      };
+    }
+
+    const arbitratorWallet = await prisma.adminWallet.findFirst({
+      where: {
+        adminId: superAdmin.id,
+        isArbitrator: true,
+      },
+    });
+
+    if (!arbitratorWallet) {
+      return {
+        // @ts-ignore
+        error: 'Unable to find admin wallet',
+      };
+    }
+
     return {
-      buyerWallet: buyerWallet as Address,
-      sellerWallet: sellerWallet as Address,
-      arbitratorWallet: ETHEREUM_ESCROW_ARBITRATOR_ADDRESS as Address,
+      buyerWallet,
+      sellerWallet,
+      arbitratorWallet,
 
       tradeAmount,
       buyerCollateral,

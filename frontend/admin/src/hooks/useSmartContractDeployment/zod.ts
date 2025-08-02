@@ -6,9 +6,9 @@ export const deploymentEscrowFormSchema = z
 		chainId: z.string().min(2, { message: 'Chain is required' }),
 		defaultFeeRate: z.string(),
 		defaultProfitMargin: z.string(),
-		platformWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-			message: 'Invalid Ethereum address format'
-		})
+		platformWallet: z
+			.string()
+			.min(2, { message: 'Platform Wallet is required' })
 	})
 	.superRefine((data, ctx) => {
 		const { defaultFeeRate, defaultProfitMargin } = data;
@@ -72,9 +72,9 @@ export const deploymentPremiumFormSchema = z
 		chainId: z.string().min(2, { message: 'Chain is required' }),
 		monthlyPrice: z.string(),
 		yearlyPrice: z.string(),
-		platformWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/, {
-			message: 'Invalid Ethereum address format'
-		})
+		platformWallet: z
+			.string()
+			.min(2, { message: 'Platform Wallet is required' })
 	})
 	.superRefine((data, ctx) => {
 		const { monthlyPrice, yearlyPrice } = data;

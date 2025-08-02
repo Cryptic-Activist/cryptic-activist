@@ -69,7 +69,7 @@ export const deployEscrowERC20SmartContract = async (
       defaultFeeRate,
       defaultProfitMargin,
       chainId,
-      platformWallet,
+      platformWalletId,
       adminId,
     } = req.body;
 
@@ -106,11 +106,23 @@ export const deployEscrowERC20SmartContract = async (
         throw new Error('Chain RPC URL not found');
       }
 
+      const platformWallet = await tx.adminWallet.findFirst({
+        where: { walletId: platformWalletId, adminId: admin.id },
+        select: {
+          wallet: true,
+          id: true,
+        },
+      });
+
+      if (!platformWallet) {
+        throw new Error('Unable to find platform wallet');
+      }
+
       try {
         const deployed = await deployEscrowERC20({
           defaultFeeRate,
           defaultProfitMargin,
-          platformWallet,
+          platformWallet: platformWallet.wallet.address,
           rpcUrl: chain.rpcUrl,
         });
 
@@ -121,6 +133,36 @@ export const deployEscrowERC20SmartContract = async (
 
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
+        }
+
+        let newWallet = await tx.wallet.findFirst({
+          where: {
+            address: deployed.deployerAddress,
+          },
+        });
+
+        if (!newWallet) {
+          newWallet = await tx.wallet.create({
+            data: {
+              address: deployed.deployerAddress,
+            },
+          });
+        }
+
+        let deployerWallet = await tx.adminWallet.findFirst({
+          where: {
+            adminId: admin.id,
+            walletId: newWallet.id,
+          },
+        });
+
+        if (!deployerWallet) {
+          deployerWallet = await tx.adminWallet.create({
+            data: {
+              adminId: admin.id,
+              walletId: newWallet.id,
+            },
+          });
         }
 
         await tx.smartContract.updateMany({
@@ -151,7 +193,8 @@ export const deployEscrowERC20SmartContract = async (
           data: {
             artifactUrl: artifact.key,
             address: deployed.contractAddress,
-            deployerAddress: deployed.deployerAddress,
+            deployerWalletId: deployerWallet.id,
+            platformWalletId: platformWallet.id,
             deploymentBlockHeight: deploymentBlockHeight,
             deploymentHash: deployed.deploymentHash,
             chainId: chain.id,
@@ -221,7 +264,7 @@ export const deployEscrowNativeTokenSmartContract = async (
       defaultFeeRate,
       defaultProfitMargin,
       chainId,
-      platformWallet,
+      platformWalletId,
       adminId,
     } = req.body;
 
@@ -258,11 +301,23 @@ export const deployEscrowNativeTokenSmartContract = async (
         throw new Error('Chain RPC URL not found');
       }
 
+      const platformWallet = await tx.adminWallet.findFirst({
+        where: { walletId: platformWalletId, adminId: admin.id },
+        select: {
+          wallet: true,
+          id: true,
+        },
+      });
+
+      if (!platformWallet) {
+        throw new Error('Unable to find platform wallet');
+      }
+
       try {
         const deployed = await deployEscrowNativeToken({
           defaultFeeRate,
           defaultProfitMargin,
-          platformWallet,
+          platformWallet: platformWallet.wallet.address,
           rpcUrl: chain.rpcUrl,
         });
 
@@ -273,6 +328,36 @@ export const deployEscrowNativeTokenSmartContract = async (
 
         if (!uploadedFiles.files || uploadedFiles.files.length === 0) {
           throw new Error('Unable to upload ABI');
+        }
+
+        let newWallet = await tx.wallet.findFirst({
+          where: {
+            address: deployed.deployerAddress,
+          },
+        });
+
+        if (!newWallet) {
+          newWallet = await tx.wallet.create({
+            data: {
+              address: deployed.deployerAddress,
+            },
+          });
+        }
+
+        let deployerWallet = await tx.adminWallet.findFirst({
+          where: {
+            adminId: admin.id,
+            walletId: newWallet.id,
+          },
+        });
+
+        if (!deployerWallet) {
+          deployerWallet = await tx.adminWallet.create({
+            data: {
+              adminId: admin.id,
+              walletId: newWallet.id,
+            },
+          });
         }
 
         await tx.smartContract.updateMany({
@@ -303,7 +388,8 @@ export const deployEscrowNativeTokenSmartContract = async (
           data: {
             artifactUrl: artifact.key,
             address: deployed.contractAddress,
-            deployerAddress: deployed.deployerAddress,
+            deployerWalletId: deployerWallet.id,
+            platformWalletId: platformWallet.id,
             deploymentBlockHeight: deploymentBlockHeight,
             deploymentHash: deployed.deploymentHash,
             chainId: chain.id,
@@ -360,6 +446,7 @@ export const deployEscrowNativeTokenSmartContract = async (
       },
     });
   } catch (error) {
+    console.log({ error });
     res.status(500).json({ error });
   }
 };

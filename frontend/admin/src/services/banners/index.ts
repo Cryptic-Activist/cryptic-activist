@@ -1,4 +1,4 @@
-import { fetchGet, fetchPost, fetchPut } from '../axios';
+import { fetchDelete, fetchGet, fetchPost, fetchPut } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
@@ -112,4 +112,22 @@ export const fetchBanners = async (pathname: string) => {
 	}
 
 	return response.data && response.data?.length > 0 ? response.data[0] : null;
+};
+
+export const deleteBanner = async (id: string) => {
+	const accessToken = getCookie('accessToken');
+
+	if (!accessToken) {
+		return null;
+	}
+
+	const response = await fetchDelete(`${BACKEND}/banners/${id}`, {
+		Authorization: getBearerToken(accessToken)
+	});
+
+	if (response.status !== 200) {
+		return null;
+	}
+
+	return response.data;
 };

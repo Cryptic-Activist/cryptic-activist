@@ -58,9 +58,9 @@ export const EditOffer = z
     label: z.string().min(1),
     terms: z.string().min(1),
     instructions: z.string().min(1),
-    vendorWalletAddress: z.string().min(2),
+    vendorWallet: z.string().min(2),
   })
-  .superRefine(({ offerType, pricingType, vendorWalletAddress }, ctx) => {
+  .superRefine(({ offerType, pricingType }, ctx) => {
     if (offerType !== 'buy' && offerType !== 'sell') {
       ctx.addIssue({
         code: 'custom',
@@ -73,13 +73,6 @@ export const EditOffer = z
         code: 'custom',
         path: ['pricingType'],
         message: "pricingType must either 'fixed' or 'market'",
-      });
-    }
-    if (!ethereumWalletAddressRegex.test(vendorWalletAddress)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Must be a valid wallet address',
-        path: ['vendorWalletAddress'],
       });
     }
   });

@@ -18,6 +18,7 @@ import {
 import ChatMessage from '@/models/ChatMessage';
 import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
+import { findOrCreateUserWallet } from '@/services/wallet';
 import { getRemainingTime } from '@/utils/timer';
 import { toTokenUnits } from '@/utils/blockchain';
 
@@ -63,8 +64,24 @@ export default class Chat {
               id: true,
               traderId: true,
               vendorId: true,
-              traderWalletAddress: true,
-              vendorWalletAddress: true,
+              traderWallet: {
+                select: {
+                  wallet: {
+                    select: {
+                      address: true,
+                    },
+                  },
+                },
+              },
+              vendorWallet: {
+                select: {
+                  wallet: {
+                    select: {
+                      address: true,
+                    },
+                  },
+                },
+              },
               cryptocurrencyAmount: true,
               status: true,
               tradeEscrowDetails: {
@@ -184,7 +201,7 @@ export default class Chat {
             }
           }, 1000);
 
-          if (trade?.traderWalletAddress === vendorWalletAddress) {
+          if (trade?.traderWallet?.wallet?.address === vendorWalletAddress) {
             this.io.to(chatId).emit('trade_error', {
               error: "Vendor's wallet can not be the same as Trader's wallet",
             });
@@ -193,13 +210,42 @@ export default class Chat {
 
           // Start trade if vendor wallet address is provided
           if (vendorWalletAddress) {
-            if (!trade?.vendorWalletAddress) {
+            if (!trade?.vendorWallet?.wallet?.address) {
+              const vendorWallet = await findOrCreateUserWallet(
+                vendorWalletAddress,
+                trade?.vendorId,
+              );
+
               const updatedTrade = await prisma.trade.update({
                 where: {
                   id: trade?.id,
                 },
                 data: {
-                  vendorWalletAddress,
+                  vendorWalletId: vendorWallet.id,
+                },
+                select: {
+                  offerId: true,
+                  cryptocurrencyAmount: true,
+                  vendorWallet: {
+                    select: {
+                      id: true,
+                      wallet: {
+                        select: {
+                          address: true,
+                        },
+                      },
+                    },
+                  },
+                  traderWallet: {
+                    select: {
+                      id: true,
+                      wallet: {
+                        select: {
+                          address: true,
+                        },
+                      },
+                    },
+                  },
                 },
               });
               await ChatMessage.create({
@@ -256,7 +302,14 @@ export default class Chat {
                 tokenDecimals,
               );
 
-              if (!createTradeDetails) {
+              console.log({
+                createTradeDetails,
+                createTradeDetailsBuyWallet:
+                  createTradeDetails.buyerWallet.wallet,
+              });
+
+              // @ts-ignore
+              if (createTradeDetails.error) {
                 const endedAt = new Date();
                 await prisma.trade.update({
                   where: { id: trade.id },
@@ -329,9 +382,9 @@ export default class Chat {
                 ...(isERC20TokenTrade && {
                   erc20TokenAddress: tokenContractDetails.address,
                 }),
-                arbitrator: createTradeDetails.arbitratorWallet,
-                buyer: createTradeDetails.buyerWallet,
-                seller: createTradeDetails.sellerWallet,
+                arbitrator: createTradeDetails.arbitratorWallet.wallet.address,
+                buyer: createTradeDetails.buyerWallet.wallet.address,
+                seller: createTradeDetails.sellerWallet.wallet.address,
                 tradeAmount: createTradeDetails.tradeAmountInWei,
                 feeRate: createTradeDetails.feeRate,
                 profitMargin: createTradeDetails.profitMargin,
@@ -381,9 +434,11 @@ export default class Chat {
                 const tradeEscrowDetails =
                   await prisma.tradeEscrowDetails.create({
                     data: {
-                      arbitratorWallet: createTradeDetails.arbitratorWallet,
+                      arbitratorWalletId:
+                        createTradeDetails.arbitratorWallet?.id,
+                      buyerWalletId: createTradeDetails.buyerWallet.id,
+                      sellerWalletId: createTradeDetails.sellerWallet.id,
                       buyerCollateral: createTradeDetails.buyerCollateral,
-                      buyerWallet: createTradeDetails.buyerWallet,
                       tradeAmount: createTradeDetails.tradeAmount,
                       feeRate: new Decimal(createTradeDetails.feeRate).div(
                         10000,
@@ -391,7 +446,6 @@ export default class Chat {
                       profitMargin: new Decimal(
                         createTradeDetails.profitMargin,
                       ).div(10000),
-                      sellerWallet: createTradeDetails.sellerWallet,
                       sellerCollateral: createTradeDetails.sellerCollateral,
                       sellerTotalFund: createTradeDetails.sellerTotalFund,
                       tradeDurationInSeconds:
@@ -449,6 +503,7 @@ export default class Chat {
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
+          console.log({ error });
           this.io.to(chatId).emit('trade_error', {
             error: 'Trade creation error',
           });

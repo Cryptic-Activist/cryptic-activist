@@ -257,7 +257,8 @@ const usePremium = () => {
             user.id,
             period,
             account.address,
-            subscribedSmartContractResponse.data.paymentHash
+            subscribedSmartContractResponse.data.paymentHash,
+            subscribedSmartContractResponse.txHash
           );
           return response;
         }
@@ -303,14 +304,11 @@ const usePremium = () => {
 
         const amount = period === 'MONTHLY' ? monthlyPrice : yearlyPrice;
         const baseUnits = toTokenUnits(amount, decimals);
-        console.log({ amount, baseUnits });
         const approved = await approveToken({
           tokenContractDetails: usdcTokenDetails,
           premiumContractDetails: premium,
           amount: baseUnits,
         });
-
-        console.log({ approved });
 
         if (!approved || approved.error) {
           throw new Error('Unable to approve token');
@@ -321,14 +319,12 @@ const usePremium = () => {
           tokenContractDetails: usdcTokenDetails,
         });
 
-        console.log({ allowance });
-
         const subscribedSmartContractResponse = await subscribeToPremiumEthers(
           premium,
           period
         );
 
-        console.log({ subscribedSmartContractResponse });
+        subscribedSmartContractResponse.txHash;
 
         if (
           subscribedSmartContractResponse.data &&
@@ -338,7 +334,8 @@ const usePremium = () => {
             user.id,
             user.premiumPurchase[0].period === 'MONTHLY' ? 'YEARLY' : 'MONTHLY',
             account.address,
-            subscribedSmartContractResponse.data.paymentHash
+            subscribedSmartContractResponse.data.paymentHash,
+            subscribedSmartContractResponse.txHash
           );
 
           return response;

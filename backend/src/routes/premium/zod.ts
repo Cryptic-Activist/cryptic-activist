@@ -7,6 +7,7 @@ export const SubscribeBody = z
     period: z.string().min(1),
     payerAddress: z.string().min(1),
     paymentHash: z.string().min(1),
+    txHash: z.string().min(1),
   })
   .superRefine(({ period, payerAddress }, ctx) => {
     if (period !== 'MONTHLY' && period !== 'YEARLY') {

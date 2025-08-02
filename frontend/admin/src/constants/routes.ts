@@ -64,4 +64,5 @@ export const adminRoutes = [
   { value: '/trades', label: 'Trades' },
   { value: '/users', label: 'Users' },
   { value: '/users/create', label: 'Create User' },
+  { value: '/wallets', label: 'Wallets' },
 ];

@@ -76,7 +76,11 @@ const useTrade = () => {
 
   const setVendorWalletAddress = (walletAddress: string) => {
     trade.setTradeValue({
-      vendorWalletAddress: walletAddress,
+      vendorWallet: {
+        wallet: {
+          address: walletAddress,
+        },
+      },
     });
   };
 

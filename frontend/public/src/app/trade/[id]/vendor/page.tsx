@@ -66,7 +66,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({
     !trade.fundedAt &&
     (trade.vendorRejectedFunding || userFundedAt === undefined);
   const isFundTradeButtonActive =
-    account?.address === trade.vendorWalletAddress &&
+    account?.address === trade.vendorWallet?.wallet?.address &&
     chain?.id === trade?.offer?.chain?.chainId;
 
   return (

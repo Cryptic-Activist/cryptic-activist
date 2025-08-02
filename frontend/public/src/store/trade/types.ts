@@ -133,8 +133,8 @@ export type Trade = {
     fundedAt?: string;
     disputedAt?: string;
     blockchainTransactionHash?: string;
-    traderWalletAddress?: string;
-    vendorWalletAddress?: string;
+    traderWallet?: any;
+    vendorWallet?: any;
     chat?: Chat;
     tradeDispute?: TradeDispute;
     vendorRejectedFunding?: boolean;
@@ -171,8 +171,8 @@ export type TradeStore = {
     fundedAt?: string;
     disputedAt?: string;
     blockchainTransactionHash?: string;
-    traderWalletAddress?: string;
-    vendorWalletAddress?: string;
+    traderWallet?: any;
+    vendorWallet?: any;
     vendorRejectedFunding?: boolean;
     traderRejectedFunding?: boolean;
     buyerId?: string;
@@ -212,8 +212,8 @@ export type TradeSetter = {
   endedAt?: string;
   fundedAt?: string;
   blockchainTransactionHash?: string;
-  traderWalletAddress?: string;
-  vendorWalletAddress?: string;
+  traderWallet?: any;
+  vendorWallet?: any;
   chat?: Chat;
   tradeDispute?: TradeDispute;
   tradeEscrowDetails?: TradeEscrowDetails;

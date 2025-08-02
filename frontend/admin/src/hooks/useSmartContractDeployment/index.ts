@@ -10,6 +10,7 @@ import {
 	deployEscrowERC20SmartContract,
 	deployEscrowNativeTokenSmartContract,
 	deployPremiumSmartContract,
+	getAdminArbitratorWallets,
 	getDeploymentStats
 } from '@/services/smart-contracts';
 import { useAdmin, useChains } from '..';
@@ -70,6 +71,11 @@ const useSmartContractDeployment = () => {
 	const deploymentStats = useMutation({
 		mutationKey: ['smartContractDeployment'],
 		mutationFn: getDeploymentStats
+	});
+
+	const superAdminArbitratorWallets = useMutation({
+		mutationKey: ['smartContractDeployment'],
+		mutationFn: (adminId: string) => getAdminArbitratorWallets(adminId)
 	});
 
 	const deploymentEscrowERC20Mutation = useMutation({
@@ -172,6 +178,7 @@ const useSmartContractDeployment = () => {
 	useEffect(() => {
 		if (admin?.data?.id && selectedChain?.id) {
 			deploymentStats.mutate(selectedChain.id);
+			superAdminArbitratorWallets.mutate(admin.data?.id);
 		}
 	}, [admin?.data?.id, selectedChain]);
 
@@ -193,9 +200,12 @@ const useSmartContractDeployment = () => {
 		}
 	}, [watchedValuesEscrow.type]);
 
+	console.log({ superAdminArbitratorWallets });
+
 	return {
 		deploymentStats,
 		handleResetAllForms,
+		superAdminArbitratorWallets,
 		escrow: {
 			watchedValues: watchedValuesEscrow,
 			errors: errorsEscrow,

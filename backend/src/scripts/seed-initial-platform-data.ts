@@ -921,6 +921,25 @@ const main = async () => {
         data: { languageId: language.id, userId: newTrader.id },
       });
 
+      const newWallet1 = await tx.wallet.upsert({
+        where: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+        create: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+        update: {
+          address: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+        },
+      });
+
+      const traderWallet = await tx.userWallet.create({
+        data: {
+          userId: newTrader.id,
+          walletId: newWallet1.id,
+        },
+      });
+
       // Create first vendor user
       const vendorPassword = 'password';
       const vendorGeneratedSalt = await bcrypt.genSalt(10);
@@ -950,6 +969,25 @@ const main = async () => {
 
       await tx.userLanguage.create({
         data: { languageId: language.id, userId: newVendor.id },
+      });
+
+      const newWallet2 = await tx.wallet.upsert({
+        where: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+        create: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+        update: {
+          address: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        },
+      });
+
+      const vendorWallet = await tx.userWallet.create({
+        data: {
+          userId: newVendor.id,
+          walletId: newWallet2.id,
+        },
       });
 
       // Get references for offer creation
@@ -1004,7 +1042,7 @@ const main = async () => {
           pricingType: 'market',
           terms: 'Fast and secure ETH trading on Ethereum mainnet',
           timeLimit: 60 * 60,
-          vendorWalletAddress: '0x90322b7dfACDBE277d4906C7FA9b5a317CCc2167',
+          vendorWalletId: traderWallet.id,
           paymentMethodId: paymentMethod!.id,
         },
       });
@@ -1027,7 +1065,7 @@ const main = async () => {
           pricingType: 'market',
           terms: 'Professional ETH trading with guaranteed execution',
           timeLimit: 60 * 60,
-          vendorWalletAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          vendorWalletId: vendorWallet.id,
           paymentMethodId: paymentMethod!.id,
         },
       });
@@ -1058,7 +1096,7 @@ const main = async () => {
             pricingType: 'fixed',
             terms: 'Low-cost USDT trading on Polygon network',
             timeLimit: 30 * 60,
-            vendorWalletAddress: '0x742d35Cc6634C0532925a3b8D0b4E19f95c3c8c3',
+            vendorWalletId: vendorWallet.id,
             paymentMethodId: paymentMethod!.id,
           },
         });
