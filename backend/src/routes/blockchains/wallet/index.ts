@@ -6,6 +6,7 @@ import {
   connectWallet,
   getSuperAdminArbitratorWallets,
   getSupportedChains,
+  getUserWallets,
 } from '@/controllers/blockchains/wallet';
 
 import { Router } from 'express';
@@ -23,6 +24,13 @@ router.get(
   requireAdminRole(['SUPER_ADMIN']),
   validateGetAdminArbitratorWallet,
   getSuperAdminArbitratorWallets,
+);
+
+router.get(
+  '/users/wallets',
+  authenticateAdmin,
+  requireAdminRole(['SUPER_ADMIN']),
+  getUserWallets,
 );
 
 export default router;

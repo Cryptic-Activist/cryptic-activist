@@ -1042,6 +1042,7 @@ model UserWallet {
   wallet                   Wallet               @relation(fields: [walletId], references: [id])
   walletId                 String
   createdAt                DateTime             @default(now()) @db.Timestamp()
+  deletedAt                DateTime?            @db.Timestamp()
   offer                    Offer[]
   buyerTradeEscrowDetails  TradeEscrowDetails[] @relation("buyerWalletTradeEscrowDetails")
   sellerTradeEscrowDetails TradeEscrowDetails[] @relation("sellerWalletTradeEscrowDetails")
@@ -1061,6 +1062,7 @@ model AdminWallet {
   wallet                      Wallet               @relation(fields: [walletId], references: [id])
   walletId                    String
   createdAt                   DateTime             @default(now()) @db.Timestamp()
+  deletedAt                   DateTime?            @db.Timestamp()
   tradeEscrowDetails          TradeEscrowDetails[]
   smartContractDeployerWallet SmartContract[]      @relation("smartContractDeployerWallet")
   smartContractPlatformWallet SmartContract[]      @relation("smartContractPlatformWallet")

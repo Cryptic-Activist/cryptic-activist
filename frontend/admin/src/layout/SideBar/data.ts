@@ -96,5 +96,11 @@ export const sidebarItems: SideBarData[] = [
 		label: 'Banners',
 		icon: 'FaFlag',
 		roles: ['SUPER_ADMIN']
+	},
+	{
+		href: '/wallets',
+		label: 'Wallets',
+		icon: 'FaWallet',
+		roles: ['SUPER_ADMIN']
 	}
 ];

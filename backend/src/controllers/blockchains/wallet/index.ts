@@ -37,6 +37,7 @@ export const getSuperAdminArbitratorWallets = async (
       where: {
         adminId,
         isArbitrator: true,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -48,9 +49,32 @@ export const getSuperAdminArbitratorWallets = async (
       },
     });
 
-    console.log({ adminWallets });
-
     res.status(200).json(adminWallets);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
+
+export const getUserWallets = async (req: Request, res: Response) => {
+  try {
+    const usersWallet = await prisma.userWallet.findMany({
+      select: {
+        id: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json(usersWallet);
   } catch (error) {
     res.status(400).json(error);
   }
