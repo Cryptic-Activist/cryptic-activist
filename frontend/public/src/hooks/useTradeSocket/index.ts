@@ -554,7 +554,6 @@ const useTradeSocket = ({
           socket.disconnect();
         }
       };
-      ('');
     }
   }, [chatId, user]);
 
