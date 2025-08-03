@@ -11,6 +11,7 @@ import { runCronJobs } from '@/middlewares/cron';
 import { setIO } from '@/services/socket';
 import socketHandler from '@/socket';
 import { startEmailConsumer } from './services/rabbitmq';
+import { subscribeToTradeTimers } from './services/redis/subscribers';
 
 const app = express();
 const server = createServer(app);
@@ -29,5 +30,7 @@ connectDB();
 startEmailConsumer().then();
 
 runCronJobs().then();
+
+subscribeToTradeTimers();
 
 export default server;

@@ -64,6 +64,7 @@ export default class Chat {
               id: true,
               traderId: true,
               vendorId: true,
+              expiredAt: true,
               traderWallet: {
                 select: {
                   wallet: {
@@ -145,56 +146,28 @@ export default class Chat {
             return;
           }
 
-          const remaining = await getRemainingTime(trade.id);
-          if (remaining === null) {
-            if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
-              const expiredAt = new Date();
-              await prisma.trade.update({
-                where: { id: trade.id },
-                data: { expiredAt, status: 'EXPIRED' },
-              });
-              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
-              return;
-            }
+          if (
+            ['EXPIRED', 'COMPLETED', 'FAILED', 'DISPUTED'].includes(
+              trade.status,
+            )
+          ) {
+            this.io
+              .to(chatId)
+              .emit('timer:expired', { chatId, expiredAt: trade.expiredAt });
+            return;
           }
 
-          this.io.to(chatId).emit('timer:update', { remaining, chatId });
+          await redisClient.set(`trade-timer:${trade.id}`, 'active', {
+            EX: trade.offer.timeLimit,
+            NX: true, // Only set if the key does not already exist
+          });
 
           const interval = setInterval(async () => {
             const remaining = await getRemainingTime(trade.id);
             if (remaining === null || remaining <= 0) {
-              const endedTrade = await prisma.trade.findUnique({
-                where: {
-                  id: trade.id,
-                  status: {
-                    in: ['COMPLETED', 'FAILED', 'DISPUTED'],
-                  },
-                },
-                select: {
-                  status: true,
-                  id: true,
-                  endedAt: true,
-                  disputedAt: true,
-                },
-              });
-              if (endedTrade?.status === 'COMPLETED') {
-                this.io.to(chatId).emit('trade_completed', {
-                  chatId,
-                  endedAt: endedTrade.endedAt,
-                });
-              }
-              if (endedTrade?.status === 'FAILED') {
-                this.io.to(chatId).emit('trade_failed', {
-                  chatId,
-                  endedAt: endedTrade.endedAt,
-                });
-              }
-              if (endedTrade?.status === 'DISPUTED') {
-                this.io.to(chatId).emit('trade_set_disputed_success', {
-                  status: 'DISPUTED',
-                  disputedAt: endedTrade.disputedAt,
-                });
-              }
+              this.io
+                .to(chatId)
+                .emit('timer:expired', { chatId, expiredAt: new Date() });
               clearInterval(interval);
             } else {
               this.io.to(chatId).emit('timer:update', { remaining, chatId });

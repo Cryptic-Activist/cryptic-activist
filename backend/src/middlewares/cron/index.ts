@@ -151,7 +151,6 @@ export const chargeRecurringPremiums = async () => {
 };
 
 export const runCronJobs = async () => {
-  await expireTimer();
   await handleAutoLiftSuspension();
   await activateScheduledPremiums();
   await chargeRecurringPremiums();

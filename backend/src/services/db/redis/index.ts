@@ -23,6 +23,8 @@ redisClient.on('connect', () => {
 
 redisClient.on('ready', () => {
   console.log(`🚀 Redis ready on ${REDIS_HOST}:${REDIS_PORT}`);
+  // Enable keyspace notifications for expired events
+  redisClient.configSet('notify-keyspace-events', 'Ex');
 });
 
 redisClient.on('error', (err) => {
