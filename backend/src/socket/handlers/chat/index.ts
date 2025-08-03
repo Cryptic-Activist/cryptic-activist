@@ -65,6 +65,7 @@ export default class Chat {
               traderId: true,
               vendorId: true,
               expiredAt: true,
+              startedAt: true,
               traderWallet: {
                 select: {
                   wallet: {
@@ -158,13 +159,33 @@ export default class Chat {
             return;
           }
 
-          console.log('start countdown');
+          const timerExists = await redisClient.exists(
+            `trade-timer:${trade.id}`,
+          );
 
-          // Atomically set the timer if it does not exist.
-          await redisClient.set(`trade-timer:${trade.id}`, 'active', {
-            EX: trade.offer.timeLimit,
-            NX: true, // Only set if the key does not already exist
-          });
+          if (!timerExists) {
+            const timeSinceCreation =
+              new Date().getTime() - new Date(trade.startedAt).getTime();
+            const timeLimitMillis = trade.offer.timeLimit * 1000;
+
+            if (timeSinceCreation > timeLimitMillis) {
+              // If timer does not exist and time is up, it means the timer expired.
+              const expiredAt = new Date();
+              await prisma.trade.update({
+                where: { id: trade.id },
+                data: { expiredAt, status: 'EXPIRED' },
+              });
+              this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
+              return;
+            } else {
+              // Atomically set the timer if it does not exist.
+              await redisClient.set(`trade-timer:${trade.id}`, 'active', {
+                EX:
+                  trade.offer.timeLimit - Math.floor(timeSinceCreation / 1000),
+                NX: true, // Only set if the key does not already exist
+              });
+            }
+          }
 
           // Start the countdown interval.
           const interval = setInterval(async () => {
