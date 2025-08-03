@@ -525,6 +525,32 @@ const useTradeSocket = ({
       return () => {
         if (socket) {
           socket.emit('leave_room', chatId);
+          socket.off('trade_error');
+          socket.off('room_messages');
+          socket.off('receive_message');
+          socket.off('room_error');
+          socket.off('room_full');
+          socket.off('user_status');
+          socket.off('trade_set_paid_success');
+          socket.off('trade_funded_success');
+          socket.off('trade_set_payment_confirmed_success');
+          socket.off('escrow_released');
+          socket.off('trade_set_canceled_success');
+          socket.off('trade_set_disputed_success');
+          socket.off('trade_set_paid_error');
+          socket.off('trade_set_canceled_error');
+          socket.off('trade_set_payment_confirmed_error');
+          socket.off('trade_set_disputed_error');
+          socket.off('chat_info_message');
+          socket.off('blockchaion_seller_fund_trade_rejected_success');
+          socket.off('blockchaion_buyer_fund_trade_rejected_success');
+          socket.off('blockchain_trade_created');
+          socket.off('blockchain_buyer_funded_trade_success');
+          socket.off('blockchain_seller_funded_trade_success');
+          socket.off('timer:update');
+          socket.off('timer:expired');
+          socket.off('trade_set_disputed_success');
+          socket.off('trade_failed');
           socket.disconnect();
         }
       };
