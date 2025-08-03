@@ -24,6 +24,7 @@ export const subscribeToTradeTimers = () => {
           select: {
             id: true,
             blockchainTradeId: true,
+            status: true,
             chat: {
               select: {
                 id: true,
@@ -32,8 +33,10 @@ export const subscribeToTradeTimers = () => {
           },
         });
 
-        if (trade) {
-          console.log({ trade });
+        if (
+          trade &&
+          (trade.status === 'PENDING' || trade.status === 'IN_PROGRESS')
+        ) {
           const expiredAt = new Date();
           if (trade.blockchainTradeId) {
             await cancelTrade(trade.blockchainTradeId);

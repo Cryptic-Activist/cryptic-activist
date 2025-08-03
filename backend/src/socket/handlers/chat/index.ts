@@ -153,9 +153,6 @@ export default class Chat {
               trade.status,
             )
           ) {
-            this.io
-              .to(chatId)
-              .emit('timer:expired', { chatId, expiredAt: trade.expiredAt });
             return;
           }
 
