@@ -146,6 +146,7 @@ export default class Chat {
             return;
           }
 
+          // If trade is already ended, notify client and stop.
           if (
             ['EXPIRED', 'COMPLETED', 'FAILED', 'DISPUTED'].includes(
               trade.status,
@@ -157,11 +158,15 @@ export default class Chat {
             return;
           }
 
+          console.log('start countdown');
+
+          // Atomically set the timer if it does not exist.
           await redisClient.set(`trade-timer:${trade.id}`, 'active', {
             EX: trade.offer.timeLimit,
             NX: true, // Only set if the key does not already exist
           });
 
+          // Start the countdown interval.
           const interval = setInterval(async () => {
             const remaining = await getRemainingTime(trade.id);
             if (remaining === null || remaining <= 0) {
