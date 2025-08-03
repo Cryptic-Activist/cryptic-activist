@@ -570,6 +570,12 @@ const useTradeSocket = ({
     }
   }, [trade.token]);
 
+  useEffect(() => {
+    if (socket && !['PENDING', 'IN_PROGRESS'].includes(trade.status)) {
+      socket.disconnect();
+    }
+  }, [trade.status, socket]);
+
   return {
     messages,
     roomError,
