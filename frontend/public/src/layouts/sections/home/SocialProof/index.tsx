@@ -23,6 +23,14 @@ const SocialProof = () => {
         </div>
       </div>
 
+      <div>
+        {/* 
+          TODO:
+          Implement best vendors algorithm and display the 3 top vendors based on number on trades, trusts, resolved disputes, volume traded etc.
+        */}
+        <h1>Best Vendors</h1>
+      </div>
+
       <div className={styles.testimonials}>
         <div className={styles.testimonialCard}>
           <p>
