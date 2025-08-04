@@ -1,8 +1,21 @@
+import { Brand, DynamicIcon } from '@/components';
+import { links, socialMedias } from './links';
+
 import { APP_NAME } from '@/constants';
-import { Brand } from '@/components';
 import Links from './Links';
-import { links } from './links';
 import styles from './index.module.scss';
+
+const SocialMedias = () => (
+  <ul className={styles.socialMedias}>
+    {socialMedias.map((socialMedia, index) => (
+      <li key={index}>
+        <a href={socialMedia.href} target="_blank">
+          <DynamicIcon iconName={socialMedia.iconName} />
+        </a>
+      </li>
+    ))}
+  </ul>
+);
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -11,7 +24,10 @@ const Footer = () => {
     <footer className={styles.footer}>
       <div className={styles.container}>
         <div className={styles.brandLinksContainer}>
-          <Brand />
+          <div className={styles.brandSocialMediaContainer}>
+            <Brand />
+            <SocialMedias />
+          </div>
           <Links links={links} />
         </div>
         <p className={styles.statement}>
