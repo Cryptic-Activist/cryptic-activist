@@ -26,6 +26,7 @@ export const getPrice = async (
     });
     return;
   } catch (err) {
+    console.log({ err: err.errors });
     res.status(500).send({
       errors: [err.message],
     });
