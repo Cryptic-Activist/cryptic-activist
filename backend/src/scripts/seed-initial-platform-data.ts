@@ -15,7 +15,7 @@ import { generatePrivateKeysBip39 } from '@/utils/privateKeys';
 import { getABI } from '@/services/blockchains/wallet';
 import { getRandomHighContrastColor } from '@/utils/color';
 import { promisify } from 'util';
-import { rateLimitedMap } from '@/utils/timer';
+import { rateLimitedMap } from '@/utils/timer/index';
 
 // import MockTokensDeployment from '../../../libraries/ethereum-smart-contracts/scripts/deploy.mock.token.hardhat'
 

@@ -12,24 +12,25 @@ export const getPrice = async (
   try {
     const { id, fiatSymbol } = req.query;
 
+    console.log({ query: req.query });
+
     const price = await getCoinPrice(id as string, fiatSymbol as string);
 
-    if (price) {
-      res.status(200).send({
-        price,
+    if (!price) {
+      res.status(400).json({
+        errors: ['Cryptocurrency not found.'],
       });
       return;
     }
 
-    res.status(400).send({
-      errors: ['Cryptocurrency not found.'],
+    res.status(200).json({
+      price,
     });
-    return;
   } catch (err) {
-    res.status(500).send({
+    console.log({ err: err.errors });
+    res.status(500).json({
       errors: [err.message],
     });
-    return;
   }
 };
 

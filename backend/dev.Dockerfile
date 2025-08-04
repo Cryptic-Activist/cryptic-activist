@@ -4,9 +4,9 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY package*.json ./
+COPY package.json ./
 
-RUN npm install
+RUN rm -rf node_modules package-lock.json && npm install
 
 COPY . .
 

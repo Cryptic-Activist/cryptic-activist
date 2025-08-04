@@ -10,8 +10,8 @@ import routes from '@/routes';
 import { runCronJobs } from '@/middlewares/cron';
 import { setIO } from '@/services/socket';
 import socketHandler from '@/socket';
-import { startEmailConsumer } from './services/rabbitmq';
-import { subscribeToTradeTimers } from './services/redis/subscribers';
+import { startEmailConsumer } from '@/services/rabbitmq';
+import { subscribeToTradeTimers } from '@/services/db/redis/subscribers';
 
 const app = express();
 const server = createServer(app);

@@ -1,19 +1,33 @@
 import { Request, Response } from 'express';
+import { cacheData, getCachedData } from '@/services/db/redis/cache';
 
 import fiatsJson from '../../../../fiats.json';
 import { prisma } from '@/services/db/prisma';
 
 export const index = async (_req: Request, res: Response) => {
   try {
-    const fiats = await prisma.fiat.findMany({
-      orderBy: {
-        name: 'desc',
-      },
-    });
+    const cachedFiats = await getCachedData('fiats');
 
-    res.status(200).send(fiats);
+    if (!cachedFiats) {
+      const fiats = await prisma.fiat.findMany({
+        orderBy: {
+          name: 'desc',
+        },
+      });
+
+      await cacheData({
+        cacheKey: 'fiats',
+        data: fiats,
+        expiry: '12M',
+      });
+
+      res.status(200).json(fiats);
+      return;
+    }
+
+    res.status(200).json(cachedFiats);
   } catch (err) {
-    res.status(500).send({
+    res.status(500).json({
       status_code: 500,
       errors: [err.message],
     });
