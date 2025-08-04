@@ -1,5 +1,6 @@
 import SystemMessage from '@/services/systemMessage';
-import { cancelTrade } from '@/services/blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeERC20 } from '@/services/blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeNative } from '@/services/blockchains/escrow/erc20';
 import { getIO } from '@/services/socket';
 import { prisma } from '@/services/db';
 import { redisClient } from '@/services/db';
@@ -14,7 +15,6 @@ export const subscribeToTradeTimers = () => {
   subscriber.connect().then(() => {
     console.log('Redis subscriber connected');
     subscriber.subscribe('__keyevent@0__:expired', async (message) => {
-      console.log('subs');
       if (message.startsWith('trade-timer:')) {
         const tradeId = message.split(':')[1];
         const systemMessage = new SystemMessage();
@@ -24,6 +24,16 @@ export const subscribeToTradeTimers = () => {
           select: {
             id: true,
             blockchainTradeId: true,
+            cryptocurrency: {
+              select: {
+                chains: {
+                  select: {
+                    abiUrl: true,
+                    contractAddress: true,
+                  },
+                },
+              },
+            },
             status: true,
             chat: {
               select: {
@@ -37,10 +47,24 @@ export const subscribeToTradeTimers = () => {
           trade &&
           (trade.status === 'PENDING' || trade.status === 'IN_PROGRESS')
         ) {
-          const expiredAt = new Date();
-          if (trade.blockchainTradeId) {
-            await cancelTrade(trade.blockchainTradeId);
+          let isERC20TokenTrade = true;
+
+          if (
+            trade.cryptocurrency.chains[0]?.abiUrl === null &&
+            trade.cryptocurrency.chains[0]?.contractAddress === null
+          ) {
+            isERC20TokenTrade = false;
           }
+
+          if (trade.blockchainTradeId) {
+            console.log('CANCELLING EXPIRED TRADE...');
+            if (isERC20TokenTrade) {
+              await cancelTradeERC20(trade.blockchainTradeId);
+            } else {
+              await cancelTradeNative(trade.blockchainTradeId);
+            }
+          }
+          const expiredAt = new Date();
           await prisma.trade.update({
             where: { id: trade.id },
             data: { expiredAt, status: 'EXPIRED' },

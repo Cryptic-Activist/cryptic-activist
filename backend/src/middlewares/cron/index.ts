@@ -2,7 +2,8 @@ import { Decimal, prisma } from '@/services/db';
 
 import SystemMessage from '@/services/systemMessage';
 import { autoLiftExpiredSuspensions } from '@/services/moderation';
-import { cancelTrade } from '@/services/blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeERC20 } from '@/services/blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeNative } from '@/services/blockchains/escrow/native';
 import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
@@ -28,6 +29,16 @@ export const expireTimer = async () => {
         id: true,
         startedAt: true,
         blockchainTradeId: true,
+        cryptocurrency: {
+          select: {
+            chains: {
+              select: {
+                abiUrl: true,
+                contractAddress: true,
+              },
+            },
+          },
+        },
         chat: {
           select: {
             id: true,
@@ -47,8 +58,21 @@ export const expireTimer = async () => {
       );
       const expiredAt = new Date();
       if (now >= expiryTime) {
+        let isERC20TokenTrade = true;
+
+        if (
+          trade.cryptocurrency.chains[0]?.abiUrl === null &&
+          trade.cryptocurrency.chains[0]?.contractAddress === null
+        ) {
+          isERC20TokenTrade = false;
+        }
+
         if (trade.blockchainTradeId) {
-          await cancelTrade(trade.blockchainTradeId);
+          if (isERC20TokenTrade) {
+            await cancelTradeERC20(trade.blockchainTradeId);
+          } else {
+            await cancelTradeNative(trade.blockchainTradeId);
+          }
         }
         await prisma.trade.update({
           where: { id: trade.id },
