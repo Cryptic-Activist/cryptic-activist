@@ -1,6 +1,6 @@
 import SystemMessage from '@/services/systemMessage';
 import { cancelTrade as cancelTradeERC20 } from '@/services/blockchains/escrow/erc20';
-import { cancelTrade as cancelTradeNative } from '@/services/blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeNative } from '@/services/blockchains/escrow/native';
 import { getIO } from '@/services/socket';
 import { prisma } from '@/services/db';
 import { redisClient } from '@/services/db';
@@ -57,11 +57,10 @@ export const subscribeToTradeTimers = () => {
           }
 
           if (trade.blockchainTradeId) {
-            console.log('CANCELLING EXPIRED TRADE...');
             if (isERC20TokenTrade) {
-              await cancelTradeERC20(trade.blockchainTradeId);
+              await cancelTradeERC20(trade.blockchainTradeId, true);
             } else {
-              await cancelTradeNative(trade.blockchainTradeId);
+              await cancelTradeNative(trade.blockchainTradeId, true);
             }
           }
           const expiredAt = new Date();

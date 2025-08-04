@@ -69,9 +69,9 @@ export const expireTimer = async () => {
 
         if (trade.blockchainTradeId) {
           if (isERC20TokenTrade) {
-            await cancelTradeERC20(trade.blockchainTradeId);
+            await cancelTradeERC20(trade.blockchainTradeId, true);
           } else {
-            await cancelTradeNative(trade.blockchainTradeId);
+            await cancelTradeNative(trade.blockchainTradeId, true);
           }
         }
         await prisma.trade.update({

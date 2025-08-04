@@ -83,9 +83,9 @@ export const closeAllOverdueDispute = async () => {
       let cancelled;
 
       if (isERC20TokenTrade) {
-        cancelled = await cancelTradeERC20(trade.blockchainTradeId);
+        cancelled = await cancelTradeERC20(trade.blockchainTradeId, true);
       } else {
-        cancelled = await cancelTradeNative(trade.blockchainTradeId);
+        cancelled = await cancelTradeNative(trade.blockchainTradeId, true);
       }
 
       return cancelled;
