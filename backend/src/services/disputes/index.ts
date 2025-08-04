@@ -1,4 +1,5 @@
-import { cancelTrade } from '../blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeERC20 } from '../blockchains/escrow/erc20';
+import { cancelTrade as cancelTradeNative } from '../blockchains/escrow/native';
 import { getRandomSeniorSuperAdmin } from '../admin';
 import { prisma } from '../db';
 
@@ -20,6 +21,16 @@ export const closeAllOverdueDispute = async () => {
         select: {
           id: true,
           blockchainTradeId: true,
+          cryptocurrency: {
+            select: {
+              chains: {
+                select: {
+                  abiUrl: true,
+                  contractAddress: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -60,7 +71,23 @@ export const closeAllOverdueDispute = async () => {
 
   const promises = overdueDisputes.map(async ({ trade }) => {
     if (trade.blockchainTradeId) {
-      const cancelled = await cancelTrade(trade.blockchainTradeId, true);
+      let isERC20TokenTrade = true;
+
+      if (
+        trade.cryptocurrency.chains[0]?.abiUrl === null &&
+        trade.cryptocurrency.chains[0]?.contractAddress === null
+      ) {
+        isERC20TokenTrade = false;
+      }
+
+      let cancelled;
+
+      if (isERC20TokenTrade) {
+        cancelled = await cancelTradeERC20(trade.blockchainTradeId, true);
+      } else {
+        cancelled = await cancelTradeNative(trade.blockchainTradeId, true);
+      }
+
       return cancelled;
     }
   });

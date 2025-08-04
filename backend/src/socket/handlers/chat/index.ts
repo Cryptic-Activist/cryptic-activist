@@ -64,6 +64,8 @@ export default class Chat {
               id: true,
               traderId: true,
               vendorId: true,
+              expiredAt: true,
+              startedAt: true,
               traderWallet: {
                 select: {
                   wallet: {
@@ -145,9 +147,26 @@ export default class Chat {
             return;
           }
 
-          const remaining = await getRemainingTime(trade.id);
-          if (remaining === null) {
-            if (trade.status === 'IN_PROGRESS' || trade.status === 'PENDING') {
+          // If trade is already ended, notify client and stop.
+          if (
+            ['EXPIRED', 'COMPLETED', 'FAILED', 'DISPUTED'].includes(
+              trade.status,
+            )
+          ) {
+            return;
+          }
+
+          const timerExists = await redisClient.exists(
+            `trade-timer:${trade.id}`,
+          );
+
+          if (!timerExists) {
+            const timeSinceCreation =
+              new Date().getTime() - new Date(trade.startedAt).getTime();
+            const timeLimitMillis = trade.offer.timeLimit * 1000;
+
+            if (timeSinceCreation > timeLimitMillis) {
+              // If timer does not exist and time is up, it means the timer expired.
               const expiredAt = new Date();
               await prisma.trade.update({
                 where: { id: trade.id },
@@ -155,46 +174,23 @@ export default class Chat {
               });
               this.io.to(chatId).emit('timer:expired', { chatId, expiredAt });
               return;
+            } else {
+              // Atomically set the timer if it does not exist.
+              await redisClient.set(`trade-timer:${trade.id}`, 'active', {
+                EX:
+                  trade.offer.timeLimit - Math.floor(timeSinceCreation / 1000),
+                NX: true, // Only set if the key does not already exist
+              });
             }
           }
 
-          this.io.to(chatId).emit('timer:update', { remaining, chatId });
-
+          // Start the countdown interval.
           const interval = setInterval(async () => {
             const remaining = await getRemainingTime(trade.id);
             if (remaining === null || remaining <= 0) {
-              const endedTrade = await prisma.trade.findUnique({
-                where: {
-                  id: trade.id,
-                  status: {
-                    in: ['COMPLETED', 'FAILED', 'DISPUTED'],
-                  },
-                },
-                select: {
-                  status: true,
-                  id: true,
-                  endedAt: true,
-                  disputedAt: true,
-                },
-              });
-              if (endedTrade?.status === 'COMPLETED') {
-                this.io.to(chatId).emit('trade_completed', {
-                  chatId,
-                  endedAt: endedTrade.endedAt,
-                });
-              }
-              if (endedTrade?.status === 'FAILED') {
-                this.io.to(chatId).emit('trade_failed', {
-                  chatId,
-                  endedAt: endedTrade.endedAt,
-                });
-              }
-              if (endedTrade?.status === 'DISPUTED') {
-                this.io.to(chatId).emit('trade_set_disputed_success', {
-                  status: 'DISPUTED',
-                  disputedAt: endedTrade.disputedAt,
-                });
-              }
+              this.io
+                .to(chatId)
+                .emit('timer:expired', { chatId, expiredAt: new Date() });
               clearInterval(interval);
             } else {
               this.io.to(chatId).emit('timer:update', { remaining, chatId });

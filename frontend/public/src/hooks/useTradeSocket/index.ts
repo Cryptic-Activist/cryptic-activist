@@ -570,6 +570,17 @@ const useTradeSocket = ({
     }
   }, [trade.token]);
 
+  useEffect(() => {
+    if (
+      socket &&
+      trade.status &&
+      !['PENDING', 'IN_PROGRESS'].includes(trade.status)
+    ) {
+      console.log('DISCONNECTED...');
+      socket.disconnect();
+    }
+  }, [trade.status, socket]);
+
   return {
     messages,
     roomError,
