@@ -1,7 +1,7 @@
 'use client';
 
 import { ActionButtonsProps, TradeProps } from './types';
-import { Button, Chat } from '@/components';
+import { Button, Chat, DraggableChat } from '@/components';
 import React, { FC } from 'react';
 import {
   convertNewlinesToBr,
@@ -17,6 +17,7 @@ import {
   useTradeSocket,
   useUser,
 } from '@/hooks';
+import { useEffect, useState } from 'react';
 
 import styles from './page.module.scss';
 import { validateWithAuthToken } from '@/services/user';
@@ -398,6 +399,18 @@ const Trade: FC<TradeProps> = ({
 };
 
 const TradeVendor = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 1000);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const {
     trade,
     queryTrade,
@@ -465,13 +478,23 @@ const TradeVendor = () => {
       trade?.trader &&
       (trade?.status === 'IN_PROGRESS' || trade?.status === 'PENDING') &&
       vendorHasEnoughFunds ? (
-        <Chat
-          receiver={trade.trader}
-          sender={trade.vendor}
-          receiverStatus={receiverStatus}
-          onSendMessage={sendMessage}
-          messages={messages}
-        />
+        isMobile ? (
+          <DraggableChat
+            receiver={trade.trader}
+            sender={trade.vendor}
+            receiverStatus={receiverStatus}
+            onSendMessage={sendMessage}
+            messages={messages}
+          />
+        ) : (
+          <Chat
+            receiver={trade.trader}
+            sender={trade.vendor}
+            receiverStatus={receiverStatus}
+            onSendMessage={sendMessage}
+            messages={messages}
+          />
+        )
       ) : (
         <div className={styles.noChat}>
           <p>Chat no longer available</p>

@@ -30,3 +30,4 @@ export * from './lists';
 export * from './offer';
 export { default as Viewer } from './Viewer';
 export { default as BannerDisplay } from './BannerDisplay';
+export { default as DraggableChat } from './DraggableChat';
