@@ -47,8 +47,6 @@ export async function removeSpokenLanguage(req: Request, res: Response) {
     const { id } = req.params;
     const { languageId } = req.body;
 
-    console.log({ id });
-
     const diassociatedLanguage = await diassociateLanguage(id, languageId);
 
     if (!diassociatedLanguage) {
