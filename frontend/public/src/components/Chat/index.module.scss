@@ -276,7 +276,9 @@
   .wrapper {
     position: fixed;
     width: 80%;
-    min-height: 50%;
+    height: 5rem;
+    right: 10%;
+    top: 5rem;
     z-index: 6;
   }
 }
