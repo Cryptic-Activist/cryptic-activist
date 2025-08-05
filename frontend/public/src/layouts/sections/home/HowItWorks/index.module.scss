@@ -1,6 +1,6 @@
 .container {
   padding: 2rem;
-  max-width: 900px;
+  max-width: 1000px;
   margin: auto;
 }
 
@@ -20,26 +20,34 @@
 
 .steps {
   display: flex;
-  flex-direction: column;
+  justify-content: space-evenly;
   gap: 2rem;
 }
 
 .step {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   align-items: flex-start;
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .stepNumber {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   text-align: center;
-  line-height: 2.5rem;
   flex-shrink: 0;
 }
 
@@ -47,4 +55,10 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
+}
+
+@media (max-width: 825px) {
+  .steps {
+    flex-direction: column;
+  }
 }

@@ -499,7 +499,25 @@ export default class Chat {
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
-          console.log({ error });
+          const trade = await prisma.trade.findFirst({
+            where: {
+              chat: {
+                id: chatId,
+              },
+            },
+            select: {
+              id: true,
+            },
+          });
+          await prisma.trade.update({
+            where: {
+              id: trade?.id,
+            },
+            data: {
+              status: 'FAILED',
+              endedAt: new Date(),
+            },
+          });
           this.io.to(chatId).emit('trade_error', {
             error: 'Trade creation error',
           });

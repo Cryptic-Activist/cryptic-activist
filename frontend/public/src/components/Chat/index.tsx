@@ -300,14 +300,20 @@ const Chat: FC<ChatProps> = ({
   sender,
 }) => {
   return (
-    <div className={styles.container}>
-      <Header
-        receiver={receiver}
-        sender={sender}
-        receiverStatus={receiverStatus}
-      />
-      <Content receiver={receiver} sender={sender} messages={messages} />
-      <Inputs receiver={receiver} sender={sender} sendMessage={onSendMessage} />
+    <div className={styles.wrapper}>
+      <div className={styles.container}>
+        <Header
+          receiver={receiver}
+          sender={sender}
+          receiverStatus={receiverStatus}
+        />
+        <Content receiver={receiver} sender={sender} messages={messages} />
+        <Inputs
+          receiver={receiver}
+          sender={sender}
+          sendMessage={onSendMessage}
+        />
+      </div>
     </div>
   );
 };

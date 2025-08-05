@@ -44,18 +44,20 @@ const useRegister = () => {
     setValue,
     formState: { errors },
     getValues,
+    watch,
   } = useForm({ resolver: registerResolver });
 
-  const onSubmit: OnSubmit = async (data) => {
-    const { confirmPassword, names, password, username, email, referralCode } =
-      data;
+  const watchedValues = watch();
+
+  const onSubmit: OnSubmit = async (_data) => {
+    console.log({ watchedValues });
     mutation.mutateAsync({
-      confirmPassword,
-      password,
-      username,
-      referralCode,
-      email,
-      names,
+      confirmPassword: watchedValues.confirmPassword,
+      password: watchedValues.password,
+      username: watchedValues.username,
+      referralCode: watchedValues.referralCode,
+      email: watchedValues.email,
+      names: watchedValues.names,
     });
   };
 

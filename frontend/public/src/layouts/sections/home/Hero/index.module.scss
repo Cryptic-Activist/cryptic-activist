@@ -1,31 +1,50 @@
 @use "../../../../styles/globals.module.scss";
 
 .hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 6rem;
-  gap: 2rem;
+  width: 1400px;
   position: relative;
+  box-sizing: border-box;
+  margin: 6rem auto;
 }
 
-.backgroundImage {
-  position: absolute;
-  z-index: -1;
-  right: 20%;
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+@keyframes upDown {
+  0% {
+    transform: translate(0rem);
+  }
+  50% {
+    transform: translateY(0.8rem);
+  }
+  100% {
+    transform: translateY(0rem);
+  }
+}
+
+.image {
+  display: flex;
+  align-self: flex-end;
+  animation: upDown 3s ease-in-out infinite;
 }
 
 .titles {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 60%;
   h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   h2 {
     font-size: 1.2rem;
+    font-weight: 500;
   }
 }
 
@@ -46,6 +65,12 @@
   text-decoration: none;
 }
 
+@media (max-width: 1500px) {
+  .hero {
+    width: 90%;
+  }
+}
+
 @media (max-width: 1200px) {
   .titles {
     h1 {
@@ -59,19 +84,24 @@
 
 @media (max-width: 768px) {
   .titles {
-    h1 {
-      font-size: 1.5rem;
-    }
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+  }
+  .image {
+    display: none;
+  }
+  .cta {
+    align-items: center;
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 610px) {
-  .hero {
-    padding: 6rem 2rem;
-  }
   .titles {
     h1 {
-      font-size: 1.3rem;
+      font-size: 1.5rem;
     }
   }
 }

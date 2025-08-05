@@ -4,6 +4,7 @@ import {
 } from '@/middlewares/authorization';
 import {
   getAllUsers,
+  getBestVendors,
   getRandomCredentials,
   getTotalUsers,
   getUserById,
@@ -38,5 +39,7 @@ router.get(
   requireAdminRole(['SUPER_ADMIN']),
   getTotalUsers,
 );
+
+router.get('/best-vendors', getBestVendors);
 
 export default router;

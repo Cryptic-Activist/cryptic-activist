@@ -1,4 +1,5 @@
 import { Links } from './Links/types';
+import { SocialMedia } from './types';
 
 export const links: Links = [
   {
@@ -59,5 +60,24 @@ export const links: Links = [
         href: '/help',
       },
     ],
+  },
+];
+
+export const socialMedias: SocialMedia[] = [
+  {
+    href: '#',
+    iconName: 'FaInstagram',
+  },
+  {
+    href: '#',
+    iconName: 'FaYoutube',
+  },
+  {
+    href: '#',
+    iconName: 'FaXTwitter',
+  },
+  {
+    href: '#',
+    iconName: 'FaFacebook',
   },
 ];
