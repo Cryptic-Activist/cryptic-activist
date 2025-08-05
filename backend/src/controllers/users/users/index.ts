@@ -249,3 +249,92 @@ export async function getTotalUsers(_req: Request, res: Response) {
     });
   }
 }
+
+export const getBestVendors = async (req: Request, res: Response) => {
+  try {
+    const bestVendors = await prisma.user.findMany({
+      where: {
+        isSuspended: false,
+      },
+      orderBy: [
+        {
+          tradeVendor: {
+            _count: 'desc',
+          },
+        },
+        {
+          feedbackTrader: {
+            _count: 'desc',
+          },
+        },
+        {
+          trustScore: 'desc',
+        },
+        {
+          lastLoginAt: 'desc',
+        },
+        {
+          createdAt: 'asc',
+        },
+      ],
+      select: {
+        _count: {
+          select: {
+            tradeVendor: {
+              where: {
+                status: 'COMPLETED',
+              },
+            },
+            feedbackTrader: {
+              where: {
+                type: 'POSITIVE',
+              },
+            },
+          },
+        },
+        id: true,
+        username: true,
+        profileColor: true,
+        firstName: true,
+        lastName: true,
+        tradeVendor: {
+          where: {
+            status: 'COMPLETED',
+          },
+          select: {
+            id: true,
+          },
+        },
+        feedbackTrader: {
+          where: {
+            type: 'POSITIVE',
+          },
+          select: {
+            id: true,
+          },
+        },
+        disputeLoser: true,
+      },
+      take: 3, // Limit to the top 20 vendors
+    });
+
+    const vendorsWithDisputeRate = bestVendors.map((vendor) => {
+      const totalTrades = vendor.tradeVendor.length;
+      const disputesLost = vendor.disputeLoser.length;
+      const disputeRate = totalTrades > 0 ? disputesLost / totalTrades : 0;
+      return {
+        ...vendor,
+        disputeRate,
+      };
+    });
+
+    vendorsWithDisputeRate.sort((a, b) => a.disputeRate - b.disputeRate);
+
+    res.status(200).json(vendorsWithDisputeRate);
+  } catch (error) {
+    console.log({ error });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while fetching the best vendors.' });
+  }
+};

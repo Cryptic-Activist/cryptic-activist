@@ -26,7 +26,7 @@
 }
 
 .featureCard {
-  background-color: #efefec;
+  background-color: #f9fafb;
   padding: 1.5rem;
   border-radius: 12px;
   border: 1px solid #e4e4e4;
@@ -43,7 +43,6 @@
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  // text-align: center;
 }
 
 .row {
@@ -51,4 +50,13 @@
   justify-content: center;
   gap: 2rem;
   width: 100%;
+}
+
+@media (max-width: 800px) {
+  .row {
+    flex-direction: column;
+  }
+  .featureCard {
+    width: 100%;
+  }
 }

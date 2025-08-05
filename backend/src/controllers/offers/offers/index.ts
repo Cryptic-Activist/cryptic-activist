@@ -24,10 +24,47 @@ export const getOffersController = async (
         offerType,
         paymentMethodId,
         deletedAt: null,
+        vendor: {
+          isSuspended: false,
+        },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        {
+          vendor: {
+            tradeVendor: {
+              _count: 'desc',
+            },
+          },
+        },
+        {
+          vendor: {
+            feedbackTrader: {
+              _count: 'desc',
+            },
+          },
+        },
+        {
+          vendor: {
+            trustScore: 'desc',
+          },
+        },
+        {
+          vendor: {
+            xp: 'desc',
+          },
+        },
+        {
+          vendor: {
+            lastLoginAt: 'desc',
+          },
+        },
+        {
+          averageTradeSpeed: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ],
       select: {
         _count: {
           select: { trades: true },
@@ -195,12 +232,51 @@ export const getOffersPaginationController = async (
     const offers = await prisma.offer.findMany({
       take: take + 1,
       ...(cursorObj && { cursor: cursorObj, skip }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        {
+          vendor: {
+            tradeVendor: {
+              _count: 'desc',
+            },
+          },
+        },
+        {
+          vendor: {
+            feedbackTrader: {
+              _count: 'desc',
+            },
+          },
+        },
+        {
+          vendor: {
+            trustScore: 'desc',
+          },
+        },
+        {
+          vendor: {
+            xp: 'desc',
+          },
+        },
+        {
+          vendor: {
+            lastLoginAt: 'desc',
+          },
+        },
+        {
+          averageTradeSpeed: 'desc',
+        },
+        {
+          createdAt: 'desc',
+        },
+      ],
       where: {
         cryptocurrencyId,
         fiatId,
         chainId,
         offerType,
+        vendor: {
+          isSuspended: false,
+        },
         ...(paymentMethodIdsArray && {
           paymentMethodId: { in: paymentMethodIdsArray },
         }),
