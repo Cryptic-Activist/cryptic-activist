@@ -10,8 +10,6 @@ export const createOfferController = async (req: Request, res: Response) => {
 
     let paymentDetailsId: string | null = null;
 
-    console.log({ paymentDetails, vendorId: body.vendorId });
-
     const transactions = await prisma.$transaction(async (tx) => {
       if (!paymentDetails?.id) {
         const newPaymentDetails = await tx.paymentDetails.create({
