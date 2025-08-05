@@ -24,7 +24,7 @@
   li {
     list-style: none;
     font-size: 1.1rem;
-    span {
+    .value {
       font-weight: 600;
     }
   }
@@ -34,6 +34,7 @@
   .container {
     border: none;
     box-shadow: none;
+    width: 100%;
   }
   .header {
     border-bottom: none;
@@ -42,5 +43,16 @@
   .list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    li {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+@media (max-width: 690px) {
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
