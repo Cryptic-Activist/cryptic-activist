@@ -1,6 +1,7 @@
 'use client';
 
 import { Controller, useForm } from 'react-hook-form';
+import { useDebounce, useSearch } from '@/hooks';
 import { useEffect, useState } from 'react';
 
 import { DynamicIcon } from '@/components';
@@ -9,53 +10,22 @@ import Link from 'next/link';
 import { getInitials } from '@/utils';
 import { searchVendors } from '@/services/users';
 import styles from './index.module.scss';
-import { useDebounce } from '@/hooks';
 import { useMutation } from '@tanstack/react-query';
 
-interface FormValues {
-  search: string;
-}
-
 const Search = () => {
-  const [search, setSearch] = useState('');
-  const [isInFocus, setIsInFocus] = useState(true);
-
-  const { control, handleSubmit, watch, reset } = useForm<FormValues>({
-    defaultValues: {
-      search: '',
-    },
-  });
-
-  const watchedValues = watch();
-
-  const { mutate, data, isSuccess } = useMutation({
-    mutationFn: (searchTerm: string) => searchVendors(searchTerm),
-  });
-
-  const debouncedSearch = useDebounce((search: string) => {
-    mutate(search);
-  }, 1000);
-
-  const onSubmit = (data: FormValues) => {
-    setSearch(data.search);
-  };
-
-  useEffect(() => {
-    if (search) {
-      debouncedSearch(search);
-    }
-  }, [search]);
+  const { form, setIsInFocus, isInFocus, data, isSuccess, search, setSearch } =
+    useSearch();
 
   return (
     <div className={styles.wrapper}>
       <form
         className={styles.container}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(form.onSubmit)}
         autoComplete="off"
       >
         <Controller
           name="search"
-          control={control}
+          control={form.control}
           render={({ field }) => (
             <input
               {...field}
@@ -80,7 +50,7 @@ const Search = () => {
         search.length > 0 &&
         data &&
         data?.length > 0 && (
-          <ul className={styles.list}>
+          <ul className={styles.list} onMouseDown={(e) => e.preventDefault()}>
             {data?.map((vendor: any, index: number) => {
               const fullName = `${vendor.firstName} ${vendor.lastName}`;
               const hasKYC =
