@@ -82,6 +82,16 @@
   z-index: 7;
   box-sizing: border-box;
   position: fixed;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: globals.$secondary;
+  }
 }
 
 .listItem {
