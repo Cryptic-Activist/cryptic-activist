@@ -5,7 +5,7 @@ import { useApp, useNavigationBar } from '@/hooks';
 import { Brand } from '@/components';
 import { FaBars } from 'react-icons/fa6';
 import Menu from './Menu';
-// import Search from './Search';
+import Search from './Search';
 import styles from './index.module.scss';
 
 const NavigationBar = () => {
@@ -27,6 +27,7 @@ const NavigationBar = () => {
           </>
         ) : (
           <div className={styles.searchMenu}>
+            <Search />
             <Menu />
           </div>
         )}

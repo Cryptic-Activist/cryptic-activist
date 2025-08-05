@@ -38,6 +38,11 @@ export const getOffersController = async (
         },
         {
           vendor: {
+            tradeVolume: 'desc',
+          },
+        },
+        {
+          vendor: {
             feedbackTrader: {
               _count: 'desc',
             },
@@ -238,6 +243,11 @@ export const getOffersPaginationController = async (
             tradeVendor: {
               _count: 'desc',
             },
+          },
+        },
+        {
+          vendor: {
+            tradeVolume: 'desc',
           },
         },
         {

@@ -662,6 +662,19 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
                 chains: true,
               },
             },
+            fiatAmount: true,
+            vendor: {
+              select: {
+                id: true,
+                tradeVolume: true,
+              },
+            },
+            trader: {
+              select: {
+                id: true,
+                tradeVolume: true,
+              },
+            },
           },
         },
         moderator: {
@@ -703,6 +716,22 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
           status: TradeStatus.COMPLETED,
           escrowReleasedAt: now,
           endedAt: now,
+        },
+      }),
+      prisma.user.update({
+        where: {
+          id: trade.vendor.id,
+        },
+        data: {
+          tradeVolume: trade.vendor.tradeVolume?.add(trade.fiatAmount),
+        },
+      }),
+      prisma.user.update({
+        where: {
+          id: trade.trader.id,
+        },
+        data: {
+          tradeVolume: trade.vendor.tradeVolume?.add(trade.fiatAmount),
         },
       }),
       prisma.systemMessage.create({
