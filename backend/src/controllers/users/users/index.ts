@@ -338,3 +338,60 @@ export const getBestVendors = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while fetching the best vendors.' });
   }
 };
+
+export const searchVendors = async (req: Request, res: Response) => {
+  try {
+    const { searchTerm } = req.query;
+
+    if (!searchTerm || typeof searchTerm !== 'string') {
+      const vendors = await prisma.user.findMany({
+        where: {},
+      });
+      return res.status(200).json(vendors);
+    }
+
+    const vendors = await prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            username: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            firstName: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        profileColor: true,
+        kyc: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json(vendors);
+  } catch (error) {
+    console.log({ error });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while searching vendors.' });
+  }
+};

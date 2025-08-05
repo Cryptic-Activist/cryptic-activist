@@ -6,6 +6,7 @@
   background-color: globals.$primary;
   border-bottom: 1px solid globals.$secondary;
   box-shadow: 0px 4px 8px -2px globals.$box-shadow-default-color;
+  position: relative;
 }
 
 .container {
@@ -19,7 +20,7 @@
 
 .searchMenu {
   display: flex;
-  gap: 3rem;
+  gap: 1rem;
 }
 
 .menu {
@@ -34,6 +35,122 @@
   border: none;
   background-color: transparent;
   cursor: pointer;
+}
+
+.mobileSearchMenu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.mobileSearchForm {
+  position: fixed;
+  top: 0;
+  z-index: 7;
+  background-color: #fff;
+  width: 100%;
+  height: 4rem;
+  border-bottom: 1px solid #000;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 4rem;
+}
+.input {
+  background-color: transparent;
+  border: none;
+  padding: 0.75rem 0.8rem 0.75rem 0.8rem;
+  font-size: 1rem;
+  color: globals.$secondary;
+  width: 100%;
+  &::placeholder {
+    color: globals.$secondary;
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+.list {
+  position: absolute;
+  max-height: 20rem;
+  min-width: fit-content;
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 1px solid #000;
+  right: 0;
+  top: 4rem;
+  z-index: 7;
+  box-sizing: border-box;
+  position: fixed;
+}
+
+.listItem {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  a {
+    width: 100%;
+    color: #000;
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+}
+
+.initials {
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  border-radius: 100%;
+  font-size: 1.2rem;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.namesUsername {
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    font-size: 1rem;
+  }
+  span {
+    font-size: 0.9rem;
+  }
+}
+
+.namesVerified {
+  display: flex;
+  gap: 0.5rem;
+  .check {
+    background-color: globals.$blue-check;
+    height: 0.9rem;
+    width: 0.9rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      fill: #fff;
+    }
+  }
+}
+
+.closeButton {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  svg {
+    transform: rotate(45deg);
+  }
 }
 
 @media (max-width: 1500px) {

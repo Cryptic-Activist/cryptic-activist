@@ -11,11 +11,11 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
       <div className={styles.header}>Profile Information</div>
       <ul className={styles.list}>
         <li>
-          Languages:{' '}
+          <span className={styles.label}>Languages:</span>{' '}
           {user?.languages?.map((language, index) => {
             const isLast = index === (user.languages?.length ?? 0) - 1;
             return (
-              <span key={index}>
+              <span key={index} className={styles.value}>
                 {language.name}
                 {!isLast ? ', ' : ''}
               </span>
@@ -23,19 +23,26 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ user }) => {
           })}
         </li>
         <li>
-          Number of trades: <span>{user?._count?.trades}</span>
+          <span className={styles.label}>Number of trades:</span>{' '}
+          <span className={styles.value}>{user?._count?.trades}</span>
         </li>
         <li>
-          Trusted by <span>{user?._count?.trusters} people</span>
+          <span className={styles.label}>Trusted by</span>{' '}
+          <span className={styles.value}>{user?._count?.trusters} people</span>
         </li>
         <li>
-          Blocked by <span>{user?._count?.blockers} people</span>
+          <span className={styles.label}>Blocked by</span>{' '}
+          <span className={styles.value}>{user?._count?.blockers} people</span>
         </li>
         <li>
-          Has blocked <span>{user?._count?.blocked} people</span>
+          <span className={styles.label}>Has blocked</span>{' '}
+          <span className={styles.value}>{user?._count?.blocked} people</span>
         </li>
         <li>
-          Joined on: <span>{formatFullDate(user?.createdAt)}</span>
+          <span className={styles.label}>Joined on:</span>{' '}
+          <span className={styles.value}>
+            {formatFullDate(user?.createdAt)}
+          </span>
         </li>
       </ul>
     </div>

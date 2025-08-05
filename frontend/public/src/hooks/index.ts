@@ -32,3 +32,5 @@ export { default as useKYC } from './useKYC';
 export { default as usePremium } from './usePremium';
 export { default as useTiers } from './useTiers';
 export { default as useContracts } from './useContracts';
+export { default as useDebounce } from './useDebounce';
+export { default as useSearch } from './useSearch';

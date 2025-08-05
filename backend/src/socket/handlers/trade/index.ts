@@ -566,6 +566,22 @@ export default class Trade {
             endedAt,
             escrowReleasedAt,
           },
+          select: {
+            id: true,
+            fiatAmount: true,
+            vendor: {
+              select: {
+                id: true,
+                tradeVolume: true,
+              },
+            },
+            trader: {
+              select: {
+                id: true,
+                tradeVolume: true,
+              },
+            },
+          },
         });
 
         if (!updatedTrade) {
@@ -574,6 +590,27 @@ export default class Trade {
           });
           return;
         }
+
+        await prisma.user.update({
+          where: {
+            id: updatedTrade.vendor.id,
+          },
+          data: {
+            tradeVolume: updatedTrade.vendor.tradeVolume?.add(
+              updatedTrade.fiatAmount,
+            ),
+          },
+        });
+        await prisma.user.update({
+          where: {
+            id: updatedTrade.trader.id,
+          },
+          data: {
+            tradeVolume: updatedTrade.vendor.tradeVolume?.add(
+              updatedTrade.fiatAmount,
+            ),
+          },
+        });
 
         this.io.to(chatId).emit('trade_set_payment_confirmed_success', {
           paymentConfirmedAt,
