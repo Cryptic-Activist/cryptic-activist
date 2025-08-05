@@ -59,7 +59,7 @@ export const getOffersController = async (
           },
         },
         {
-          averageTradeSpeed: 'desc',
+          averageTradeSpeed: 'asc',
         },
         {
           createdAt: 'desc',
@@ -263,7 +263,7 @@ export const getOffersPaginationController = async (
           },
         },
         {
-          averageTradeSpeed: 'desc',
+          averageTradeSpeed: 'asc',
         },
         {
           createdAt: 'desc',
