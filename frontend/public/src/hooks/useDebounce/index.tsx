@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useState } from 'react';
 
 // Define the generic type for the callback function

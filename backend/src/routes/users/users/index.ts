@@ -12,6 +12,7 @@ import {
   getUserController,
   getUserVerify,
   getUsersController,
+  searchVendors,
 } from '@/controllers/users';
 
 import { Router } from 'express';
@@ -41,5 +42,7 @@ router.get(
 );
 
 router.get('/best-vendors', getBestVendors);
+
+router.get('/search', searchVendors);
 
 export default router;
