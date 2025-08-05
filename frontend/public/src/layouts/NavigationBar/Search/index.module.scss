@@ -60,7 +60,6 @@
   }
 }
 
-
 .initials {
   display: flex;
   height: 3rem;
@@ -103,5 +102,26 @@
     svg {
       fill: #fff;
     }
+  }
+}
+
+@media (max-width: 950px) {
+  .input {
+    width: 10rem;
+  }
+  .list {
+    left: 0;
+  }
+}
+
+@media (max-width: 870px) {
+  .input {
+    width: 8rem;
+  }
+}
+
+@media (max-width: 800px) {
+  .input {
+    width: 6rem;
   }
 }
