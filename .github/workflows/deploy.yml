@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+      - staging
+      - deployment
+    paths:
+      - 'backend/**'
+      - 'frontend/admin/**'
+      - 'frontend/public/**'
 
 jobs:
   deploy:
