@@ -2,7 +2,6 @@ import {
   BACKEND,
   DO_SPACES_ACCESS_KEY_ID,
   DO_SPACES_BUCKET_NAME,
-  DO_SPACES_ENDPOINT,
   DO_SPACES_REGION,
   DO_SPACES_SECRET_ACCESS_KEY,
 } from '@/constants/env';
@@ -28,17 +27,9 @@ export const upload = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 1MB limit
 });
 
-console.log({
-  DO_SPACES_ACCESS_KEY_ID,
-  DO_SPACES_BUCKET_NAME,
-  DO_SPACES_ENDPOINT,
-  DO_SPACES_REGION,
-  DO_SPACES_SECRET_ACCESS_KEY,
-});
-
 // DigitalOcean Spaces configuration
 const s3 = new S3Client({
-  endpoint: DO_SPACES_ENDPOINT,
+  endpoint: `https://${DO_SPACES_REGION}.digitaloceanspaces.com`,
   region: DO_SPACES_REGION!,
   credentials: {
     accessKeyId: DO_SPACES_ACCESS_KEY_ID!,
@@ -83,7 +74,7 @@ export const uploadFiles = async (
         const size = finalBuffer.length;
         const mimeType = skipProcessing ? file.mimetype : 'image/webp';
 
-        if (true) {
+        if (!IS_DEVELOPMENT) {
           // Upload to DigitalOcean Spaces
           const uploadParams = {
             Bucket: DO_SPACES_BUCKET_NAME!,
@@ -97,8 +88,7 @@ export const uploadFiles = async (
 
           await s3.send(new PutObjectCommand(uploadParams));
 
-          const DO_SPACE = DO_SPACES_ENDPOINT.split('https://');
-          const key = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACE}/${folder}/${fileName}`;
+          const key = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACES_REGION}.digitaloceanspaces.com/${folder}/${fileName}`;
 
           return {
             fileName,

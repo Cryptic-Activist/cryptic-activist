@@ -111,7 +111,7 @@ export const deployPremiumSmartContract = async (
         });
 
         const file = convertArtifactToFile(deployed.artifact);
-        const uploadedFiles = await uploadFiles('smart-contracts/premium/', [
+        const uploadedFiles = await uploadFiles('smart-contracts/premium', [
           file,
         ]);
 

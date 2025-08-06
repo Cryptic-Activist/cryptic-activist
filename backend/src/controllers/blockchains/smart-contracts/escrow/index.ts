@@ -127,7 +127,7 @@ export const deployEscrowERC20SmartContract = async (
         });
 
         const file = convertArtifactToFile(deployed.artifact);
-        const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
+        const uploadedFiles = await uploadFiles('smart-contracts/escrow', [
           file,
         ]);
 
@@ -322,7 +322,7 @@ export const deployEscrowNativeTokenSmartContract = async (
         });
 
         const file = convertArtifactToFile(deployed.artifact);
-        const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
+        const uploadedFiles = await uploadFiles('smart-contracts/escrow', [
           file,
         ]);
 
