@@ -77,7 +77,7 @@ export const uploadFiles = async (
         const mimeType = skipProcessing ? file.mimetype : 'image/webp';
         const objectKey = `${folder}/${fileName}`;
 
-        if (!IS_DEVELOPMENT) {
+        if (true) {
           // Upload to DigitalOcean Spaces
           const uploadParams = {
             Bucket: DO_SPACES_BUCKET_NAME!,

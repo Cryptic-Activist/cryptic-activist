@@ -854,7 +854,7 @@ const main = async () => {
         return up;
       });
 
-      const promisedUploaded = await Promise.all(uploadReady);
+      await Promise.all(uploadReady);
 
       if (IS_DEVELOPMENT) {
         // Update MockToken for testing purposes

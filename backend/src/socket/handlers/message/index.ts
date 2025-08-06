@@ -2,6 +2,7 @@ import { IO, Socket } from '../types';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+import { IS_DEVELOPMENT } from '@/constants';
 // import { IS_DEVELOPMENT } from '@/constants';
 import { SendMessageParams } from './types';
 import { getPresignedUrl } from '@/services/upload';
@@ -32,9 +33,6 @@ export default class Message {
           });
 
           if (chat?.id) {
-            const key = await getPresignedUrl(attachment?.key);
-
-            console.log({ key });
             const newMessage = await ChatMessage.create({
               chatId: chat.id,
               from: from,
@@ -43,9 +41,7 @@ export default class Message {
               ...(attachment && {
                 type: 'attachment',
                 attachment: {
-                  key: false
-                    ? attachment.key
-                    : await getPresignedUrl(attachment.key),
+                  key: attachment.key,
                   size: attachment.size,
                   name: attachment.fileName,
                   mimeType: attachment.mimeType,
