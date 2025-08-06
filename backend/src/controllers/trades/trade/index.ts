@@ -8,6 +8,7 @@ import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { fetchGet } from '@/services/axios';
 import { findOrCreateUserWallet } from '@/services/wallet';
 import { getCoinPrice } from '@/services/coinGecko';
+import { getPresignedUrl } from '@/services/upload';
 import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
 
@@ -266,7 +267,11 @@ export async function getTradeController(req: Request, res: Response) {
                 },
               },
               select: {
-                abiUrl: true,
+                abi: {
+                  select: {
+                    key: true,
+                  },
+                },
                 contractAddress: true,
               },
             },
@@ -357,7 +362,11 @@ export async function getTradeController(req: Request, res: Response) {
         chainId: trade.offer.chain.id,
       },
       select: {
-        abiUrl: true,
+        abi: {
+          select: {
+            key: true,
+          },
+        },
         contractAddress: true,
       },
     });
@@ -367,9 +376,10 @@ export async function getTradeController(req: Request, res: Response) {
       abi: [],
     };
 
-    if (cryptocurrencyChain?.abiUrl && cryptocurrencyChain?.contractAddress) {
+    if (cryptocurrencyChain?.abi?.key && cryptocurrencyChain?.contractAddress) {
       try {
-        const response = await fetchGet(cryptocurrencyChain?.abiUrl);
+        const abiUrl = await getPresignedUrl(cryptocurrencyChain.abi.key);
+        const response = await fetchGet(abiUrl.url!);
         token.abi = response.data;
       } catch (error) {
         console.error('Error fetching ABI:', error);

@@ -173,9 +173,17 @@ export const deployPremiumSmartContract = async (
           'patch',
         );
 
+        const uploadedArtifact = await tx.uploadedFile.create({
+          data: {
+            key: artifact.key,
+            mimeType: artifact.mimeType,
+            size: artifact.size,
+          },
+        });
+
         const newDeployment = await tx.smartContract.create({
           data: {
-            artifactUrl: artifact.key,
+            artifactId: uploadedArtifact.id,
             address: deployed.contractAddress,
             deployerWalletId: deployerWallet.id,
             platformWalletId: platformWallet.id,

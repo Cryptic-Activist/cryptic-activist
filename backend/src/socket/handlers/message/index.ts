@@ -2,7 +2,9 @@ import { IO, Socket } from '../types';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
+// import { IS_DEVELOPMENT } from '@/constants';
 import { SendMessageParams } from './types';
+import { getPresignedUrl } from '@/services/upload';
 
 export default class Message {
   private socket: Socket;
@@ -21,7 +23,7 @@ export default class Message {
         chatId,
       }: SendMessageParams) => {
         try {
-          console.log({ message, attachment });
+          // console.log({ message, attachment });
 
           const chat = await prisma.chat.findFirst({
             where: {
@@ -30,6 +32,9 @@ export default class Message {
           });
 
           if (chat?.id) {
+            const key = await getPresignedUrl(attachment?.key);
+
+            console.log({ key });
             const newMessage = await ChatMessage.create({
               chatId: chat.id,
               from: from,
@@ -38,7 +43,9 @@ export default class Message {
               ...(attachment && {
                 type: 'attachment',
                 attachment: {
-                  key: attachment.key,
+                  key: false
+                    ? attachment.key
+                    : await getPresignedUrl(attachment.key),
                   size: attachment.size,
                   name: attachment.fileName,
                   mimeType: attachment.mimeType,
@@ -47,7 +54,7 @@ export default class Message {
               }),
             });
 
-            console.log({ newMessage });
+            // console.log({ newMessage });
 
             // Check if recipient is online via Redis
             const recipientSocketId = await redisClient.hGet(

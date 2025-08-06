@@ -4,6 +4,7 @@ import { getMonthBoundaries, toUTCDateOnly } from '@/utils/date';
 
 import { KYCStatus } from '@prisma/client';
 import { calculatePercentageChange } from '@/utils/number';
+import { getPresignedUrl } from '@/services/upload';
 import { prisma } from '@/services/db';
 
 export const getNationalities = async (_req: Request, res: Response) => {
@@ -375,7 +376,36 @@ export const getKYCDetailsAdmin = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(kyc);
+    let documentFront;
+    let documentBack;
+    let selfie;
+    let utilityBill;
+    let bankStatement;
+
+    if (kyc?.documentFront) {
+      documentFront = await getPresignedUrl(kyc.documentFront.key);
+    }
+    if (kyc?.documentBack) {
+      documentBack = await getPresignedUrl(kyc.documentBack.key);
+    }
+    if (kyc?.selfie) {
+      selfie = await getPresignedUrl(kyc.selfie.key);
+    }
+    if (kyc?.utilityBill) {
+      utilityBill = await getPresignedUrl(kyc.utilityBill.key);
+    }
+    if (kyc?.bankStatement) {
+      bankStatement = await getPresignedUrl(kyc.bankStatement.key);
+    }
+
+    res.status(200).json({
+      ...kyc,
+      documentFront,
+      documentBack,
+      selfie,
+      utilityBill,
+      bankStatement,
+    });
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

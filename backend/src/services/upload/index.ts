@@ -75,26 +75,26 @@ export const uploadFiles = async (
 
         const size = finalBuffer.length;
         const mimeType = skipProcessing ? file.mimetype : 'image/webp';
+        const objectKey = `${folder}/${fileName}`;
 
         if (!IS_DEVELOPMENT) {
           // Upload to DigitalOcean Spaces
           const uploadParams = {
             Bucket: DO_SPACES_BUCKET_NAME!,
-            Key: `${folder}/${fileName}`,
+            Key: objectKey,
             Body: finalBuffer,
             ContentType: mimeType,
             ACL: 'private' as ObjectCannedACL,
           };
 
           await s3.send(new PutObjectCommand(uploadParams));
-
-          const key = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACES_REGION}.digitaloceanspaces.com/${folder}/${fileName}`;
-
+          const url = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACES_REGION}.digitaloceanspaces.com/${folder}/${fileName}`;
           return {
             fileName,
-            key,
+            key: objectKey,
             mimeType,
             size,
+            url,
           };
         } else {
           // Save to local /uploads folder
@@ -106,13 +106,14 @@ export const uploadFiles = async (
           const filePath = path.join(localPath, fileName);
           fs.writeFileSync(filePath, finalBuffer);
 
-          const key = `${BACKEND}/uploads/${folder}/${fileName}`;
+          const url = `${BACKEND}/uploads/${folder}/${fileName}`;
 
           return {
             fileName,
-            key,
+            key: objectKey,
             mimeType,
             size,
+            url,
           };
         }
       }),

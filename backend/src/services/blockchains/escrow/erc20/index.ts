@@ -37,6 +37,7 @@ import { prisma, redisClient } from '@/services/db';
 import { Decimal } from '@/services/db';
 import EscrowArtifact from '@/contracts/escrow/artifacts/ERC20Escrow.json';
 import { fetchGet } from '@/services/axios';
+import { getPresignedUrl } from '@/services/upload';
 import { getSetting } from '@/utils/settings';
 import { parseDurationToSeconds } from '@/utils/date';
 
@@ -76,23 +77,29 @@ export const getTokenDetails = async (coingeckoId: string, chainId: string) => {
         },
       },
       select: {
-        abiUrl: true,
+        abi: true,
         contractAddress: true,
       },
     });
 
     if (
       !tokenSmartContract ||
-      !tokenSmartContract.abiUrl ||
+      !tokenSmartContract.abi ||
       !tokenSmartContract.contractAddress
     ) {
       throw new Error('Unable to find Token Details');
     }
 
-    const response = await fetchGet(tokenSmartContract.abiUrl);
+    const presignedAbi = await getPresignedUrl(tokenSmartContract.abi.key);
+
+    if (presignedAbi.error || !presignedAbi.url) {
+      throw new Error('Unable to presign abi');
+    }
+
+    const response = await fetchGet(presignedAbi.url);
 
     if (response.status !== 200) {
-      throw new Error(`Failed to fetch ABI from ${tokenSmartContract.abiUrl}`);
+      throw new Error(`Failed to fetch ABI from ${presignedAbi.url}`);
     }
 
     details = {
@@ -128,7 +135,11 @@ export const getEscrowDetails = async () => {
         },
       },
       select: {
-        artifactUrl: true,
+        artifact: {
+          select: {
+            key: true,
+          },
+        },
         address: true,
       },
     });
@@ -137,12 +148,18 @@ export const getEscrowDetails = async () => {
       throw new Error('Unable to find Escrow Details');
     }
 
-    const response = await fetchGet(escrowSmartContract.artifactUrl);
+    const artifactPresigned = await getPresignedUrl(
+      escrowSmartContract.artifact.key,
+    );
+
+    if (artifactPresigned.error || !artifactPresigned.url) {
+      throw new Error('Unable to presign artifact url');
+    }
+
+    const response = await fetchGet(artifactPresigned.url);
 
     if (response.status !== 200) {
-      throw new Error(
-        `Failed to fetch ABI from ${escrowSmartContract.artifactUrl}`,
-      );
+      throw new Error(`Failed to fetch ABI from ${artifactPresigned.url}`);
     }
 
     details = {

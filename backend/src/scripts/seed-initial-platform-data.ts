@@ -2,8 +2,8 @@ import 'dotenv/config';
 
 import { Decimal, prisma } from '../services/db';
 import { IS_DEVELOPMENT, TIER_VOLUME } from '@/constants';
+import { getPresignedUrl, upload, uploadFiles } from '@/services/upload';
 import { getPublicSettings, getSetting } from '@/utils/settings';
-import { upload, uploadFiles } from '@/services/upload';
 
 import { ETHERSCAN_API_KEY } from '@/constants/env';
 import MockToken from '@/contracts/escrow/artifacts/MockToken.json';
@@ -791,7 +791,7 @@ const main = async () => {
         select: {
           contractAddress: true,
           cryptocurrency: true,
-          abiUrl: true,
+          abi: true,
           chainId: true,
           createdAt: true,
           cryptocurrencyId: true,
@@ -813,9 +813,9 @@ const main = async () => {
               contractAddress: cryptoChain.contractAddress,
               crypto: cryptoChain.cryptocurrency,
             });
-            return { abi: response?.abi, ...cryptoChain };
+            return { abiObject: response?.abi, ...cryptoChain };
           }
-          return { abi: null, ...cryptoChain };
+          return { abiObject: null, ...cryptoChain };
         },
         4, // 2 calls per second
       );
@@ -823,20 +823,27 @@ const main = async () => {
       const promised = await Promise.all(mapped);
 
       const uploadReady = promised.map(async (up) => {
-        if (up && up.abi) {
-          const file = convertArtifactToFile(up.abi);
+        if (up && up.abiObject) {
+          const file = convertArtifactToFile(up.abiObject);
           const uploaded = await uploadFiles(
             `abis/${up.chainId}/${up.cryptocurrencyId}`,
             [file],
           );
 
           if (uploaded.files) {
+            const uploadedAbi = await tx.uploadedFile.create({
+              data: {
+                key: uploaded.files[0].key,
+                size: uploaded.files[0].size,
+                mimeType: uploaded.files[0].mimeType,
+              },
+            });
             await tx.cryptocurrencyChain.update({
               where: {
                 id: up.id,
               },
               data: {
-                abiUrl: uploaded.files[0].key,
+                abiId: uploadedAbi.id,
               },
             });
             return { ...up, abiUrl: uploaded.files[0].key };
@@ -862,7 +869,7 @@ const main = async () => {
               chainId: true,
               cryptocurrencyId: true,
               contractAddress: true,
-              abiUrl: true,
+              abi: true,
             },
           });
 
@@ -873,12 +880,19 @@ const main = async () => {
         );
 
         if (uploadedMockToken.files) {
+          const uploadedAbi = await tx.uploadedFile.create({
+            data: {
+              key: uploadedMockToken.files[0].key,
+              size: uploadedMockToken.files[0].size,
+              mimeType: uploadedMockToken.files[0].mimeType,
+            },
+          });
           await tx.cryptocurrencyChain.update({
             where: {
               id: mockTokenCryptocurrencyChain?.id,
             },
             data: {
-              abiUrl: uploadedMockToken.files[0].key,
+              abiId: uploadedAbi.id,
             },
           });
         }

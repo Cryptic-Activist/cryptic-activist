@@ -28,6 +28,7 @@ import ChatMessage from '@/models/ChatMessage';
 import SystemMessage from '@/services/systemMessage';
 import { UserManagementActions } from './data';
 import { getFutureDate } from '@/utils/date';
+import { isERC20Trade } from '@/services/blockchains';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
 
@@ -659,7 +660,15 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
             blockchainTradeId: true,
             cryptocurrency: {
               select: {
-                chains: true,
+                chains: {
+                  select: {
+                    abi: {
+                      select: {
+                        key: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             fiatAmount: true,
@@ -753,14 +762,7 @@ export async function resolveInTraderFavor(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      let isERC20TokenTrade = true;
-
-      if (
-        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
-        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
-      ) {
-        isERC20TokenTrade = false;
-      }
+      const isERC20TokenTrade = await isERC20Trade(dispute.tradeId);
 
       let executedTrade;
 
@@ -876,14 +878,7 @@ export async function resolveInVendorFavor(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      let isERC20TokenTrade = true;
-
-      if (
-        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
-        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
-      ) {
-        isERC20TokenTrade = false;
-      }
+      const isERC20TokenTrade = await isERC20Trade(dispute?.trade.traderId);
 
       let canceledTrade;
 
@@ -1254,14 +1249,7 @@ export async function cancelTradeByModerator(req: Request, res: Response) {
     ]);
 
     if (dispute.trade?.blockchainTradeId?.toString()) {
-      let isERC20TokenTrade = true;
-
-      if (
-        dispute?.trade.cryptocurrency.chains[0]?.abiUrl === null &&
-        dispute?.trade.cryptocurrency.chains[0]?.contractAddress === null
-      ) {
-        isERC20TokenTrade = false;
-      }
+      const isERC20TokenTrade = await isERC20Trade(dispute?.tradeId);
 
       let canceledTrade;
 
