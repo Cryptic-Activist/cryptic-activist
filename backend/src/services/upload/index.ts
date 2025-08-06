@@ -1,8 +1,18 @@
-import { Request, Response } from 'express';
+import {
+  BACKEND,
+  DO_SPACES_ACCESS_KEY_ID,
+  DO_SPACES_BUCKET_NAME,
+  DO_SPACES_ENDPOINT,
+  DO_SPACES_REGION,
+  DO_SPACES_SECRET_ACCESS_KEY,
+} from '@/constants/env';
+import {
+  ObjectCannedACL,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 
-import { BACKEND } from '@/constants/env';
 import { IS_DEVELOPMENT } from '@/constants';
-import { S3 } from 'aws-sdk';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -18,11 +28,22 @@ export const upload = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 1MB limit
 });
 
-// AWS S3 config
-const s3 = new S3({
-  region: process.env.AWS_REGION,
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+console.log({
+  DO_SPACES_ACCESS_KEY_ID,
+  DO_SPACES_BUCKET_NAME,
+  DO_SPACES_ENDPOINT,
+  DO_SPACES_REGION,
+  DO_SPACES_SECRET_ACCESS_KEY,
+});
+
+// DigitalOcean Spaces configuration
+const s3 = new S3Client({
+  endpoint: DO_SPACES_ENDPOINT,
+  region: DO_SPACES_REGION!,
+  credentials: {
+    accessKeyId: DO_SPACES_ACCESS_KEY_ID!,
+    secretAccessKey: DO_SPACES_SECRET_ACCESS_KEY!,
+  },
 });
 
 export const uploadFiles = async (
@@ -62,21 +83,26 @@ export const uploadFiles = async (
         const size = finalBuffer.length;
         const mimeType = skipProcessing ? file.mimetype : 'image/webp';
 
-        if (!IS_DEVELOPMENT) {
-          // Upload to S3
+        if (true) {
+          // Upload to DigitalOcean Spaces
           const uploadParams = {
-            Bucket: process.env.AWS_S3_BUCKET_NAME!,
+            Bucket: DO_SPACES_BUCKET_NAME!,
             Key: `${folder}/${fileName}`,
             Body: finalBuffer,
             ContentType: mimeType,
-            ACL: 'public-read',
+            // TODO:
+            // Change access roles
+            ACL: 'public-read' as ObjectCannedACL,
           };
 
-          const { Location } = await s3.upload(uploadParams).promise();
+          await s3.send(new PutObjectCommand(uploadParams));
+
+          const DO_SPACE = DO_SPACES_ENDPOINT.split('https://');
+          const key = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACE}/${folder}/${fileName}`;
 
           return {
             fileName,
-            key: Location,
+            key,
             mimeType,
             size,
           };

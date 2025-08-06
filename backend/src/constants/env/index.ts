@@ -66,3 +66,13 @@ export const SETTINGS_CACHE_TTL_SECONDS = parseInt(
 );
 
 export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY as string;
+
+// Digital Ocean envs
+export const DO_SPACES_ENDPOINT = process.env.DO_SPACES_ENDPOINT as string;
+export const DO_SPACES_REGION = process.env.DO_SPACES_REGION as string;
+export const DO_SPACES_ACCESS_KEY_ID = process.env
+  .DO_SPACES_ACCESS_KEY_ID as string;
+export const DO_SPACES_SECRET_ACCESS_KEY = process.env
+  .DO_SPACES_SECRET_ACCESS_KEY as string;
+export const DO_SPACES_BUCKET_NAME = process.env
+  .DO_SPACES_BUCKET_NAME as string;
