@@ -6,6 +6,7 @@ import {
   DO_SPACES_SECRET_ACCESS_KEY,
 } from '@/constants/env';
 import {
+  GetObjectCommand,
   ObjectCannedACL,
   PutObjectCommand,
   S3Client,
@@ -15,6 +16,7 @@ import { IS_DEVELOPMENT } from '@/constants';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import multer from 'multer';
 import path from 'path';
 import sharp from 'sharp';
@@ -24,7 +26,7 @@ dotenv.config();
 // Multer setup: store files in memory
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 }, // 1MB limit
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
 });
 
 // DigitalOcean Spaces configuration
@@ -81,9 +83,7 @@ export const uploadFiles = async (
             Key: `${folder}/${fileName}`,
             Body: finalBuffer,
             ContentType: mimeType,
-            // TODO:
-            // Change access roles
-            ACL: 'public-read' as ObjectCannedACL,
+            ACL: 'private' as ObjectCannedACL,
           };
 
           await s3.send(new PutObjectCommand(uploadParams));
@@ -122,5 +122,20 @@ export const uploadFiles = async (
   } catch (error) {
     console.error('Upload failed:', error);
     return { message: 'Upload failed.', error };
+  }
+};
+
+export const getPresignedUrl = async (key: string) => {
+  const command = new GetObjectCommand({
+    Bucket: DO_SPACES_BUCKET_NAME!,
+    Key: key,
+  });
+
+  try {
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return { url };
+  } catch (error) {
+    console.error('Error generating presigned URL:', error);
+    return { error: 'Could not generate presigned URL.' };
   }
 };
