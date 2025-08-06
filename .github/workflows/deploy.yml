@@ -10,6 +10,7 @@ on:
       - 'backend/**'
       - 'frontend/admin/**'
       - 'frontend/public/**'
+      - '.github/workflows/**'
 
 jobs:
   deploy:
