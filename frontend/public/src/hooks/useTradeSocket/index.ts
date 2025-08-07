@@ -106,7 +106,6 @@ const useTradeSocket = ({
       } else {
         socket.emit('send_message', { content: messageContent, chatId });
       }
-      appendMessage(messageContent);
     }
   };
 

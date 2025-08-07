@@ -50,25 +50,35 @@ export default class Message {
               }),
             });
 
-            // console.log({ newMessage });
-
             // Check if recipient is online via Redis
             const recipientSocketId = await redisClient.hGet(
               'onlineTradingUsers',
               to,
             );
+            const senderSocketId = await redisClient.hGet(
+              'onlineTradingUsers',
+              from,
+            );
 
-            console.log({ recipientSocketId });
+            let presignedAttachmentUrl;
+
+            if (attachment) {
+              presignedAttachmentUrl = await getPresignedUrl(attachment.key);
+            }
+
             if (recipientSocketId) {
               // Deliver message in real time
-              this.socket.to(chatId).emit('receive_message', {
+              this.io.to(chatId).emit('receive_message', {
                 from,
                 to,
                 createdAt: newMessage.createdAt,
                 message,
                 ...(attachment && {
                   type: newMessage.type,
-                  attachment: newMessage.attachment,
+                  attachment: {
+                    ...newMessage.attachment,
+                    key: presignedAttachmentUrl.url,
+                  },
                 }),
               });
             }

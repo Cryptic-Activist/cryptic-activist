@@ -28,6 +28,7 @@ import ChatMessage from '@/models/ChatMessage';
 import SystemMessage from '@/services/systemMessage';
 import { UserManagementActions } from './data';
 import { getFutureDate } from '@/utils/date';
+import { getPresignedUrl } from '@/services/upload';
 import { isERC20Trade } from '@/services/blockchains';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
@@ -209,6 +210,23 @@ export async function getDisputeAdmin(req: Request, res: Response) {
         },
       },
     });
+
+    const mappedEvidences = dispute?.evidences.map(async (evidence) => {
+      if (!evidence.file?.key) {
+        return evidence;
+      }
+
+      const evidencePresigned = await getPresignedUrl(evidence.file?.key);
+      return {
+        ...evidence,
+        file: {
+          ...evidence.file,
+          key: evidencePresigned.url,
+        },
+      };
+    });
+
+    const promisedEvidences = await Promise.all(mappedEvidences);
 
     let query = ChatMessage.find(
       { chatId: dispute?.trade?.chat?.id, type: { $ne: 'info' } },

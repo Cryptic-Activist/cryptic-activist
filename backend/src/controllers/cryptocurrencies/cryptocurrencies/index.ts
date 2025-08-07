@@ -164,22 +164,27 @@ export const getSupportedTokens = async (req: Request, res: Response) => {
         chain: true,
         contractAddress: true,
         cryptocurrency: true,
-        abi: true,
+        abi: {
+          select: {
+            key: true,
+          },
+        },
       },
     });
 
     const mapped = filters.map(async (token) => {
-      if (!token.abi?.key) {
+      const { abi, ...rest } = token;
+      if (!abi?.key) {
         return {
           ...token,
           abiUrl: null,
         };
       }
 
-      const abiUrl = await getPresignedUrl(token.abi?.key);
+      const abiUrl = await getPresignedUrl(abi?.key);
 
       return {
-        ...token,
+        ...rest,
         abiUrl: abiUrl.url,
       };
     });
