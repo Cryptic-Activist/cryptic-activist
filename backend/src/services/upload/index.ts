@@ -127,6 +127,10 @@ export const uploadFiles = async (
 };
 
 export const getPresignedUrl = async (key: string) => {
+  if (IS_DEVELOPMENT) {
+    return { url: `${BACKEND}/uploads/${key}` };
+  }
+
   const command = new GetObjectCommand({
     Bucket: DO_SPACES_BUCKET_NAME!,
     Key: key,
