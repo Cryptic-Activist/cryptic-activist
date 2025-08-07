@@ -1,11 +1,22 @@
-import { Request, Response } from 'express';
+import {
+  BACKEND,
+  DO_SPACES_ACCESS_KEY_ID,
+  DO_SPACES_BUCKET_NAME,
+  DO_SPACES_REGION,
+  DO_SPACES_SECRET_ACCESS_KEY,
+} from '@/constants/env';
+import {
+  GetObjectCommand,
+  ObjectCannedACL,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 
-import { BACKEND } from '@/constants/env';
 import { IS_DEVELOPMENT } from '@/constants';
-import { S3 } from 'aws-sdk';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import multer from 'multer';
 import path from 'path';
 import sharp from 'sharp';
@@ -15,14 +26,17 @@ dotenv.config();
 // Multer setup: store files in memory
 export const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 }, // 1MB limit
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
 });
 
-// AWS S3 config
-const s3 = new S3({
-  region: process.env.AWS_REGION,
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+// DigitalOcean Spaces configuration
+const s3 = new S3Client({
+  endpoint: `https://${DO_SPACES_REGION}.digitaloceanspaces.com`,
+  region: DO_SPACES_REGION!,
+  credentials: {
+    accessKeyId: DO_SPACES_ACCESS_KEY_ID!,
+    secretAccessKey: DO_SPACES_SECRET_ACCESS_KEY!,
+  },
 });
 
 export const uploadFiles = async (
@@ -61,24 +75,26 @@ export const uploadFiles = async (
 
         const size = finalBuffer.length;
         const mimeType = skipProcessing ? file.mimetype : 'image/webp';
+        const objectKey = `${folder}/${fileName}`;
 
         if (!IS_DEVELOPMENT) {
-          // Upload to S3
+          // Upload to DigitalOcean Spaces
           const uploadParams = {
-            Bucket: process.env.AWS_S3_BUCKET_NAME!,
-            Key: `${folder}/${fileName}`,
+            Bucket: DO_SPACES_BUCKET_NAME!,
+            Key: objectKey,
             Body: finalBuffer,
             ContentType: mimeType,
-            ACL: 'public-read',
+            ACL: 'private' as ObjectCannedACL,
           };
 
-          const { Location } = await s3.upload(uploadParams).promise();
-
+          await s3.send(new PutObjectCommand(uploadParams));
+          const url = `https://${DO_SPACES_BUCKET_NAME}.${DO_SPACES_REGION}.digitaloceanspaces.com/${folder}/${fileName}`;
           return {
             fileName,
-            key: Location,
+            key: objectKey,
             mimeType,
             size,
+            url,
           };
         } else {
           // Save to local /uploads folder
@@ -90,13 +106,14 @@ export const uploadFiles = async (
           const filePath = path.join(localPath, fileName);
           fs.writeFileSync(filePath, finalBuffer);
 
-          const key = `${BACKEND}/uploads/${folder}/${fileName}`;
+          const url = `${BACKEND}/uploads/${folder}/${fileName}`;
 
           return {
             fileName,
-            key,
+            key: objectKey,
             mimeType,
             size,
+            url,
           };
         }
       }),
@@ -106,5 +123,24 @@ export const uploadFiles = async (
   } catch (error) {
     console.error('Upload failed:', error);
     return { message: 'Upload failed.', error };
+  }
+};
+
+export const getPresignedUrl = async (key: string) => {
+  if (IS_DEVELOPMENT) {
+    return { url: `${BACKEND}/uploads/${key}` };
+  }
+
+  const command = new GetObjectCommand({
+    Bucket: DO_SPACES_BUCKET_NAME!,
+    Key: key,
+  });
+
+  try {
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return { url };
+  } catch (error) {
+    console.error('Error generating presigned URL:', error);
+    return { error: 'Could not generate presigned URL.' };
   }
 };

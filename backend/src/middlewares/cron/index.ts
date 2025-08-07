@@ -8,6 +8,7 @@ import { closeAllOverdueDispute } from '@/services/disputes';
 import cron from 'node-cron';
 import { getIO } from '@/services/socket';
 import { getSetting } from '@/utils/settings';
+import { isERC20Trade } from '@/services/blockchains';
 
 export const expireTimer = async () => {
   cron.schedule('*/1 * * * *', async () => {
@@ -29,16 +30,6 @@ export const expireTimer = async () => {
         id: true,
         startedAt: true,
         blockchainTradeId: true,
-        cryptocurrency: {
-          select: {
-            chains: {
-              select: {
-                abiUrl: true,
-                contractAddress: true,
-              },
-            },
-          },
-        },
         chat: {
           select: {
             id: true,
@@ -58,14 +49,7 @@ export const expireTimer = async () => {
       );
       const expiredAt = new Date();
       if (now >= expiryTime) {
-        let isERC20TokenTrade = true;
-
-        if (
-          trade.cryptocurrency.chains[0]?.abiUrl === null &&
-          trade.cryptocurrency.chains[0]?.contractAddress === null
-        ) {
-          isERC20TokenTrade = false;
-        }
+        const isERC20TokenTrade = await isERC20Trade(trade.id);
 
         if (trade.blockchainTradeId) {
           if (isERC20TokenTrade) {

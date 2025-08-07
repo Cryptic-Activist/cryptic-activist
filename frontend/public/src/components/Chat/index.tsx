@@ -190,7 +190,17 @@ const Inputs: FC<InputsProps> = ({ receiver, sender, sendMessage }) => {
 
   const handleSendMessage = () => {
     const trimmedMessage = message.trim();
-    if (trimmedMessage.length > 0 || file) {
+    let canSubmit = false;
+
+    if (trimmedMessage.length === 0 && file) {
+      canSubmit = true;
+    } else if (trimmedMessage.length === 0 && !file) {
+      canSubmit = false;
+    } else if (trimmedMessage.length > 0) {
+      canSubmit = true;
+    }
+
+    if (canSubmit) {
       sendMessage({
         content: {
           from: sender.id,

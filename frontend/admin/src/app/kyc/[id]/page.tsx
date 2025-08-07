@@ -68,6 +68,7 @@ const KYCDetaisPage = () => {
 	);
 
 	const SubmittedDocumentItem = (document: Document) => {
+		console.log({ document });
 		const split = document.file?.key?.split('/');
 		const filename = split ? split[split.length - 1] : '';
 		const fileExt = filename.split('.')[1];
@@ -247,5 +248,5 @@ const KYCDetaisPage = () => {
 };
 
 export default withAuth(KYCDetaisPage, {
-	roles: ['SUPER_ADMIN', 'KYC_REVIEWER', 'SENIOR_ADMIN'],
+	roles: ['SUPER_ADMIN', 'KYC_REVIEWER', 'SENIOR_ADMIN']
 });

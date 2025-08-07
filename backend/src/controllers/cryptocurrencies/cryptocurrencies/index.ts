@@ -3,6 +3,7 @@ import { getCoin, getCoins } from '@/services/coinGecko';
 
 import { fetchGet } from '@/services/axios';
 import { filterLongShort } from '@/utils/filters';
+import { getPresignedUrl } from '@/services/upload';
 import { prisma } from '@/services/db/prisma';
 
 export const index = async (req: Request, res: Response) => {
@@ -163,11 +164,36 @@ export const getSupportedTokens = async (req: Request, res: Response) => {
         chain: true,
         contractAddress: true,
         cryptocurrency: true,
-        abiUrl: true,
+        abi: {
+          select: {
+            key: true,
+          },
+        },
       },
     });
-    res.status(200).json(filters);
+
+    const mapped = filters.map(async (token) => {
+      const { abi, ...rest } = token;
+      if (!abi?.key) {
+        return {
+          ...token,
+          abiUrl: null,
+        };
+      }
+
+      const abiUrl = await getPresignedUrl(abi?.key);
+
+      return {
+        ...rest,
+        abiUrl: abiUrl.url,
+      };
+    });
+
+    const promised = await Promise.all(mapped);
+
+    res.status(200).json(promised);
   } catch (err) {
+    console.log({ err });
     res.status(500).json({
       errors: [err.message],
     });

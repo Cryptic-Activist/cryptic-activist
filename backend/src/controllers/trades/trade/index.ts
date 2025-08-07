@@ -8,8 +8,10 @@ import { DEFAULT_PREMIUM_DISCOUNT } from '@/constants/env';
 import { fetchGet } from '@/services/axios';
 import { findOrCreateUserWallet } from '@/services/wallet';
 import { getCoinPrice } from '@/services/coinGecko';
+import { getPresignedUrl } from '@/services/upload';
 import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -266,7 +268,11 @@ export async function getTradeController(req: Request, res: Response) {
                 },
               },
               select: {
-                abiUrl: true,
+                abi: {
+                  select: {
+                    key: true,
+                  },
+                },
                 contractAddress: true,
               },
             },
@@ -357,7 +363,11 @@ export async function getTradeController(req: Request, res: Response) {
         chainId: trade.offer.chain.id,
       },
       select: {
-        abiUrl: true,
+        abi: {
+          select: {
+            key: true,
+          },
+        },
         contractAddress: true,
       },
     });
@@ -367,9 +377,10 @@ export async function getTradeController(req: Request, res: Response) {
       abi: [],
     };
 
-    if (cryptocurrencyChain?.abiUrl && cryptocurrencyChain?.contractAddress) {
+    if (cryptocurrencyChain?.abi?.key && cryptocurrencyChain?.contractAddress) {
       try {
-        const response = await fetchGet(cryptocurrencyChain?.abiUrl);
+        const abiUrl = await getPresignedUrl(cryptocurrencyChain.abi.key);
+        const response = await fetchGet(abiUrl.url!);
         token.abi = response.data;
       } catch (error) {
         console.error('Error fetching ABI:', error);
@@ -646,10 +657,12 @@ export async function getTradeDetails(req: Request, res: Response) {
     query = query.sort('desc');
 
     const chatMessages = await query.exec();
+    const chatMessagesWithAttachments =
+      await retrieveChatMessageWithAttachments(chatMessages);
 
     res.status(200).send({
       tradeDetails,
-      chatMessages,
+      chatMessages: chatMessagesWithAttachments,
     });
   } catch (err) {
     console.log({ err });

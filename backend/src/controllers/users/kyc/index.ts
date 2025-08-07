@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { countries, documentTypes, documentTypesWithBack } from './data';
 import { getMonthBoundaries, toUTCDateOnly } from '@/utils/date';
 
+import { KYCFile } from './type';
 import { KYCStatus } from '@prisma/client';
 import { calculatePercentageChange } from '@/utils/number';
+import { getPresignedUrl } from '@/services/upload';
 import { prisma } from '@/services/db';
 
 export const getNationalities = async (_req: Request, res: Response) => {
@@ -375,8 +377,53 @@ export const getKYCDetailsAdmin = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(kyc);
+    let documentFront: KYCFile = { key: null };
+    let documentBack: KYCFile = { key: null };
+    let selfie: KYCFile = { key: null };
+    let utilityBill: KYCFile = { key: null };
+    let bankStatement: KYCFile = { key: null };
+
+    if (kyc?.documentFront) {
+      const presignedDocumentFront = await getPresignedUrl(
+        kyc.documentFront.key,
+      );
+      documentFront = {
+        key: presignedDocumentFront.url ?? null,
+      };
+    }
+    if (kyc?.documentBack) {
+      const presignedDocumentBack = await getPresignedUrl(kyc.documentBack.key);
+      documentBack = {
+        key: presignedDocumentBack.url ?? null,
+      };
+    }
+    if (kyc?.selfie) {
+      const presignedSelfie = await getPresignedUrl(kyc.selfie.key);
+      selfie = {
+        key: presignedSelfie.url ?? null,
+      };
+    }
+    if (kyc?.utilityBill) {
+      const presignedUtilityBill = await getPresignedUrl(kyc.utilityBill.key);
+      utilityBill = { key: presignedUtilityBill.url ?? null };
+    }
+    if (kyc?.bankStatement) {
+      const presignedBankStatement = await getPresignedUrl(
+        kyc.bankStatement.key,
+      );
+      bankStatement = { key: presignedBankStatement.url ?? null };
+    }
+
+    res.status(200).json({
+      ...kyc,
+      ...(documentFront.key && { documentFront }),
+      ...(documentBack.key && { documentBack }),
+      ...(selfie.key && { selfie }),
+      ...(utilityBill.key && { utilityBill }),
+      ...(bankStatement.key && { bankStatement }),
+    });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

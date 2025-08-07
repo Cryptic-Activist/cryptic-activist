@@ -3,6 +3,7 @@ import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
 import { SendMessageParams } from './types';
+import { getPresignedUrl } from '@/services/upload';
 
 export default class Message {
   private socket: Socket;
@@ -21,13 +22,13 @@ export default class Message {
         chatId,
       }: SendMessageParams) => {
         try {
-          console.log({ message, attachment });
-
           const chat = await prisma.chat.findFirst({
             where: {
               id: chatId,
             },
           });
+
+          console.log({ from, message, to, attachment, chatId });
 
           if (chat?.id) {
             const newMessage = await ChatMessage.create({
@@ -55,22 +56,31 @@ export default class Message {
               to,
             );
 
-            console.log({ recipientSocketId });
+            let presignedAttachmentUrl;
+
+            if (attachment) {
+              presignedAttachmentUrl = await getPresignedUrl(attachment.key);
+            }
+
             if (recipientSocketId) {
               // Deliver message in real time
-              this.socket.to(chatId).emit('receive_message', {
+              this.io.to(chatId).emit('receive_message', {
                 from,
                 to,
                 createdAt: newMessage.createdAt,
                 message,
                 ...(attachment && {
                   type: newMessage.type,
-                  attachment: newMessage.attachment,
+                  attachment: {
+                    ...newMessage.attachment,
+                    key: presignedAttachmentUrl.url,
+                  },
                 }),
               });
             }
           }
         } catch (error) {
+          console.log({ error });
           // Check if recipient is online via Redis
           const recipientSocketId = await redisClient.hGet(
             'onlineTradingUsers',

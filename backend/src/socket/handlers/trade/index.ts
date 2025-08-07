@@ -33,6 +33,7 @@ import SystemMessage from '@/services/systemMessage';
 import buildTradeConfirmationEmail from '@/services/email/templates/trade-confirmation';
 import { create } from 'node:domain';
 import { getRandomAdmin } from '@/services/admin';
+import { isERC20Trade } from '@/services/blockchains';
 import { parseEther } from 'ethers';
 import { publishToQueue } from '@/services/rabbitmq';
 
@@ -519,14 +520,7 @@ export default class Trade {
         });
 
         if (trade?.blockchainTradeId?.toString()) {
-          let isERC20TokenTrade = true;
-
-          if (
-            trade.cryptocurrency.chains[0]?.abiUrl === null &&
-            trade.cryptocurrency.chains[0]?.contractAddress === null
-          ) {
-            isERC20TokenTrade = false;
-          }
+          const isERC20TokenTrade = await isERC20Trade(trade.id);
 
           let executedTrade;
 
@@ -690,6 +684,7 @@ export default class Trade {
           select: {
             trade: {
               select: {
+                id: true,
                 cryptocurrency: { select: { chains: true } },
                 blockchainTradeId: true,
               },
@@ -697,21 +692,14 @@ export default class Trade {
           },
         });
 
-        if (!chatObject?.trade?.blockchainTradeId) {
+        if (!chatObject?.trade?.blockchainTradeId || !chatObject.trade.id) {
           this.io.to(chatId).emit('trade_set_canceled_error', {
             error: true,
           });
           return;
         }
 
-        let isERC20TokenTrade = true;
-
-        if (
-          chatObject.trade.cryptocurrency.chains[0]?.abiUrl === null &&
-          chatObject.trade.cryptocurrency.chains[0]?.contractAddress === null
-        ) {
-          isERC20TokenTrade = false;
-        }
+        const isERC20TokenTrade = await isERC20Trade(chatObject.trade.id);
 
         let canceledTrade;
 

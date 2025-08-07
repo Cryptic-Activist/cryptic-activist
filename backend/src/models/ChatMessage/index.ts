@@ -17,7 +17,7 @@ const ChatMessageSchema: Schema = new Schema(
     from: { type: String, required: true },
     to: { type: String, required: true },
     type: { type: String, required: false },
-    message: { type: String, required: true },
+    message: { type: String, required: false },
     attachment: { type: AttachmentSchema, required: false },
   },
   { timestamps: true },

@@ -14,7 +14,6 @@ const Viewer = forwardRef<HTMLDivElement, ViewerProps>(
 				<div className={styles.bg} />
 				<div className={styles.container} ref={ref}>
 					<div className={styles.header}>
-						<h1>{filename}</h1>
 						<button onClick={onClose}>
 							<DynamicIcon iconName="FaPlus" />
 						</button>

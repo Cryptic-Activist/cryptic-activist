@@ -19,7 +19,10 @@ import ChatMessage from '@/models/ChatMessage';
 import { MockToken } from '@/contracts';
 import SystemMessage from '@/services/systemMessage';
 import { findOrCreateUserWallet } from '@/services/wallet';
+import { getPresignedUrl } from '@/services/upload';
 import { getRemainingTime } from '@/utils/timer';
+import { isERC20Trade } from '@/services/blockchains';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 import { toTokenUnits } from '@/utils/blockchain';
 
 export default class Chat {
@@ -108,7 +111,6 @@ export default class Chat {
                   chain: {
                     select: {
                       id: true,
-                      chainId: true,
                     },
                   },
                 },
@@ -116,25 +118,6 @@ export default class Chat {
               cryptocurrency: {
                 select: {
                   coingeckoId: true,
-                  chains: {
-                    where: {
-                      chain: {
-                        offers: {
-                          some: {
-                            trades: {
-                              some: {
-                                id: chat?.tradeId,
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                    select: {
-                      abiUrl: true,
-                      contractAddress: true,
-                    },
-                  },
                 },
               },
             },
@@ -262,14 +245,7 @@ export default class Chat {
                 },
               ]);
 
-              let isERC20TokenTrade = true;
-
-              if (
-                trade.cryptocurrency.chains[0]?.abiUrl === null &&
-                trade.cryptocurrency.chains[0]?.contractAddress === null
-              ) {
-                isERC20TokenTrade = false;
-              }
+              const isERC20TokenTrade = await isERC20Trade(trade.id);
 
               let tokenContractDetails;
 
@@ -494,8 +470,10 @@ export default class Chat {
           );
           query = query.sort('desc');
           const chatMessages = await query.exec();
+          const chatMessagesWithAttachments =
+            await retrieveChatMessageWithAttachments(chatMessages);
 
-          this.io.to(chatId).emit('room_messages', chatMessages);
+          this.io.to(chatId).emit('room_messages', chatMessagesWithAttachments);
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {
