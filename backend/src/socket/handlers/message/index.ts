@@ -2,8 +2,6 @@ import { IO, Socket } from '../types';
 import { prisma, redisClient } from '@/services/db';
 
 import ChatMessage from '@/models/ChatMessage';
-import { IS_DEVELOPMENT } from '@/constants';
-// import { IS_DEVELOPMENT } from '@/constants';
 import { SendMessageParams } from './types';
 import { getPresignedUrl } from '@/services/upload';
 
@@ -24,8 +22,6 @@ export default class Message {
         chatId,
       }: SendMessageParams) => {
         try {
-          // console.log({ message, attachment });
-
           const chat = await prisma.chat.findFirst({
             where: {
               id: chatId,
