@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { countries, documentTypes, documentTypesWithBack } from './data';
 import { getMonthBoundaries, toUTCDateOnly } from '@/utils/date';
 
+import { KYCFile } from './type';
 import { KYCStatus } from '@prisma/client';
 import { calculatePercentageChange } from '@/utils/number';
 import { getPresignedUrl } from '@/services/upload';
@@ -376,37 +377,53 @@ export const getKYCDetailsAdmin = async (req: Request, res: Response) => {
       },
     });
 
-    let documentFront;
-    let documentBack;
-    let selfie;
-    let utilityBill;
-    let bankStatement;
+    let documentFront: KYCFile = { key: null };
+    let documentBack: KYCFile = { key: null };
+    let selfie: KYCFile = { key: null };
+    let utilityBill: KYCFile = { key: null };
+    let bankStatement: KYCFile = { key: null };
 
     if (kyc?.documentFront) {
-      documentFront = await getPresignedUrl(kyc.documentFront.key);
+      const presignedDocumentFront = await getPresignedUrl(
+        kyc.documentFront.key,
+      );
+      documentFront = {
+        key: presignedDocumentFront.url ?? null,
+      };
     }
     if (kyc?.documentBack) {
-      documentBack = await getPresignedUrl(kyc.documentBack.key);
+      const presignedDocumentBack = await getPresignedUrl(kyc.documentBack.key);
+      documentBack = {
+        key: presignedDocumentBack.url ?? null,
+      };
     }
     if (kyc?.selfie) {
-      selfie = await getPresignedUrl(kyc.selfie.key);
+      const presignedSelfie = await getPresignedUrl(kyc.selfie.key);
+      selfie = {
+        key: presignedSelfie.url ?? null,
+      };
     }
     if (kyc?.utilityBill) {
-      utilityBill = await getPresignedUrl(kyc.utilityBill.key);
+      const presignedUtilityBill = await getPresignedUrl(kyc.utilityBill.key);
+      utilityBill = { key: presignedUtilityBill.url ?? null };
     }
     if (kyc?.bankStatement) {
-      bankStatement = await getPresignedUrl(kyc.bankStatement.key);
+      const presignedBankStatement = await getPresignedUrl(
+        kyc.bankStatement.key,
+      );
+      bankStatement = { key: presignedBankStatement.url ?? null };
     }
 
     res.status(200).json({
       ...kyc,
-      documentFront,
-      documentBack,
-      selfie,
-      utilityBill,
-      bankStatement,
+      ...(documentFront.key && { documentFront }),
+      ...(documentBack.key && { documentBack }),
+      ...(selfie.key && { selfie }),
+      ...(utilityBill.key && { utilityBill }),
+      ...(bankStatement.key && { bankStatement }),
     });
   } catch (err) {
+    console.log({ err });
     res.status(500).send({
       errors: [err.message],
     });

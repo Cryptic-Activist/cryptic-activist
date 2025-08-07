@@ -32,6 +32,7 @@ import { getPresignedUrl } from '@/services/upload';
 import { isERC20Trade } from '@/services/blockchains';
 import { parseEther } from 'ethers';
 import { prisma } from '@/services/db';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 
 export async function getDisputeTypes(_req: Request, res: Response) {
   try {
@@ -211,12 +212,19 @@ export async function getDisputeAdmin(req: Request, res: Response) {
       },
     });
 
-    const mappedEvidences = dispute?.evidences.map(async (evidence) => {
-      if (!evidence.file?.key) {
+    if (!dispute) {
+      res.status(404).json({
+        errors: ['Dispute not found'],
+      });
+      return;
+    }
+
+    const mappedEvidences = dispute.evidences.map(async (evidence) => {
+      if (!evidence.file || !evidence.file.key) {
         return evidence;
       }
 
-      const evidencePresigned = await getPresignedUrl(evidence.file?.key);
+      const evidencePresigned = await getPresignedUrl(evidence.file.key);
       return {
         ...evidence,
         file: {
@@ -229,21 +237,24 @@ export async function getDisputeAdmin(req: Request, res: Response) {
     const promisedEvidences = await Promise.all(mappedEvidences);
 
     let query = ChatMessage.find(
-      { chatId: dispute?.trade?.chat?.id, type: { $ne: 'info' } },
+      { chatId: dispute.trade?.chat?.id, type: { $ne: 'info' } },
       'createdAt from message type to attachment',
     );
 
     query = query.sort('desc');
 
     const chatMessages = await query.exec();
+    const chatMessagesWithAttachments =
+      await retrieveChatMessageWithAttachments(chatMessages);
 
     res.status(200).json({
       ...dispute,
+      evidences: promisedEvidences,
       trade: {
-        ...dispute?.trade,
+        ...dispute.trade,
         chat: {
-          ...dispute?.trade?.chat,
-          messages: chatMessages,
+          ...dispute.trade?.chat,
+          messages: chatMessagesWithAttachments,
         },
       },
     });

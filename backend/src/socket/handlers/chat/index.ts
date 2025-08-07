@@ -22,6 +22,7 @@ import { findOrCreateUserWallet } from '@/services/wallet';
 import { getPresignedUrl } from '@/services/upload';
 import { getRemainingTime } from '@/utils/timer';
 import { isERC20Trade } from '@/services/blockchains';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 import { toTokenUnits } from '@/utils/blockchain';
 
 export default class Chat {
@@ -469,36 +470,10 @@ export default class Chat {
           );
           query = query.sort('desc');
           const chatMessages = await query.exec();
+          const chatMessagesWithAttachments =
+            await retrieveChatMessageWithAttachments(chatMessages);
 
-          const mappedChatMesasge = chatMessages.map(async (chatMessage) => {
-            let msg = {
-              chatId: chatMessage.chatId,
-              from: chatMessage.from,
-              to: chatMessage.to,
-              type: chatMessage.type,
-              message: chatMessage.message,
-              createdAt: chatMessage.createdAt,
-            };
-            if (!chatMessage.attachment?.key) {
-              return msg;
-            }
-            const { key, ...restAttachment } = chatMessage.attachment;
-            const presigned = await getPresignedUrl(key);
-
-            return {
-              ...msg,
-              attachment: {
-                ...restAttachment,
-                key: presigned.url,
-              },
-            };
-          });
-
-          const promised = await Promise.all(mappedChatMesasge);
-
-          console.log({ promised });
-
-          this.io.to(chatId).emit('room_messages', promised);
+          this.io.to(chatId).emit('room_messages', chatMessagesWithAttachments);
           // Notify room about new user
           this.io.emit('user_status', { user, status: 'online' });
         } catch (error) {

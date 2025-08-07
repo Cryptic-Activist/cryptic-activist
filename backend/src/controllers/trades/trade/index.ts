@@ -11,6 +11,7 @@ import { getCoinPrice } from '@/services/coinGecko';
 import { getPresignedUrl } from '@/services/upload';
 import { getSetting } from '@/utils/settings';
 import { isUserPremium } from '@/utils/user';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 
 export async function index(req: Request, res: Response) {
   try {
@@ -656,10 +657,12 @@ export async function getTradeDetails(req: Request, res: Response) {
     query = query.sort('desc');
 
     const chatMessages = await query.exec();
+    const chatMessagesWithAttachments =
+      await retrieveChatMessageWithAttachments(chatMessages);
 
     res.status(200).send({
       tradeDetails,
-      chatMessages,
+      chatMessages: chatMessagesWithAttachments,
     });
   } catch (err) {
     console.log({ err });
