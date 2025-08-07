@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { FormValues } from './types';
 import { searchVendors } from '@/services/users';
@@ -42,8 +42,6 @@ const useSearch = () => {
       debouncedSearch(search);
     }
   }, [search]);
-
-  console.log({ isFormOpen });
 
   return {
     data,
