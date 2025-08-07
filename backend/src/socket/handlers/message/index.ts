@@ -28,6 +28,8 @@ export default class Message {
             },
           });
 
+          console.log({ from, message, to, attachment, chatId });
+
           if (chat?.id) {
             const newMessage = await ChatMessage.create({
               chatId: chat.id,
@@ -46,14 +48,12 @@ export default class Message {
               }),
             });
 
+            console.log({ newMessage });
+
             // Check if recipient is online via Redis
             const recipientSocketId = await redisClient.hGet(
               'onlineTradingUsers',
               to,
-            );
-            const senderSocketId = await redisClient.hGet(
-              'onlineTradingUsers',
-              from,
             );
 
             let presignedAttachmentUrl;
@@ -80,6 +80,7 @@ export default class Message {
             }
           }
         } catch (error) {
+          console.log({ error });
           // Check if recipient is online via Redis
           const recipientSocketId = await redisClient.hGet(
             'onlineTradingUsers',
