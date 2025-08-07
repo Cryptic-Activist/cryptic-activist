@@ -12,12 +12,13 @@
     "dev": "tsx watch src/server.ts",
     "migrate:dev": "npx prisma db push && npx prisma generate",
     "migrate:reset": "npx prisma migrate reset --force && npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset --force",
     "lint": "eslint --fix",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cryptic-activist --project cryptic-activist-backend ./dist && sentry-cli sourcemaps upload --org cryptic-activist --project cryptic-activist-backend ./dist",
     "seed:admin": "tsx src/scripts/create-initial-admin.ts",
     "seed:platform": "tsx src/scripts/seed-initial-platform-data.ts",
     "seed:all": "npm run seed:admin && npm run seed:platform",
-    "hardreset": "npm run migrate:reset && npm run seed:all"
+    "hardreset": "npm run db:reset && npm run seed:all"
   },
   "lint-staged": {
     "**/*.{json,js,ts,jsx,tsx,html}": [
