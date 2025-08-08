@@ -35,8 +35,8 @@ jobs:
         id: get_active_color
         uses: appleboy/ssh-action@v1.2.2
         with:
-          host: 142.93.120.251
-          username: root
+          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
+          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
           script: |
             set -e
