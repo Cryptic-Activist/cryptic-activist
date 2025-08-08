@@ -1012,6 +1012,8 @@ export const validateWithAuthToken = async (req: Request, res: Response) => {
     const token = authorization.split('Bearer ')[1];
     const decoded = decodeToken(token);
 
+    console.log({ decoded });
+
     if (!decoded) {
       res.status(401).send({
         isValid: false,

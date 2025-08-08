@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { AdminRole } from '@/stores/admin/types';
 import { Role } from '@/stores/admins';
@@ -7,12 +7,11 @@ import { useAdmin } from '@/hooks';
 import { validateWithAuthToken } from '@/services/admin';
 
 export const useAuth = (roles?: Role[]) => {
-	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(true);
-	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const { admin, hasRoles } = useAdmin();
 
-	useEffect(() => {
-		const checkAuth = async () => {
+	const { data: isAuthenticated, isLoading } = useQuery({
+		queryKey: ['auth', admin.data?.id],
+		queryFn: async () => {
 			const token = getCookie('accessToken');
 			if (token) {
 				try {
@@ -20,24 +19,17 @@ export const useAuth = (roles?: Role[]) => {
 
 					if (admin.data?.roles && roles) {
 						const hasRequiredRole = hasRoles(roles);
-
-						if (hasRequiredRole) {
-							setIsAuthenticated(isValid);
-						} else {
-							setIsAuthenticated(false);
-						}
+						return hasRequiredRole && isValid;
 					}
+					return isValid;
 				} catch (error) {
-					setIsAuthenticated(false);
+					return false;
 				}
-			} else {
-				setIsAuthenticated(false);
 			}
-			setIsLoading(false);
-		};
-
-		checkAuth();
-	}, [admin.data?.id]);
+			return false;
+		},
+		refetchOnWindowFocus: false
+	});
 
 	return { isAuthenticated, isLoading };
 };
