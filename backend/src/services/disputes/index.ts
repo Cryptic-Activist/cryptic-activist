@@ -1,6 +1,7 @@
 import { cancelTrade as cancelTradeERC20 } from '../blockchains/escrow/erc20';
 import { cancelTrade as cancelTradeNative } from '../blockchains/escrow/native';
 import { getRandomSeniorSuperAdmin } from '../admin';
+import { isERC20Trade } from '../blockchains';
 import { prisma } from '../db';
 
 export const closeAllOverdueDispute = async () => {
@@ -21,16 +22,6 @@ export const closeAllOverdueDispute = async () => {
         select: {
           id: true,
           blockchainTradeId: true,
-          cryptocurrency: {
-            select: {
-              chains: {
-                select: {
-                  abiUrl: true,
-                  contractAddress: true,
-                },
-              },
-            },
-          },
         },
       },
     },
@@ -71,14 +62,7 @@ export const closeAllOverdueDispute = async () => {
 
   const promises = overdueDisputes.map(async ({ trade }) => {
     if (trade.blockchainTradeId) {
-      let isERC20TokenTrade = true;
-
-      if (
-        trade.cryptocurrency.chains[0]?.abiUrl === null &&
-        trade.cryptocurrency.chains[0]?.contractAddress === null
-      ) {
-        isERC20TokenTrade = false;
-      }
+      const isERC20TokenTrade = await isERC20Trade(trade.id);
 
       let cancelled;
 

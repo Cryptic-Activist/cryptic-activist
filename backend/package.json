@@ -12,12 +12,13 @@
     "dev": "tsx watch src/server.ts",
     "migrate:dev": "npx prisma db push && npx prisma generate",
     "migrate:reset": "npx prisma migrate reset --force && npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset --force",
     "lint": "eslint --fix",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org cryptic-activist --project cryptic-activist-backend ./dist && sentry-cli sourcemaps upload --org cryptic-activist --project cryptic-activist-backend ./dist",
     "seed:admin": "tsx src/scripts/create-initial-admin.ts",
     "seed:platform": "tsx src/scripts/seed-initial-platform-data.ts",
     "seed:all": "npm run seed:admin && npm run seed:platform",
-    "hardreset": "npm run migrate:reset && npm run seed:all"
+    "hardreset": "npm run db:reset && npm run seed:all"
   },
   "lint-staged": {
     "**/*.{json,js,ts,jsx,tsx,html}": [
@@ -53,14 +54,14 @@
     "typescript-eslint": "^8.25.0"
   },
   "dependencies": {
-    "@moralisweb3/common-evm-utils": "^2.27.2",
+    "@aws-sdk/client-s3": "^3.859.0",
+    "@aws-sdk/s3-request-presigner": "^3.859.0",
     "@prisma/client": "^6.6.0",
     "@sentry/cli": "^2.45.0",
     "@sentry/node": "^9.17.0",
     "@types/multer": "^1.4.13",
     "@types/semver": "^7.7.0",
     "amqplib": "^0.10.8",
-    "aws-sdk": "^2.1692.0",
     "axios": "^1.8.1",
     "bcryptjs": "^3.0.2",
     "bip39": "^3.1.0",

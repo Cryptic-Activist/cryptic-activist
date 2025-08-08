@@ -120,7 +120,8 @@ model CryptocurrencyChain {
   contractAddress  String?        @db.VarChar(200) // Contract address on this specific chain
   isVerified       Boolean        @default(false) @db.Boolean // Whether the token is verified on this chain
   createdAt        DateTime       @default(now()) @db.Timestamp()
-  abiUrl           String?
+  abi              UploadedFile?  @relation(fields: [abiId], references: [id])
+  abiId            String?
 
   @@unique([cryptocurrencyId, chainId])
   @@map("cryptocurrency_chains")
@@ -209,20 +210,22 @@ enum KYCDocumentType {
 }
 
 model UploadedFile {
-  id               String           @id @default(uuid())
-  key              String
-  mimeType         String? // e.g., "image/jpeg"
-  size             Int?
-  submittedAt      DateTime         @default(now())
-  documentFrontKYC KYC?             @relation("documentFront")
-  documentBackKYC  KYC?             @relation("documentBack")
-  selfieKYC        KYC?             @relation("selfie")
-  utilityBillKYC   KYC?             @relation("utilityBill")
-  bankStatementKYC KYC?             @relation("bankStatement")
-  disputeEvidence  DisputeEvidence?
-  deletedAt        DateTime?        @db.Timestamp()
-  createdAt        DateTime?        @default(now()) @db.Timestamp()
-  updatedAt        DateTime?        @updatedAt @db.Timestamp()
+  id                  String                @id @default(uuid())
+  key                 String
+  mimeType            String? // e.g., "image/jpeg"
+  size                Int?
+  submittedAt         DateTime              @default(now())
+  documentFrontKYC    KYC?                  @relation("documentFront")
+  documentBackKYC     KYC?                  @relation("documentBack")
+  selfieKYC           KYC?                  @relation("selfie")
+  utilityBillKYC      KYC?                  @relation("utilityBill")
+  bankStatementKYC    KYC?                  @relation("bankStatement")
+  disputeEvidence     DisputeEvidence?
+  smartContract       SmartContract[]
+  cryptocurrencyChain CryptocurrencyChain[]
+  deletedAt           DateTime?             @db.Timestamp()
+  createdAt           DateTime?             @default(now()) @db.Timestamp()
+  updatedAt           DateTime?             @updatedAt @db.Timestamp()
 
   @@map("uploaded_files")
 }
@@ -272,21 +275,19 @@ model Language {
 }
 
 model Chain {
-  id             String   @id @default(uuid())
-  name           String   @unique // e.g., "Ethereum", "Polygon"
-  symbol         String
-  chainId        Int      @unique // Network chain ID (e.g., 1 for Ethereum mainnet)
-  rpcUrl         String? // RPC endpoint URL
-  explorerUrl    String? // Block explorer URL
-  nativeCurrency String // Native currency symbol
-  isTestnet      Boolean  @default(false) @db.Boolean
-  isActive       Boolean  @default(true) @db.Boolean
-  logoUrl        String? // Chain logo/icon URL
-  description    String?
-  createdAt      DateTime @default(now()) @db.Timestamp()
-  updatedAt      DateTime @updatedAt @db.Timestamp()
-
-  // Relations
+  id                   String                @id @default(uuid())
+  name                 String                @unique // e.g., "Ethereum", "Polygon"
+  symbol               String
+  chainId              Int                   @unique // Network chain ID (e.g., 1 for Ethereum mainnet)
+  rpcUrl               String? // RPC endpoint URL
+  explorerUrl          String? // Block explorer URL
+  nativeCurrency       String // Native currency symbol
+  isTestnet            Boolean               @default(false) @db.Boolean
+  isActive             Boolean               @default(true) @db.Boolean
+  logoUrl              String? // Chain logo/icon URL
+  description          String?
+  createdAt            DateTime              @default(now()) @db.Timestamp()
+  updatedAt            DateTime              @updatedAt @db.Timestamp()
   offers               Offer[]               @relation("offer")
   cryptocurrencyChains CryptocurrencyChain[] @relation("chainCryptocurrency")
   smartContract        SmartContract[]
@@ -493,24 +494,25 @@ model Tier {
 }
 
 model SmartContract {
-  id                    String      @id @default(uuid())
+  id                    String       @id @default(uuid())
   address               String // Deployed contract address
   chainId               String
-  chain                 Chain       @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
+  chain                 Chain        @relation(fields: [chainId], references: [id]) // e.g., "polygon-amoy", "mainnet"
   version               String // Optional versioning (e.g., "v1.0.0")
   deployedById          String // Admin or system user who deployed it
-  deployedBy            Admin       @relation(fields: [deployedById], references: [id])
-  deployerWallet        AdminWallet @relation("smartContractDeployerWallet", fields: [deployerWalletId], references: [id])
+  deployedBy            Admin        @relation(fields: [deployedById], references: [id])
+  deployerWallet        AdminWallet  @relation("smartContractDeployerWallet", fields: [deployerWalletId], references: [id])
   deployerWalletId      String
-  platformWallet        AdminWallet @relation("smartContractPlatformWallet", fields: [platformWalletId], references: [id])
+  platformWallet        AdminWallet  @relation("smartContractPlatformWallet", fields: [platformWalletId], references: [id])
   platformWalletId      String
   deploymentHash        String? // Transaction hash
   deploymentBlockHeight BigInt? // Transaction block height
   gasUsed               BigInt?
   gasPrice              BigInt?
-  deployedAt            DateTime    @default(now()) @db.Timestamp()
-  isActive              Boolean     @default(true) // Useful for versioned contracts
-  artifactUrl           String
+  deployedAt            DateTime     @default(now()) @db.Timestamp()
+  isActive              Boolean      @default(true) // Useful for versioned contracts
+  artifact              UploadedFile @relation(fields: [artifactId], references: [id])
+  artifactId            String
   metadata              Json? // Arbitrary extra data (tags, etc.)
 
   @@index([address])

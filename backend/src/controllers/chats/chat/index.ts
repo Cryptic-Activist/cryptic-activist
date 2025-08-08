@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import ChatMessage from '@/models/ChatMessage';
 import { prisma } from '@/services/db/prisma';
+import { retrieveChatMessageWithAttachments } from '@/services/chat';
 
 export const createChatController = async (req: Request, res: Response) => {
   try {
@@ -32,7 +33,10 @@ export const getChatHistory = async (req: Request, res: Response) => {
 
     const chatMessages = await query.exec();
 
-    res.status(200).send(chatMessages);
+    const chatMessagesWithAttachments =
+      await retrieveChatMessageWithAttachments(chatMessages);
+
+    res.status(200).send(chatMessagesWithAttachments);
   } catch (err) {
     res.status(500).send({
       errors: [err.message],

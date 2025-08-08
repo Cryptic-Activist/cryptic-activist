@@ -127,7 +127,7 @@ export const deployEscrowERC20SmartContract = async (
         });
 
         const file = convertArtifactToFile(deployed.artifact);
-        const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
+        const uploadedFiles = await uploadFiles('smart-contracts/escrow', [
           file,
         ]);
 
@@ -189,9 +189,17 @@ export const deployEscrowERC20SmartContract = async (
           'patch',
         );
 
+        const uploadedArtifact = await tx.uploadedFile.create({
+          data: {
+            key: artifact.key,
+            mimeType: artifact.mimeType,
+            size: artifact.size,
+          },
+        });
+
         const newDeployment = await tx.smartContract.create({
           data: {
-            artifactUrl: artifact.key,
+            artifactId: uploadedArtifact.id,
             address: deployed.contractAddress,
             deployerWalletId: deployerWallet.id,
             platformWalletId: platformWallet.id,
@@ -322,7 +330,7 @@ export const deployEscrowNativeTokenSmartContract = async (
         });
 
         const file = convertArtifactToFile(deployed.artifact);
-        const uploadedFiles = await uploadFiles('smart-contracts/escrow/', [
+        const uploadedFiles = await uploadFiles('smart-contracts/escrow', [
           file,
         ]);
 
@@ -384,9 +392,17 @@ export const deployEscrowNativeTokenSmartContract = async (
           'patch',
         );
 
+        const uploadedArtifact = await tx.uploadedFile.create({
+          data: {
+            key: artifact.key,
+            mimeType: artifact.mimeType,
+            size: artifact.size,
+          },
+        });
+
         const newDeployment = await tx.smartContract.create({
           data: {
-            artifactUrl: artifact.key,
+            artifactId: uploadedArtifact.id,
             address: deployed.contractAddress,
             deployerWalletId: deployerWallet.id,
             platformWalletId: platformWallet.id,

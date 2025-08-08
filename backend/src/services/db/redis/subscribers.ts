@@ -2,6 +2,7 @@ import SystemMessage from '@/services/systemMessage';
 import { cancelTrade as cancelTradeERC20 } from '@/services/blockchains/escrow/erc20';
 import { cancelTrade as cancelTradeNative } from '@/services/blockchains/escrow/native';
 import { getIO } from '@/services/socket';
+import { isERC20Trade } from '@/services/blockchains';
 import { prisma } from '@/services/db';
 import { redisClient } from '@/services/db';
 
@@ -24,16 +25,6 @@ export const subscribeToTradeTimers = () => {
           select: {
             id: true,
             blockchainTradeId: true,
-            cryptocurrency: {
-              select: {
-                chains: {
-                  select: {
-                    abiUrl: true,
-                    contractAddress: true,
-                  },
-                },
-              },
-            },
             status: true,
             chat: {
               select: {
@@ -47,14 +38,7 @@ export const subscribeToTradeTimers = () => {
           trade &&
           (trade.status === 'PENDING' || trade.status === 'IN_PROGRESS')
         ) {
-          let isERC20TokenTrade = true;
-
-          if (
-            trade.cryptocurrency.chains[0]?.abiUrl === null &&
-            trade.cryptocurrency.chains[0]?.contractAddress === null
-          ) {
-            isERC20TokenTrade = false;
-          }
+          const isERC20TokenTrade = await isERC20Trade(trade.id);
 
           if (trade.blockchainTradeId) {
             if (isERC20TokenTrade) {

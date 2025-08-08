@@ -13,6 +13,7 @@ import { DeployPremiumSmartContractParams } from './types';
 import { IS_DEVELOPMENT } from '@/constants';
 import PremiumArtifact from '@/contracts/premium/artifacts/PremiumSubscriptionManager.json';
 import { fetchGet } from '@/services/axios';
+import { getPresignedUrl } from '@/services/upload';
 import { parseDurationToSeconds } from '@/utils/date';
 
 const iface = new Interface(PremiumArtifact.abi);
@@ -50,7 +51,11 @@ export const getPremiumDetails = async () => {
         },
       },
       select: {
-        artifactUrl: true,
+        artifact: {
+          select: {
+            key: true,
+          },
+        },
         address: true,
       },
     });
@@ -59,12 +64,18 @@ export const getPremiumDetails = async () => {
       throw new Error('Unable to find Premium Contract');
     }
 
-    const response = await fetchGet(premiumSmartContract.artifactUrl);
+    const artifactPresigned = await getPresignedUrl(
+      premiumSmartContract.artifact.key,
+    );
+
+    if (artifactPresigned.error || !artifactPresigned.url) {
+      throw new Error('Unable to presign artifact url');
+    }
+
+    const response = await fetchGet(artifactPresigned.url);
 
     if (response.status !== 200) {
-      throw new Error(
-        `Failed to fetch ABI from ${premiumSmartContract.artifactUrl}`,
-      );
+      throw new Error(`Failed to fetch ABI from ${artifactPresigned.url}`);
     }
 
     details = {

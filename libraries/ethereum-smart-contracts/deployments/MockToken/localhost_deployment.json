@@ -1,6 +1,6 @@
 {
-  "usdcContractAddress": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-  "daiContractAddress": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+  "usdcContractAddress": "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8",
+  "daiContractAddress": "0x851356ae760d987E095750cCeb3bC6014560891C",
   "minted": "10000000.0 USDC and 10000000.0 DAI were minted",
   "addresses": [
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",

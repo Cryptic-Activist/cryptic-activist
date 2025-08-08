@@ -36,3 +36,37 @@ export const getNextSmartContractVersion = async (
 
   return `v${next}`;
 };
+
+export const isERC20Trade = async (tradeId: string) => {
+  const trade = await prisma.trade.findUnique({
+    where: {
+      id: tradeId,
+    },
+    select: {
+      cryptocurrency: {
+        select: {
+          chains: {
+            select: {
+              abi: {
+                select: {
+                  key: true,
+                },
+              },
+              contractAddress: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (
+    trade &&
+    !trade?.cryptocurrency.chains[0].abi?.key &&
+    trade.cryptocurrency.chains[0].contractAddress === null
+  ) {
+    return false;
+  }
+
+  return true;
+};
