@@ -38,7 +38,9 @@ const Admins = () => {
 					<p className={styles.metaInfoValue}>Create, Delete, Update admins</p>
 					<button
 						className={`${styles.btn} ${styles.btnPrimary}`}
-						onClick={() => openModal()}
+						onClick={() => {
+							openModal();
+						}}
 					>
 						<DynamicIcon iconName="FaPlus" size={16} color="#fff" />
 						Create Admin

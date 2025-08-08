@@ -44,7 +44,6 @@ const PaymentMethodsCreate = () => {
 					register={register}
 					label="Payment Method Category"
 					required
-					// @ts-ignore
 					errorMessage={errors['paymentMethodCategory']?.id?.message}
 				/>
 				<Submit type="submit">Submit</Submit>
