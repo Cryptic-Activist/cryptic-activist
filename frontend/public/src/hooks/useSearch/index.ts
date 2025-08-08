@@ -43,8 +43,6 @@ const useSearch = () => {
     }
   }, [search]);
 
-  console.log({ isFormOpen });
-
   return {
     data,
     isSuccess,

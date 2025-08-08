@@ -62,7 +62,7 @@ const HowMuch: FC<HowMuchProps> = ({
           cryptocurrencyAmount,
           blockchain.balance.value,
           blockchain.balance.decimals,
-          app.settings?.depositPerTradePercent,
+          app.settings?.depositPerTradePercent as number,
           offer.offerType
         );
 
