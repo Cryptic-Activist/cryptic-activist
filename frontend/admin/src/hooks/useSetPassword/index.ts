@@ -65,16 +65,16 @@ const useSetPassword = () => {
 		console.log({ submitted });
 	};
 
-	useEffect(() => {
-		if (setPasswordtokenQuery.failureReason) {
-			// window.location.href = '/?reset-password=0';
-			return;
-		}
-		if (setPasswordtokenQuery.data?.ok) {
-			// window.location.href = '/?reset-password=1&token=' + token;
-			return;
-		}
-	}, [setPasswordtokenQuery.failureReason, setPasswordtokenQuery.data]);
+	// useEffect(() => {
+	// 	if (setPasswordtokenQuery.failureReason) {
+	// 		// window.location.href = '/?reset-password=0';
+	// 		return;
+	// 	}
+	// 	if (setPasswordtokenQuery.data?.ok) {
+	// 		// window.location.href = '/?reset-password=1&token=' + token;
+	// 		return;
+	// 	}
+	// }, [setPasswordtokenQuery.failureReason, setPasswordtokenQuery.data]);
 
 	return {
 		form: {
