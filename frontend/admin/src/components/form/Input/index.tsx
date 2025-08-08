@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
 import type { InputProps } from './types';
 import styles from './index.module.scss';

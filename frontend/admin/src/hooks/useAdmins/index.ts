@@ -1,5 +1,5 @@
-import { Role, admins, setAdmins } from '@/stores/admins';
-import {
+import type { Role } from '@/stores/admins';
+import type {
 	createAdmin,
 	deleteAdmin,
 	generatePassword,

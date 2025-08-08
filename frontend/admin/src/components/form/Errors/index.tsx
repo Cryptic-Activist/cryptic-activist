@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { ErrorsProps } from './types';
+import type { FC } from 'react';
+import type { ErrorsProps } from './types';
 
 import styles from './styles.module.scss';
 

@@ -1,5 +1,5 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { KYC } from '@/stores/kycs/types';
+import type { ColumnDef } from '@tanstack/react-table';
+import type { KYC } from '@/stores/kycs/types';
 
 export const kycsColumns: ColumnDef<KYC>[] = [
 	{ header: 'ID', accessorKey: 'id' },

@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { DefaultFields } from './types';
+import type { DefaultFields } from './types';
 import { useAdmin } from '..';
 import { useStore } from '@nanostores/react';
 

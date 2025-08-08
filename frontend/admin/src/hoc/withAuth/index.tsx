@@ -1,8 +1,8 @@
 'use client';
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 
-import { WithAuthOptions } from './types';
+import type { WithAuthOptions } from './types';
 import { useAuth } from './useAuth';
 
 export const withAuth = <P extends object>(

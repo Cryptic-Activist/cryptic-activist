@@ -1,8 +1,8 @@
 'use client';
 
-import { FC, useState } from 'react';
+import { type FC, useState } from 'react';
 
-import { DatePickerProps } from './types';
+import type { DatePickerProps } from './types';
 import { DayPicker } from 'react-day-picker';
 import DynamicIcon from '@/components/DynamicIcon';
 import styles from './index.module.scss';

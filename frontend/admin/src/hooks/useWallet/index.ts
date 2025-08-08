@@ -10,7 +10,7 @@ import {
 } from '@/services/wallets';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { CreateAdminWalletParams } from './types';
+import type { CreateAdminWalletParams } from './types';
 import useAdmin from '../useAdmin';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';

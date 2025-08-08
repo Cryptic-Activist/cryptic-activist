@@ -1,4 +1,4 @@
-import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
+import type { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 
 export type SelectProps = {
 	id: string;

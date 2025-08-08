@@ -1,6 +1,6 @@
 'use client';
 
-import { CreateChainParams, UseChainsParams } from './types';
+import type { CreateChainParams, UseChainsParams } from './types';
 import { chains, setChains } from '@/stores/chains';
 import { useQueries, useQuery } from '@tanstack/react-query';
 

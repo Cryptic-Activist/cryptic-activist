@@ -11,7 +11,7 @@ import {
 	logout,
 	setAdmin
 } from '@/stores/admin';
-import { AdminRole, type CreateUserParams } from './types';
+import type { AdminRole, CreateUserParams } from './types';
 import { useQuery } from '@tanstack/react-query';
 
 const useAdmin = () => {

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
 import type { ListProps } from './types';

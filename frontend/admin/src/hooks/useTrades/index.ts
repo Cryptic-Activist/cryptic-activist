@@ -11,7 +11,7 @@ import {
 import { setCurrentPage, setTrades, trades } from '@/stores';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
-import { GetTradesParams } from '@/services/trades/types';
+import type { GetTradesParams } from '@/services/trades/types';
 import { getCryptocurenciesFilters } from '@/services/cryptocurrencies';
 import { getLocaleFullDateString } from '@/utils/date';
 import { getTrades } from '@/services/trades';

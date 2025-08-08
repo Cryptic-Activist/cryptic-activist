@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { AdminRole } from '@/stores/admin/types';
-import { Role } from '@/stores/admins';
+import type { AdminRole } from '@/stores/admin/types';
+import type { Role } from '@/stores/admins';
 import { getCookie } from '@/utils';
 import { useAdmin } from '@/hooks';
 import { validateWithAuthToken } from '@/services/admin';

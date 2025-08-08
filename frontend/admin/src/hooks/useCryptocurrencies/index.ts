@@ -8,7 +8,7 @@ import {
   listCryptocurrencies,
   cryptocurrencies,
 } from '@/stores/cryptocurrencies';
-import { CreateCryptocurrencyParams, UseCryptocurrenciesParams } from './types';
+import type { CreateCryptocurrencyParams, UseCryptocurrenciesParams } from './types';
 
 const useCryptocurrencies = (fetchData?: UseCryptocurrenciesParams) => {
   const $cryptocurrencies = useStore(cryptocurrencies);

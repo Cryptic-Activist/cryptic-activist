@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useEffect } from 'react';
 import {
 	onSubmitAdminSetPassword,
 	validatePasswordSetToken
 } from '@/services/setPassword';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { AdminSetPasswordParams } from '@/services/setPassword/types';
-import { SetPasswordValues } from './types';
+import type { AdminSetPasswordParams } from '@/services/setPassword/types';
+import type { SetPasswordValues } from './types';
 import { setPasswordResolver } from './zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useURL from '../useURL';
 

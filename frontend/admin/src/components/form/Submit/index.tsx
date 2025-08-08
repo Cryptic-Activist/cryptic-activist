@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { SubmitProps } from './types';
+import type { FC } from 'react';
+import type { SubmitProps } from './types';
 
 import styles from './styles.module.scss';
 

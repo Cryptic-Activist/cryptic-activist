@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { RegisterAdmin } from './types';
+import type { RegisterAdmin } from './types';
 import { handleRegisterAdmin } from '@/stores/admin';
 
 const useNewAdmin = () => {

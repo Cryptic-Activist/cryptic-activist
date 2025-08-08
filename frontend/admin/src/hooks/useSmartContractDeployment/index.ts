@@ -17,10 +17,9 @@ import { useAdmin, useChains } from '..';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { Chain } from '@/stores/chains/types';
-import { DeploySmartContractParams } from '@/services/smart-contracts/types';
+import type { Chain } from '@/stores/chains/types';
+import type { DeploySmartContractParams } from '@/services/smart-contracts/types';
 import { IS_DEVELOPMENT } from '@/constants';
-import { errors } from 'decimal.js';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 

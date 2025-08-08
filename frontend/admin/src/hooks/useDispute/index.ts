@@ -1,6 +1,6 @@
 'use client';
 
-import {
+import type {
 	AddDisputePartyNoteBody,
 	CancelTradeByModeratorBody,
 	ResolveInTraderFavorBody,
@@ -31,7 +31,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { PreviousDisputePartyNotes } from './types';
+import type { PreviousDisputePartyNotes } from './types';
 import { useAdmin } from '..';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'next/navigation';
