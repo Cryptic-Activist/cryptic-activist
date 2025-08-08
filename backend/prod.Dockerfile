@@ -46,4 +46,3 @@ EXPOSE 5000
 
 # Use entrypoint script
 ENTRYPOINT ["./entrypoint.sh"]
-# CMD ["npm", "run", "start"]
