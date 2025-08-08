@@ -1,14 +1,14 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { FC } from 'react';
+import type { FC } from 'react';
 import { FaPlus } from 'react-icons/fa';
 
 import Breadcrumb from '@/components/Breadcrumb';
 import Button from '@/components/Button';
 
 import layout from './layout.module.scss';
-import { FiatsLayoutProps } from './types';
+import type { FiatsLayoutProps } from './types';
 
 const FiatsLayout: FC<FiatsLayoutProps> = ({ children }) => {
 	const pathname = usePathname();

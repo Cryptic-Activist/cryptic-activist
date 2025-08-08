@@ -1,6 +1,6 @@
 import DynamicIcon from '../DynamicIcon';
-import { FC } from 'react';
-import { StatusCardProps } from './types';
+import type { FC } from 'react';
+import type { StatusCardProps } from './types';
 import styles from './index.module.scss';
 
 const StatusCard: FC<StatusCardProps> = ({

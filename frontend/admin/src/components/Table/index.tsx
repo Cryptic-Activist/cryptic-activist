@@ -1,8 +1,8 @@
 'use client';
 
 import {
-	Cell,
-	SortingState,
+	type Cell,
+	type SortingState,
 	flexRender,
 	getCoreRowModel,
 	getPaginationRowModel,
@@ -13,7 +13,7 @@ import { DynamicIcon, Pagination } from '@/components';
 import React, { useState } from 'react';
 import { getFutureDateByHours, getLocaleFullDateString } from '@/utils/date';
 
-import { GenericTableProps } from './types';
+import type { GenericTableProps } from './types';
 import styles from './index.module.scss';
 
 const Table = <T extends object>({

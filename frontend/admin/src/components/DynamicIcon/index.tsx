@@ -6,9 +6,9 @@ import * as IoIcons from 'react-icons/io';
 import * as MdIcons from 'react-icons/md';
 import * as RxIcons from 'react-icons/rx';
 
-import { DynamicIconProps, IconPacks } from './types';
+import type { DynamicIconProps, IconPacks } from './types';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 
 const iconPacks: IconPacks = {
 	Fa: FaIcons,

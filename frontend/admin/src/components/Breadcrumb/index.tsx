@@ -2,11 +2,11 @@
 
 import { capitalizePathname } from '@/utils/strings';
 import { usePathname } from 'next/navigation';
-import { FC } from 'react';
+import type { FC } from 'react';
 import Back from '../Buttons/Back';
 
 import styles from './styles.module.scss';
-import { BreadcrumbProps } from './types';
+import type { BreadcrumbProps } from './types';
 
 const Breadcrumb: FC<BreadcrumbProps> = ({ children }) => {
   const pathname = usePathname();
