@@ -352,8 +352,6 @@ jobs:
       #         echo "❌ Health check timeout after $max_attempts attempts"
       #         exit 1
       #       }
-            
-      #       check_health
 
       - name: Switch traffic to new environment
         uses: appleboy/ssh-action@v1.2.2
