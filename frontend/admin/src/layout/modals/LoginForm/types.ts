@@ -1,1 +1,1 @@
-export type Modal = "login" | "register" | "resetPassword";
+export type Modal = 'login' | 'register' | 'resetPassword';

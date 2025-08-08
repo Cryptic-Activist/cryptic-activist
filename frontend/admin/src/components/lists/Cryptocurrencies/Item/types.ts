@@ -1,4 +1,4 @@
-import { Cryptocurrency } from "@/stores/cryptocurrencies/types";
+import { Cryptocurrency } from '@/stores/cryptocurrencies/types';
 
 export type ItemProps = {
   item: Cryptocurrency;

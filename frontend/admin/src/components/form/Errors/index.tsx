@@ -1,7 +1,7 @@
-import React, { FC } from "react";
-import { ErrorsProps } from "./types";
+import React, { FC } from 'react';
+import { ErrorsProps } from './types';
 
-import styles from "./styles.module.scss";
+import styles from './styles.module.scss';
 
 const Errors: FC<ErrorsProps> = ({ errors }) => {
   return (

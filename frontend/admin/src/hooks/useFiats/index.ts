@@ -1,9 +1,9 @@
-"use client";
-import { useStore } from "@nanostores/react";
-import { useEffect } from "react";
+'use client';
+import { useStore } from '@nanostores/react';
+import { useEffect } from 'react';
 
-import { createFiat, createAllFiats, listFiats, fiats } from "@/stores/fiats";
-import { CreateFiatParams, UseFiatsParams } from "./types";
+import { createFiat, createAllFiats, listFiats, fiats } from '@/stores/fiats';
+import { CreateFiatParams, UseFiatsParams } from './types';
 
 const useFiats = (fetchData?: UseFiatsParams) => {
   const $fiats = useStore(fiats);

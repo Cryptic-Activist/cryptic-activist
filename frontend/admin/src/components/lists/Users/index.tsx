@@ -1,10 +1,10 @@
-import { FC } from "react";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FC } from 'react';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-import type { ListProps } from "./types";
+import type { ListProps } from './types';
 
-import styles from "./styles.module.scss";
-import Item from "./Item";
+import styles from './styles.module.scss';
+import Item from './Item';
 
 const Users: FC<ListProps> = ({ items }) => {
   return (

@@ -1,9 +1,9 @@
-import { FC, useCallback } from "react";
-import { FaSpinner } from "react-icons/fa";
+import { FC, useCallback } from 'react';
+import { FaSpinner } from 'react-icons/fa';
 
-import { useNavigationBar } from "@/hooks";
+import { useNavigationBar } from '@/hooks';
 
-import styles from "./styles.module.scss";
+import styles from './styles.module.scss';
 import { ModalTemplateProps } from "./types";
 
 const ModalTemplate: FC<ModalTemplateProps> = ({

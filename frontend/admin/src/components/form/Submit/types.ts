@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
 export type SubmitProps = {
-  type: "submit" | "button";
+  type: 'submit' | 'button';
   onClick?: () => void;
   children: ReactNode;
 };

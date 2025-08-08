@@ -1,9 +1,9 @@
-import { FC } from "react";
+import { FC } from 'react';
 
-import type { ListProps } from "./types";
+import type { ListProps } from './types';
 
-import Item from "./Item";
-import styles from "./styles.module.scss";
+import Item from './Item';
+import styles from './styles.module.scss';
 
 const Cryptocurrencies: FC<ListProps> = ({ items }) => {
   return (

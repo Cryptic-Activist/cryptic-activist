@@ -1,4 +1,4 @@
-import type { PaymentMethodCategory } from "@/stores/paymentMethodCategories/types";
+import type { PaymentMethodCategory } from '@/stores/paymentMethodCategories/types';
 
 export type PaymentMethod = {
   id: string;

@@ -1,18 +1,18 @@
-"use client";
-import { redirect, usePathname, useRouter } from "next/navigation";
+'use client';
+import { redirect, usePathname, useRouter } from 'next/navigation';
 
-import { FaChevronLeft } from "react-icons/fa";
+import { FaChevronLeft } from 'react-icons/fa';
 
-import styles from "./styles.module.scss";
+import styles from './styles.module.scss';
 
 const Back = () => {
   const pathname = usePathname();
   const router = useRouter();
 
   const handleBack = () => {
-    const pathnameArray = pathname?.split("/") as string[];
+    const pathnameArray = pathname?.split('/') as string[];
     pathnameArray.pop();
-    const backTo = pathnameArray.join("/");
+    const backTo = pathnameArray.join('/');
 
     router.push(backTo);
   };

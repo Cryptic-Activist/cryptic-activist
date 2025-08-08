@@ -78,7 +78,7 @@ export const getSuperAdmins = async () => {
 		return null;
 	}
 
-	const response = await fetchGet(BACKEND + '/admins/super-admins', {
+	const response = await fetchGet(BACKEND + '/admins/super-admins', { {
 		Authorization: getBearerToken(accessToken)
 	});
 	return response.data;

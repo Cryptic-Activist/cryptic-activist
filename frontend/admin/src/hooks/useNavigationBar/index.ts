@@ -1,7 +1,7 @@
-import { useStore } from "@nanostores/react";
+import { useStore } from '@nanostores/react';
 
-import { closeModal, navigationBar, openModal } from "@/stores/navigationBar";
-import { ToggleModalParams } from "@/stores/navigationBar/types";
+import { closeModal, navigationBar, openModal } from '@/stores/navigationBar';
+import { ToggleModalParams } from '@/stores/navigationBar/types';
 
 const useNavigationBar = () => {
   const $navigationBar = useStore(navigationBar);

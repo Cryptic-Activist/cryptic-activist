@@ -1,4 +1,4 @@
-import type { ToggleModalParams } from "@/stores/navigationBar/types";
+import type { ToggleModalParams } from '@/stores/navigationBar/types';
 
 export type FormButtonProps = {
   modal: ToggleModalParams;
