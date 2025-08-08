@@ -1,12 +1,11 @@
 'use client';
 
 import { ContentState, EditorState, convertFromHTML } from 'draft-js';
-import { JSX, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { adminRoutes, publicRoutes } from '@/constants/routes';
 import { useParams, useRouter } from 'next/navigation';
 
 import MultiSelect from '@/components/MultiSelect';
-import React from 'react';
 import RichTextEditor from '@/components/RichTextEditor';
 import { formatDatetimeLocal } from '@/utils/date';
 import styles from '../../banners.module.scss';

@@ -1,9 +1,8 @@
 'use client';
 
-import { ActionCard, Button, StatusCard } from '@/components';
+import { ActionCard, StatusCard, Table } from '@/components';
 
 import React from 'react';
-import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
 import { withAuth } from '@/hoc/withAuth';

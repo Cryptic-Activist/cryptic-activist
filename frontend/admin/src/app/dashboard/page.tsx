@@ -1,9 +1,8 @@
 'use client';
 
-import { Button, StatusCard } from '@/components';
+import { Button, StatusCard, Table } from '@/components';
 
 import React from 'react';
-import { Table } from '@/components';
 import styles from './page.module.scss';
 import { useDashboard } from '@/hooks';
 import { validateWithAuthToken } from '@/services/admin';
