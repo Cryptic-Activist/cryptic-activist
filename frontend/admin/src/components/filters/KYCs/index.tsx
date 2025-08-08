@@ -4,7 +4,6 @@ import { Input, Select } from '@/components/form';
 
 import Button from '@/components/Button';
 import React from 'react';
-import { formatEnum } from '@/utils';
 import styles from './index.module.scss';
 import { useKYCs } from '@/hooks';
 

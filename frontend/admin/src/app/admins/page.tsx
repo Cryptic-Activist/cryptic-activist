@@ -66,7 +66,7 @@ const Admins = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{admins.map((admin) => {
+							{admins.map((admin: any) => {
 								const disabledStyle = !admin.isActive
 									? styles.disabledAdmin
 									: '';

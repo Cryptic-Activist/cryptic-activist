@@ -1,6 +1,6 @@
 'use client';
 
-import type { Input, Select } from '@/components/form';
+import { Input, Select } from '@/components/form';
 
 import Button from '@/components/Button';
 import React from 'react';

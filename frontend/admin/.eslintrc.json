@@ -30,6 +30,8 @@
 		"@typescript-eslint/semi": "off",
 		"@typescript-eslint/consistent-type-definitions": "off",
 		"@typescript-eslint/member-delimiter-style": "off",
-		"@typescript-eslint/non-nullable-type-assertion-style": "off"
+		"@typescript-eslint/non-nullable-type-assertion-style": "off",
+		"@typescript-eslint/comma-dangle": "off",
+		"@typescript-eslint/no-unsafe-argument": "off"
 	}
 }

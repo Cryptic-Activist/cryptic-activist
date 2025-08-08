@@ -8,7 +8,7 @@ import type {
 	TimelineItemProps,
 	UserCardProps
 } from './types';
-import type { FC, useRef, useState } from 'react';
+import { type FC, useRef, useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
 import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';
