@@ -1,4 +1,4 @@
-import { ApproveKYCParams, GetKYCParams, RejectKYCParams } from './types';
+import type { ApproveKYCParams, GetKYCParams, RejectKYCParams } from './types';
 import { fetchGet, fetchPost } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 

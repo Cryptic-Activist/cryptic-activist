@@ -62,7 +62,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
-										// @ts-ignore
+										// @ts-expect-error
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('password')}
@@ -78,7 +78,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
-										// @ts-ignore
+										// @ts-expect-error
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('confirmPassword')}
@@ -90,7 +90,7 @@ const SetPassword = () => {
 							className={`${styles.btn} ${styles.btnPrimary}`}
 							disabled={
 								setPasswordtokenMutation.isPending ||
-								// @ts-ignore
+								// @ts-expect-error
 								setPasswordtokenMutation.data?.ok
 							}
 						>

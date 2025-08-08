@@ -1,7 +1,7 @@
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants/envs';
-import { GetRecentTradesParams } from './types';
+import type { GetRecentTradesParams } from './types';
 import { fetchGet } from '../axios';
 import { getQueries } from '@/utils/axios';
 

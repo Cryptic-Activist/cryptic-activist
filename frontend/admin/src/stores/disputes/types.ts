@@ -1,4 +1,4 @@
-import { Admin } from '../admin/types';
+import type { Admin } from '../admin/types';
 
 type Moderator = {
 	id: string;

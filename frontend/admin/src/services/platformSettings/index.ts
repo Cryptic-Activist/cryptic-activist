@@ -2,7 +2,7 @@ import { fetchGet, fetchPost, fetchPut } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
-import { DefaultFields } from '@/hooks/usePlatformSettings/types';
+import type { DefaultFields } from '@/hooks/usePlatformSettings/types';
 
 export const getPlatformSettings = async () => {
 	const accessToken = getCookie('accessToken');

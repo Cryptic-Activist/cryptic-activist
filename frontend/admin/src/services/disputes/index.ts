@@ -1,4 +1,4 @@
-import { Filter, GetDisputesParams } from './types';
+import type { Filter, GetDisputesParams } from './types';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';

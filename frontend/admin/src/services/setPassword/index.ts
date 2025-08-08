@@ -1,4 +1,4 @@
-import { AdminSetPasswordParams, AdminSetPasswordRequestParams } from './types';
+import type { AdminSetPasswordParams, AdminSetPasswordRequestParams } from './types';
 import { fetchGet, fetchPost } from '@/services/axios';
 
 import { BACKEND } from '@/constants';

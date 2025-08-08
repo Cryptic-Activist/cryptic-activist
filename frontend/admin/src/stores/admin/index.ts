@@ -2,13 +2,13 @@ import { BACKEND } from '@/constants/envs';
 import { fetchGet, fetchPost } from '@/services/axios';
 import { getCookie, removeCookie, setCookie } from '@/utils/browser/cookies';
 import { map } from 'nanostores';
-import {
-	type Admin,
-	type AdminState,
-	type GetAdminInfoReturn,
-	type GetTokensReturn,
-	type LoginAdminParams,
-	type RegisterAdminParams
+import type {
+	Admin,
+	AdminState,
+	GetAdminInfoReturn,
+	GetTokensReturn,
+	LoginAdminParams,
+	RegisterAdminParams
 } from './types';
 
 export const admin = map<AdminState>({

@@ -2,7 +2,7 @@ import { fetchGet, fetchPost } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
-import { DeploySmartContractParams } from './types';
+import type { DeploySmartContractParams } from './types';
 
 export const getDeploymentStats = async (chainId: string) => {
 	const accessToken = getCookie('accessToken');
