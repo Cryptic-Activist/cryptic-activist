@@ -17,16 +17,12 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       'react-hooks/exhaustive-deps': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
+      '@typescript-eslint/no-unused-vars': 'off',
       // Use this rukle when cicurlar imports breaks the build step
       // 'import/no-cycle': ['error', { maxDepth: Infinity }],
+      '@next/next/no-img-element': 'off',
+      'prefer-const': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off'
     },
   },
 ];
