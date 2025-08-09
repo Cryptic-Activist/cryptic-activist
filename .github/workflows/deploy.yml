@@ -1,5 +1,9 @@
 name: Deploy to DigitalOcean
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -42,6 +46,23 @@ jobs:
             echo "🧹 Cleaning up Docker system..."
             docker system prune -a --volumes -f
             echo "✅ Docker system cleanup complete."
+
+      # Build & push images to GHCR
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build & push Docker images
+        run: |
+          IMAGE_NAMESPACE=ghcr.io/${{ github.actor }}
+
+          docker build -t $IMAGE_NAMESPACE/frontend-public:latest -f frontend/public/prod.Dockerfile .
+          docker push $IMAGE_NAMESPACE/frontend-public:latest
+
+          docker build -t $IMAGE_NAMESPACE/frontend-admin:latest -f frontend/admin/prod.Dockerfile .
+          docker push $IMAGE_NAMESPACE/frontend-admin:latest
+
+          docker build -t $IMAGE_NAMESPACE/backend:latest -f backend/prod.Dockerfile .
+          docker push $IMAGE_NAMESPACE/backend:latest
 
       - name: Create environment files on server
         uses: appleboy/ssh-action@v1.2.2
@@ -185,4 +206,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The application has been successfully deployed." >> $GITHUB_STEP_SUMMARY
 
-          
