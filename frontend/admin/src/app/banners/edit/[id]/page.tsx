@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { adminRoutes, publicRoutes } from '@/constants/routes';
-import { useParams, useRouter } from 'next/navigation';
 
 import { Descendant } from 'slate';
 import MultiSelect from '@/components/MultiSelect';
@@ -10,6 +9,7 @@ import RichTextEditor from '@/components/RichTextEditor';
 import { formatDatetimeLocal } from '@/utils/date';
 import styles from '../../banners.module.scss';
 import { useEditBanner } from '@/hooks/useEditBanner';
+import { useParams } from 'next/navigation';
 import { withAuth } from '@/hoc/withAuth';
 
 const EditBannerPage = () => {

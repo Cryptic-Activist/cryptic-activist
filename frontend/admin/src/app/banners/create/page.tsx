@@ -7,7 +7,6 @@ import MultiSelect from '@/components/MultiSelect';
 import RichTextEditor from '@/components/RichTextEditor';
 import styles from '../banners.module.scss';
 import { useBanner } from '@/hooks/useBanner';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { withAuth } from '@/hoc/withAuth';
 

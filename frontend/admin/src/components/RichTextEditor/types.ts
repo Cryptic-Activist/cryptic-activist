@@ -1,9 +1,16 @@
-import { BaseEditor } from 'slate';
+import { BaseEditor, Descendant } from 'slate';
+
 import { ReactEditor } from 'slate-react';
+
+export interface SlateEditorProps {
+	initialValue: Descendant[];
+	onChange: (value: Descendant[]) => void;
+}
 
 export type CustomElement = {
 	type:
 		| 'paragraph'
+		| 'heading'
 		| 'h1'
 		| 'h2'
 		| 'blockquote'
@@ -14,9 +21,9 @@ export type CustomElement = {
 		| 'link'
 		| 'image';
 	align?: 'left' | 'center' | 'right' | 'justify';
-	url?: string; // For links
-	src?: string; // For images
-	alt?: string; // For images
+	url?: string;
+	src?: string;
+	alt?: string;
 	children: CustomText[];
 };
 
