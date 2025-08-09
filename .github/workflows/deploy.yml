@@ -217,28 +217,15 @@ jobs:
             git reset --hard origin/main
             
             # Pull latest images for shared services
-            docker compose -f prod.docker-compose.yml pull redis mongodb postgres rabbitmq
+            docker compose -f prod.docker-compose.yml pull redis mongodb rabbitmq
             
             # Deploy shared services (these don't have profiles so they start without profile specification)
-            docker compose -f prod.docker-compose.yml up -d redis mongodb postgres rabbitmq
+            docker compose -f prod.docker-compose.yml up -d redis mongodb rabbitmq
             
             echo "✅ Shared services deployed"
             
             # Wait for databases to be ready
             echo "⏳ Waiting for databases to be ready..."
-            
-            # Wait for PostgreSQL to be healthy
-            echo "Waiting for PostgreSQL..."
-            timeout=300  # 5 minutes
-            elapsed=0
-            while [ $elapsed -lt $timeout ]; do
-              if docker compose -f prod.docker-compose.yml exec -T postgres pg_isready -U ${{ secrets.POSTGRES_USER }} > /dev/null 2>&1; then
-                echo "✅ PostgreSQL is ready"
-                break
-              fi
-              sleep 5
-              elapsed=$((elapsed + 5))
-            done
             
             # Wait for MongoDB to be ready
             echo "Waiting for MongoDB..."
@@ -349,7 +336,7 @@ jobs:
       #         done
               
       #         echo "❌ Health check timeout after $max_attempts attempts"
-      
+
 
       - name: Switch traffic to new environment
         uses: appleboy/ssh-action@v1.2.2
