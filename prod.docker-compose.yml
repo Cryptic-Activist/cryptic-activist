@@ -3,8 +3,6 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
-    driver: local
   backend-uploads:
     driver: local
   redis-data:
@@ -88,7 +86,6 @@ services:
     networks:
       - app-network
     depends_on:
-      - postgres
       - redis
       - mongodb
       - rabbitmq
@@ -117,7 +114,6 @@ services:
     networks:
       - app-network
     depends_on:
-      - postgres
       - redis
       - mongodb
       - rabbitmq
