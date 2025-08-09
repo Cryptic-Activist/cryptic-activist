@@ -1,0 +1,66 @@
+@use "../../styles/globals.module.scss";
+@import "../../app/banners/banners.module.scss";
+
+.editorContainer {
+  @include form-control-base;
+  min-height: 150px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+
+  &:focus-within {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  ul,
+  ol {
+    list-style-position: inside;
+    margin-left: 0;
+    padding-left: 1rem;
+  }
+
+  li {
+    margin-left: 0;
+    padding-left: 0;
+  }
+}
+
+.toolbar {
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+}
+
+.toolbarButton {
+  @include button-base;
+  padding: 8px 12px;
+  font-size: 12px;
+  background-color: #e0e0e0;
+  color: $text-primary;
+
+  &:hover {
+    background-color: #d0d0d0;
+  }
+
+  &[data-active="true"] {
+    background-color: $primary-color;
+    color: white;
+  }
+}
+
+.editable {
+  padding: 5px 0;
+  &:focus {
+    outline: none;
+  }
+}

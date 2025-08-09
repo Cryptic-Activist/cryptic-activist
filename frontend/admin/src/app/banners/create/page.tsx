@@ -2,7 +2,6 @@
 
 import { adminRoutes, publicRoutes } from '@/constants/routes';
 
-import { EditorState } from 'draft-js';
 import MultiSelect from '@/components/MultiSelect';
 import RichTextEditor from '@/components/RichTextEditor';
 import styles from '../banners.module.scss';
@@ -10,6 +9,7 @@ import { useBanner } from '@/hooks/useBanner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { withAuth } from '@/hoc/withAuth';
+import { Descendant } from 'slate';
 
 const CreateBannerPage = () => {
 	const { onSubmit, isCreating, form } = useBanner();
@@ -20,7 +20,12 @@ const CreateBannerPage = () => {
 		setValue,
 		watch
 	} = form;
-	const [editorState, setEditorState] = useState(EditorState.createEmpty());
+	const [content, setContent] = useState<Descendant[]>([
+		{
+			type: 'paragraph',
+			children: [{ text: '' }],
+		},
+	]);
 
 	const targetWebsite = watch('targetWebsite');
 	const pages = watch('pages');
@@ -37,13 +42,17 @@ const CreateBannerPage = () => {
 					<div className={styles.formGroup}>
 						<label className={styles.formLabel}>Content</label>
 						<RichTextEditor
-							editorState={editorState}
-							onChange={(editorState) => {
-								setEditorState(editorState);
-								setValue(
-									'content',
-									editorState.getCurrentContent().getPlainText('\u0001')
-								);
+							initialValue={content}
+							onChange={(newValue) => {
+								setContent(newValue);
+								// Convert Slate Descendant[] to plain text for form submission
+								const plainText = newValue.map(node => {
+									if ('children' in node && Array.isArray(node.children)) {
+										return node.children.map(child => 'text' in child ? child.text : '').join('');
+									}
+									return '';
+								}).join('\n');
+								setValue('content', plainText);
 							}}
 						/>
 						{errors.content?.message && (
