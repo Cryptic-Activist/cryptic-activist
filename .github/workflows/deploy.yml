@@ -53,7 +53,7 @@ jobs:
 
       - name: Build & push Docker images
         run: |
-          IMAGE_NAMESPACE=ghcr.io/${{ github.repository }}
+          IMAGE_NAMESPACE=ghcr.io/crypticactivist
 
           docker build -t $IMAGE_NAMESPACE/frontend-public:latest -f frontend/public/prod.Dockerfile .
           docker push $IMAGE_NAMESPACE/frontend-public:latest
