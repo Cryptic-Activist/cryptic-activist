@@ -173,6 +173,10 @@ jobs:
             RABBITMQ_DEFAULT_PASS=${{ secrets.RABBITMQ_DEFAULT_PASS }}
             EOF
 
+            cat > envs/prod.env << EOF
+            IMAGE_OWNER=${{ github.repository_owner }}
+            EOF
+
             echo "✅ Environment files created successfully"
 
       - name: Deploy application

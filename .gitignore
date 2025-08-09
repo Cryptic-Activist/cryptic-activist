@@ -12,4 +12,4 @@ frontend-admin
 **/prod.*.env
 
 /nginx/logs/*.log
-.env
+envs/prod.env
