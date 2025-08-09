@@ -2,6 +2,7 @@ import { CustomElement, CustomText } from './types';
 import {
 	Descendant,
 	Editor,
+	Range,
 	Element as SlateElement,
 	Transforms,
 	createEditor
@@ -68,7 +69,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					spellCheck
 					autoFocus
 					onKeyDown={(event) => {
-						// Only prevent default for the specific shortcut
 						if (event.key === '`' && event.ctrlKey) {
 							event.preventDefault();
 							CustomEditor.toggleCodeBlock(editor);
@@ -110,13 +110,17 @@ const Toolbar: React.FC<{ editor: Editor }> = ({ editor }) => {
 			<BlockButton editor={editor} format="bulleted-list">
 				Bulleted List
 			</BlockButton>
+			<LinkButton editor={editor}>Link</LinkButton>
+			<ImageButton editor={editor}>Image</ImageButton>
 		</div>
 	);
 };
 
 const CustomEditor = {
 	isMarkActive(editor: Editor, format: keyof Omit<CustomText, 'text'>) {
-		const marks = Editor.marks(editor);
+		const marks = Editor.marks(editor) as Partial<
+			Record<keyof Omit<CustomText, 'text'>, boolean>
+		>;
 		return marks ? marks[format] === true : false;
 	},
 
@@ -215,6 +219,53 @@ const CustomEditor = {
 			// @ts-expect-error: n type
 			{ match: (n) => Editor.isBlock(editor, n) }
 		);
+	},
+
+	isLinkActive(editor: Editor) {
+		const [link] = Editor.nodes(editor, {
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				(n as CustomElement).type === 'link'
+		});
+		return !!link;
+	},
+
+	unwrapLink(editor: Editor) {
+		Transforms.unwrapNodes(editor, {
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				(n as CustomElement).type === 'link'
+		});
+	},
+
+	wrapLink(editor: Editor, url: string) {
+		if (CustomEditor.isLinkActive(editor)) {
+			CustomEditor.unwrapLink(editor);
+		}
+
+		const { selection } = editor;
+		const isCollapsed = selection && Range.isCollapsed(selection);
+
+		const link: CustomElement = {
+			type: 'link',
+			url,
+			children: isCollapsed ? [{ text: url }] : []
+		};
+
+		if (isCollapsed) {
+			Transforms.insertNodes(editor, link);
+		} else {
+			Transforms.wrapNodes(editor, link, { split: true });
+			Transforms.collapse(editor, { edge: 'end' });
+		}
+	},
+
+	insertImage(editor: Editor, src: string, alt: string) {
+		const text = { text: '' };
+		const image: CustomElement = { type: 'image', src, alt, children: [text] };
+		Transforms.insertNodes(editor, image);
 	}
 };
 
@@ -267,6 +318,21 @@ const Element: React.FC<RenderElementProps> = ({
 				<pre style={style} {...attributes}>
 					<code>{children}</code>
 				</pre>
+			);
+		case 'link':
+			return (
+				<a href={customElement.url} {...attributes}>
+					{children}
+				</a>
+			);
+		case 'image':
+			return (
+				<img
+					src={customElement.src}
+					alt={customElement.alt}
+					{...attributes}
+					style={{ maxWidth: '100%' }}
+				/>
 			);
 		default:
 			return (
@@ -331,6 +397,49 @@ const BlockButton: React.FC<{
 			onMouseDown={(event) => {
 				event.preventDefault();
 				CustomEditor.toggleBlock(editor, format);
+			}}
+		>
+			{children}
+		</button>
+	);
+};
+
+const LinkButton: React.FC<{ editor: Editor; children: React.ReactNode }> = ({
+	editor,
+	children
+}) => {
+	const isActive = CustomEditor.isLinkActive(editor);
+	return (
+		<button
+			className={styles.toolbarButton}
+			data-active={isActive}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				const url = window.prompt('Enter the URL:');
+				if (url) {
+					CustomEditor.wrapLink(editor, url);
+				}
+			}}
+		>
+			{children}
+		</button>
+	);
+};
+
+const ImageButton: React.FC<{ editor: Editor; children: React.ReactNode }> = ({
+	editor,
+	children
+}) => {
+	return (
+		<button
+			className={styles.toolbarButton}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				const src = window.prompt('Enter the image URL:');
+				if (src) {
+					const alt = window.prompt('Enter image alt text (optional):') || '';
+					CustomEditor.insertImage(editor, src, alt);
+				}
 			}}
 		>
 			{children}

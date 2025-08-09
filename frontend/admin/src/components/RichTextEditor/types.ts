@@ -10,8 +10,13 @@ export type CustomElement = {
 		| 'bulleted-list'
 		| 'numbered-list'
 		| 'list-item'
-		| 'code-block';
+		| 'code-block'
+		| 'link'
+		| 'image';
 	align?: 'left' | 'center' | 'right' | 'justify';
+	url?: string; // For links
+	src?: string; // For images
+	alt?: string; // For images
 	children: CustomText[];
 };
 
