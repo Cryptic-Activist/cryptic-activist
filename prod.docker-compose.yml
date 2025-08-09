@@ -20,6 +20,9 @@ services:
     volumes:
       - redis-data:/data
     restart: always
+    profiles:
+      - redis
+      - shared
     env_file:
       - envs/prod.redis.env
     networks:
@@ -41,6 +44,9 @@ services:
     env_file:
       - envs/prod.mongodb.env
     restart: always
+    profiles:
+      - mongodb
+      - shared
     networks:
       - app-network
     healthcheck:
@@ -60,6 +66,9 @@ services:
     networks:
       - app-network
     restart: always
+    profiles:
+      - rabbitmq
+      - shared
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
       interval: 30s
@@ -74,6 +83,9 @@ services:
       dockerfile: backend/prod.Dockerfile
       target: production
     restart: always
+    profiles:
+      - backend
+      - prod
     ports:
       - "5000:5000"
     env_file:
@@ -99,6 +111,9 @@ services:
       context: .
       dockerfile: frontend/public/prod.Dockerfile
     restart: always
+    profiles:
+      - frontend-public
+      - prod
     ports:
       - "3000:3000"
     env_file:
@@ -122,6 +137,9 @@ services:
       context: .
       dockerfile: frontend/admin/prod.Dockerfile
     restart: always
+    profiles:
+      - frontend-admin
+      - prod
     ports:
       - "3001:3001"
     env_file:
