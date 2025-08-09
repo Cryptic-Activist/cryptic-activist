@@ -2,6 +2,7 @@
 
 import { adminRoutes, publicRoutes } from '@/constants/routes';
 
+import { Descendant } from 'slate';
 import MultiSelect from '@/components/MultiSelect';
 import RichTextEditor from '@/components/RichTextEditor';
 import styles from '../banners.module.scss';
@@ -9,7 +10,6 @@ import { useBanner } from '@/hooks/useBanner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { withAuth } from '@/hoc/withAuth';
-import { Descendant } from 'slate';
 
 const CreateBannerPage = () => {
 	const { onSubmit, isCreating, form } = useBanner();
@@ -23,8 +23,8 @@ const CreateBannerPage = () => {
 	const [content, setContent] = useState<Descendant[]>([
 		{
 			type: 'paragraph',
-			children: [{ text: '' }],
-		},
+			children: [{ text: '' }]
+		}
 	]);
 
 	const targetWebsite = watch('targetWebsite');
@@ -45,14 +45,7 @@ const CreateBannerPage = () => {
 							initialValue={content}
 							onChange={(newValue) => {
 								setContent(newValue);
-								// Convert Slate Descendant[] to plain text for form submission
-								const plainText = newValue.map(node => {
-									if ('children' in node && Array.isArray(node.children)) {
-										return node.children.map(child => 'text' in child ? child.text : '').join('');
-									}
-									return '';
-								}).join('\n');
-								setValue('content', plainText);
+								setValue('content', JSON.stringify(newValue));
 							}}
 						/>
 						{errors.content?.message && (
