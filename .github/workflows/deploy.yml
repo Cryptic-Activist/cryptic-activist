@@ -184,3 +184,5 @@ jobs:
           echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The application has been successfully deployed." >> $GITHUB_STEP_SUMMARY
+
+          
