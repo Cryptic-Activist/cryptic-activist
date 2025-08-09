@@ -17,6 +17,7 @@ COPY envs/prod.frontend-admin.env .env
 ENV NEXT_OUTPUT=standalone
 
 # Build the app
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
 # Stage 3: Production image
