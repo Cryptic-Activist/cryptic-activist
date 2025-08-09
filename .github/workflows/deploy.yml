@@ -1,4 +1,4 @@
-name: Blue-Green Deploy to DigitalOcean
+name: Deploy to DigitalOcean
 
 on:
   workflow_dispatch:
@@ -30,51 +30,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Determine current active environment
-        id: get_active_color
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          script: |
-            set -e
-            cd app
-            
-            # Check which nginx container is currently running
-            if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "nginx_blue.*Up"; then
-              echo "ACTIVE_COLOR=blue"
-              echo "INACTIVE_COLOR=green"
-              echo "Blue nginx is currently active"
-            elif docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_green.*Up"; then
-              echo "ACTIVE_COLOR=green"
-              echo "INACTIVE_COLOR=blue" 
-              echo "Green nginx is currently active"
-            else
-              # No nginx running, default to blue as inactive (so we deploy green first)
-              echo "ACTIVE_COLOR=blue"
-              echo "INACTIVE_COLOR=green"
-              echo "No nginx found running, defaulting to deploy green environment"
-            fi
-
-      - name: Set environment variables
-        run: |
-          # Extract colors from SSH output
-          ACTIVE_COLOR=$(echo '${{ steps.get_active_color.outputs.stdout }}' | grep "ACTIVE_COLOR=" | cut -d'=' -f2 | tr -d '\r\n')
-          INACTIVE_COLOR=$(echo '${{ steps.get_active_color.outputs.stdout }}' | grep "INACTIVE_COLOR=" | cut -d'=' -f2 | tr -d '\r\n')
-          
-          # Set defaults if extraction failed
-          if [ -z "$ACTIVE_COLOR" ]; then
-            ACTIVE_COLOR="blue"
-            INACTIVE_COLOR="green"
-          fi
-          
-          echo "ACTIVE_COLOR=$ACTIVE_COLOR" >> $GITHUB_ENV
-          echo "INACTIVE_COLOR=$INACTIVE_COLOR" >> $GITHUB_ENV
-          
-          echo "🔵 Active environment: $ACTIVE_COLOR"
-          echo "🟢 Deploying to: $INACTIVE_COLOR"
 
       - name: Clean up Docker system
         uses: appleboy/ssh-action@v1.2.2
@@ -199,67 +154,7 @@ jobs:
 
             echo "✅ Environment files created successfully"
 
-      - name: Deploy shared services (databases and message queue)
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 15m
-          script: |
-            set -e
-            cd app
-            
-            echo "🗄️ Deploying shared services (MongoDB, PostgreSQL, Redis, RabbitMQ)..."
-            
-            # Pull latest code
-            git fetch origin
-            git reset --hard origin/main
-            
-            # Pull latest images for shared services
-            docker compose -f prod.docker-compose.yml pull redis mongodb rabbitmq
-            
-            # Deploy shared services (these don't have profiles so they start without profile specification)
-            docker compose -f prod.docker-compose.yml up -d redis mongodb rabbitmq
-            
-            echo "✅ Shared services deployed"
-            
-            # Wait for databases to be ready
-            echo "⏳ Waiting for databases to be ready..."
-            
-            # Wait for MongoDB to be ready
-            echo "Waiting for MongoDB..."
-            timeout=300  # 5 minutes
-            elapsed=0
-            while [ $elapsed -lt $timeout ]; do
-              if docker compose -f prod.docker-compose.yml exec -T mongodb mongosh --eval "db.runCommand('ping')" > /dev/null 2>&1; then
-                echo "✅ MongoDB is ready"
-                break
-              fi
-              sleep 5
-              elapsed=$((elapsed + 5))
-            done
-            
-            # Wait for Redis to be ready
-            echo "Waiting for Redis..."
-            timeout=300  # 5 minutes
-            elapsed=0
-            while [ $elapsed -lt $timeout ]; do
-              if docker compose -f prod.docker-compose.yml exec -T redis redis-cli ping > /dev/null 2>&1; then
-                echo "✅ Redis is ready"
-                break
-              fi
-              sleep 5
-              elapsed=$((elapsed + 5))
-            done
-            
-            # Wait for RabbitMQ to be ready
-            echo "Waiting for RabbitMQ..."
-            sleep 30  # RabbitMQ typically takes a bit longer to start
-            
-            echo "✅ All shared services are ready"
-
-      - name: Deploy to inactive environment
+      - name: Deploy application
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
@@ -270,148 +165,22 @@ jobs:
             set -e # Exit immediately if a command exits with a non-zero status.
             cd app
             
-            echo "🚀 Starting deployment to ${{ env.INACTIVE_COLOR }} environment"
+            echo "🚀 Starting deployment"
             
             # Pull latest images for application services
             docker compose -f prod.docker-compose.yml pull
             
-            # Deploy inactive environment (this will include the shared services that are already running)
-            echo "🔧 Deploying ${{ env.INACTIVE_COLOR }} environment..."
-            docker compose -f prod.docker-compose.yml --profile ${{ env.INACTIVE_COLOR }} up -d --build --remove-orphans
+            # Deploy all services
+            echo "🔧 Deploying all services..."
+            docker compose -f prod.docker-compose.yml up -d --build --remove-orphans
             
-            echo "✅ ${{ env.INACTIVE_COLOR }} environment deployed"
-
-      #   uses: appleboy/ssh-action@v1.2.2
-      #   with:
-      #     host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-      #     username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-      #     key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-      #     command_timeout: 15m
-      #     script: |
-      #       cd app
-            
-      #       echo "🏥 Starting health checks for ${{ env.INACTIVE_COLOR }} environment..."
-            
-      #       # Wait for containers to start
-      #       sleep 30
-            
-      #       # Function to check container health
-      #       check_health() {
-      #         local max_attempts=30
-      #         local attempt=1
-              
-      #         while [ $attempt -le $max_attempts ]; do
-      #           echo "Health check attempt $attempt/$max_attempts..."
-                
-      #           # Check shared services first
-      #           local shared_services=("redis" "mongodb" "postgres" "rabbitmq")
-      #           local app_containers=("backend_${{ env.INACTIVE_COLOR }}" "public_${{ env.INACTIVE_COLOR }}" "admin_${{ env.INACTIVE_COLOR }}")
-      #           local all_services=("${shared_services[@]}" "${app_containers[@]}")
-      #           local all_healthy=true
-                
-      #           for container in "${all_services[@]}"; do
-      #             if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "$container.*Up"; then
-      #               local health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-health-check{{end}}' "$container" 2>/dev/null || echo "not-found")
-      #               echo "localHealth=$health_status"
-
-      #               if [ "$health_status" = "healthy" ] || [ "$health_status" = "no-health-check" ]; then
-      #                 echo "✅ $container is healthy"
-      #               else
-      #                 echo "⏳ $container status: $health_status"
-      #                 all_healthy=false
-      #               fi
-      #             else
-      #               echo "❌ $container is not running"
-      #               all_healthy=false
-      #             fi
-      #           done
-                
-      #           if [ "$all_healthy" = true ]; then
-      #             echo "🎉 All services and ${{ env.INACTIVE_COLOR }} containers are healthy!"
-      #             return 0
-      #           fi
-                
-      #           sleep 10
-      #           attempt=$((attempt + 1))
-      #         done
-              
-      #         echo "❌ Health check timeout after $max_attempts attempts"
-
-
-
-      - name: Switch traffic to new environment
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            set -e
-            cd app
-            
-            echo "🔄 Switching traffic from ${{ env.ACTIVE_COLOR }} to ${{ env.INACTIVE_COLOR }}..."
-            
-            # Start the new nginx container for the inactive environment
-            echo "Starting nginx_${{ env.INACTIVE_COLOR }}..."
-            docker compose -f prod.docker-compose.yml --profile ${{ env.INACTIVE_COLOR }} up -d nginx_${{ env.INACTIVE_COLOR }}
-            
-            # Wait a moment for nginx to start
-            sleep 10
-            
-            # Verify the new nginx is running
-            if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_${{ env.INACTIVE_COLOR }}.*Up"; then
-              echo "✅ nginx_${{ env.INACTIVE_COLOR }} is now running"
-              
-              # Stop the old nginx container
-              echo "Stopping nginx_${{ env.ACTIVE_COLOR }}..."
-              docker compose -f prod.docker-compose.yml stop nginx_${{ env.ACTIVE_COLOR }}
-              
-              echo "✅ Traffic successfully switched to ${{ env.INACTIVE_COLOR }} environment"
-            else
-              echo "❌ Failed to start nginx_${{ env.INACTIVE_COLOR }}"
-              exit 1
-            fi
-
-      - name: Cleanup old environment
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.DIGITAL_OCEAN_HOST }}
-          username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
-          key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 30m
-          script: |
-            set -e
-            cd app
-            
-            echo "🧹 Cleaning up old ${{ env.ACTIVE_COLOR }} environment..."
-            
-            # Stop old environment containers (but keep shared services running)
-            # Only stop the application containers, not the shared services
-            docker compose -f prod.docker-compose.yml stop backend_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml stop public_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml stop admin_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml stop nginx_${{ env.ACTIVE_COLOR }}
-            
-            # Remove old containers (but keep shared services)
-            docker compose -f prod.docker-compose.yml rm -f backend_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml rm -f public_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml rm -f admin_${{ env.ACTIVE_COLOR }}
-            docker compose -f prod.docker-compose.yml rm -f nginx_${{ env.ACTIVE_COLOR }}
-            
-            # Clean up unused images (but be careful not to remove images that are in use)
-            docker image prune -f
-            
-            echo "✅ Cleanup completed (shared services preserved)"
+            echo "✅ Deployment complete"
 
       - name: Deployment summary
         run: |
           echo "## 🎉 Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Previous Active Environment:** ${{ env.ACTIVE_COLOR }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **New Active Environment:** ${{ env.INACTIVE_COLOR }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Shared Services:** MongoDB, PostgreSQL, Redis, RabbitMQ ✅" >> $GITHUB_STEP_SUMMARY
           echo "- **Deployment Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The application has been successfully deployed using blue-green deployment strategy with shared database services." >> $GITHUB_STEP_SUMMARY
+          echo "The application has been successfully deployed." >> $GITHUB_STEP_SUMMARY
