@@ -290,7 +290,8 @@ jobs:
             
             # Deploy inactive environment (this will include the shared services that are already running)
             echo "🔧 Deploying ${{ env.INACTIVE_COLOR }} environment..."
-            docker compose -f prod.docker-compose.yml --profile ${{ env.INACTIVE_COLOR }} up -d --build --remove-orphans
+            docker compose -f prod.docker-compose.yml build --no-cache --profile ${{ env.INACTIVE_COLOR }}
+            docker compose -f prod.docker-compose.yml --profile ${{ env.INACTIVE_COLOR }} up -d --remove-orphans
             
             echo "✅ ${{ env.INACTIVE_COLOR }} environment deployed"
 
