@@ -78,10 +78,7 @@ services:
 
   backend:
     container_name: backend
-    build:
-      context: .
-      dockerfile: backend/prod.Dockerfile
-      target: production
+    image: ghcr.io/${IMAGE_OWNER}/backend:latest
     restart: always
     profiles:
       - backend
@@ -107,9 +104,7 @@ services:
 
   frontend-public:
     container_name: frontend-public
-    build:
-      context: .
-      dockerfile: frontend/public/prod.Dockerfile
+    image: ghcr.io/${IMAGE_OWNER}/frontend-public:latest
     restart: always
     profiles:
       - frontend-public
@@ -133,9 +128,7 @@ services:
 
   frontend-admin:
     container_name: frontend-admin
-    build:
-      context: .
-      dockerfile: frontend/admin/prod.Dockerfile
+    image: ghcr.io/${IMAGE_OWNER}/frontend-admin:latest
     restart: always
     profiles:
       - frontend-admin
