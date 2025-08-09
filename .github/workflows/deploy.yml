@@ -265,7 +265,7 @@ jobs:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 30m
+          command_timeout: 120m
           script: |
             set -e # Exit immediately if a command exits with a non-zero status.
             cd app
@@ -337,7 +337,6 @@ jobs:
               
       #         echo "❌ Health check timeout after $max_attempts attempts"
 
-      
 
       - name: Switch traffic to new environment
         uses: appleboy/ssh-action@v1.2.2
@@ -345,7 +344,7 @@ jobs:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 5m
+          command_timeout: 10m
           script: |
             set -e
             cd app
@@ -379,7 +378,7 @@ jobs:
           host: ${{ secrets.DIGITAL_OCEAN_HOST }}
           username: ${{ secrets.DIGITAL_OCEAN_USERNAME }}
           key: ${{ secrets.DIGITAL_OCEAN_SSH_KEY }}
-          command_timeout: 10m
+          command_timeout: 30m
           script: |
             set -e
             cd app
