@@ -11,8 +11,8 @@ import {
 import { kycs, setKYCs, setKYCsCurrentPage } from '@/stores';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
-import { GetKYCsParams } from '@/services/kycs/types';
-import { KYCStatus } from '@/stores/kycs/types';
+import type { GetKYCsParams } from '@/services/kycs/types';
+import type { KYCStatus } from '@/stores/kycs/types';
 import { kycsColumns } from './data';
 import { kycsFiltersResolver } from './zod';
 import { useAdmin } from '..';

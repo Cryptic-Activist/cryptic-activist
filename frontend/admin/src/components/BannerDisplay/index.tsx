@@ -1,6 +1,7 @@
 'use client';
 
 import { fetchBanners } from '@/services/banners';
+import { slateToHtml } from '@/utils/slate';
 import styles from './index.module.scss';
 import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -47,7 +48,9 @@ const BannerDisplay = () => {
 	return (
 		<div
 			className={`${styles.banner} ${getBannerStyle()}`}
-			dangerouslySetInnerHTML={{ __html: banner.content }}
+			dangerouslySetInnerHTML={{
+				__html: slateToHtml(JSON.parse(banner.content))
+			}}
 		/>
 	);
 };

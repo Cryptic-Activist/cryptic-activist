@@ -10,7 +10,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useMutation, useQueries } from '@tanstack/react-query';
 
-import { RecentTrade } from './types';
+import type { RecentTrade } from './types';
 import { getLocaleFullDateString } from '@/utils/date';
 import { recentTradesColumns } from './data';
 import { toUpperCase } from '@/utils';

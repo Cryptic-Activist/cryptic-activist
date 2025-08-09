@@ -1,9 +1,9 @@
 'use client';
 
 import { DynamicIcon } from '@/components';
-import { FC } from 'react';
+import type { FC } from 'react';
 import Link from 'next/link';
-import { SideBarProps } from './types';
+import type { SideBarProps } from './types';
 import { sidebarItems } from './data';
 import styles from './styles.module.scss';
 import { useAdmin } from '@/hooks';

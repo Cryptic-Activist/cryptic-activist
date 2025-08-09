@@ -1,4 +1,4 @@
-import type { PaymentMethodCategory } from "@/stores/paymentMethodCategories/types";
+import type { PaymentMethodCategory } from '@/stores/paymentMethodCategories/types';
 
 export const mapPaymentMethodCategories = (
   data: PaymentMethodCategory[],
@@ -9,7 +9,7 @@ export const mapPaymentMethodCategories = (
     value: category.id,
   }));
 
-  const concat = [{ label: "-------", value: "" }].concat(...mapped);
+  const concat = [{ label: '-------', value: '' }].concat(...mapped);
 
   return concat;
 };

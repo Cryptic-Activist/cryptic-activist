@@ -2,7 +2,7 @@ import { fetchDelete, fetchGet, fetchPost, fetchPut } from '../axios';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';
-import { CreateBannerParams } from './types';
+import type { CreateBannerParams } from './types';
 
 export const createBanner = async (params: CreateBannerParams) => {
 	const accessToken = getCookie('accessToken');

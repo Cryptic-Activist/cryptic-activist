@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Role } from '@/stores/admins';
+import type { Role } from '@/stores/admins';
 
 export interface WithAuthOptions {
 	redirectTo?: string;

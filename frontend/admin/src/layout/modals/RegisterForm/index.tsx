@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { Input, Submit } from '@/components/form';
 
 import { ModalTemplate } from '@/layout/modals';

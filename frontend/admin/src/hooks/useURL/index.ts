@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, usePathname } from 'next/navigation';
 
-import { AddParams } from './types';
+import type { AddParams } from './types';
 import { getQueries } from '@/utils';
 import { useRouter } from '@/hooks';
 

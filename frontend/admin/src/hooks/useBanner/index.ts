@@ -39,6 +39,7 @@ export const useBanner = () => {
 
 	const onSubmit = (data: any) => {
 		if (admin.data?.id) {
+			console.log({ data });
 			createBannerMutate(
 				{ ...data, adminId: admin.data?.id },
 				{

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC } from 'react';
+import type { ChangeEvent, FC } from 'react';
 
 import type { TextAreaProps } from './types';
 import styles from './index.module.scss';

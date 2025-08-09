@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies (include lockfile for deterministic builds)
 COPY frontend/admin/package.json frontend/admin/package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 # Stage 2: Build the application
 FROM node:lts-alpine AS builder

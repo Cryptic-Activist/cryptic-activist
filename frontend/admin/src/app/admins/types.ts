@@ -1,4 +1,4 @@
-import { Role } from '@/stores/admins';
+import type { Role } from '@/stores/admins';
 
 export type SelectedAdmin = {
 	id: string;

@@ -1,4 +1,4 @@
-import { KYCStatus } from '@/stores/kycs/types';
+import type { KYCStatus } from '@/stores/kycs/types';
 
 export type GetKYCsParams = {
 	page: number;

@@ -38,7 +38,9 @@ const Admins = () => {
 					<p className={styles.metaInfoValue}>Create, Delete, Update admins</p>
 					<button
 						className={`${styles.btn} ${styles.btnPrimary}`}
-						onClick={() => openModal()}
+						onClick={() => {
+							openModal();
+						}}
 					>
 						<DynamicIcon iconName="FaPlus" size={16} color="#fff" />
 						Create Admin
@@ -66,7 +68,7 @@ const Admins = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{admins.map((admin) => {
+							{admins.map((admin: any) => {
 								const disabledStyle = !admin.isActive
 									? styles.disabledAdmin
 									: '';

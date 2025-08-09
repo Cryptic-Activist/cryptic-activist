@@ -1,4 +1,4 @@
-import { Filter, GetKYCsParams } from './types';
+import type { Filter, GetKYCsParams } from './types';
 import { getBearerToken, getCookie } from '@/utils';
 
 import { BACKEND } from '@/constants';

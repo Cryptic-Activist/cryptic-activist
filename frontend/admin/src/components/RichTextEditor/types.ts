@@ -1,13 +1,42 @@
+import { BaseEditor, Descendant } from 'slate';
 
-import type { ContentBlock, ContentState } from 'draft-js';
+import { ReactEditor } from 'slate-react';
 
-export interface LinkProps {
-  children: React.ReactNode;
-  contentState: ContentState;
-  entityKey: string;
+export interface SlateEditorProps {
+	initialValue: Descendant[];
+	onChange: (value: Descendant[]) => void;
 }
 
-export interface ImageProps {
-  block: ContentBlock;
-  contentState: ContentState;
+export type CustomElement = {
+	type:
+		| 'paragraph'
+		| 'heading'
+		| 'h1'
+		| 'h2'
+		| 'blockquote'
+		| 'bulleted-list'
+		| 'numbered-list'
+		| 'list-item'
+		| 'code-block'
+		| 'link'
+		| 'image';
+	align?: 'left' | 'center' | 'right' | 'justify';
+	url?: string;
+	src?: string;
+	alt?: string;
+	children: CustomText[];
+};
+
+export type Formats = 'bold' | 'italic' | 'underline' | 'code';
+
+export type CustomText = {
+	text: string;
+} & Partial<Record<Formats, boolean>>;
+
+declare module 'slate' {
+	interface CustomTypes {
+		Editor: BaseEditor & ReactEditor;
+		Element: CustomElement;
+		Text: CustomText;
+	}
 }

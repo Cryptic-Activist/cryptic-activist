@@ -1,6 +1,6 @@
-import React, { FC } from 'react';
+import type { FC } from 'react';
 
-import { PaginationProps } from './types';
+import type { PaginationProps } from './types';
 import styles from './index.module.scss';
 
 const Pagination: FC<PaginationProps> = ({

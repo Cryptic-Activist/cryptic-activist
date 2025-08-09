@@ -1,14 +1,14 @@
 'use client';
 
 import { DynamicIcon, Tooltip, Viewer } from '@/components';
-import {
+import type {
 	Evidence,
 	Message,
 	StatusBadgeProps,
 	TimelineItemProps,
 	UserCardProps
 } from './types';
-import React, { FC, useRef, useState } from 'react';
+import { type FC, useRef, useState } from 'react';
 import { formatEnum, getInitials, toCapitalize, toUpperCase } from '@/utils';
 import { getLocaleFullDateString, timeSince } from '@/utils/date';
 import { useDispute, useOutsideClick } from '@/hooks';

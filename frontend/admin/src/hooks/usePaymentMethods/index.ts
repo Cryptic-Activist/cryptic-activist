@@ -1,14 +1,16 @@
 'use client';
 
-import { CreatePaymentMethodParams, UsePaymentMethodsParams } from './types';
-import { ZodPaymentMethod, paymentMethodResolver } from './zod';
+import type {
+	CreatePaymentMethodParams,
+	UsePaymentMethodsParams
+} from './types';
 import {
 	createPaymentMethod,
 	listPaymentMethod,
-	paymentMethodCategories,
 	paymentMethods
 } from '@/stores';
 
+import { paymentMethodResolver } from './zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useStore } from '@nanostores/react';

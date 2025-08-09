@@ -1,7 +1,7 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 
 import styles from './styles.module.scss';
-import { SelectProps } from './types';
+import type { SelectProps } from './types';
 
 const Select: FC<SelectProps> = ({
 	id,

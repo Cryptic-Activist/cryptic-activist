@@ -1,5 +1,5 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Trade } from './types';
+import type { ColumnDef } from '@tanstack/react-table';
+import type { Trade } from './types';
 
 export const tradesColumns: ColumnDef<Trade>[] = [
 	{ header: 'ID', accessorKey: 'id' },

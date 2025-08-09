@@ -2,12 +2,11 @@
 
 import { adminRoutes, publicRoutes } from '@/constants/routes';
 
-import { EditorState } from 'draft-js';
+import { Descendant } from 'slate';
 import MultiSelect from '@/components/MultiSelect';
 import RichTextEditor from '@/components/RichTextEditor';
 import styles from '../banners.module.scss';
 import { useBanner } from '@/hooks/useBanner';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { withAuth } from '@/hoc/withAuth';
 
@@ -20,7 +19,12 @@ const CreateBannerPage = () => {
 		setValue,
 		watch
 	} = form;
-	const [editorState, setEditorState] = useState(EditorState.createEmpty());
+	const [content, setContent] = useState<Descendant[]>([
+		{
+			type: 'paragraph',
+			children: [{ text: '' }]
+		}
+	]);
 
 	const targetWebsite = watch('targetWebsite');
 	const pages = watch('pages');
@@ -37,13 +41,10 @@ const CreateBannerPage = () => {
 					<div className={styles.formGroup}>
 						<label className={styles.formLabel}>Content</label>
 						<RichTextEditor
-							editorState={editorState}
-							onChange={(editorState) => {
-								setEditorState(editorState);
-								setValue(
-									'content',
-									editorState.getCurrentContent().getPlainText('\u0001')
-								);
+							initialValue={content}
+							onChange={(newValue) => {
+								setContent(newValue);
+								setValue('content', JSON.stringify(newValue));
 							}}
 						/>
 						{errors.content?.message && (

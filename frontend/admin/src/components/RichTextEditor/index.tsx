@@ -1,151 +1,450 @@
-'use client';
+import { CustomElement, CustomText } from './types';
+import {
+	Descendant,
+	Editor,
+	Range,
+	Element as SlateElement,
+	Transforms,
+	createEditor
+} from 'slate';
+import {
+	Editable,
+	RenderElementProps,
+	RenderLeafProps,
+	Slate,
+	withReact
+} from 'slate-react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import React from 'react';
-import { Editor, EditorState, RichUtils, AtomicBlockUtils, CompositeDecorator, ContentBlock, ContentState } from 'draft-js';
-import 'draft-js/dist/Draft.css';
-
-import styles from './styles.module.scss';
-
-interface LinkProps {
-  entityKey: string;
-  contentState: ContentState;
-  children: React.ReactNode;
-}
-
-const Link = ({ entityKey, contentState, children }: LinkProps) => {
-  const { url } = contentState.getEntity(entityKey).getData();
-  return (
-    <a href={url} className={styles.link}>
-      {children}
-    </a>
-  );
-};
-
-interface ImageProps {
-  block: ContentBlock;
-  contentState: ContentState;
-}
-
-const Image = ({ block, contentState }: ImageProps) => {
-  const entity = contentState.getEntity(block.getEntityAt(0));
-  const { src } = entity.getData();
-  return <img src={src} alt="" className={styles.image} />;
-};
-
-const decorator = new CompositeDecorator([
-  {
-    strategy: (contentBlock, callback, contentState) => {
-      contentBlock.findEntityRanges(
-        (character) => {
-          const entityKey = character.getEntity();
-          return (
-            entityKey !== null &&
-            contentState.getEntity(entityKey).getType() === 'LINK'
-          );
-        },
-        callback
-      );
-    },
-    component: Link,
-  },
-]);
+import styles from './RichTextEditor.module.scss';
+import { withHistory } from 'slate-history';
 
 interface RichTextEditorProps {
-  editorState: EditorState;
-  onChange: (editorState: EditorState) => void;
+	initialValue?: Descendant[];
+	onChange: (value: Descendant[]) => void;
 }
 
+const LIST_TYPES = ['numbered-list', 'bulleted-list'];
+const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify'];
 
-const RichTextEditor = ({ editorState, onChange }: RichTextEditorProps) => {
-  const handleKeyCommand = (command: string, state: EditorState) => {
-    const newState = RichUtils.handleKeyCommand(state, command);
-    if (newState) {
-      onChange(newState);
-      return 'handled';
-    }
-    return 'not-handled';
-  };
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
+	initialValue,
+	onChange
+}) => {
+	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+	const [value, setValue] = useState<Descendant[]>(
+		initialValue || [
+			{
+				type: 'paragraph',
+				children: [{ text: '' }]
+			}
+		]
+	);
 
-  const toggleInlineStyle = (inlineStyle: string) => {
-    onChange(RichUtils.toggleInlineStyle(editorState, inlineStyle));
-  };
+	const renderElement = useCallback(
+		(props: RenderElementProps) => <Element {...props} />,
+		[]
+	);
+	const renderLeaf = useCallback(
+		(props: RenderLeafProps) => <Leaf {...props} />,
+		[]
+	);
 
-  const toggleBlockType = (blockType: string) => {
-    onChange(RichUtils.toggleBlockType(editorState, blockType));
-  };
-
-  const promptForLink = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const selection = editorState.getSelection();
-    if (!selection.isCollapsed()) {
-      const url = window.prompt('Enter the URL');
-      if (!url) return;
-      const contentState = editorState.getCurrentContent();
-      const contentStateWithEntity = contentState.createEntity('LINK', 'MUTABLE', { url });
-      const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-      const newEditorState = EditorState.set(editorState, { currentContent: contentStateWithEntity });
-      onChange(RichUtils.toggleLink(newEditorState, newEditorState.getSelection(), entityKey));
-    }
-  };
-
-  const promptForImage = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const url = window.prompt('Enter the Image URL');
-    if (!url) return;
-    const contentState = editorState.getCurrentContent();
-    const contentStateWithEntity = contentState.createEntity('IMAGE', 'IMMUTABLE', { src: url });
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newEditorState = AtomicBlockUtils.insertAtomicBlock(
-      editorState,
-      entityKey,
-      ' '
-    );
-    onChange(newEditorState);
-  };
-
-  const mediaBlockRenderer = (block: ContentBlock) => {
-    if (block.getType() === 'atomic') {
-      return {
-        component: Image,
-        editable: false,
-      };
-    }
-    return null;
-  };
-
-  const currentStyle = editorState.getCurrentInlineStyle();
-  const selection = editorState.getSelection();
-  const blockType = editorState
-    .getCurrentContent()
-    .getBlockForKey(selection.getStartKey())
-    .getType();
-
-  return (
-    <div className={styles.editorContainer}>
-      <div className={styles.toolbar}>
-        <button type="button" className={currentStyle.has('BOLD') ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleInlineStyle('BOLD'); }}>Bold</button>
-        <button type="button" className={currentStyle.has('ITALIC') ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleInlineStyle('ITALIC'); }}>Italic</button>
-        <button type="button" className={currentStyle.has('UNDERLINE') ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleInlineStyle('UNDERLINE'); }}>Underline</button>
-        <button type="button" className={currentStyle.has('STRIKETHROUGH') ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleInlineStyle('STRIKETHROUGH'); }}>Strikethrough</button>
-        <button type="button" className={blockType === 'unordered-list-item' ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleBlockType('unordered-list-item'); }}>Unordered List</button>
-        <button type="button" className={blockType === 'ordered-list-item' ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleBlockType('ordered-list-item'); }}>Ordered List</button>
-        <button type="button" className={blockType === 'header-one' ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleBlockType('header-one'); }}>H1</button>
-        <button type="button" className={blockType === 'header-two' ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleBlockType('header-two'); }}>H2</button>
-        <button type="button" className={blockType === 'header-three' ? styles.active : ''} onMouseDown={(e) => { e.preventDefault(); toggleBlockType('header-three'); }}>H3</button>
-        <button type="button" onMouseDown={promptForLink}>Link</button>
-        <button type="button" onMouseDown={promptForImage}>Image</button>
-      </div>
-      <div className={styles.editor}>
-        <Editor
-          editorState={EditorState.set(editorState, { decorator })}
-          handleKeyCommand={handleKeyCommand}
-          onChange={onChange}
-          blockRendererFn={mediaBlockRenderer}
-        />
-      </div>
-    </div>
-  );
+	return (
+		<Slate
+			editor={editor}
+			initialValue={value}
+			onChange={(newValue) => {
+				setValue(newValue);
+				onChange(newValue);
+			}}
+		>
+			<Toolbar editor={editor} />
+			<div className={styles.editorContainer}>
+				<Editable
+					className={styles.editable}
+					renderElement={renderElement}
+					renderLeaf={renderLeaf}
+					placeholder="Enter some rich text..."
+					spellCheck
+					autoFocus
+					onKeyDown={(event) => {
+						if (event.key === '`' && event.ctrlKey) {
+							event.preventDefault();
+							CustomEditor.toggleCodeBlock(editor);
+						}
+					}}
+				/>
+			</div>
+		</Slate>
+	);
 };
 
+const Toolbar: React.FC<{ editor: Editor }> = ({ editor }) => {
+	return (
+		<div className={styles.toolbar}>
+			<MarkButton editor={editor} format="bold">
+				Bold
+			</MarkButton>
+			<MarkButton editor={editor} format="italic">
+				Italic
+			</MarkButton>
+			<MarkButton editor={editor} format="underline">
+				Underline
+			</MarkButton>
+			<MarkButton editor={editor} format="code">
+				Code
+			</MarkButton>
+			<BlockButton editor={editor} format="h1">
+				H1
+			</BlockButton>
+			<BlockButton editor={editor} format="h2">
+				H2
+			</BlockButton>
+			<BlockButton editor={editor} format="blockquote">
+				Blockquote
+			</BlockButton>
+			<BlockButton editor={editor} format="numbered-list">
+				Numbered List
+			</BlockButton>
+			<BlockButton editor={editor} format="bulleted-list">
+				Bulleted List
+			</BlockButton>
+			<LinkButton editor={editor}>Link</LinkButton>
+			<ImageButton editor={editor}>Image</ImageButton>
+		</div>
+	);
+};
+
+const CustomEditor = {
+	isMarkActive(editor: Editor, format: keyof Omit<CustomText, 'text'>) {
+		const marks = Editor.marks(editor) as Partial<
+			Record<keyof Omit<CustomText, 'text'>, boolean>
+		>;
+		return marks ? marks[format] === true : false;
+	},
+
+	toggleMark(editor: Editor, format: keyof Omit<CustomText, 'text'>) {
+		const isActive = CustomEditor.isMarkActive(editor, format);
+
+		if (isActive) {
+			Editor.removeMark(editor, format);
+		} else {
+			Editor.addMark(editor, format, true);
+		}
+	},
+
+	isBlockActive(
+		editor: Editor,
+		format: CustomElement['type'] | CustomElement['align'],
+		blockType = 'type'
+	) {
+		const { selection } = editor;
+		if (!selection) return false;
+
+		const [match] = Array.from(
+			Editor.nodes(editor, {
+				at: Editor.unhangRange(editor, selection),
+				match: (n): n is CustomElement => {
+					if (!SlateElement.isElement(n)) {
+						return false;
+					}
+					const customNode = n as CustomElement;
+					if (blockType === 'type') {
+						return 'type' in customNode && customNode.type === format;
+					} else if (blockType === 'align') {
+						return 'align' in customNode && customNode.align === format;
+					}
+					return false;
+				}
+			})
+		);
+
+		return !!match;
+	},
+
+	toggleBlock(
+		editor: Editor,
+		format: CustomElement['type'] | CustomElement['align']
+	) {
+		const isActive = CustomEditor.isBlockActive(
+			editor,
+			format,
+			TEXT_ALIGN_TYPES.includes(format as string) ? 'align' : 'type'
+		);
+		const isList = LIST_TYPES.includes(format as string);
+
+		Transforms.unwrapNodes(editor, {
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				LIST_TYPES.includes((n as CustomElement).type as string) &&
+				!TEXT_ALIGN_TYPES.includes(format as string),
+			split: true
+		});
+		let newProperties: Partial<SlateElement>;
+		if (TEXT_ALIGN_TYPES.includes(format as string)) {
+			newProperties = {
+				align: isActive ? undefined : (format as CustomElement['align'])
+			};
+		} else {
+			newProperties = {
+				type: isActive
+					? 'paragraph'
+					: isList
+					? 'list-item'
+					: (format as CustomElement['type'])
+			};
+		}
+		Transforms.setNodes<SlateElement>(editor, newProperties);
+
+		if (!isActive && isList) {
+			const block: CustomElement = {
+				type: format as CustomElement['type'],
+				children: []
+			};
+			Transforms.wrapNodes(editor, block);
+		}
+	},
+
+	toggleCodeBlock(editor: Editor) {
+		const isActive = CustomEditor.isBlockActive(editor, 'code-block');
+		Transforms.setNodes(
+			editor,
+			{
+				type: isActive
+					? ('paragraph' as CustomElement['type'])
+					: ('code-block' as CustomElement['type'])
+			},
+			// @ts-expect-error: n type
+			{ match: (n) => Editor.isBlock(editor, n) }
+		);
+	},
+
+	isLinkActive(editor: Editor) {
+		const [link] = Editor.nodes(editor, {
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				(n as CustomElement).type === 'link'
+		});
+		return !!link;
+	},
+
+	unwrapLink(editor: Editor) {
+		Transforms.unwrapNodes(editor, {
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				(n as CustomElement).type === 'link'
+		});
+	},
+
+	wrapLink(editor: Editor, url: string) {
+		if (CustomEditor.isLinkActive(editor)) {
+			CustomEditor.unwrapLink(editor);
+		}
+
+		const { selection } = editor;
+		const isCollapsed = selection && Range.isCollapsed(selection);
+
+		const link: CustomElement = {
+			type: 'link',
+			url,
+			children: isCollapsed ? [{ text: url }] : []
+		};
+
+		if (isCollapsed) {
+			Transforms.insertNodes(editor, link);
+		} else {
+			Transforms.wrapNodes(editor, link, { split: true });
+			Transforms.collapse(editor, { edge: 'end' });
+		}
+	},
+
+	insertImage(editor: Editor, src: string, alt: string) {
+		const text = { text: '' };
+		const image: CustomElement = { type: 'image', src, alt, children: [text] };
+		Transforms.insertNodes(editor, image);
+	}
+};
+
+const Element: React.FC<RenderElementProps> = ({
+	attributes,
+	children,
+	element
+}) => {
+	const customElement = element as CustomElement;
+	const style = { textAlign: customElement.align };
+	switch (customElement.type) {
+		case 'blockquote':
+			return (
+				<blockquote style={style} {...attributes}>
+					{children}
+				</blockquote>
+			);
+		case 'bulleted-list':
+			return (
+				<ul style={style} {...attributes}>
+					{children}
+				</ul>
+			);
+		case 'h1':
+			return (
+				<h1 style={style} {...attributes}>
+					{children}
+				</h1>
+			);
+		case 'h2':
+			return (
+				<h2 style={style} {...attributes}>
+					{children}
+				</h2>
+			);
+		case 'list-item':
+			return (
+				<li style={style} {...attributes}>
+					{children}
+				</li>
+			);
+		case 'numbered-list':
+			return (
+				<ol style={style} {...attributes}>
+					{children}
+				</ol>
+			);
+		case 'code-block':
+			return (
+				<pre style={style} {...attributes}>
+					<code>{children}</code>
+				</pre>
+			);
+		case 'link':
+			return (
+				<a href={customElement.url} {...attributes}>
+					{children}
+				</a>
+			);
+		case 'image':
+			return (
+				<img
+					src={customElement.src}
+					alt={customElement.alt}
+					{...attributes}
+					style={{ maxWidth: '100%' }}
+				/>
+			);
+		default:
+			return (
+				<p style={style} {...attributes}>
+					{children}
+				</p>
+			);
+	}
+};
+
+const Leaf: React.FC<RenderLeafProps> = ({ attributes, children, leaf }) => {
+	// Ensure leaf properties are correctly applied
+	if (leaf.bold) {
+		children = <strong>{children}</strong>;
+	}
+
+	if (leaf.italic) {
+		children = <em>{children}</em>;
+	}
+
+	if (leaf.underline) {
+		children = <u>{children}</u>;
+	}
+
+	if (leaf.code) {
+		children = <code>{children}</code>;
+	}
+
+	return <span {...attributes}>{children}</span>;
+};
+
+const MarkButton: React.FC<{
+	editor: Editor;
+	format: keyof Omit<CustomText, 'text'>;
+	children: React.ReactNode;
+}> = ({ editor, format, children }) => {
+	const isActive = CustomEditor.isMarkActive(editor, format);
+	return (
+		<button
+			className={styles.toolbarButton}
+			data-active={isActive}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				CustomEditor.toggleMark(editor, format);
+			}}
+		>
+			{children}
+		</button>
+	);
+};
+
+const BlockButton: React.FC<{
+	editor: Editor;
+	format: CustomElement['type'] | CustomElement['align'];
+	children: React.ReactNode;
+}> = ({ editor, format, children }) => {
+	const isActive = CustomEditor.isBlockActive(editor, format);
+	return (
+		<button
+			className={styles.toolbarButton}
+			data-active={isActive}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				CustomEditor.toggleBlock(editor, format);
+			}}
+		>
+			{children}
+		</button>
+	);
+};
+
+const LinkButton: React.FC<{ editor: Editor; children: React.ReactNode }> = ({
+	editor,
+	children
+}) => {
+	const isActive = CustomEditor.isLinkActive(editor);
+	return (
+		<button
+			className={styles.toolbarButton}
+			data-active={isActive}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				const url = window.prompt('Enter the URL:');
+				if (url) {
+					CustomEditor.wrapLink(editor, url);
+				}
+			}}
+		>
+			{children}
+		</button>
+	);
+};
+
+const ImageButton: React.FC<{ editor: Editor; children: React.ReactNode }> = ({
+	editor,
+	children
+}) => {
+	return (
+		<button
+			className={styles.toolbarButton}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				const src = window.prompt('Enter the image URL:');
+				if (src) {
+					const alt = window.prompt('Enter image alt text (optional):') || '';
+					CustomEditor.insertImage(editor, src, alt);
+				}
+			}}
+		>
+			{children}
+		</button>
+	);
+};
 
 export default RichTextEditor;

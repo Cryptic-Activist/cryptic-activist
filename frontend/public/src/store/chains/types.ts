@@ -24,6 +24,7 @@ export type ChainsSetter = {
     coingeckoId: string;
     logoUrl: string;
     chainId: number;
+    description: string;
   }[];
 };
 

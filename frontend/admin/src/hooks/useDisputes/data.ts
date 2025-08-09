@@ -1,5 +1,5 @@
-import { ColumnDef } from '@tanstack/react-table';
-import { Dispute } from '@/stores/disputes/types';
+import type { ColumnDef } from '@tanstack/react-table';
+import type { Dispute } from '@/stores/disputes/types';
 
 export const disputesColumns: ColumnDef<Dispute>[] = [
 	{ header: 'ID', accessorKey: 'id' },

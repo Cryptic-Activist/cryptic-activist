@@ -1,14 +1,14 @@
-"use client";
-import { useStore } from "@nanostores/react";
-import { useEffect } from "react";
+'use client';
+import { useStore } from '@nanostores/react';
+import { useEffect } from 'react';
 
 import {
   createCryptocurrency,
   createAllCryptocurrencies,
   listCryptocurrencies,
   cryptocurrencies,
-} from "@/stores/cryptocurrencies";
-import { CreateCryptocurrencyParams, UseCryptocurrenciesParams } from "./types";
+} from '@/stores/cryptocurrencies';
+import type { CreateCryptocurrencyParams, UseCryptocurrenciesParams } from './types';
 
 const useCryptocurrencies = (fetchData?: UseCryptocurrenciesParams) => {
   const $cryptocurrencies = useStore(cryptocurrencies);

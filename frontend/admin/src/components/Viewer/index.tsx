@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 
 import DynamicIcon from '../DynamicIcon';
-import { ViewerProps } from './types';
+import type { ViewerProps } from './types';
 import styles from './index.module.scss';
 
 const Viewer = forwardRef<HTMLDivElement, ViewerProps>(

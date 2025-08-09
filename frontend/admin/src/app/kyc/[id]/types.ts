@@ -1,4 +1,4 @@
-import { File } from '@/stores/kyc/types';
+import type { File } from '@/stores/kyc/types';
 
 export type Message = {
 	createdAt: string;

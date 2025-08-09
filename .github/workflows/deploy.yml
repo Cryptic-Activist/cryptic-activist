@@ -1,6 +1,16 @@
 name: Blue-Green Deploy to DigitalOcean
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
   push:
     branches:
       - main
@@ -10,10 +20,13 @@ on:
       - 'backend/**'
       - 'frontend/admin/**'
       - 'frontend/public/**'
+      - '.github/workflows/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment || (github.ref == 'refs/heads/main' && 'production') || 'staging' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,7 +43,7 @@ jobs:
             cd app
             
             # Check which nginx container is currently running
-            if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_blue.*Up"; then
+            if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "nginx_blue.*Up"; then
               echo "ACTIVE_COLOR=blue"
               echo "INACTIVE_COLOR=green"
               echo "Blue nginx is currently active"
@@ -281,7 +294,6 @@ jobs:
             
             echo "✅ ${{ env.INACTIVE_COLOR }} environment deployed"
 
-      # - name: Health check inactive environment
       #   uses: appleboy/ssh-action@v1.2.2
       #   with:
       #     host: ${{ secrets.DIGITAL_OCEAN_HOST }}
@@ -311,7 +323,7 @@ jobs:
       #           local all_healthy=true
                 
       #           for container in "${all_services[@]}"; do
-      #             if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$container.*Up"; then
+      #             if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "$container.*Up"; then
       #               local health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-health-check{{end}}' "$container" 2>/dev/null || echo "not-found")
       #               echo "localHealth=$health_status"
 
@@ -337,10 +349,7 @@ jobs:
       #         done
               
       #         echo "❌ Health check timeout after $max_attempts attempts"
-      #         exit 1
-      #       }
-            
-      #       check_health
+
 
       - name: Switch traffic to new environment
         uses: appleboy/ssh-action@v1.2.2
@@ -363,7 +372,7 @@ jobs:
             sleep 10
             
             # Verify the new nginx is running
-            if docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "nginx_${{ env.INACTIVE_COLOR }}.*Up"; then
+            if docker ps --format "table {{.Names}}	{{.Status}}" | grep -q "nginx_${{ env.INACTIVE_COLOR }}.*Up"; then
               echo "✅ nginx_${{ env.INACTIVE_COLOR }} is now running"
               
               # Stop the old nginx container

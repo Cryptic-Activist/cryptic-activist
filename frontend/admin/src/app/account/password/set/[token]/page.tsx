@@ -62,7 +62,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
-										// @ts-ignore
+										// @ts-expect-error: The type of setPasswordtokenMutation.data.ok is not directly compatible with boolean, but it will be converted to boolean by React.
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('password')}
@@ -78,7 +78,7 @@ const SetPassword = () => {
 									className={styles.formControl}
 									disabled={
 										setPasswordtokenMutation.isPending ||
-										// @ts-ignore
+										// @ts-expect-error: The type of setPasswordtokenMutation.data.ok is not directly compatible with boolean, but it will be converted to boolean by React.
 										setPasswordtokenMutation.data?.ok
 									}
 									{...form.register('confirmPassword')}
@@ -90,7 +90,7 @@ const SetPassword = () => {
 							className={`${styles.btn} ${styles.btnPrimary}`}
 							disabled={
 								setPasswordtokenMutation.isPending ||
-								// @ts-ignore
+								// @ts-expect-error: The type of setPasswordtokenMutation.data.ok is not directly compatible with boolean, but it will be converted to boolean by React.
 								setPasswordtokenMutation.data?.ok
 							}
 						>

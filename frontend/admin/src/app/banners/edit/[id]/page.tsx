@@ -1,16 +1,15 @@
 'use client';
 
-import { ContentState, EditorState, convertFromHTML } from 'draft-js';
-import { JSX, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { adminRoutes, publicRoutes } from '@/constants/routes';
-import { useParams, useRouter } from 'next/navigation';
 
+import { Descendant } from 'slate';
 import MultiSelect from '@/components/MultiSelect';
-import React from 'react';
 import RichTextEditor from '@/components/RichTextEditor';
 import { formatDatetimeLocal } from '@/utils/date';
 import styles from '../../banners.module.scss';
 import { useEditBanner } from '@/hooks/useEditBanner';
+import { useParams } from 'next/navigation';
 import { withAuth } from '@/hoc/withAuth';
 
 const EditBannerPage = () => {
@@ -24,20 +23,18 @@ const EditBannerPage = () => {
 		setValue,
 		watch
 	} = form;
-	const [editorState, setEditorState] = useState(EditorState.createEmpty());
+	const [content, setContent] = useState<Descendant[]>([
+		{
+			type: 'paragraph',
+			children: [{ text: '' }]
+		}
+	]);
 
 	const targetWebsite = watch('targetWebsite');
 	const pages = watch('pages');
 
 	useEffect(() => {
 		if (banner) {
-			const blocksFromHTML = convertFromHTML(banner.content);
-			const state = ContentState.createFromBlockArray(
-				blocksFromHTML.contentBlocks,
-				blocksFromHTML.entityMap
-			);
-			setEditorState(EditorState.createWithContent(state));
-
 			const newStartDate = formatDatetimeLocal(banner.startDate);
 			const newEndDate = formatDatetimeLocal(banner.endDate);
 			form.reset({
@@ -47,6 +44,16 @@ const EditBannerPage = () => {
 			});
 		}
 	}, [banner, form]);
+
+	useEffect(() => {
+		console.log();
+		if (banner?.content && banner?.content.length > 0) {
+			console.log({ bannerContent: banner.content });
+			setContent(JSON.parse(banner.content));
+		}
+	}, [banner?.content]);
+
+	console.log({ content });
 
 	const routes = targetWebsite === 'public' ? publicRoutes : adminRoutes;
 
@@ -59,16 +66,15 @@ const EditBannerPage = () => {
 				<form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
 					<div className={styles.formGroup}>
 						<label className={styles.formLabel}>Content</label>
-						<RichTextEditor
-							editorState={editorState}
-							onChange={(editorState) => {
-								setEditorState(editorState);
-								setValue(
-									'content',
-									editorState.getCurrentContent().getPlainText('\u0001')
-								);
-							}}
-						/>
+						{banner?.content && banner?.content?.length > 0 && (
+							<RichTextEditor
+								initialValue={JSON.parse(banner?.content)}
+								onChange={(newValue) => {
+									setContent(newValue);
+									setValue('content', JSON.stringify(newValue));
+								}}
+							/>
+						)}
 						{errors.content?.message && (
 							<p className={styles.error}>
 								{errors.content.message.toString()}

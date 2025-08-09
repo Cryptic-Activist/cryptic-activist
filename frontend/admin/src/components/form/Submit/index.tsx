@@ -1,11 +1,11 @@
-import { FC } from "react";
-import { SubmitProps } from "./types";
+import type { FC } from 'react';
+import type { SubmitProps } from './types';
 
-import styles from "./styles.module.scss";
+import styles from './styles.module.scss';
 
 const Submit: FC<SubmitProps> = ({ onClick, type, children }) => {
   const handleOnClick = () => {
-    if (type === "button" && onClick) {
+    if (type === 'button' && onClick) {
       onClick();
     }
   };

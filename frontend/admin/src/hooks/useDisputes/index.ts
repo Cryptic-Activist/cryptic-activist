@@ -1,6 +1,6 @@
 'use client';
 
-import {
+import type {
 	DisputeSeverity,
 	DisputeStatus,
 	DisputeType
@@ -16,7 +16,7 @@ import {
 import { getDisputes, getFilter } from '@/services/disputes';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 
-import { GetDisputesParams } from '@/services/disputes/types';
+import type { GetDisputesParams } from '@/services/disputes/types';
 import { disputesColumns } from './data';
 import { disputesFiltersResolver } from './zod';
 import { useAdmin } from '..';

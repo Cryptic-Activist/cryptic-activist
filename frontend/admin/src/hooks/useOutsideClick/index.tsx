@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import { Callback } from './types';
+import type { Callback } from './types';
 
 const useOutsideClick = (callback: Callback) => {
 	const ref = useRef<any>(null);

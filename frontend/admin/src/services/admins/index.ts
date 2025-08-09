@@ -1,7 +1,7 @@
-import { CreateAdminParams, UpdateAdminParams } from './types';
+import type { CreateAdminParams, UpdateAdminParams } from './types';
 import { fetchDelete, fetchGet, fetchPost, fetchPut } from '@/services/axios';
 
-import { Admin } from '@/stores/admins';
+import type { Admin } from '@/stores/admins';
 import { BACKEND } from '@/constants';
 import { getBearerToken2 } from '@/utils/browser/storage';
 

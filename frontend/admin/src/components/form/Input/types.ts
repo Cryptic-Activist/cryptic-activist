@@ -1,6 +1,6 @@
-import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
+import type { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 type InputType = 'text' | 'email' | 'password' | 'hidden' | 'number';
 

@@ -1,6 +1,6 @@
-import { Admin } from '../admin/types';
-import { Cryptocurrency } from '../cryptocurrencies/types';
-import { Fiat } from '../fiats/types';
+import type { Admin } from '../admin/types';
+import type { Cryptocurrency } from '../cryptocurrencies/types';
+import type { Fiat } from '../fiats/types';
 
 type Moderator = {
 	id: string;

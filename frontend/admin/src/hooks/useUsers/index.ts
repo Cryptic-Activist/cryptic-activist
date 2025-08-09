@@ -1,9 +1,9 @@
-"use client";
-import { useStore } from "@nanostores/react";
-import { useEffect } from "react";
+'use client';
+import { useStore } from '@nanostores/react';
+import { useEffect } from 'react';
 
-import { createUser, listUsers, users } from "@/stores/users";
-import { CreateUserParams, UseUsersParams } from "./types";
+import { createUser, listUsers, users } from '@/stores/users';
+import type { CreateUserParams, UseUsersParams } from './types';
 
 const useUsers = (fetchData?: UseUsersParams) => {
   const $users = useStore(users);

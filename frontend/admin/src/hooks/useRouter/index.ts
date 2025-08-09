@@ -1,6 +1,6 @@
 'use client';
 
-import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import type { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useRouter as useRouterNext } from 'next/navigation';
 
 const useRouter = () => {

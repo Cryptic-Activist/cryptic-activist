@@ -1,6 +1,6 @@
 import { FaPen, FaTrash } from 'react-icons/fa';
 
-import { FC } from 'react';
+import type { FC } from 'react';
 import type { ItemProps } from './types';
 import { getLocaleFullDateString } from '@/utils/date';
 import styles from './styles.module.scss';
